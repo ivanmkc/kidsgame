@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { SCENE_IMAGES, SPOTIT_ICONS, UI_IMAGES } from './src/assets/images';
 import { PlayerPicker } from './src/components/PlayerPicker';
+import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
 import { HiddenGame } from './src/games/hidden/HiddenGame';
 import { MemoryGame } from './src/games/memory/MemoryGame';
@@ -51,6 +52,7 @@ export default function App() {
       <StatusBar style="dark" />
       {screen === 'players' && (
         <ImageBackground source={UI_IMAGES.menu_bg} style={styles.bg} resizeMode="cover">
+          <TwinkleField count={8} />
           <PlayerPicker
             players={players}
             onChange={setPlayers}
@@ -129,10 +131,11 @@ function Menu({
 
   return (
     <ImageBackground source={UI_IMAGES.menu_bg} style={styles.bg} resizeMode="cover">
+      <TwinkleField count={9} />
       <ScrollView contentContainerStyle={styles.menu}>
         <Reveal delay={0}>
           <View style={styles.headerRow}>
-            <Image source={UI_IMAGES.logo} style={isLandscape ? styles.logoSmall : styles.logo} resizeMode="contain" />
+            <BobbingLogo small={isLandscape} />
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
               <Text style={styles.heading}>Kids Game Box</Text>
               {player ? (
@@ -163,6 +166,32 @@ function Menu({
         </View>
       </ScrollView>
     </ImageBackground>
+  );
+}
+
+function BobbingLogo({ small }: { small: boolean }) {
+  const t = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(t, { toValue: 1, duration: 1800, useNativeDriver: true }),
+        Animated.timing(t, { toValue: 0, duration: 1800, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [t]);
+  return (
+    <Animated.View
+      style={{
+        transform: [
+          { translateY: t.interpolate({ inputRange: [0, 1], outputRange: [0, -7] }) },
+          { rotate: t.interpolate({ inputRange: [0, 1], outputRange: ['-2deg', '2deg'] }) },
+        ],
+      }}
+    >
+      <Image source={UI_IMAGES.logo} style={small ? styles.logoSmall : styles.logo} resizeMode="contain" />
+    </Animated.View>
   );
 }
 

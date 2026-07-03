@@ -1,5 +1,5 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fonts, shadows } from '../theme';
 
 interface Props {
@@ -34,10 +34,19 @@ export function GameShell({ title, subtitle, onBack, right, children }: Props) {
 }
 
 export function ScoreChip({ label, testID }: { label: string; testID?: string }) {
+  const pulse = useRef(new Animated.Value(1)).current;
+  const prev = useRef(label);
+  useEffect(() => {
+    if (prev.current !== label) {
+      prev.current = label;
+      pulse.setValue(1.35);
+      Animated.spring(pulse, { toValue: 1, friction: 4, useNativeDriver: true }).start();
+    }
+  }, [label, pulse]);
   return (
-    <View style={[styles.chip, shadows.soft]}>
+    <Animated.View style={[styles.chip, shadows.soft, { transform: [{ scale: pulse }] }]}>
       <Text style={styles.chipText} testID={testID}>{label}</Text>
-    </View>
+    </Animated.View>
   );
 }
 

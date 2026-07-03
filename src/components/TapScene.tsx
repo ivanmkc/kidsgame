@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { Animated, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Box } from '../manifest';
 import { colors, shadows } from '../theme';
+import { SparkleBurst } from './Sparkles';
 
 interface Props {
   source: number; // require() ref
@@ -75,10 +76,13 @@ function FoundRing() {
     Animated.spring(pop, { toValue: 1, useNativeDriver: true, friction: 4 }).start();
   }, [pop]);
   return (
-    <Animated.View
-      pointerEvents="none"
-      style={[styles.ring, { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] }]}
-    />
+    <>
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.ring, { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] }]}
+      />
+      <SparkleBurst trigger="found" />
+    </>
   );
 }
 

@@ -64,3 +64,22 @@ def ask_yes_no(question: str, images: list[Image.Image], attempts: int = 3) -> b
 
 def strict_min(q1: str, q2: str, images: list[Image.Image]) -> bool:
     return ask_yes_no(q1, images) and ask_yes_no(q2, images)
+
+
+def ask_text(question: str, images: list[Image.Image], attempts: int = 3) -> str:
+    """Short free-text answer (e.g. captioning what changed)."""
+    parts: list[types.Part] = [_png_part(im) for im in images]
+    parts.append(types.Part(text=question))
+    for i in range(attempts):
+        try:
+            resp = client().models.generate_content(
+                model=judge_model(),
+                contents=[types.Content(role="user", parts=parts)],
+            )
+            text = (resp.text or "").strip().strip('."')
+            if text:
+                return text[:80]
+        except Exception as e:  # noqa: BLE001
+            print(f"  WARN ask_text attempt {i + 1}: {type(e).__name__} {str(e)[:100]}", file=sys.stderr)
+            time.sleep(4 * (i + 1))
+    return "something changed here"

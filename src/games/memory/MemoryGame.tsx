@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
@@ -133,7 +134,15 @@ function FlipCard({
       <Animated.View
         style={[styles.face, styles.faceDown, shadows.soft, { transform: [{ perspective: 700 }, { rotateY: frontRot }] }]}
       >
-        <Text style={{ fontSize: size * 0.4 }}>❓</Text>
+        <View style={styles.backRim}>
+          <View style={styles.backBadge}>
+            <Text style={{ fontSize: size * 0.3 }}>❓</Text>
+          </View>
+          <View style={[styles.backDot, { top: 7, left: 7 }]} />
+          <View style={[styles.backDot, { top: 7, right: 7 }]} />
+          <View style={[styles.backDot, { bottom: 7, left: 7 }]} />
+          <View style={[styles.backDot, { bottom: 7, right: 7 }]} />
+        </View>
       </Animated.View>
       <Animated.View
         style={[
@@ -145,6 +154,7 @@ function FlipCard({
         ]}
       >
         <Image source={SPOTIT_ICONS[card.icon]} style={{ width: '78%', height: '78%' }} resizeMode="contain" />
+        {matched ? <SparkleBurst trigger={card.icon} count={5} size={13} /> : null}
       </Animated.View>
     </Pressable>
   );
@@ -168,7 +178,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backfaceVisibility: 'hidden',
   },
-  faceDown: { backgroundColor: colors.teal },
+  faceDown: { backgroundColor: colors.teal, padding: 5 },
+  backRim: {
+    flex: 1,
+    alignSelf: 'stretch',
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backBadge: {
+    width: '58%',
+    aspectRatio: 1,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backDot: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.6)',
+  },
   faceUp: { backgroundColor: colors.card, borderWidth: 3, borderColor: colors.teal },
   faceMatched: { borderColor: colors.green, backgroundColor: 'rgba(95,191,110,0.12)' },
   moves: {
