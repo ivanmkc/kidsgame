@@ -118,13 +118,12 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     diff = np.abs(o - b).sum(-1)
     changed_inside = float((diff[mask] > 30).mean()) if mask.any() else 0.0
 
-    # Drift (re-render detection) is measured on blurred 8x-downsampled
-    # copies: when NBP returns a different resolution, resizing back shifts
-    # every fine edge, and a raw pixel diff reads 10-20% even for a faithful
-    # edit. Downsampling washes that out; a genuine whole-scene re-render
-    # still lights up.
+    # Drift (re-render detection) is measured on blurred downsampled copies:
+    # when NBP returns a different resolution, resizing back shifts every
+    # fine edge, and a raw pixel diff reads 10-20% even for a faithful edit.
+    # Downsampling washes that out; a genuine re-render still lights up.
     from PIL import ImageFilter
-    small = (base.width // 8, base.height // 8)
+    small = (max(1, base.width // 8), max(1, base.height // 8))
     b_s = np.asarray(base.filter(ImageFilter.GaussianBlur(3)).resize(small), np.int16)
     o_s = np.asarray(out.filter(ImageFilter.GaussianBlur(3)).resize(small), np.int16)
     diff_s = np.abs(o_s - b_s).sum(-1)
@@ -133,8 +132,38 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
 
     # Feathered composite: soften the mask boundary so the accepted edit
     # blends instead of showing a hard rectangle seam.
-    from PIL import ImageFilter
     m_img = Image.fromarray((mask * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(4))
     m = np.asarray(m_img, np.float32)[..., None] / 255.0
     comp = b.astype(np.float32) * (1 - m) + o.astype(np.float32) * m
     return Image.fromarray(comp.clip(0, 255).astype(np.uint8)), changed_inside, changed_outside
+
+
+def edit_local(
+    base: Image.Image,
+    rect: tuple[int, int, int, int],
+    prompt: str,
+    ctx: int = 110,
+) -> tuple[Image.Image, float, float]:
+    """Patch-local masked edit: the model only ever sees a padded crop around
+    `rect`, so a "re-render" can at worst re-render the patch — the rest of
+    the scene is untouched by construction. Far more reliable than full-frame
+    edits, where NBP sometimes moves objects elsewhere in the scene and slips
+    under any global drift gate.
+
+    Returns (new full image, inside_change, drift) where drift is measured on
+    the crop's context ring.
+    """
+    x, y, w, h = rect
+    W, H = base.size
+    cx0, cy0 = max(0, x - ctx), max(0, y - ctx)
+    cx1, cy1 = min(W, x + w + ctx), min(H, y + h + ctx)
+    crop = base.crop((cx0, cy0, cx1, cy1))
+
+    mask = np.zeros((cy1 - cy0, cx1 - cx0), bool)
+    mask[y - cy0:y - cy0 + h, x - cx0:x - cx0 + w] = True
+
+    edited_crop, inside, drift = edit(crop, mask, prompt)
+
+    out = base.copy()
+    out.paste(edited_crop, (cx0, cy0))
+    return out, inside, drift

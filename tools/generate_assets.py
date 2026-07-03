@@ -60,7 +60,7 @@ def run_diff(manifest: dict) -> bool:
     todo = [t for t in DIFF_THEMES if t["id"] not in done_ids]
     ok = True
     with ThreadPoolExecutor(max_workers=2) as pool:
-        for entry in pool.map(lambda t: gen_diff_scene(t, out, seed=__import__("zlib").crc32(t["id"].encode())), todo):
+        for entry in pool.map(lambda t: gen_diff_scene(t, out, seed=__import__("zlib").crc32(t["id"].encode()) ^ __import__("os").getpid()), todo):
             if entry:
                 manifest["diff"].append(entry)
                 save_manifest(manifest)
@@ -76,7 +76,7 @@ def run_hidden(manifest: dict) -> bool:
     todo = [t for t in HIDDEN_THEMES if t["id"] not in done_ids]
     ok = True
     with ThreadPoolExecutor(max_workers=2) as pool:
-        for entry in pool.map(lambda t: gen_hidden_scene(t, out, seed=__import__("zlib").crc32(t["id"].encode())), todo):
+        for entry in pool.map(lambda t: gen_hidden_scene(t, out, seed=__import__("zlib").crc32(t["id"].encode()) ^ __import__("os").getpid()), todo):
             if entry:
                 manifest["hidden"].append(entry)
                 save_manifest(manifest)
