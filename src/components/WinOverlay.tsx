@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, shadows } from '../theme';
+import { colors, fonts, shadows } from '../theme';
+import { Confetti } from './Confetti';
 
 interface Props {
   visible: boolean;
@@ -11,20 +12,24 @@ interface Props {
 
 export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
+  const starPop = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
       scale.setValue(0.3);
+      starPop.setValue(0);
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
+      Animated.spring(starPop, { toValue: 1, useNativeDriver: true, friction: 3, delay: 250 }).start();
     }
-  }, [visible, scale]);
+  }, [visible, scale, starPop]);
 
   if (!visible) return null;
 
   return (
     <View style={styles.backdrop} testID="win-overlay">
-      <Animated.View style={[styles.card, shadows.card, { transform: [{ scale }] }]}>
-        <Text style={styles.stars}>⭐⭐⭐</Text>
+      <Confetti />
+      <Animated.View style={[styles.card, shadows.sticker, { transform: [{ scale }] }]}>
+        <Animated.Text style={[styles.stars, { transform: [{ scale: starPop }] }]}>⭐⭐⭐</Animated.Text>
         <Text style={styles.message}>{message}</Text>
         <Pressable
           onPress={onPlayAgain}
@@ -52,29 +57,31 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(58,56,69,0.55)',
+    backgroundColor: 'rgba(67,48,75,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
   card: {
-    backgroundColor: colors.card,
-    borderRadius: 28,
-    paddingVertical: 28,
-    paddingHorizontal: 32,
+    backgroundColor: colors.paper,
+    borderRadius: 32,
+    paddingVertical: 30,
+    paddingHorizontal: 34,
     alignItems: 'center',
     gap: 14,
-    minWidth: 260,
+    minWidth: 270,
+    borderWidth: 4,
+    borderColor: colors.gold,
   },
-  stars: { fontSize: 44 },
-  message: { fontSize: 24, fontWeight: '800', color: colors.text, textAlign: 'center' },
+  stars: { fontSize: 46 },
+  message: { fontSize: 26, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
   btn: {
-    borderRadius: 18,
+    borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 28,
-    minWidth: 210,
+    minWidth: 220,
     alignItems: 'center',
   },
-  pressed: { opacity: 0.7, transform: [{ scale: 0.97 }] },
-  btnText: { fontSize: 19, fontWeight: '800', color: '#fff' },
+  pressed: { opacity: 0.75, transform: [{ scale: 0.97 }] },
+  btnText: { fontSize: 20, fontFamily: fonts.display, color: '#fff' },
 });

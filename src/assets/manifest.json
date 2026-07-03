@@ -1,0 +1,192 @@
+{
+  "spotit": {
+    "icons": [
+      "dog",
+      "cat",
+      "lion",
+      "frog",
+      "panda",
+      "fox",
+      "monkey",
+      "pig",
+      "rabbit",
+      "koala",
+      "unicorn",
+      "octopus",
+      "crab",
+      "fish",
+      "butterfly",
+      "ladybug",
+      "blossom",
+      "sunflower",
+      "apple",
+      "banana",
+      "strawberry",
+      "pizza",
+      "icecream",
+      "balloon",
+      "car",
+      "plane",
+      "rocket",
+      "soccer",
+      "rainbow",
+      "star",
+      "gift"
+    ]
+  },
+  "diff": [
+    {
+      "id": "farm",
+      "name": "Farm",
+      "imageA": "diff/farm_a.png",
+      "imageB": "diff/farm_b.png",
+      "w": 1024,
+      "h": 768,
+      "diffs": [
+        {
+          "x": 536,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a small white duck"
+        },
+        {
+          "x": 280,
+          "y": 280,
+          "w": 208,
+          "h": 208,
+          "what": "a bright red tractor toy"
+        },
+        {
+          "x": 792,
+          "y": 280,
+          "w": 208,
+          "h": 208,
+          "what": "a little grey rabbit"
+        },
+        {
+          "x": 24,
+          "y": 280,
+          "w": 208,
+          "h": 208,
+          "what": "a straw hat on the ground"
+        }
+      ]
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean",
+      "imageA": "diff/ocean_a.png",
+      "imageB": "diff/ocean_b.png",
+      "w": 1024,
+      "h": 768,
+      "diffs": [
+        {
+          "x": 536,
+          "y": 536,
+          "w": 208,
+          "h": 208,
+          "what": "a purple octopus"
+        },
+        {
+          "x": 792,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a green seahorse"
+        },
+        {
+          "x": 280,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a spiral seashell"
+        },
+        {
+          "x": 536,
+          "y": 280,
+          "w": 208,
+          "h": 208,
+          "what": "a striped clownfish"
+        }
+      ]
+    },
+    {
+      "id": "party",
+      "name": "Party",
+      "imageA": "diff/party_a.png",
+      "imageB": "diff/party_b.png",
+      "w": 1024,
+      "h": 768,
+      "diffs": [
+        {
+          "x": 24,
+          "y": 536,
+          "w": 208,
+          "h": 208,
+          "what": "a toy sailboat"
+        },
+        {
+          "x": 536,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a red toy robot"
+        },
+        {
+          "x": 280,
+          "y": 536,
+          "w": 208,
+          "h": 208,
+          "what": "a small rocking horse"
+        },
+        {
+          "x": 280,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a golden trophy"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "name": "Space",
+      "imageA": "diff/space_a.png",
+      "imageB": "diff/space_b.png",
+      "w": 1024,
+      "h": 768,
+      "diffs": [
+        {
+          "x": 280,
+          "y": 536,
+          "w": 208,
+          "h": 208,
+          "what": "a purple planet"
+        },
+        {
+          "x": 536,
+          "y": 536,
+          "w": 208,
+          "h": 208,
+          "what": "a shooting star"
+        },
+        {
+          "x": 280,
+          "y": 24,
+          "w": 208,
+          "h": 208,
+          "what": "a shiny satellite"
+        },
+        {
+          "x": 280,
+          "y": 280,
+          "w": 208,
+          "h": 208,
+          "what": "an astronaut floating"
+        }
+      ]
+    }
+  ],
+  "hidden": []
+}
