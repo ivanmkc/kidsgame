@@ -59,7 +59,9 @@ def gen_icon(name: str, desc: str, out_dir: Path, attempts: int = 3) -> bool:
     if out.exists():
         return True
     for i in range(attempts):
-        img = generate(f"{desc}. {STYLE}", (768, 768))
+        # Key at NBP's native resolution — resizing to a square first would
+        # squash the sticker (native output is ~1.8:1).
+        img = generate(f"{desc}. {STYLE}", None)
         sprite, coverage = key_out_magenta(img, out_size=256)
         if not (0.15 <= coverage <= 0.98):
             print(f"  {name}: coverage {coverage:.2f} out of range, retry {i + 1}")

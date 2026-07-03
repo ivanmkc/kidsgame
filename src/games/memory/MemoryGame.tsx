@@ -3,27 +3,37 @@ import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
+import { settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { MemoryCard, buildBoard } from './logic';
 
-const COLS = 3;
-
 interface Props {
   onHome: () => void;
-  playerName?: string;
+  player: Player | null;
 }
 
-export function MemoryGame({ onHome, playerName }: Props) {
+export function MemoryGame({ onHome, player }: Props) {
+  const settings = settingsFor(player?.difficulty);
+  const pairs = settings.memoryPairs;
   const [board, setBoard] = useState<MemoryCard[]>(() =>
-    buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons)
+    buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs)
   );
-  const [faceUp, setFaceUp] = useState<number[]>([]); // card keys currently revealed
-  const [matched, setMatched] = useState<string[]>([]); // icon names matched
+  const [faceUp, setFaceUp] = useState<number[]>([]);
+  const [matched, setMatched] = useState<string[]>([]);
   const [moves, setMoves] = useState(0);
   const lockRef = useRef(false);
   const won = matched.length * 2 === board.length;
+
+  useEffect(() => {
+    // difficulty changed (player switch) — rebuild
+    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
+    setFaceUp([]);
+    setMatched([]);
+    setMoves(0);
+  }, [pairs]);
 
   const onFlip = (card: MemoryCard) => {
     if (lockRef.current || won) return;
@@ -47,7 +57,7 @@ export function MemoryGame({ onHome, playerName }: Props) {
   };
 
   const reset = () => {
-    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons));
+    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     setFaceUp([]);
     setMatched([]);
     setMoves(0);
@@ -55,31 +65,45 @@ export function MemoryGame({ onHome, playerName }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
-  const cardW = Math.min((width - 32 - (COLS - 1) * 12) / COLS, (height - 200) / 4 - 12, 150);
+  const isLandscape = width > height;
+  const count = board.length;
+  // Choose a grid that fills the viewport without scrolling.
+  const cols = isLandscape ? Math.ceil(count / 2) : count <= 8 ? 2 : count <= 12 ? 3 : 4;
+  const rows = Math.ceil(count / cols);
+  const gap = 12;
+  const availW = Math.min(width - 32, 1100);
+  const availH = height - 84 - 40; // header + moves line
+  const cardW = Math.min(
+    (availW - (cols - 1) * gap) / cols,
+    (availH - (rows - 1) * gap) / rows / 1.15,
+    150
+  );
 
   return (
     <GameShell
       title="Memory Match"
-      subtitle="Find all the matching pairs"
+      subtitle={`Find all ${pairs} pairs`}
       onBack={onHome}
-      right={<ScoreChip label={`🧠 ${matched.length}/${board.length / 2}`} testID="memory-score" />}
+      right={<ScoreChip label={`🧠 ${matched.length}/${pairs}`} testID="memory-score" />}
     >
-      <View style={styles.board}>
-        {board.map((card) => (
-          <FlipCard
-            key={card.key}
-            card={card}
-            size={cardW}
-            up={faceUp.includes(card.key) || matched.includes(card.icon)}
-            matched={matched.includes(card.icon)}
-            onFlip={() => onFlip(card)}
-          />
-        ))}
+      <View style={styles.boardWrap}>
+        <View style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }]}>
+          {board.map((card) => (
+            <FlipCard
+              key={card.key}
+              card={card}
+              size={cardW}
+              up={faceUp.includes(card.key) || matched.includes(card.icon)}
+              matched={matched.includes(card.icon)}
+              onFlip={() => onFlip(card)}
+            />
+          ))}
+        </View>
+        <Text style={styles.moves} testID="memory-moves">Moves: {moves}</Text>
       </View>
-      <Text style={styles.moves} testID="memory-moves">Moves: {moves}</Text>
       <WinOverlay
         visible={won}
-        message={playerName ? `Amazing memory, ${playerName}!` : 'You matched them all!'}
+        message={player ? `Amazing memory, ${player.name}!` : 'You matched them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />
@@ -127,14 +151,11 @@ function FlipCard({
 }
 
 const styles = StyleSheet.create({
+  boardWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   board: {
-    flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    alignContent: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
   },
   face: {
     position: 'absolute',
@@ -155,6 +176,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
     fontSize: 15,
-    paddingBottom: 14,
+    paddingTop: 10,
   },
 });

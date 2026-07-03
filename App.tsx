@@ -13,6 +13,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from 'react-native';
 import { SCENE_IMAGES, SPOTIT_ICONS, UI_IMAGES } from './src/assets/images';
 import { PlayerPicker } from './src/components/PlayerPicker';
@@ -22,10 +23,9 @@ import { MemoryGame } from './src/games/memory/MemoryGame';
 import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { manifest } from './src/manifest';
+import { routeParts, useRoute } from './src/nav';
 import { Player, loadPlayers } from './src/profile';
 import { colors, fonts, shadows } from './src/theme';
-
-type Screen = 'players' | 'menu' | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -35,9 +35,12 @@ export default function App() {
     Nunito_700Bold,
   });
   const [players, setPlayers] = useState<Player[]>(() => loadPlayers());
-  const [player, setPlayer] = useState<Player | null>(null);
-  const [screen, setScreen] = useState<Screen>('players');
-  const goHome = () => setScreen('menu');
+  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [route, navigate] = useRoute();
+  const { screen, param } = routeParts(route);
+  // Deep links / refreshes land past the picker — fall back to the first kid.
+  const player = players.find((p) => p.id === playerId) ?? (screen !== 'players' ? players[0] : null);
+  const goHome = () => navigate('menu');
 
   if (!fontsLoaded) {
     return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
@@ -51,101 +54,112 @@ export default function App() {
           <PlayerPicker
             players={players}
             onChange={setPlayers}
-            onPick={(p) => { setPlayer(p); setScreen('menu'); }}
+            onPick={(p) => { setPlayerId(p.id); navigate('menu'); }}
           />
         </ImageBackground>
       )}
       {screen === 'menu' && (
-        <Menu player={player} onPick={setScreen} onSwitchPlayer={() => setScreen('players')} />
+        <Menu player={player} onNavigate={navigate} onSwitchPlayer={() => navigate('players')} />
       )}
-      {screen === 'spotit' && <SpotItGame onHome={goHome} playerName={player?.name} />}
-      {screen === 'diff' && <DiffGame onHome={goHome} playerName={player?.name} />}
-      {screen === 'hidden' && <HiddenGame onHome={goHome} playerName={player?.name} />}
-      {screen === 'memory' && <MemoryGame onHome={goHome} playerName={player?.name} />}
-      {screen === 'puzzle' && <PuzzleGame onHome={goHome} playerName={player?.name} />}
+      {screen === 'spotit' && <SpotItGame onHome={goHome} player={player} />}
+      {screen === 'diff' && (
+        <DiffGame
+          onHome={goHome}
+          player={player}
+          sceneId={param}
+          onPickScene={(id) => navigate(`diff/${id}`)}
+          onBackToPicker={() => navigate('diff')}
+        />
+      )}
+      {screen === 'hidden' && (
+        <HiddenGame
+          onHome={goHome}
+          player={player}
+          sceneId={param}
+          onPickScene={(id) => navigate(`hidden/${id}`)}
+          onBackToPicker={() => navigate('hidden')}
+        />
+      )}
+      {screen === 'memory' && <MemoryGame onHome={goHome} player={player} />}
+      {screen === 'puzzle' && (
+        <PuzzleGame
+          onHome={goHome}
+          player={player}
+          sceneId={param}
+          onPickScene={(id) => navigate(`puzzle/${id}`)}
+          onBackToPicker={() => navigate('puzzle')}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
+const GAME_CARDS = [
+  { route: 'spotit', color: colors.red, title: 'Spot It!', blurb: 'Find the matching picture on both cards', preview: 'icons0' },
+  { route: 'diff', color: colors.teal, title: 'Find the Difference', blurb: 'What changed between the two pictures?', preview: 'diff' },
+  { route: 'hidden', color: colors.purple, title: 'Hidden Objects', blurb: 'Hunt for the secret things in the scene', preview: 'hidden' },
+  { route: 'memory', color: colors.green, title: 'Memory Match', blurb: 'Flip the cards and find the pairs', preview: 'icons8' },
+  { route: 'puzzle', color: colors.gold, title: 'Picture Puzzle', blurb: 'Put the mixed-up picture back together', preview: 'puzzle' },
+];
+
 function Menu({
-  player, onPick, onSwitchPlayer,
+  player, onNavigate, onSwitchPlayer,
 }: {
   player: Player | null;
-  onPick: (s: Screen) => void;
+  onNavigate: (r: string) => void;
   onSwitchPlayer: () => void;
 }) {
-  const diffPreview = manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0];
-  const hiddenPreview = manifest.hidden.find((h) => h.id === 'ballroom') ?? manifest.hidden[0];
-  const puzzlePreview = manifest.diff.find((d) => d.id === 'princess') ?? manifest.diff[1] ?? manifest.diff[0];
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const cardWidth = isLandscape ? Math.min(430, (Math.min(width, 1100) - 72) / 2) : Math.min(460, width - 32);
+
+  const previewFor = (key: string): React.ReactNode => {
+    if (key === 'icons0') return <IconRow from={0} />;
+    if (key === 'icons8') return <IconRow from={8} />;
+    const scene =
+      key === 'diff'
+        ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])
+        : key === 'hidden'
+          ? (manifest.hidden.find((h) => h.id === 'ballroom') ?? manifest.hidden[0])
+          : (manifest.diff.find((d) => d.id === 'princess') ?? manifest.diff[0]);
+    if (!scene) return null;
+    const src = 'imageA' in scene ? SCENE_IMAGES[(scene as { imageA: string }).imageA] : SCENE_IMAGES[(scene as { image: string }).image];
+    return <Image source={src} style={styles.preview} />;
+  };
 
   return (
     <ImageBackground source={UI_IMAGES.menu_bg} style={styles.bg} resizeMode="cover">
       <ScrollView contentContainerStyle={styles.menu}>
         <Reveal delay={0}>
-          <Image source={UI_IMAGES.logo} style={styles.logo} resizeMode="contain" />
+          <View style={styles.headerRow}>
+            <Image source={UI_IMAGES.logo} style={isLandscape ? styles.logoSmall : styles.logo} resizeMode="contain" />
+            <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
+              <Text style={styles.heading}>Kids Game Box</Text>
+              {player ? (
+                <Pressable onPress={onSwitchPlayer} testID="switch-player" style={styles.playerRow}>
+                  <Image source={SPOTIT_ICONS[player.avatar]} style={styles.playerAvatar} />
+                  <Text style={styles.tagline}>Have fun, {player.name}!  (switch)</Text>
+                </Pressable>
+              ) : (
+                <Text style={styles.tagline}>Pick a game!</Text>
+              )}
+            </View>
+          </View>
         </Reveal>
-        <Reveal delay={70}>
-          <Text style={styles.heading}>Kids Game Box</Text>
-          {player ? (
-            <Pressable onPress={onSwitchPlayer} testID="switch-player" style={styles.playerRow}>
-              <Image source={SPOTIT_ICONS[player.avatar]} style={styles.playerAvatar} />
-              <Text style={styles.tagline}>Have fun, {player.name}!  (switch)</Text>
-            </Pressable>
-          ) : (
-            <Text style={styles.tagline}>Pick a game!</Text>
-          )}
-        </Reveal>
-        <View style={styles.cards}>
-          <Reveal delay={140}>
-            <GameCard
-              color={colors.red}
-              title="Spot It!"
-              blurb="Find the matching picture on both cards"
-              onPress={() => onPick('spotit')}
-              testID="menu-spotit"
-              preview={<IconRow from={0} />}
-            />
-          </Reveal>
-          <Reveal delay={220}>
-            <GameCard
-              color={colors.teal}
-              title="Find the Difference"
-              blurb="What changed between the two pictures?"
-              onPress={() => onPick('diff')}
-              testID="menu-diff"
-              preview={diffPreview ? <Image source={SCENE_IMAGES[diffPreview.imageA]} style={styles.preview} /> : null}
-            />
-          </Reveal>
-          <Reveal delay={300}>
-            <GameCard
-              color={colors.purple}
-              title="Hidden Objects"
-              blurb="Hunt for the secret things in the scene"
-              onPress={() => onPick('hidden')}
-              testID="menu-hidden"
-              preview={hiddenPreview ? <Image source={SCENE_IMAGES[hiddenPreview.image]} style={styles.preview} /> : null}
-            />
-          </Reveal>
-          <Reveal delay={380}>
-            <GameCard
-              color={colors.green}
-              title="Memory Match"
-              blurb="Flip the cards and find the pairs"
-              onPress={() => onPick('memory')}
-              testID="menu-memory"
-              preview={<IconRow from={8} />}
-            />
-          </Reveal>
-          <Reveal delay={460}>
-            <GameCard
-              color={colors.gold}
-              title="Picture Puzzle"
-              blurb="Put the mixed-up picture back together"
-              onPress={() => onPick('puzzle')}
-              testID="menu-puzzle"
-              preview={puzzlePreview ? <Image source={SCENE_IMAGES[puzzlePreview.imageA]} style={styles.preview} /> : null}
-            />
-          </Reveal>
+        <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
+          {GAME_CARDS.map((g, i) => (
+            <Reveal key={g.route} delay={120 + i * 80}>
+              <GameCard
+                color={g.color}
+                title={g.title}
+                blurb={g.blurb}
+                onPress={() => onNavigate(g.route)}
+                testID={`menu-${g.route}`}
+                preview={previewFor(g.preview)}
+                width={cardWidth}
+              />
+            </Reveal>
+          ))}
         </View>
       </ScrollView>
     </ImageBackground>
@@ -164,7 +178,7 @@ function IconRow({ from }: { from: number }) {
 }
 
 function GameCard({
-  color, title, blurb, preview, onPress, testID,
+  color, title, blurb, preview, onPress, testID, width,
 }: {
   color: string;
   title: string;
@@ -172,12 +186,13 @@ function GameCard({
   preview: React.ReactNode;
   onPress: () => void;
   testID: string;
+  width: number;
 }) {
   return (
     <Pressable
       onPress={onPress}
       testID={testID}
-      style={({ pressed }) => [styles.gameCard, shadows.sticker, { borderColor: color }, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.gameCard, shadows.sticker, { borderColor: color, width }, pressed && styles.pressed]}
     >
       <View style={styles.previewWrap}>{preview}</View>
       <View style={styles.cardBody}>
@@ -201,8 +216,6 @@ function Reveal({ delay, children }: { delay: number; children: React.ReactNode 
       style={{
         opacity: t,
         transform: [{ translateY: t.interpolate({ inputRange: [0, 1], outputRange: [26, 0] }) }],
-        width: '100%',
-        alignItems: 'center',
       }}
     >
       {children}
@@ -213,27 +226,36 @@ function Reveal({ delay, children }: { delay: number; children: React.ReactNode 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.bg },
   bg: { flex: 1 },
-  menu: { alignItems: 'center', paddingVertical: 26, paddingHorizontal: 16 },
-  logo: { width: 120, height: 120 },
-  heading: { fontSize: 38, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
-  playerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 16 },
-  playerAvatar: { width: 30, height: 30 },
-  tagline: {
-    fontSize: 17,
-    fontFamily: fonts.bodyReg,
-    color: colors.inkSoft,
-    textAlign: 'center',
+  menu: { alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 14,
+    flexWrap: 'wrap',
   },
-  cards: { gap: 18, width: '100%', maxWidth: 460, alignItems: 'stretch', marginTop: 14 },
+  logo: { width: 104, height: 104 },
+  logoSmall: { width: 72, height: 72 },
+  heading: { fontSize: 36, fontFamily: fonts.display, color: colors.ink },
+  playerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  playerAvatar: { width: 26, height: 26 },
+  tagline: { fontSize: 16, fontFamily: fonts.bodyReg, color: colors.inkSoft },
+  cards: {
+    gap: 16,
+    width: '100%',
+    marginTop: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
   gameCard: {
     backgroundColor: colors.paper,
     borderRadius: 26,
     borderWidth: 4,
     overflow: 'hidden',
-    width: '100%',
   },
   pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
-  previewWrap: { height: 110, backgroundColor: colors.blush },
+  previewWrap: { height: 104, backgroundColor: colors.blush },
   preview: { width: '100%', height: '100%' },
   iconRow: {
     flex: 1,
@@ -243,10 +265,10 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: colors.paper,
   },
-  iconRowImg: { width: 62, height: 62 },
+  iconRowImg: { width: 58, height: 58 },
   cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
-  gameTitle: { fontSize: 23, fontFamily: fonts.display },
-  gameBlurb: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },
+  gameTitle: { fontSize: 22, fontFamily: fonts.display },
+  gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },
   playBadge: {
     position: 'absolute',
     right: 14,

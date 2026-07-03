@@ -35,8 +35,7 @@ def main() -> None:
         d["imageB"] = to_jpg(d["imageB"])
     for h in m["hidden"]:
         h["image"] = to_jpg(h["image"])
-        for t in h["targets"]:
-            t["thumb"] = to_jpg(t["thumb"])
+        # thumbs are RGBA cutouts — they must stay PNG (alpha)
     MANIFEST.write_text(json.dumps(m, indent=2) + "\n")
 
     bg = ASSETS / "ui" / "menu_bg.png"

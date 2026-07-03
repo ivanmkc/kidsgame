@@ -1,40 +1,79 @@
-import React, { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker, SceneOption } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
+import { settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { PUZZLE_N, isSolved, makePuzzle, swap } from './logic';
+import { isSolved, makePuzzle, swap } from './logic';
 
 interface Props {
   onHome: () => void;
-  playerName?: string;
+  player: Player | null;
+  sceneId?: string;
+  onPickScene: (id: string) => void;
+  onBackToPicker: () => void;
 }
 
 function puzzleOptions(): SceneOption[] {
   return [
-    ...manifest.diff.map((d) => ({ id: `diff-${d.id}`, name: d.name, image: d.imageA })),
-    ...manifest.hidden.map((h) => ({ id: `hidden-${h.id}`, name: h.name, image: h.image })),
+    ...manifest.diff.map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA })),
+    ...manifest.hidden.map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image })),
   ];
 }
 
-export function PuzzleGame({ onHome, playerName }: Props) {
+export function PuzzleGame({ onHome, player, sceneId, onPickScene, onBackToPicker }: Props) {
   const options = puzzleOptions();
-  const [picked, setPicked] = useState<SceneOption | null>(null);
+  const picked = options.find((o) => o.id === sceneId) ?? null;
+  const settings = settingsFor(player?.difficulty);
+  const cols = settings.puzzleCols;
+  const rows = settings.puzzleRows;
+  const size = cols * rows;
+
   const [perm, setPerm] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
-  const won = perm.length > 0 && isSolved(perm);
 
-  const start = (opt: SceneOption) => {
-    setPicked(opt);
-    setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9))));
-    setSelected(null);
-    setMoves(0);
-  };
+  useEffect(() => {
+    if (picked) {
+      setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), cols * rows));
+      setSelected(null);
+      setMoves(0);
+    }
+  }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const won = perm.length === size && isSolved(perm);
+
+  const { width, height } = useWindowDimensions();
+
+  if (!picked) {
+    return (
+      <GameShell title="Picture Puzzle" subtitle="Choose a picture" onBack={onHome}>
+        <ScenePicker
+          title="Which picture do you want to solve?"
+          options={options}
+          onPick={onPickScene}
+          onSurprise={() => onPickScene(options[Math.floor(Math.random() * options.length)].id)}
+        />
+      </GameShell>
+    );
+  }
+
+  // scene AR comes from the manifest (all scenes share W/H, but read it anyway)
+  const srcScene =
+    manifest.diff.find((d) => `d-${d.id}` === picked.id) ??
+    manifest.hidden.find((h) => `h-${h.id}` === picked.id);
+  const ar = srcScene ? srcScene.w / srcScene.h : 16 / 9;
+
+  const availH = height - 84 - 44;
+  const boardW = Math.min(width - 28, availH * ar, 1000);
+  const boardH = boardW / ar;
+  const tileW = boardW / cols;
+  const tileH = boardH / rows;
 
   const onTile = (pos: number) => {
     if (won || perm.length === 0) return;
@@ -49,67 +88,54 @@ export function PuzzleGame({ onHome, playerName }: Props) {
     }
   };
 
-  const { width } = useWindowDimensions();
-  const boardW = Math.min(width - 32, 480);
-  const tileW = boardW / PUZZLE_N;
-  const tileH = tileW * (768 / 1024);
-
   return (
     <GameShell
       title="Picture Puzzle"
-      subtitle={picked ? `${picked.name} — tap two pieces to swap them` : 'Choose a picture'}
-      onBack={picked ? () => setPicked(null) : onHome}
-      right={picked ? <ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" /> : undefined}
+      subtitle={`${picked.name} — tap two pieces to swap them`}
+      onBack={onBackToPicker}
+      right={<ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" />}
     >
-      {!picked ? (
-        <ScenePicker title="Which picture do you want to solve?" options={options}
-          onPick={(id) => { const o = options.find((x) => x.id === id); if (o) start(o); }}
-          onSurprise={() => start(options[Math.floor(Math.random() * options.length)])}
-        />
-      ) : (
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <View style={[styles.board, shadows.sticker, { width: boardW, height: tileH * PUZZLE_N }]}>
-            {perm.map((piece, pos) => {
-              const col = pos % PUZZLE_N;
-              const row = Math.floor(pos / PUZZLE_N);
-              const pCol = piece % PUZZLE_N;
-              const pRow = Math.floor(piece / PUZZLE_N);
-              return (
-                <Pressable
-                  key={pos}
-                  testID={`puzzle-tile-${pos}-piece-${piece}`}
-                  onPress={() => onTile(pos)}
-                  style={[
-                    styles.tile,
-                    {
-                      left: col * tileW,
-                      top: row * tileH,
-                      width: tileW,
-                      height: tileH,
-                    },
-                    selected === pos && styles.selected,
-                  ]}
-                >
-                  <Image
-                    source={SCENE_IMAGES[picked.image]}
-                    style={{
-                      width: tileW * PUZZLE_N,
-                      height: tileH * PUZZLE_N,
-                      marginLeft: -pCol * tileW,
-                      marginTop: -pRow * tileH,
-                    }}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
-          <Text style={styles.hint}>Tap one piece, then tap another to swap them!</Text>
-        </ScrollView>
-      )}
+      <View style={styles.center}>
+        <View style={[styles.board, shadows.sticker, { width: boardW, height: boardH }]}>
+          {perm.map((piece, pos) => {
+            const col = pos % cols;
+            const row = Math.floor(pos / cols);
+            const pCol = piece % cols;
+            const pRow = Math.floor(piece / cols);
+            return (
+              <Pressable
+                key={pos}
+                testID={`puzzle-tile-${pos}-piece-${piece}`}
+                onPress={() => onTile(pos)}
+                style={[
+                  styles.tile,
+                  { left: col * tileW, top: row * tileH, width: tileW, height: tileH },
+                  selected === pos && styles.selected,
+                ]}
+              >
+                <Image
+                  source={SCENE_IMAGES[picked.image]}
+                  style={{
+                    width: boardW,
+                    height: boardH,
+                    marginLeft: -pCol * tileW,
+                    marginTop: -pRow * tileH,
+                  }}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+        <Text style={styles.hint}>Tap one piece, then tap another to swap them!</Text>
+      </View>
       <WinOverlay
         visible={won}
-        message={playerName ? `Puzzle master, ${playerName}!` : 'Puzzle complete!'}
-        onPlayAgain={() => picked && start(picked)}
+        message={player ? `Puzzle master, ${player.name}!` : 'Puzzle complete!'}
+        onPlayAgain={() => {
+          setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), size));
+          setSelected(null);
+          setMoves(0);
+        }}
         onHome={onHome}
       />
     </GameShell>
@@ -117,15 +143,15 @@ export function PuzzleGame({ onHome, playerName }: Props) {
 }
 
 const styles = StyleSheet.create({
-  scroll: { alignItems: 'center', paddingBottom: 24, paddingHorizontal: 14 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },
   board: { borderRadius: 18, overflow: 'hidden', backgroundColor: colors.card },
   tile: { position: 'absolute', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },
   selected: { borderWidth: 4, borderColor: colors.gold, zIndex: 2 },
   hint: {
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
-    fontSize: 14,
-    marginTop: 10,
+    fontSize: 13,
+    marginTop: 8,
     textAlign: 'center',
   },
 });

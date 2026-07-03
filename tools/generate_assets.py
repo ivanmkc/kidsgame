@@ -110,7 +110,8 @@ def run_ui() -> bool:
         if path.exists():
             continue
         try:
-            img = generate(prompt, size)
+            # logo is chroma-keyed, so let it come back at native aspect
+            img = generate(prompt, None if fname == "logo.png" else size)
             if fname == "logo.png":
                 from gen.chroma import key_out_magenta
                 img, cov = key_out_magenta(img, out_size=512)
