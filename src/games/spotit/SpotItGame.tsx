@@ -1,26 +1,62 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { GameShell } from '../../components/GameShell';
+import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SPOTIT_ICONS } from '../../assets/images';
+import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
-import { makeRng } from '../../rng';
+import { manifest } from '../../manifest';
+import { Rng, makeRng } from '../../rng';
 import { colors, shadows } from '../../theme';
-import { Card, SYMBOLS, buildDeck, dealRound } from './logic';
+import { Card, buildDeck, dealRound } from './logic';
 
 const ROUNDS_TO_WIN = 5;
 
 interface Props {
   onHome: () => void;
   seed?: number;
+  playerName?: string;
 }
 
-export function SpotItGame({ onHome, seed }: Props) {
+// Classic Dobble layout: one icon in the middle, five in a ring, each with
+// its own size + tilt so cards feel hand-scattered.
+interface Slot {
+  cx: number; // 0..1 within card
+  cy: number;
+  size: number; // fraction of card width
+  rot: number; // degrees
+}
+
+function layoutSlots(rng: Rng): Slot[] {
+  const slots: Slot[] = [{ cx: 0.5, cy: 0.5, size: 0.24 + rng() * 0.06, rot: (rng() - 0.5) * 50 }];
+  const startAngle = rng() * Math.PI * 2;
+  for (let i = 0; i < 5; i++) {
+    const a = startAngle + (i * Math.PI * 2) / 5;
+    const r = 0.31 + rng() * 0.04;
+    slots.push({
+      cx: 0.5 + Math.cos(a) * r,
+      cy: 0.5 + Math.sin(a) * r,
+      size: 0.19 + rng() * 0.09,
+      rot: (rng() - 0.5) * 60,
+    });
+  }
+  return slots;
+}
+
+export function SpotItGame({ onHome, seed, playerName }: Props) {
   const deck = useMemo(() => buildDeck(), []);
-  const [gameSeed, setGameSeed] = useState(seed ?? Math.floor(Math.random() * 1e9));
-  const rngRef = useRef(makeRng(gameSeed));
+  const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
+  const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
+    top: layoutSlots(rngRef.current),
+    bottom: layoutSlots(rngRef.current),
+  }));
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
   const won = score >= ROUNDS_TO_WIN;
+
+  const nextRound = () => {
+    setRound(dealRound(rngRef.current, deck));
+    setSlots({ top: layoutSlots(rngRef.current), bottom: layoutSlots(rngRef.current) });
+  };
 
   const onTap = (symbol: number) => {
     if (won) return;
@@ -28,7 +64,7 @@ export function SpotItGame({ onHome, seed }: Props) {
       const next = score + 1;
       setScore(next);
       setWrongFlash(null);
-      if (next < ROUNDS_TO_WIN) setRound(dealRound(rngRef.current, deck));
+      if (next < ROUNDS_TO_WIN) nextRound();
     } else {
       setWrongFlash(symbol);
       setTimeout(() => setWrongFlash((w) => (w === symbol ? null : w)), 450);
@@ -36,12 +72,10 @@ export function SpotItGame({ onHome, seed }: Props) {
   };
 
   const reset = () => {
-    const s = Math.floor(Math.random() * 1e9);
-    setGameSeed(s);
-    rngRef.current = makeRng(s);
+    rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongFlash(null);
-    setRound(dealRound(rngRef.current, deck));
+    nextRound();
   };
 
   return (
@@ -49,58 +83,69 @@ export function SpotItGame({ onHome, seed }: Props) {
       title="Spot It!"
       subtitle="Tap the picture that is on BOTH cards"
       onBack={onHome}
-      right={<Text style={styles.score} testID="spotit-score">⭐ {score}/{ROUNDS_TO_WIN}</Text>}
+      right={<ScoreChip label={`⭐ ${score}/${ROUNDS_TO_WIN}`} testID="spotit-score" />}
     >
       <View style={styles.board}>
-        <SpotCard card={round.top} onTap={onTap} wrongFlash={wrongFlash} tint={colors.secondary} testIDPrefix="top" />
+        <SpotCard card={round.top} slots={slots.top} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
         <Text style={styles.vs}>👀</Text>
-        <SpotCard card={round.bottom} onTap={onTap} wrongFlash={wrongFlash} tint={colors.primary} testIDPrefix="bottom" />
+        <SpotCard card={round.bottom} slots={slots.bottom} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
       </View>
-      <WinOverlay visible={won} message="You spotted them all!" onPlayAgain={reset} onHome={onHome} />
+      <WinOverlay
+        visible={won}
+        message={playerName ? `Sharp eyes, ${playerName}!` : 'You spotted them all!'}
+        onPlayAgain={reset}
+        onHome={onHome}
+      />
     </GameShell>
   );
 }
 
 function SpotCard({
-  card,
-  onTap,
-  wrongFlash,
-  tint,
-  testIDPrefix,
+  card, slots, onTap, wrongFlash, tint, testIDPrefix,
 }: {
   card: Card;
+  slots: Slot[];
   onTap: (s: number) => void;
   wrongFlash: number | null;
   tint: string;
   testIDPrefix: string;
 }) {
-  const { width } = useWindowDimensions();
-  const size = Math.min(width - 32, 420);
+  const { width, height } = useWindowDimensions();
+  const size = Math.min(width - 40, (height - 220) / 2, 380);
   return (
-    <View style={[styles.card, shadows.card, { width: size, borderColor: tint }]}>
-      {card.map((sym) => (
-        <SymbolButton
-          key={sym}
-          symbol={sym}
-          wrong={wrongFlash === sym}
-          onTap={() => onTap(sym)}
-          testID={`${testIDPrefix}-symbol-${sym}`}
-        />
-      ))}
+    <View style={[styles.card, shadows.sticker, { width: size, height: size, borderRadius: size / 2, borderColor: tint }]}>
+      {card.map((sym, i) => {
+        const slot = slots[i];
+        const s = slot.size * size;
+        return (
+          <SymbolButton
+            key={sym}
+            iconName={manifest.spotit.icons[sym]}
+            wrong={wrongFlash === sym}
+            onTap={() => onTap(sym)}
+            testID={`${testIDPrefix}-symbol-${sym}`}
+            left={slot.cx * size - s / 2}
+            top={slot.cy * size - s / 2}
+            size={s}
+            rot={slot.rot}
+          />
+        );
+      })}
     </View>
   );
 }
 
 function SymbolButton({
-  symbol,
-  wrong,
-  onTap,
-  testID,
+  iconName, wrong, onTap, testID, left, top, size, rot,
 }: {
-  symbol: number;
+  iconName: string;
   wrong: boolean;
   onTap: () => void;
   testID: string;
+  left: number;
+  top: number;
+  size: number;
+  rot: number;
 }) {
   const scale = useRef(new Animated.Value(1)).current;
   const press = () => {
@@ -111,37 +156,27 @@ function SymbolButton({
     onTap();
   };
   return (
-    <Pressable onPress={press} testID={testID} style={styles.symbolWrap}>
-      <Animated.View style={[styles.symbol, wrong && styles.wrong, { transform: [{ scale }] }]}>
-        <Text style={styles.symbolText}>{SYMBOLS[symbol]}</Text>
+    <Pressable onPress={press} testID={testID} style={{ position: 'absolute', left, top, width: size, height: size }}>
+      <Animated.View
+        style={[
+          styles.symbol,
+          wrong && styles.wrong,
+          { transform: [{ scale }, { rotate: `${rot}deg` }] },
+        ]}
+      >
+        <Image source={SPOTIT_ICONS[iconName]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
       </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  score: { fontSize: 18, fontWeight: '800', color: colors.text },
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6, paddingBottom: 12 },
+  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingBottom: 10 },
   card: {
     backgroundColor: colors.card,
-    borderRadius: 26,
-    borderWidth: 4,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 6,
+    borderWidth: 5,
   },
-  vs: { fontSize: 26, marginVertical: 2 },
-  symbolWrap: { padding: 4 },
-  symbol: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  wrong: { backgroundColor: '#FFB4B4' },
-  symbolText: { fontSize: 44 },
+  vs: { fontSize: 24, marginVertical: 0 },
+  symbol: { flex: 1, borderRadius: 999 },
+  wrong: { backgroundColor: 'rgba(232,86,79,0.35)' },
 });

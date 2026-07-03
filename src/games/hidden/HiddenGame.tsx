@@ -1,135 +1,134 @@
-import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { GameShell } from '../../components/GameShell';
+import React, { useState } from 'react';
+import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SCENE_IMAGES } from '../../assets/images';
+import { GameShell, ScoreChip } from '../../components/GameShell';
+import { ScenePicker } from '../../components/ScenePicker';
+import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { makeRng } from '../../rng';
-import { colors, shadows } from '../../theme';
-import { HIDDEN_COLS, HIDDEN_ROWS, HiddenPuzzle, buildHiddenPuzzle } from './logic';
+import { HiddenScene, manifest } from '../../manifest';
+import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
-  seed?: number;
+  playerName?: string;
 }
 
-export function HiddenGame({ onHome, seed }: Props) {
-  const [puzzle, setPuzzle] = useState<HiddenPuzzle>(() =>
-    buildHiddenPuzzle(makeRng(seed ?? Math.floor(Math.random() * 1e9)))
-  );
+export function HiddenGame({ onHome, playerName }: Props) {
+  const [scene, setScene] = useState<HiddenScene | null>(null);
   const [found, setFound] = useState<string[]>([]);
-  const [wrongCell, setWrongCell] = useState<number | null>(null);
-  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const won = found.length === puzzle.targets.length;
 
-  const onTapCell = (idx: number) => {
-    if (won) return;
-    const cell = puzzle.cells[idx];
-    if (cell.isTarget && !found.includes(cell.emoji)) {
-      setFound((f) => [...f, cell.emoji]);
-    } else if (!cell.isTarget) {
-      setWrongCell(idx);
-      if (wrongTimer.current) clearTimeout(wrongTimer.current);
-      wrongTimer.current = setTimeout(() => setWrongCell(null), 450);
-    }
-  };
-
-  const reset = () => {
-    setPuzzle(buildHiddenPuzzle(makeRng(Math.floor(Math.random() * 1e9))));
+  const start = (s: HiddenScene) => {
+    setScene(s);
     setFound([]);
-    setWrongCell(null);
   };
 
   const { width } = useWindowDimensions();
-  const sceneW = Math.min(width - 24, 520);
-  const cellW = sceneW / HIDDEN_COLS;
-  const cellH = cellW * 0.95;
+  const sceneWidth = Math.min(width - 28, 640);
+
+  if (!scene) {
+    return (
+      <GameShell title="Hidden Objects" subtitle="Choose a scene" onBack={onHome}>
+        <ScenePicker
+          title="Where do you want to search?"
+          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image }))}
+          onPick={(id) => { const s = manifest.hidden.find((h) => h.id === id); if (s) start(s); }}
+          onSurprise={() => start(manifest.hidden[Math.floor(Math.random() * manifest.hidden.length)])}
+        />
+      </GameShell>
+    );
+  }
+
+  const total = scene.targets.length;
+  const won = found.length === total && total > 0;
+  const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
+  const onHit = (id: string) => {
+    if (won) return;
+    setFound((f) => (f.includes(id) ? f : [...f, id]));
+  };
 
   return (
     <GameShell
       title="Hidden Objects"
-      subtitle={`Scene: ${puzzle.scene} — find all of these!`}
-      onBack={onHome}
-      right={<Text style={styles.score} testID="hidden-score">🔎 {found.length}/{puzzle.targets.length}</Text>}
+      subtitle={`${scene.name} — can you find all of these?`}
+      onBack={() => setScene(null)}
+      right={<ScoreChip label={`🔎 ${found.length}/${total}`} testID="hidden-score" />}
     >
       <View style={styles.checklist} testID="hidden-checklist">
-        {puzzle.targets.map((t) => (
-          <View key={t} style={[styles.chip, found.includes(t) && styles.chipFound]}>
-            <Text style={styles.chipEmoji}>{t}</Text>
-            {found.includes(t) ? <Text style={styles.chipCheck}>✔️</Text> : null}
-          </View>
-        ))}
+        {scene.targets.map((t) => {
+          const done = found.includes(t.id);
+          return (
+            <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
+              <Image source={SCENE_IMAGES[t.thumb]} style={styles.chipImg} />
+              {done ? (
+                <View style={styles.chipCheck}>
+                  <Text style={styles.chipCheckText}>✔️</Text>
+                </View>
+              ) : null}
+            </View>
+          );
+        })}
       </View>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[styles.scene, shadows.card, { width: sceneW, height: cellH * HIDDEN_ROWS }]}>
-          {puzzle.cells.map((cell, i) => {
-            const col = i % HIDDEN_COLS;
-            const row = Math.floor(i / HIDDEN_COLS);
-            const isFoundTarget = cell.isTarget && found.includes(cell.emoji);
-            return (
-              <Pressable
-                key={i}
-                onPress={() => onTapCell(i)}
-                testID={`hidden-cell-${i}`}
-                style={[
-                  styles.cell,
-                  { left: col * cellW, top: row * cellH, width: cellW, height: cellH },
-                  isFoundTarget && styles.found,
-                  wrongCell === i && styles.wrong,
-                ]}
-              >
-                <Text
-                  style={{
-                    fontSize: 30 * cell.scale,
-                    transform: [
-                      { translateX: (cell.jx - 0.5) * cellW * 0.5 },
-                      { translateY: (cell.jy - 0.5) * cellH * 0.5 },
-                      { rotate: `${cell.rot}deg` },
-                    ],
-                  }}
-                >
-                  {cell.emoji}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+        <TapScene
+          source={SCENE_IMAGES[scene.image]}
+          sceneW={scene.w}
+          sceneH={scene.h}
+          displayWidth={sceneWidth}
+          boxes={boxes}
+          foundIds={found}
+          onHit={onHit}
+          onMiss={() => {}}
+          testIDPrefix="hidden"
+        />
+        <Text style={styles.hint}>Tap the picture when you spot something from the list!</Text>
       </ScrollView>
-      <WinOverlay visible={won} message="You found everything!" onPlayAgain={reset} onHome={onHome} />
+      <WinOverlay
+        visible={won}
+        message={playerName ? `Super detective, ${playerName}!` : 'You found everything!'}
+        onPlayAgain={() => setScene(null)}
+        onHome={onHome}
+      />
     </GameShell>
   );
 }
 
 const styles = StyleSheet.create({
-  score: { fontSize: 18, fontWeight: '800', color: colors.text },
   checklist: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
     paddingHorizontal: 12,
-    paddingBottom: 8,
+    paddingBottom: 10,
     flexWrap: 'wrap',
   },
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: 62,
+    height: 62,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: colors.card,
     backgroundColor: colors.card,
-    borderRadius: 14,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 2,
-    borderWidth: 2,
-    borderColor: colors.soft,
+    overflow: 'hidden',
   },
-  chipFound: { borderColor: colors.green, backgroundColor: 'rgba(107,203,119,0.15)' },
-  chipEmoji: { fontSize: 24 },
-  chipCheck: { fontSize: 14 },
-  scroll: { alignItems: 'center', paddingBottom: 24 },
-  scene: { backgroundColor: colors.card, borderRadius: 20, overflow: 'hidden' },
-  cell: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-  found: {
-    borderWidth: 4,
-    borderColor: colors.green,
-    borderRadius: 999,
-    backgroundColor: 'rgba(107,203,119,0.18)',
+  chipFound: { borderColor: colors.green },
+  chipImg: { width: '100%', height: '100%' },
+  chipCheck: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(95,191,110,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  wrong: { backgroundColor: 'rgba(255,107,107,0.25)', borderRadius: 999 },
+  chipCheckText: { fontSize: 24 },
+  scroll: { alignItems: 'center', paddingBottom: 28, paddingHorizontal: 14 },
+  hint: {
+    fontSize: 14,
+    fontFamily: fonts.bodyReg,
+    color: colors.inkSoft,
+    marginTop: 10,
+    textAlign: 'center',
+  },
 });
