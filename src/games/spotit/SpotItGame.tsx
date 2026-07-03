@@ -3,26 +3,26 @@ import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
+import { settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { Player } from '../../profile';
 import { Rng, makeRng } from '../../rng';
 import { colors, shadows } from '../../theme';
 import { Card, buildDeck, dealRound } from './logic';
 
-const ROUNDS_TO_WIN = 5;
-
 interface Props {
   onHome: () => void;
+  player: Player | null;
   seed?: number;
-  playerName?: string;
 }
 
 // Classic Dobble layout: one icon in the middle, five in a ring, each with
 // its own size + tilt so cards feel hand-scattered.
 interface Slot {
-  cx: number; // 0..1 within card
+  cx: number;
   cy: number;
-  size: number; // fraction of card width
-  rot: number; // degrees
+  size: number;
+  rot: number;
 }
 
 function layoutSlots(rng: Rng): Slot[] {
@@ -41,8 +41,9 @@ function layoutSlots(rng: Rng): Slot[] {
   return slots;
 }
 
-export function SpotItGame({ onHome, seed, playerName }: Props) {
+export function SpotItGame({ onHome, player, seed }: Props) {
   const deck = useMemo(() => buildDeck(), []);
+  const roundsToWin = settingsFor(player?.difficulty).spotitRounds;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
   const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
@@ -51,7 +52,7 @@ export function SpotItGame({ onHome, seed, playerName }: Props) {
   }));
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
-  const won = score >= ROUNDS_TO_WIN;
+  const won = score >= roundsToWin;
 
   const nextRound = () => {
     setRound(dealRound(rngRef.current, deck));
@@ -64,7 +65,7 @@ export function SpotItGame({ onHome, seed, playerName }: Props) {
       const next = score + 1;
       setScore(next);
       setWrongFlash(null);
-      if (next < ROUNDS_TO_WIN) nextRound();
+      if (next < roundsToWin) nextRound();
     } else {
       setWrongFlash(symbol);
       setTimeout(() => setWrongFlash((w) => (w === symbol ? null : w)), 450);
@@ -78,21 +79,29 @@ export function SpotItGame({ onHome, seed, playerName }: Props) {
     nextRound();
   };
 
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const availH = height - 84;
+  // Two cards side by side in landscape, stacked in portrait — sized to fit.
+  const cardSize = isLandscape
+    ? Math.min(availH - 24, (width - 3 * 24) / 2, 460)
+    : Math.min((availH - 60) / 2, width - 40, 400);
+
   return (
     <GameShell
       title="Spot It!"
       subtitle="Tap the picture that is on BOTH cards"
       onBack={onHome}
-      right={<ScoreChip label={`⭐ ${score}/${ROUNDS_TO_WIN}`} testID="spotit-score" />}
+      right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
     >
-      <View style={styles.board}>
-        <SpotCard card={round.top} slots={slots.top} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+      <View style={[styles.board, isLandscape && styles.boardRow]}>
+        <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
         <Text style={styles.vs}>👀</Text>
-        <SpotCard card={round.bottom} slots={slots.bottom} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
+        <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
       </View>
       <WinOverlay
         visible={won}
-        message={playerName ? `Sharp eyes, ${playerName}!` : 'You spotted them all!'}
+        message={player ? `Sharp eyes, ${player.name}!` : 'You spotted them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />
@@ -101,17 +110,16 @@ export function SpotItGame({ onHome, seed, playerName }: Props) {
 }
 
 function SpotCard({
-  card, slots, onTap, wrongFlash, tint, testIDPrefix,
+  card, slots, size, onTap, wrongFlash, tint, testIDPrefix,
 }: {
   card: Card;
   slots: Slot[];
+  size: number;
   onTap: (s: number) => void;
   wrongFlash: number | null;
   tint: string;
   testIDPrefix: string;
 }) {
-  const { width, height } = useWindowDimensions();
-  const size = Math.min(width - 40, (height - 220) / 2, 380);
   return (
     <View style={[styles.card, shadows.sticker, { width: size, height: size, borderRadius: size / 2, borderColor: tint }]}>
       {card.map((sym, i) => {
@@ -171,12 +179,13 @@ function SymbolButton({
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingBottom: 10 },
+  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 4, paddingBottom: 8 },
+  boardRow: { flexDirection: 'row', gap: 10 },
   card: {
     backgroundColor: colors.card,
     borderWidth: 5,
   },
-  vs: { fontSize: 24, marginVertical: 0 },
+  vs: { fontSize: 22 },
   symbol: { flex: 1, borderRadius: 999 },
   wrong: { backgroundColor: 'rgba(232,86,79,0.35)' },
 });

@@ -10,6 +10,7 @@ interface Props {
   displayWidth: number;
   boxes: { id: string; box: Box }[];
   foundIds: string[];
+  hintId?: string | null; // temporarily flash this box's ring (easy mode)
   onHit: (id: string) => void;
   onMiss: () => void;
   testIDPrefix: string;
@@ -18,7 +19,7 @@ interface Props {
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, foundIds, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, foundIds, hintId, onHit, onMiss, testIDPrefix,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -60,7 +61,7 @@ export function TapScene({
             onPress={() => (found ? undefined : onHit(id))}
             style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
           >
-            {found ? <FoundRing /> : null}
+            {found ? <FoundRing /> : hintId === id ? <HintRing /> : null}
           </Pressable>
         );
       })}
@@ -81,6 +82,24 @@ function FoundRing() {
   );
 }
 
+function HintRing() {
+  const pulse = useRef(new Animated.Value(0)).current;
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 450, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 450, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [pulse]);
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.hint, { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.9] }) }]}
+    />
+  );
+}
+
 const styles = StyleSheet.create({
   frame: {
     borderRadius: 22,
@@ -95,5 +114,12 @@ const styles = StyleSheet.create({
     borderColor: colors.ring,
     borderRadius: 999,
     backgroundColor: 'rgba(95,191,110,0.16)',
+  },
+  hint: {
+    flex: 1,
+    borderWidth: 5,
+    borderColor: colors.gold,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,194,75,0.25)',
   },
 });

@@ -70,11 +70,34 @@ def _call(contents, attempts: int = 4) -> bytes:
     raise RuntimeError(f"NBP failed after {attempts} attempts: {last}")
 
 
-def generate(prompt: str, size: tuple[int, int]) -> Image.Image:
-    """Text -> RGB image, normalized to `size`."""
+def aspect_fit(img: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """Center-crop to the target aspect ratio, then resize — NEVER squash.
+
+    NBP's native output is ~1.8:1 regardless of the requested framing, so a
+    blind resize horizontally compresses everything (round things go oval).
+    """
+    tw, th = size
+    target = tw / th
+    w, h = img.size
+    ar = w / h
+    if abs(ar - target) > 0.01:
+        if ar > target:  # too wide — crop width
+            nw = int(h * target)
+            x0 = (w - nw) // 2
+            img = img.crop((x0, 0, x0 + nw, h))
+        else:  # too tall — crop height
+            nh = int(w / target)
+            y0 = (h - nh) // 2
+            img = img.crop((0, y0, w, y0 + nh))
+    return img.resize(size, Image.Resampling.LANCZOS) if img.size != size else img
+
+
+def generate(prompt: str, size: tuple[int, int] | None = None) -> Image.Image:
+    """Text -> RGB image. size=None returns the native render; otherwise
+    aspect-crop + resize (no distortion)."""
     data = _call([prompt])
     img = Image.open(io.BytesIO(data)).convert("RGB")
-    return img.resize(size, Image.Resampling.LANCZOS) if img.size != size else img
+    return img if size is None else aspect_fit(img, size)
 
 
 def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image, float, float]:
@@ -111,7 +134,7 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     data = _call([types.Content(role="user", parts=parts)])
     out = Image.open(io.BytesIO(data)).convert("RGB")
     if out.size != base.size:
-        out = out.resize(base.size, Image.Resampling.LANCZOS)
+        out = aspect_fit(out, base.size)
 
     b = np.asarray(base, np.int16)
     o = np.asarray(out, np.int16)

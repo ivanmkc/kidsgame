@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import manifest from '../../assets/manifest.json';
+import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { SYMBOLS, buildDeck, dealRound, sharedSymbol } from '../spotit/logic';
 

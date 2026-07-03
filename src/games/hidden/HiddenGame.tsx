@@ -1,29 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { HiddenScene, manifest } from '../../manifest';
+import { settingsFor } from '../../difficulty';
+import { manifest } from '../../manifest';
+import { Player } from '../../profile';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
-  playerName?: string;
+  player: Player | null;
+  sceneId?: string;
+  onPickScene: (id: string) => void;
+  onBackToPicker: () => void;
 }
 
-export function HiddenGame({ onHome, playerName }: Props) {
-  const [scene, setScene] = useState<HiddenScene | null>(null);
+export function HiddenGame({ onHome, player, sceneId, onPickScene, onBackToPicker }: Props) {
+  const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
+  const settings = settingsFor(player?.difficulty);
 
-  const start = (s: HiddenScene) => {
-    setScene(s);
-    setFound([]);
-  };
+  useEffect(() => setFound([]), [sceneId]);
 
-  const { width } = useWindowDimensions();
-  const sceneWidth = Math.min(width - 28, 640);
+  const { width, height } = useWindowDimensions();
 
   if (!scene) {
     return (
@@ -31,8 +33,8 @@ export function HiddenGame({ onHome, playerName }: Props) {
         <ScenePicker
           title="Where do you want to search?"
           options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image }))}
-          onPick={(id) => { const s = manifest.hidden.find((h) => h.id === id); if (s) start(s); }}
-          onSurprise={() => start(manifest.hidden[Math.floor(Math.random() * manifest.hidden.length)])}
+          onPick={onPickScene}
+          onSurprise={() => onPickScene(manifest.hidden[Math.floor(Math.random() * manifest.hidden.length)].id)}
         />
       </GameShell>
     );
@@ -41,6 +43,12 @@ export function HiddenGame({ onHome, playerName }: Props) {
   const total = scene.targets.length;
   const won = found.length === total && total > 0;
   const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
+  const ar = scene.w / scene.h;
+
+  // Checklist row (~86px) + header — fit the scene into what's left.
+  const availH = height - 84 - 92;
+  const sceneWidth = Math.min(width - 24, availH * ar, 1100);
+
   const onHit = (id: string) => {
     if (won) return;
     setFound((f) => (f.includes(id) ? f : [...f, id]));
@@ -50,15 +58,21 @@ export function HiddenGame({ onHome, playerName }: Props) {
     <GameShell
       title="Hidden Objects"
       subtitle={`${scene.name} — can you find all of these?`}
-      onBack={() => setScene(null)}
+      onBack={onBackToPicker}
       right={<ScoreChip label={`🔎 ${found.length}/${total}`} testID="hidden-score" />}
     >
       <View style={styles.checklist} testID="hidden-checklist">
         {scene.targets.map((t) => {
           const done = found.includes(t.id);
+          // Hard mode: silhouette chips — you know the shape, not the colors.
+          const silhouette = settings.hiddenSilhouette && !done;
           return (
             <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
-              <Image source={SCENE_IMAGES[t.thumb]} style={styles.chipImg} />
+              <Image
+                source={SCENE_IMAGES[t.thumb]}
+                style={[styles.chipImg, silhouette && styles.chipSilhouette]}
+                resizeMode="contain"
+              />
               {done ? (
                 <View style={styles.chipCheck}>
                   <Text style={styles.chipCheckText}>✔️</Text>
@@ -80,12 +94,11 @@ export function HiddenGame({ onHome, playerName }: Props) {
           onMiss={() => {}}
           testIDPrefix="hidden"
         />
-        <Text style={styles.hint}>Tap the picture when you spot something from the list!</Text>
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={playerName ? `Super detective, ${playerName}!` : 'You found everything!'}
-        onPlayAgain={() => setScene(null)}
+        message={player ? `Super detective, ${player.name}!` : 'You found everything!'}
+        onPlayAgain={onBackToPicker}
         onHome={onHome}
       />
     </GameShell>
@@ -98,20 +111,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     paddingHorizontal: 12,
-    paddingBottom: 10,
+    paddingBottom: 8,
     flexWrap: 'wrap',
   },
   chip: {
-    width: 62,
-    height: 62,
+    width: 64,
+    height: 64,
     borderRadius: 16,
     borderWidth: 3,
     borderColor: colors.card,
-    backgroundColor: colors.card,
+    backgroundColor: colors.paper,
     overflow: 'hidden',
+    padding: 5,
   },
   chipFound: { borderColor: colors.green },
   chipImg: { width: '100%', height: '100%' },
+  chipSilhouette: { tintColor: '#5B4B66' },
   chipCheck: {
     position: 'absolute',
     top: 0,
@@ -123,12 +138,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipCheckText: { fontSize: 24 },
-  scroll: { alignItems: 'center', paddingBottom: 28, paddingHorizontal: 14 },
-  hint: {
-    fontSize: 14,
-    fontFamily: fonts.bodyReg,
-    color: colors.inkSoft,
-    marginTop: 10,
-    textAlign: 'center',
-  },
+  scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 12, paddingHorizontal: 12 },
 });

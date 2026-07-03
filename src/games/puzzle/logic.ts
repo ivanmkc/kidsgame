@@ -1,10 +1,7 @@
 import { Rng, shuffle } from '../../rng';
 
-export const PUZZLE_N = 3; // 3x3
-
 // perm[position] = which piece sits at that position. Solved = identity.
-export function makePuzzle(rng: Rng, n = PUZZLE_N): number[] {
-  const size = n * n;
+export function makePuzzle(rng: Rng, size: number): number[] {
   let perm: number[];
   do {
     perm = shuffle(rng, Array.from({ length: size }, (_, i) => i));
