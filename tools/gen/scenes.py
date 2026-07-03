@@ -11,17 +11,18 @@ from __future__ import annotations
 import random
 from pathlib import Path
 
-import numpy as np
 from PIL import Image
 
 from .judge import ask_yes_no, strict_min
-from .nbp import edit, generate
+from .nbp import edit_local, generate
 
 W, H = 1024, 768
-MIN_CHANGE = 0.035  # fraction of mask px; small objects legitimately change little
+MIN_CHANGE = 0.025  # fraction of mask px; small objects legitimately change little
 MIN_CHANGE_PX = 1500  # absolute floor so noise cannot pass
-MAX_CHANGE = 0.80  # an "add object" edit must not repaint the entire rect
-MAX_DRIFT = 0.12  # outside-mask change above this = whole-scene re-render, reject
+# Local-patch mode: NBP usually repaints the whole inner rect — that's fine,
+# edit()'s composite keeps only the rect and the judges arbitrate quality.
+# Drift on the context ring is only a total-nonsense sanity check.
+MAX_DRIFT = 0.60
 
 SCENE_STYLE = (
     "Bright, warm children's picture-book illustration, flat colors, soft "
@@ -165,11 +166,6 @@ def _grid_rects(cols: int, rows: int, n: int, rng: random.Random, margin: int = 
     return rects
 
 
-def _mask_from_rect(rect: tuple[int, int, int, int]) -> np.ndarray:
-    x, y, w, h = rect
-    m = np.zeros((H, W), bool)
-    m[y:y + h, x:x + w] = True
-    return m
 
 
 def _crop(img: Image.Image, rect: tuple[int, int, int, int], pad: int = 12) -> Image.Image:
@@ -190,31 +186,35 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
     current = base
     diffs = []
     for rect in rects:
-        mask = _mask_from_rect(rect)
-        mask_px = int(mask.sum())
+        mask_px = rect[2] * rect[3]
         placed = False
         # An object that won't place cleanly gets swapped for the next one in
         # the pool rather than sinking the whole scene.
         while pool and not placed:
             obj = pool.pop(0)
             for attempt in range(3):
-                edited, changed, drift = edit(
-                    current, mask,
-                    f"{obj}, added as a clearly visible new object that fits the scene naturally",
+                edited, changed, drift = edit_local(
+                    current, rect,
+                    f"Add {obj} INTO the existing scenery. Keep the marked area's "
+                    "current background, colors and objects exactly as they are — "
+                    "just draw the new object on top of them, naturally placed "
+                    "(standing / resting / floating as fits the scene), bold and "
+                    "clearly visible, matching the art style. Do NOT repaint the "
+                    "backdrop.",
                 )
-                if drift > MAX_DRIFT:
-                    print(f"  {theme['id']}: '{obj}' re-rendered scene (drift {drift:.2f}), retry {attempt + 1}")
+                if changed > 0.72:
+                    print(f"  {theme['id']}: '{obj}' repainted backdrop ({changed:.2f}), retry {attempt + 1}")
                     continue
-                if changed > MAX_CHANGE:
-                    print(f"  {theme['id']}: '{obj}' repainted whole rect ({changed:.2f}), retry {attempt + 1}")
+                if drift > MAX_DRIFT:
+                    print(f"  {theme['id']}: '{obj}' incoherent patch (drift {drift:.2f}), retry {attempt + 1}")
                     continue
                 if changed < MIN_CHANGE or changed * mask_px < MIN_CHANGE_PX:
                     print(f"  {theme['id']}: '{obj}' change {changed:.2f} too small, retry {attempt + 1}")
                     continue
                 if not strict_min(
                     "These two crops come from a spot-the-difference game for young children. Is there a clearly visible difference between them?",
-                    "Would a 4-year-old child notice that something changed between these two image crops?",
-                    [_crop(base, rect), _crop(edited, rect)],
+                    "Does the newly added object look naturally drawn into the illustration — no pasted-on box, no white frame, no style clash?",
+                    [_crop(base, rect, pad=60), _crop(edited, rect, pad=60)],
                 ):
                     print(f"  {theme['id']}: '{obj}' judge rejected, retry {attempt + 1}")
                     continue
@@ -271,30 +271,32 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
     current = base
     targets = []
     for rect in rects:
-        mask = _mask_from_rect(rect)
-        mask_px = int(mask.sum())
+        mask_px = rect[2] * rect[3]
         placed = False
         while pool and not placed:
             tid, desc = pool.pop(0)
             for attempt in range(3):
-                edited, changed, drift = edit(
-                    current, mask,
-                    f"{desc}, tucked into the scene but clearly drawn and recognizable — "
-                    "medium-small, blending naturally with the surroundings",
+                edited, changed, drift = edit_local(
+                    current, rect,
+                    f"Add {desc} INTO the existing scenery. Keep the marked area's "
+                    "current background, colors and objects exactly as they are — "
+                    "just draw the new object on top of them, naturally placed, "
+                    "medium-sized and clearly drawn, colorful and cute, fully visible, "
+                    "matching the art style. Do NOT repaint the backdrop.",
                 )
-                if drift > MAX_DRIFT:
-                    print(f"  {theme['id']}: '{tid}' re-rendered scene (drift {drift:.2f}), retry {attempt + 1}")
+                if changed > 0.72:
+                    print(f"  {theme['id']}: '{tid}' repainted backdrop ({changed:.2f}), retry {attempt + 1}")
                     continue
-                if changed > MAX_CHANGE:
-                    print(f"  {theme['id']}: '{tid}' repainted whole rect ({changed:.2f}), retry {attempt + 1}")
+                if drift > MAX_DRIFT:
+                    print(f"  {theme['id']}: '{tid}' incoherent patch (drift {drift:.2f}), retry {attempt + 1}")
                     continue
                 if changed < 0.025 or changed * mask_px < MIN_CHANGE_PX:
                     print(f"  {theme['id']}: '{tid}' change {changed:.2f} too small, retry {attempt + 1}")
                     continue
                 if not strict_min(
                     f"Does this image crop contain {desc}?",
-                    f"If someone pointed at it, could a young child tell that this crop contains {desc}?",
-                    [_crop(edited, rect)],
+                    f"Does {desc} look naturally drawn into the scene (not pasted on) and recognizable to a young child?",
+                    [_crop(edited, rect, pad=60)],
                 ):
                     print(f"  {theme['id']}: '{tid}' judge rejected, retry {attempt + 1}")
                     continue
