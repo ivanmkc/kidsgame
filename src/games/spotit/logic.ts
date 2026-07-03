@@ -1,0 +1,57 @@
+import { Rng, randInt, shuffle } from '../../rng';
+
+// 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
+export const SYMBOLS = [
+  '🐶', '🐱', '🦁', '🐸', '🐼', '🦊', '🐵', '🐷',
+  '🐰', '🐨', '🦄', '🐙', '🦀', '🐠', '🦋', '🐞',
+  '🌸', '🌻', '🍎', '🍌', '🍓', '🍕', '🍦', '🎈',
+  '🚗', '✈️', '🚀', '⚽', '🌈', '⭐', '🎁',
+] as const;
+
+export type Card = number[]; // indices into SYMBOLS, 6 per card
+
+// Projective plane of order n (prime): n^2+n+1 cards, n+1 symbols each,
+// any two cards share exactly one symbol.
+export function buildDeck(n = 5): Card[] {
+  const cards: Card[] = [];
+  const first: Card = [];
+  for (let i = 0; i <= n; i++) first.push(i);
+  cards.push(first);
+  for (let i = 0; i < n; i++) {
+    const card: Card = [0];
+    for (let j = 0; j < n; j++) card.push(n + 1 + n * i + j);
+    cards.push(card);
+  }
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const card: Card = [i + 1];
+      for (let k = 0; k < n; k++) {
+        card.push(n + 1 + n * k + ((i * k + j) % n));
+      }
+      cards.push(card);
+    }
+  }
+  return cards;
+}
+
+export function sharedSymbol(a: Card, b: Card): number {
+  const set = new Set(a);
+  const shared = b.filter((s) => set.has(s));
+  if (shared.length !== 1) throw new Error(`cards share ${shared.length} symbols`);
+  return shared[0];
+}
+
+export interface SpotItRound {
+  top: Card; // symbol order shuffled for display
+  bottom: Card;
+  answer: number; // the shared symbol index
+}
+
+export function dealRound(rng: Rng, deck: Card[]): SpotItRound {
+  const i = randInt(rng, deck.length);
+  let j = randInt(rng, deck.length - 1);
+  if (j >= i) j += 1;
+  const top = shuffle(rng, deck[i]);
+  const bottom = shuffle(rng, deck[j]);
+  return { top, bottom, answer: sharedSymbol(top, bottom) };
+}
