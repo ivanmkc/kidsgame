@@ -52,11 +52,13 @@ export function SpotItGame({ onHome, player, seed }: Props) {
   }));
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
+  const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
   const won = score >= roundsToWin;
 
   const nextRound = () => {
     setRound(dealRound(rngRef.current, deck));
     setSlots({ top: layoutSlots(rngRef.current), bottom: layoutSlots(rngRef.current) });
+    setRoundKey((k) => k + 1);
   };
 
   const onTap = (symbol: number) => {
@@ -95,9 +97,13 @@ export function SpotItGame({ onHome, player, seed }: Props) {
       right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
-        <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+        <DealIn key={`t${roundKey}`} from={-1}>
+          <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+        </DealIn>
         <Text style={styles.vs}>👀</Text>
-        <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
+        <DealIn key={`b${roundKey}`} from={1}>
+          <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
+        </DealIn>
       </View>
       <WinOverlay
         visible={won}
@@ -106,6 +112,26 @@ export function SpotItGame({ onHome, player, seed }: Props) {
         onHome={onHome}
       />
     </GameShell>
+  );
+}
+
+function DealIn({ from, children }: { from: number; children: React.ReactNode }) {
+  const t = useRef(new Animated.Value(0)).current;
+  React.useEffect(() => {
+    Animated.spring(t, { toValue: 1, friction: 7, useNativeDriver: true }).start();
+  }, [t]);
+  return (
+    <Animated.View
+      style={{
+        opacity: t,
+        transform: [
+          { translateX: t.interpolate({ inputRange: [0, 1], outputRange: [from * 60, 0] }) },
+          { rotate: t.interpolate({ inputRange: [0, 1], outputRange: [`${from * 7}deg`, '0deg'] }) },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
   );
 }
 

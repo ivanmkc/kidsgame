@@ -3,7 +3,8 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { SPOTIT_ICONS } from '../assets/images';
 import { DIFFICULTIES } from '../difficulty';
 import { AVATAR_CHOICES, Difficulty, MAX_PLAYERS, Player, newPlayer, savePlayers } from '../profile';
-import { colors, fonts, shadows } from '../theme';
+import { colors, darken, fonts, shadows } from '../theme';
+import { ChunkyButton } from './ChunkyButton';
 
 interface Props {
   players: Player[];
@@ -89,13 +90,15 @@ export function PlayerPicker({ players, onChange, onPick }: Props) {
                 );
               })}
             </View>
-            <Pressable
+            <ChunkyButton
+              label="Let's play!"
+              color={colors.purple}
+              darkColor={darken(colors.purple)}
               onPress={() => onPick(p)}
-              style={({ pressed }) => [styles.playBtn, pressed && styles.pressed]}
               testID={`player-${p.id}-play`}
-            >
-              <Text style={styles.playText}>Let's play!</Text>
-            </Pressable>
+              minWidth={150}
+              fontSize={16}
+            />
           </View>
         ))}
         {players.length < MAX_PLAYERS ? (

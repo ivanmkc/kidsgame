@@ -161,6 +161,86 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     return Image.fromarray(comp.clip(0, 255).astype(np.uint8)), changed_inside, changed_outside
 
 
+IMAGEN_MODEL = "imagen-3.0-capability-001"
+_IMAGEN_LOCATION = "us-central1"  # Imagen edit_image is not on the global endpoint
+
+
+def _imagen_client() -> genai.Client:
+    if getattr(_tls, "imagen_client", None) is None:
+        _tls.imagen_client = genai.Client(vertexai=True, project=PROJECT, location=_IMAGEN_LOCATION)
+    return _tls.imagen_client
+
+
+def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[Image.Image, float, float]:
+    """Remove whatever is inside `rect` using Imagen 3's purpose-built
+    EDIT_MODE_INPAINT_REMOVAL (NBP is biased toward preserving content and
+    frequently no-ops on removal prompts). Same return shape as edit_local.
+    """
+    x, y, w, h = rect
+    W_, H_ = base.size
+    mask_arr = np.zeros((H_, W_), np.uint8)
+    mask_arr[y:y + h, x:x + w] = 255
+
+    def png(im: Image.Image) -> bytes:
+        buf = io.BytesIO()
+        im.save(buf, "PNG")
+        return buf.getvalue()
+
+    last: Exception | None = None
+    for i in range(3):
+        try:
+            resp = _imagen_client().models.edit_image(
+                model=IMAGEN_MODEL,
+                prompt="empty background, seamless continuation of the surrounding scenery",
+                reference_images=[
+                    types.RawReferenceImage(
+                        reference_image=types.Image(image_bytes=png(base)), reference_id=0),
+                    types.MaskReferenceImage(
+                        reference_image=types.Image(
+                            image_bytes=png(Image.fromarray(mask_arr, "L").convert("RGB"))),
+                        reference_id=1,
+                        config=types.MaskReferenceConfig(
+                            mask_mode="MASK_MODE_USER_PROVIDED", mask_dilation=0.01),
+                    ),
+                ],
+                config=types.EditImageConfig(
+                    edit_mode="EDIT_MODE_INPAINT_REMOVAL",
+                    number_of_images=1,
+                    negative_prompt="a new object, a new animal, a new character, text, watermark",
+                ),
+            )
+            gens = [g for g in (resp.generated_images or []) if g.image and g.image.image_bytes]
+            if not gens:
+                raise RuntimeError("imagen returned no images (content filter?)")
+            out = Image.open(io.BytesIO(gens[0].image.image_bytes)).convert("RGB")
+            if out.size != base.size:
+                out = aspect_fit(out, base.size)
+            b = np.asarray(base, np.int16)
+            o = np.asarray(out, np.int16)
+            diff = np.abs(o - b).sum(-1)
+            mask = mask_arr > 127
+            inside = float((diff[mask] > 30).mean())
+
+            from PIL import ImageFilter
+            small = (max(1, base.width // 8), max(1, base.height // 8))
+            b_s = np.asarray(base.filter(ImageFilter.GaussianBlur(3)).resize(small), np.int16)
+            o_s = np.asarray(out.filter(ImageFilter.GaussianBlur(3)).resize(small), np.int16)
+            diff_s = np.abs(o_s - b_s).sum(-1)
+            mask_s = np.asarray(Image.fromarray(mask_arr, "L").resize(small)) > 127
+            drift = float((diff_s[~mask_s] > 45).mean()) if (~mask_s).any() else 0.0
+
+            m_img = Image.fromarray(mask_arr, "L").filter(ImageFilter.GaussianBlur(4))
+            m = np.asarray(m_img, np.float32)[..., None] / 255.0
+            comp = b.astype(np.float32) * (1 - m) + o.astype(np.float32) * m
+            return Image.fromarray(comp.clip(0, 255).astype(np.uint8)), inside, drift
+        except Exception as e:  # noqa: BLE001
+            last = e
+            _tls.imagen_client = None
+            print(f"  WARN imagen_remove attempt {i + 1}: {type(e).__name__} {str(e)[:120]}", file=sys.stderr)
+            time.sleep(5 * (i + 1))
+    raise RuntimeError(f"imagen_remove failed: {last}")
+
+
 def edit_local(
     base: Image.Image,
     rect: tuple[int, int, int, int],

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, fonts, shadows } from '../theme';
+import { Animated, StyleSheet, Text, View } from 'react-native';
+import { colors, darken, fonts, shadows } from '../theme';
+import { ChunkyButton } from './ChunkyButton';
 import { Confetti } from './Confetti';
 
 interface Props {
@@ -12,39 +13,49 @@ interface Props {
 
 export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
-  const starPop = useRef(new Animated.Value(0)).current;
+  const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
 
   useEffect(() => {
     if (visible) {
       scale.setValue(0.3);
-      starPop.setValue(0);
+      stars.forEach((s) => s.setValue(0));
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
-      Animated.spring(starPop, { toValue: 1, useNativeDriver: true, friction: 3, delay: 250 }).start();
+      Animated.stagger(
+        160,
+        stars.map((s) => Animated.spring(s, { toValue: 1, useNativeDriver: true, friction: 3 }))
+      ).start();
     }
-  }, [visible, scale, starPop]);
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!visible) return null;
 
   return (
     <View style={styles.backdrop} testID="win-overlay">
       <Confetti />
-      <Animated.View style={[styles.card, shadows.sticker, { transform: [{ scale }] }]}>
-        <Animated.Text style={[styles.stars, { transform: [{ scale: starPop }] }]}>⭐⭐⭐</Animated.Text>
+      <Animated.View style={[styles.card, shadows.lifted, { transform: [{ scale }] }]}>
+        <View style={styles.starRow}>
+          {stars.map((s, i) => (
+            <Animated.Text
+              key={i}
+              style={[
+                styles.star,
+                i === 1 && styles.starBig,
+                {
+                  opacity: s,
+                  transform: [
+                    { scale: s.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0, 1.35, 1] }) },
+                    { rotate: s.interpolate({ inputRange: [0, 1], outputRange: [i === 1 ? '-40deg' : '40deg', '0deg'] }) },
+                  ],
+                },
+              ]}
+            >
+              ⭐
+            </Animated.Text>
+          ))}
+        </View>
         <Text style={styles.message}>{message}</Text>
-        <Pressable
-          onPress={onPlayAgain}
-          style={({ pressed }) => [styles.btn, { backgroundColor: colors.green }, pressed && styles.pressed]}
-          testID="play-again"
-        >
-          <Text style={styles.btnText}>Play Again 🔁</Text>
-        </Pressable>
-        <Pressable
-          onPress={onHome}
-          style={({ pressed }) => [styles.btn, { backgroundColor: colors.purple }, pressed && styles.pressed]}
-          testID="win-home"
-        >
-          <Text style={styles.btnText}>All Games 🏠</Text>
-        </Pressable>
+        <ChunkyButton label="Play Again 🔁" color={colors.green} darkColor={darken(colors.green)} onPress={onPlayAgain} testID="play-again" minWidth={224} />
+        <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={onHome} testID="win-home" minWidth={224} />
       </Animated.View>
     </View>
   );
@@ -65,23 +76,16 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.paper,
     borderRadius: 32,
-    paddingVertical: 30,
+    paddingVertical: 28,
     paddingHorizontal: 34,
     alignItems: 'center',
-    gap: 14,
-    minWidth: 270,
+    gap: 12,
+    minWidth: 280,
     borderWidth: 4,
     borderColor: colors.gold,
   },
-  stars: { fontSize: 46 },
-  message: { fontSize: 26, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
-  btn: {
-    borderRadius: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    minWidth: 220,
-    alignItems: 'center',
-  },
-  pressed: { opacity: 0.75, transform: [{ scale: 0.97 }] },
-  btnText: { fontSize: 20, fontFamily: fonts.display, color: '#fff' },
+  starRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 62 },
+  star: { fontSize: 38 },
+  starBig: { fontSize: 54, marginBottom: 2 },
+  message: { fontSize: 25, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
 });

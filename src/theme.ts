@@ -37,4 +37,29 @@ export const shadows = {
     shadowRadius: 6,
     elevation: 3,
   },
+  // deeper warm ambient for hero cards; pair with `soft` on an inner view
+  // for a layered two-shadow look
+  lifted: {
+    shadowColor: '#8A5A3B',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.22,
+    shadowRadius: 22,
+    elevation: 10,
+  },
+  glowGold: {
+    shadowColor: '#FFC24B',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 18,
+    elevation: 8,
+  },
 };
+
+export function darken(hex: string, amount = 0.22): string {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v: number) => Math.max(0, Math.round(v * (1 - amount)));
+  const r = f((n >> 16) & 255);
+  const g = f((n >> 8) & 255);
+  const b = f(n & 255);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}

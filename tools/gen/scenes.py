@@ -24,8 +24,8 @@ import numpy as np
 from PIL import Image
 
 from .detect import detect_objects, usable_detections
-from .judge import ask_yes_no, strict_min
-from .nbp import edit_local, generate
+from .judge import ask_text, ask_yes_no, strict_min
+from .nbp import edit_local, generate, imagen_remove
 
 W, H = 1280, 720  # matches NBP's native ~16:9 output (no squash, minimal crop)
 MIN_CHANGE = 0.025
@@ -236,7 +236,8 @@ def _on_white(rgba: Image.Image) -> Image.Image:
 
 def _try_edit(theme_id: str, current: Image.Image, rect: tuple[int, int, int, int],
               prompt: str, q1: str, q2: str, base_for_judge: Image.Image,
-              attempts: int = 3, tag: str = "", judge_images: str = "pair") -> Image.Image | None:
+              attempts: int = 3, tag: str = "", judge_images: str = "pair",
+              edit_fn=edit_local, max_change: float = MAX_CHANGE) -> Image.Image | None:
     """One verified edit: pixel gates + strict-min judge, with retries.
 
     judge_images: "pair" shows the judge before+after crops (diff game);
@@ -244,11 +245,11 @@ def _try_edit(theme_id: str, current: Image.Image, rect: tuple[int, int, int, in
     """
     mask_px = rect[2] * rect[3]
     for attempt in range(attempts):
-        edited, changed, drift = edit_local(current, rect, prompt)
+        edited, changed, drift = edit_fn(current, rect, prompt)
         if drift > MAX_DRIFT:
             print(f"  {theme_id}: {tag} incoherent patch (drift {drift:.2f}), retry {attempt + 1}")
             continue
-        if changed > MAX_CHANGE:
+        if changed > max_change:
             print(f"  {theme_id}: {tag} repainted backdrop ({changed:.2f}), retry {attempt + 1}")
             continue
         if changed < MIN_CHANGE or changed * mask_px < MIN_CHANGE_PX:
@@ -303,17 +304,29 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
             if kind == "remove":
                 edited = _try_edit(
                     theme["id"], current, rect,
-                    f"Remove the {det['label']} completely. Seamlessly continue the "
-                    "background and scenery behind it as if it was never there. Do "
-                    "not add anything new.",
-                    "These two crops are from a spot-the-difference game for young children. Did an object clearly disappear between the first and second crop?",
-                    "In the second crop, does the area look clean and natural — no smudge, blur patch, or leftover outline where the object was?",
+                    "unused (imagen removal mode)",
+                    "These two crops are from a spot-the-difference game for young children. Is the content clearly different between them — something removed, changed, or transformed?",
+                    "Does the second crop look clean and naturally illustrated — no smudge, blur patch, pasted-on box, or leftover outline?",
                     base_for_judge=base, tag=f"remove '{det['label']}'",
+                    edit_fn=lambda c, r, _p: imagen_remove(c, r),
+                    max_change=0.97,
                 )
+                if edited is not None:
+                    caption = ask_text(
+                        "These two crops are from a children's spot-the-difference game (before and after). "
+                        "In 3-8 simple words, what changed? (e.g. 'the cow disappeared', 'the balloon turned blue')",
+                        [_crop(base, rect, pad=40), _crop(edited, rect, pad=40)],
+                    )
+                    # the caption doubles as a verifier: a change described as
+                    # blur/smudge/nothing is an artifact, not a game difference
+                    bad_words = ("blur", "smudge", "nothing", "unclear", "same", "no change")
+                    if any(w in caption.lower() for w in bad_words):
+                        print(f"  {theme['id']}: caption flagged artifact ({caption!r}), rejecting edit")
+                        edited = None
                 if edited is not None:
                     current = edited
                     diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
-                                  "what": f"the {det['label']} disappeared"})
+                                  "what": caption})
                     placed = True
             else:
                 while add_pool and not placed:
@@ -326,6 +339,7 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
                         "These two crops are from a spot-the-difference game for young children. Did one object clearly turn into a different object?",
                         "Does the new object look naturally drawn into the illustration — no pasted-on box, no white frame, no style clash?",
                         base_for_judge=base, tag=f"replace '{det['label']}'->'{alt}'",
+                        max_change=0.95,
                     )
                     if edited is not None:
                         current = edited
@@ -346,6 +360,28 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
                     "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
                     "Does the newly added object look naturally drawn into the illustration — no pasted-on box, no white frame, no style clash?",
                     base_for_judge=base, tag=f"add '{obj}'",
+                )
+                if edited is not None:
+                    free_rects.pop(0)
+                    current = edited
+                    diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
+                                  "what": f"{obj} appeared"})
+                    placed = True
+        if not placed and kind in ("remove", "replace"):
+            print(f"  {theme['id']}: '{kind}' failed - falling back to an add for this slot")
+            while add_pool and free_rects and not placed:
+                obj = add_pool.pop(0)
+                rect = free_rects[0]
+                edited = _try_edit(
+                    theme["id"], current, rect,
+                    f"Add {obj} INTO the existing scenery. Keep the marked area's "
+                    "current background, colors and objects exactly as they are - "
+                    "just draw the new object on top of them, naturally placed, bold "
+                    "and clearly visible, matching the art style. Do NOT repaint the "
+                    "backdrop.",
+                    "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
+                    "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white frame, no style clash?",
+                    base_for_judge=base, tag=f"fallback add '{obj}'",
                 )
                 if edited is not None:
                     free_rects.pop(0)
