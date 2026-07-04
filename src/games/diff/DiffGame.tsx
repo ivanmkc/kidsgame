@@ -22,13 +22,29 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
   const [hintId, setHintId] = useState<string | null>(null);
+  const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const settings = settingsFor(player?.difficulty);
+
+  // The hint button stays hidden until the kid is genuinely stuck (~20s
+  // without a find), and hides again after each use — no hint spamming.
+  const armHintTimer = () => {
+    setHintAvailable(false);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    if (settings.diffHint) {
+      idleTimer.current = setTimeout(() => setHintAvailable(true), 20000);
+    }
+  };
 
   useEffect(() => {
     setFound([]);
     setHintId(null);
-  }, [sceneId]);
+    armHintTimer();
+    return () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -67,6 +83,7 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
     if (won) return;
     setFound((f) => (f.includes(id) ? f : [...f, id]));
     if (hintId === id) setHintId(null);
+    armHintTimer();
   };
 
   const showHint = () => {
@@ -75,6 +92,7 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
     setHintId(remaining[Math.floor(Math.random() * remaining.length)]);
     if (hintTimer.current) clearTimeout(hintTimer.current);
     hintTimer.current = setTimeout(() => setHintId(null), 2200);
+    armHintTimer(); // one peek, then back to earning it
   };
 
   const pictures = (
@@ -121,7 +139,7 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={isLandscape ? styles.rowWrap : styles.colWrap}>{pictures}</View>
-        {settings.diffHint && !won ? (
+        {settings.diffHint && hintAvailable && !won ? (
           <Pressable onPress={showHint} testID="diff-hint" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
             <Text style={styles.hintText}>💡 Hint</Text>
           </Pressable>
