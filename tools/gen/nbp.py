@@ -227,6 +227,14 @@ def _imagen_client() -> genai.Client:
     return _tls.imagen_client
 
 
+def imagen_remove_mask(base: Image.Image, mask_bool: np.ndarray) -> tuple[Image.Image, float, float]:
+    """Mask-shaped Imagen removal (SAM segment → inpaint). The precise
+    silhouette is what keeps removals ghost-free: a rectangle mask makes
+    Imagen re-imagine everything in the box, a tight dilated segment only
+    asks it to continue background where the object was."""
+    return _imagen_remove_arr(base, (mask_bool * 255).astype(np.uint8))
+
+
 def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[Image.Image, float, float]:
     """Remove whatever is inside `rect` using Imagen 3's purpose-built
     EDIT_MODE_INPAINT_REMOVAL (NBP is biased toward preserving content and
@@ -236,6 +244,10 @@ def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[I
     W_, H_ = base.size
     mask_arr = np.zeros((H_, W_), np.uint8)
     mask_arr[y:y + h, x:x + w] = 255
+    return _imagen_remove_arr(base, mask_arr)
+
+
+def _imagen_remove_arr(base: Image.Image, mask_arr: np.ndarray) -> tuple[Image.Image, float, float]:
 
     def png(im: Image.Image) -> bytes:
         buf = io.BytesIO()
