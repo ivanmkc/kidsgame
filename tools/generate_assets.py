@@ -19,7 +19,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from gen.nbp import generate  # noqa: E402
-from gen.scenes import DIFF_THEMES, HIDDEN_THEMES, gen_diff_scene, gen_hidden_scene  # noqa: E402
+from gen.scenes import DIFF_THEMES, HIDDEN_THEMES  # noqa: E402
+from gen.scenes_sam import gen_diff_scene, gen_hidden_scene  # noqa: E402  (SAM-first pipeline)
 from gen.spotit import ICONS, gen_icon  # noqa: E402
 
 ROOT = Path(__file__).parent.parent
