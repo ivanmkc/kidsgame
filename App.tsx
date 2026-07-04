@@ -40,7 +40,11 @@ export default function App() {
   const [players, setPlayers] = useState<Player[]>(() => loadPlayers());
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [route, navigate] = useRoute();
-  const { screen, param } = routeParts(route);
+  const parts = routeParts(route);
+  const KNOWN = ['players', 'menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'puzzle'];
+  // A stale/mistyped hash must never strand a kid on a blank page.
+  const screen = KNOWN.includes(parts.screen) ? parts.screen : 'players';
+  const param = parts.param;
   // Deep links / refreshes land past the picker — fall back to the first kid.
   const player = players.find((p) => p.id === playerId) ?? (screen !== 'players' ? players[0] : null);
   const goHome = () => navigate('menu');
