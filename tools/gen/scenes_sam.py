@@ -16,6 +16,7 @@ decision, nothing that can clip an object mid-body.
 from __future__ import annotations
 
 import random
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import cv2
@@ -188,10 +189,12 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         except Exception as e:  # noqa: BLE001 — VM hiccup: next attempt re-renders anyway
             print(f"  {theme['id']}: SAM batch failed ({str(e)[:120]})")
             continue
-        usable = _drop_overlaps([
-            {"obj": o, "seg": s} for o, p in zip(objs, prompts)
-            if (s := _refined_seg(base, p, segs.get(p, []), f"{theme['id']}/{p}"))
-        ])
+        with ThreadPoolExecutor(4) as ex:
+            refined = list(ex.map(
+                lambda op: (op[0], _refined_seg(base, op[1], segs.get(op[1], []),
+                                                f"{theme['id']}/{op[1]}")),
+                zip(objs, prompts)))
+        usable = _drop_overlaps([{"obj": o, "seg": s} for o, s in refined if s])
         if len(usable) < NUM_DIFFS:
             print(f"  {theme['id']}: only {len(usable)}/{NUM_DIFFS} segmentable objects, re-render {attempt + 1}")
             continue
@@ -199,28 +202,32 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         rng.shuffle(picked)
 
         # A loses the first two (they exist only in B → "appeared");
-        # B loses the other two (exist only in A → "missing").
-        img_a: Image.Image | None = base
-        img_b: Image.Image | None = base
-        diffs = []
-        ok = True
-        for i, item in enumerate(picked):
-            side = "A" if i < 2 else "B"
-            src = img_a if side == "A" else img_b
-            out = _remove_verified(src, item, theme["id"])
-            if out is None:
-                ok = False
-                break
-            if side == "A":
-                img_a = out
-            else:
-                img_b = out
-            hx, hy, hw, hh = _hitbox(item["seg"])
-            what = (f"a {_short(item['obj'])} appeared" if side == "A"
-                    else f"the {_short(item['obj'])} is missing")
-            diffs.append({"x": hx, "y": hy, "w": hw, "h": hh, "what": what})
-        if not ok:
+        # B loses the other two (exist only in A → "missing"). The branches
+        # start from the same base and never touch the same pixels
+        # (hitboxes are non-overlapping by the gate), so they run in
+        # parallel; within a branch removals chain sequentially.
+        def run_branch(items: list[dict], phrase: str) -> tuple[Image.Image, list[dict]] | None:
+            img = base
+            out = []
+            for item in items:
+                nxt = _remove_verified(img, item, theme["id"])
+                if nxt is None:
+                    return None
+                img = nxt
+                hx, hy, hw, hh = _hitbox(item["seg"])
+                out.append({"x": hx, "y": hy, "w": hw, "h": hh,
+                            "what": phrase.format(_short(item["obj"]))})
+            return img, out
+
+        with ThreadPoolExecutor(2) as ex:
+            fa = ex.submit(run_branch, picked[:2], "a {} appeared")
+            fb = ex.submit(run_branch, picked[2:], "the {} is missing")
+            ra, rb = fa.result(), fb.result()
+        if ra is None or rb is None:
             continue
+        img_a, diffs_a = ra
+        img_b, diffs_b = rb
+        diffs = diffs_a + diffs_b
 
         if not strict_min(
             "These are picture A and picture B of a spot-the-difference puzzle for children. Do they show the same scene with a few clear object differences?",
@@ -288,10 +295,14 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         except Exception as e:  # noqa: BLE001
             print(f"  {theme['id']}: SAM batch failed ({str(e)[:120]})")
             continue
+        with ThreadPoolExecutor(4) as ex:
+            refined = list(ex.map(
+                lambda tp: (tp[0][0], tp[0][1],
+                            _refined_seg(base, tp[1], segs.get(tp[1], []),
+                                         f"{theme['id']}/{tp[1]}")),
+                zip(chosen, prompts)))
         usable = _drop_overlaps([
-            {"tid": tid, "obj": desc, "seg": s}
-            for (tid, desc), p in zip(chosen, prompts)
-            if (s := _refined_seg(base, p, segs.get(p, []), f"{theme['id']}/{p}"))
+            {"tid": tid, "obj": desc, "seg": s} for tid, desc, s in refined if s
         ])
 
         targets = []
