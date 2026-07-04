@@ -319,7 +319,7 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
                     )
                     # the caption doubles as a verifier: a change described as
                     # blur/smudge/nothing is an artifact, not a game difference
-                    bad_words = ("blur", "smudge", "nothing", "unclear", "same", "no change")
+                    bad_words = ("blur", "smudge", "nothing", "unclear", "same", "no change", "no difference", "not sure", "identical", "cannot", "hard to")
                     if any(w in caption.lower() for w in bad_words):
                         print(f"  {theme['id']}: caption flagged artifact ({caption!r}), rejecting edit")
                         edited = None
