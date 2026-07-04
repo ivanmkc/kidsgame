@@ -14,7 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { SCENE_IMAGES, SPOTIT_ICONS, UI_IMAGES } from './src/assets/images';
+import { SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
 import { PlayerPicker } from './src/components/PlayerPicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
@@ -124,10 +124,10 @@ function Menu({
   const cardWidth = isLandscape ? Math.min(430, (Math.min(width, 1100) - 72) / 2) : Math.min(460, width - 32);
 
   const previewFor = (key: string): React.ReactNode => {
-    if (key === 'icons0') return <IconRow from={0} />;
-    if (key === 'icons8') return <IconRow from={8} />;
-    if (key === 'icons13') return <IconRow from={13} />;
-    if (key === 'icons20') return <IconRow from={20} />;
+    if (key === 'icons0') return <SpotItPreview />;
+    if (key === 'icons8') return <MemoryPreview />;
+    if (key === 'icons13') return <ShadowPreview />;
+    if (key === 'icons20') return <OddOnePreview />;
     const scene =
       key === 'diff'
         ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])
@@ -232,6 +232,68 @@ function IconRow({ from }: { from: number }) {
   );
 }
 
+// Spot It preview: two overlapping mini "cards" sharing one icon
+function SpotItPreview() {
+  const icons = manifest.spotit.icons;
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(232,86,79,0.08)' }]}>
+      <View style={[styles.miniCard, { borderColor: colors.teal, transform: [{ rotate: '-6deg' }] }]}>
+        <Image source={SPOTIT_ICONS[icons[0]]} style={styles.miniIcon} />
+        <Image source={SPOTIT_ICONS[icons[4]]} style={styles.miniIcon} />
+      </View>
+      <View style={[styles.miniCard, { borderColor: colors.red, transform: [{ rotate: '5deg' }] }]}>
+        <Image source={SPOTIT_ICONS[icons[4]]} style={styles.miniIcon} />
+        <Image source={SPOTIT_ICONS[icons[9]]} style={styles.miniIcon} />
+      </View>
+    </View>
+  );
+}
+
+// Memory preview: face-down card backs with one flipped pair
+function MemoryPreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(95,191,110,0.08)' }]}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <View key={i} style={[styles.miniBack, i === 2 && styles.miniBackUp]}>
+          {i === 2 ? (
+            <Image source={SPOTIT_ICONS[manifest.spotit.icons[8]]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+          ) : (
+            <Text style={{ fontSize: 22 }}>❓</Text>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// Shadow preview: dark silhouettes with one revealed sticker
+function ShadowPreview() {
+  const names = manifest.spotit.icons.slice(13, 17);
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(67,48,75,0.10)' }]}>
+      {names.map((n, i) => (
+        <Image
+          key={n}
+          source={i === 1 ? SPOTIT_ICONS[n] : (SPOTIT_SHADOWS[n] ?? SPOTIT_ICONS[n])}
+          style={styles.iconRowImg}
+        />
+      ))}
+    </View>
+  );
+}
+
+// Odd One Out preview: a row of the same icon with one different
+function OddOnePreview() {
+  const icons = manifest.spotit.icons;
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(232,135,79,0.10)' }]}>
+      {[0, 0, 0, 22, 0].map((idx, i) => (
+        <Image key={i} source={SPOTIT_ICONS[icons[idx]]} style={styles.iconRowImg} />
+      ))}
+    </View>
+  );
+}
+
 function GameCard({
   color, title, blurb, preview, onPress, testID, width,
 }: {
@@ -323,6 +385,28 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
   },
   iconRowImg: { width: '16%', aspectRatio: 1, maxWidth: 58 },
+  miniCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.card,
+    borderWidth: 3,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  miniIcon: { width: 34, height: 34 },
+  miniBack: {
+    width: 44,
+    height: 52,
+    borderRadius: 10,
+    backgroundColor: colors.teal,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.5)',
+  },
+  miniBackUp: { backgroundColor: colors.card, borderColor: colors.green },
   cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
   gameTitle: { fontSize: 22, fontFamily: fonts.display },
   gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },

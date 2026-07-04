@@ -314,44 +314,50 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
     base = generate(f"{theme['base']} {SCENE_STYLE}", (W, H))
 
     rects = _grid_rects(4, 3, NUM_DIFFS, rng)
-    pool = rng.sample(theme["adds"], len(theme["adds"]))
-    sides = ["A", "B", "A", "B"]
-    rng.shuffle(sides)
+    all_objs = rng.sample(theme["adds"], len(theme["adds"]))
+    # A and B evolve independently from the same base - run both add-chains
+    # in parallel (each branch stays sequential internally).
+    half = len(all_objs) // 2
+    branch_pools = {"A": all_objs[:half], "B": all_objs[half:]}
+    branch_rects = {"A": rects[:2], "B": rects[2:]}
 
-    img_a = base
-    img_b = base
-    diffs = []
-    for rect, side in zip(rects, sides):
-        placed = False
-        while pool and not placed:
-            obj = pool.pop(0)
-            current = img_a if side == "A" else img_b
-            edited = _try_edit(
-                theme["id"], current, rect,
-                f"Add {obj} INTO the existing scenery. Keep the marked area's "
-                "current background, colors and objects exactly as they are - "
-                "just draw the new object on top of them, naturally placed ON "
-                "the ground or a surface (never floating in the sky), bold and "
-                "clearly visible, matching the art style. Do NOT repaint the "
-                "backdrop.",
-                "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
-                "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white patch behind it, no style clash?",
-                base_for_judge=base, tag=f"add[{side}] '{obj}'",
-            )
-            if edited is not None:
-                # hitbox = tight bbox of what was actually drawn (+10px), so
-                # taps are precise and boxes can never overlap
-                hit = changed_bbox(current, edited, rect) or rect
-                if side == "A":
-                    img_a = edited
-                    what = f"the {_short(obj)} is missing"
-                else:
-                    img_b = edited
-                    what = f"a {_short(obj)} appeared"
-                diffs.append({"x": hit[0], "y": hit[1], "w": hit[2], "h": hit[3], "what": what})
-                placed = True
-        if not placed:
-            print(f"  FAIL diff {theme['id']}: object pool exhausted")
+    def run_branch(side):
+        current = base
+        found = []
+        pool = branch_pools[side]
+        for rect in branch_rects[side]:
+            placed = False
+            while pool and not placed:
+                obj = pool.pop(0)
+                edited = _try_edit(
+                    theme["id"], current, rect,
+                    f"Add {obj} INTO the existing scenery. Keep the marked area's "
+                    "current background, colors and objects exactly as they are - "
+                    "just draw the new object on top of them, naturally placed ON "
+                    "the ground or a surface (never floating in the sky), bold and "
+                    "clearly visible, matching the art style. Do NOT repaint the "
+                    "backdrop.",
+                    "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
+                    "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white patch behind it, no style clash?",
+                    base_for_judge=base, tag=f"add[{side}] '{obj}'",
+                )
+                if edited is not None:
+                    hit = changed_bbox(current, edited, rect) or rect
+                    what = f"the {_short(obj)} is missing" if side == "A" else f"a {_short(obj)} appeared"
+                    found.append({"x": hit[0], "y": hit[1], "w": hit[2], "h": hit[3], "what": what})
+                    current = edited
+                    placed = True
+            if not placed:
+                print(f"  FAIL diff {theme['id']}: branch {side} pool exhausted")
+        return current, found
+
+    from concurrent.futures import ThreadPoolExecutor as _TPE
+    with _TPE(max_workers=2) as bp:
+        fut_a = bp.submit(run_branch, "A")
+        fut_b = bp.submit(run_branch, "B")
+        img_a, diffs_a = fut_a.result()
+        img_b, diffs_b = fut_b.result()
+    diffs = diffs_a + diffs_b
 
     if len(diffs) < NUM_DIFFS:
         return None
