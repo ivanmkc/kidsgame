@@ -81,8 +81,11 @@ def usable_detections(dets: list[dict], W: int, H: int) -> list[dict]:
         good.append(d)
 
     def overlaps(a, b):
-        return (a["x"] < b["x"] + b["w"] and b["x"] < a["x"] + a["w"]
-                and a["y"] < b["y"] + b["h"] and b["y"] < a["y"] + a["h"])
+        # compare with the +16px hitbox padding applied at edit time, so two
+        # picked detections can never yield overlapping game hitboxes
+        pad = 16
+        return (a["x"] - pad < b["x"] + b["w"] + pad and b["x"] - pad < a["x"] + a["w"] + pad
+                and a["y"] - pad < b["y"] + b["h"] + pad and b["y"] - pad < a["y"] + a["h"] + pad)
 
     picked: list[dict] = []
     for d in sorted(good, key=lambda d: d["w"] * d["h"], reverse=True):

@@ -34,6 +34,468 @@
       "gift"
     ]
   },
-  "diff": [],
-  "hidden": []
+  "diff": [
+    {
+      "id": "space",
+      "name": "Space",
+      "imageA": "diff/space_a.jpg",
+      "imageB": "diff/space_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 24,
+          "y": 24,
+          "w": 272,
+          "h": 192,
+          "what": "a shiny satellite appeared"
+        },
+        {
+          "x": 140,
+          "y": 287,
+          "w": 96,
+          "h": 124,
+          "what": "Three stars appeared"
+        },
+        {
+          "x": 535,
+          "y": 24,
+          "w": 224,
+          "h": 327,
+          "what": "The star and moon disappeared"
+        },
+        {
+          "x": 528,
+          "y": 447,
+          "w": 216,
+          "h": 256,
+          "what": "the bottom rocket became a tiny flying saucer"
+        }
+      ]
+    },
+    {
+      "id": "princess",
+      "name": "Princess Castle",
+      "imageA": "diff/princess_a.jpg",
+      "imageB": "diff/princess_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 664,
+          "y": 504,
+          "w": 272,
+          "h": 192,
+          "what": "a frog wearing a tiny crown appeared"
+        },
+        {
+          "x": 984,
+          "y": 504,
+          "w": 272,
+          "h": 192,
+          "what": "a white pony appeared"
+        },
+        {
+          "x": 22,
+          "y": 0,
+          "w": 172,
+          "h": 116,
+          "what": "the Sun became a pink heart balloon"
+        },
+        {
+          "x": 344,
+          "y": 24,
+          "w": 272,
+          "h": 192,
+          "what": "a golden crown on a cushion appeared"
+        }
+      ]
+    },
+    {
+      "id": "unicorn",
+      "name": "Unicorn Meadow",
+      "imageA": "diff/unicorn_a.jpg",
+      "imageB": "diff/unicorn_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 344,
+          "y": 504,
+          "w": 272,
+          "h": 192,
+          "what": "a little bluebird appeared"
+        },
+        {
+          "x": 24,
+          "y": 504,
+          "w": 272,
+          "h": 192,
+          "what": "a red toadstool mushroom appeared"
+        },
+        {
+          "x": 664,
+          "y": 264,
+          "w": 272,
+          "h": 192,
+          "what": "a pink butterfly appeared"
+        },
+        {
+          "x": 24,
+          "y": 24,
+          "w": 272,
+          "h": 192,
+          "what": "a baby unicorn appeared"
+        }
+      ]
+    },
+    {
+      "id": "party",
+      "name": "Party",
+      "imageA": "diff/party_a.jpg",
+      "imageB": "diff/party_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 278,
+          "y": 380,
+          "w": 352,
+          "h": 197,
+          "what": "the tablecloth became a red toy robot"
+        },
+        {
+          "x": 675,
+          "y": 560,
+          "w": 492,
+          "h": 147,
+          "what": "The confetti disappeared"
+        },
+        {
+          "x": 664,
+          "y": 264,
+          "w": 272,
+          "h": 192,
+          "what": "a toy sailboat appeared"
+        },
+        {
+          "x": 956,
+          "y": 20,
+          "w": 249,
+          "h": 305,
+          "what": "Bunting pattern changed and covers a balloon"
+        }
+      ]
+    },
+    {
+      "id": "farm",
+      "name": "Farm",
+      "imageA": "diff/farm_a.jpg",
+      "imageB": "diff/farm_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 615,
+          "y": 524,
+          "w": 148,
+          "h": 88,
+          "what": "The white chicken's head changed"
+        },
+        {
+          "x": 784,
+          "y": 373,
+          "w": 188,
+          "h": 150,
+          "what": "the cow became a bright red tractor toy"
+        },
+        {
+          "x": 344,
+          "y": 24,
+          "w": 272,
+          "h": 192,
+          "what": "a small white duck appeared"
+        },
+        {
+          "x": 152,
+          "y": 467,
+          "w": 143,
+          "h": 91,
+          "what": "One duck disappeared"
+        }
+      ]
+    }
+  ],
+  "hidden": [
+    {
+      "id": "jungle",
+      "name": "Jungle",
+      "image": "hidden/jungle.jpg",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "parrot",
+          "label": "a red and blue parrot",
+          "x": 798,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/jungle_t_parrot.png"
+        },
+        {
+          "id": "snake",
+          "label": "a friendly green snake coiled on a branch",
+          "x": 286,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/jungle_t_snake.png"
+        },
+        {
+          "id": "frog",
+          "label": "a tiny orange frog",
+          "x": 30,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/jungle_t_frog.png"
+        },
+        {
+          "id": "chameleon",
+          "label": "a purple chameleon",
+          "x": 286,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/jungle_t_chameleon.png"
+        },
+        {
+          "id": "crown",
+          "label": "a small golden crown",
+          "x": 798,
+          "y": 270,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/jungle_t_crown.png"
+        }
+      ]
+    },
+    {
+      "id": "ballroom",
+      "name": "Princess Ballroom",
+      "image": "hidden/ballroom.jpg",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "crown",
+          "label": "a golden crown on a cushion",
+          "x": 286,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/ballroom_t_crown.png"
+        },
+        {
+          "id": "slipper",
+          "label": "a sparkly glass slipper",
+          "x": 798,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/ballroom_t_slipper.png"
+        },
+        {
+          "id": "wand",
+          "label": "a star-tipped magic wand",
+          "x": 1054,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/ballroom_t_wand.png"
+        },
+        {
+          "id": "kitten",
+          "label": "a white kitten with a pink bow",
+          "x": 286,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/ballroom_t_kitten.png"
+        },
+        {
+          "id": "mirror",
+          "label": "a golden hand mirror",
+          "x": 30,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/ballroom_t_mirror.png"
+        }
+      ]
+    },
+    {
+      "id": "fairy",
+      "name": "Fairy Garden",
+      "image": "hidden/fairy.jpg",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "unicorn",
+          "label": "a tiny white unicorn with a rainbow mane",
+          "x": 1054,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/fairy_t_unicorn.png"
+        },
+        {
+          "id": "teacup",
+          "label": "a tiny pink teacup",
+          "x": 286,
+          "y": 270,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/fairy_t_teacup.png"
+        },
+        {
+          "id": "key",
+          "label": "a small golden key",
+          "x": 30,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/fairy_t_key.png"
+        },
+        {
+          "id": "gem",
+          "label": "a sparkling pink gem",
+          "x": 542,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/fairy_t_gem.png"
+        },
+        {
+          "id": "butterfly",
+          "label": "a blue butterfly",
+          "x": 1054,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/fairy_t_butterfly.png"
+        }
+      ]
+    },
+    {
+      "id": "toybox",
+      "name": "Toy Room",
+      "image": "hidden/toybox.jpg",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "key",
+          "label": "a small golden key",
+          "x": 30,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/toybox_t_key.png"
+        },
+        {
+          "id": "duck",
+          "label": "a yellow rubber duck",
+          "x": 30,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/toybox_t_duck.png"
+        },
+        {
+          "id": "kite",
+          "label": "a small red kite",
+          "x": 798,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/toybox_t_kite.png"
+        },
+        {
+          "id": "drum",
+          "label": "a little toy drum",
+          "x": 286,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/toybox_t_drum.png"
+        },
+        {
+          "id": "snail",
+          "label": "a smiling cartoon snail",
+          "x": 286,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/toybox_t_snail.png"
+        }
+      ]
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "image": "hidden/kitchen.jpg",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "mouse",
+          "label": "a tiny grey mouse",
+          "x": 30,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/kitchen_t_mouse.png"
+        },
+        {
+          "id": "teapot",
+          "label": "a blue teapot",
+          "x": 30,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/kitchen_t_teapot.png"
+        },
+        {
+          "id": "pretzel",
+          "label": "a golden pretzel",
+          "x": 286,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/kitchen_t_pretzel.png"
+        },
+        {
+          "id": "fish",
+          "label": "a goldfish in a small bowl",
+          "x": 798,
+          "y": 510,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/kitchen_t_fish.png"
+        },
+        {
+          "id": "clock",
+          "label": "a small red alarm clock",
+          "x": 542,
+          "y": 30,
+          "w": 196,
+          "h": 180,
+          "thumb": "hidden/kitchen_t_clock.png"
+        }
+      ]
+    }
+  ]
 }
