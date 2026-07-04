@@ -395,11 +395,16 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
     if len(diffs) < NUM_DIFFS:
         return None
 
-    # Whole-scene verification: the pair must read as a clean puzzle.
+    # Whole-scene verification: the pair must read as a clean puzzle. The
+    # third check hunts artifacts with an INVERTED question — stochastic
+    # judges agree to friendly framings too easily.
     if not strict_min(
         "These are picture A and picture B of a spot-the-difference puzzle for children. Does picture B look like a clean, professional variant of A — same scene, several clear differences?",
         "Look carefully at picture B: is it free of broken patches, pasted-on rectangles, smudges, or style clashes?",
         [base, current],
+    ) or ask_yes_no(
+        "Look carefully at this children's illustration. Are there any pale/white rectangular patches, erased-looking smears, floating half-drawn objects, or blurry spots that look like editing mistakes? Answer YES if you see ANY such artifact.",
+        [current],
     ):
         print(f"  {theme['id']}: whole-scene judge rejected the pair")
         return None
