@@ -718,6 +718,120 @@
           "what": "a owl on a branch appeared"
         }
       ]
+    },
+    {
+      "id": "pirate",
+      "name": "Pirate Cove",
+      "imageA": "diff/pirate_a.jpg",
+      "imageB": "diff/pirate_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 654,
+          "y": 14,
+          "w": 291,
+          "h": 211,
+          "what": "the friendly shark fin in the water is missing"
+        },
+        {
+          "x": 14,
+          "y": 14,
+          "w": 291,
+          "h": 211,
+          "what": "the message in a bottle is missing"
+        },
+        {
+          "x": 974,
+          "y": 14,
+          "w": 273,
+          "h": 211,
+          "what": "a parrot on a barrel appeared"
+        },
+        {
+          "x": 654,
+          "y": 494,
+          "w": 291,
+          "h": 211,
+          "what": "a spyglass on the sand appeared"
+        }
+      ]
+    },
+    {
+      "id": "savanna",
+      "name": "Savanna",
+      "imageA": "diff/savanna_a.jpg",
+      "imageB": "diff/savanna_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 334,
+          "y": 14,
+          "w": 291,
+          "h": 211,
+          "what": "the baby elephant is missing"
+        },
+        {
+          "x": 974,
+          "y": 356,
+          "w": 291,
+          "h": 109,
+          "what": "the meerkat standing tall is missing"
+        },
+        {
+          "x": 1147,
+          "y": 54,
+          "w": 118,
+          "h": 171,
+          "what": "a termite mound appeared"
+        },
+        {
+          "x": 654,
+          "y": 494,
+          "w": 291,
+          "h": 211,
+          "what": "a tortoise appeared"
+        }
+      ]
+    },
+    {
+      "id": "dinos",
+      "name": "Dinosaur Valley",
+      "imageA": "diff/dinos_a.jpg",
+      "imageB": "diff/dinos_b.jpg",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 654,
+          "y": 14,
+          "w": 291,
+          "h": 211,
+          "what": "the pterodactyl flying is missing"
+        },
+        {
+          "x": 996,
+          "y": 14,
+          "w": 269,
+          "h": 211,
+          "what": "the red flower bush is missing"
+        },
+        {
+          "x": 334,
+          "y": 254,
+          "w": 279,
+          "h": 211,
+          "what": "a orange dinosaur appeared"
+        },
+        {
+          "x": 14,
+          "y": 494,
+          "w": 291,
+          "h": 211,
+          "what": "a butterfly appeared"
+        }
+      ]
     }
   ],
   "hidden": [
