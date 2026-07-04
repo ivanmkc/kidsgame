@@ -19,9 +19,12 @@ QUALITY = 85
 
 def to_jpg(rel: str) -> str:
     """Convert one asset (manifest-relative path) to JPEG; return new rel path."""
+    if rel.endswith(".jpg"):
+        return rel  # already converted — src==dst here, converting again would
+        # write the jpg and then unlink it (this bug once deleted every scene)
     src = ASSETS / rel
     if not src.exists():  # already converted in a previous run
-        return rel if rel.endswith(".jpg") else rel[: rel.rfind(".")] + ".jpg"
+        return rel[: rel.rfind(".")] + ".jpg"
     dst = src.with_suffix(".jpg")
     Image.open(src).convert("RGB").save(dst, "JPEG", quality=QUALITY, optimize=True)
     src.unlink()
