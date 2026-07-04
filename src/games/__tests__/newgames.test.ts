@@ -60,3 +60,32 @@ describe('difficulty table', () => {
     }
   });
 });
+
+describe('shadow match', () => {
+  it('answer is always among the options; options unique', async () => {
+    const { makeShadowRound } = await import('../shadow/logic');
+    for (let seed = 1; seed <= 40; seed++) {
+      for (const choices of [3, 4, 5]) {
+        const r = makeShadowRound(makeRng(seed * choices), manifest.spotit.icons, choices);
+        expect(r.options).toHaveLength(choices);
+        expect(new Set(r.options).size).toBe(choices);
+        expect(r.options).toContain(r.answer);
+      }
+    }
+  });
+});
+
+describe('odd one out', () => {
+  it('exactly one odd item at the reported index', async () => {
+    const { makeOddOneRound } = await import('../oddone/logic');
+    for (let seed = 1; seed <= 40; seed++) {
+      for (const n of [4, 6, 9]) {
+        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
+        expect(r.items).toHaveLength(n);
+        expect(r.items.filter((x) => x === r.odd)).toHaveLength(1);
+        expect(r.items[r.oddIndex]).toBe(r.odd);
+        expect(new Set(r.items).size).toBe(2);
+      }
+    }
+  });
+});

@@ -21,6 +21,8 @@ import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
 import { HiddenGame } from './src/games/hidden/HiddenGame';
 import { MemoryGame } from './src/games/memory/MemoryGame';
+import { OddOneGame } from './src/games/oddone/OddOneGame';
+import { ShadowGame } from './src/games/shadow/ShadowGame';
 import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { manifest } from './src/manifest';
@@ -83,6 +85,8 @@ export default function App() {
         />
       )}
       {screen === 'memory' && <MemoryGame onHome={goHome} player={player} />}
+      {screen === 'shadow' && <ShadowGame onHome={goHome} player={player} />}
+      {screen === 'oddone' && <OddOneGame onHome={goHome} player={player} />}
       {screen === 'puzzle' && (
         <PuzzleGame
           onHome={goHome}
@@ -102,6 +106,8 @@ const GAME_CARDS = [
   { route: 'hidden', color: colors.purple, title: 'Hidden Objects', blurb: 'Hunt for the secret things in the scene', preview: 'hidden' },
   { route: 'memory', color: colors.green, title: 'Memory Match', blurb: 'Flip the cards and find the pairs', preview: 'icons8' },
   { route: 'puzzle', color: colors.gold, title: 'Picture Puzzle', blurb: 'Put the mixed-up picture back together', preview: 'puzzle' },
+  { route: 'shadow', color: colors.ink, title: 'Shadow Match', blurb: 'Whose shadow is that? Match it!', preview: 'icons13' },
+  { route: 'oddone', color: '#E8874F', title: 'Odd One Out', blurb: 'Spot the one that is different', preview: 'icons20' },
 ];
 
 function Menu({
@@ -118,6 +124,8 @@ function Menu({
   const previewFor = (key: string): React.ReactNode => {
     if (key === 'icons0') return <IconRow from={0} />;
     if (key === 'icons8') return <IconRow from={8} />;
+    if (key === 'icons13') return <IconRow from={13} />;
+    if (key === 'icons20') return <IconRow from={20} />;
     const scene =
       key === 'diff'
         ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])

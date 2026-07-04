@@ -224,6 +224,44 @@
           "what": "One duck disappeared"
         }
       ]
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean",
+      "imageA": "diff/ocean_a.png",
+      "imageB": "diff/ocean_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 938,
+          "y": 277,
+          "w": 200,
+          "h": 148,
+          "what": "the orange fish became a spiral seashell"
+        },
+        {
+          "x": 344,
+          "y": 24,
+          "w": 272,
+          "h": 192,
+          "what": "a striped clownfish appeared"
+        },
+        {
+          "x": 24,
+          "y": 504,
+          "w": 272,
+          "h": 192,
+          "what": "a green seahorse appeared"
+        },
+        {
+          "x": 828,
+          "y": 108,
+          "w": 156,
+          "h": 114,
+          "what": "The orange fish disappeared"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -314,15 +352,6 @@
           "w": 196,
           "h": 180,
           "thumb": "hidden/ballroom_t_wand.png"
-        },
-        {
-          "id": "kitten",
-          "label": "a white kitten with a pink bow",
-          "x": 286,
-          "y": 30,
-          "w": 196,
-          "h": 180,
-          "thumb": "hidden/ballroom_t_kitten.png"
         },
         {
           "id": "mirror",
