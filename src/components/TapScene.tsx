@@ -43,6 +43,7 @@ export function TapScene({
       style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight, transform: [{ translateX: shake }] }]}
     >
       <Image source={source} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+      <View pointerEvents="none" style={styles.hairline} />
       <Pressable
         style={StyleSheet.absoluteFill}
         onPress={miss}
@@ -109,8 +110,23 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     overflow: 'hidden',
     backgroundColor: colors.card,
-    borderWidth: 4,
+    borderWidth: 5,
     borderColor: colors.card,
+    shadowColor: '#8A5A3B',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    elevation: 8,
+  },
+  hairline: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: 'rgba(67,48,75,0.08)',
   },
   ring: {
     flex: 1,

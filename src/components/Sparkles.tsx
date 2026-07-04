@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
+import { prefersReducedMotion } from '../motion';
 
 // SparkleBurst — a one-shot ring of sparkles radiating from the center of
 // its parent (parent must be position:relative-ish; we absolute-fill).
 export function SparkleBurst({ count = 6, size = 16, trigger }: { count?: number; size?: number; trigger: number | string }) {
+  if (prefersReducedMotion()) return null;
   return (
     <>
       {Array.from({ length: count }, (_, i) => (
@@ -44,6 +46,7 @@ function BurstPiece({ index, count, size }: { index: number; count: number; size
 
 // TwinkleField — ambient looping twinkles for the menu / player picker.
 export function TwinkleField({ count = 7 }: { count?: number }) {
+  if (prefersReducedMotion()) return null;
   return (
     <>
       {Array.from({ length: count }, (_, i) => (

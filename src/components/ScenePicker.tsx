@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SCENE_IMAGES } from '../assets/images';
 import { colors, fonts, shadows } from '../theme';
 
@@ -29,19 +29,40 @@ export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
         <Text style={styles.surpriseText}>🎲 Surprise me!</Text>
       </Pressable>
       <View style={styles.grid}>
-        {options.map((o) => (
-          <Pressable
-            key={o.id}
-            onPress={() => onPick(o.id)}
-            testID={`scene-pick-${o.id}`}
-            style={({ pressed }) => [styles.card, shadows.sticker, pressed && styles.pressed]}
-          >
-            <Image source={SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
-            <Text style={styles.name}>{o.name}</Text>
-          </Pressable>
+        {options.map((o, i) => (
+          <PopIn key={o.id} delay={60 + i * 70} tilt={(i % 2 === 0 ? -1 : 1) * 0.9}>
+            <Pressable
+              onPress={() => onPick(o.id)}
+              testID={`scene-pick-${o.id}`}
+              style={({ pressed }) => [styles.card, shadows.sticker, pressed && styles.pressed]}
+            >
+              <Image source={SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
+              <Text style={styles.name}>{o.name}</Text>
+            </Pressable>
+          </PopIn>
         ))}
       </View>
     </ScrollView>
+  );
+}
+
+function PopIn({ delay, tilt, children }: { delay: number; tilt: number; children: React.ReactNode }) {
+  const t = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.spring(t, { toValue: 1, friction: 6, delay, useNativeDriver: true }).start();
+  }, [t, delay]);
+  return (
+    <Animated.View
+      style={{
+        opacity: t,
+        transform: [
+          { scale: t.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) },
+          { rotate: `${tilt}deg` },
+        ],
+      }}
+    >
+      {children}
+    </Animated.View>
   );
 }
 
