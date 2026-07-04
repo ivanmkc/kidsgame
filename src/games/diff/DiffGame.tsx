@@ -5,27 +5,26 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker }: Props) {
+export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
   const [hintId, setHintId] = useState<string | null>(null);
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const settings = settingsFor(player?.difficulty);
+  const settings = settingsFor(difficulty);
 
   // The hint button stays hidden until the kid is genuinely stuck (~20s
   // without a find), and hides again after each use — no hint spamming.
@@ -147,7 +146,7 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={player ? `Eagle eyes, ${player.name}!` : 'You found every difference!'}
+        message={'Eagle eyes! You found every difference!'}
         onPlayAgain={onBackToPicker}
         onHome={onHome}
       />

@@ -4,20 +4,19 @@ import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { MemoryCard, buildBoard } from './logic';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
 }
 
-export function MemoryGame({ onHome, player }: Props) {
-  const settings = settingsFor(player?.difficulty);
+export function MemoryGame({ onHome, difficulty }: Props) {
+  const settings = settingsFor(difficulty);
   const pairs = settings.memoryPairs;
   const [board, setBoard] = useState<MemoryCard[]>(() =>
     buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs)
@@ -108,7 +107,7 @@ export function MemoryGame({ onHome, player }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={player ? `Amazing memory, ${player.name}!` : 'You matched them all!'}
+        message={'Amazing memory! You matched them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />

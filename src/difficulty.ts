@@ -1,4 +1,22 @@
-import { Difficulty } from './profile';
+import { Platform } from 'react-native';
+
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+const KEY = 'kgb.difficulty.v1';
+
+export function loadDifficulty(): Difficulty {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    const v = window.localStorage.getItem(KEY);
+    if (v === 'easy' || v === 'medium' || v === 'hard') return v;
+  }
+  return 'easy';
+}
+
+export function saveDifficulty(d: Difficulty): void {
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+    try { window.localStorage.setItem(KEY, d); } catch { /* non-fatal */ }
+  }
+}
 
 export interface DifficultySettings {
   label: string;

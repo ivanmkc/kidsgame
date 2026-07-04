@@ -3,31 +3,29 @@ import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'r
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { OddKind, makeOddOneRound } from './logic';
+import { makeOddOneRound } from './logic';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
 }
 
-function oddSettings(p: Player | null): { n: number; kind: OddKind } {
-  // easy: obviously different. medium: same-category cousin. hard: the SAME
-  // sticker with one mirrored twin — genuine visual scrutiny.
-  if (p?.difficulty === 'hard') return { n: 12, kind: 'mirrored' };
-  if (p?.difficulty === 'medium') return { n: 9, kind: 'category' };
-  return { n: 6, kind: 'different' };
+function oddSettings(d: Difficulty): { n: number } {
+  // "which one does not belong?" — always categorical; harder = more items
+  if (d === 'hard') return { n: 9 };
+  if (d === 'medium') return { n: 6 };
+  return { n: 4 };
 }
 
-export function OddOneGame({ onHome, player }: Props) {
-  const roundsToWin = settingsFor(player?.difficulty).spotitRounds;
-  const { n, kind } = oddSettings(player);
+export function OddOneGame({ onHome, difficulty }: Props) {
+  const roundsToWin = settingsFor(difficulty).spotitRounds;
+  const { n } = oddSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState(() => makeOddOneRound(rngRef.current, manifest.spotit.icons, n, kind));
+  const [round, setRound] = useState(() => makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
   const [score, setScore] = useState(0);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const won = score >= roundsToWin;
@@ -39,7 +37,7 @@ export function OddOneGame({ onHome, player }: Props) {
       setScore(next);
       setWrongIdx(null);
       if (next < roundsToWin) {
-        setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n, kind));
+        setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
       }
     } else {
       setWrongIdx(idx);
@@ -51,7 +49,7 @@ export function OddOneGame({ onHome, player }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongIdx(null);
-    setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n, kind));
+    setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
   };
 
   const { width, height } = useWindowDimensions();
@@ -64,10 +62,7 @@ export function OddOneGame({ onHome, player }: Props) {
     150
   );
 
-  const subtitle =
-    kind === 'mirrored' ? 'One sticker is flipped the wrong way!'
-    : kind === 'category' ? 'One of these is a different friend!'
-    : 'One of these is not like the others!';
+  const subtitle = 'Which one does NOT belong?';
 
   return (
     <GameShell
@@ -78,12 +73,12 @@ export function OddOneGame({ onHome, player }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
-          {round.items.map((item, i) => (
+          {round.items.map((icon, i) => (
             <Pressable
-              key={i}
+              key={`${score}-${i}`}
               onPress={() => onPick(i)}
-              testID={`oddone-item-${i}-${item.icon}${item.mirrored ? '-m' : ''}`}
-              accessibilityLabel={item.icon}
+              testID={`oddone-item-${i}-${icon}${i === round.oddIndex ? '-odd' : ''}`}
+              accessibilityLabel={icon}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.tile,
@@ -93,15 +88,7 @@ export function OddOneGame({ onHome, player }: Props) {
                 pressed && styles.pressed,
               ]}
             >
-              <Image
-                source={SPOTIT_ICONS[item.icon]}
-                style={{
-                  width: '80%',
-                  height: '80%',
-                  transform: [{ scaleX: item.mirrored ? -1 : 1 }],
-                }}
-                resizeMode="contain"
-              />
+              <Image source={SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
             </Pressable>
           ))}
         </View>
@@ -109,7 +96,7 @@ export function OddOneGame({ onHome, player }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={player ? `Super spotter, ${player.name}!` : 'You found them all!'}
+        message={'Super spotter! You found them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />

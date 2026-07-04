@@ -5,23 +5,22 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function HiddenGame({ onHome, player, sceneId, onPickScene, onBackToPicker }: Props) {
+export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
-  const settings = settingsFor(player?.difficulty);
+  const settings = settingsFor(difficulty);
 
   useEffect(() => setFound([]), [sceneId]);
 
@@ -101,7 +100,7 @@ export function HiddenGame({ onHome, player, sceneId, onPickScene, onBackToPicke
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={player ? `Super detective, ${player.name}!` : 'You found everything!'}
+        message={'Super detective! You found everything!'}
         onPlayAgain={onBackToPicker}
         onHome={onHome}
       />

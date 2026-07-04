@@ -4,16 +4,15 @@ import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker, SceneOption } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { isSolved, makePuzzle, swap } from './logic';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
@@ -26,10 +25,10 @@ function puzzleOptions(): SceneOption[] {
   ];
 }
 
-export function PuzzleGame({ onHome, player, sceneId, onPickScene, onBackToPicker }: Props) {
+export function PuzzleGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
   const options = puzzleOptions();
   const picked = options.find((o) => o.id === sceneId) ?? null;
-  const settings = settingsFor(player?.difficulty);
+  const settings = settingsFor(difficulty);
   const cols = settings.puzzleCols;
   const rows = settings.puzzleRows;
   const size = cols * rows;
@@ -130,7 +129,7 @@ export function PuzzleGame({ onHome, player, sceneId, onPickScene, onBackToPicke
       </View>
       <WinOverlay
         visible={won}
-        message={player ? `Puzzle master, ${player.name}!` : 'Puzzle complete!'}
+        message={'Puzzle master! Amazing!'}
         onPlayAgain={() => {
           setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), size));
           setSelected(null);

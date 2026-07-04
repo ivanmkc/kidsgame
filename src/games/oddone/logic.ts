@@ -1,43 +1,29 @@
-import { Rng } from '../../rng';
-import { sameCategory } from '../iconCategories';
-
-export type OddKind = 'different' | 'category' | 'mirrored';
+import { Rng, shuffle } from '../../rng';
+import { ICON_CATEGORIES } from '../iconCategories';
 
 export interface OddOneRound {
-  kind: OddKind;
-  common: string;
-  odd: string; // for 'mirrored' this equals common (the twin is flipped)
-  items: { icon: string; mirrored: boolean }[];
+  baseCategory: string;
+  oddCategory: string;
+  odd: string;
+  items: string[]; // n-1 DISTINCT icons from baseCategory + the odd one
   oddIndex: number;
 }
 
-// Mirroring a symmetric sticker (soccer ball, star) is invisible — the
-// mirrored mode only ever uses clearly asymmetric icons.
-export const ASYMMETRIC_ICONS = ['banana', 'fish', 'car', 'plane', 'unicorn', 'rocket'];
+// "Which one does not belong?" — items are distinct members of one category
+// plus a single intruder from another. Difficulty = more items + the number
+// of rounds; the categorical judgement is the game.
+export function makeOddOneRound(rng: Rng, icons: string[], n: number): OddOneRound {
+  const cats = Object.entries(ICON_CATEGORIES)
+    .map(([name, members]) => [name, members.filter((m) => icons.includes(m))] as const)
+    .filter(([, members]) => members.length >= n - 1);
+  const [baseCategory, baseMembers] = cats[Math.floor(rng() * cats.length)];
+  const otherCats = Object.entries(ICON_CATEGORIES)
+    .map(([name, members]) => [name, members.filter((m) => icons.includes(m))] as const)
+    .filter(([name, members]) => name !== baseCategory && members.length > 0);
+  const [oddCategory, oddMembers] = otherCats[Math.floor(rng() * otherCats.length)];
 
-// easy: a clearly different icon. medium: a same-category icon (subtler).
-// hard: the SAME icon, but the odd one is mirrored — pure visual scrutiny.
-export function makeOddOneRound(rng: Rng, icons: string[], n: number, kind: OddKind): OddOneRound {
-  const source = kind === 'mirrored' ? ASYMMETRIC_ICONS.filter((i) => icons.includes(i)) : icons;
-  const common = source[Math.floor(rng() * source.length)];
-  let odd: string;
-  if (kind === 'mirrored') {
-    odd = common;
-  } else if (kind === 'category') {
-    const pool = sameCategory(common).filter((i) => i !== common && icons.includes(i));
-    odd = pool.length > 0
-      ? pool[Math.floor(rng() * pool.length)]
-      : icons.filter((i) => i !== common)[Math.floor(rng() * (icons.length - 1))];
-  } else {
-    const pool = icons.filter((i) => i !== common && !sameCategory(common).includes(i));
-    odd = (pool.length > 0 ? pool : icons.filter((i) => i !== common))[
-      Math.floor(rng() * Math.max(1, pool.length))
-    ];
-  }
-
-  const items = Array.from({ length: n }, () => ({ icon: common, mirrored: false }));
-  const oddIndex = Math.floor(rng() * n);
-  items[oddIndex] = kind === 'mirrored' ? { icon: common, mirrored: true } : { icon: odd, mirrored: false };
-  // shuffle-free: oddIndex already random; keep array order stable
-  return { kind, common, odd, items, oddIndex };
+  const base = shuffle(rng, [...baseMembers]).slice(0, n - 1);
+  const odd = oddMembers[Math.floor(rng() * oddMembers.length)];
+  const items = shuffle(rng, [...base, odd]);
+  return { baseCategory, oddCategory, odd, items, oddIndex: items.indexOf(odd) };
 }

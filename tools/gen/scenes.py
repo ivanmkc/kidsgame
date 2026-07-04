@@ -453,18 +453,15 @@ def _gen_hidden_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None
                     continue
                 cutout = object_cutout(before, edited, rect)
                 if cutout is None:
-                    print(f"  {theme['id']}: '{tid}' cutout empty, retry {attempt + 1}")
-                    continue
-                solidity = float((np.asarray(cutout)[..., 3] > 32).mean())
-                if solidity < 0.30:
-                    print(f"  {theme['id']}: '{tid}' too spindly (solidity {solidity:.2f}), retry {attempt + 1}")
-                    continue
-                if not ask_yes_no(
-                    f"This is a checklist icon for a children's seek-and-find game. Does it show {desc}, cleanly isolated (no big chunks of scenery around it)?",
-                    [_on_white(cutout)],
-                ):
-                    print(f"  {theme['id']}: '{tid}' cutout judge rejected, retry {attempt + 1}")
-                    continue
+                    # fall back to a plain crop; fix_thumbs redraws it later
+                    print(f"  {theme['id']}: '{tid}' cutout weak - chip will be redrawn post-pass")
+                    cutout = _crop(edited, rect, pad=4).convert("RGBA").resize((256, 256))
+                else:
+                    a = np.asarray(cutout)[..., 3] > 32
+                    ys, xs = np.where(a)
+                    solidity = float(a[ys.min():ys.max() + 1, xs.min():xs.max() + 1].mean()) if len(ys) else 0.0
+                    if solidity < 0.30:
+                        print(f"  {theme['id']}: '{tid}' chip spindly ({solidity:.2f}) - will be redrawn post-pass")
                 hit = changed_bbox(before, edited, rect) or rect
                 current = edited
                 cutout.save(out_dir / f"{theme['id']}_t_{tid}.png")
