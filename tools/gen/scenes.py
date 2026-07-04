@@ -168,8 +168,12 @@ if os.environ.get("KGB_EXTRA_THEMES") == "1":
 
 def _grid_rects(cols: int, rows: int, n: int, rng: random.Random,
                 margin: int = 24, avoid: list[dict] | None = None) -> list[tuple[int, int, int, int]]:
-    """Pick n grid cells (skipping cells that overlap `avoid` boxes)."""
-    cells = [(c, r) for c in range(cols) for r in range(rows)]
+    """Pick n grid cells (skipping cells that overlap `avoid` boxes).
+
+    Row 0 is excluded: a rect in the sky band leaves NBP nothing to place an
+    object ON, so grounded adds end up floating (bottle-in-the-sky).
+    """
+    cells = [(c, r) for c in range(cols) for r in range(1, rows)]
     rng.shuffle(cells)
     cw, ch = W // cols, H // rows
     rects = []
@@ -207,6 +211,8 @@ def changed_bbox(before: Image.Image, after: Image.Image,
     b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
     a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
     changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
+    # ignore a 6px border band — matches _object_composite's region erosion
+    changed[:6, :] = 0; changed[-6:, :] = 0; changed[:, :6] = 0; changed[:, -6:] = 0
     m = Image.fromarray(changed, "L").filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
     mask = np.asarray(m) > 127
     if mask.sum() < 400:
@@ -237,6 +243,7 @@ def object_cutout(
     b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
     a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
     changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
+    changed[:6, :] = 0; changed[-6:, :] = 0; changed[:, :6] = 0; changed[:, -6:] = 0
 
     m = Image.fromarray(changed, "L")
     m = m.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))  # close pinholes

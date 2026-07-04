@@ -163,8 +163,15 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
 
 
 def _object_composite(b: np.ndarray, o: np.ndarray, region: np.ndarray) -> Image.Image:
-    """Blend only genuinely-changed pixels of `o` into `b` within `region`."""
+    """Blend only genuinely-changed pixels of `o` into `b` within `region`.
+
+    The region is eroded ~6px first: NBP sometimes paints the mask
+    rectangle's outline into its output, and without erosion that thin
+    frame survives the changed-pixel composite as a visible white box.
+    """
     from PIL import ImageFilter
+    region_img = Image.fromarray((region * 255).astype(np.uint8), "L").filter(ImageFilter.MinFilter(13))
+    region = np.asarray(region_img) > 127
     diff = np.abs(o - b).sum(-1)
     changed = ((diff > 30) & region).astype(np.uint8) * 255
     m_img = Image.fromarray(changed, "L")

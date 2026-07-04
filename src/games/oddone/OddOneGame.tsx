@@ -9,6 +9,13 @@ import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { makeOddOneRound } from './logic';
 
+const CATEGORY_QUESTION: Record<string, string> = {
+  animals: 'Which one is NOT an animal?',
+  nature: 'Which one is NOT a flower, rainbow or star?',
+  food: 'Which one is NOT food?',
+  things: 'Which one is NOT a toy or vehicle?',
+};
+
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
@@ -62,7 +69,7 @@ export function OddOneGame({ onHome, difficulty }: Props) {
     150
   );
 
-  const subtitle = 'Which one does NOT belong?';
+  const subtitle = 'Find the one that does not belong';
 
   return (
     <GameShell
@@ -72,6 +79,9 @@ export function OddOneGame({ onHome, difficulty }: Props) {
       right={<ScoreChip label={`🔍 ${score}/${roundsToWin}`} testID="oddone-score" />}
     >
       <View style={styles.board}>
+        <View style={[styles.question, shadows.soft]} testID={`oddone-question-${round.baseCategory}`}>
+          <Text style={styles.questionText}>{CATEGORY_QUESTION[round.baseCategory] ?? 'Which one does not belong?'}</Text>
+        </View>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
           {round.items.map((icon, i) => (
             <Pressable
@@ -106,6 +116,16 @@ export function OddOneGame({ onHome, difficulty }: Props) {
 
 const styles = StyleSheet.create({
   board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  question: {
+    backgroundColor: '#F7EDDA',
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    maxWidth: 520,
+  },
+  questionText: { fontFamily: fonts.display, fontSize: 19, color: colors.ink, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   tile: {
     backgroundColor: colors.card,

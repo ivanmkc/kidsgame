@@ -4,7 +4,7 @@ import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
@@ -19,17 +19,21 @@ interface Props {
 // ANIMALS!") and a tile grid; clear every match to advance. On hard, some
 // rounds only say "Do Rule #N again!" — you have to REMEMBER what it was.
 export function RulesGame({ onHome, difficulty }: Props) {
-  const roundsToWin = settingsFor(difficulty).spotitRounds;
+  const roundsToWin = 10;
   const tileCount = difficulty === 'hard' ? 9 : difficulty === 'medium' ? 8 : 6;
-  const recallFrom = difficulty === 'hard' ? 2 : Infinity; // recall rounds start here
+  const recallFrom = difficulty === 'hard' ? 3 : difficulty === 'medium' ? 6 : Infinity; // memory kicks in
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const rulesRef = useRef(makeRules(rngRef.current, roundsToWin));
 
-  const buildRound = (idx: number): RulesRound =>
-    makeRulesRound(
-      rngRef.current, manifest.spotit.icons, rulesRef.current, idx, tileCount,
-      idx >= recallFrom && idx % 2 === 0 ? true : false,
+  const buildRound = (idx: number): RulesRound => {
+    // A recall round REPEATS an earlier rule without restating it — it only
+    // makes sense once that rule has already been shown.
+    const recall = idx >= recallFrom && idx % 3 === 2;
+    const ruleIdx = recall ? idx % recallFrom : idx;
+    return makeRulesRound(
+      rngRef.current, manifest.spotit.icons, rulesRef.current, ruleIdx, tileCount, recall,
     );
+  };
 
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RulesRound>(() => buildRound(0));
@@ -88,7 +92,7 @@ export function RulesGame({ onHome, difficulty }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.ruleCard, shadows.soft]} testID={`rules-rule-${round.rule.category}${round.isRecall ? '-recall' : ''}`}>
-          <Text style={styles.ruleNumber}>Rule #{round.ruleNumber}</Text>
+          <Text style={styles.ruleNumber}>{round.isRecall ? 'Memory check!' : `Rule #${round.ruleNumber}`}</Text>
           <Text style={styles.ruleText}>
             {round.isRecall ? `Do Rule #${round.ruleNumber} again — remember it? 🤔` : round.rule.label}
           </Text>
