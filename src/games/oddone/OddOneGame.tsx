@@ -7,14 +7,8 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
+import { CATEGORY_TEXT } from '../iconCategories';
 import { makeOddOneRound } from './logic';
-
-const CATEGORY_QUESTION: Record<string, string> = {
-  animals: 'Which one is NOT an animal?',
-  nature: 'Which one is NOT a flower, rainbow or star?',
-  food: 'Which one is NOT food?',
-  things: 'Which one is NOT a toy or vehicle?',
-};
 
 interface Props {
   onHome: () => void;
@@ -80,7 +74,7 @@ export function OddOneGame({ onHome, difficulty }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.question, shadows.soft]} testID={`oddone-question-${round.baseCategory}`}>
-          <Text style={styles.questionText}>{CATEGORY_QUESTION[round.baseCategory] ?? 'Which one does not belong?'}</Text>
+          <Text style={styles.questionText}>{CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?'}</Text>
         </View>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
           {round.items.map((icon, i) => (
@@ -102,7 +96,6 @@ export function OddOneGame({ onHome, difficulty }: Props) {
             </Pressable>
           ))}
         </View>
-        <Text style={styles.hint}>Tap the one that's different!</Text>
       </View>
       <WinOverlay
         visible={won}
@@ -137,5 +130,4 @@ const styles = StyleSheet.create({
   },
   wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
   pressed: { transform: [{ scale: 0.94 }] },
-  hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14 },
 });

@@ -42,7 +42,7 @@ ICONS = [
     ("rocket", "a cartoon space rocket"),
     ("soccer", "a black and white soccer ball"),
     ("rainbow", "a rainbow with two small clouds"),
-    ("star", "a golden five-pointed star with a smiling face"),
+    ("star", "a golden five-pointed star with a smiling face, classic star shape with correct proportions (as tall as it is wide)"),
     ("gift", "a wrapped gift box with a bow"),
 ]
 

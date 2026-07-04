@@ -4,7 +4,7 @@ import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
@@ -19,9 +19,8 @@ interface Props {
 // ANIMALS!") and a tile grid; clear every match to advance. On hard, some
 // rounds only say "Do Rule #N again!" — you have to REMEMBER what it was.
 export function RulesGame({ onHome, difficulty }: Props) {
-  const roundsToWin = 10;
-  const tileCount = difficulty === 'hard' ? 9 : difficulty === 'medium' ? 8 : 6;
-  const recallFrom = difficulty === 'hard' ? 3 : difficulty === 'medium' ? 6 : Infinity; // memory kicks in
+  const { rulesRounds: roundsToWin, rulesTiles: tileCount, rulesRecallFrom: recallFrom } =
+    settingsFor(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const rulesRef = useRef(makeRules(rngRef.current, roundsToWin));
 

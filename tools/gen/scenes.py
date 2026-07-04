@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image
 
 from .judge import ask_text, ask_yes_no, strict_min
-from .nbp import edit_local, generate
+from .nbp import EDGE_ERODE_PX, edit_local, generate
 
 W, H = 1280, 720  # matches NBP's native ~16:9 output (no squash, minimal crop)
 MIN_CHANGE = 0.025
@@ -202,17 +202,26 @@ def _crop(img: Image.Image, rect: tuple[int, int, int, int], pad: int = 12) -> I
     return img.crop((max(0, x - pad), max(0, y - pad), min(W, x + w + pad), min(H, y + h + pad)))
 
 
+def _changed_arr(before: Image.Image, after: Image.Image,
+                 rect: tuple[int, int, int, int]) -> tuple[np.ndarray, np.ndarray]:
+    """(after-crop, changed-pixel mask) inside rect, with the composite's
+    eroded border band zeroed — pixels there can only be mask-frame paint."""
+    x, y, w, h = rect
+    b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
+    a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
+    changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
+    e = EDGE_ERODE_PX
+    changed[:e, :] = 0; changed[-e:, :] = 0; changed[:, :e] = 0; changed[:, -e:] = 0
+    return a, changed
+
+
 def changed_bbox(before: Image.Image, after: Image.Image,
                  rect: tuple[int, int, int, int], pad: int = 10) -> tuple[int, int, int, int] | None:
     """Tight bbox (scene coords) of the pixels an edit changed inside rect."""
     from PIL import ImageFilter
 
-    x, y, w, h = rect
-    b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
-    a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
-    changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
-    # ignore a 6px border band — matches _object_composite's region erosion
-    changed[:6, :] = 0; changed[-6:, :] = 0; changed[:, :6] = 0; changed[:, -6:] = 0
+    x, y = rect[0], rect[1]
+    _, changed = _changed_arr(before, after, rect)
     m = Image.fromarray(changed, "L").filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
     mask = np.asarray(m) > 127
     if mask.sum() < 400:
@@ -239,11 +248,7 @@ def object_cutout(
     """
     from PIL import ImageFilter
 
-    x, y, w, h = rect
-    b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
-    a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
-    changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
-    changed[:6, :] = 0; changed[-6:, :] = 0; changed[:, :6] = 0; changed[:, -6:] = 0
+    a, changed = _changed_arr(before, after, rect)
 
     m = Image.fromarray(changed, "L")
     m = m.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))  # close pinholes

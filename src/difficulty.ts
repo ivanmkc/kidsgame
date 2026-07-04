@@ -26,7 +26,9 @@ export interface DifficultySettings {
   puzzleCols: number;
   puzzleRows: number;
   diffHint: boolean; // easy players get a 💡 button that flashes one answer
-  hiddenSilhouette: boolean; // hard players see shadow chips, not full cutouts
+  rulesRounds: number;
+  rulesTiles: number;
+  rulesRecallFrom: number; // round index where memory-check rounds may start (Infinity = never)
 }
 
 export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
@@ -34,19 +36,22 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     label: 'Easy', emoji: '😊',
     spotitRounds: 3, memoryPairs: 4,
     puzzleCols: 3, puzzleRows: 2,
-    diffHint: true, hiddenSilhouette: false,
+    diffHint: true,
+    rulesRounds: 10, rulesTiles: 6, rulesRecallFrom: Infinity,
   },
   medium: {
     label: 'Medium', emoji: '🌟',
     spotitRounds: 5, memoryPairs: 6,
     puzzleCols: 3, puzzleRows: 3,
-    diffHint: false, hiddenSilhouette: false,
+    diffHint: false,
+    rulesRounds: 10, rulesTiles: 8, rulesRecallFrom: 6,
   },
   hard: {
     label: 'Hard', emoji: '🔥',
     spotitRounds: 7, memoryPairs: 8,
     puzzleCols: 4, puzzleRows: 3,
-    diffHint: false, hiddenSilhouette: true,
+    diffHint: false,
+    rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
   },
 };
 

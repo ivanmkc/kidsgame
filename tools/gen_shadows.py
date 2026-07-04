@@ -25,7 +25,7 @@ def shadow_of(src: Path) -> None:
 
 def main() -> None:
     n = 0
-    for d, pattern in ((ASSETS / "spotit", "*.png"), (ASSETS / "hidden", "*_t_*.png")):
+    for d, pattern in ((ASSETS / "spotit", "*.png"),):
         for f in sorted(d.glob(pattern)):
             if f.stem.endswith("_shadow"):
                 continue

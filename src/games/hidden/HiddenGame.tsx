@@ -5,7 +5,7 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 
@@ -20,7 +20,6 @@ interface Props {
 export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
-  const settings = settingsFor(difficulty);
 
   useEffect(() => setFound([]), [sceneId]);
 
