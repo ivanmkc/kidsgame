@@ -77,7 +77,7 @@ export function MemoryGame({ onHome, player }: Props) {
   const rows = Math.ceil(count / cols);
   const gap = 12;
   const availW = Math.min(width - 32, 1100);
-  const availH = height - 84 - 40; // header + moves line
+  const availH = height - 84 - 64; // header + moves line
   const cardW = Math.min(
     (availW - (cols - 1) * gap) / cols,
     (availH - (rows - 1) * gap) / rows / 1.15,

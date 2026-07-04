@@ -62,29 +62,46 @@ describe('difficulty table', () => {
 });
 
 describe('shadow match', () => {
-  it('answer is always among the options; options unique', async () => {
+  it('answer among options; options unique; transforms only when enabled', async () => {
     const { makeShadowRound } = await import('../shadow/logic');
+    const diffs = [
+      { choices: 3, categoryDistractors: false, transform: false },
+      { choices: 4, categoryDistractors: true, transform: true },
+      { choices: 5, categoryDistractors: true, transform: true },
+    ];
     for (let seed = 1; seed <= 40; seed++) {
-      for (const choices of [3, 4, 5]) {
-        const r = makeShadowRound(makeRng(seed * choices), manifest.spotit.icons, choices);
-        expect(r.options).toHaveLength(choices);
-        expect(new Set(r.options).size).toBe(choices);
+      for (const d of diffs) {
+        const r = makeShadowRound(makeRng(seed * d.choices), manifest.spotit.icons, d);
+        expect(r.options).toHaveLength(d.choices);
+        expect(new Set(r.options).size).toBe(d.choices);
         expect(r.options).toContain(r.answer);
+        if (!d.transform) {
+          expect(r.rotation).toBe(0);
+          expect(r.mirrored).toBe(false);
+        }
       }
     }
   });
 });
 
 describe('odd one out', () => {
-  it('exactly one odd item at the reported index', async () => {
-    const { makeOddOneRound } = await import('../oddone/logic');
+  it('exactly one odd item at the reported index for every mode', async () => {
+    const { makeOddOneRound, ASYMMETRIC_ICONS } = await import('../oddone/logic');
     for (let seed = 1; seed <= 40; seed++) {
-      for (const n of [4, 6, 9]) {
-        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
+      for (const [n, kind] of [[6, 'different'], [9, 'category'], [12, 'mirrored']] as const) {
+        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n, kind);
         expect(r.items).toHaveLength(n);
-        expect(r.items.filter((x) => x === r.odd)).toHaveLength(1);
-        expect(r.items[r.oddIndex]).toBe(r.odd);
-        expect(new Set(r.items).size).toBe(2);
+        expect(r.items[r.oddIndex].mirrored).toBe(kind === 'mirrored');
+        if (kind === 'mirrored') {
+          // odd twin is the same icon flipped; all icons identical, exactly one mirrored
+          expect(new Set(r.items.map((x) => x.icon)).size).toBe(1);
+          expect(r.items.filter((x) => x.mirrored)).toHaveLength(1);
+          expect(ASYMMETRIC_ICONS).toContain(r.common);
+        } else {
+          expect(r.items.filter((x) => x.icon === r.odd)).toHaveLength(1);
+          expect(new Set(r.items.map((x) => x.icon)).size).toBe(2);
+          expect(r.items[r.oddIndex].icon).toBe(r.odd);
+        }
       }
     }
   });

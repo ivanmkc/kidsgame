@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, darken, fonts, shadows } from '../theme';
 import { ChunkyButton } from './ChunkyButton';
 import { Confetti } from './Confetti';
@@ -14,9 +14,15 @@ interface Props {
 export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
   const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
+  // Tap shield: a kid hammering the final answer would otherwise punch
+  // through the freshly-mounted overlay onto its buttons (and beyond, into
+  // the menu). Buttons arm only after the entrance settles.
+  const [armed, setArmed] = useState(false);
 
   useEffect(() => {
     if (visible) {
+      setArmed(false);
+      const t = setTimeout(() => setArmed(true), 600);
       scale.setValue(0.3);
       stars.forEach((s) => s.setValue(0));
       Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
@@ -24,13 +30,14 @@ export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
         160,
         stars.map((s) => Animated.spring(s, { toValue: 1, useNativeDriver: true, friction: 3 }))
       ).start();
+      return () => clearTimeout(t);
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!visible) return null;
 
   return (
-    <View style={styles.backdrop} testID="win-overlay">
+    <Pressable style={styles.backdrop} testID="win-overlay" onPress={() => {}}>
       <Confetti />
       <Animated.View style={[styles.card, shadows.lifted, { transform: [{ scale }] }]}>
         <View style={styles.starRow}>
@@ -54,10 +61,10 @@ export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
           ))}
         </View>
         <Text style={styles.message}>{message}</Text>
-        <ChunkyButton label="Play Again 🔁" color={colors.green} darkColor={darken(colors.green)} onPress={onPlayAgain} testID="play-again" minWidth={224} />
-        <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={onHome} testID="win-home" minWidth={224} />
+        <ChunkyButton label="Play Again 🔁" color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onPlayAgain()} testID="play-again" minWidth={224} />
+        <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
       </Animated.View>
-    </View>
+    </Pressable>
   );
 }
 

@@ -30,11 +30,11 @@ function layoutSlots(rng: Rng): Slot[] {
   const startAngle = rng() * Math.PI * 2;
   for (let i = 0; i < 5; i++) {
     const a = startAngle + (i * Math.PI * 2) / 5;
-    const r = 0.31 + rng() * 0.04;
+    const r = 0.285 + rng() * 0.03;
     slots.push({
       cx: 0.5 + Math.cos(a) * r,
       cy: 0.5 + Math.sin(a) * r,
-      size: 0.19 + rng() * 0.09,
+      size: 0.18 + rng() * 0.07,
       rot: (rng() - 0.5) * 60,
     });
   }
@@ -198,7 +198,7 @@ function SymbolButton({
           { transform: [{ scale }, { rotate: `${rot}deg` }] },
         ]}
       >
-        <Image source={SPOTIT_ICONS[iconName]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+        <Image source={SPOTIT_ICONS[iconName]} style={{ position: 'absolute', top: '9%', left: '9%', width: '82%', height: '82%' }} resizeMode="contain" />
       </Animated.View>
     </Pressable>
   );

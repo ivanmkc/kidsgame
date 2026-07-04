@@ -6,7 +6,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
-  ImageBackground,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -31,7 +30,7 @@ import { Player, loadPlayers } from './src/profile';
 import { colors, fonts, shadows } from './src/theme';
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  useFonts({
     Baloo2_600SemiBold,
     Baloo2_800ExtraBold,
     Nunito_600SemiBold,
@@ -49,22 +48,21 @@ export default function App() {
   const player = players.find((p) => p.id === playerId) ?? (screen !== 'players' ? players[0] : null);
   const goHome = () => navigate('menu');
 
-  if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: colors.bg }} />;
-  }
-
+  // fontsLoaded intentionally does NOT gate rendering: on slow networks the
+  // gate meant a blank screen for many seconds; a brief system-font flash is
+  // the better trade for a kids app.
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
       {screen === 'players' && (
-        <ImageBackground source={UI_IMAGES.menu_bg} style={styles.bg} resizeMode="cover">
+        <AppBackground>
           <TwinkleField count={8} />
           <PlayerPicker
             players={players}
             onChange={setPlayers}
             onPick={(p) => { setPlayerId(p.id); navigate('menu'); }}
           />
-        </ImageBackground>
+        </AppBackground>
       )}
       {screen === 'menu' && (
         <Menu player={player} onNavigate={navigate} onSwitchPlayer={() => navigate('players')} />
@@ -142,7 +140,7 @@ function Menu({
   };
 
   return (
-    <ImageBackground source={UI_IMAGES.menu_bg} style={styles.bg} resizeMode="cover">
+    <AppBackground>
       <TwinkleField count={9} />
       <ScrollView contentContainerStyle={styles.menu}>
         <Reveal delay={0}>
@@ -177,7 +175,23 @@ function Menu({
           ))}
         </View>
       </ScrollView>
-    </ImageBackground>
+    </AppBackground>
+  );
+}
+
+// Full-bleed background that actually covers any viewport: an explicit
+// absolute-fill <Image>, because rn-web sizes ImageBackground's inner image
+// at its intrinsic 768px and leaves a hard seam on wide screens.
+function AppBackground({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={styles.bg}>
+      <Image
+        source={UI_IMAGES.menu_bg}
+        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        resizeMode="cover"
+      />
+      {children}
+    </View>
   );
 }
 
@@ -308,7 +322,7 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: colors.paper,
   },
-  iconRowImg: { width: 58, height: 58 },
+  iconRowImg: { width: '16%', aspectRatio: 1, maxWidth: 58 },
   cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
   gameTitle: { fontSize: 22, fontFamily: fonts.display },
   gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },

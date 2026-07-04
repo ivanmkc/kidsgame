@@ -23,9 +23,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from .detect import detect_objects, usable_detections
 from .judge import ask_text, ask_yes_no, strict_min
-from .nbp import edit_local, generate, imagen_remove
+from .nbp import edit_local, generate
 
 W, H = 1280, 720  # matches NBP's native ~16:9 output (no squash, minimal crop)
 MIN_CHANGE = 0.025
@@ -86,14 +85,14 @@ HIDDEN_THEMES = [
         "name": "Toy Room",
         "base": "A cozy, busy playroom overflowing with toys: shelves with toys, a toy chest, blocks and balls scattered on a rug, stuffed animals, a rocking horse, crayon drawings pinned on the wall.",
         "targets": [
-            ("key", "a small golden key"),
             ("duck", "a yellow rubber duck"),
-            ("kite", "a small red kite"),
             ("drum", "a little toy drum"),
-            ("snail", "a smiling cartoon snail"),
             ("robot", "a small blue toy robot"),
+            ("ball", "a red and white beach ball"),
+            ("bear", "a brown teddy bear"),
             ("boat", "a little toy sailboat"),
-            ("crayon", "a big red crayon"),
+            ("dino", "a green toy dinosaur"),
+            ("snail", "a smiling cartoon snail"),
         ],
     },
     {
@@ -102,13 +101,13 @@ HIDDEN_THEMES = [
         "base": "A lush, dense jungle scene: big leaves, vines, colorful flowers, a waterfall in the background, a monkey in a tree, butterflies, mossy rocks.",
         "targets": [
             ("parrot", "a red and blue parrot"),
-            ("snake", "a friendly green snake coiled on a branch"),
-            ("frog", "a tiny orange frog"),
+            ("frog", "a plump orange frog"),
             ("chameleon", "a purple chameleon"),
-            ("crown", "a small golden crown"),
             ("toucan", "a toucan with a big orange beak"),
-            ("egg", "a spotted egg in a little nest"),
-            ("ladybug", "a red ladybug on a leaf"),
+            ("owl", "a round brown owl"),
+            ("egg", "a big spotted egg in a nest"),
+            ("pineapple", "a pineapple"),
+            ("turtle", "a small green turtle"),
         ],
     },
     {
@@ -116,14 +115,14 @@ HIDDEN_THEMES = [
         "name": "Kitchen",
         "base": "A warm, busy cartoon kitchen: shelves with jars and pots, a stove with a steaming pot, hanging utensils, a fruit bowl on the counter, a window with curtains, a checkered floor.",
         "targets": [
-            ("mouse", "a tiny grey mouse"),
+            ("mouse", "a plump grey mouse"),
             ("teapot", "a blue teapot"),
-            ("pretzel", "a golden pretzel"),
-            ("fish", "a goldfish in a small bowl"),
-            ("clock", "a small red alarm clock"),
+            ("fish", "a goldfish in a round bowl"),
+            ("clock", "a red alarm clock"),
             ("cupcake", "a pink frosted cupcake"),
-            ("spoon", "a big wooden spoon"),
+            ("donut", "a pink frosted donut"),
             ("jam", "a jar of red jam"),
+            ("cheese", "a wedge of yellow cheese"),
         ],
     },
     {
@@ -133,12 +132,12 @@ HIDDEN_THEMES = [
         "targets": [
             ("crown", "a golden crown on a cushion"),
             ("slipper", "a sparkly glass slipper"),
-            ("wand", "a star-tipped magic wand"),
-            ("rose", "a single red rose"),
-            ("kitten", "a white kitten with a pink bow"),
+            ("cake", "a slice of strawberry cake"),
+            ("gift", "a wrapped pink gift box"),
             ("mirror", "a golden hand mirror"),
-            ("fan", "a pink folding fan"),
-            ("tiara", "a silver tiara with pink gems"),
+            ("teddy", "a royal teddy bear with a red cape"),
+            ("frog", "a green frog wearing a tiny crown"),
+            ("pumpkin", "a round orange pumpkin carriage"),
         ],
     },
     {
@@ -147,16 +146,24 @@ HIDDEN_THEMES = [
         "base": "An enchanted fairy garden: giant colorful flowers, glowing lanterns, little mushroom houses with tiny doors and windows, a small pond with lily pads, sparkles in the air, mossy stones.",
         "targets": [
             ("unicorn", "a tiny white unicorn with a rainbow mane"),
-            ("teacup", "a tiny pink teacup"),
-            ("key", "a small golden key"),
+            ("teacup", "a pink teacup"),
             ("star", "a glowing golden star"),
             ("gem", "a sparkling pink gem"),
             ("snail", "a little snail with a spiral shell"),
-            ("crown", "a tiny golden crown"),
-            ("butterfly", "a blue butterfly"),
+            ("hedgehog", "a small brown hedgehog"),
+            ("toadstool", "a red toadstool with white dots"),
+            ("bluebird", "a plump little bluebird"),
         ],
     },
 ]
+
+
+import os
+
+if os.environ.get("KGB_EXTRA_THEMES") == "1":
+    from .scenes_extra import EXTRA_DIFF_THEMES, EXTRA_HIDDEN_THEMES
+    DIFF_THEMES = DIFF_THEMES + EXTRA_DIFF_THEMES
+    HIDDEN_THEMES = HIDDEN_THEMES + EXTRA_HIDDEN_THEMES
 
 
 def _grid_rects(cols: int, rows: int, n: int, rng: random.Random,
@@ -189,6 +196,27 @@ def _clamp_rect(x: int, y: int, w: int, h: int, pad: int = 16) -> tuple[int, int
 def _crop(img: Image.Image, rect: tuple[int, int, int, int], pad: int = 12) -> Image.Image:
     x, y, w, h = rect
     return img.crop((max(0, x - pad), max(0, y - pad), min(W, x + w + pad), min(H, y + h + pad)))
+
+
+def changed_bbox(before: Image.Image, after: Image.Image,
+                 rect: tuple[int, int, int, int], pad: int = 10) -> tuple[int, int, int, int] | None:
+    """Tight bbox (scene coords) of the pixels an edit changed inside rect."""
+    from PIL import ImageFilter
+
+    x, y, w, h = rect
+    b = np.asarray(before.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
+    a = np.asarray(after.crop((x, y, x + w, y + h)).convert("RGB"), np.int16)
+    changed = (np.abs(a - b).sum(-1) > 40).astype(np.uint8) * 255
+    m = Image.fromarray(changed, "L").filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))
+    mask = np.asarray(m) > 127
+    if mask.sum() < 400:
+        return None
+    ys, xs = np.where(mask)
+    bx0 = max(0, x + int(xs.min()) - pad)
+    by0 = max(0, y + int(ys.min()) - pad)
+    bx1 = min(W, x + int(xs.max()) + pad)
+    by1 = min(H, y + int(ys.max()) + pad)
+    return (bx0, by0, bx1 - bx0, by1 - by0)
 
 
 def object_cutout(
@@ -274,149 +302,92 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
 
 
 def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
+    """Two-branch add-only construction — correct by construction.
+
+    A and B both grow from the SAME base render: two objects are added only
+    to A (the player experiences them as "disappeared" in B) and two only
+    to B ("appeared"). Every pixel is either pristine shared base or a
+    cleanly composited added object, so removal-fill ghosts (lingering
+    horns, smears) are structurally impossible.
+    """
     rng = random.Random(seed)
     base = generate(f"{theme['base']} {SCENE_STYLE}", (W, H))
 
-    dets = usable_detections(detect_objects(base), W, H)
-    rng.shuffle(dets)
-    print(f"  {theme['id']}: {len(dets)} usable detections: {[d['label'] for d in dets][:6]}")
+    rects = _grid_rects(4, 3, NUM_DIFFS, rng)
+    pool = rng.sample(theme["adds"], len(theme["adds"]))
+    sides = ["A", "B", "A", "B"]
+    rng.shuffle(sides)
 
-    # Edit plan: up to 2 removals + 1 replacement from detections, rest adds.
-    plan: list[tuple[str, dict | None]] = []
-    for d in dets[:2]:
-        plan.append(("remove", d))
-    if len(dets) > 2:
-        plan.append(("replace", dets[2]))
-    while len(plan) < NUM_DIFFS:
-        plan.append(("add", None))
-    rng.shuffle(plan)
-
-    add_pool = rng.sample(theme["adds"], len(theme["adds"]))
-    used_rects = [dict(x=d["x"], y=d["y"], w=d["w"], h=d["h"]) for _, d in plan if d]
-    free_rects = _grid_rects(4, 3, NUM_DIFFS, rng, avoid=used_rects)
-
-    current = base
+    img_a = base
+    img_b = base
     diffs = []
-    for kind, det in plan:
+    for rect, side in zip(rects, sides):
         placed = False
-        if kind in ("remove", "replace") and det is not None:
-            rect = _clamp_rect(det["x"], det["y"], det["w"], det["h"])
-            if kind == "remove":
-                edited = _try_edit(
-                    theme["id"], current, rect,
-                    "unused (imagen removal mode)",
-                    "These two crops are from a spot-the-difference game for young children. Is the content clearly different between them — something removed, changed, or transformed?",
-                    "Does the second crop look clean and naturally illustrated — no smudge, blur patch, pasted-on box, or leftover outline?",
-                    base_for_judge=base, tag=f"remove '{det['label']}'",
-                    edit_fn=lambda c, r, _p: imagen_remove(c, r),
-                    max_change=0.97,
-                )
-                if edited is not None:
-                    caption = ask_text(
-                        "These two crops are from a children's spot-the-difference game (before and after). "
-                        "In 3-8 simple words, what changed? (e.g. 'the cow disappeared', 'the balloon turned blue')",
-                        [_crop(base, rect, pad=40), _crop(edited, rect, pad=40)],
-                    )
-                    # the caption doubles as a verifier: a change described as
-                    # blur/smudge/nothing is an artifact, not a game difference
-                    bad_words = ("blur", "smudge", "nothing", "unclear", "same", "no change", "no difference", "not sure", "identical", "cannot", "hard to")
-                    if any(w in caption.lower() for w in bad_words):
-                        print(f"  {theme['id']}: caption flagged artifact ({caption!r}), rejecting edit")
-                        edited = None
-                if edited is not None:
-                    current = edited
-                    diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
-                                  "what": caption})
-                    placed = True
-            else:
-                while add_pool and not placed:
-                    alt = add_pool.pop(0)
-                    edited = _try_edit(
-                        theme["id"], current, rect,
-                        f"Replace the {det['label']} with {alt}, in the same spot and "
-                        "at a similar size, matching the scene's art style. Keep the "
-                        "background around it exactly as it is.",
-                        "These two crops are from a spot-the-difference game for young children. Did one object clearly turn into a different object?",
-                        "Does the new object look naturally drawn into the illustration — no pasted-on box, no white frame, no style clash?",
-                        base_for_judge=base, tag=f"replace '{det['label']}'->'{alt}'",
-                        max_change=0.95,
-                    )
-                    if edited is not None:
-                        current = edited
-                        diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
-                                      "what": f"the {det['label']} became {alt}"})
-                        placed = True
-        else:
-            while add_pool and free_rects and not placed:
-                obj = add_pool.pop(0)
-                rect = free_rects[0]
-                edited = _try_edit(
-                    theme["id"], current, rect,
-                    f"Add {obj} INTO the existing scenery. Keep the marked area's "
-                    "current background, colors and objects exactly as they are — "
-                    "just draw the new object on top of them, naturally placed, bold "
-                    "and clearly visible, matching the art style. Do NOT repaint the "
-                    "backdrop.",
-                    "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
-                    "Does the newly added object look naturally drawn into the illustration — no pasted-on box, no white frame, no style clash?",
-                    base_for_judge=base, tag=f"add '{obj}'",
-                )
-                if edited is not None:
-                    free_rects.pop(0)
-                    current = edited
-                    diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
-                                  "what": f"{obj} appeared"})
-                    placed = True
-        if not placed and kind in ("remove", "replace"):
-            print(f"  {theme['id']}: '{kind}' failed - falling back to an add for this slot")
-            while add_pool and free_rects and not placed:
-                obj = add_pool.pop(0)
-                rect = free_rects[0]
-                edited = _try_edit(
-                    theme["id"], current, rect,
-                    f"Add {obj} INTO the existing scenery. Keep the marked area's "
-                    "current background, colors and objects exactly as they are - "
-                    "just draw the new object on top of them, naturally placed, bold "
-                    "and clearly visible, matching the art style. Do NOT repaint the "
-                    "backdrop.",
-                    "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
-                    "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white frame, no style clash?",
-                    base_for_judge=base, tag=f"fallback add '{obj}'",
-                )
-                if edited is not None:
-                    free_rects.pop(0)
-                    current = edited
-                    diffs.append({"x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
-                                  "what": f"{obj} appeared"})
-                    placed = True
+        while pool and not placed:
+            obj = pool.pop(0)
+            current = img_a if side == "A" else img_b
+            edited = _try_edit(
+                theme["id"], current, rect,
+                f"Add {obj} INTO the existing scenery. Keep the marked area's "
+                "current background, colors and objects exactly as they are - "
+                "just draw the new object on top of them, naturally placed ON "
+                "the ground or a surface (never floating in the sky), bold and "
+                "clearly visible, matching the art style. Do NOT repaint the "
+                "backdrop.",
+                "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
+                "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white patch behind it, no style clash?",
+                base_for_judge=base, tag=f"add[{side}] '{obj}'",
+            )
+            if edited is not None:
+                # hitbox = tight bbox of what was actually drawn (+10px), so
+                # taps are precise and boxes can never overlap
+                hit = changed_bbox(current, edited, rect) or rect
+                if side == "A":
+                    img_a = edited
+                    what = f"the {_short(obj)} is missing"
+                else:
+                    img_b = edited
+                    what = f"a {_short(obj)} appeared"
+                diffs.append({"x": hit[0], "y": hit[1], "w": hit[2], "h": hit[3], "what": what})
+                placed = True
         if not placed:
-            print(f"  {theme['id']}: could not complete a '{kind}' edit")
+            print(f"  FAIL diff {theme['id']}: object pool exhausted")
 
     if len(diffs) < NUM_DIFFS:
         return None
 
-    # Whole-scene verification: the pair must read as a clean puzzle. The
-    # third check hunts artifacts with an INVERTED question — stochastic
-    # judges agree to friendly framings too easily.
+    # Whole-scene verification: the pair must read as a clean puzzle, and an
+    # inverted artifact hunt runs over BOTH branches.
     if not strict_min(
-        "These are picture A and picture B of a spot-the-difference puzzle for children. Does picture B look like a clean, professional variant of A — same scene, several clear differences?",
-        "Look carefully at picture B: is it free of broken patches, pasted-on rectangles, smudges, or style clashes?",
-        [base, current],
+        "These are picture A and picture B of a spot-the-difference puzzle for children. Do they show the same scene with a few clear object differences?",
+        "Look carefully at both pictures: are they free of broken patches, pasted-on rectangles, smudges, or style clashes?",
+        [img_a, img_b],
     ) or ask_yes_no(
         "Look carefully at this children's illustration. Are there any pale/white rectangular patches, erased-looking smears, floating half-drawn objects, or blurry spots that look like editing mistakes? Answer YES if you see ANY such artifact.",
-        [current],
+        [img_a],
+    ) or ask_yes_no(
+        "Look carefully at this children's illustration. Are there any pale/white rectangular patches, erased-looking smears, floating half-drawn objects, or blurry spots that look like editing mistakes? Answer YES if you see ANY such artifact.",
+        [img_b],
     ):
         print(f"  {theme['id']}: whole-scene judge rejected the pair")
         return None
 
-    base.save(out_dir / f"{theme['id']}_a.png")
-    current.save(out_dir / f"{theme['id']}_b.png")
-    print(f"  diff scene OK: {theme['id']} ({len(diffs)} diffs: {[d['what'] for d in diffs]})")
+    img_a.save(out_dir / f"{theme['id']}_a.png")
+    img_b.save(out_dir / f"{theme['id']}_b.png")
+    print(f"  diff scene OK: {theme['id']} ({[d['what'] for d in diffs]})")
     return {
         "id": theme["id"], "name": theme["name"],
         "imageA": f"diff/{theme['id']}_a.png", "imageB": f"diff/{theme['id']}_b.png",
         "w": W, "h": H, "diffs": diffs,
     }
+
+
+def _short(obj: str) -> str:
+    """'a small white duck' -> 'white duck' (caption-friendly)."""
+    words = obj.split()
+    while words and words[0] in ("a", "an", "small", "little", "tiny", "big", "bright"):
+        words.pop(0)
+    return " ".join(words) if words else obj
 
 
 def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
@@ -478,17 +449,22 @@ def _gen_hidden_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None
                 if cutout is None:
                     print(f"  {theme['id']}: '{tid}' cutout empty, retry {attempt + 1}")
                     continue
+                solidity = float((np.asarray(cutout)[..., 3] > 32).mean())
+                if solidity < 0.30:
+                    print(f"  {theme['id']}: '{tid}' too spindly (solidity {solidity:.2f}), retry {attempt + 1}")
+                    continue
                 if not ask_yes_no(
                     f"This is a checklist icon for a children's seek-and-find game. Does it show {desc}, cleanly isolated (no big chunks of scenery around it)?",
                     [_on_white(cutout)],
                 ):
                     print(f"  {theme['id']}: '{tid}' cutout judge rejected, retry {attempt + 1}")
                     continue
+                hit = changed_bbox(before, edited, rect) or rect
                 current = edited
                 cutout.save(out_dir / f"{theme['id']}_t_{tid}.png")
                 targets.append({
                     "id": tid, "label": desc,
-                    "x": rect[0], "y": rect[1], "w": rect[2], "h": rect[3],
+                    "x": hit[0], "y": hit[1], "w": hit[2], "h": hit[3],
                     "thumb": f"hidden/{theme['id']}_t_{tid}.png",
                 })
                 placed = True
