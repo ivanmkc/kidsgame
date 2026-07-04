@@ -22,10 +22,16 @@ import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 
-from .judge import ask_yes_no, strict_min
+from .judge import _png_part, ask_yes_no, client as _judge_client, strict_min
 from .nbp import generate, imagen_remove_mask
 from .sam_batch import sam_segment_batch
 from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
+
+# SAM 3.1 proposes masks; Gemini 3.1 refines — picks the true instance from
+# labeled proposals and vetoes objects that exist twice in the scene. Gemini
+# never produces coordinates; it only chooses from SAM's named masks
+# (same division of labor as the pod repo's sam3_detect).
+REFINE_MODEL = "gemini-3.1-pro-preview"
 
 MIN_AREA = 1200            # px — smaller reads as noise, not an object
 MAX_AREA = 0.05 * W * H    # a "target" this big is scenery, not an object
@@ -36,19 +42,81 @@ MASK_DILATE = 14           # removal mask growth: covers soft edges + the
                            # composite's 6px erosion with room to spare
 
 
-def _good_seg(cands: list[dict]) -> dict | None:
-    """Exactly one confident, sanely-sized, non-border instance."""
-    if not cands or cands[0]["score"] < 0.45:
+def _prefilter(cands: list[dict]) -> list[dict]:
+    """Cheap deterministic gates before Gemini sees anything: confidence,
+    size, border clearance; and merge away part-masks (a mask mostly inside
+    a higher-scoring one is the boat's hull, not a second boat)."""
+    out: list[dict] = []
+    for c in sorted(cands, key=lambda d: -d["score"]):
+        if c["score"] < 0.35 or not (MIN_AREA <= c["area"] <= MAX_AREA):
+            continue
+        x0, y0, x1, y1 = c["bbox"]
+        if x0 < EDGE_CLEAR or y0 < EDGE_CLEAR or x1 > W - EDGE_CLEAR or y1 > H - EDGE_CLEAR:
+            continue
+        if any((k["mask"] & c["mask"]).sum() / max(1, c["mask"].sum()) >= 0.6 for k in out):
+            continue
+        out.append(c)
+    return out[:6]
+
+
+_LABEL_RGB = [(230, 30, 30), (30, 180, 30), (30, 80, 230), (230, 180, 20), (200, 30, 200), (20, 200, 200)]
+
+
+def _overlay(scene: Image.Image, cands: list[dict]) -> Image.Image:
+    """Scene with each candidate mask outlined + numbered for Gemini."""
+    vis = np.asarray(scene.convert("RGB")).copy()
+    for i, c in enumerate(cands):
+        color = _LABEL_RGB[i % len(_LABEL_RGB)]
+        m = c["mask"].astype(np.uint8)
+        contours, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(vis, contours, -1, color, 3)
+        x0, y0, _, _ = c["bbox"]
+        cv2.putText(vis, str(i), (max(4, x0), max(28, y0 - 6)),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.1, color, 3)
+    return Image.fromarray(vis)
+
+
+def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str) -> dict | None:
+    """SAM proposals → Gemini 3.1 pick + uniqueness veto.
+
+    Returns the confirmed mask, or None when Gemini can't name exactly one
+    complete instance / sees another one elsewhere in the scene (gameplay-
+    ambiguous). Falls back to the top proposal on repeated API failure so a
+    Gemini outage degrades to the old heuristic instead of starving themes.
+    """
+    import json as _json
+
+    from google.genai import types as _t
+
+    pre = _prefilter(cands)
+    if not pre:
         return None
-    if len(cands) > 1 and cands[1]["score"] > 0.35:
-        return None  # duplicates in scene → ambiguous for gameplay
-    best = cands[0]
-    x0, y0, x1, y1 = best["bbox"]
-    if not (MIN_AREA <= best["area"] <= MAX_AREA):
-        return None
-    if x0 < EDGE_CLEAR or y0 < EDGE_CLEAR or x1 > W - EDGE_CLEAR or y1 > H - EDGE_CLEAR:
-        return None
-    return best
+    q = (
+        f"The picture shows {len(pre)} outlined region(s), labeled 0-{len(pre) - 1}. "
+        f"Which ONE label outlines exactly a single, complete {label} (not a part of it, "
+        f"not it plus other things)? Also: is there any OTHER {label} visible anywhere "
+        f"else in the picture, outlined or not?\n"
+        'Respond ONLY with JSON: {"pick": <label number, or -1 if none fits>, '
+        '"another_elsewhere": true or false}'
+    )
+    for attempt in range(2):
+        try:
+            resp = _judge_client().models.generate_content(
+                model=REFINE_MODEL,
+                contents=[_t.Content(role="user", parts=[_png_part(_overlay(scene, pre)),
+                                                         _t.Part(text=q)])],
+                config=_t.GenerateContentConfig(
+                    temperature=0.1, response_mime_type="application/json",
+                    http_options=_t.HttpOptions(timeout=120_000)),
+            )
+            d = _json.loads(resp.text or "")
+            pick, another = int(d["pick"]), bool(d["another_elsewhere"])
+            if pick < 0 or pick >= len(pre) or another:
+                return None
+            return pre[pick]
+        except Exception as e:  # noqa: BLE001 — refinement outage ≠ theme starvation
+            print(f"  {tag}: gemini refine attempt {attempt + 1} failed ({str(e)[:100]})")
+    return pre[0] if pre[0]["score"] >= 0.45 and len(pre) == 1 else None
 
 
 def _hitbox(seg: dict) -> tuple[int, int, int, int]:
@@ -120,7 +188,7 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             continue
         usable = _drop_overlaps([
             {"obj": o, "seg": s} for o, p in zip(objs, prompts)
-            if (s := _good_seg(segs.get(p, [])))
+            if (s := _refined_seg(base, p, segs.get(p, []), f"{theme['id']}/{p}"))
         ])
         if len(usable) < NUM_DIFFS:
             print(f"  {theme['id']}: only {len(usable)}/{NUM_DIFFS} segmentable objects, re-render {attempt + 1}")
@@ -221,7 +289,7 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         usable = _drop_overlaps([
             {"tid": tid, "obj": desc, "seg": s}
             for (tid, desc), p in zip(chosen, prompts)
-            if (s := _good_seg(segs.get(p, [])))
+            if (s := _refined_seg(base, p, segs.get(p, []), f"{theme['id']}/{p}"))
         ])
 
         targets = []
