@@ -167,6 +167,33 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     return comp, changed_inside, changed_outside
 
 
+def keep_solid_components(mask_u8: np.ndarray) -> np.ndarray:
+    """Drop thin/linear connected components from a change mask.
+
+    NBP sometimes paints the edit mask's outline INTO the output — not
+    always at the rect edge, so border erosion alone can't catch it. A
+    painted frame is hollow (fills a few % of its own bbox) or thin (a few
+    px in one axis), while a real object blob is tens of px in BOTH axes
+    and fills 30%+ of its bbox. Fails open: if nothing passes, the largest
+    component stays.
+    """
+    import cv2
+    binary = (mask_u8 > 127).astype(np.uint8)
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(binary)
+    if n <= 1:
+        return mask_u8
+    areas = stats[1:, cv2.CC_STAT_AREA]
+    ws = stats[1:, cv2.CC_STAT_WIDTH]
+    hs = stats[1:, cv2.CC_STAT_HEIGHT]
+    fills = areas / np.maximum(1, ws * hs)
+    keep_ids = [i + 1 for i in range(n - 1)
+                if fills[i] >= 0.15 and areas[i] >= 200 and min(ws[i], hs[i]) >= 14]
+    if not keep_ids:
+        keep_ids = [1 + int(areas.argmax())]
+    out = np.where(np.isin(labels, keep_ids), mask_u8, 0)
+    return out.astype(np.uint8)
+
+
 def _object_composite(b: np.ndarray, o: np.ndarray, region: np.ndarray) -> Image.Image:
     """Blend only genuinely-changed pixels of `o` into `b` within `region`.
 
@@ -183,6 +210,7 @@ def _object_composite(b: np.ndarray, o: np.ndarray, region: np.ndarray) -> Image
     m_img = m_img.filter(ImageFilter.MaxFilter(7))   # close pinholes, join parts
     m_img = m_img.filter(ImageFilter.MinFilter(5))   # shave stray specks
     m_img = m_img.filter(ImageFilter.MaxFilter(5))   # small safety dilation
+    m_img = Image.fromarray(keep_solid_components(np.asarray(m_img)), "L")
     m_img = m_img.filter(ImageFilter.GaussianBlur(2))  # feather the true edge
     m = np.asarray(m_img, np.float32)[..., None] / 255.0
     comp = b.astype(np.float32) * (1 - m) + o.astype(np.float32) * m

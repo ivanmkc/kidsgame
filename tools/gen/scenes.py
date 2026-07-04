@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image
 
 from .judge import ask_text, ask_yes_no, strict_min
-from .nbp import EDGE_ERODE_PX, edit_local, generate
+from .nbp import EDGE_ERODE_PX, edit_local, generate, keep_solid_components
 
 W, H = 1280, 720  # matches NBP's native ~16:9 output (no squash, minimal crop)
 MIN_CHANGE = 0.025
@@ -253,7 +253,7 @@ def object_cutout(
     m = Image.fromarray(changed, "L")
     m = m.filter(ImageFilter.MaxFilter(5)).filter(ImageFilter.MinFilter(5))  # close pinholes
     m = m.filter(ImageFilter.MinFilter(3))  # shave the feathered fringe
-    mask = np.asarray(m) > 127
+    mask = keep_solid_components(np.asarray(m)) > 127
     if mask.sum() < 400:
         return None
 
