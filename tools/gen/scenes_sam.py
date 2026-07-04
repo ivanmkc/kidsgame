@@ -109,7 +109,9 @@ def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str) ->
                     temperature=0.1, response_mime_type="application/json",
                     http_options=_t.HttpOptions(timeout=120_000)),
             )
-            d = _json.loads(resp.text or "")
+            # raw_decode: the model occasionally appends prose/whitespace
+            # after the JSON object even with a JSON response mime type.
+            d = _json.JSONDecoder().raw_decode((resp.text or "").strip())[0]
             pick, another = int(d["pick"]), bool(d["another_elsewhere"])
             if pick < 0 or pick >= len(pre) or another:
                 return None
