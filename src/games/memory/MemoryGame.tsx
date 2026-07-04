@@ -134,7 +134,13 @@ function FlipCard({
   const backRot = t.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '360deg'] });
 
   return (
-    <Pressable onPress={onFlip} testID={`memory-card-${card.key}-${card.icon}`} style={{ width: size, height: size * 1.15 }}>
+    <Pressable
+      onPress={onFlip}
+      testID={`memory-card-${card.key}-${card.icon}`}
+      accessibilityLabel={up ? card.icon : 'face-down card'}
+      accessibilityRole="button"
+      style={{ width: size, height: size * 1.15 }}
+    >
       <Animated.View
         style={[styles.face, styles.faceDown, shadows.soft, { transform: [{ perspective: 700 }, { rotateY: frontRot }] }]}
       >

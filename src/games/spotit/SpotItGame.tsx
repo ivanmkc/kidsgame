@@ -190,7 +190,7 @@ function SymbolButton({
     onTap();
   };
   return (
-    <Pressable onPress={press} testID={testID} style={{ position: 'absolute', left, top, width: size, height: size }}>
+    <Pressable onPress={press} testID={testID} accessibilityLabel={iconName} accessibilityRole="button" style={{ position: 'absolute', left, top, width: size, height: size }}>
       <Animated.View
         style={[
           styles.symbol,

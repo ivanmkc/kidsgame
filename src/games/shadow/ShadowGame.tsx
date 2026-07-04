@@ -79,6 +79,8 @@ export function ShadowGame({ onHome, player }: Props) {
               key={icon}
               onPress={() => onPick(icon)}
               testID={`shadow-option-${icon}`}
+              accessibilityLabel={icon}
+              accessibilityRole="button"
               style={({ pressed }) => [
                 styles.option,
                 shadows.soft,
