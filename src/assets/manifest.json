@@ -228,8 +228,8 @@
     {
       "id": "ocean",
       "name": "Ocean",
-      "imageA": "diff/ocean_a.png",
-      "imageB": "diff/ocean_b.png",
+      "imageA": "diff/ocean_a.jpg",
+      "imageB": "diff/ocean_b.jpg",
       "w": 1280,
       "h": 720,
       "diffs": [
