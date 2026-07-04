@@ -51,7 +51,9 @@ describe('difficulty table', () => {
     expect(easy.puzzleCols * easy.puzzleRows).toBeLessThan(medium.puzzleCols * medium.puzzleRows);
     expect(medium.puzzleCols * medium.puzzleRows).toBeLessThan(hard.puzzleCols * hard.puzzleRows);
     expect(easy.diffHint).toBe(true);
-    expect(hard.hiddenSilhouette).toBe(true);
+    expect(easy.rulesTiles).toBeLessThan(medium.rulesTiles);
+    expect(medium.rulesTiles).toBeLessThan(hard.rulesTiles);
+    expect(hard.rulesRecallFrom).toBeLessThan(medium.rulesRecallFrom);
   });
 
   it('memory pairs never exceed available icons', () => {

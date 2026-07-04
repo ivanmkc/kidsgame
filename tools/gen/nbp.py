@@ -22,6 +22,11 @@ PROJECT = "adk-coding-agents"
 LOCATION = "global"
 NBP_MODEL = "gemini-3-pro-image-preview"
 
+# NBP sometimes paints the edit mask's rectangle outline into its output.
+# Composites erode the region by this many px so a painted frame can never
+# survive; changed_bbox/object_cutout in scenes.py zero the same band.
+EDGE_ERODE_PX = 6
+
 # google-genai's underlying HTTP client is not safe to share across threads
 # (concurrent use surfaces as "Cannot send a request, as the client has been
 # closed") — keep one client per thread and reset on failure.
@@ -165,12 +170,12 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
 def _object_composite(b: np.ndarray, o: np.ndarray, region: np.ndarray) -> Image.Image:
     """Blend only genuinely-changed pixels of `o` into `b` within `region`.
 
-    The region is eroded ~6px first: NBP sometimes paints the mask
+    The region is eroded EDGE_ERODE_PX first: NBP sometimes paints the mask
     rectangle's outline into its output, and without erosion that thin
     frame survives the changed-pixel composite as a visible white box.
     """
     from PIL import ImageFilter
-    region_img = Image.fromarray((region * 255).astype(np.uint8), "L").filter(ImageFilter.MinFilter(13))
+    region_img = Image.fromarray((region * 255).astype(np.uint8), "L").filter(ImageFilter.MinFilter(2 * EDGE_ERODE_PX + 1))
     region = np.asarray(region_img) > 127
     diff = np.abs(o - b).sum(-1)
     changed = ((diff > 30) & region).astype(np.uint8) * 255

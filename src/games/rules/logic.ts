@@ -1,5 +1,5 @@
 import { Rng, shuffle } from '../../rng';
-import { ICON_CATEGORIES } from '../iconCategories';
+import { CATEGORY_CONFLICTS, CATEGORY_TEXT, ICON_CATEGORIES } from '../iconCategories';
 
 export interface Rule {
   category: string;
@@ -14,18 +14,11 @@ export interface RulesRound {
   matchCount: number;
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  animals: 'Tap all the ANIMALS! 🐾',
-  nature: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
-  food: 'Tap all the YUMMY FOOD! 🍎',
-  things: 'Tap the TOYS & VEHICLES! 🚗',
-};
-
 export function makeRules(rng: Rng, count: number): Rule[] {
-  const cats = shuffle(rng, Object.keys(CATEGORY_LABELS));
+  const cats = shuffle(rng, Object.keys(CATEGORY_TEXT));
   return Array.from({ length: count }, (_, i) => {
     const category = cats[i % cats.length];
-    return { category, label: CATEGORY_LABELS[category] };
+    return { category, label: CATEGORY_TEXT[category].tap };
   });
 }
 
@@ -39,11 +32,10 @@ export function makeRulesRound(
 ): RulesRound {
   const rule = rules[ruleIndex];
   const inCat = ICON_CATEGORIES[rule.category].filter((m) => icons.includes(m));
-  let outCat = icons.filter((i) => !ICON_CATEGORIES[rule.category].includes(i));
-  if (rule.category === 'nature') {
-    // animals are arguably "nature" too — keep them out of nature rounds
-    outCat = outCat.filter((i) => !ICON_CATEGORIES.animals.includes(i));
-  }
+  const confusable = (CATEGORY_CONFLICTS[rule.category] ?? []).flatMap((c) => ICON_CATEGORIES[c]);
+  const outCat = icons.filter(
+    (i) => !ICON_CATEGORIES[rule.category].includes(i) && !confusable.includes(i),
+  );
   const matchCount = Math.min(2 + Math.floor(rng() * 2), inCat.length); // 2-3 matches
   const matches = shuffle(rng, inCat).slice(0, matchCount);
   const fillers = shuffle(rng, outCat).slice(0, tileCount - matchCount);
