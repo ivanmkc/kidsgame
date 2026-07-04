@@ -87,7 +87,7 @@ describe('asset manifest: hidden objects', () => {
 
   it.each(manifest.hidden.map((s) => [s.id, s] as const))('%s: valid targets and files', (_id, scene) => {
     expect(existsSync(join(ASSETS, '..', 'game', scene.image))).toBe(true);
-    expect(scene.targets.length).toBeGreaterThanOrEqual(5);
+    expect(scene.targets.length).toBeGreaterThanOrEqual(4);
     expect(new Set(scene.targets.map((t) => t.id)).size).toBe(scene.targets.length);
     for (const t of scene.targets) {
       expect(existsSync(join(ASSETS, '..', 'game', t.thumb)), t.thumb).toBe(true);

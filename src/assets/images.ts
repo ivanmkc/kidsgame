@@ -38,6 +38,8 @@ export const SPOTIT_ICONS: Record<string, number> = {
 export const SCENE_IMAGES: Record<string, number> = {
   'diff/farm_a.jpg': require('../../assets/game/diff/farm_a.jpg'),
   'diff/farm_b.jpg': require('../../assets/game/diff/farm_b.jpg'),
+  'diff/ocean_a.png': require('../../assets/game/diff/ocean_a.png'),
+  'diff/ocean_b.png': require('../../assets/game/diff/ocean_b.png'),
   'diff/party_a.jpg': require('../../assets/game/diff/party_a.jpg'),
   'diff/party_b.jpg': require('../../assets/game/diff/party_b.jpg'),
   'diff/princess_a.jpg': require('../../assets/game/diff/princess_a.jpg'),
@@ -48,7 +50,6 @@ export const SCENE_IMAGES: Record<string, number> = {
   'diff/unicorn_b.jpg': require('../../assets/game/diff/unicorn_b.jpg'),
   'hidden/ballroom.jpg': require('../../assets/game/hidden/ballroom.jpg'),
   'hidden/ballroom_t_crown.png': require('../../assets/game/hidden/ballroom_t_crown.png'),
-  'hidden/ballroom_t_kitten.png': require('../../assets/game/hidden/ballroom_t_kitten.png'),
   'hidden/ballroom_t_mirror.png': require('../../assets/game/hidden/ballroom_t_mirror.png'),
   'hidden/ballroom_t_slipper.png': require('../../assets/game/hidden/ballroom_t_slipper.png'),
   'hidden/ballroom_t_wand.png': require('../../assets/game/hidden/ballroom_t_wand.png'),
