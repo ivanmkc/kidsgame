@@ -265,8 +265,10 @@ function Reveal({ delay, children }: { delay: number; children: React.ReactNode 
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
-  bg: { flex: 1 },
+  // overflow hidden clips the rn-web background IMG that otherwise renders
+  // at its intrinsic width and forces horizontal scroll on small phones
+  safe: { flex: 1, backgroundColor: colors.bg, overflow: 'hidden' },
+  bg: { flex: 1, overflow: 'hidden' },
   menu: { alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 },
   headerRow: {
     flexDirection: 'row',
