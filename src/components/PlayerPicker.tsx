@@ -42,7 +42,14 @@ export function PlayerPicker({ players, onChange, onPick }: Props) {
         {players.map((p) => (
           <View key={p.id} style={[styles.card, shadows.sticker]}>
             {players.length > 1 ? (
-              <Pressable style={styles.remove} onPress={() => remove(p.id)} testID={`player-${p.id}-remove`}>
+              <Pressable
+                style={styles.remove}
+                onPress={() => remove(p.id)}
+                testID={`player-${p.id}-remove`}
+                accessibilityLabel={`Remove ${p.name}`}
+                accessibilityRole="button"
+                hitSlop={12}
+              >
                 <Text style={styles.removeText}>✕</Text>
               </Pressable>
             ) : null}
@@ -52,6 +59,8 @@ export function PlayerPicker({ players, onChange, onPick }: Props) {
                 update(p.id, { avatar: AVATAR_CHOICES[(i + 1) % AVATAR_CHOICES.length] });
               }}
               testID={`player-${p.id}-avatar`}
+              accessibilityLabel={`Change ${p.name}'s picture`}
+              accessibilityRole="button"
               style={styles.avatarWrap}
             >
               <Image source={SPOTIT_ICONS[p.avatar]} style={styles.avatar} resizeMode="contain" />
@@ -69,7 +78,7 @@ export function PlayerPicker({ players, onChange, onPick }: Props) {
                 testID={`player-${p.id}-input`}
               />
             ) : (
-              <Pressable onPress={() => setEditing(p.id)} testID={`player-${p.id}-rename`}>
+              <Pressable onPress={() => setEditing(p.id)} testID={`player-${p.id}-rename`} accessibilityLabel={`Rename ${p.name}`} accessibilityRole="button" hitSlop={8}>
                 <Text style={styles.name}>{p.name} <Text style={styles.pencil}>✏️</Text></Text>
               </Pressable>
             )}
@@ -155,13 +164,15 @@ const styles = StyleSheet.create({
   },
   diffRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', justifyContent: 'center' },
   diffChip: {
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    minHeight: 44,
+    justifyContent: 'center',
     backgroundColor: colors.blush,
   },
   diffChipOn: { backgroundColor: colors.gold },
-  diffText: { fontSize: 12, fontFamily: fonts.body, color: colors.inkSoft },
+  diffText: { fontSize: 13, fontFamily: fonts.body, color: colors.inkSoft },
   diffTextOn: { color: colors.ink },
   playBtn: {
     backgroundColor: colors.purple,

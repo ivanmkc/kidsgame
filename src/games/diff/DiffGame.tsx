@@ -140,7 +140,7 @@ export function DiffGame({ onHome, player, sceneId, onPickScene, onBackToPicker 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={isLandscape ? styles.rowWrap : styles.colWrap}>{pictures}</View>
         {settings.diffHint && hintAvailable && !won ? (
-          <Pressable onPress={showHint} testID="diff-hint" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
+          <Pressable onPress={showHint} testID="diff-hint" accessibilityLabel="Show a hint" accessibilityRole="button" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
             <Text style={styles.hintText}>💡 Hint</Text>
           </Pressable>
         ) : null}
