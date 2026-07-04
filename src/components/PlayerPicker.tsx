@@ -128,7 +128,9 @@ export function PlayerPicker({ players, onChange, onPick }: Props) {
 const styles = StyleSheet.create({
   wrap: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', gap: 18, padding: 16 },
   title: { fontSize: 32, fontFamily: fonts.display, color: colors.ink },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 18, justifyContent: 'center', maxWidth: 900 },
+  // width:'100%' is load-bearing: inside an alignItems:center parent,
+  // rn-web gives the row max-content width and flexWrap never wraps
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 18, justifyContent: 'center', width: '100%', maxWidth: 900 },
   card: {
     backgroundColor: colors.paper,
     borderRadius: 26,
