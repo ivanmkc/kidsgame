@@ -84,24 +84,45 @@ describe('shadow match', () => {
   });
 });
 
-describe('odd one out', () => {
-  it('exactly one odd item at the reported index for every mode', async () => {
-    const { makeOddOneRound, ASYMMETRIC_ICONS } = await import('../oddone/logic');
+describe('odd one out (which does not belong)', () => {
+  it('n-1 distinct same-category items + one intruder at oddIndex', async () => {
+    const { makeOddOneRound } = await import('../oddone/logic');
+    const { categoryOf } = await import('../iconCategories');
     for (let seed = 1; seed <= 40; seed++) {
-      for (const [n, kind] of [[6, 'different'], [9, 'category'], [12, 'mirrored']] as const) {
-        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n, kind);
+      for (const n of [4, 6, 9]) {
+        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
         expect(r.items).toHaveLength(n);
-        expect(r.items[r.oddIndex].mirrored).toBe(kind === 'mirrored');
-        if (kind === 'mirrored') {
-          // odd twin is the same icon flipped; all icons identical, exactly one mirrored
-          expect(new Set(r.items.map((x) => x.icon)).size).toBe(1);
-          expect(r.items.filter((x) => x.mirrored)).toHaveLength(1);
-          expect(ASYMMETRIC_ICONS).toContain(r.common);
-        } else {
-          expect(r.items.filter((x) => x.icon === r.odd)).toHaveLength(1);
-          expect(new Set(r.items.map((x) => x.icon)).size).toBe(2);
-          expect(r.items[r.oddIndex].icon).toBe(r.odd);
+        expect(new Set(r.items).size).toBe(n); // all distinct
+        expect(r.items[r.oddIndex]).toBe(r.odd);
+        expect(categoryOf(r.odd)).toBe(r.oddCategory);
+        expect(r.oddCategory).not.toBe(r.baseCategory);
+        for (let i = 0; i < n; i++) {
+          if (i !== r.oddIndex) expect(categoryOf(r.items[i])).toBe(r.baseCategory);
         }
+      }
+    }
+  });
+});
+
+describe('rule time', () => {
+  it('rounds have the right matches and recall flag', async () => {
+    const { makeRules, makeRulesRound } = await import('../rules/logic');
+    const { ICON_CATEGORIES } = await import('../iconCategories');
+    for (let seed = 1; seed <= 30; seed++) {
+      const rng = makeRng(seed);
+      const rules = makeRules(rng, 5);
+      expect(rules).toHaveLength(5);
+      for (let idx = 0; idx < 5; idx++) {
+        const round = makeRulesRound(rng, manifest.spotit.icons, rules, idx, 8, idx === 3);
+        expect(round.tiles).toHaveLength(8);
+        const matches = round.tiles.filter((t) => t.isMatch);
+        expect(matches.length).toBe(round.matchCount);
+        expect(matches.length).toBeGreaterThanOrEqual(2);
+        for (const t of round.tiles) {
+          const inCat = ICON_CATEGORIES[round.rule.category].includes(t.icon);
+          expect(t.isMatch).toBe(inCat);
+        }
+        expect(round.isRecall).toBe(idx === 3);
       }
     }
   });

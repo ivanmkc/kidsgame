@@ -15,7 +15,6 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
-import { PlayerPicker } from './src/components/PlayerPicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
 import { HiddenGame } from './src/games/hidden/HiddenGame';
@@ -23,10 +22,11 @@ import { MemoryGame } from './src/games/memory/MemoryGame';
 import { OddOneGame } from './src/games/oddone/OddOneGame';
 import { ShadowGame } from './src/games/shadow/ShadowGame';
 import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
+import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { manifest } from './src/manifest';
+import { Difficulty, DIFFICULTIES, loadDifficulty, saveDifficulty } from './src/difficulty';
 import { routeParts, useRoute } from './src/nav';
-import { Player, loadPlayers } from './src/profile';
 import { colors, fonts, shadows } from './src/theme';
 
 export default function App() {
@@ -36,17 +36,15 @@ export default function App() {
     Nunito_600SemiBold,
     Nunito_700Bold,
   });
-  const [players, setPlayers] = useState<Player[]>(() => loadPlayers());
-  const [playerId, setPlayerId] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => loadDifficulty());
   const [route, navigate] = useRoute();
   const parts = routeParts(route);
-  const KNOWN = ['players', 'menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'puzzle'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle'];
   // A stale/mistyped hash must never strand a kid on a blank page.
-  const screen = KNOWN.includes(parts.screen) ? parts.screen : 'players';
+  const screen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const param = parts.param;
-  // Deep links / refreshes land past the picker — fall back to the first kid.
-  const player = players.find((p) => p.id === playerId) ?? (screen !== 'players' ? players[0] : null);
   const goHome = () => navigate('menu');
+  const pickDifficulty = (d: Difficulty) => { setDifficulty(d); saveDifficulty(d); };
 
   // fontsLoaded intentionally does NOT gate rendering: on slow networks the
   // gate meant a blank screen for many seconds; a brief system-font flash is
@@ -54,24 +52,14 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
-      {screen === 'players' && (
-        <AppBackground>
-          <TwinkleField count={8} />
-          <PlayerPicker
-            players={players}
-            onChange={setPlayers}
-            onPick={(p) => { setPlayerId(p.id); navigate('menu'); }}
-          />
-        </AppBackground>
-      )}
       {screen === 'menu' && (
-        <Menu player={player} onNavigate={navigate} onSwitchPlayer={() => navigate('players')} />
+        <Menu difficulty={difficulty} onPickDifficulty={pickDifficulty} onNavigate={navigate} />
       )}
-      {screen === 'spotit' && <SpotItGame onHome={goHome} player={player} />}
+      {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'diff' && (
         <DiffGame
           onHome={goHome}
-          player={player}
+          difficulty={difficulty}
           sceneId={param}
           onPickScene={(id) => navigate(`diff/${id}`)}
           onBackToPicker={() => navigate('diff')}
@@ -80,19 +68,20 @@ export default function App() {
       {screen === 'hidden' && (
         <HiddenGame
           onHome={goHome}
-          player={player}
+          difficulty={difficulty}
           sceneId={param}
           onPickScene={(id) => navigate(`hidden/${id}`)}
           onBackToPicker={() => navigate('hidden')}
         />
       )}
-      {screen === 'memory' && <MemoryGame onHome={goHome} player={player} />}
-      {screen === 'shadow' && <ShadowGame onHome={goHome} player={player} />}
-      {screen === 'oddone' && <OddOneGame onHome={goHome} player={player} />}
+      {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'rules' && <RulesGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'puzzle' && (
         <PuzzleGame
           onHome={goHome}
-          player={player}
+          difficulty={difficulty}
           sceneId={param}
           onPickScene={(id) => navigate(`puzzle/${id}`)}
           onBackToPicker={() => navigate('puzzle')}
@@ -109,15 +98,16 @@ const GAME_CARDS = [
   { route: 'memory', color: colors.green, title: 'Memory Match', blurb: 'Flip the cards and find the pairs', preview: 'icons8' },
   { route: 'puzzle', color: colors.gold, title: 'Picture Puzzle', blurb: 'Put the mixed-up picture back together', preview: 'puzzle' },
   { route: 'shadow', color: colors.ink, title: 'Shadow Match', blurb: 'Whose shadow is that? Match it!', preview: 'icons13' },
-  { route: 'oddone', color: '#E8874F', title: 'Odd One Out', blurb: 'Spot the one that is different', preview: 'icons20' },
+  { route: 'oddone', color: '#E8874F', title: 'Odd One Out', blurb: 'Which one does not belong?', preview: 'icons20' },
+  { route: 'rules', color: '#3E9BB8', title: 'Rule Time!', blurb: 'Follow the rule — tap the right ones!', preview: 'rules' },
 ];
 
 function Menu({
-  player, onNavigate, onSwitchPlayer,
+  difficulty, onPickDifficulty, onNavigate,
 }: {
-  player: Player | null;
+  difficulty: Difficulty;
+  onPickDifficulty: (d: Difficulty) => void;
   onNavigate: (r: string) => void;
-  onSwitchPlayer: () => void;
 }) {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -128,6 +118,7 @@ function Menu({
     if (key === 'icons8') return <MemoryPreview />;
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
+    if (key === 'rules') return <RulesPreview />;
     const scene =
       key === 'diff'
         ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])
@@ -148,14 +139,25 @@ function Menu({
             <BobbingLogo small={isLandscape} />
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
               <Text style={styles.heading}>Kids Game Box</Text>
-              {player ? (
-                <Pressable onPress={onSwitchPlayer} testID="switch-player" style={styles.playerRow}>
-                  <Image source={SPOTIT_ICONS[player.avatar]} style={styles.playerAvatar} />
-                  <Text style={styles.tagline}>Have fun, {player.name}!  (switch)</Text>
-                </Pressable>
-              ) : (
-                <Text style={styles.tagline}>Pick a game!</Text>
-              )}
+              <View style={styles.diffRow}>
+                {(Object.keys(DIFFICULTIES) as Difficulty[]).map((d) => {
+                  const on = difficulty === d;
+                  return (
+                    <Pressable
+                      key={d}
+                      onPress={() => onPickDifficulty(d)}
+                      testID={`difficulty-${d}`}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${DIFFICULTIES[d].label} difficulty`}
+                      style={[styles.diffChip, on && styles.diffChipOn]}
+                    >
+                      <Text style={[styles.diffText, on && styles.diffTextOn]}>
+                        {DIFFICULTIES[d].emoji} {DIFFICULTIES[d].label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
           </View>
         </Reveal>
@@ -266,29 +268,58 @@ function MemoryPreview() {
   );
 }
 
-// Shadow preview: dark silhouettes with one revealed sticker
+// Shadow preview: a mystery silhouette tile, an equals hint, and the answer
 function ShadowPreview() {
-  const names = manifest.spotit.icons.slice(13, 17);
+  const n = manifest.spotit.icons[10]; // unicorn
   return (
-    <View style={[styles.iconRow, { backgroundColor: 'rgba(67,48,75,0.10)' }]}>
-      {names.map((n, i) => (
-        <Image
-          key={n}
-          source={i === 1 ? SPOTIT_ICONS[n] : (SPOTIT_SHADOWS[n] ?? SPOTIT_ICONS[n])}
-          style={styles.iconRowImg}
-        />
-      ))}
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(155,126,222,0.12)' }]}>
+      <View style={[styles.previewTile, { borderColor: colors.purple, backgroundColor: '#EFE8F7' }]}>
+        <Image source={SPOTIT_SHADOWS[n] ?? SPOTIT_ICONS[n]} style={styles.previewTileImg} />
+      </View>
+      <Text style={{ fontSize: 26, fontFamily: fonts.display, color: colors.purple }}>=</Text>
+      <View style={[styles.previewTile, { borderColor: colors.gold }]}>
+        <Image source={SPOTIT_ICONS[n]} style={styles.previewTileImg} />
+      </View>
+      <View style={[styles.previewTile, { borderColor: colors.blush }]}>
+        <Image source={SPOTIT_ICONS[manifest.spotit.icons[4]]} style={styles.previewTileImg} />
+      </View>
     </View>
   );
 }
 
-// Odd One Out preview: a row of the same icon with one different
+// Rule Time preview: a mini rule banner over tiles
+function RulesPreview() {
+  const icons = manifest.spotit.icons;
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(62,155,184,0.10)', flexDirection: 'column', gap: 6 }]}>
+      <View style={styles.miniRule}><Text style={styles.miniRuleText}>Tap all the ANIMALS! 🐾</Text></View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {[0, 18, 3, 24].map((idx, i) => (
+          <View key={i} style={[styles.previewTile, { width: 46, height: 46, borderColor: [0, 3].includes(idx) ? colors.green : colors.blush }]}>
+            <Image source={SPOTIT_ICONS[icons[idx]]} style={styles.previewTileImg} />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+// Odd One Out preview: proper game tiles, the odd one popped in gold
 function OddOnePreview() {
   const icons = manifest.spotit.icons;
   return (
     <View style={[styles.iconRow, { backgroundColor: 'rgba(232,135,79,0.10)' }]}>
-      {[0, 0, 0, 22, 0].map((idx, i) => (
-        <Image key={i} source={SPOTIT_ICONS[icons[idx]]} style={styles.iconRowImg} />
+      {[0, 0, 22, 0].map((idx, i) => (
+        <View
+          key={i}
+          style={[
+            styles.previewTile,
+            { borderColor: idx === 22 ? colors.gold : colors.blush },
+            idx === 22 && { transform: [{ rotate: '-4deg' }, { scale: 1.08 }] },
+          ]}
+        >
+          <Image source={SPOTIT_ICONS[icons[idx]]} style={styles.previewTileImg} />
+        </View>
       ))}
     </View>
   );
@@ -356,9 +387,18 @@ const styles = StyleSheet.create({
   logo: { width: 104, height: 104 },
   logoSmall: { width: 72, height: 72 },
   heading: { fontSize: 36, fontFamily: fonts.display, color: colors.ink },
-  playerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  playerAvatar: { width: 26, height: 26 },
-  tagline: { fontSize: 16, fontFamily: fonts.bodyReg, color: colors.inkSoft },
+  diffRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
+  diffChip: {
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    minHeight: 44,
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+  },
+  diffChipOn: { backgroundColor: colors.gold },
+  diffText: { fontSize: 14, fontFamily: fonts.body, color: colors.inkSoft },
+  diffTextOn: { color: colors.ink },
   cards: {
     gap: 16,
     width: '100%',
@@ -407,6 +447,27 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.5)',
   },
   miniBackUp: { backgroundColor: colors.card, borderColor: colors.green },
+  previewTile: {
+    width: 58,
+    height: 58,
+    borderRadius: 14,
+    borderWidth: 3,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#B8905F',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+  },
+  previewTileImg: { width: '76%', height: '76%', resizeMode: 'contain' } as object,
+  miniRule: {
+    backgroundColor: colors.gold,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  miniRuleText: { fontFamily: fonts.display, fontSize: 12, color: colors.ink },
   cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
   gameTitle: { fontSize: 22, fontFamily: fonts.display },
   gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },

@@ -4,28 +4,27 @@ import { SPOTIT_ICONS, SPOTIT_SHADOWS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { ShadowDifficulty, makeShadowRound } from './logic';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
 }
 
-function shadowDifficulty(p: Player | null): ShadowDifficulty {
+function shadowDifficulty(d: Difficulty): ShadowDifficulty {
   // medium+ turns on mental rotation and confusable same-category options
-  if (p?.difficulty === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
-  if (p?.difficulty === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
+  if (d === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
+  if (d === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
   return { choices: 3, categoryDistractors: false, transform: false };
 }
 
-export function ShadowGame({ onHome, player }: Props) {
-  const roundsToWin = settingsFor(player?.difficulty).spotitRounds;
-  const diff = shadowDifficulty(player);
+export function ShadowGame({ onHome, difficulty }: Props) {
+  const roundsToWin = settingsFor(difficulty).spotitRounds;
+  const diff = shadowDifficulty(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
   const [score, setScore] = useState(0);
@@ -112,7 +111,7 @@ export function ShadowGame({ onHome, player }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={player ? `Shadow wizard, ${player.name}!` : 'You matched every shadow!'}
+        message={'Shadow wizard! You matched them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />

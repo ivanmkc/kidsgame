@@ -3,16 +3,15 @@ import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
-import { settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
-import { Player } from '../../profile';
 import { Rng, makeRng } from '../../rng';
 import { colors, shadows } from '../../theme';
 import { Card, buildDeck, dealRound } from './logic';
 
 interface Props {
   onHome: () => void;
-  player: Player | null;
+  difficulty: Difficulty;
   seed?: number;
 }
 
@@ -41,9 +40,9 @@ function layoutSlots(rng: Rng): Slot[] {
   return slots;
 }
 
-export function SpotItGame({ onHome, player, seed }: Props) {
+export function SpotItGame({ onHome, difficulty, seed }: Props) {
   const deck = useMemo(() => buildDeck(), []);
-  const roundsToWin = settingsFor(player?.difficulty).spotitRounds;
+  const roundsToWin = settingsFor(difficulty).spotitRounds;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
   const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
@@ -107,7 +106,7 @@ export function SpotItGame({ onHome, player, seed }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={player ? `Sharp eyes, ${player.name}!` : 'You spotted them all!'}
+        message={'Sharp eyes! You spotted them all!'}
         onPlayAgain={reset}
         onHome={onHome}
       />
