@@ -63,19 +63,9 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       <View style={styles.checklist} testID="hidden-checklist">
         {scene.targets.map((t) => {
           const done = found.includes(t.id);
-          // Hard mode: silhouette chips — you know the shape, not the colors.
-          const silhouette = settings.hiddenSilhouette && !done;
           return (
             <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
-              <Image
-                source={
-                  silhouette
-                    ? (SCENE_IMAGES[t.thumb.replace('.png', '_shadow.png')] ?? SCENE_IMAGES[t.thumb])
-                    : SCENE_IMAGES[t.thumb]
-                }
-                style={styles.chipImg}
-                resizeMode="contain"
-              />
+              <Image source={SCENE_IMAGES[t.thumb]} style={styles.chipImg} resizeMode="contain" />
               {done ? (
                 <View style={styles.chipCheck}>
                   <Text style={styles.chipCheckText}>✔️</Text>

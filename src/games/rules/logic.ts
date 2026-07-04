@@ -16,9 +16,9 @@ export interface RulesRound {
 
 const CATEGORY_LABELS: Record<string, string> = {
   animals: 'Tap all the ANIMALS! 🐾',
-  nature: 'Tap all the NATURE things! 🌈',
+  nature: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
   food: 'Tap all the YUMMY FOOD! 🍎',
-  things: 'Tap all the TOYS & THINGS! 🚗',
+  things: 'Tap the TOYS & VEHICLES! 🚗',
 };
 
 export function makeRules(rng: Rng, count: number): Rule[] {
@@ -39,7 +39,11 @@ export function makeRulesRound(
 ): RulesRound {
   const rule = rules[ruleIndex];
   const inCat = ICON_CATEGORIES[rule.category].filter((m) => icons.includes(m));
-  const outCat = icons.filter((i) => !ICON_CATEGORIES[rule.category].includes(i));
+  let outCat = icons.filter((i) => !ICON_CATEGORIES[rule.category].includes(i));
+  if (rule.category === 'nature') {
+    // animals are arguably "nature" too — keep them out of nature rounds
+    outCat = outCat.filter((i) => !ICON_CATEGORIES.animals.includes(i));
+  }
   const matchCount = Math.min(2 + Math.floor(rng() * 2), inCat.length); // 2-3 matches
   const matches = shuffle(rng, inCat).slice(0, matchCount);
   const fillers = shuffle(rng, outCat).slice(0, tileCount - matchCount);
