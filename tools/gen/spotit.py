@@ -46,10 +46,25 @@ ICONS = [
     ("gift", "a wrapped gift box with a bow"),
 ]
 
+def _touches_edge(img, tol: int = 6) -> bool:
+    """True if non-magenta artwork reaches the native canvas border — the
+    sticker would be flush-cut with no die-cut outline on that side."""
+    import numpy as np
+    rgb = np.asarray(img.convert("RGB"), np.int16)
+    border = np.concatenate([rgb[0, :], rgb[-1, :], rgb[:, 0], rgb[:, -1],
+                             rgb[1, :], rgb[-2, :], rgb[:, 1], rgb[:, -2]])
+    bg = np.median(border, axis=0)
+    for edge in (rgb[:tol, :], rgb[-tol:, :], rgb[:, :tol], rgb[:, -tol:]):
+        if (np.abs(edge - bg).sum(-1) > 120).mean() > 0.004:
+            return True
+    return False
+
+
 STYLE = (
     "Cheerful cartoon sticker for a toddler's game, bold black outline, flat "
     "bright colors, thick white sticker border, centered, fills most of the "
-    "frame, on a plain solid bright magenta background (#FF00FF). "
+    "frame but with clear magenta margin on ALL sides (nothing touching the "
+    "image edges), on a plain solid bright magenta background (#FF00FF). "
     "Children's book style. No text, no watermark, single object only."
 )
 
@@ -62,6 +77,9 @@ def gen_icon(name: str, desc: str, out_dir: Path, attempts: int = 3) -> bool:
         # Key at NBP's native resolution — resizing to a square first would
         # squash the sticker (native output is ~1.8:1).
         img = generate(f"{desc}. {STYLE}", None)
+        if _touches_edge(img):
+            print(f"  {name}: artwork touches the render edge (flush-cut), retry {i + 1}")
+            continue
         sprite, coverage = key_out_magenta(img, out_size=256)
         if not (0.15 <= coverage <= 0.98):
             print(f"  {name}: coverage {coverage:.2f} out of range, retry {i + 1}")

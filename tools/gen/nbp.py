@@ -153,12 +153,28 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     mask_s = np.asarray(Image.fromarray((mask * 255).astype(np.uint8), "L").resize(small)) > 127
     changed_outside = float((diff_s[~mask_s] > 45).mean()) if (~mask_s).any() else 0.0
 
-    # Feathered composite: soften the mask boundary so the accepted edit
-    # blends instead of showing a hard rectangle seam.
-    m_img = Image.fromarray((mask * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(4))
+    # Composite ONLY the changed pixels (the object), not the whole rect:
+    # NBP re-renders the patch with a slight tone shift, so blending the
+    # full rect leaves a visible soft rectangle around the object. The
+    # object mask = changed pixels inside the rect, closed, dilated and
+    # feathered — background stays original everywhere else.
+    comp = _object_composite(b, o, mask)
+    return comp, changed_inside, changed_outside
+
+
+def _object_composite(b: np.ndarray, o: np.ndarray, region: np.ndarray) -> Image.Image:
+    """Blend only genuinely-changed pixels of `o` into `b` within `region`."""
+    from PIL import ImageFilter
+    diff = np.abs(o - b).sum(-1)
+    changed = ((diff > 30) & region).astype(np.uint8) * 255
+    m_img = Image.fromarray(changed, "L")
+    m_img = m_img.filter(ImageFilter.MaxFilter(7))   # close pinholes, join parts
+    m_img = m_img.filter(ImageFilter.MinFilter(5))   # shave stray specks
+    m_img = m_img.filter(ImageFilter.MaxFilter(5))   # small safety dilation
+    m_img = m_img.filter(ImageFilter.GaussianBlur(2))  # feather the true edge
     m = np.asarray(m_img, np.float32)[..., None] / 255.0
     comp = b.astype(np.float32) * (1 - m) + o.astype(np.float32) * m
-    return Image.fromarray(comp.clip(0, 255).astype(np.uint8)), changed_inside, changed_outside
+    return Image.fromarray(comp.clip(0, 255).astype(np.uint8))
 
 
 IMAGEN_MODEL = "imagen-3.0-capability-001"
@@ -229,10 +245,8 @@ def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[I
             mask_s = np.asarray(Image.fromarray(mask_arr, "L").resize(small)) > 127
             drift = float((diff_s[~mask_s] > 45).mean()) if (~mask_s).any() else 0.0
 
-            m_img = Image.fromarray(mask_arr, "L").filter(ImageFilter.GaussianBlur(4))
-            m = np.asarray(m_img, np.float32)[..., None] / 255.0
-            comp = b.astype(np.float32) * (1 - m) + o.astype(np.float32) * m
-            return Image.fromarray(comp.clip(0, 255).astype(np.uint8)), inside, drift
+            comp = _object_composite(b, o, mask)
+            return comp, inside, drift
         except Exception as e:  # noqa: BLE001
             last = e
             _tls.imagen_client = None

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SPOTIT_ICONS, SPOTIT_SHADOWS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -9,19 +9,25 @@ import { manifest } from '../../manifest';
 import { Player } from '../../profile';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { makeShadowRound } from './logic';
+import { ShadowDifficulty, makeShadowRound } from './logic';
 
 interface Props {
   onHome: () => void;
   player: Player | null;
 }
 
+function shadowDifficulty(p: Player | null): ShadowDifficulty {
+  // medium+ turns on mental rotation and confusable same-category options
+  if (p?.difficulty === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
+  if (p?.difficulty === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
+  return { choices: 3, categoryDistractors: false, transform: false };
+}
+
 export function ShadowGame({ onHome, player }: Props) {
-  const settings = settingsFor(player?.difficulty);
-  const roundsToWin = settings.spotitRounds; // reuse the 3/5/7 ladder
-  const choices = player?.difficulty === 'hard' ? 5 : player?.difficulty === 'medium' ? 4 : 3;
+  const roundsToWin = settingsFor(player?.difficulty).spotitRounds;
+  const diff = shadowDifficulty(player);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, choices));
+  const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(0);
@@ -35,7 +41,7 @@ export function ShadowGame({ onHome, player }: Props) {
       setScore(next);
       setWrong(null);
       if (next < roundsToWin) {
-        setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, choices));
+        setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
       }
     } else {
       setWrong(icon);
@@ -47,28 +53,35 @@ export function ShadowGame({ onHome, player }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrong(null);
-    setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, choices));
+    setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
   };
 
   const { width, height } = useWindowDimensions();
-  const shadowSize = Math.min(width - 80, height - 84 - 200, 300);
-  const optionSize = Math.min((width - 32 - (choices - 1) * 14) / choices, 110);
+  const shadowSize = Math.min(width - 100, height - 84 - 210, 280);
+  const optionSize = Math.min((Math.min(width, 640) - 32 - (diff.choices - 1) * 14) / diff.choices, 108);
 
   return (
     <GameShell
       title="Shadow Match"
-      subtitle="Whose shadow is this?"
+      subtitle={diff.transform ? 'Tricky! The shadow is twisted around' : 'Whose shadow is this?'}
       onBack={onHome}
       right={<ScoreChip label={`🌙 ${score}/${roundsToWin}`} testID="shadow-score" />}
     >
       <View style={styles.board}>
         <View
-          style={[styles.shadowCard, shadows.sticker, { width: shadowSize + 44, height: shadowSize + 44 }]}
+          style={[styles.shadowCard, shadows.sticker, { width: shadowSize + 48, height: shadowSize + 48 }]}
           testID={`shadow-answer-${round.answer}`}
         >
           <Image
-            source={SPOTIT_ICONS[round.answer]}
-            style={{ width: shadowSize, height: shadowSize, tintColor: '#4B3A57' }}
+            source={SPOTIT_SHADOWS[round.answer] ?? SPOTIT_ICONS[round.answer]}
+            style={{
+              width: shadowSize,
+              height: shadowSize,
+              transform: [
+                { rotate: `${round.rotation}deg` },
+                { scaleX: round.mirrored ? -1 : 1 },
+              ],
+            }}
             resizeMode="contain"
           />
           <SparkleBurst trigger={celebrate} count={7} />
@@ -93,7 +106,9 @@ export function ShadowGame({ onHome, player }: Props) {
             </Pressable>
           ))}
         </View>
-        <Text style={styles.hint}>Tap the sticker that makes the shadow!</Text>
+        <Text style={styles.hint}>
+          {diff.transform ? 'It might be flipped or turned — look at the shape!' : 'Tap the sticker that makes the shadow!'}
+        </Text>
       </View>
       <WinOverlay
         visible={won}
@@ -106,7 +121,7 @@ export function ShadowGame({ onHome, player }: Props) {
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 22, paddingHorizontal: 16 },
+  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20, paddingHorizontal: 16 },
   shadowCard: {
     backgroundColor: colors.paper,
     borderRadius: 28,
@@ -126,5 +141,5 @@ const styles = StyleSheet.create({
   },
   wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
   pressed: { transform: [{ scale: 0.94 }] },
-  hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14 },
+  hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
 });

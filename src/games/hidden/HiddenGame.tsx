@@ -46,7 +46,7 @@ export function HiddenGame({ onHome, player, sceneId, onPickScene, onBackToPicke
   const ar = scene.w / scene.h;
 
   // Checklist row (~86px) + header — fit the scene into what's left.
-  const availH = height - 84 - 92;
+  const availH = height - 84 - 122;
   const sceneWidth = Math.min(width - 24, availH * ar, 1100);
 
   const onHit = (id: string) => {
@@ -69,8 +69,12 @@ export function HiddenGame({ onHome, player, sceneId, onPickScene, onBackToPicke
           return (
             <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
               <Image
-                source={SCENE_IMAGES[t.thumb]}
-                style={[styles.chipImg, silhouette && styles.chipSilhouette]}
+                source={
+                  silhouette
+                    ? (SCENE_IMAGES[t.thumb.replace('.png', '_shadow.png')] ?? SCENE_IMAGES[t.thumb])
+                    : SCENE_IMAGES[t.thumb]
+                }
+                style={styles.chipImg}
                 resizeMode="contain"
               />
               {done ? (
@@ -115,8 +119,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   chip: {
-    width: 64,
-    height: 64,
+    width: 92,
+    height: 92,
     borderRadius: 16,
     borderWidth: 3,
     borderColor: colors.card,
@@ -126,7 +130,6 @@ const styles = StyleSheet.create({
   },
   chipFound: { borderColor: colors.green },
   chipImg: { width: '100%', height: '100%' },
-  chipSilhouette: { tintColor: '#5B4B66' },
   chipCheck: {
     position: 'absolute',
     top: 0,
