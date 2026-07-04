@@ -5,7 +5,7 @@ export const colors = {
   paper: '#FFFDF7',
   card: '#FFFFFF',
   ink: '#43304B', // deep plum, softer than black for storybook text
-  inkSoft: '#9A8AA5',
+  inkSoft: '#6E5C7B', // secondary text — keeps >=4.5:1 on the cream surfaces
   red: '#E8564F',
   teal: '#2FB8AC',
   gold: '#FFC24B',

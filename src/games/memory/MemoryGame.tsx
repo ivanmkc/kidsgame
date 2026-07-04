@@ -28,8 +28,12 @@ export function MemoryGame({ onHome, player }: Props) {
   const lockRef = useRef(false);
   const won = matched.length * 2 === board.length;
 
+  const prevPairs = useRef(pairs);
   useEffect(() => {
-    // difficulty changed (player switch) — rebuild
+    // rebuild ONLY when difficulty actually changes — running on mount would
+    // replace the board a frame after first paint (flicker + stale taps)
+    if (prevPairs.current === pairs) return;
+    prevPairs.current = pairs;
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     setFaceUp([]);
     setMatched([]);

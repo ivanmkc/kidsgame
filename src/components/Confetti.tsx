@@ -1,11 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, Text, useWindowDimensions } from 'react-native';
+import { prefersReducedMotion } from '../motion';
 
 const PIECES = ['🎉', '⭐', '🎈', '🎊', '✨'];
 
 // Lightweight celebratory rain — pieces fall & spin once when mounted.
 export function Confetti({ count = 18 }: { count?: number }) {
   const { width, height } = useWindowDimensions();
+  if (prefersReducedMotion()) return null;
   return (
     <>
       {Array.from({ length: count }, (_, i) => (
