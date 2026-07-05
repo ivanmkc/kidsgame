@@ -20,8 +20,8 @@ interface Props {
 
 function puzzleOptions(): SceneOption[] {
   return [
-    ...manifest.diff.map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA })),
-    ...manifest.hidden.map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image })),
+    ...manifest.diff.map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA, flagged: d.flagged })),
+    ...manifest.hidden.map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image, flagged: h.flagged })),
   ];
 }
 

@@ -30,7 +30,7 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       <GameShell title="Hidden Objects" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to search?"
-          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image }))}
+          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(manifest.hidden[Math.floor(Math.random() * manifest.hidden.length)].id)}
         />

@@ -7,6 +7,7 @@ export interface SceneOption {
   id: string;
   name: string;
   image: string; // manifest-relative path
+  flagged?: boolean; // not yet quality-verified — show a warning badge
 }
 
 interface Props {
@@ -38,6 +39,11 @@ export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
             >
               <Image source={SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
               <Text style={styles.name}>{o.name}</Text>
+              {o.flagged ? (
+                <View style={styles.flagBadge} testID={`scene-flagged-${o.id}`}>
+                  <Text style={styles.flagText}>⚠️</Text>
+                </View>
+              ) : null}
             </Pressable>
           </PopIn>
         ))}
@@ -95,6 +101,16 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.8, transform: [{ scale: 0.97 }] },
   thumb: { width: '100%', height: 120 },
+  flagBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  flagText: { fontSize: 14 },
   name: {
     fontFamily: fonts.displayMed,
     fontSize: 16,

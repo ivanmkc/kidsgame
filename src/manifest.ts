@@ -14,6 +14,7 @@ export interface DiffRegion extends Box {
 export interface DiffScene {
   id: string;
   name: string;
+  flagged?: boolean;
   imageA: string;
   imageB: string;
   w: number;
@@ -30,6 +31,7 @@ export interface HiddenTarget extends Box {
 export interface HiddenScene {
   id: string;
   name: string;
+  flagged?: boolean;
   image: string;
   w: number;
   h: number;

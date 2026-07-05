@@ -53,7 +53,7 @@ export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPic
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to play?"
-          options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: d.imageA }))}
+          options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: d.imageA, flagged: d.flagged }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(manifest.diff[Math.floor(Math.random() * manifest.diff.length)].id)}
         />
