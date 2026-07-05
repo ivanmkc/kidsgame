@@ -1,0 +1,10 @@
+{
+  "note": "Scene ids verified clean by the adversarial visual audit fleet. The ship script deploys ONLY these — broken or unaudited content cannot reach the site.",
+  "clean": [
+    "tidepool", "trains", "dinos", "camping",
+    "aquarium", "bakery", "farm", "ocean", "playground", "space",
+    "ballroom", "cabin", "fairy", "petshop", "pond", "shed",
+    "space_station", "toybox", "treasure",
+    "jungle", "kitchenb", "picnic", "workshop"
+  ]
+}
