@@ -42,6 +42,14 @@ def save_manifest(m: dict) -> None:
         for key in ("diff", "hidden"):
             ours = {e["id"] for e in m[key]}
             m[key].extend(e for e in disk.get(key, []) if e["id"] not in ours)
+    # An entry whose files are gone was deliberately wiped for regeneration:
+    # drop it, or the stale in-memory copy resurrects it as a zombie (entry
+    # without assets) that the loop then counts as done forever.
+    def _has_files(e: dict) -> bool:
+        paths = [e[k] for k in ("imageA", "imageB", "image") if k in e]
+        return all((ASSETS / p).exists() for p in paths)
+    for key in ("diff", "hidden"):
+        m[key] = [e for e in m[key] if _has_files(e)]
     MANIFEST.parent.mkdir(parents=True, exist_ok=True)
     MANIFEST.write_text(json.dumps(m, indent=2) + "\n")
 

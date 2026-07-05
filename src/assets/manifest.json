@@ -691,6 +691,44 @@
           "what": "the wheelbarrow is missing"
         }
       ]
+    },
+    {
+      "id": "princess",
+      "name": "Princess Castle",
+      "imageA": "diff/princess_a.png",
+      "imageB": "diff/princess_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 1085,
+          "y": 310,
+          "w": 178,
+          "h": 162,
+          "what": "the treasure chest full of jewels changed color!"
+        },
+        {
+          "x": 1063,
+          "y": 495,
+          "w": 201,
+          "h": 198,
+          "what": "the white pony changed color!"
+        },
+        {
+          "x": 805,
+          "y": 344,
+          "w": 155,
+          "h": 189,
+          "what": "the peacock changed color!"
+        },
+        {
+          "x": 921,
+          "y": 581,
+          "w": 86,
+          "h": 107,
+          "what": "the frog wearing a tiny crown changed color!"
+        }
+      ]
     }
   ],
   "hidden": [
