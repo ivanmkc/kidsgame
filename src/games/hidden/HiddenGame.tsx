@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -6,7 +6,7 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, byLevel, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
@@ -23,7 +23,17 @@ interface Props {
 export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
+  const showTimer = settingsFor(difficulty).timer;
   const [found, setFound] = useState<string[]>([]);
+  const elapsed = useElapsed(showTimer && !!scene && !(scene && found.length === scene.targets.length && scene.targets.length > 0), sceneId);
+
+  const drawn = useMemo(() => {
+    if (!scene) return [];
+    const k = difficulty === 'easy' ? 5 : 6;
+    return [...scene.targets].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.targets.length));
+  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const total = drawn.length;
+  const won = found.length === total && total > 0;
 
   useEffect(() => setFound([]), [sceneId]);
 
@@ -42,11 +52,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPick
     );
   }
 
-  const total = scene.targets.length;
-  const won = found.length === total && total > 0;
-  const showTimer = settingsFor(difficulty).timer;
-  const elapsed = useElapsed(showTimer && !won, sceneId);
-  const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
+  const boxes = drawn.map((t) => ({ id: t.id, box: t }));
   const ar = scene.w / scene.h;
 
   // Checklist row (~86px) + header — fit the scene into what's left.
@@ -75,7 +81,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPick
       }
     >
       <View style={styles.checklist} testID="hidden-checklist">
-        {scene.targets.map((t) => {
+        {drawn.map((t) => {
           const done = found.includes(t.id);
           return (
             <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
@@ -106,7 +112,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPick
         visible={won}
         message={'Super detective! You found everything!'}
         onNext={() => {
-          const pool = visible.some((h) => h.id === scene.id) ? visible : manifest.hidden;
+          const pool = byLevel(visible.some((h) => h.id === scene.id) ? visible : manifest.hidden);
           const ids = pool.map((h) => h.id);
           onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
         }}

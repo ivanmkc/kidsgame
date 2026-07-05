@@ -78,3 +78,10 @@ export const FILTERS: { id: DifficultyFilter; label: string; emoji: string }[] =
 export function inFilter(level: Difficulty | undefined, f: DifficultyFilter): boolean {
   return f === 'all' || !level || level === f;
 }
+
+const LEVEL_ORDER = { easy: 0, medium: 1, hard: 2 } as const;
+
+/** Sort scenes for the Next button: gentler levels first, harder later. */
+export function byLevel<T extends { level?: Difficulty }>(scenes: T[]): T[] {
+  return [...scenes].sort((a, b) => LEVEL_ORDER[a.level ?? 'medium'] - LEVEL_ORDER[b.level ?? 'medium']);
+}

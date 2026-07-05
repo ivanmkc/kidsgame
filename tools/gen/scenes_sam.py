@@ -447,8 +447,8 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
 
         targets = []
         for item in usable:
-            if len(targets) == NEEDED_TARGETS:
-                break
+            if len(targets) == 8:
+                break  # pool cap
             chip = _chip(base, item["seg"])
             scene_crop = _crop(base, _hitbox(item["seg"]), pad=40)
             if not (_chip_whole(chip) and strict_min(
@@ -478,8 +478,8 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
                 "x": hx, "y": hy, "w": hw, "h": hh,
                 "thumb": f"hidden/{theme['id']}_t_{item['tid']}.png",
             })
-        if len(targets) < NEEDED_TARGETS:
-            print(f"  {theme['id']}: {len(targets)}/{NEEDED_TARGETS} clean targets, re-render {attempt + 1}")
+        if len(targets) < 6:  # big pool: game draws 5-6 per play
+            print(f"  {theme['id']}: {len(targets)}/6 clean targets, re-render {attempt + 1}")
             continue
 
         if not strict_min(
