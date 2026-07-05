@@ -225,9 +225,20 @@ def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image
     # accept-back region stays tight regardless of how big the edit mask
     # grows on retry: collateral changes outside it are discarded.
     tight = _removal_mask(item["seg"], 8 + EDGE_ERODE_PX)
-    for attempt in range(2):
-        mask = _removal_mask(item["seg"], MASK_DILATE * (attempt + 1))
-        out, _, drift = imagen_remove_mask(img, mask, tight)
+    for attempt in range(3):
+        mask = _removal_mask(item["seg"], MASK_DILATE * min(attempt + 1, 2))
+        if attempt < 2:
+            out, _, drift = imagen_remove_mask(img, mask, tight)
+        else:
+            # Imagen keeps smearing here — let NBP repaint the background
+            # under the same accept-back constraint and the same judge.
+            print(f"  {theme_id}: '{short}' trying NBP repaint fallback")
+            out, _, drift = nbp_edit(
+                img, mask,
+                f"the {short} has been removed: paint ONLY the natural background "
+                "scenery that would continue behind where it stood, matching the "
+                "art style exactly. No object, no animal, no shadow, nothing new.",
+                composite_mask=tight)
         if drift > 0.10:
             print(f"  {theme_id}: remove '{short}' drifted ({drift:.2f}), retry {attempt + 1}")
             continue
