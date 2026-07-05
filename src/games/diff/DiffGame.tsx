@@ -6,8 +6,9 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, byLevel, inFilter, settingsFor } from '../../difficulty';
-import { manifest } from '../../manifest';
+import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor } from '../../difficulty';
+import { baseImage, manifest } from '../../manifest';
+import { makeRng, sample } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
@@ -54,22 +55,23 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
   // Pooled scenes draw a fresh random subset (and random side per
   // difference) every time the scene mounts — a level never plays the
   // same twice. Legacy flat pairs keep their fixed four.
-  const round = useMemo(() => {
-    if (scene?.pool && scene.image) {
-      const k = difficulty === 'easy' ? 3 : 4;
-      const picked = [...scene.pool].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.pool.length));
-      return picked.map((p) => ({ box: p, patch: p.patch, patchOnA: Math.random() < 0.5 }));
-    }
-    return (scene?.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
+  const { boxes, overlaysA, overlaysB, total } = useMemo(() => {
+    const rng = makeRng(Math.floor(Math.random() * 1e9));
+    const round = scene?.pool && scene.image
+      ? sample(rng, scene.pool, settingsFor(difficulty).diffDraw)
+          .map((p) => ({ box: p, patch: p.patch as string | undefined, patchOnA: rng() < 0.5 }))
+      : (scene?.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
+    return {
+      total: round.length,
+      boxes: round.map((r, i) => ({ id: String(i), box: r.box })),
+      overlaysA: round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
+      overlaysB: round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
+    };
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
-  const total = round.length;
   const won = found.length === total && total > 0;
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
-  const boxes = round.map((r, i) => ({ id: String(i), box: r.box }));
-  const overlaysA = round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
-  const overlaysB = round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
-  const srcA = scene ? SCENE_IMAGES[(scene.image ?? scene.imageA)!] : 0;
+  const srcA = scene ? SCENE_IMAGES[baseImage(scene)] : 0;
   const srcB = scene ? SCENE_IMAGES[(scene.imageB ?? scene.image)!] : 0;
   const ar = scene ? scene.w / scene.h : 16 / 9;
 
@@ -78,7 +80,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to play?"
-          options={visible.map((d) => ({ id: d.id, name: d.name, image: (d.image ?? d.imageA)!, flagged: d.flagged, level: d.level }))}
+          options={visible.map((d) => ({ id: d.id, name: d.name, image: baseImage(d), flagged: d.flagged, level: d.level }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
         />
@@ -175,11 +177,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <WinOverlay
         visible={won}
         message={'Eagle eyes! You found every difference!'}
-        onNext={() => {
-          const pool = byLevel(visible.some((d) => d.id === scene.id) ? visible : manifest.diff);
-          const ids = pool.map((d) => d.id);
-          onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
-        }}
+        onNext={() => onPickScene(nextSceneId(manifest.diff, visible, scene.id))}
         onHome={onHome}
       />
     </GameShell>

@@ -26,7 +26,7 @@ import { StickerGame } from './src/games/sticker/StickerGame';
 import { StoryGame } from './src/games/story/StoryGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
-import { manifest } from './src/manifest';
+import { DiffScene, baseImage, manifest } from './src/manifest';
 import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
 import { isMuted, setMuted, sfx } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
@@ -151,11 +151,7 @@ function Menu({
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
     if (key === 'rules') return <RulesPreview />;
-    if (key === 'story') {
-      const st = manifest.stories?.[0];
-      if (st) return <Image source={SCENE_THUMBS[st.nodes.start.image] ?? SCENE_IMAGES[st.nodes.start.image]} style={styles.preview} />;
-      return <RulesPreview />;
-    }
+
     const scene =
       key === 'diff'
         ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])
@@ -163,8 +159,8 @@ function Menu({
           ? (manifest.hidden.find((h) => h.id === 'ballroom') ?? manifest.hidden[0])
           : (manifest.diff.find((d) => d.id === 'princess') ?? manifest.diff[0]);
     if (!scene) return null;
-    const sAny = scene as { imageA?: string; image?: string };
-    const imgKey = (sAny.image ?? sAny.imageA)!;
+    const imgKey = key === 'story' ? manifest.stories?.[0]?.nodes.start.image : baseImage(scene as DiffScene) ?? (scene as { image?: string }).image;
+    if (!imgKey) return null;
     const src = SCENE_THUMBS[imgKey] ?? SCENE_IMAGES[imgKey];
     return <Image source={src} style={styles.preview} />;
   };

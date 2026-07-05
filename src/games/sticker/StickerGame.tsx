@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Animated, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
+import { SCENE_AR } from '../../manifest';
 import { manifest } from '../../manifest';
+import { allSceneOptions } from '../sceneOptions';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 
@@ -22,16 +24,24 @@ interface Placed {
   size: number; // scene-relative width fraction
 }
 
+const BACKDROPS = allSceneOptions('all');
+
 // Free-play toy mode: no win state, no timer — just decorate a scene with
 // stickers. Tap a tray sticker to drop it, drag to move, double-tap to pop.
 export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Props) {
-  const backdrops = [
-    ...manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image })),
-    ...manifest.diff.map((d) => ({ id: `d-${d.id}`, name: d.name, image: (d.image ?? d.imageA)! })),
-  ];
+  const backdrops = BACKDROPS;
   const picked = backdrops.find((b) => b.id === sceneId) ?? null;
   const [placed, setPlaced] = useState<Placed[]>([]);
   const nextKey = useRef(1);
+
+  const popSticker = useCallback((key: number) => {
+    sfx.flip();
+    setPlaced((p) => p.filter((s) => s.key !== key));
+  }, []);
+
+  const moveSticker = useCallback((key: number, x: number, y: number) => {
+    setPlaced((p) => p.map((s) => (s.key === key ? { ...s, x, y } : s)));
+  }, []);
 
   const { width, height } = useWindowDimensions();
 
@@ -48,7 +58,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
     );
   }
 
-  const ar = 1280 / 720;
+  const ar = SCENE_AR;
   const trayH = 96;
   const stageW = Math.min(width - 24, (height - 84 - trayH - 24) * ar, 1100);
   const stageH = stageW / ar;
@@ -67,14 +77,6 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
     ]);
   };
 
-  const popSticker = (key: number) => {
-    sfx.flip();
-    setPlaced((p) => p.filter((s) => s.key !== key));
-  };
-
-  const moveSticker = (key: number, x: number, y: number) => {
-    setPlaced((p) => p.map((s) => (s.key === key ? { ...s, x, y } : s)));
-  };
 
   return (
     <GameShell
@@ -127,7 +129,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
   );
 }
 
-function DraggableSticker({
+const DraggableSticker = React.memo(function DraggableSticker({
   placed, stageW, stageH, onMove, onPop,
 }: {
   placed: Placed;
@@ -137,31 +139,38 @@ function DraggableSticker({
   onPop: (key: number) => void;
 }) {
   const size = placed.size * stageW;
-  const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  // The PanResponder is created ONCE; everything it needs at release time
+  // flows through refs so re-renders never rebuild gesture plumbing.
+  const live = useRef({ placed, stageW, stageH, onMove, onPop });
+  live.current = { placed, stageW, stageH, onMove, onPop };
+  const pan = useRef<Animated.ValueXY | null>(null);
+  if (!pan.current) pan.current = new Animated.ValueXY({ x: 0, y: 0 });
   const lastTap = useRef(0);
-  const responder = useRef(
-    PanResponder.create({
+  const responder = useRef<ReturnType<typeof PanResponder.create> | null>(null);
+  if (!responder.current) {
+    responder.current = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) + Math.abs(g.dy) > 4,
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
+      onPanResponderMove: Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], { useNativeDriver: false }),
       onPanResponderRelease: (_e, g) => {
+        const { placed: pl, stageW: w, stageH: h, onMove: mv, onPop: pop } = live.current;
         if (Math.abs(g.dx) + Math.abs(g.dy) < 6) {
           const now = Date.now();
-          if (now - lastTap.current < 350) onPop(placed.key);
+          if (now - lastTap.current < 350) pop(pl.key);
           lastTap.current = now;
         } else {
-          const nx = Math.min(0.95, Math.max(0, placed.x + g.dx / stageW));
-          const ny = Math.min(0.95, Math.max(0, placed.y + g.dy / stageH));
-          onMove(placed.key, nx, ny);
+          mv(pl.key,
+             Math.min(0.95, Math.max(0, pl.x + g.dx / w)),
+             Math.min(0.95, Math.max(0, pl.y + g.dy / h)));
         }
-        pan.setValue({ x: 0, y: 0 });
+        pan.current!.setValue({ x: 0, y: 0 });
       },
-    })
-  ).current;
+    });
+  }
 
   return (
     <Animated.View
-      {...responder.panHandlers}
+      {...responder.current.panHandlers}
       testID={`sticker-placed-${placed.key}`}
       style={{
         position: 'absolute',
@@ -169,13 +178,13 @@ function DraggableSticker({
         top: placed.y * stageH,
         width: size,
         height: size,
-        transform: pan.getTranslateTransform(),
+        transform: pan.current.getTranslateTransform(),
       }}
     >
       <Image source={SPOTIT_ICONS[placed.icon]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 8 },

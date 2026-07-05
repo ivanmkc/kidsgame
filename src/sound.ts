@@ -61,3 +61,13 @@ export function say(text: string): void {
     window.speechSynthesis.speak(u);
   } catch { /* no voices: stay silent */ }
 }
+
+import React from 'react';
+
+/** Speak `text` whenever it changes; pass null to stay silent. One home
+ *  for the narration concern (mute, cadence, future voice tuning). */
+export function useSay(text: string | null): void {
+  React.useEffect(() => {
+    if (text) say(text);
+  }, [text]);
+}

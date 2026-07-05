@@ -6,8 +6,9 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, byLevel, inFilter, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { makeRng, sample } from '../../rng';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 
@@ -25,15 +26,14 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPick
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   const showTimer = settingsFor(difficulty).timer;
   const [found, setFound] = useState<string[]>([]);
-  const elapsed = useElapsed(showTimer && !!scene && !(scene && found.length === scene.targets.length && scene.targets.length > 0), sceneId);
 
-  const drawn = useMemo(() => {
-    if (!scene) return [];
-    const k = difficulty === 'easy' ? 5 : 6;
-    return [...scene.targets].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.targets.length));
-  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const drawn = useMemo(
+    () => (scene ? sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, settingsFor(difficulty).hiddenDraw) : []),
+    [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = drawn.length;
   const won = found.length === total && total > 0;
+  const elapsed = useElapsed(showTimer && !!scene && !won, sceneId);
 
   useEffect(() => setFound([]), [sceneId]);
 
@@ -111,11 +111,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPick
       <WinOverlay
         visible={won}
         message={'Super detective! You found everything!'}
-        onNext={() => {
-          const pool = byLevel(visible.some((h) => h.id === scene.id) ? visible : manifest.hidden);
-          const ids = pool.map((h) => h.id);
-          onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
-        }}
+        onNext={() => onPickScene(nextSceneId(manifest.hidden, visible, scene.id))}
         onHome={onHome}
       />
     </GameShell>

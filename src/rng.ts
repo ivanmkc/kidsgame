@@ -28,3 +28,8 @@ export function shuffle<T>(rng: Rng, arr: T[]): T[] {
 export function pick<T>(rng: Rng, arr: T[]): T {
   return arr[randInt(rng, arr.length)];
 }
+
+/** k random items via the seeded Fisher-Yates shuffle (uniform, testable). */
+export function sample<T>(rng: Rng, arr: T[], k: number): T[] {
+  return shuffle(rng, arr).slice(0, Math.min(k, arr.length));
+}

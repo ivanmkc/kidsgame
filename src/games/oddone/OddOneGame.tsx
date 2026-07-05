@@ -8,7 +8,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { say, sfx } from '../../sound';
+import { sfx, useSay } from '../../sound';
 import { CATEGORY_TEXT } from '../iconCategories';
 import { makeOddOneRound } from './logic';
 
@@ -36,10 +36,7 @@ export function OddOneGame({ onHome, difficulty }: Props) {
   const won = score >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
-  useEffect(() => {
-    if (won) return;
-    say(CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
-  }, [round, won]);
+  useSay(won ? null : CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
 
   const onPick = (idx: number) => {
     if (won) return;

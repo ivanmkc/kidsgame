@@ -21,9 +21,7 @@ ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 
-STYLE = ("Bright, warm children's picture-book illustration, flat colors, soft "
-         "shapes, high detail, friendly. Landscape orientation. No text, no "
-         "letters, no watermark.")
+from gen.scenes import SCENE_STYLE as STYLE  # noqa: E402 — one house art style
 
 LUNA = ("Luna, a small white unicorn foal with a curly rainbow mane and tail, "
         "big friendly eyes and a tiny golden horn")
@@ -180,43 +178,51 @@ STORIES = [
 ]
 
 
-def gen_story(spec: dict) -> dict | None:
+def _gen_node(spec: dict, nid: str, n: dict) -> None:
+    fname = f"{spec['id']}_{nid}.png"
+    if (OUT / fname).exists():
+        print(f"  {spec['id']}/{nid}: exists, reusing")
+        return
+    ref = OUT / f"{spec['id']}_start.png"
+    best = None
+    for attempt in range(3):
+        if nid != "start" and ref.exists():
+            img = generate_with_ref(
+                f"{n['scene']}. The main character must look IDENTICAL to the "
+                f"character in the reference image — same face, colors, markings "
+                f"and proportions. {STYLE}",
+                ref, (1280, 720))
+        else:
+            img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
+        best = img
+        if ask_yes_no(
+            f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
+            [img],
+        ):
+            break
+        print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
+    else:
+        # a decent-but-imperfect scene beats losing the whole story
+        print(f"  {spec['id']}/{nid}: accepting best attempt despite judge")
+    best.save(OUT / fname)
+    print(f"  story {spec['id']}/{nid} OK")
+
+
+def gen_story(spec: dict) -> dict:
     OUT.mkdir(parents=True, exist_ok=True)
+    # start renders first (it is the identity reference for every other node),
+    # then the rest fan out — they only depend on start, never on each other.
+    _gen_node(spec, "start", spec["nodes"]["start"])
+    rest = [(nid, n) for nid, n in spec["nodes"].items() if nid != "start"]
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(3) as ex:
+        list(ex.map(lambda kv: _gen_node(spec, kv[0], kv[1]), rest))
     nodes = {}
     for nid, n in spec["nodes"].items():
-        fname = f"{spec['id']}_{nid}.png"
-        if (OUT / fname).exists():
-            print(f"  {spec['id']}/{nid}: exists, reusing")
-        else:
-            # the start scene anchors the character; every other node is
-            # conditioned on it so the hero stays visually consistent
-            ref = OUT / f"{spec['id']}_start.png"
-            best = None
-            for attempt in range(3):
-                if nid != "start" and ref.exists():
-                    img = generate_with_ref(
-                        f"{n['scene']}. The main character must look IDENTICAL to the "
-                        f"character in the reference image — same face, colors, markings "
-                        f"and proportions. {STYLE}",
-                        ref, (1280, 720))
-                else:
-                    img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
-                best = img
-                if ask_yes_no(
-                    f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
-                    [img],
-                ):
-                    break
-                print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
-            else:
-                # a decent-but-imperfect scene beats losing the whole story
-                print(f"  {spec['id']}/{nid}: accepting best attempt despite judge")
-            best.save(OUT / fname)
-        entry = {"image": f"story/{fname}", "text": n["text"]}
+        entry = {"image": f"story/{spec['id']}_{nid}.png", "text": n["text"]}
         if "choices" in n:
             entry["choices"] = n["choices"]
         nodes[nid] = entry
-        print(f"  story {spec['id']}/{nid} OK")
     return {"id": spec["id"], "title": spec["title"], "nodes": nodes}
 
 
@@ -231,12 +237,11 @@ def main() -> None:
             print(f"{spec['id']}: already present, skipping")
             continue
         got = gen_story(spec)
-        if got:
-            cur = json.loads(MANIFEST.read_text())
-            cur.setdefault("stories", [])
-            cur["stories"] = [s for s in cur["stories"] if s["id"] != got["id"]] + [got]
-            MANIFEST.write_text(json.dumps(cur, indent=2))
-            print(f"story {spec['id']} saved ({len(got['nodes'])} nodes)")
+        cur = json.loads(MANIFEST.read_text())
+        cur.setdefault("stories", [])
+        cur["stories"] = [s for s in cur["stories"] if s["id"] != got["id"]] + [got]
+        MANIFEST.write_text(json.dumps(cur, indent=2) + "\n")
+        print(f"story {spec['id']} saved ({len(got['nodes'])} nodes)")
 
 
 if __name__ == "__main__":

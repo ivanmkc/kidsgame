@@ -26,7 +26,7 @@ from PIL import Image, ImageFilter
 from .judge import _png_part, ask_text, ask_yes_no, client as _judge_client, strict_min
 from .nbp import EDGE_ERODE_PX, edit as nbp_edit, generate, imagen_remove_mask
 from .sam_batch import sam_segment_batch
-from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
+from .scenes import H, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
 
 # SAM 3.1 proposes masks; Gemini 3.1 refines — picks the true instance from
 # labeled proposals and vetoes objects that exist twice in the scene. Gemini
@@ -40,7 +40,9 @@ MAX_AREA_HIDDEN = 0.022 * W * H  # hidden targets must be small enough to hide
 EDGE_CLEAR = 12            # object may not touch the scene border
 HIT_PAD = 10
 OVERLAP_PAD = 16           # hitboxes must not overlap even padded
-MASK_DILATE = 14           # removal mask growth: covers soft edges + the
+MASK_DILATE = 14
+HIDDEN_POOL_CAP = 8   # verify up to this many targets per scene
+HIDDEN_POOL_MIN = 6   # game draws 5-6 per play, so the pool must exceed it           # removal mask growth: covers soft edges + the
                            # composite's 6px erosion with room to spare
 
 
@@ -447,8 +449,8 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
 
         targets = []
         for item in usable:
-            if len(targets) == 8:
-                break  # pool cap
+            if len(targets) == HIDDEN_POOL_CAP:
+                break
             chip = _chip(base, item["seg"])
             scene_crop = _crop(base, _hitbox(item["seg"]), pad=40)
             if not (_chip_whole(chip) and strict_min(
@@ -478,8 +480,8 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
                 "x": hx, "y": hy, "w": hw, "h": hh,
                 "thumb": f"hidden/{theme['id']}_t_{item['tid']}.png",
             })
-        if len(targets) < 6:  # big pool: game draws 5-6 per play
-            print(f"  {theme['id']}: {len(targets)}/6 clean targets, re-render {attempt + 1}")
+        if len(targets) < HIDDEN_POOL_MIN:
+            print(f"  {theme['id']}: {len(targets)}/{HIDDEN_POOL_MIN} clean targets, re-render {attempt + 1}")
             continue
 
         if not strict_min(

@@ -34,6 +34,8 @@ export interface DifficultySettings {
   puzzleCols: number;
   puzzleRows: number;
   diffHint: boolean; // easy players get a 💡 button that flashes one answer
+  diffDraw: number;   // differences drawn per play from the scene pool
+  hiddenDraw: number; // targets drawn per play from the scene pool
   timer: boolean;    // easy mode is pressure-free: no visible timer
   rulesRounds: number;
   rulesTiles: number;
@@ -46,6 +48,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     spotitRounds: 10, memoryPairs: 4,
     puzzleCols: 3, puzzleRows: 2,
     diffHint: true, timer: false,
+    diffDraw: 3, hiddenDraw: 5,
     rulesRounds: 10, rulesTiles: 6, rulesRecallFrom: Infinity,
   },
   medium: {
@@ -53,6 +56,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     spotitRounds: 12, memoryPairs: 6,
     puzzleCols: 3, puzzleRows: 3,
     diffHint: false, timer: true,
+    diffDraw: 4, hiddenDraw: 6,
     rulesRounds: 10, rulesTiles: 8, rulesRecallFrom: 6,
   },
   hard: {
@@ -60,6 +64,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     spotitRounds: 14, memoryPairs: 8,
     puzzleCols: 4, puzzleRows: 3,
     diffHint: false, timer: true,
+    diffDraw: 4, hiddenDraw: 6,
     rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
   },
 };
@@ -84,4 +89,13 @@ const LEVEL_ORDER = { easy: 0, medium: 1, hard: 2 } as const;
 /** Sort scenes for the Next button: gentler levels first, harder later. */
 export function byLevel<T extends { level?: Difficulty }>(scenes: T[]): T[] {
   return [...scenes].sort((a, b) => LEVEL_ORDER[a.level ?? 'medium'] - LEVEL_ORDER[b.level ?? 'medium']);
+}
+
+/** Next-scene progression: gentlest levels first, wrap around. */
+export function nextSceneId<T extends { id: string; level?: Difficulty }>(
+  all: T[], visible: T[], currentId: string,
+): string {
+  const pool = byLevel(visible.some((s) => s.id === currentId) ? visible : all);
+  const ids = pool.map((s) => s.id);
+  return ids[(ids.indexOf(currentId) + 1) % ids.length];
 }
