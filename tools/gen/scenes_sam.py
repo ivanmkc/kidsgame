@@ -23,7 +23,7 @@ import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 
-from .judge import _png_part, ask_yes_no, client as _judge_client, strict_min
+from .judge import _png_part, ask_text, ask_yes_no, client as _judge_client, strict_min
 from .nbp import EDGE_ERODE_PX, edit as nbp_edit, generate, imagen_remove_mask
 from .sam_batch import sam_segment_batch
 from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
@@ -252,6 +252,42 @@ def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image
     return None
 
 
+
+
+_PALETTE = ["red", "blue", "green", "purple", "orange", "pink", "yellow", "teal"]
+
+
+def _recolor_verified(img: Image.Image, item: dict, theme_id: str) -> tuple[Image.Image, str] | None:
+    """Color-change difference: no background inpaint, so no trace is
+    possible by construction — the rescue mechanic for backdrops where
+    removals can't be invisible (snow, sand, dense decoration)."""
+    import random as _r
+    short = _short(item["obj"])
+    rect = _hitbox(item["seg"])
+    before_crop = _crop(img, rect, pad=40)
+    cur = ask_text(f"In ONE word, what is the main color of the {short}?", [before_crop]).strip().lower()
+    choices = [c for c in _PALETTE if c not in cur]
+    for new in _r.sample(choices, min(3, len(choices))):
+        mask = _dilated(item["seg"]["mask"], 6)
+        out, ch, drift = nbp_edit(
+            img, mask,
+            f"the exact same {short} in the exact same position with the same shape and "
+            f"outline, but colored {new} instead of {cur}. Change ONLY its color; the "
+            f"background must stay pixel-identical.",
+            composite_mask=_dilated(item["seg"]["mask"], 12))
+        if drift > 0.10 or ch < 0.12:
+            print(f"  {theme_id}: recolor '{short}' -> {new} weak (ch={ch:.2f} drift={drift:.2f})")
+            continue
+        after_crop = _crop(out, rect, pad=40)
+        if _ask_pro(
+            f"Two crops of the same spot. Is the {short} the SAME object in the SAME place in both, with ONLY its color clearly changed (now {new}), everything else identical — no artifacts, no shape change, background untouched?",
+            [before_crop, after_crop],
+        ):
+            return out, f"the {short} changed color!"
+        print(f"  {theme_id}: recolor '{short}' -> {new} judge rejected")
+    return None
+
+
 # ---------------------------------------------------------------- diff ----
 
 def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
@@ -297,10 +333,12 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             img = base
             out = []
             queue = list(items)
+            failed = []
             while queue and len(out) < 2:
                 item = queue.pop(0)
                 nxt = _remove_verified(img, item, theme["id"])
                 if nxt is None:
+                    failed.append(item)
                     if spare:
                         sub = spare.pop(0)
                         print(f"  {theme['id']}: swapping '{_short(item['obj'])}' -> spare '{_short(sub['obj'])}'")
@@ -310,6 +348,15 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
                 img = nxt
                 out.append({"x": hx, "y": hy, "w": hw, "h": hh,
                             "what": phrase.format(_short(item["obj"]))})
+            # Rescue: recolor differences need no background inpaint at all.
+            while failed and len(out) < 2:
+                item = failed.pop(0)
+                r = _recolor_verified(img, item, theme["id"])
+                if r is None:
+                    continue
+                img, caption = r
+                hx, hy, hw, hh = _hitbox(item["seg"])
+                out.append({"x": hx, "y": hy, "w": hw, "h": hh, "what": caption})
             if len(out) < 2:
                 return None
             return img, out
