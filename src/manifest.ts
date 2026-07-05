@@ -74,7 +74,7 @@ export interface Manifest {
   hidden: HiddenScene[];
 }
 
-export const manifest = raw as Manifest;
+export const manifest = raw as unknown as Manifest;
 
 export function pickScene<T>(scenes: T[], avoidIndex?: number): { scene: T; index: number } {
   let index = Math.floor(Math.random() * scenes.length);
