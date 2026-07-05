@@ -20,7 +20,7 @@ EXTRA_DIFF_THEMES = [
      "adds": ["a red cardinal bird", "a pair of ice skates", "a gift box in the snow", "a snow fort", "a lantern on a pole", "a penguin"]},
     {"id": "candy", "name": "Candy Land",
      "base": "A whimsical candy landscape: lollipop trees, a chocolate river with a candy-cane bridge, gumdrop bushes, a gingerbread house, cotton-candy clouds, candy stones path.",
-     "adds": ["a giant swirly lollipop", "a wrapped candy", "a cupcake with a cherry", "a gummy bear", "a donut with sprinkles", "a candy cane"]},
+     "adds": ["a strawberry milkshake with a straw", "a waffle ice cream cone", "a cupcake with a cherry", "a gummy bear", "a donut with sprinkles", "a slice of layer cake"]},
     {"id": "tidepool", "name": "Tide Pool",
      "base": "A rocky tide pool close-up: clear shallow water, colorful anemones, hermit crabs, small darting fish, smooth pebbles, kelp strands, a distant lighthouse.",
      "adds": ["a purple sea urchin", "a pink sea snail", "a small octopus peeking out", "a blue starfish", "a floating feather", "a sand dollar"]},
