@@ -46,29 +46,29 @@
         {
           "x": 933,
           "y": 362,
-          "w": 119,
-          "h": 103,
+          "w": 120,
+          "h": 104,
           "what": "a pink sea snail appeared"
         },
         {
           "x": 346,
           "y": 110,
-          "w": 153,
-          "h": 122,
+          "w": 154,
+          "h": 123,
           "what": "a blue starfish appeared"
         },
         {
           "x": 782,
           "y": 98,
-          "w": 172,
-          "h": 162,
+          "w": 173,
+          "h": 163,
           "what": "the octopus peeking out is missing"
         },
         {
           "x": 635,
           "y": 544,
-          "w": 223,
-          "h": 172,
+          "w": 224,
+          "h": 173,
           "what": "the purple sea urchin is missing"
         }
       ],
@@ -85,29 +85,29 @@
         {
           "x": 640,
           "y": 533,
-          "w": 169,
-          "h": 165,
+          "w": 170,
+          "h": 166,
           "what": "a red suitcase appeared"
         },
         {
           "x": 942,
           "y": 551,
-          "w": 153,
-          "h": 100,
+          "w": 154,
+          "h": 101,
           "what": "a cat sleeping on a bench appeared"
         },
         {
           "x": 135,
           "y": 543,
-          "w": 199,
-          "h": 153,
+          "w": 200,
+          "h": 154,
           "what": "the wooden crate of apples is missing"
         },
         {
           "x": 190,
           "y": 169,
-          "w": 145,
-          "h": 202,
+          "w": 146,
+          "h": 203,
           "what": "the bouquet of balloons tied to a post is missing"
         }
       ],
@@ -124,29 +124,29 @@
         {
           "x": 696,
           "y": 34,
-          "w": 219,
-          "h": 134,
+          "w": 220,
+          "h": 135,
           "what": "a pterodactyl flying appeared"
         },
         {
           "x": 111,
           "y": 316,
-          "w": 92,
-          "h": 103,
+          "w": 86,
+          "h": 104,
           "what": "a butterfly appeared"
         },
         {
           "x": 1091,
           "y": 458,
-          "w": 134,
-          "h": 112,
+          "w": 135,
+          "h": 113,
           "what": "the orange dinosaur is missing"
         },
         {
           "x": 665,
           "y": 501,
-          "w": 109,
-          "h": 122,
+          "w": 110,
+          "h": 123,
           "what": "the white dinosaur egg is missing"
         }
       ],
@@ -161,31 +161,31 @@
       "h": 720,
       "diffs": [
         {
-          "x": 594,
+          "x": 651,
           "y": 348,
-          "w": 258,
-          "h": 146,
+          "w": 202,
+          "h": 147,
           "what": "a friendly raccoon peeking appeared"
         },
         {
           "x": 983,
           "y": 377,
-          "w": 148,
-          "h": 293,
+          "w": 149,
+          "h": 294,
           "what": "a acoustic guitar appeared"
         },
         {
           "x": 63,
           "y": 543,
-          "w": 163,
-          "h": 100,
+          "w": 164,
+          "h": 101,
           "what": "the sleeping bag rolled up is missing"
         },
         {
           "x": 535,
-          "y": 371,
-          "w": 81,
-          "h": 106,
+          "y": 381,
+          "w": 82,
+          "h": 97,
           "what": "the canteen is missing"
         }
       ],
@@ -202,29 +202,29 @@
         {
           "x": 918,
           "y": 493,
-          "w": 120,
-          "h": 111,
+          "w": 121,
+          "h": 112,
           "what": "a wooden bucket appeared"
         },
         {
           "x": 1152,
           "y": 436,
-          "w": 98,
+          "w": 99,
           "h": 95,
           "what": "a white duck appeared"
         },
         {
           "x": 399,
           "y": 497,
-          "w": 228,
+          "w": 229,
           "h": 223,
           "what": "the red tractor toy is missing"
         },
         {
           "x": 145,
           "y": 535,
-          "w": 114,
-          "h": 175,
+          "w": 115,
+          "h": 176,
           "what": "the grey rabbit is missing"
         }
       ],
@@ -240,30 +240,30 @@
       "diffs": [
         {
           "x": 906,
-          "y": 501,
-          "w": 211,
-          "h": 151,
+          "y": 503,
+          "w": 212,
+          "h": 143,
           "what": "a sea turtle appeared"
         },
         {
           "x": 688,
           "y": 121,
-          "w": 133,
-          "h": 224,
+          "w": 134,
+          "h": 225,
           "what": "a pink jellyfish appeared"
         },
         {
           "x": 345,
           "y": 455,
-          "w": 97,
-          "h": 205,
+          "w": 98,
+          "h": 206,
           "what": "the diver figurine is missing"
         },
         {
           "x": 1008,
           "y": 238,
-          "w": 153,
-          "h": 159,
+          "w": 154,
+          "h": 160,
           "what": "the pufferfish puffed up is missing"
         }
       ],
@@ -280,29 +280,29 @@
         {
           "x": 1058,
           "y": 367,
-          "w": 40,
-          "h": 81,
+          "w": 41,
+          "h": 82,
           "what": "a water bottle on the bench appeared"
         },
         {
           "x": 674,
           "y": 552,
-          "w": 106,
-          "h": 110,
+          "w": 107,
+          "h": 111,
           "what": "a red kick ball appeared"
         },
         {
-          "x": 167,
+          "x": 174,
           "y": 449,
-          "w": 128,
-          "h": 103,
+          "w": 122,
+          "h": 104,
           "what": "the toy dump truck in the sandbox is missing"
         },
         {
           "x": 453,
           "y": 601,
-          "w": 130,
-          "h": 77,
+          "w": 131,
+          "h": 78,
           "what": "the paper airplane is missing"
         }
       ],
@@ -324,24 +324,24 @@
           "what": "a purple octopus appeared"
         },
         {
-          "x": 407,
-          "y": 579,
-          "w": 182,
-          "h": 122,
+          "x": 426,
+          "y": 599,
+          "w": 164,
+          "h": 103,
           "what": "a spiral seashell appeared"
         },
         {
           "x": 692,
           "y": 538,
-          "w": 109,
-          "h": 112,
+          "w": 110,
+          "h": 113,
           "what": "the orange starfish is missing"
         },
         {
           "x": 209,
           "y": 475,
-          "w": 288,
-          "h": 239,
+          "w": 213,
+          "h": 240,
           "what": "the treasure chest is missing"
         }
       ],
@@ -358,29 +358,29 @@
         {
           "x": 1061,
           "y": 425,
-          "w": 145,
-          "h": 192,
+          "w": 146,
+          "h": 193,
           "what": "a astronaut floating appeared"
         },
         {
           "x": 373,
-          "y": 518,
-          "w": 183,
-          "h": 153,
+          "y": 572,
+          "w": 129,
+          "h": 100,
           "what": "a flying saucer appeared"
         },
         {
-          "x": 466,
+          "x": 522,
           "y": 515,
-          "w": 149,
-          "h": 147,
+          "w": 94,
+          "h": 148,
           "what": "the green alien waving is missing"
         },
         {
           "x": 55,
           "y": 457,
-          "w": 149,
-          "h": 141,
+          "w": 150,
+          "h": 142,
           "what": "the purple planet is missing"
         }
       ],
@@ -397,29 +397,29 @@
         {
           "x": 971,
           "y": 397,
-          "w": 108,
-          "h": 79,
+          "w": 109,
+          "h": 80,
           "what": "a gingerbread man cookie appeared"
         },
         {
           "x": 107,
           "y": 278,
-          "w": 97,
-          "h": 99,
+          "w": 98,
+          "h": 100,
           "what": "a strawberry tart appeared"
         },
         {
           "x": 20,
           "y": 506,
-          "w": 185,
-          "h": 177,
+          "w": 186,
+          "h": 178,
           "what": "the pink birthday cake is missing"
         },
         {
           "x": 803,
           "y": 532,
-          "w": 183,
-          "h": 170,
+          "w": 184,
+          "h": 171,
           "what": "the basket of croissants is missing"
         }
       ],
@@ -436,29 +436,29 @@
         {
           "x": 277,
           "y": 550,
-          "w": 138,
-          "h": 105,
+          "w": 139,
+          "h": 106,
           "what": "a pair of flip-flops appeared"
         },
         {
           "x": 1016,
           "y": 396,
-          "w": 98,
-          "h": 97,
+          "w": 99,
+          "h": 98,
           "what": "a starfish appeared"
         },
         {
           "x": 1101,
           "y": 195,
-          "w": 77,
-          "h": 91,
+          "w": 78,
+          "h": 92,
           "what": "the sailboat on the horizon is missing"
         },
         {
-          "x": 1078,
-          "y": 472,
-          "w": 193,
-          "h": 217,
+          "x": 1134,
+          "y": 528,
+          "w": 138,
+          "h": 162,
           "what": "the seagull is missing"
         }
       ],
@@ -476,28 +476,28 @@
           "x": 718,
           "y": 477,
           "w": 217,
-          "h": 163,
+          "h": 164,
           "what": "a lion cub in the grass appeared"
         },
         {
           "x": 31,
           "y": 481,
           "w": 195,
-          "h": 234,
+          "h": 235,
           "what": "a colorful tropical bird appeared"
         },
         {
           "x": 982,
           "y": 297,
-          "w": 255,
-          "h": 263,
+          "w": 256,
+          "h": 264,
           "what": "the baby elephant is missing"
         },
         {
           "x": 1031,
           "y": 578,
-          "w": 192,
-          "h": 142,
+          "w": 193,
+          "h": 140,
           "what": "the tortoise is missing"
         }
       ]
@@ -513,28 +513,28 @@
         {
           "x": 819,
           "y": 21,
-          "w": 148,
-          "h": 177,
+          "w": 149,
+          "h": 152,
           "what": "a dragonfly appeared"
         },
         {
           "x": 436,
           "y": 595,
-          "w": 181,
+          "w": 182,
           "h": 125,
           "what": "a little pillbug appeared"
         },
         {
           "x": 1029,
           "y": 521,
-          "w": 178,
-          "h": 171,
+          "w": 179,
+          "h": 172,
           "what": "the cricket is missing"
         },
         {
           "x": 706,
           "y": 566,
-          "w": 145,
+          "w": 146,
           "h": 154,
           "what": "the caterpillar on a twig is missing"
         }
@@ -551,29 +551,29 @@
         {
           "x": 494,
           "y": 483,
-          "w": 152,
-          "h": 220,
+          "w": 153,
+          "h": 221,
           "what": "a red toy robot appeared"
         },
         {
           "x": 237,
-          "y": 551,
-          "w": 212,
-          "h": 154,
+          "y": 560,
+          "w": 213,
+          "h": 146,
           "what": "a sleeping orange cat appeared"
         },
         {
           "x": 28,
           "y": 472,
-          "w": 180,
-          "h": 231,
+          "w": 181,
+          "h": 232,
           "what": "the toy sailboat is missing"
         },
         {
           "x": 694,
           "y": 500,
-          "w": 103,
-          "h": 199,
+          "w": 104,
+          "h": 200,
           "what": "the pinwheel toy is missing"
         }
       ]
@@ -589,29 +589,29 @@
         {
           "x": 1071,
           "y": 554,
-          "w": 149,
-          "h": 161,
+          "w": 146,
+          "h": 162,
           "what": "a bluebird appeared"
         },
         {
           "x": 827,
           "y": 342,
-          "w": 144,
-          "h": 145,
+          "w": 145,
+          "h": 146,
           "what": "a baby unicorn appeared"
         },
         {
-          "x": 75,
+          "x": 84,
           "y": 415,
-          "w": 85,
-          "h": 115,
+          "w": 77,
+          "h": 116,
           "what": "the pink butterfly is missing"
         },
         {
           "x": 702,
           "y": 264,
-          "w": 107,
-          "h": 143,
+          "w": 108,
+          "h": 144,
           "what": "the floating star wand is missing"
         }
       ]
@@ -627,29 +627,29 @@
         {
           "x": 258,
           "y": 545,
-          "w": 115,
-          "h": 127,
+          "w": 116,
+          "h": 128,
           "what": "a slice of layer cake appeared"
         },
         {
           "x": 918,
           "y": 527,
-          "w": 92,
-          "h": 160,
+          "w": 93,
+          "h": 161,
           "what": "a waffle ice cream cone appeared"
         },
         {
           "x": 700,
           "y": 546,
-          "w": 104,
-          "h": 134,
+          "w": 105,
+          "h": 135,
           "what": "the cupcake with a cherry is missing"
         },
         {
           "x": 1140,
           "y": 515,
-          "w": 84,
-          "h": 167,
+          "w": 85,
+          "h": 168,
           "what": "the strawberry milkshake with a straw is missing"
         }
       ]
@@ -665,29 +665,29 @@
         {
           "x": 1018,
           "y": 526,
-          "w": 239,
-          "h": 165,
+          "w": 240,
+          "h": 166,
           "what": "a cement mixer truck appeared"
         },
         {
           "x": 33,
           "y": 562,
-          "w": 297,
-          "h": 118,
+          "w": 298,
+          "h": 119,
           "what": "a stack of wooden planks appeared"
         },
         {
           "x": 669,
           "y": 552,
-          "w": 157,
-          "h": 137,
+          "w": 158,
+          "h": 138,
           "what": "the red toolbox is missing"
         },
         {
           "x": 411,
           "y": 545,
-          "w": 192,
-          "h": 138,
+          "w": 193,
+          "h": 139,
           "what": "the wheelbarrow is missing"
         }
       ]
@@ -702,30 +702,30 @@
       "diffs": [
         {
           "x": 1085,
-          "y": 310,
-          "w": 178,
-          "h": 162,
+          "y": 311,
+          "w": 184,
+          "h": 164,
           "what": "the treasure chest full of jewels changed color!"
         },
         {
-          "x": 1063,
-          "y": 495,
-          "w": 201,
-          "h": 198,
+          "x": 1064,
+          "y": 496,
+          "w": 205,
+          "h": 200,
           "what": "the white pony changed color!"
         },
         {
           "x": 805,
-          "y": 344,
+          "y": 345,
           "w": 155,
-          "h": 189,
+          "h": 184,
           "what": "the peacock changed color!"
         },
         {
           "x": 921,
-          "y": 581,
-          "w": 86,
-          "h": 107,
+          "y": 582,
+          "w": 90,
+          "h": 113,
           "what": "the frog wearing a tiny crown changed color!"
         }
       ]
@@ -739,31 +739,31 @@
       "h": 720,
       "diffs": [
         {
-          "x": 1041,
+          "x": 1043,
           "y": 76,
-          "w": 125,
-          "h": 194,
+          "w": 120,
+          "h": 195,
           "what": "a red cardinal bird appeared"
         },
         {
           "x": 1089,
           "y": 391,
-          "w": 103,
-          "h": 133,
+          "w": 104,
+          "h": 134,
           "what": "a penguin appeared"
         },
         {
           "x": 823,
           "y": 571,
-          "w": 135,
-          "h": 116,
+          "w": 136,
+          "h": 117,
           "what": "the pair of ice skates is missing"
         },
         {
           "x": 1091,
           "y": 547,
-          "w": 123,
-          "h": 119,
+          "w": 124,
+          "h": 120,
           "what": "the gift box in the snow is missing"
         }
       ]
@@ -777,31 +777,31 @@
       "h": 720,
       "diffs": [
         {
-          "x": 23,
-          "y": 597,
-          "w": 184,
-          "h": 91,
+          "x": 19,
+          "y": 599,
+          "w": 188,
+          "h": 94,
           "what": "the spyglass on the sand changed color!"
         },
         {
-          "x": 239,
-          "y": 507,
-          "w": 151,
-          "h": 89,
+          "x": 238,
+          "y": 508,
+          "w": 153,
+          "h": 91,
           "what": "the golden coin pile changed color!"
         },
         {
           "x": 1019,
           "y": 572,
-          "w": 108,
-          "h": 106,
+          "w": 113,
+          "h": 114,
           "what": "the friendly shark fin in the water changed color!"
         },
         {
           "x": 521,
-          "y": 358,
-          "w": 126,
-          "h": 92,
+          "y": 360,
+          "w": 127,
+          "h": 93,
           "what": "the black pirate flag changed color!"
         }
       ]
