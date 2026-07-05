@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -56,7 +56,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to play?"
-          options={visible.map((d) => ({ id: d.id, name: d.name, image: d.imageA, flagged: d.flagged, level: d.level }))}
+          options={visible.map((d) => ({ id: d.id, name: d.name, image: (d.image ?? d.imageA)!, flagged: d.flagged, level: d.level }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
         />
@@ -64,11 +64,26 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
     );
   }
 
-  const total = scene.diffs.length;
+  // Pooled scenes draw a fresh random subset (and random side per
+  // difference) every time the scene mounts — a level never plays the
+  // same twice. Legacy flat pairs keep their fixed four.
+  const round = useMemo(() => {
+    if (scene.pool && scene.image) {
+      const k = difficulty === 'easy' ? 3 : 4;
+      const picked = [...scene.pool].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.pool.length));
+      return picked.map((p) => ({ box: p, patch: p.patch, patchOnA: Math.random() < 0.5 }));
+    }
+    return (scene.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
+  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const total = round.length;
   const won = found.length === total && total > 0;
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
-  const boxes = scene.diffs.map((d, i) => ({ id: String(i), box: d }));
+  const boxes = round.map((r, i) => ({ id: String(i), box: r.box }));
+  const overlaysA = round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
+  const overlaysB = round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
+  const srcA = SCENE_IMAGES[(scene.image ?? scene.imageA)!];
+  const srcB = SCENE_IMAGES[(scene.imageB ?? scene.image)!];
   const ar = scene.w / scene.h;
 
   // Fit both pictures in the viewport — side by side in landscape,
@@ -104,7 +119,8 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <View style={styles.sceneBlock}>
         <Text style={styles.label}>Picture A</Text>
         <TapScene
-          source={SCENE_IMAGES[scene.imageA]}
+          source={srcA}
+          overlays={overlaysA}
           sceneW={scene.w}
           sceneH={scene.h}
           displayWidth={sceneWidth}
@@ -119,7 +135,8 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <View style={styles.sceneBlock}>
         <Text style={styles.label}>Picture B</Text>
         <TapScene
-          source={SCENE_IMAGES[scene.imageB]}
+          source={srcB}
+          overlays={overlaysB}
           sceneW={scene.w}
           sceneH={scene.h}
           displayWidth={sceneWidth}

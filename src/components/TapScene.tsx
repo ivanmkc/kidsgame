@@ -10,6 +10,7 @@ interface Props {
   sceneH: number;
   displayWidth: number;
   boxes: { id: string; box: Box }[];
+  overlays?: { box: Box; source: number }[]; // patch crops composited over the base
   foundIds: string[];
   hintId?: string | null; // temporarily flash this box's ring (easy mode)
   onHit: (id: string) => void;
@@ -20,7 +21,7 @@ interface Props {
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, foundIds, hintId, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, hintId, onHit, onMiss, testIDPrefix,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -43,6 +44,20 @@ export function TapScene({
       style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight, transform: [{ translateX: shake }] }]}
     >
       <Image source={source} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+      {(overlays ?? []).map((o, i) => (
+        <Image
+          key={`ov${i}`}
+          source={o.source}
+          style={{
+            position: 'absolute',
+            left: o.box.x * scale,
+            top: o.box.y * scale,
+            width: o.box.w * scale,
+            height: o.box.h * scale,
+          }}
+          resizeMode="stretch"
+        />
+      ))}
       <View pointerEvents="none" style={styles.hairline} />
       <Pressable
         style={StyleSheet.absoluteFill}

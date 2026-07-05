@@ -31,7 +31,7 @@ def main() -> None:
     m = json.loads(MANIFEST.read_text())
     n = 0
     for d in m["diff"]:
-        thumb_for(d["imageA"]); n += 1
+        thumb_for(d.get("image") or d["imageA"]); n += 1
     for h in m["hidden"]:
         thumb_for(h["image"]); n += 1
     print(f"{n} scene thumbnails ensured")

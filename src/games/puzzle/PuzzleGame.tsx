@@ -23,7 +23,7 @@ interface Props {
 function puzzleOptions(filter: DifficultyFilter): SceneOption[] {
   return [
     ...manifest.diff.filter((d) => inFilter(d.level, filter))
-      .map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA, flagged: d.flagged, level: d.level })),
+      .map((d) => ({ id: `d-${d.id}`, name: d.name, image: (d.image ?? d.imageA)!, flagged: d.flagged, level: d.level })),
     ...manifest.hidden.filter((h) => inFilter(h.level, filter))
       .map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image, flagged: h.flagged, level: h.level })),
   ];

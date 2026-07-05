@@ -63,18 +63,27 @@ describe('asset manifest: find the difference', () => {
   });
 
   it.each(manifest.diff.map((s) => [s.id, s] as const))('%s: valid diffs and files', (_id, scene) => {
-    expect(existsSync(join(ASSETS, '..', 'game', scene.imageA))).toBe(true);
-    expect(existsSync(join(ASSETS, '..', 'game', scene.imageB))).toBe(true);
-    expect(scene.diffs.length).toBeGreaterThanOrEqual(4);
-    for (const d of scene.diffs) {
+    // pooled schema: one base + composable patches; legacy: flat A/B pair
+    const regions = scene.pool ?? scene.diffs ?? [];
+    if (scene.pool && scene.image) {
+      expect(existsSync(join(ASSETS, '..', 'game', scene.image))).toBe(true);
+      for (const e of scene.pool) {
+        expect(existsSync(join(ASSETS, '..', 'game', e.patch)), e.patch).toBe(true);
+      }
+    } else {
+      expect(existsSync(join(ASSETS, '..', 'game', scene.imageA!))).toBe(true);
+      expect(existsSync(join(ASSETS, '..', 'game', scene.imageB!))).toBe(true);
+    }
+    expect(regions.length).toBeGreaterThanOrEqual(4);
+    for (const d of regions) {
       expect(d.x).toBeGreaterThanOrEqual(0);
       expect(d.y).toBeGreaterThanOrEqual(0);
       expect(d.x + d.w).toBeLessThanOrEqual(scene.w);
       expect(d.y + d.h).toBeLessThanOrEqual(scene.h);
     }
-    for (let i = 0; i < scene.diffs.length; i++) {
-      for (let j = i + 1; j < scene.diffs.length; j++) {
-        expect(overlaps(scene.diffs[i], scene.diffs[j]), `diffs ${i},${j} overlap`).toBe(false);
+    for (let i = 0; i < regions.length; i++) {
+      for (let j = i + 1; j < regions.length; j++) {
+        expect(overlaps(regions[i], regions[j]), `diffs ${i},${j} overlap`).toBe(false);
       }
     }
   });

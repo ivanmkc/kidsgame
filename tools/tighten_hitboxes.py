@@ -100,6 +100,9 @@ def main() -> None:
     m = json.loads(MANIFEST.read_text())
     total = 0
     for entry in m["diff"]:
+        if "pool" in entry:
+            print(f"  {entry['id']}: pooled (hitboxes derived at generation)")
+            continue
         k = tighten(entry)
         total += k
         print(f"  {entry['id']}: {k} hitbox(es) tightened")
