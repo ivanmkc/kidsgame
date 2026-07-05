@@ -49,3 +49,15 @@ export const sfx = {
   flip(): void { play('flip', 0.35); },
   win(): void { play('win', 0.6); },
 };
+
+/** Read instructions aloud for pre-readers (Web Speech API). */
+export function say(text: string): void {
+  if (muted || Platform.OS !== 'web' || typeof window === 'undefined' || !window.speechSynthesis) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim());
+    u.rate = 0.92;
+    u.pitch = 1.12;
+    window.speechSynthesis.speak(u);
+  } catch { /* no voices: stay silent */ }
+}

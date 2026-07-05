@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -9,7 +9,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
+import { say, sfx } from '../../sound';
 import { RulesRound, makeRules, makeRulesRound } from './logic';
 
 interface Props {
@@ -45,6 +45,13 @@ export function RulesGame({ onHome, difficulty }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  useEffect(() => {
+    if (won) return;
+    say(round.isRecall
+      ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
+      : round.rule.label);
+  }, [round, won]);
 
   const onTile = (i: number) => {
     if (won || tapped.includes(i)) return;

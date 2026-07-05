@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -8,7 +8,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
+import { say, sfx } from '../../sound';
 import { CATEGORY_TEXT } from '../iconCategories';
 import { makeOddOneRound } from './logic';
 
@@ -35,6 +35,11 @@ export function OddOneGame({ onHome, difficulty }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  useEffect(() => {
+    if (won) return;
+    say(CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
+  }, [round, won]);
 
   const onPick = (idx: number) => {
     if (won) return;
