@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 from .judge import _png_part, ask_yes_no, client as _judge_client, strict_min
-from .nbp import EDGE_ERODE_PX, generate, imagen_remove_mask
+from .nbp import EDGE_ERODE_PX, edit as nbp_edit, generate, imagen_remove_mask
 from .sam_batch import sam_segment_batch
 from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
 

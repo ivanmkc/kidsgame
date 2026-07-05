@@ -105,7 +105,8 @@ def generate(prompt: str, size: tuple[int, int] | None = None) -> Image.Image:
     return img if size is None else aspect_fit(img, size)
 
 
-def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image, float, float]:
+def edit(base: Image.Image, mask: np.ndarray, prompt: str,
+         composite_mask: np.ndarray | None = None) -> tuple[Image.Image, float, float]:
     """Masked edit. mask: bool array HxW, True = editable.
 
     Returns (composited image, inside_change, outside_change) where the
@@ -163,7 +164,7 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str) -> tuple[Image.Image,
     # full rect leaves a visible soft rectangle around the object. The
     # object mask = changed pixels inside the rect, closed, dilated and
     # feathered — background stays original everywhere else.
-    comp = _object_composite(b, o, mask)
+    comp = _object_composite(b, o, mask if composite_mask is None else composite_mask)
     return comp, changed_inside, changed_outside
 
 
