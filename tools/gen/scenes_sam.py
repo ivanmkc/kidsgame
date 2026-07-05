@@ -272,29 +272,41 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             print(f"  {theme['id']}: only {len(usable)}/{NUM_DIFFS} segmentable objects, re-render {attempt + 1}")
             continue
         picked = usable[:NUM_DIFFS]
+        spares = usable[NUM_DIFFS:]
         rng.shuffle(picked)
+        spares_ab = [spares[0::2], spares[1::2]]
 
         # A loses the first two (they exist only in B → "appeared");
         # B loses the other two (exist only in A → "missing"). The branches
         # start from the same base and never touch the same pixels
         # (hitboxes are non-overlapping by the gate), so they run in
         # parallel; within a branch removals chain sequentially.
-        def run_branch(items: list[dict], phrase: str) -> tuple[Image.Image, list[dict]] | None:
+        def run_branch(items: list[dict], spare: list[dict], phrase: str) -> tuple[Image.Image, list[dict]] | None:
+            # A stubborn object (busy background) shouldn't cost a whole
+            # re-render: swap in a spare segmented object instead.
             img = base
             out = []
-            for item in items:
+            queue = list(items)
+            while queue and len(out) < 2:
+                item = queue.pop(0)
                 nxt = _remove_verified(img, item, theme["id"])
                 if nxt is None:
-                    return None
+                    if spare:
+                        sub = spare.pop(0)
+                        print(f"  {theme['id']}: swapping '{_short(item['obj'])}' -> spare '{_short(sub['obj'])}'")
+                        queue.append(sub)
+                    continue
                 hx, hy, hw, hh = _change_hitbox(img, nxt, item["seg"])
                 img = nxt
                 out.append({"x": hx, "y": hy, "w": hw, "h": hh,
                             "what": phrase.format(_short(item["obj"]))})
+            if len(out) < 2:
+                return None
             return img, out
 
         with ThreadPoolExecutor(2) as ex:
-            fa = ex.submit(run_branch, picked[:2], "a {} appeared")
-            fb = ex.submit(run_branch, picked[2:], "the {} is missing")
+            fa = ex.submit(run_branch, picked[:2], spares_ab[0], "a {} appeared")
+            fb = ex.submit(run_branch, picked[2:], spares_ab[1], "the {} is missing")
             ra, rb = fa.result(), fb.result()
         if ra is None or rb is None:
             continue

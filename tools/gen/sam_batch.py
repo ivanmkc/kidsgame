@@ -12,19 +12,41 @@ box's compute SA lacks ssh scopes.
 from __future__ import annotations
 
 import json
-import sys
 import tempfile
 import threading
 import uuid
 from pathlib import Path
 
+import subprocess
+
 import numpy as np
 from PIL import Image
 
-sys.path.insert(0, "/home/ivanmkc/persistence-of-dreams")
-from tools._gpu_ssh import gcloud_scp_down, gcloud_scp_up, gcloud_ssh  # noqa: E402
-
 VM, ZONE = "gpu-sam3-a100", "us-central1-f"
+
+
+# Self-contained gcloud transport: importing the pod repo's tools package
+# pulled in whatever heavy deps other sessions add there (today: a broken
+# torchvision), so these thin wrappers live here instead.
+
+def _run(argv: list[str], timeout: int) -> subprocess.CompletedProcess:
+    r = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    if r.returncode != 0:
+        raise RuntimeError(f"{argv[0]} failed ({r.returncode}): {r.stderr[-300:]}")
+    return r
+
+
+def gcloud_ssh(vm: str, zone: str, cmd: str, timeout: int = 600) -> str:
+    r = _run(["gcloud", "compute", "ssh", vm, "--zone", zone, "--command", cmd], timeout)
+    return r.stdout + ("\n" + r.stderr if r.stderr else "")
+
+
+def gcloud_scp_up(vm: str, zone: str, local: str, remote: str, timeout: int = 600) -> None:
+    _run(["gcloud", "compute", "scp", "--zone", zone, local, f"{vm}:{remote}"], timeout)
+
+
+def gcloud_scp_down(vm: str, zone: str, remote: str, local: str, timeout: int = 600) -> None:
+    _run(["gcloud", "compute", "scp", "--zone", zone, f"{vm}:{remote}", local], timeout)
 # The T4 fits ~2 concurrent SAM sessions; more just thrash.
 _SEM = threading.Semaphore(2)
 
