@@ -377,17 +377,23 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             if len(targets) == NEEDED_TARGETS:
                 break
             chip = _chip(base, item["seg"])
-            if not _chip_whole(chip):
-                print(f"  {theme['id']}: '{item['tid']}' chip fragmented, trying next target")
-                continue
             scene_crop = _crop(base, _hitbox(item["seg"]), pad=40)
-            if not strict_min(
+            if not (_chip_whole(chip) and strict_min(
                 f"The first image is a cutout sticker, the second the scene it was cut from. Is the sticker a COMPLETE {item['obj']} exactly as it appears in the scene — no missing bites or notches where something covered it, no background patches stuck to it, no parts cut off?",
                 f"Would a young child instantly recognize the sticker as {item['obj']}?",
                 [chip, scene_crop],
-            ):
-                print(f"  {theme['id']}: '{item['tid']}' chip rejected, trying next target")
-                continue
+            )):
+                # Occlusion broke the exact cutout. The scene and hitbox are
+                # still good — redraw the CHIP as an NBP sticker anchored to
+                # the scene crop (fix_thumbs pattern) instead of starving
+                # the theme: 5 hidden themes exhausted 8 rounds this way.
+                from fix_thumbs import redraw
+                sprite = redraw(item["obj"], scene_crop)
+                if sprite is None:
+                    print(f"  {theme['id']}: '{item['tid']}' chip unusable + redraw failed, next target")
+                    continue
+                print(f"  {theme['id']}: '{item['tid']}' chip redrawn from scene reference")
+                chip = sprite
             hx, hy, hw, hh = _hitbox(item["seg"])
             chip.save(out_dir / f"{theme['id']}_t_{item['tid']}.png")
             targets.append({
