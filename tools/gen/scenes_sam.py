@@ -260,8 +260,10 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         objs = rng.sample(theme["adds"], len(theme["adds"]))
         base = generate(
             f"{theme['base']} Also include each of these, drawn exactly once, "
-            f"clearly visible, naturally placed on the ground or a surface, not "
-            f"overlapping each other: {', '.join(objs)}. {SCENE_STYLE}",
+            f"clearly visible, each standing on a PLAIN simply-colored part of "
+            f"the ground or a surface (never on patterned rugs, confetti, "
+            f"sparkles or busy decoration), not overlapping each other: "
+            f"{', '.join(objs)}. {SCENE_STYLE}",
             (W, H),
         )
         prompts = [_short(o) for o in objs]
