@@ -615,6 +615,82 @@
           "what": "the floating star wand is missing"
         }
       ]
+    },
+    {
+      "id": "candy",
+      "name": "Candy Land",
+      "imageA": "diff/candy_a.png",
+      "imageB": "diff/candy_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 258,
+          "y": 545,
+          "w": 115,
+          "h": 127,
+          "what": "a slice of layer cake appeared"
+        },
+        {
+          "x": 918,
+          "y": 527,
+          "w": 92,
+          "h": 160,
+          "what": "a waffle ice cream cone appeared"
+        },
+        {
+          "x": 700,
+          "y": 546,
+          "w": 104,
+          "h": 134,
+          "what": "the cupcake with a cherry is missing"
+        },
+        {
+          "x": 1140,
+          "y": 515,
+          "w": 84,
+          "h": 167,
+          "what": "the strawberry milkshake with a straw is missing"
+        }
+      ]
+    },
+    {
+      "id": "construction",
+      "name": "Construction Site",
+      "imageA": "diff/construction_a.png",
+      "imageB": "diff/construction_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 1018,
+          "y": 526,
+          "w": 239,
+          "h": 165,
+          "what": "a cement mixer truck appeared"
+        },
+        {
+          "x": 33,
+          "y": 562,
+          "w": 297,
+          "h": 118,
+          "what": "a stack of wooden planks appeared"
+        },
+        {
+          "x": 669,
+          "y": 552,
+          "w": 157,
+          "h": 137,
+          "what": "the red toolbox is missing"
+        },
+        {
+          "x": 411,
+          "y": 545,
+          "w": 192,
+          "h": 138,
+          "what": "the wheelbarrow is missing"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1607,6 +1683,60 @@
         }
       ],
       "level": "medium"
+    },
+    {
+      "id": "fairground",
+      "name": "Fairground",
+      "image": "hidden/fairground.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "lantern",
+          "label": "a round red paper lantern",
+          "x": 847,
+          "y": 88,
+          "w": 123,
+          "h": 130,
+          "thumb": "hidden/fairground_t_lantern.png"
+        },
+        {
+          "id": "pinwheel",
+          "label": "a rainbow pinwheel",
+          "x": 869,
+          "y": 441,
+          "w": 114,
+          "h": 125,
+          "thumb": "hidden/fairground_t_pinwheel.png"
+        },
+        {
+          "id": "monkey",
+          "label": "a wind-up toy monkey with cymbals",
+          "x": 157,
+          "y": 373,
+          "w": 121,
+          "h": 149,
+          "thumb": "hidden/fairground_t_monkey.png"
+        },
+        {
+          "id": "goldfish",
+          "label": "a goldfish in a clear water bag",
+          "x": 1178,
+          "y": 354,
+          "w": 77,
+          "h": 61,
+          "thumb": "hidden/fairground_t_goldfish.png"
+        },
+        {
+          "id": "ticket",
+          "label": "a roll of golden tickets",
+          "x": 1016,
+          "y": 452,
+          "w": 80,
+          "h": 62,
+          "thumb": "hidden/fairground_t_ticket.png"
+        }
+      ]
     }
   ]
 }
