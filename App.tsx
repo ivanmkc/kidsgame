@@ -25,7 +25,8 @@ import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { manifest } from './src/manifest';
-import { Difficulty, DIFFICULTIES, loadDifficulty, saveDifficulty } from './src/difficulty';
+import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
+import { isMuted, setMuted, sfx } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
 
@@ -36,7 +37,8 @@ export default function App() {
     Nunito_600SemiBold,
     Nunito_700Bold,
   });
-  const [difficulty, setDifficulty] = useState<Difficulty>(() => loadDifficulty());
+  const [filter, setFilter] = useState<DifficultyFilter>(() => loadFilter());
+  const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
   const parts = routeParts(route);
   const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle'];
@@ -44,7 +46,7 @@ export default function App() {
   const screen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const param = parts.param;
   const goHome = () => navigate('menu');
-  const pickDifficulty = (d: Difficulty) => { setDifficulty(d); saveDifficulty(d); };
+  const pickFilter = (f: DifficultyFilter) => { setFilter(f); saveFilter(f); sfx.tap(); };
 
   // fontsLoaded intentionally does NOT gate rendering: on slow networks the
   // gate meant a blank screen for many seconds; a brief system-font flash is
@@ -53,13 +55,14 @@ export default function App() {
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
       {screen === 'menu' && (
-        <Menu difficulty={difficulty} onPickDifficulty={pickDifficulty} onNavigate={navigate} />
+        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} />
       )}
       {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'diff' && (
         <DiffGame
           onHome={goHome}
           difficulty={difficulty}
+          filter={filter}
           sceneId={param}
           onPickScene={(id) => navigate(`diff/${id}`)}
           onBackToPicker={() => navigate('diff')}
@@ -69,6 +72,7 @@ export default function App() {
         <HiddenGame
           onHome={goHome}
           difficulty={difficulty}
+          filter={filter}
           sceneId={param}
           onPickScene={(id) => navigate(`hidden/${id}`)}
           onBackToPicker={() => navigate('hidden')}
@@ -82,6 +86,7 @@ export default function App() {
         <PuzzleGame
           onHome={goHome}
           difficulty={difficulty}
+          filter={filter}
           sceneId={param}
           onPickScene={(id) => navigate(`puzzle/${id}`)}
           onBackToPicker={() => navigate('puzzle')}
@@ -103,12 +108,19 @@ const GAME_CARDS = [
 ];
 
 function Menu({
-  difficulty, onPickDifficulty, onNavigate,
+  filter, onPickFilter, onNavigate,
 }: {
-  difficulty: Difficulty;
-  onPickDifficulty: (d: Difficulty) => void;
+  filter: DifficultyFilter;
+  onPickFilter: (f: DifficultyFilter) => void;
   onNavigate: (r: string) => void;
 }) {
+  const [muted, setMutedState] = React.useState(isMuted());
+  const toggleMute = () => {
+    const m = !muted;
+    setMuted(m);
+    setMutedState(m);
+    if (!m) sfx.good();
+  };
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const cardWidth = isLandscape ? Math.min(430, (Math.min(width, 1100) - 72) / 2) : Math.min(460, width - 32);
@@ -140,23 +152,32 @@ function Menu({
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
               <Text style={styles.heading}>Kids Game Box</Text>
               <View style={styles.diffRow}>
-                {(Object.keys(DIFFICULTIES) as Difficulty[]).map((d) => {
-                  const on = difficulty === d;
+                {FILTERS.map((f) => {
+                  const on = filter === f.id;
                   return (
                     <Pressable
-                      key={d}
-                      onPress={() => onPickDifficulty(d)}
-                      testID={`difficulty-${d}`}
+                      key={f.id}
+                      onPress={() => onPickFilter(f.id)}
+                      testID={`difficulty-${f.id}`}
                       accessibilityRole="button"
-                      accessibilityLabel={`${DIFFICULTIES[d].label} difficulty`}
+                      accessibilityLabel={`${f.label} levels`}
                       style={[styles.diffChip, on && styles.diffChipOn]}
                     >
                       <Text style={[styles.diffText, on && styles.diffTextOn]}>
-                        {DIFFICULTIES[d].emoji} {DIFFICULTIES[d].label}
+                        {f.emoji} {f.label}
                       </Text>
                     </Pressable>
                   );
                 })}
+                <Pressable
+                  onPress={toggleMute}
+                  testID="sound-toggle"
+                  accessibilityRole="button"
+                  accessibilityLabel={muted ? 'Turn sound on' : 'Turn sound off'}
+                  style={[styles.diffChip, styles.soundChip]}
+                >
+                  <Text style={styles.diffText}>{muted ? '🔇' : '🔊'}</Text>
+                </Pressable>
               </View>
             </View>
           </View>
@@ -396,6 +417,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.card,
   },
+  soundChip: { paddingHorizontal: 10 },
   diffChipOn: { backgroundColor: colors.gold },
   diffText: { fontSize: 14, fontFamily: fonts.body, color: colors.inkSoft },
   diffTextOn: { color: colors.ink },

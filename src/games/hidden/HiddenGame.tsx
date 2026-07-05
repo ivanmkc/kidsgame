@@ -2,22 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  filter?: DifficultyFilter;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
+export function HiddenGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
+  const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
 
@@ -30,9 +34,9 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       <GameShell title="Hidden Objects" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to search?"
-          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged }))}
+          options={visible.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged, level: h.level }))}
           onPick={onPickScene}
-          onSurprise={() => onPickScene(manifest.hidden[Math.floor(Math.random() * manifest.hidden.length)].id)}
+          onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
         />
       </GameShell>
     );
@@ -40,6 +44,8 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
 
   const total = scene.targets.length;
   const won = found.length === total && total > 0;
+  const showTimer = settingsFor(difficulty).timer;
+  const elapsed = useElapsed(showTimer && !won, sceneId);
   const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
   const ar = scene.w / scene.h;
 
@@ -49,7 +55,11 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
 
   const onHit = (id: string) => {
     if (won) return;
-    setFound((f) => (f.includes(id) ? f : [...f, id]));
+    setFound((f) => {
+      if (f.includes(id)) return f;
+      sfx.good();
+      return [...f, id];
+    });
   };
 
   return (
@@ -57,7 +67,12 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       title="Hidden Objects"
       subtitle={`${scene.name} — can you find all of these?`}
       onBack={onBackToPicker}
-      right={<ScoreChip label={`🔎 ${found.length}/${total}`} testID="hidden-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="hidden-timer" /> : null}
+          <ScoreChip label={`🔎 ${found.length}/${total}`} testID="hidden-score" />
+        </View>
+      }
     >
       <View style={styles.checklist} testID="hidden-checklist">
         {scene.targets.map((t) => {
@@ -90,7 +105,11 @@ export function HiddenGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       <WinOverlay
         visible={won}
         message={'Super detective! You found everything!'}
-        onPlayAgain={onBackToPicker}
+        onNext={() => {
+          const pool = visible.some((h) => h.id === scene.id) ? visible : manifest.hidden;
+          const ids = pool.map((h) => h.id);
+          onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
+        }}
         onHome={onHome}
       />
     </GameShell>

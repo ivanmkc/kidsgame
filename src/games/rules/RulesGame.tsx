@@ -2,12 +2,14 @@ import React, { useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
+import { sfx } from '../../sound';
 import { RulesRound, makeRules, makeRulesRound } from './logic';
 
 interface Props {
@@ -39,11 +41,15 @@ export function RulesGame({ onHome, difficulty }: Props) {
   const [tapped, setTapped] = useState<number[]>([]);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
+  const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
+  const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const onTile = (i: number) => {
     if (won || tapped.includes(i)) return;
     if (round.tiles[i].isMatch) {
+      sfx.good();
       const next = [...tapped, i];
       setTapped(next);
       if (next.length === round.matchCount) {
@@ -58,12 +64,14 @@ export function RulesGame({ onHome, difficulty }: Props) {
         }, 550);
       }
     } else {
+      sfx.wrong();
       setWrongIdx(i);
       setTimeout(() => setWrongIdx((w) => (w === i ? null : w)), 450);
     }
   };
 
   const reset = () => {
+    setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     rulesRef.current = makeRules(rngRef.current, roundsToWin);
     setRoundIdx(0);
@@ -87,7 +95,12 @@ export function RulesGame({ onHome, difficulty }: Props) {
       title="Rule Time!"
       subtitle="Do what the rule says as fast as you can"
       onBack={onHome}
-      right={<ScoreChip label={`📜 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`} testID="rules-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="rules-timer" /> : null}
+          <ScoreChip label={`📜 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`} testID="rules-score" />
+        </View>
+      }
     >
       <View style={styles.board}>
         <View style={[styles.ruleCard, shadows.soft]} testID={`rules-rule-${round.rule.category}${round.isRecall ? '-recall' : ''}`}>
@@ -128,7 +141,7 @@ export function RulesGame({ onHome, difficulty }: Props) {
       <WinOverlay
         visible={won}
         message={'Rule master! You followed every rule!'}
-        onPlayAgain={reset}
+        onNext={reset} nextLabel={'Next Round ▶️'}
         onHome={onHome}
       />
     </GameShell>

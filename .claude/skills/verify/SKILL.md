@@ -19,7 +19,10 @@ Drive with Playwright from a repo that has it installed (e.g.
 `~/termchart/node_modules/playwright`). Every interactive element has a
 `data-testid`:
 
-- difficulty (menu, persisted in localStorage kgb.difficulty.v1): `difficulty-easy|medium|hard`
+- difficulty FILTER (menu, localStorage kgb.filter.v1): `difficulty-all|easy|medium|hard` — filters scene lists; round games play medium when 'all'. `sound-toggle` mutes SFX (kgb.sound.v1).
+- scene cards: `scene-level-<id>-easy|medium|hard` badge, `scene-flagged-<id>` = ⚠️ unverified
+- timers (medium/hard only, never easy): `spotit-timer` = conic ring around the top card; `diff|hidden|puzzle|memory|shadow|oddone|rules-timer` = small rings
+- win overlay button `play-again` now reads "Next Level ▶️" and ADVANCES (next scene / fresh rounds), never repeats
 - menu: `menu-spotit|diff|hidden|memory|puzzle|shadow|oddone|rules`
 - games: `spotit-score`, `top-symbol-N`/`bottom-symbol-N` (answer = the testid
   present on both cards); `scene-pick-<id>`, `scene-surprise`; diff hitboxes

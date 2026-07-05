@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker, SceneOption } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -13,20 +14,23 @@ import { isSolved, makePuzzle, swap } from './logic';
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  filter?: DifficultyFilter;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-function puzzleOptions(): SceneOption[] {
+function puzzleOptions(filter: DifficultyFilter): SceneOption[] {
   return [
-    ...manifest.diff.map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA, flagged: d.flagged })),
-    ...manifest.hidden.map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image, flagged: h.flagged })),
+    ...manifest.diff.filter((d) => inFilter(d.level, filter))
+      .map((d) => ({ id: `d-${d.id}`, name: d.name, image: d.imageA, flagged: d.flagged, level: d.level })),
+    ...manifest.hidden.filter((h) => inFilter(h.level, filter))
+      .map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image, flagged: h.flagged, level: h.level })),
   ];
 }
 
-export function PuzzleGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
-  const options = puzzleOptions();
+export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
+  const options = puzzleOptions(filter);
   const picked = options.find((o) => o.id === sceneId) ?? null;
   const settings = settingsFor(difficulty);
   const cols = settings.puzzleCols;
@@ -46,6 +50,8 @@ export function PuzzleGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const won = perm.length === size && isSolved(perm);
+  const showTimer = settingsFor(difficulty).timer;
+  const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
   const { width, height } = useWindowDimensions();
 
@@ -92,7 +98,12 @@ export function PuzzleGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       title="Picture Puzzle"
       subtitle={`${picked.name} — tap two pieces to swap them`}
       onBack={onBackToPicker}
-      right={<ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="puzzle-timer" /> : null}
+          <ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" />
+        </View>
+      }
     >
       <View style={styles.center}>
         <View style={[styles.board, shadows.sticker, { width: boardW, height: boardH }]}>
@@ -130,10 +141,9 @@ export function PuzzleGame({ onHome, difficulty, sceneId, onPickScene, onBackToP
       <WinOverlay
         visible={won}
         message={'Puzzle master! Amazing!'}
-        onPlayAgain={() => {
-          setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), size));
-          setSelected(null);
-          setMoves(0);
+        onNext={() => {
+          const ids = options.map((o) => o.id);
+          onPickScene(ids[(ids.indexOf(picked.id) + 1) % ids.length]);
         }}
         onHome={onHome}
       />

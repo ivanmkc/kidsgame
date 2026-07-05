@@ -8,7 +8,10 @@ export interface SceneOption {
   name: string;
   image: string; // manifest-relative path
   flagged?: boolean; // not yet quality-verified — show a warning badge
+  level?: 'easy' | 'medium' | 'hard';
 }
+
+const LEVEL_EMOJI = { easy: '😊', medium: '🌟', hard: '🔥' } as const;
 
 interface Props {
   title: string;
@@ -42,6 +45,11 @@ export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
               {o.flagged ? (
                 <View style={styles.flagBadge} testID={`scene-flagged-${o.id}`}>
                   <Text style={styles.flagText}>⚠️</Text>
+                </View>
+              ) : null}
+              {o.level ? (
+                <View style={styles.levelBadge} testID={`scene-level-${o.id}-${o.level}`}>
+                  <Text style={styles.flagText}>{LEVEL_EMOJI[o.level]}</Text>
                 </View>
               ) : null}
             </Pressable>
@@ -111,6 +119,15 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   flagText: { fontSize: 14 },
+  levelBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
   name: {
     fontFamily: fonts.displayMed,
     fontSize: 16,

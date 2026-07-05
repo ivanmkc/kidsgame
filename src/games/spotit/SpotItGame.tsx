@@ -7,6 +7,8 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { Rng, makeRng } from '../../rng';
 import { colors, shadows } from '../../theme';
+import { sfx } from '../../sound';
+import { TimerRing, fmtTime, useElapsed } from '../../components/TimerRing';
 import { Card, buildDeck, dealRound } from './logic';
 
 interface Props {
@@ -52,15 +54,11 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
-  const [elapsed, setElapsed] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
-
-  useEffect(() => {
-    if (won) return;
-    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
-    return () => clearInterval(t);
-  }, [won]);
-  const mmss = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
+  const showTimer = settingsFor(difficulty).timer;
+  const elapsed = useElapsed(showTimer && !won, timerKey);
+  const mmss = fmtTime(elapsed);
 
   const nextRound = () => {
     setRound(dealRound(rngRef.current, deck));
@@ -75,7 +73,9 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
       setScore(next);
       setWrongFlash(null);
       if (next < roundsToWin) nextRound();
+      sfx.good();
     } else {
+      sfx.wrong();
       setWrongFlash(symbol);
       setTimeout(() => setWrongFlash((w) => (w === symbol ? null : w)), 450);
     }
@@ -85,7 +85,7 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongFlash(null);
-    setElapsed(0);
+    setTimerKey((k) => k + 1);
     nextRound();
   };
 
@@ -102,16 +102,17 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
       title="Spot It!"
       subtitle="Tap the picture that is on BOTH cards"
       onBack={onHome}
-      right={
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <ScoreChip label={`⏱ ${mmss}`} testID="spotit-timer" />
-          <ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />
-        </View>
-      }
+      right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
         <DealIn key={`t${roundKey}`} from={-1}>
-          <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+          {showTimer ? (
+            <TimerRing elapsed={elapsed} size={cardSize + 24} stroke={9} testID="spotit-timer">
+              <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+            </TimerRing>
+          ) : (
+            <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+          )}
         </DealIn>
         <Text style={styles.vs}>👀</Text>
         <DealIn key={`b${roundKey}`} from={1}>
@@ -120,8 +121,8 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={`You matched them all in ${mmss}! ⏱`}
-        onPlayAgain={reset}
+        message={showTimer ? `You matched them all in ${mmss}! ⏱` : 'Sharp eyes! You spotted them all!'}
+        onNext={reset} nextLabel={'Next Round ▶️'}
         onHome={onHome}
       />
     </GameShell>
