@@ -718,6 +718,96 @@
           "patch": "diff/savanna_d_4_baby_elephant.png"
         }
       ]
+    },
+    {
+      "id": "pirate",
+      "name": "Pirate Cove",
+      "image": "diff/pirate_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 138,
+          "y": 573,
+          "w": 197,
+          "h": 104,
+          "name": "golden coin pile",
+          "kind": "recolor",
+          "patch": "diff/pirate_d_0_golden_coin_pile.png"
+        },
+        {
+          "x": 851,
+          "y": 11,
+          "w": 83,
+          "h": 83,
+          "name": "black pirate flag",
+          "kind": "remove",
+          "patch": "diff/pirate_d_1_black_pirate_flag.png"
+        },
+        {
+          "x": 268,
+          "y": 294,
+          "w": 79,
+          "h": 118,
+          "name": "parrot on a barrel",
+          "kind": "recolor",
+          "patch": "diff/pirate_d_2_parrot_on_a_barrel.png"
+        },
+        {
+          "x": 940,
+          "y": 521,
+          "w": 97,
+          "h": 92,
+          "name": "friendly shark fin in the water",
+          "kind": "recolor",
+          "patch": "diff/pirate_d_3_friendly_shark_fin_in_th.png"
+        }
+      ]
+    },
+    {
+      "id": "trains",
+      "name": "Train Station",
+      "image": "diff/trains_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 25,
+          "y": 546,
+          "w": 194,
+          "h": 139,
+          "name": "wooden crate of apples",
+          "kind": "remove",
+          "patch": "diff/trains_d_0_wooden_crate_of_apples.png"
+        },
+        {
+          "x": 371,
+          "y": 503,
+          "w": 147,
+          "h": 124,
+          "name": "cat sleeping on a bench",
+          "kind": "remove",
+          "patch": "diff/trains_d_1_cat_sleeping_on_a_bench.png"
+        },
+        {
+          "x": 791,
+          "y": 441,
+          "w": 154,
+          "h": 141,
+          "name": "red suitcase",
+          "kind": "remove",
+          "patch": "diff/trains_d_2_red_suitcase.png"
+        },
+        {
+          "x": 1038,
+          "y": 98,
+          "w": 180,
+          "h": 231,
+          "name": "bouquet of balloons tied to a post",
+          "kind": "recolor",
+          "patch": "diff/trains_d_3_bouquet_of_balloons_tied.png"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1114,6 +1204,69 @@
           "w": 100,
           "h": 95,
           "thumb": "hidden/kitchenb_t_mouse.png"
+        }
+      ]
+    },
+    {
+      "id": "workshop",
+      "name": "Toy Workshop",
+      "image": "hidden/workshop.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "dice",
+          "label": "a big red die",
+          "x": 488,
+          "y": 318,
+          "w": 121,
+          "h": 109,
+          "thumb": "hidden/workshop_t_dice.png"
+        },
+        {
+          "id": "duckie",
+          "label": "a yellow rubber duck",
+          "x": 1154,
+          "y": 9,
+          "w": 104,
+          "h": 94,
+          "thumb": "hidden/workshop_t_duckie.png"
+        },
+        {
+          "id": "bear",
+          "label": "a small stuffed bear",
+          "x": 627,
+          "y": 136,
+          "w": 108,
+          "h": 126,
+          "thumb": "hidden/workshop_t_bear.png"
+        },
+        {
+          "id": "robot",
+          "label": "a wind-up robot toy",
+          "x": 806,
+          "y": 265,
+          "w": 105,
+          "h": 159,
+          "thumb": "hidden/workshop_t_robot.png"
+        },
+        {
+          "id": "plane",
+          "label": "a small wooden toy plane",
+          "x": 581,
+          "y": 581,
+          "w": 211,
+          "h": 130,
+          "thumb": "hidden/workshop_t_plane.png"
+        },
+        {
+          "id": "top",
+          "label": "a striped spinning top",
+          "x": 987,
+          "y": 396,
+          "w": 110,
+          "h": 112,
+          "thumb": "hidden/workshop_t_top.png"
         }
       ]
     }

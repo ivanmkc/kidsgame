@@ -105,6 +105,22 @@ def generate(prompt: str, size: tuple[int, int] | None = None) -> Image.Image:
     return img if size is None else aspect_fit(img, size)
 
 
+def generate_with_ref(prompt: str, ref_path, size: tuple[int, int] | None = None) -> Image.Image:
+    """Text + reference image -> RGB image. The reference pins character
+    identity across independent story-scene renders."""
+    from pathlib import Path
+    buf = io.BytesIO()
+    Image.open(Path(ref_path)).convert("RGB").save(buf, "PNG")
+    parts = [
+        types.Part(text="Reference image (character identity to preserve):"),
+        types.Part(inline_data=types.Blob(mime_type="image/png", data=buf.getvalue())),
+        types.Part(text=prompt),
+    ]
+    data = _call([types.Content(role="user", parts=parts)])
+    img = Image.open(io.BytesIO(data)).convert("RGB")
+    return img if size is None else aspect_fit(img, size)
+
+
 def edit(base: Image.Image, mask: np.ndarray, prompt: str,
          composite_mask: np.ndarray | None = None) -> tuple[Image.Image, float, float]:
     """Masked edit. mask: bool array HxW, True = editable.

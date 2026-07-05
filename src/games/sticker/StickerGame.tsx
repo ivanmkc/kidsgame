@@ -107,7 +107,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
             />
           ))}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: trayH }} contentContainerStyle={styles.tray}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: trayH, width: '100%' }} contentContainerStyle={styles.tray}>
           {manifest.spotit.icons.map((icon) => (
             <Pressable
               key={icon}

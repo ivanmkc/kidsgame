@@ -43,6 +43,9 @@ for (const h of manifest.hidden) {
     if (exists(shadow)) sceneFiles.add(shadow);
   }
 }
+for (const st of manifest.stories ?? []) {
+  for (const n of Object.values(st.nodes)) sceneFiles.add(n.image);
+}
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);
 }
