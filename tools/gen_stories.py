@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from gen.judge import ask_yes_no  # noqa: E402
-from gen.nbp import generate  # noqa: E402
+from gen.nbp import generate, generate_with_ref  # noqa: E402
 
 ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
@@ -188,9 +188,19 @@ def gen_story(spec: dict) -> dict | None:
         if (OUT / fname).exists():
             print(f"  {spec['id']}/{nid}: exists, reusing")
         else:
+            # the start scene anchors the character; every other node is
+            # conditioned on it so the hero stays visually consistent
+            ref = OUT / f"{spec['id']}_start.png"
             best = None
             for attempt in range(3):
-                img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
+                if nid != "start" and ref.exists():
+                    img = generate_with_ref(
+                        f"{n['scene']}. The main character must look IDENTICAL to the "
+                        f"character in the reference image — same face, colors, markings "
+                        f"and proportions. {STYLE}",
+                        ref, (1280, 720))
+                else:
+                    img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
                 best = img
                 if ask_yes_no(
                     f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
