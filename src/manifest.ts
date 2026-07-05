@@ -11,16 +11,26 @@ export interface DiffRegion extends Box {
   what: string;
 }
 
+export interface PoolEntry extends Box {
+  name: string;
+  patch: string; // changed-state crop composited over the base
+  kind: 'remove' | 'recolor';
+}
+
 export interface DiffScene {
   id: string;
   name: string;
   flagged?: boolean;
   level?: 'easy' | 'medium' | 'hard';
-  imageA: string;
-  imageB: string;
+  // legacy flat pair
+  imageA?: string;
+  imageB?: string;
+  diffs?: DiffRegion[];
+  // pooled schema: one base + a pool of composable differences
+  image?: string;
+  pool?: PoolEntry[];
   w: number;
   h: number;
-  diffs: DiffRegion[];
 }
 
 export interface HiddenTarget extends Box {

@@ -27,8 +27,13 @@ for (const name of manifest.spotit.icons) {
 lines.push('};', '', 'export const SCENE_IMAGES: Record<string, number> = {');
 const sceneFiles = new Set();
 for (const d of manifest.diff) {
-  sceneFiles.add(d.imageA);
-  sceneFiles.add(d.imageB);
+  if (d.pool) {
+    sceneFiles.add(d.image);
+    for (const e of d.pool) sceneFiles.add(e.patch);
+  } else {
+    sceneFiles.add(d.imageA);
+    sceneFiles.add(d.imageB);
+  }
 }
 for (const h of manifest.hidden) {
   sceneFiles.add(h.image);
@@ -44,7 +49,7 @@ for (const f of [...sceneFiles].sort()) {
 lines.push('};', '', '// small jpg derivatives for picker cards (fall back to full image)');
 lines.push('export const SCENE_THUMBS: Record<string, number> = {');
 const thumbable = new Set();
-for (const d of manifest.diff) thumbable.add(d.imageA);
+for (const d of manifest.diff) thumbable.add(d.image ?? d.imageA);
 for (const h of manifest.hidden) thumbable.add(h.image);
 for (const f of [...thumbable].sort()) {
   const t = f.replace(/\.(png|jpg)$/, '_thumb.jpg');

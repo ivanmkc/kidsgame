@@ -34,7 +34,8 @@ def rate(median_pct: float, easy_at: float, hard_at: float) -> str:
 def main() -> None:
     m = json.loads(MANIFEST.read_text())
     for e in m["diff"]:
-        pct = statistics.median(d["w"] * d["h"] for d in e["diffs"]) / SCENE_PX * 100
+        regions = e.get("pool") or e.get("diffs") or []
+        pct = statistics.median(d["w"] * d["h"] for d in regions) / SCENE_PX * 100
         e["level"] = rate(pct, DIFF_EASY, DIFF_HARD)
     for e in m["hidden"]:
         pct = statistics.median(t["w"] * t["h"] for t in e["targets"]) / SCENE_PX * 100
