@@ -55,10 +55,18 @@ export interface StoryChoice {
   next: string;
 }
 
+export interface StoryScare extends Box {
+  pop: string;        // transparent sprite that springs from the region
+  sting: 'boing' | 'thunder';
+  reveal: string;     // spoken after the pop (delay controls the beat)
+  delay: number;      // ms between pop and reveal (0 = instant comfort)
+}
+
 export interface StoryNode {
   image: string;
   text: string;
   choices?: StoryChoice[];
+  scare?: StoryScare;
 }
 
 export interface Story {

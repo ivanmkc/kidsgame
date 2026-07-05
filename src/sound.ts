@@ -22,7 +22,7 @@ export function setMuted(m: boolean): void {
   }
 }
 
-type Name = 'tap' | 'good' | 'wrong' | 'flip' | 'win';
+type Name = 'tap' | 'good' | 'wrong' | 'flip' | 'win' | 'boing' | 'thunder';
 const cache: Partial<Record<Name, HTMLAudioElement>> = {};
 
 function play(name: Name, volume = 0.5): void {
@@ -48,6 +48,8 @@ export const sfx = {
   wrong(): void { play('wrong', 0.4); },
   flip(): void { play('flip', 0.35); },
   win(): void { play('win', 0.6); },
+  boing(): void { play('boing', 0.6); },
+  thunder(): void { play('thunder', 0.75); },
 };
 
 /** Read instructions aloud for pre-readers (Web Speech API). */

@@ -1,239 +1,192 @@
-"""Generate Story Path scenes: branching 7-node picture stories.
+"""Generate Story Path content: scenes, identity references, jump scares.
 
-Every prompt carries the full character description so the hero stays
-consistent across nodes (NBP has no memory between calls). Each scene is
-judge-gated. Merge-on-save into manifest['stories'].
+Specs live in gen/story_specs.py (data, not code). Per story:
+- identity anchor: explicit `ref` (e.g. cast lineup portrait) or the start
+  scene; every other node is reference-conditioned on it.
+- optional `style` override (e.g. moody nighttime for The Whispering House).
+- per-node `scare`: SAM locates the dare-region bbox in the rendered scene;
+  the pop sprite renders on magenta with the story reference attached and
+  is chroma-keyed. SAM miss => the node ships without a scare (never with a
+  misplaced one).
 
-Usage: python3 tools/gen_stories.py [story_id ...]
+Usage: python3 tools/gen_stories.py [story_id ...]   (resumes from files)
 """
 
 from __future__ import annotations
 
+import io
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
+from gen.chroma import key_out_magenta  # noqa: E402
 from gen.judge import ask_yes_no  # noqa: E402
-from gen.nbp import generate, generate_with_ref  # noqa: E402
+from gen.nbp import _call, generate, generate_with_ref  # noqa: E402
+from gen.sam_batch import sam_segment_batch  # noqa: E402
+from gen.scenes import SCENE_STYLE  # noqa: E402
+from gen.story_specs import SCARE_SCHOOL, WHISPERING_HOUSE  # noqa: E402
+from google.genai import types  # noqa: E402
+from PIL import Image  # noqa: E402
 
 ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 
-from gen.scenes import SCENE_STYLE as STYLE  # noqa: E402 — one house art style
-
-LUNA = ("Luna, a small white unicorn foal with a curly rainbow mane and tail, "
-        "big friendly eyes and a tiny golden horn")
-PIP = ("Pip, a chubby golden puppy with floppy ears, a red collar with a bone "
-       "tag, and a happy open-mouth smile")
-
-STORIES = [
-    {
-        "id": "luna",
-        "title": "Luna's Big Day",
-        "character": LUNA,
-        "nodes": {
-            "start": {
-                "scene": f"{LUNA} waking up at sunrise in a flower meadow beside a sparkling stream",
-                "text": "Luna the unicorn wakes up on a sunny morning. Where should she go today?",
-                "choices": [{"label": "Trot to the forest! 🌲", "next": "a"},
-                            {"label": "Gallop to the beach! 🌊", "next": "b"}],
-            },
-            "a": {
-                "scene": f"{LUNA} walking into a friendly sunlit forest, butterflies around her, a squirrel waving from a branch",
-                "text": "In the forest, a little squirrel waves hello. It looks like it needs help!",
-                "choices": [{"label": "Help find acorns 🌰", "next": "aa"},
-                            {"label": "Play hide and seek 🙈", "next": "ab"}],
-            },
-            "b": {
-                "scene": f"{LUNA} trotting onto a sandy beach with gentle waves, a small sailboat near the shore",
-                "text": "At the beach, Luna finds a little sailboat. The sea sparkles!",
-                "choices": [{"label": "Sail away! ⛵", "next": "ba"},
-                            {"label": "Build a sandcastle 🏰", "next": "bb"}],
-            },
-            "aa": {
-                "scene": f"{LUNA} and a happy squirrel beside a big pile of acorns under an oak tree, both smiling proudly",
-                "text": "Together they find a mountain of acorns! The squirrel is so thankful. What now?",
-                "choices": [{"label": "Throw an acorn party! 🎉", "next": "end_party"},
-                            {"label": "Ride the rainbow home 🌈", "next": "end_rainbow"}],
-            },
-            "ab": {
-                "scene": f"{LUNA} peeking out from behind a big mushroom while forest animals giggle and search for her",
-                "text": "Luna is the best hider in the forest! All the animals want more fun.",
-                "choices": [{"label": "Crown the champion 👑", "next": "end_crown"},
-                            {"label": "Ride the rainbow home 🌈", "next": "end_rainbow"}],
-            },
-            "ba": {
-                "scene": f"{LUNA} standing proudly on a small sailboat sailing past a friendly whale spouting water",
-                "text": "A friendly whale swims beside the boat and winks at Luna!",
-                "choices": [{"label": "Dive with the whale 🐋", "next": "end_pearl"},
-                            {"label": "Dance at the bonfire 🔥", "next": "end_bonfire"}],
-            },
-            "bb": {
-                "scene": f"{LUNA} beside a huge fancy sandcastle decorated with seashells, a crab wearing a tiny paper crown",
-                "text": "The sandcastle is magnificent, and a little crab wants to be its king!",
-                "choices": [{"label": "Crown the crab king 🦀", "next": "end_crab"},
-                            {"label": "Dance at the bonfire 🔥", "next": "end_bonfire"}],
-            },
-            "end_party": {
-                "scene": f"{LUNA} and many forest animals having a picnic party with acorn treats under paper lanterns",
-                "text": "The whole forest comes to Luna's acorn party! What a wonderful day. The End!",
-            },
-            "end_rainbow": {
-                "scene": f"{LUNA} sliding down a giant glowing rainbow toward her meadow home at sunset",
-                "text": "Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!",
-            },
-            "end_crown": {
-                "scene": f"{LUNA} wearing a crown of daisies while forest animals cheer around her",
-                "text": "The animals crown Luna the Hide-and-Seek Champion of the forest! The End!",
-            },
-            "end_pearl": {
-                "scene": f"{LUNA} underwater in a magic air bubble beside the smiling whale, holding a glowing pearl",
-                "text": "The whale shows Luna a glowing pearl — a gift for her bravery! The End!",
-            },
-            "end_crab": {
-                "scene": f"{LUNA} bowing to a proud little crab sitting on a sandcastle throne with a seaweed cape",
-                "text": "King Crab rules the grandest sandcastle on the beach. Long live the king! The End!",
-            },
-            "end_bonfire": {
-                "scene": f"{LUNA} dancing with seagulls and crabs around a cozy beach bonfire under the stars",
-                "text": "Everyone dances around the bonfire until the stars come out. The End!",
-            },
-        },
-    },
-    {
-        "id": "pip",
-        "title": "Pip Finds a Treasure",
-        "character": PIP,
-        "nodes": {
-            "start": {
-                "scene": f"{PIP} in a sunny backyard garden holding an old rolled-up treasure map in his mouth",
-                "text": "Pip the puppy found a treasure map! Where does the trail begin?",
-                "choices": [{"label": "Search the garden 🌻", "next": "a"},
-                            {"label": "Run to the park 🛝", "next": "b"}],
-            },
-            "a": {
-                "scene": f"{PIP} sniffing between tall sunflowers in a vegetable garden, a trail of paw prints in the dirt",
-                "text": "Sniff sniff! The trail leads through the sunflowers. Pip hears a sound...",
-                "choices": [{"label": "Dig here! 🕳️", "next": "aa"},
-                            {"label": "Follow the sound 👂", "next": "ab"}],
-            },
-            "b": {
-                "scene": f"{PIP} at a colorful playground park, looking at a slide and a big oak tree with a hollow",
-                "text": "The map shows the park! Where should Pip look first?",
-                "choices": [{"label": "Zoom down the slide! 🛝", "next": "ba"},
-                            {"label": "Sniff the oak tree 🌳", "next": "bb"}],
-            },
-            "aa": {
-                "scene": f"{PIP} proudly digging up a small wooden chest with the lid still closed, dirt flying",
-                "text": "Pip digs up a mysterious little chest! It rattles. Should he...",
-                "choices": [{"label": "Open it now! 🔓", "next": "end_biscuits"},
-                            {"label": "Share it with friends 🐾", "next": "end_share"}],
-            },
-            "ab": {
-                "scene": f"{PIP} nose to nose with three tiny kittens hiding in a watering can, all very happy",
-                "text": "The sound was three tiny kittens! They look hungry and a little lost.",
-                "choices": [{"label": "Lead them home 🏡", "next": "end_kittens"},
-                            {"label": "Share it with friends 🐾", "next": "end_share"}],
-            },
-            "ba": {
-                "scene": f"{PIP} sliding down a big red slide with ears flying, a shiny golden ball waiting at the bottom",
-                "text": "Wheee! At the bottom waits a shiny golden ball. It starts to roll away!",
-                "choices": [{"label": "Chase the ball! 🎾", "next": "end_ball"},
-                            {"label": "Invite friends to play ⚽", "next": "end_game"}],
-            },
-            "bb": {
-                "scene": f"{PIP} looking into a tree hollow glowing with fireflies, eyes wide with wonder",
-                "text": "Inside the old oak lives a family of glowing fireflies! They swirl around Pip.",
-                "choices": [{"label": "Follow the fireflies ✨", "next": "end_fireflies"},
-                            {"label": "Invite friends to play ⚽", "next": "end_game"}],
-            },
-            "end_biscuits": {
-                "scene": f"{PIP} with an open wooden chest overflowing with bone-shaped golden dog biscuits",
-                "text": "The chest is full of golden biscuits! Best treasure a puppy ever found. The End!",
-            },
-            "end_share": {
-                "scene": f"{PIP} sharing biscuits from a small chest with kittens and a bunny at a garden picnic",
-                "text": "Pip shares his treasure with all his friends. Sharing is the best treasure! The End!",
-            },
-            "end_kittens": {
-                "scene": f"{PIP} proudly leading three tiny kittens to a cozy basket by a farmhouse door at dusk",
-                "text": "Pip leads the kittens safely home. Their mama purrs a big thank-you! The End!",
-            },
-            "end_ball": {
-                "scene": f"{PIP} leaping joyfully to catch a shiny golden ball in mid-air over the playground",
-                "text": "Pip catches the golden ball with a super jump! Champion Pip! The End!",
-            },
-            "end_game": {
-                "scene": f"{PIP} playing ball with two other puppies and a kitten on the sunny playground lawn",
-                "text": "Pip and his friends play until sunset. A treasure of a day! The End!",
-            },
-            "end_fireflies": {
-                "scene": f"{PIP} following a sparkling trail of fireflies to a hidden garden lit like fairyland",
-                "text": "The fireflies lead Pip to a secret glowing garden. Magic! The End!",
-            },
-        },
-    },
-]
+STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL]
 
 
-def _gen_node(spec: dict, nid: str, n: dict) -> None:
-    fname = f"{spec['id']}_{nid}.png"
-    if (OUT / fname).exists():
-        print(f"  {spec['id']}/{nid}: exists, reusing")
+def _story_style(spec: dict) -> str:
+    return spec.get("style") or SCENE_STYLE
+
+
+def _ref_path(spec: dict) -> Path:
+    if "ref" in spec:
+        return OUT / spec["ref"]["file"]
+    return OUT / f"{spec['id']}_start.png"
+
+
+def _gen_ref(spec: dict) -> None:
+    """Render the identity anchor (cast lineup) if the story declares one."""
+    if "ref" not in spec:
         return
-    ref = OUT / f"{spec['id']}_start.png"
-    best = None
+    path = _ref_path(spec)
+    if path.exists():
+        print(f"  {spec['id']}/ref: exists, reusing")
+        return
+    img = None
     for attempt in range(3):
-        if nid != "start" and ref.exists():
-            img = generate_with_ref(
-                f"{n['scene']}. The main character must look IDENTICAL to the "
-                f"character in the reference image — same face, colors, markings "
-                f"and proportions. {STYLE}",
-                ref, (1280, 720))
-        else:
-            img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
-        best = img
+        img = generate(f"{spec['ref']['prompt']}. {_story_style(spec)}", (1280, 720))
         if ask_yes_no(
-            f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
+            "Does this lineup show several DISTINCT cartoon monsters, each fully visible, in a clean artifact-free children's book style with no text?",
             [img],
         ):
-            break
-        print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
+            img.save(path)
+            print(f"  {spec['id']}/ref: cast lineup OK")
+            return
+        print(f"  {spec['id']}/ref: judge rejected, retry {attempt + 1}")
+    img.save(path)
+    print(f"  {spec['id']}/ref: accepting best attempt")
+
+
+def _gen_pop(spec: dict, nid: str, prompt: str) -> str | None:
+    """Transparent pop sprite: magenta render conditioned on the story ref."""
+    fname = f"{spec['id']}_{nid}_pop.png"
+    if (OUT / fname).exists():
+        return f"story/{fname}"
+    ref = _ref_path(spec)
+    ref_parts = []
+    if ref.exists():
+        b = io.BytesIO()
+        Image.open(ref).convert("RGB").save(b, "PNG")
+        ref_parts = [types.Part(text="Reference image (character designs to match exactly):"),
+                     types.Part(inline_data=types.Blob(mime_type="image/png", data=b.getvalue()))]
+    for attempt in range(3):
+        data = _call([types.Content(role="user", parts=[
+            *ref_parts,
+            types.Part(text=(
+                f"Draw {prompt}, matching the reference art style and character designs, as a "
+                "single centered figure filling most of the frame, mid-jump-scare pose bursting "
+                "toward the viewer, on a plain solid bright magenta background (#FF00FF). "
+                "Nothing else in the image. No text.")),
+        ])])
+        sprite, coverage = key_out_magenta(Image.open(io.BytesIO(data)).convert("RGB"), out_size=512)
+        if 0.15 <= coverage <= 0.98 and ask_yes_no(
+            f"Is this a single clean cutout of {prompt} on a transparent background — complete, dynamic, no leftover background?",
+            [sprite],
+        ):
+            sprite.save(OUT / fname)
+            return f"story/{fname}"
+        print(f"  {spec['id']}/{nid}: pop sprite retry {attempt + 1} (cov={coverage:.2f})")
+    return None
+
+
+def _locate_scare(img: Image.Image, spot: str, tag: str) -> tuple[int, int, int, int] | None:
+    """SAM finds the dare region; loose gates (any confident mask, sane size)."""
+    try:
+        segs = sam_segment_batch(img, [spot], tag=tag)
+    except Exception as e:  # noqa: BLE001
+        print(f"  {tag}: SAM failed ({str(e)[:100]})")
+        return None
+    cands = segs.get(spot, [])
+    if not cands or cands[0]["score"] < 0.3:
+        return None
+    x0, y0, x1, y1 = cands[0]["bbox"]
+    if (x1 - x0) * (y1 - y0) < 2500:
+        return None
+    pad = 12
+    x0, y0 = max(0, x0 - pad), max(0, y0 - pad)
+    x1, y1 = min(1280, x1 + pad), min(720, y1 + pad)
+    return (x0, y0, x1 - x0, y1 - y0)
+
+
+def _gen_node(spec: dict, nid: str, n: dict) -> dict:
+    fname = f"{spec['id']}_{nid}.png"
+    ref = _ref_path(spec)
+    if (OUT / fname).exists():
+        print(f"  {spec['id']}/{nid}: scene exists, reusing")
     else:
-        # a decent-but-imperfect scene beats losing the whole story
-        print(f"  {spec['id']}/{nid}: accepting best attempt despite judge")
-    best.save(OUT / fname)
+        best = None
+        use_ref = ref.exists() and not (nid == "start" and "ref" not in spec)
+        for attempt in range(3):
+            if use_ref:
+                img = generate_with_ref(
+                    f"{n['scene']}. Characters must look IDENTICAL to the reference image — "
+                    f"same faces, colors, markings, proportions. {_story_style(spec)}",
+                    ref, (1280, 720))
+            else:
+                img = generate(f"{n['scene']}. {_story_style(spec)}", (1280, 720))
+            best = img
+            if ask_yes_no(
+                f"Is this a charming, artifact-free children's book illustration with no text, clearly showing {spec['character'].split(',')[0]}?",
+                [img],
+            ):
+                break
+            print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
+        else:
+            print(f"  {spec['id']}/{nid}: accepting best attempt despite judge")
+        best.save(OUT / fname)
+
+    entry: dict = {"image": f"story/{fname}", "text": n["text"]}
+    if "choices" in n:
+        entry["choices"] = n["choices"]
+
+    if "scare" in n:
+        sc = n["scare"]
+        scene_img = Image.open(OUT / fname)
+        box = _locate_scare(scene_img, sc["spot"], f"{spec['id']}/{nid}")
+        pop = _gen_pop(spec, nid, sc["pop"]) if box else None
+        if box and pop:
+            entry["scare"] = {"x": box[0], "y": box[1], "w": box[2], "h": box[3],
+                              "pop": pop, "sting": sc["sting"],
+                              "reveal": sc["reveal"], "delay": sc["delay"]}
+            print(f"  {spec['id']}/{nid}: scare wired at {box}")
+        else:
+            print(f"  {spec['id']}/{nid}: scare DROPPED (spot not locatable) — node ships without it")
     print(f"  story {spec['id']}/{nid} OK")
+    return entry
 
 
 def gen_story(spec: dict) -> dict:
     OUT.mkdir(parents=True, exist_ok=True)
-    # start renders first (it is the identity reference for every other node),
-    # then the rest fan out — they only depend on start, never on each other.
-    _gen_node(spec, "start", spec["nodes"]["start"])
+    _gen_ref(spec)
+    # the anchor scene renders first, everything else fans out
+    entries = {"start": _gen_node(spec, "start", spec["nodes"]["start"])}
     rest = [(nid, n) for nid, n in spec["nodes"].items() if nid != "start"]
-    from concurrent.futures import ThreadPoolExecutor
     with ThreadPoolExecutor(3) as ex:
-        list(ex.map(lambda kv: _gen_node(spec, kv[0], kv[1]), rest))
-    nodes = {}
-    for nid, n in spec["nodes"].items():
-        entry = {"image": f"story/{spec['id']}_{nid}.png", "text": n["text"]}
-        if "choices" in n:
-            entry["choices"] = n["choices"]
-        nodes[nid] = entry
-    return {"id": spec["id"], "title": spec["title"], "nodes": nodes}
+        results = list(ex.map(lambda kv: (kv[0], _gen_node(spec, kv[0], kv[1])), rest))
+    entries.update(dict(results))
+    return {"id": spec["id"], "title": spec["title"], "nodes": entries}
 
 
 def main() -> None:
     only = set(sys.argv[1:])
-    m = json.loads(MANIFEST.read_text())
-    m.setdefault("stories", [])
     for spec in STORIES:
         if only and spec["id"] not in only:
             continue
-        if any(s["id"] == spec["id"] for s in m["stories"]):
+        cur = json.loads(MANIFEST.read_text())
+        if any(s["id"] == spec["id"] for s in cur.get("stories", [])):
             print(f"{spec['id']}: already present, skipping")
             continue
         got = gen_story(spec)
