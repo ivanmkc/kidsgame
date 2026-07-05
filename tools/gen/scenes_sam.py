@@ -35,7 +35,8 @@ from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
 REFINE_MODEL = "gemini-3.1-pro-preview"
 
 MIN_AREA = 1200            # px — smaller reads as noise, not an object
-MAX_AREA = 0.05 * W * H    # a "target" this big is scenery, not an object
+MAX_AREA = 0.035 * W * H   # diff objects: a change this big is scenery ("hotspots not too big")
+MAX_AREA_HIDDEN = 0.022 * W * H  # hidden targets must be small enough to hide
 EDGE_CLEAR = 12            # object may not touch the scene border
 HIT_PAD = 10
 OVERLAP_PAD = 16           # hitboxes must not overlap even padded
@@ -43,13 +44,13 @@ MASK_DILATE = 14           # removal mask growth: covers soft edges + the
                            # composite's 6px erosion with room to spare
 
 
-def _prefilter(cands: list[dict]) -> list[dict]:
+def _prefilter(cands: list[dict], max_area: float = MAX_AREA) -> list[dict]:
     """Cheap deterministic gates before Gemini sees anything: confidence,
     size, border clearance; and merge away part-masks (a mask mostly inside
     a higher-scoring one is the boat's hull, not a second boat)."""
     out: list[dict] = []
     for c in sorted(cands, key=lambda d: -d["score"]):
-        if c["score"] < 0.35 or not (MIN_AREA <= c["area"] <= MAX_AREA):
+        if c["score"] < 0.35 or not (MIN_AREA <= c["area"] <= max_area):
             continue
         x0, y0, x1, y1 = c["bbox"]
         if x0 < EDGE_CLEAR or y0 < EDGE_CLEAR or x1 > W - EDGE_CLEAR or y1 > H - EDGE_CLEAR:
@@ -77,7 +78,8 @@ def _overlay(scene: Image.Image, cands: list[dict]) -> Image.Image:
     return Image.fromarray(vis)
 
 
-def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str) -> dict | None:
+def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str,
+                 max_area: float = MAX_AREA) -> dict | None:
     """SAM proposals → Gemini 3.1 pick + uniqueness veto.
 
     Returns the confirmed mask, or None when Gemini can't name exactly one
@@ -89,7 +91,7 @@ def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str) ->
 
     from google.genai import types as _t
 
-    pre = _prefilter(cands)
+    pre = _prefilter(cands, max_area)
     if not pre:
         return None
     q = (
@@ -167,6 +169,28 @@ def _removal_mask(seg: dict, grow: int) -> np.ndarray:
     return _dilated(m | shadow, grow)
 
 
+def _change_hitbox(before: Image.Image, after: Image.Image, seg: dict,
+                   pad: int = 8) -> tuple[int, int, int, int]:
+    """Tight bbox of the pixels the removal ACTUALLY altered.
+
+    The tap hotspot must center on the visual change a player sees — which
+    includes the vanished shadow, not the object silhouette SAM drew — and
+    carry no more padding than needed. Falls back to the object bbox if the
+    diff is degenerate."""
+    region = _removal_mask(seg, MASK_DILATE * 2 + 8)  # superset of any attempt's mask
+    b = np.asarray(before.convert("RGB"), np.int16)
+    a = np.asarray(after.convert("RGB"), np.int16)
+    ch = ((np.abs(a - b).sum(-1) > 30) & region).astype(np.uint8)
+    ch = cv2.morphologyEx(ch, cv2.MORPH_OPEN,
+                          cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)))
+    ys, xs = np.where(ch > 0)
+    if len(xs) < 200:
+        return _hitbox(seg)
+    x0 = max(0, int(xs.min()) - pad); y0 = max(0, int(ys.min()) - pad)
+    x1 = min(W, int(xs.max()) + pad); y1 = min(H, int(ys.max()) + pad)
+    return (x0, y0, x1 - x0, y1 - y0)
+
+
 def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image | None:
     """Inpaint one segmented object away; a BEFORE/AFTER pair judge insists
     every trace went with it (shadow, ripples, string, held items) and that
@@ -233,8 +257,8 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
                 nxt = _remove_verified(img, item, theme["id"])
                 if nxt is None:
                     return None
+                hx, hy, hw, hh = _change_hitbox(img, nxt, item["seg"])
                 img = nxt
-                hx, hy, hw, hh = _hitbox(item["seg"])
                 out.append({"x": hx, "y": hy, "w": hw, "h": hh,
                             "what": phrase.format(_short(item["obj"]))})
             return img, out
@@ -248,6 +272,11 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         img_a, diffs_a = ra
         img_b, diffs_b = rb
         diffs = diffs_a + diffs_b
+        if any(_boxes_clash((p["x"], p["y"], p["w"], p["h"]),
+                            (q["x"], q["y"], q["w"], q["h"]), pad=12)
+               for i, p in enumerate(diffs) for q in diffs[i + 1:]):
+            print(f"  {theme['id']}: final hotspots collide, re-render")
+            continue
 
         if not strict_min(
             "These are picture A and picture B of a spot-the-difference puzzle for children. Do they show the same scene with a few clear object differences?",
@@ -337,7 +366,7 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             refined = list(ex.map(
                 lambda tp: (tp[0][0], tp[0][1],
                             _refined_seg(base, tp[1], segs.get(tp[1], []),
-                                         f"{theme['id']}/{tp[1]}")),
+                                         f"{theme['id']}/{tp[1]}", MAX_AREA_HIDDEN)),
                 zip(chosen, prompts)))
         usable = _drop_overlaps([
             {"tid": tid, "obj": desc, "seg": s} for tid, desc, s in refined if s
