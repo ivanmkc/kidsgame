@@ -6,7 +6,7 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, byLevel, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 
@@ -51,6 +51,28 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
+  // Pooled scenes draw a fresh random subset (and random side per
+  // difference) every time the scene mounts — a level never plays the
+  // same twice. Legacy flat pairs keep their fixed four.
+  const round = useMemo(() => {
+    if (scene?.pool && scene.image) {
+      const k = difficulty === 'easy' ? 3 : 4;
+      const picked = [...scene.pool].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.pool.length));
+      return picked.map((p) => ({ box: p, patch: p.patch, patchOnA: Math.random() < 0.5 }));
+    }
+    return (scene?.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
+  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const total = round.length;
+  const won = found.length === total && total > 0;
+  const showTimer = settingsFor(difficulty).timer;
+  const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
+  const boxes = round.map((r, i) => ({ id: String(i), box: r.box }));
+  const overlaysA = round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
+  const overlaysB = round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
+  const srcA = scene ? SCENE_IMAGES[(scene.image ?? scene.imageA)!] : 0;
+  const srcB = scene ? SCENE_IMAGES[(scene.imageB ?? scene.image)!] : 0;
+  const ar = scene ? scene.w / scene.h : 16 / 9;
+
   if (!scene) {
     return (
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
@@ -64,27 +86,6 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
     );
   }
 
-  // Pooled scenes draw a fresh random subset (and random side per
-  // difference) every time the scene mounts — a level never plays the
-  // same twice. Legacy flat pairs keep their fixed four.
-  const round = useMemo(() => {
-    if (scene.pool && scene.image) {
-      const k = difficulty === 'easy' ? 3 : 4;
-      const picked = [...scene.pool].sort(() => Math.random() - 0.5).slice(0, Math.min(k, scene.pool.length));
-      return picked.map((p) => ({ box: p, patch: p.patch, patchOnA: Math.random() < 0.5 }));
-    }
-    return (scene.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
-  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
-  const total = round.length;
-  const won = found.length === total && total > 0;
-  const showTimer = settingsFor(difficulty).timer;
-  const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
-  const boxes = round.map((r, i) => ({ id: String(i), box: r.box }));
-  const overlaysA = round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
-  const overlaysB = round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] }));
-  const srcA = SCENE_IMAGES[(scene.image ?? scene.imageA)!];
-  const srcB = SCENE_IMAGES[(scene.imageB ?? scene.image)!];
-  const ar = scene.w / scene.h;
 
   // Fit both pictures in the viewport — side by side in landscape,
   // stacked in portrait — so no scrolling is needed on normal screens.
@@ -175,7 +176,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
         visible={won}
         message={'Eagle eyes! You found every difference!'}
         onNext={() => {
-          const pool = visible.some((d) => d.id === scene.id) ? visible : manifest.diff;
+          const pool = byLevel(visible.some((d) => d.id === scene.id) ? visible : manifest.diff);
           const ids = pool.map((d) => d.id);
           onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
         }}
