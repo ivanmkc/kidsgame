@@ -24,7 +24,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 from .judge import _png_part, ask_yes_no, client as _judge_client, strict_min
-from .nbp import generate, imagen_remove_mask
+from .nbp import EDGE_ERODE_PX, generate, imagen_remove_mask
 from .sam_batch import sam_segment_batch
 from .scenes import H, NEEDED_TARGETS, NUM_DIFFS, SCENE_STYLE, W, _crop, _short
 
@@ -42,6 +42,29 @@ HIT_PAD = 10
 OVERLAP_PAD = 16           # hitboxes must not overlap even padded
 MASK_DILATE = 14           # removal mask growth: covers soft edges + the
                            # composite's 6px erosion with room to spare
+
+
+def _ask_pro(question: str, images: list) -> bool:
+    """YES/NO judged by the refine model — the removal gate needs sharper
+    eyes than flash (orphaned footprints and reflection ghosts slid by)."""
+    from google.genai import types as _t
+    for attempt in range(3):
+        try:
+            resp = _judge_client().models.generate_content(
+                model=REFINE_MODEL,
+                contents=[_t.Content(role="user", parts=[*[_png_part(im) for im in images],
+                                                         _t.Part(text=question + "\nAnswer with exactly one word: YES or NO.")])],
+                config=_t.GenerateContentConfig(temperature=0.0,
+                                                http_options=_t.HttpOptions(timeout=120_000)),
+            )
+            t = (resp.text or "").strip().upper()
+            if "YES" in t[:12]:
+                return True
+            if "NO" in t[:12]:
+                return False
+        except Exception as e:  # noqa: BLE001
+            print(f"  WARN pro-judge attempt {attempt + 1}: {str(e)[:90]}")
+    return False  # fail closed
 
 
 def _prefilter(cands: list[dict], max_area: float = MAX_AREA) -> list[dict]:
@@ -96,7 +119,8 @@ def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str,
         return None
     q = (
         f"The picture shows {len(pre)} outlined region(s), labeled 0-{len(pre) - 1}. "
-        f"Which ONE label outlines exactly a single, complete {label} (not a part of it, "
+        f"Which ONE label outlines exactly a single, complete {label} — it must clearly BE "
+        f"a {label}, not a similar-looking different thing (not a part of it, "
         f"not it plus other things)? Also: is there any OTHER {label} visible anywhere "
         f"else in the picture, outlined or not — count even small, partial, decorative, "
         f"or background copies (a mini version on a shelf or pattern counts)?\n"
@@ -198,16 +222,21 @@ def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image
     short = _short(item["obj"])
     rect = _hitbox(item["seg"])
     before_crop = _crop(img, rect, pad=60)
+    # accept-back region stays tight regardless of how big the edit mask
+    # grows on retry: collateral changes outside it are discarded.
+    tight = _removal_mask(item["seg"], 8 + EDGE_ERODE_PX)
     for attempt in range(2):
         mask = _removal_mask(item["seg"], MASK_DILATE * (attempt + 1))
-        out, _, drift = imagen_remove_mask(img, mask)
+        out, _, drift = imagen_remove_mask(img, mask, tight)
         if drift > 0.10:
             print(f"  {theme_id}: remove '{short}' drifted ({drift:.2f}), retry {attempt + 1}")
             continue
         after_crop = _crop(out, rect, pad=60)
-        if strict_min(
-            f"The first picture shows the original scene with a {short}; the second shows the same spot after removal. In the SECOND picture, is every trace of the {short} completely gone — including its shadow, reflection, ripples, strings, and anything it was holding or that was attached to it — with NOTHING new drawn in its place?",
-            "In the second picture, does the area show clean, natural, continuous scenery — no smudges, blur patches, leftover outlines, orphaned shadows, or floating fragments?",
+        if _ask_pro(
+            f"The first picture shows the original scene with a {short}; the second shows the same spot after removal. In the SECOND picture, is every trace of the {short} completely gone — including its shadow, reflection, footprints, ripples, strings, and anything it was holding or attached to — with NOTHING new drawn in its place?",
+            [before_crop, after_crop],
+        ) and _ask_pro(
+            "Compare the two pictures. In the second, does the area show clean natural scenery with nothing else altered — no smudges, leftover outlines, orphaned shadows or footprints, and no OTHER objects changed, moved, or redrawn?",
             [before_crop, after_crop],
         ):
             return out
@@ -405,8 +434,9 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             print(f"  {theme['id']}: {len(targets)}/{NEEDED_TARGETS} clean targets, re-render {attempt + 1}")
             continue
 
-        if not ask_yes_no(
+        if not strict_min(
             "Does this children's seek-and-find scene look coherent and professionally illustrated — busy but natural, with no visible rectangular seams, smudges, or pasted-on patches?",
+            "Is the scene completely free of text, letters, words and labels (garbled or otherwise)?",
             [base],
         ):
             print(f"  {theme['id']}: whole-scene judge rejected")

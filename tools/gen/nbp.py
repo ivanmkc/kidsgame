@@ -227,12 +227,17 @@ def _imagen_client() -> genai.Client:
     return _tls.imagen_client
 
 
-def imagen_remove_mask(base: Image.Image, mask_bool: np.ndarray) -> tuple[Image.Image, float, float]:
-    """Mask-shaped Imagen removal (SAM segment → inpaint). The precise
-    silhouette is what keeps removals ghost-free: a rectangle mask makes
-    Imagen re-imagine everything in the box, a tight dilated segment only
-    asks it to continue background where the object was."""
-    return _imagen_remove_arr(base, (mask_bool * 255).astype(np.uint8))
+def imagen_remove_mask(base: Image.Image, mask_bool: np.ndarray,
+                       composite_bool: np.ndarray | None = None) -> tuple[Image.Image, float, float]:
+    """Mask-shaped Imagen removal (SAM segment → inpaint).
+
+    `mask_bool` is what Imagen may repaint (bigger = better blending);
+    `composite_bool` is what we ACCEPT back. Keeping the accept region
+    tight to the object makes collateral re-imagining (a bookshelf
+    redrawn because it sat inside the dilated mask) impossible by
+    construction — those pixels stay base."""
+    comp = None if composite_bool is None else (composite_bool * 255).astype(np.uint8)
+    return _imagen_remove_arr(base, (mask_bool * 255).astype(np.uint8), comp)
 
 
 def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[Image.Image, float, float]:
@@ -247,7 +252,8 @@ def imagen_remove(base: Image.Image, rect: tuple[int, int, int, int]) -> tuple[I
     return _imagen_remove_arr(base, mask_arr)
 
 
-def _imagen_remove_arr(base: Image.Image, mask_arr: np.ndarray) -> tuple[Image.Image, float, float]:
+def _imagen_remove_arr(base: Image.Image, mask_arr: np.ndarray,
+                       composite_arr: np.ndarray | None = None) -> tuple[Image.Image, float, float]:
 
     def png(im: Image.Image) -> bytes:
         buf = io.BytesIO()
@@ -297,7 +303,7 @@ def _imagen_remove_arr(base: Image.Image, mask_arr: np.ndarray) -> tuple[Image.I
             mask_s = np.asarray(Image.fromarray(mask_arr, "L").resize(small)) > 127
             drift = float((diff_s[~mask_s] > 45).mean()) if (~mask_s).any() else 0.0
 
-            comp = _object_composite(b, o, mask)
+            comp = _object_composite(b, o, (composite_arr if composite_arr is not None else mask_arr) > 127)
             return comp, inside, drift
         except Exception as e:  # noqa: BLE001
             last = e
