@@ -96,7 +96,8 @@ def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str) ->
         f"The picture shows {len(pre)} outlined region(s), labeled 0-{len(pre) - 1}. "
         f"Which ONE label outlines exactly a single, complete {label} (not a part of it, "
         f"not it plus other things)? Also: is there any OTHER {label} visible anywhere "
-        f"else in the picture, outlined or not?\n"
+        f"else in the picture, outlined or not — count even small, partial, decorative, "
+        f"or background copies (a mini version on a shelf or pattern counts)?\n"
         'Respond ONLY with JSON: {"pick": <label number, or -1 if none fits>, '
         '"another_elsewhere": true or false}'
     )
@@ -150,21 +151,40 @@ def _dilated(mask: np.ndarray, px: int = MASK_DILATE) -> np.ndarray:
     return cv2.dilate(mask.astype(np.uint8), k).astype(bool)
 
 
+def _removal_mask(seg: dict, grow: int) -> np.ndarray:
+    """Object mask + downward shadow band, dilated.
+
+    Imagen removes exactly what the mask covers — an object-only mask
+    leaves its contact shadow orphaned on the ground (audit: farm tractor,
+    construction truck, playground ball). The band extends the silhouette
+    down by ~35% of its height before dilation.
+    """
+    m = seg["mask"]
+    _, y0, _, y1 = seg["bbox"]
+    drop = max(6, int(0.35 * (y1 - y0)))
+    shadow = np.zeros_like(m)
+    shadow[drop:] = m[:-drop]
+    return _dilated(m | shadow, grow)
+
+
 def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image | None:
-    """Inpaint one segmented object away; judge that NOTHING is left."""
+    """Inpaint one segmented object away; a BEFORE/AFTER pair judge insists
+    every trace went with it (shadow, ripples, string, held items) and that
+    nothing new was painted in its place. Retry escalates the mask."""
     short = _short(item["obj"])
-    mask = _dilated(item["seg"]["mask"])
     rect = _hitbox(item["seg"])
+    before_crop = _crop(img, rect, pad=60)
     for attempt in range(2):
+        mask = _removal_mask(item["seg"], MASK_DILATE * (attempt + 1))
         out, _, drift = imagen_remove_mask(img, mask)
         if drift > 0.10:
             print(f"  {theme_id}: remove '{short}' drifted ({drift:.2f}), retry {attempt + 1}")
             continue
-        crop = _crop(out, rect, pad=60)
+        after_crop = _crop(out, rect, pad=60)
         if strict_min(
-            f"Was there ever a {short} here? Answer YES only if the picture shows NO trace, outline, shadow or ghost of a {short} — the spot must look like plain scenery.",
-            "Does the scenery here look natural and continuous — no smudge, blur patch, or broken area?",
-            [crop],
+            f"The first picture shows the original scene with a {short}; the second shows the same spot after removal. In the SECOND picture, is every trace of the {short} completely gone — including its shadow, reflection, ripples, strings, and anything it was holding or that was attached to it — with NOTHING new drawn in its place?",
+            "In the second picture, does the area show clean, natural, continuous scenery — no smudges, blur patches, leftover outlines, orphaned shadows, or floating fragments?",
+            [before_crop, after_crop],
         ):
             return out
         print(f"  {theme_id}: remove '{short}' left a trace, retry {attempt + 1}")
@@ -278,6 +298,24 @@ def _chip(scene: Image.Image, seg: dict) -> Image.Image:
     return img
 
 
+def _chip_whole(chip: Image.Image) -> bool:
+    """One connected blob, no detached fragments.
+
+    SAM masks only VISIBLE pixels, so a branch across a parrot leaves its
+    tail as a floating island (audit: jungle, depot). Occlusion notches on
+    a single blob are left to the judge — a hull-solidity gate would
+    over-reject naturally spindly objects (the old pipeline's lesson).
+    """
+    a = (np.asarray(chip)[..., 3] > 32).astype(np.uint8)
+    total = int(a.sum())
+    if total < 400:
+        return False
+    n, _, stats, _ = cv2.connectedComponentsWithStats(a)
+    if n <= 1:
+        return False
+    return stats[1:, cv2.CC_STAT_AREA].max() / total >= 0.97
+
+
 def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
     rng = random.Random(seed)
     for attempt in range(3):
@@ -310,9 +348,14 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
             if len(targets) == NEEDED_TARGETS:
                 break
             chip = _chip(base, item["seg"])
-            if not ask_yes_no(
-                f"Is this a single, complete, recognizable image of {item['obj']} that a young child could identify?",
-                [chip],
+            if not _chip_whole(chip):
+                print(f"  {theme['id']}: '{item['tid']}' chip fragmented, trying next target")
+                continue
+            scene_crop = _crop(base, _hitbox(item["seg"]), pad=40)
+            if not strict_min(
+                f"The first image is a cutout sticker, the second the scene it was cut from. Is the sticker a COMPLETE {item['obj']} exactly as it appears in the scene — no missing bites or notches where something covered it, no background patches stuck to it, no parts cut off?",
+                f"Would a young child instantly recognize the sticker as {item['obj']}?",
+                [chip, scene_crop],
             ):
                 print(f"  {theme['id']}: '{item['tid']}' chip rejected, trying next target")
                 continue
