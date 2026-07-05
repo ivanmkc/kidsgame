@@ -50,8 +50,26 @@ export interface HiddenScene {
   targets: HiddenTarget[];
 }
 
+export interface StoryChoice {
+  label: string;
+  next: string;
+}
+
+export interface StoryNode {
+  image: string;
+  text: string;
+  choices?: StoryChoice[];
+}
+
+export interface Story {
+  id: string;
+  title: string;
+  nodes: Record<string, StoryNode>;
+}
+
 export interface Manifest {
   spotit: { icons: string[] };
+  stories?: Story[];
   diff: DiffScene[];
   hidden: HiddenScene[];
 }

@@ -36,832 +36,753 @@
   },
   "diff": [
     {
-      "id": "tidepool",
-      "name": "Tide Pool",
-      "imageA": "diff/tidepool_a.png",
-      "imageB": "diff/tidepool_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 933,
-          "y": 362,
-          "w": 120,
-          "h": 104,
-          "what": "a pink sea snail appeared"
-        },
-        {
-          "x": 346,
-          "y": 110,
-          "w": 154,
-          "h": 123,
-          "what": "a blue starfish appeared"
-        },
-        {
-          "x": 782,
-          "y": 98,
-          "w": 173,
-          "h": 163,
-          "what": "the octopus peeking out is missing"
-        },
-        {
-          "x": 635,
-          "y": 544,
-          "w": 224,
-          "h": 173,
-          "what": "the purple sea urchin is missing"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "trains",
-      "name": "Train Station",
-      "imageA": "diff/trains_a.png",
-      "imageB": "diff/trains_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 640,
-          "y": 533,
-          "w": 170,
-          "h": 166,
-          "what": "a red suitcase appeared"
-        },
-        {
-          "x": 942,
-          "y": 551,
-          "w": 154,
-          "h": 101,
-          "what": "a cat sleeping on a bench appeared"
-        },
-        {
-          "x": 135,
-          "y": 543,
-          "w": 200,
-          "h": 154,
-          "what": "the wooden crate of apples is missing"
-        },
-        {
-          "x": 190,
-          "y": 169,
-          "w": 146,
-          "h": 203,
-          "what": "the bouquet of balloons tied to a post is missing"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "dinos",
-      "name": "Dinosaur Valley",
-      "imageA": "diff/dinos_a.png",
-      "imageB": "diff/dinos_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 696,
-          "y": 34,
-          "w": 220,
-          "h": 135,
-          "what": "a pterodactyl flying appeared"
-        },
-        {
-          "x": 111,
-          "y": 316,
-          "w": 86,
-          "h": 104,
-          "what": "a butterfly appeared"
-        },
-        {
-          "x": 1091,
-          "y": 458,
-          "w": 135,
-          "h": 113,
-          "what": "the orange dinosaur is missing"
-        },
-        {
-          "x": 665,
-          "y": 501,
-          "w": 110,
-          "h": 123,
-          "what": "the white dinosaur egg is missing"
-        }
-      ],
-      "level": "hard"
-    },
-    {
-      "id": "camping",
-      "name": "Campsite",
-      "imageA": "diff/camping_a.png",
-      "imageB": "diff/camping_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 651,
-          "y": 348,
-          "w": 202,
-          "h": 147,
-          "what": "a friendly raccoon peeking appeared"
-        },
-        {
-          "x": 983,
-          "y": 377,
-          "w": 149,
-          "h": 294,
-          "what": "a acoustic guitar appeared"
-        },
-        {
-          "x": 63,
-          "y": 543,
-          "w": 164,
-          "h": 101,
-          "what": "the sleeping bag rolled up is missing"
-        },
-        {
-          "x": 535,
-          "y": 381,
-          "w": 82,
-          "h": 97,
-          "what": "the canteen is missing"
-        }
-      ],
-      "level": "easy"
-    },
-    {
       "id": "farm",
       "name": "Farm",
-      "imageA": "diff/farm_a.png",
-      "imageB": "diff/farm_b.png",
+      "image": "diff/farm_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 918,
-          "y": 493,
-          "w": 121,
-          "h": 112,
-          "what": "a wooden bucket appeared"
-        },
-        {
-          "x": 1152,
-          "y": 436,
-          "w": 99,
-          "h": 95,
-          "what": "a white duck appeared"
-        },
-        {
-          "x": 399,
-          "y": 497,
-          "w": 229,
+          "x": 711,
+          "y": 453,
+          "w": 261,
           "h": 223,
-          "what": "the red tractor toy is missing"
+          "name": "red tractor toy",
+          "kind": "remove",
+          "patch": "diff/farm_d_0_red_tractor_toy.png"
         },
         {
-          "x": 145,
-          "y": 535,
-          "w": 115,
-          "h": 176,
-          "what": "the grey rabbit is missing"
+          "x": 1096,
+          "y": 511,
+          "w": 114,
+          "h": 152,
+          "name": "grey rabbit",
+          "kind": "remove",
+          "patch": "diff/farm_d_1_grey_rabbit.png"
+        },
+        {
+          "x": 1105,
+          "y": 388,
+          "w": 99,
+          "h": 88,
+          "name": "white duck",
+          "kind": "remove",
+          "patch": "diff/farm_d_2_white_duck.png"
+        },
+        {
+          "x": 30,
+          "y": 419,
+          "w": 112,
+          "h": 138,
+          "name": "wooden bucket",
+          "kind": "remove",
+          "patch": "diff/farm_d_3_wooden_bucket.png"
         }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "aquarium",
-      "name": "Aquarium",
-      "imageA": "diff/aquarium_a.png",
-      "imageB": "diff/aquarium_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 906,
-          "y": 503,
-          "w": 212,
-          "h": 143,
-          "what": "a sea turtle appeared"
-        },
-        {
-          "x": 688,
-          "y": 121,
-          "w": 134,
-          "h": 225,
-          "what": "a pink jellyfish appeared"
-        },
-        {
-          "x": 345,
-          "y": 455,
-          "w": 98,
-          "h": 206,
-          "what": "the diver figurine is missing"
-        },
-        {
-          "x": 1008,
-          "y": 238,
-          "w": 154,
-          "h": 160,
-          "what": "the pufferfish puffed up is missing"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "playground",
-      "name": "Playground",
-      "imageA": "diff/playground_a.png",
-      "imageB": "diff/playground_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 1058,
-          "y": 367,
-          "w": 41,
-          "h": 82,
-          "what": "a water bottle on the bench appeared"
-        },
-        {
-          "x": 674,
-          "y": 552,
-          "w": 107,
-          "h": 111,
-          "what": "a red kick ball appeared"
-        },
-        {
-          "x": 174,
-          "y": 449,
-          "w": 122,
-          "h": 104,
-          "what": "the toy dump truck in the sandbox is missing"
-        },
-        {
-          "x": 453,
-          "y": 601,
-          "w": 131,
-          "h": 78,
-          "what": "the paper airplane is missing"
-        }
-      ],
-      "level": "hard"
+      ]
     },
     {
       "id": "ocean",
       "name": "Ocean",
-      "imageA": "diff/ocean_a.png",
-      "imageB": "diff/ocean_b.png",
+      "image": "diff/ocean_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 939,
-          "y": 362,
-          "w": 341,
-          "h": 358,
-          "what": "a purple octopus appeared"
+          "x": 359,
+          "y": 497,
+          "w": 99,
+          "h": 168,
+          "name": "green seahorse",
+          "kind": "recolor",
+          "patch": "diff/ocean_d_0_green_seahorse.png"
         },
         {
-          "x": 426,
-          "y": 599,
-          "w": 164,
-          "h": 103,
-          "what": "a spiral seashell appeared"
+          "x": 696,
+          "y": 430,
+          "w": 117,
+          "h": 121,
+          "name": "striped clownfish",
+          "kind": "remove",
+          "patch": "diff/ocean_d_1_striped_clownfish.png"
         },
         {
-          "x": 692,
-          "y": 538,
-          "w": 110,
-          "h": 113,
-          "what": "the orange starfish is missing"
+          "x": 480,
+          "y": 446,
+          "w": 103,
+          "h": 89,
+          "name": "orange starfish",
+          "kind": "remove",
+          "patch": "diff/ocean_d_2_orange_starfish.png"
         },
         {
-          "x": 209,
-          "y": 475,
-          "w": 213,
-          "h": 240,
-          "what": "the treasure chest is missing"
+          "x": 837,
+          "y": 570,
+          "w": 145,
+          "h": 123,
+          "name": "spiral seashell",
+          "kind": "remove",
+          "patch": "diff/ocean_d_3_spiral_seashell.png"
         }
-      ],
-      "level": "easy"
+      ]
     },
     {
       "id": "space",
       "name": "Space",
-      "imageA": "diff/space_a.png",
-      "imageB": "diff/space_b.png",
+      "image": "diff/space_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 1061,
-          "y": 425,
-          "w": 146,
-          "h": 193,
-          "what": "a astronaut floating appeared"
-        },
-        {
-          "x": 373,
-          "y": 572,
-          "w": 129,
-          "h": 100,
-          "what": "a flying saucer appeared"
-        },
-        {
-          "x": 522,
-          "y": 515,
-          "w": 94,
-          "h": 148,
-          "what": "the green alien waving is missing"
-        },
-        {
-          "x": 55,
-          "y": 457,
-          "w": 150,
-          "h": 142,
-          "what": "the purple planet is missing"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "bakery",
-      "name": "Bakery",
-      "imageA": "diff/bakery_a.png",
-      "imageB": "diff/bakery_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 971,
-          "y": 397,
-          "w": 109,
-          "h": 80,
-          "what": "a gingerbread man cookie appeared"
-        },
-        {
-          "x": 107,
-          "y": 278,
-          "w": 98,
-          "h": 100,
-          "what": "a strawberry tart appeared"
-        },
-        {
-          "x": 20,
-          "y": 506,
-          "w": 186,
-          "h": 178,
-          "what": "the pink birthday cake is missing"
-        },
-        {
-          "x": 803,
-          "y": 532,
-          "w": 184,
-          "h": 171,
-          "what": "the basket of croissants is missing"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "beach",
-      "name": "Beach Day",
-      "imageA": "diff/beach_a.png",
-      "imageB": "diff/beach_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 277,
-          "y": 550,
-          "w": 139,
-          "h": 106,
-          "what": "a pair of flip-flops appeared"
-        },
-        {
-          "x": 1016,
-          "y": 396,
-          "w": 99,
-          "h": 98,
-          "what": "a starfish appeared"
-        },
-        {
-          "x": 1101,
-          "y": 195,
-          "w": 78,
-          "h": 92,
-          "what": "the sailboat on the horizon is missing"
-        },
-        {
-          "x": 1134,
-          "y": 528,
-          "w": 138,
-          "h": 162,
-          "what": "the seagull is missing"
-        }
-      ],
-      "level": "hard"
-    },
-    {
-      "id": "savanna",
-      "name": "Savanna",
-      "imageA": "diff/savanna_a.png",
-      "imageB": "diff/savanna_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 718,
-          "y": 477,
-          "w": 217,
-          "h": 164,
-          "what": "a lion cub in the grass appeared"
-        },
-        {
-          "x": 31,
-          "y": 481,
-          "w": 195,
-          "h": 235,
-          "what": "a colorful tropical bird appeared"
-        },
-        {
-          "x": 982,
-          "y": 297,
-          "w": 256,
-          "h": 264,
-          "what": "the baby elephant is missing"
-        },
-        {
-          "x": 1031,
-          "y": 578,
-          "w": 193,
-          "h": 140,
-          "what": "the tortoise is missing"
-        }
-      ]
-    },
-    {
-      "id": "bugs",
-      "name": "Bug Garden",
-      "imageA": "diff/bugs_a.png",
-      "imageB": "diff/bugs_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 819,
-          "y": 21,
-          "w": 149,
-          "h": 152,
-          "what": "a dragonfly appeared"
-        },
-        {
-          "x": 436,
-          "y": 595,
-          "w": 182,
-          "h": 125,
-          "what": "a little pillbug appeared"
-        },
-        {
-          "x": 1029,
-          "y": 521,
+          "x": 720,
+          "y": 453,
           "w": 179,
-          "h": 172,
-          "what": "the cricket is missing"
+          "h": 214,
+          "name": "astronaut floating",
+          "kind": "recolor",
+          "patch": "diff/space_d_0_astronaut_floating.png"
         },
         {
-          "x": 706,
-          "y": 566,
-          "w": 146,
-          "h": 154,
-          "what": "the caterpillar on a twig is missing"
-        }
-      ]
-    },
-    {
-      "id": "party",
-      "name": "Party",
-      "imageA": "diff/party_a.png",
-      "imageB": "diff/party_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 494,
-          "y": 483,
-          "w": 153,
-          "h": 221,
-          "what": "a red toy robot appeared"
+          "x": 938,
+          "y": 315,
+          "w": 131,
+          "h": 219,
+          "name": "green alien waving",
+          "kind": "remove",
+          "patch": "diff/space_d_1_green_alien_waving.png"
         },
         {
-          "x": 237,
-          "y": 560,
-          "w": 213,
-          "h": 146,
-          "what": "a sleeping orange cat appeared"
+          "x": 288,
+          "y": 358,
+          "w": 120,
+          "h": 120,
+          "name": "purple planet",
+          "kind": "recolor",
+          "patch": "diff/space_d_2_purple_planet.png"
         },
         {
-          "x": 28,
-          "y": 472,
-          "w": 181,
-          "h": 232,
-          "what": "the toy sailboat is missing"
-        },
-        {
-          "x": 694,
-          "y": 500,
-          "w": 104,
-          "h": 200,
-          "what": "the pinwheel toy is missing"
-        }
-      ]
-    },
-    {
-      "id": "unicorn",
-      "name": "Unicorn Meadow",
-      "imageA": "diff/unicorn_a.png",
-      "imageB": "diff/unicorn_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 1071,
-          "y": 554,
-          "w": 146,
-          "h": 162,
-          "what": "a bluebird appeared"
-        },
-        {
-          "x": 827,
-          "y": 342,
-          "w": 145,
-          "h": 146,
-          "what": "a baby unicorn appeared"
-        },
-        {
-          "x": 84,
-          "y": 415,
-          "w": 77,
-          "h": 116,
-          "what": "the pink butterfly is missing"
-        },
-        {
-          "x": 702,
-          "y": 264,
-          "w": 108,
-          "h": 144,
-          "what": "the floating star wand is missing"
-        }
-      ]
-    },
-    {
-      "id": "candy",
-      "name": "Candy Land",
-      "imageA": "diff/candy_a.png",
-      "imageB": "diff/candy_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 258,
-          "y": 545,
-          "w": 116,
-          "h": 128,
-          "what": "a slice of layer cake appeared"
-        },
-        {
-          "x": 918,
-          "y": 527,
-          "w": 93,
-          "h": 161,
-          "what": "a waffle ice cream cone appeared"
-        },
-        {
-          "x": 700,
-          "y": 546,
-          "w": 105,
-          "h": 135,
-          "what": "the cupcake with a cherry is missing"
-        },
-        {
-          "x": 1140,
-          "y": 515,
-          "w": 85,
-          "h": 168,
-          "what": "the strawberry milkshake with a straw is missing"
-        }
-      ]
-    },
-    {
-      "id": "construction",
-      "name": "Construction Site",
-      "imageA": "diff/construction_a.png",
-      "imageB": "diff/construction_b.png",
-      "w": 1280,
-      "h": 720,
-      "diffs": [
-        {
-          "x": 1018,
-          "y": 526,
-          "w": 240,
-          "h": 166,
-          "what": "a cement mixer truck appeared"
-        },
-        {
-          "x": 33,
-          "y": 562,
-          "w": 298,
-          "h": 119,
-          "what": "a stack of wooden planks appeared"
-        },
-        {
-          "x": 669,
-          "y": 552,
-          "w": 158,
-          "h": 138,
-          "what": "the red toolbox is missing"
-        },
-        {
-          "x": 411,
-          "y": 545,
-          "w": 193,
-          "h": 139,
-          "what": "the wheelbarrow is missing"
+          "x": 185,
+          "y": 547,
+          "w": 136,
+          "h": 131,
+          "name": "flying saucer",
+          "kind": "remove",
+          "patch": "diff/space_d_3_flying_saucer.png"
         }
       ]
     },
     {
       "id": "princess",
       "name": "Princess Castle",
-      "imageA": "diff/princess_a.png",
-      "imageB": "diff/princess_b.png",
+      "image": "diff/princess_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 1085,
-          "y": 311,
-          "w": 184,
-          "h": 164,
-          "what": "the treasure chest full of jewels changed color!"
+          "x": 1016,
+          "y": 400,
+          "w": 259,
+          "h": 279,
+          "name": "white pony",
+          "kind": "recolor",
+          "patch": "diff/princess_d_0_white_pony.png"
         },
         {
-          "x": 1064,
+          "x": 40,
+          "y": 436,
+          "w": 131,
+          "h": 128,
+          "name": "pink heart balloon",
+          "kind": "recolor",
+          "patch": "diff/princess_d_1_pink_heart_balloon.png"
+        },
+        {
+          "x": 252,
+          "y": 517,
+          "w": 120,
+          "h": 127,
+          "name": "frog wearing a tiny crown",
+          "kind": "recolor",
+          "patch": "diff/princess_d_2_frog_wearing_a_tiny_crow.png"
+        },
+        {
+          "x": 793,
+          "y": 331,
+          "w": 123,
+          "h": 84,
+          "name": "golden crown on a cushion",
+          "kind": "recolor",
+          "patch": "diff/princess_d_3_golden_crown_on_a_cushio.png"
+        }
+      ]
+    },
+    {
+      "id": "unicorn",
+      "name": "Unicorn Meadow",
+      "image": "diff/unicorn_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 43,
+          "y": 479,
+          "w": 133,
+          "h": 163,
+          "name": "pink butterfly",
+          "kind": "remove",
+          "patch": "diff/unicorn_d_0_pink_butterfly.png"
+        },
+        {
+          "x": 1118,
           "y": 496,
-          "w": 205,
-          "h": 200,
-          "what": "the white pony changed color!"
+          "w": 143,
+          "h": 117,
+          "name": "bluebird",
+          "kind": "recolor",
+          "patch": "diff/unicorn_d_1_bluebird.png"
         },
         {
-          "x": 805,
-          "y": 345,
-          "w": 155,
-          "h": 184,
-          "what": "the peacock changed color!"
+          "x": 996,
+          "y": 237,
+          "w": 162,
+          "h": 216,
+          "name": "baby unicorn",
+          "kind": "recolor",
+          "patch": "diff/unicorn_d_2_baby_unicorn.png"
         },
         {
-          "x": 921,
-          "y": 582,
+          "x": 754,
+          "y": 190,
+          "w": 147,
+          "h": 189,
+          "name": "floating star wand",
+          "kind": "recolor",
+          "patch": "diff/unicorn_d_3_floating_star_wand.png"
+        },
+        {
+          "x": 334,
+          "y": 519,
+          "w": 133,
+          "h": 126,
+          "name": "red toadstool mushroom",
+          "kind": "recolor",
+          "patch": "diff/unicorn_d_4_red_toadstool_mushroom.png"
+        },
+        {
+          "x": 812,
+          "y": 533,
+          "w": 186,
+          "h": 168,
+          "name": "pot of gold",
+          "kind": "remove",
+          "patch": "diff/unicorn_d_5_pot_of_gold.png"
+        }
+      ]
+    },
+    {
+      "id": "dinos",
+      "name": "Dinosaur Valley",
+      "image": "diff/dinos_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 1039,
+          "y": 506,
+          "w": 218,
+          "h": 172,
+          "name": "baby triceratops",
+          "kind": "remove",
+          "patch": "diff/dinos_d_0_baby_triceratops.png"
+        },
+        {
+          "x": 676,
+          "y": 443,
+          "w": 97,
+          "h": 117,
+          "name": "butterfly",
+          "kind": "remove",
+          "patch": "diff/dinos_d_1_butterfly.png"
+        },
+        {
+          "x": 1087,
+          "y": 308,
+          "w": 127,
+          "h": 143,
+          "name": "white dinosaur egg",
+          "kind": "recolor",
+          "patch": "diff/dinos_d_2_white_dinosaur_egg.png"
+        },
+        {
+          "x": 757,
+          "y": 31,
+          "w": 263,
+          "h": 195,
+          "name": "pterodactyl flying",
+          "kind": "remove",
+          "patch": "diff/dinos_d_3_pterodactyl_flying.png"
+        },
+        {
+          "x": 719,
+          "y": 251,
+          "w": 204,
+          "h": 175,
+          "name": "orange dinosaur",
+          "kind": "remove",
+          "patch": "diff/dinos_d_4_orange_dinosaur.png"
+        }
+      ]
+    },
+    {
+      "id": "beach",
+      "name": "Beach Day",
+      "image": "diff/beach_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 229,
+          "y": 565,
+          "w": 175,
+          "h": 134,
+          "name": "pair of flip-flops",
+          "kind": "remove",
+          "patch": "diff/beach_d_0_pair_of_flip-flops.png"
+        },
+        {
+          "x": 652,
+          "y": 33,
+          "w": 141,
+          "h": 151,
+          "name": "seagull",
+          "kind": "remove",
+          "patch": "diff/beach_d_1_seagull.png"
+        },
+        {
+          "x": 1084,
+          "y": 213,
+          "w": 102,
+          "h": 110,
+          "name": "sailboat on the horizon",
+          "kind": "remove",
+          "patch": "diff/beach_d_2_sailboat_on_the_horizon.png"
+        },
+        {
+          "x": 987,
+          "y": 590,
+          "w": 145,
+          "h": 111,
+          "name": "starfish",
+          "kind": "recolor",
+          "patch": "diff/beach_d_3_starfish.png"
+        },
+        {
+          "x": 786,
+          "y": 568,
           "w": 90,
-          "h": 113,
-          "what": "the frog wearing a tiny crown changed color!"
+          "h": 124,
+          "name": "ice cream cone in the sand",
+          "kind": "remove",
+          "patch": "diff/beach_d_4_ice_cream_cone_in_the_sa.png"
         }
       ]
     },
     {
       "id": "snow",
       "name": "Snowy Village",
-      "imageA": "diff/snow_a.png",
-      "imageB": "diff/snow_b.png",
+      "image": "diff/snow_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 1043,
-          "y": 76,
-          "w": 120,
-          "h": 195,
-          "what": "a red cardinal bird appeared"
+          "x": 99,
+          "y": 350,
+          "w": 95,
+          "h": 98,
+          "name": "red cardinal bird",
+          "kind": "remove",
+          "patch": "diff/snow_d_0_red_cardinal_bird.png"
         },
         {
-          "x": 1089,
-          "y": 391,
-          "w": 104,
-          "h": 134,
-          "what": "a penguin appeared"
+          "x": 659,
+          "y": 544,
+          "w": 122,
+          "h": 118,
+          "name": "pair of ice skates",
+          "kind": "recolor",
+          "patch": "diff/snow_d_1_pair_of_ice_skates.png"
         },
         {
-          "x": 823,
-          "y": 571,
-          "w": 136,
-          "h": 117,
-          "what": "the pair of ice skates is missing"
+          "x": 246,
+          "y": 461,
+          "w": 108,
+          "h": 138,
+          "name": "gift box in the snow",
+          "kind": "remove",
+          "patch": "diff/snow_d_2_gift_box_in_the_snow.png"
         },
         {
-          "x": 1091,
-          "y": 547,
-          "w": 124,
-          "h": 120,
-          "what": "the gift box in the snow is missing"
+          "x": 378,
+          "y": 509,
+          "w": 133,
+          "h": 211,
+          "name": "penguin",
+          "kind": "remove",
+          "patch": "diff/snow_d_3_penguin.png"
+        },
+        {
+          "x": 1116,
+          "y": 372,
+          "w": 127,
+          "h": 259,
+          "name": "lantern on a pole",
+          "kind": "recolor",
+          "patch": "diff/snow_d_4_lantern_on_a_pole.png"
         }
       ]
     },
     {
-      "id": "pirate",
-      "name": "Pirate Cove",
-      "imageA": "diff/pirate_a.png",
-      "imageB": "diff/pirate_b.png",
+      "id": "candy",
+      "name": "Candy Land",
+      "image": "diff/candy_base.png",
       "w": 1280,
       "h": 720,
-      "diffs": [
+      "pool": [
         {
-          "x": 19,
-          "y": 599,
-          "w": 188,
-          "h": 94,
-          "what": "the spyglass on the sand changed color!"
+          "x": 372,
+          "y": 510,
+          "w": 181,
+          "h": 177,
+          "name": "slice of layer cake",
+          "kind": "remove",
+          "patch": "diff/candy_d_0_slice_of_layer_cake.png"
         },
         {
-          "x": 238,
-          "y": 508,
-          "w": 153,
-          "h": 91,
-          "what": "the golden coin pile changed color!"
+          "x": 48,
+          "y": 314,
+          "w": 121,
+          "h": 167,
+          "name": "cupcake with a cherry",
+          "kind": "recolor",
+          "patch": "diff/candy_d_1_cupcake_with_a_cherry.png"
         },
         {
-          "x": 1019,
-          "y": 572,
-          "w": 113,
-          "h": 114,
-          "what": "the friendly shark fin in the water changed color!"
+          "x": 759,
+          "y": 409,
+          "w": 123,
+          "h": 261,
+          "name": "strawberry milkshake with a straw",
+          "kind": "recolor",
+          "patch": "diff/candy_d_2_strawberry_milkshake_wit.png"
         },
         {
-          "x": 521,
-          "y": 360,
-          "w": 127,
-          "h": 93,
-          "what": "the black pirate flag changed color!"
+          "x": 1084,
+          "y": 405,
+          "w": 168,
+          "h": 178,
+          "name": "donut with sprinkles",
+          "kind": "remove",
+          "patch": "diff/candy_d_3_donut_with_sprinkles.png"
+        }
+      ]
+    },
+    {
+      "id": "tidepool",
+      "name": "Tide Pool",
+      "image": "diff/tidepool_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 171,
+          "y": 100,
+          "w": 182,
+          "h": 199,
+          "name": "blue starfish",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_0_blue_starfish.png"
+        },
+        {
+          "x": 908,
+          "y": 101,
+          "w": 201,
+          "h": 212,
+          "name": "octopus peeking out",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_1_octopus_peeking_out.png"
+        },
+        {
+          "x": 402,
+          "y": 30,
+          "w": 201,
+          "h": 223,
+          "name": "purple sea urchin",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_2_purple_sea_urchin.png"
+        },
+        {
+          "x": 937,
+          "y": 533,
+          "w": 204,
+          "h": 187,
+          "name": "pink sea snail",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_3_pink_sea_snail.png"
+        }
+      ]
+    },
+    {
+      "id": "bugs",
+      "name": "Bug Garden",
+      "image": "diff/bugs_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 709,
+          "y": 206,
+          "w": 159,
+          "h": 191,
+          "name": "dragonfly",
+          "kind": "remove",
+          "patch": "diff/bugs_d_0_dragonfly.png"
+        },
+        {
+          "x": 443,
+          "y": 201,
+          "w": 142,
+          "h": 126,
+          "name": "caterpillar on a twig",
+          "kind": "remove",
+          "patch": "diff/bugs_d_1_caterpillar_on_a_twig.png"
+        },
+        {
+          "x": 1030,
+          "y": 382,
+          "w": 184,
+          "h": 130,
+          "name": "cricket",
+          "kind": "remove",
+          "patch": "diff/bugs_d_2_cricket.png"
+        },
+        {
+          "x": 671,
+          "y": 581,
+          "w": 128,
+          "h": 81,
+          "name": "pillbug",
+          "kind": "recolor",
+          "patch": "diff/bugs_d_3_pillbug.png"
+        }
+      ]
+    },
+    {
+      "id": "aquarium",
+      "name": "Aquarium",
+      "image": "diff/aquarium_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 379,
+          "y": 487,
+          "w": 240,
+          "h": 162,
+          "name": "sea turtle",
+          "kind": "remove",
+          "patch": "diff/aquarium_d_0_sea_turtle.png"
+        },
+        {
+          "x": 429,
+          "y": 159,
+          "w": 139,
+          "h": 248,
+          "name": "pink jellyfish",
+          "kind": "remove",
+          "patch": "diff/aquarium_d_1_pink_jellyfish.png"
+        },
+        {
+          "x": 705,
+          "y": 410,
+          "w": 85,
+          "h": 143,
+          "name": "diver figurine",
+          "kind": "remove",
+          "patch": "diff/aquarium_d_2_diver_figurine.png"
+        },
+        {
+          "x": 960,
+          "y": 361,
+          "w": 175,
+          "h": 173,
+          "name": "pufferfish puffed up",
+          "kind": "remove",
+          "patch": "diff/aquarium_d_3_pufferfish_puffed_up.png"
+        }
+      ]
+    },
+    {
+      "id": "playground",
+      "name": "Playground",
+      "image": "diff/playground_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 503,
+          "y": 449,
+          "w": 114,
+          "h": 76,
+          "name": "toy dump truck in the sandbox",
+          "kind": "remove",
+          "patch": "diff/playground_d_0_toy_dump_truck_in_the_sa.png"
+        },
+        {
+          "x": 816,
+          "y": 570,
+          "w": 115,
+          "h": 62,
+          "name": "paper airplane",
+          "kind": "remove",
+          "patch": "diff/playground_d_1_paper_airplane.png"
+        },
+        {
+          "x": 725,
+          "y": 193,
+          "w": 61,
+          "h": 64,
+          "name": "red kick ball",
+          "kind": "remove",
+          "patch": "diff/playground_d_2_red_kick_ball.png"
+        },
+        {
+          "x": 1005,
+          "y": 601,
+          "w": 231,
+          "h": 112,
+          "name": "skipping rope",
+          "kind": "remove",
+          "patch": "diff/playground_d_3_skipping_rope.png"
+        }
+      ]
+    },
+    {
+      "id": "savanna",
+      "name": "Savanna",
+      "image": "diff/savanna_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 339,
+          "y": 528,
+          "w": 190,
+          "h": 151,
+          "name": "tortoise",
+          "kind": "remove",
+          "patch": "diff/savanna_d_0_tortoise.png"
+        },
+        {
+          "x": 891,
+          "y": 470,
+          "w": 110,
+          "h": 184,
+          "name": "meerkat standing tall",
+          "kind": "remove",
+          "patch": "diff/savanna_d_1_meerkat_standing_tall.png"
+        },
+        {
+          "x": 1089,
+          "y": 536,
+          "w": 174,
+          "h": 184,
+          "name": "lion cub in the grass",
+          "kind": "remove",
+          "patch": "diff/savanna_d_2_lion_cub_in_the_grass.png"
+        },
+        {
+          "x": 628,
+          "y": 505,
+          "w": 172,
+          "h": 183,
+          "name": "colorful tropical bird",
+          "kind": "remove",
+          "patch": "diff/savanna_d_3_colorful_tropical_bird.png"
+        },
+        {
+          "x": 1066,
+          "y": 213,
+          "w": 164,
+          "h": 167,
+          "name": "baby elephant",
+          "kind": "remove",
+          "patch": "diff/savanna_d_4_baby_elephant.png"
         }
       ]
     }
   ],
   "hidden": [
     {
-      "id": "toybox",
-      "name": "Toy Room",
-      "image": "hidden/toybox.png",
+      "id": "jungle",
+      "name": "Jungle",
+      "image": "hidden/jungle.png",
       "w": 1280,
       "h": 720,
       "targets": [
         {
-          "id": "robot",
-          "label": "a small blue toy robot",
-          "x": 568,
-          "y": 251,
-          "w": 88,
-          "h": 123,
-          "thumb": "hidden/toybox_t_robot.png"
+          "id": "toucan",
+          "label": "a toucan with a big orange beak",
+          "x": 867,
+          "y": 240,
+          "w": 199,
+          "h": 228,
+          "thumb": "hidden/jungle_t_toucan.png"
         },
         {
-          "id": "ball",
-          "label": "a red and white beach ball",
-          "x": 654,
-          "y": 397,
-          "w": 113,
-          "h": 110,
-          "thumb": "hidden/toybox_t_ball.png"
+          "id": "parrot",
+          "label": "a red and blue parrot",
+          "x": 1111,
+          "y": 283,
+          "w": 152,
+          "h": 294,
+          "thumb": "hidden/jungle_t_parrot.png"
         },
         {
-          "id": "boat",
-          "label": "a little toy sailboat",
-          "x": 1149,
-          "y": 212,
-          "w": 112,
-          "h": 134,
-          "thumb": "hidden/toybox_t_boat.png"
+          "id": "chameleon",
+          "label": "a purple chameleon",
+          "x": 315,
+          "y": 457,
+          "w": 175,
+          "h": 169,
+          "thumb": "hidden/jungle_t_chameleon.png"
         },
         {
-          "id": "drum",
-          "label": "a little toy drum",
-          "x": 36,
-          "y": 584,
-          "w": 122,
+          "id": "turtle",
+          "label": "a small green turtle",
+          "x": 796,
+          "y": 592,
+          "w": 170,
           "h": 112,
-          "thumb": "hidden/toybox_t_drum.png"
+          "thumb": "hidden/jungle_t_turtle.png"
         },
         {
-          "id": "duck",
-          "label": "a yellow rubber duck",
-          "x": 703,
-          "y": 274,
-          "w": 71,
-          "h": 67,
-          "thumb": "hidden/toybox_t_duck.png"
+          "id": "frog",
+          "label": "a plump orange frog",
+          "x": 43,
+          "y": 269,
+          "w": 152,
+          "h": 145,
+          "thumb": "hidden/jungle_t_frog.png"
+        },
+        {
+          "id": "egg",
+          "label": "a big spotted egg in a nest",
+          "x": 151,
+          "y": 517,
+          "w": 137,
+          "h": 150,
+          "thumb": "hidden/jungle_t_egg.png"
         }
-      ],
-      "level": "medium"
+      ]
     },
     {
       "id": "ballroom",
@@ -873,545 +794,67 @@
         {
           "id": "pumpkin",
           "label": "a round orange pumpkin carriage",
-          "x": 557,
-          "y": 301,
-          "w": 170,
-          "h": 147,
+          "x": 249,
+          "y": 342,
+          "w": 200,
+          "h": 189,
           "thumb": "hidden/ballroom_t_pumpkin.png"
         },
         {
-          "id": "mirror",
-          "label": "a golden hand mirror",
-          "x": 4,
-          "y": 489,
-          "w": 88,
-          "h": 157,
-          "thumb": "hidden/ballroom_t_mirror.png"
+          "id": "frog",
+          "label": "a green frog wearing a tiny crown",
+          "x": 1161,
+          "y": 549,
+          "w": 93,
+          "h": 108,
+          "thumb": "hidden/ballroom_t_frog.png"
+        },
+        {
+          "id": "crown",
+          "label": "a golden crown on a cushion",
+          "x": 93,
+          "y": 528,
+          "w": 108,
+          "h": 89,
+          "thumb": "hidden/ballroom_t_crown.png"
         },
         {
           "id": "gift",
           "label": "a wrapped pink gift box",
-          "x": 175,
-          "y": 471,
-          "w": 82,
-          "h": 82,
+          "x": 764,
+          "y": 361,
+          "w": 79,
+          "h": 83,
           "thumb": "hidden/ballroom_t_gift.png"
         },
         {
           "id": "cake",
           "label": "a slice of strawberry cake",
-          "x": 1191,
-          "y": 499,
-          "w": 81,
-          "h": 79,
+          "x": 88,
+          "y": 370,
+          "w": 63,
+          "h": 62,
           "thumb": "hidden/ballroom_t_cake.png"
         },
         {
           "id": "teddy",
           "label": "a royal teddy bear with a red cape",
-          "x": 807,
-          "y": 300,
-          "w": 91,
-          "h": 107,
-          "thumb": "hidden/ballroom_t_teddy.png"
-        }
-      ],
-      "level": "hard"
-    },
-    {
-      "id": "fairy",
-      "name": "Fairy Garden",
-      "image": "hidden/fairy.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "hedgehog",
-          "label": "a small brown hedgehog",
-          "x": 128,
-          "y": 598,
-          "w": 125,
-          "h": 92,
-          "thumb": "hidden/fairy_t_hedgehog.png"
-        },
-        {
-          "id": "teacup",
-          "label": "a pink teacup",
-          "x": 1076,
-          "y": 456,
-          "w": 142,
-          "h": 99,
-          "thumb": "hidden/fairy_t_teacup.png"
-        },
-        {
-          "id": "unicorn",
-          "label": "a tiny white unicorn with a rainbow mane",
-          "x": 459,
-          "y": 354,
-          "w": 117,
-          "h": 94,
-          "thumb": "hidden/fairy_t_unicorn.png"
-        },
-        {
-          "id": "toadstool",
-          "label": "a red toadstool with white dots",
-          "x": 816,
-          "y": 338,
-          "w": 163,
-          "h": 179,
-          "thumb": "hidden/fairy_t_toadstool.png"
-        },
-        {
-          "id": "snail",
-          "label": "a little snail with a spiral shell",
-          "x": 861,
-          "y": 595,
-          "w": 135,
-          "h": 91,
-          "thumb": "hidden/fairy_t_snail.png"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "cabin",
-      "name": "Snowy Cabin",
-      "image": "hidden/cabin.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "cat",
-          "label": "a sleeping ginger cat",
-          "x": 429,
-          "y": 567,
-          "w": 196,
-          "h": 121,
-          "thumb": "hidden/cabin_t_cat.png"
-        },
-        {
-          "id": "book",
-          "label": "a red storybook",
-          "x": 1103,
-          "y": 367,
-          "w": 155,
-          "h": 78,
-          "thumb": "hidden/cabin_t_book.png"
-        },
-        {
-          "id": "candle",
-          "label": "a lit candle",
-          "x": 1022,
-          "y": 299,
-          "w": 46,
-          "h": 117,
-          "thumb": "hidden/cabin_t_candle.png"
-        },
-        {
-          "id": "bell",
-          "label": "a golden bell",
-          "x": 865,
-          "y": 77,
-          "w": 89,
-          "h": 107,
-          "thumb": "hidden/cabin_t_bell.png"
-        },
-        {
-          "id": "mitten",
-          "label": "a red knitted mitten",
-          "x": 752,
-          "y": 542,
-          "w": 104,
-          "h": 76,
-          "thumb": "hidden/cabin_t_mitten.png"
-        }
-      ],
-      "level": "hard"
-    },
-    {
-      "id": "shed",
-      "name": "Garden Shed",
-      "image": "hidden/shed.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "ladybug",
-          "label": "a big ladybug",
-          "x": 160,
-          "y": 397,
-          "w": 145,
-          "h": 113,
-          "thumb": "hidden/shed_t_ladybug.png"
-        },
-        {
-          "id": "mouse",
-          "label": "a plump field mouse",
-          "x": 654,
-          "y": 470,
-          "w": 189,
-          "h": 132,
-          "thumb": "hidden/shed_t_mouse.png"
-        },
-        {
-          "id": "apple",
-          "label": "a shiny red apple",
-          "x": 1082,
-          "y": 513,
-          "w": 99,
-          "h": 109,
-          "thumb": "hidden/shed_t_apple.png"
-        },
-        {
-          "id": "carrot",
-          "label": "a bunch of carrots",
-          "x": 701,
-          "y": 228,
-          "w": 206,
-          "h": 159,
-          "thumb": "hidden/shed_t_carrot.png"
-        },
-        {
-          "id": "spider",
-          "label": "a friendly cartoon spider",
-          "x": 267,
-          "y": 151,
-          "w": 136,
-          "h": 104,
-          "thumb": "hidden/shed_t_spider.png"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "treasure",
-      "name": "Treasure Room",
-      "image": "hidden/treasure.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "key",
-          "label": "a big chunky golden key",
-          "x": 563,
-          "y": 392,
-          "w": 164,
-          "h": 90,
-          "thumb": "hidden/treasure_t_key.png"
-        },
-        {
-          "id": "crown",
-          "label": "a jeweled golden crown",
-          "x": 396,
-          "y": 304,
-          "w": 129,
-          "h": 103,
-          "thumb": "hidden/treasure_t_crown.png"
-        },
-        {
-          "id": "parrot",
-          "label": "a green parrot",
-          "x": 1076,
-          "y": 186,
-          "w": 177,
-          "h": 190,
-          "thumb": "hidden/treasure_t_parrot.png"
-        },
-        {
-          "id": "goblet",
-          "label": "a silver goblet",
-          "x": 702,
-          "y": 499,
-          "w": 102,
-          "h": 133,
-          "thumb": "hidden/treasure_t_goblet.png"
-        },
-        {
-          "id": "skullhat",
-          "label": "a pirate hat",
-          "x": 668,
-          "y": 249,
-          "w": 136,
-          "h": 98,
-          "thumb": "hidden/treasure_t_skullhat.png"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "petshop",
-      "name": "Pet Shop",
-      "image": "hidden/petshop.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "parakeet",
-          "label": "a blue parakeet",
-          "x": 809,
-          "y": 133,
-          "w": 82,
-          "h": 128,
-          "thumb": "hidden/petshop_t_parakeet.png"
-        },
-        {
-          "id": "turtle",
-          "label": "a tiny pet turtle",
-          "x": 1003,
-          "y": 83,
-          "w": 77,
-          "h": 54,
-          "thumb": "hidden/petshop_t_turtle.png"
-        },
-        {
-          "id": "hamster",
-          "label": "a hamster in a wheel",
-          "x": 1094,
-          "y": 500,
-          "w": 175,
-          "h": 164,
-          "thumb": "hidden/petshop_t_hamster.png"
-        },
-        {
-          "id": "bunny",
-          "label": "a lop-eared bunny",
-          "x": 672,
-          "y": 552,
-          "w": 196,
-          "h": 126,
-          "thumb": "hidden/petshop_t_bunny.png"
-        },
-        {
-          "id": "goldfish",
-          "label": "a goldfish in a bag",
-          "x": 223,
-          "y": 165,
-          "w": 115,
-          "h": 158,
-          "thumb": "hidden/petshop_t_goldfish.png"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "space_station",
-      "name": "Space Station",
-      "image": "hidden/space_station.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "alien",
-          "label": "a small green alien buddy",
-          "x": 915,
-          "y": 189,
-          "w": 132,
-          "h": 145,
-          "thumb": "hidden/space_station_t_alien.png"
-        },
-        {
-          "id": "star",
-          "label": "a bright gold star ornament",
-          "x": 583,
-          "y": 107,
+          "x": 1012,
+          "y": 385,
           "w": 114,
-          "h": 109,
-          "thumb": "hidden/space_station_t_star.png"
-        },
-        {
-          "id": "rocketship",
-          "label": "a tiny toy rocket",
-          "x": 994,
-          "y": 504,
-          "w": 89,
-          "h": 119,
-          "thumb": "hidden/space_station_t_rocketship.png"
-        },
-        {
-          "id": "banana",
-          "label": "a floating banana",
-          "x": 431,
-          "y": 206,
-          "w": 82,
-          "h": 99,
-          "thumb": "hidden/space_station_t_banana.png"
-        },
-        {
-          "id": "planet",
-          "label": "a small striped planet model",
-          "x": 1124,
-          "y": 472,
-          "w": 130,
-          "h": 94,
-          "thumb": "hidden/space_station_t_planet.png"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "pond",
-      "name": "Frog Pond",
-      "image": "hidden/pond.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "heron",
-          "label": "a white heron",
-          "x": 1001,
-          "y": 121,
-          "w": 199,
-          "h": 305,
-          "thumb": "hidden/pond_t_heron.png"
-        },
-        {
-          "id": "boat",
-          "label": "a tiny paper boat",
-          "x": 800,
-          "y": 314,
-          "w": 120,
-          "h": 69,
-          "thumb": "hidden/pond_t_boat.png"
-        },
-        {
-          "id": "duckling",
-          "label": "a fluffy yellow duckling",
-          "x": 150,
-          "y": 369,
-          "w": 131,
           "h": 127,
-          "thumb": "hidden/pond_t_duckling.png"
+          "thumb": "hidden/ballroom_t_teddy.png"
         },
         {
-          "id": "fish",
-          "label": "an orange koi fish",
-          "x": 499,
-          "y": 351,
-          "w": 263,
-          "h": 134,
-          "thumb": "hidden/pond_t_fish.png"
-        },
-        {
-          "id": "beaver",
-          "label": "a busy beaver",
-          "x": 396,
-          "y": 152,
-          "w": 176,
-          "h": 100,
-          "thumb": "hidden/pond_t_beaver.png"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "workshop",
-      "name": "Toy Workshop",
-      "image": "hidden/workshop.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "dice",
-          "label": "a big red die",
-          "x": 1119,
-          "y": 428,
-          "w": 149,
-          "h": 136,
-          "thumb": "hidden/workshop_t_dice.png"
-        },
-        {
-          "id": "bear",
-          "label": "a small stuffed bear",
-          "x": 153,
-          "y": 209,
-          "w": 106,
-          "h": 136,
-          "thumb": "hidden/workshop_t_bear.png"
-        },
-        {
-          "id": "robot",
-          "label": "a wind-up robot toy",
-          "x": 280,
-          "y": 220,
-          "w": 133,
-          "h": 174,
-          "thumb": "hidden/workshop_t_robot.png"
-        },
-        {
-          "id": "plane",
-          "label": "a small wooden toy plane",
-          "x": 329,
-          "y": 581,
-          "w": 185,
-          "h": 130,
-          "thumb": "hidden/workshop_t_plane.png"
-        },
-        {
-          "id": "brush",
-          "label": "a paintbrush with red paint",
-          "x": 458,
-          "y": 349,
-          "w": 150,
-          "h": 60,
-          "thumb": "hidden/workshop_t_brush.png"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "kitchenb",
-      "name": "Bakery Kitchen",
-      "image": "hidden/kitchenb.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "rollingpin",
-          "label": "a wooden rolling pin",
-          "x": 686,
-          "y": 426,
-          "w": 209,
-          "h": 120,
-          "thumb": "hidden/kitchenb_t_rollingpin.png"
-        },
-        {
-          "id": "jam",
-          "label": "a jar of strawberry jam",
-          "x": 50,
-          "y": 225,
-          "w": 86,
+          "id": "mirror",
+          "label": "a golden hand mirror",
+          "x": 666,
+          "y": 415,
+          "w": 62,
           "h": 103,
-          "thumb": "hidden/kitchenb_t_jam.png"
-        },
-        {
-          "id": "egg",
-          "label": "a brown egg",
-          "x": 240,
-          "y": 35,
-          "w": 75,
-          "h": 85,
-          "thumb": "hidden/kitchenb_t_egg.png"
-        },
-        {
-          "id": "teapot",
-          "label": "a polka-dot teapot",
-          "x": 1079,
-          "y": 17,
-          "w": 161,
-          "h": 120,
-          "thumb": "hidden/kitchenb_t_teapot.png"
-        },
-        {
-          "id": "pretzel",
-          "label": "a golden pretzel",
-          "x": 1087,
-          "y": 186,
-          "w": 126,
-          "h": 107,
-          "thumb": "hidden/kitchenb_t_pretzel.png"
+          "thumb": "hidden/ballroom_t_mirror.png"
         }
-      ],
-      "level": "medium"
+      ]
     },
     {
       "id": "picnic",
@@ -1423,432 +866,254 @@
         {
           "id": "ball",
           "label": "a striped beach ball",
-          "x": 1028,
-          "y": 361,
-          "w": 153,
-          "h": 147,
+          "x": 1050,
+          "y": 290,
+          "w": 156,
+          "h": 150,
           "thumb": "hidden/picnic_t_ball.png"
         },
         {
-          "id": "shell",
-          "label": "a big pink conch shell",
-          "x": 871,
-          "y": 440,
-          "w": 124,
-          "h": 102,
-          "thumb": "hidden/picnic_t_shell.png"
-        },
-        {
-          "id": "watermelon",
-          "label": "a watermelon slice",
-          "x": 540,
-          "y": 587,
-          "w": 142,
-          "h": 92,
-          "thumb": "hidden/picnic_t_watermelon.png"
+          "id": "bucket",
+          "label": "a blue sand bucket",
+          "x": 225,
+          "y": 517,
+          "w": 136,
+          "h": 137,
+          "thumb": "hidden/picnic_t_bucket.png"
         },
         {
           "id": "crab",
           "label": "a little red crab",
-          "x": 94,
-          "y": 398,
-          "w": 101,
-          "h": 95,
+          "x": 35,
+          "y": 479,
+          "w": 118,
+          "h": 108,
           "thumb": "hidden/picnic_t_crab.png"
+        },
+        {
+          "id": "watermelon",
+          "label": "a watermelon slice",
+          "x": 418,
+          "y": 495,
+          "w": 134,
+          "h": 101,
+          "thumb": "hidden/picnic_t_watermelon.png"
         },
         {
           "id": "cookie",
           "label": "a chocolate chip cookie",
-          "x": 234,
-          "y": 574,
-          "w": 90,
-          "h": 61,
-          "thumb": "hidden/picnic_t_cookie.png"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "jungle",
-      "name": "Jungle",
-      "image": "hidden/jungle.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "frog",
-          "label": "a plump orange frog",
-          "x": 1009,
-          "y": 567,
-          "w": 131,
-          "h": 114,
-          "thumb": "hidden/jungle_t_frog.png"
-        },
-        {
-          "id": "parrot",
-          "label": "a red and blue parrot",
-          "x": 742,
-          "y": 229,
-          "w": 127,
-          "h": 159,
-          "thumb": "hidden/jungle_t_parrot.png"
-        },
-        {
-          "id": "turtle",
-          "label": "a small green turtle",
-          "x": 741,
-          "y": 572,
-          "w": 141,
-          "h": 106,
-          "thumb": "hidden/jungle_t_turtle.png"
-        },
-        {
-          "id": "pineapple",
-          "label": "a pineapple",
-          "x": 220,
-          "y": 457,
-          "w": 82,
-          "h": 157,
-          "thumb": "hidden/jungle_t_pineapple.png"
-        },
-        {
-          "id": "owl",
-          "label": "a round brown owl",
-          "x": 1143,
-          "y": 187,
+          "x": 701,
+          "y": 511,
           "w": 103,
-          "h": 126,
-          "thumb": "hidden/jungle_t_owl.png"
+          "h": 67,
+          "thumb": "hidden/picnic_t_cookie.png"
+        },
+        {
+          "id": "juice",
+          "label": "a juice box with a straw",
+          "x": 852,
+          "y": 509,
+          "w": 94,
+          "h": 122,
+          "thumb": "hidden/picnic_t_juice.png"
         }
-      ],
-      "level": "medium"
+      ]
     },
     {
-      "id": "dinonest",
-      "name": "Dino Nest",
-      "image": "hidden/dinonest.png",
+      "id": "cabin",
+      "name": "Snowy Cabin",
+      "image": "hidden/cabin.png",
       "w": 1280,
       "h": 720,
       "targets": [
-        {
-          "id": "frog",
-          "label": "a plump green frog",
-          "x": 938,
-          "y": 349,
-          "w": 140,
-          "h": 130,
-          "thumb": "hidden/dinonest_t_frog.png"
-        },
-        {
-          "id": "snail",
-          "label": "a big snail",
-          "x": 49,
-          "y": 263,
-          "w": 180,
-          "h": 146,
-          "thumb": "hidden/dinonest_t_snail.png"
-        },
-        {
-          "id": "bone",
-          "label": "a big cartoon bone",
-          "x": 904,
-          "y": 537,
-          "w": 246,
-          "h": 147,
-          "thumb": "hidden/dinonest_t_bone.png"
-        },
-        {
-          "id": "babydino",
-          "label": "a baby dinosaur hatching from an egg",
-          "x": 553,
-          "y": 193,
-          "w": 115,
-          "h": 148,
-          "thumb": "hidden/dinonest_t_babydino.png"
-        },
-        {
-          "id": "beetle",
-          "label": "a shiny blue beetle",
-          "x": 547,
-          "y": 415,
-          "w": 110,
-          "h": 96,
-          "thumb": "hidden/dinonest_t_beetle.png"
-        }
-      ],
-      "level": "easy"
-    },
-    {
-      "id": "depot",
-      "name": "Train Depot",
-      "image": "hidden/depot.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "pigeon",
-          "label": "a plump pigeon",
-          "x": 953,
-          "y": 81,
-          "w": 95,
-          "h": 93,
-          "thumb": "hidden/depot_t_pigeon.png"
-        },
         {
           "id": "cat",
-          "label": "a black and white cat",
-          "x": 1128,
-          "y": 260,
-          "w": 114,
-          "h": 86,
-          "thumb": "hidden/depot_t_cat.png"
+          "label": "a sleeping ginger cat",
+          "x": 449,
+          "y": 551,
+          "w": 222,
+          "h": 128,
+          "thumb": "hidden/cabin_t_cat.png"
         },
         {
-          "id": "barrel",
-          "label": "a wooden barrel of apples",
-          "x": 990,
-          "y": 432,
-          "w": 105,
-          "h": 115,
-          "thumb": "hidden/depot_t_barrel.png"
+          "id": "pinecone",
+          "label": "a big pinecone",
+          "x": 823,
+          "y": 113,
+          "w": 101,
+          "h": 119,
+          "thumb": "hidden/cabin_t_pinecone.png"
         },
         {
-          "id": "whistle",
-          "label": "a golden train whistle",
-          "x": 824,
-          "y": 599,
-          "w": 136,
-          "h": 104,
-          "thumb": "hidden/depot_t_whistle.png"
+          "id": "cocoa",
+          "label": "a mug of hot cocoa with marshmallows",
+          "x": 581,
+          "y": 306,
+          "w": 95,
+          "h": 82,
+          "thumb": "hidden/cabin_t_cocoa.png"
         },
         {
-          "id": "clock",
-          "label": "a round station clock",
-          "x": 158,
-          "y": 238,
-          "w": 84,
-          "h": 86,
-          "thumb": "hidden/depot_t_clock.png"
+          "id": "candle",
+          "label": "a lit candle",
+          "x": 1094,
+          "y": 81,
+          "w": 51,
+          "h": 143,
+          "thumb": "hidden/cabin_t_candle.png"
+        },
+        {
+          "id": "bell",
+          "label": "a golden bell",
+          "x": 1121,
+          "y": 304,
+          "w": 85,
+          "h": 84,
+          "thumb": "hidden/cabin_t_bell.png"
+        },
+        {
+          "id": "scarf",
+          "label": "a striped scarf",
+          "x": 32,
+          "y": 240,
+          "w": 157,
+          "h": 243,
+          "thumb": "hidden/cabin_t_scarf.png"
         }
-      ],
-      "level": "hard"
+      ]
     },
     {
-      "id": "tent",
-      "name": "Inside the Tent",
-      "image": "hidden/tent.png",
+      "id": "treasure",
+      "name": "Treasure Room",
+      "image": "hidden/treasure.png",
       "w": 1280,
       "h": 720,
       "targets": [
         {
-          "id": "thermos",
-          "label": "a green thermos",
-          "x": 739,
-          "y": 250,
-          "w": 93,
-          "h": 173,
-          "thumb": "hidden/tent_t_thermos.png"
+          "id": "parrot",
+          "label": "a green parrot",
+          "x": 944,
+          "y": 226,
+          "w": 107,
+          "h": 170,
+          "thumb": "hidden/treasure_t_parrot.png"
         },
         {
-          "id": "sock",
-          "label": "a red striped sock",
-          "x": 375,
-          "y": 489,
-          "w": 146,
-          "h": 96,
-          "thumb": "hidden/tent_t_sock.png"
+          "id": "map",
+          "label": "a rolled treasure map",
+          "x": 52,
+          "y": 534,
+          "w": 215,
+          "h": 137,
+          "thumb": "hidden/treasure_t_map.png"
         },
         {
-          "id": "flashlight",
-          "label": "a yellow flashlight",
-          "x": 694,
-          "y": 488,
-          "w": 136,
-          "h": 80,
-          "thumb": "hidden/tent_t_flashlight.png"
+          "id": "crown",
+          "label": "a jeweled golden crown",
+          "x": 578,
+          "y": 236,
+          "w": 124,
+          "h": 92,
+          "thumb": "hidden/treasure_t_crown.png"
         },
         {
-          "id": "harmonica",
-          "label": "a shiny harmonica",
-          "x": 312,
-          "y": 621,
-          "w": 137,
-          "h": 83,
-          "thumb": "hidden/tent_t_harmonica.png"
+          "id": "key",
+          "label": "a big chunky golden key",
+          "x": 745,
+          "y": 338,
+          "w": 119,
+          "h": 185,
+          "thumb": "hidden/treasure_t_key.png"
+        },
+        {
+          "id": "skullhat",
+          "label": "a pirate hat",
+          "x": 88,
+          "y": 278,
+          "w": 165,
+          "h": 98,
+          "thumb": "hidden/treasure_t_skullhat.png"
         },
         {
           "id": "compass",
-          "label": "a round compass",
-          "x": 812,
-          "y": 625,
-          "w": 112,
-          "h": 87,
-          "thumb": "hidden/tent_t_compass.png"
+          "label": "a golden compass",
+          "x": 1069,
+          "y": 511,
+          "w": 176,
+          "h": 181,
+          "thumb": "hidden/treasure_t_compass.png"
+        },
+        {
+          "id": "pearl",
+          "label": "a giant pearl in an open shell",
+          "x": 895,
+          "y": 532,
+          "w": 75,
+          "h": 72,
+          "thumb": "hidden/treasure_t_pearl.png"
         }
-      ],
-      "level": "medium"
+      ]
     },
     {
-      "id": "kitchen",
-      "name": "Kitchen",
-      "image": "hidden/kitchen.png",
+      "id": "kitchenb",
+      "name": "Bakery Kitchen",
+      "image": "hidden/kitchenb.png",
       "w": 1280,
       "h": 720,
       "targets": [
         {
+          "id": "rollingpin",
+          "label": "a wooden rolling pin",
+          "x": 426,
+          "y": 489,
+          "w": 222,
+          "h": 80,
+          "thumb": "hidden/kitchenb_t_rollingpin.png"
+        },
+        {
+          "id": "pretzel",
+          "label": "a golden pretzel",
+          "x": 923,
+          "y": 473,
+          "w": 122,
+          "h": 100,
+          "thumb": "hidden/kitchenb_t_pretzel.png"
+        },
+        {
+          "id": "jam",
+          "label": "a jar of strawberry jam",
+          "x": 14,
+          "y": 84,
+          "w": 84,
+          "h": 109,
+          "thumb": "hidden/kitchenb_t_jam.png"
+        },
+        {
+          "id": "egg",
+          "label": "a brown egg",
+          "x": 784,
+          "y": 631,
+          "w": 68,
+          "h": 74,
+          "thumb": "hidden/kitchenb_t_egg.png"
+        },
+        {
           "id": "teapot",
-          "label": "a blue teapot",
-          "x": 280,
-          "y": 330,
-          "w": 129,
-          "h": 104,
-          "thumb": "hidden/kitchen_t_teapot.png"
+          "label": "a polka-dot teapot",
+          "x": 428,
+          "y": 47,
+          "w": 138,
+          "h": 135,
+          "thumb": "hidden/kitchenb_t_teapot.png"
         },
         {
           "id": "mouse",
-          "label": "a plump grey mouse",
-          "x": 833,
-          "y": 516,
-          "w": 151,
-          "h": 125,
-          "thumb": "hidden/kitchen_t_mouse.png"
-        },
-        {
-          "id": "clock",
-          "label": "a red alarm clock",
-          "x": 880,
-          "y": 266,
-          "w": 72,
-          "h": 89,
-          "thumb": "hidden/kitchen_t_clock.png"
-        },
-        {
-          "id": "cupcake",
-          "label": "a pink frosted cupcake",
-          "x": 96,
-          "y": 14,
-          "w": 80,
-          "h": 100,
-          "thumb": "hidden/kitchen_t_cupcake.png"
-        },
-        {
-          "id": "donut",
-          "label": "a pink frosted donut",
-          "x": 1175,
-          "y": 261,
-          "w": 78,
-          "h": 77,
-          "thumb": "hidden/kitchen_t_donut.png"
-        }
-      ],
-      "level": "hard"
-    },
-    {
-      "id": "orchard",
-      "name": "Apple Orchard",
-      "image": "hidden/orchard.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "butterfly",
-          "label": "a yellow butterfly",
-          "x": 897,
-          "y": 504,
-          "w": 75,
-          "h": 78,
-          "thumb": "hidden/orchard_t_butterfly.png"
-        },
-        {
-          "id": "squirrel",
-          "label": "a red squirrel",
-          "x": 204,
-          "y": 398,
-          "w": 111,
-          "h": 107,
-          "thumb": "hidden/orchard_t_squirrel.png"
-        },
-        {
-          "id": "basket",
-          "label": "a basket overflowing with apples",
-          "x": 340,
-          "y": 391,
-          "w": 94,
-          "h": 100,
-          "thumb": "hidden/orchard_t_basket.png"
-        },
-        {
-          "id": "crow",
-          "label": "a plump black crow",
-          "x": 1117,
-          "y": 404,
-          "w": 149,
-          "h": 123,
-          "thumb": "hidden/orchard_t_crow.png"
-        },
-        {
-          "id": "jug",
-          "label": "a jug of apple cider",
-          "x": 1010,
-          "y": 557,
-          "w": 117,
-          "h": 146,
-          "thumb": "hidden/orchard_t_jug.png"
-        }
-      ],
-      "level": "medium"
-    },
-    {
-      "id": "fairground",
-      "name": "Fairground",
-      "image": "hidden/fairground.png",
-      "w": 1280,
-      "h": 720,
-      "targets": [
-        {
-          "id": "lantern",
-          "label": "a round red paper lantern",
-          "x": 847,
-          "y": 88,
-          "w": 123,
-          "h": 130,
-          "thumb": "hidden/fairground_t_lantern.png"
-        },
-        {
-          "id": "pinwheel",
-          "label": "a rainbow pinwheel",
-          "x": 869,
-          "y": 441,
-          "w": 114,
-          "h": 125,
-          "thumb": "hidden/fairground_t_pinwheel.png"
-        },
-        {
-          "id": "monkey",
-          "label": "a wind-up toy monkey with cymbals",
-          "x": 157,
-          "y": 373,
-          "w": 121,
-          "h": 149,
-          "thumb": "hidden/fairground_t_monkey.png"
-        },
-        {
-          "id": "goldfish",
-          "label": "a goldfish in a clear water bag",
-          "x": 1178,
-          "y": 354,
-          "w": 77,
-          "h": 61,
-          "thumb": "hidden/fairground_t_goldfish.png"
-        },
-        {
-          "id": "ticket",
-          "label": "a roll of golden tickets",
-          "x": 1016,
-          "y": 452,
-          "w": 80,
-          "h": 62,
-          "thumb": "hidden/fairground_t_ticket.png"
+          "label": "a tiny mouse with a crumb",
+          "x": 1162,
+          "y": 536,
+          "w": 100,
+          "h": 95,
+          "thumb": "hidden/kitchenb_t_mouse.png"
         }
       ]
     }
