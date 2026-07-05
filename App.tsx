@@ -22,6 +22,8 @@ import { MemoryGame } from './src/games/memory/MemoryGame';
 import { OddOneGame } from './src/games/oddone/OddOneGame';
 import { ShadowGame } from './src/games/shadow/ShadowGame';
 import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
+import { StickerGame } from './src/games/sticker/StickerGame';
+import { StoryGame } from './src/games/story/StoryGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { manifest } from './src/manifest';
@@ -41,7 +43,7 @@ export default function App() {
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const screen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const param = parts.param;
@@ -78,6 +80,22 @@ export default function App() {
           onBackToPicker={() => navigate('hidden')}
         />
       )}
+      {screen === 'sticker' && (
+        <StickerGame
+          onHome={goHome}
+          sceneId={param}
+          onPickScene={(id) => navigate(`sticker/${id}`)}
+          onBackToPicker={() => navigate('sticker')}
+        />
+      )}
+      {screen === 'story' && (
+        <StoryGame
+          onHome={goHome}
+          sceneId={param}
+          onPickScene={(id) => navigate(`story/${id}`)}
+          onBackToPicker={() => navigate('story')}
+        />
+      )}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} />}
@@ -105,6 +123,8 @@ const GAME_CARDS = [
   { route: 'shadow', color: colors.ink, title: 'Shadow Match', blurb: 'Whose shadow is that? Match it!', preview: 'icons13' },
   { route: 'oddone', color: '#E8874F', title: 'Odd One Out', blurb: 'Which one does not belong?', preview: 'icons20' },
   { route: 'rules', color: '#3E9BB8', title: 'Rule Time!', blurb: 'Follow the rule — tap the right ones!', preview: 'rules' },
+  { route: 'sticker', color: '#D66FA8', title: 'Sticker Party', blurb: 'Decorate scenes with silly stickers!', preview: 'icons0' },
+  { route: 'story', color: '#7A6FD6', title: 'Story Path', blurb: 'Pick what happens next in the tale!', preview: 'story' },
 ];
 
 function Menu({
@@ -131,6 +151,11 @@ function Menu({
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
     if (key === 'rules') return <RulesPreview />;
+    if (key === 'story') {
+      const st = manifest.stories?.[0];
+      if (st) return <Image source={SCENE_THUMBS[st.nodes.start.image] ?? SCENE_IMAGES[st.nodes.start.image]} style={styles.preview} />;
+      return <RulesPreview />;
+    }
     const scene =
       key === 'diff'
         ? (manifest.diff.find((d) => d.id === 'unicorn') ?? manifest.diff[0])
@@ -138,7 +163,8 @@ function Menu({
           ? (manifest.hidden.find((h) => h.id === 'ballroom') ?? manifest.hidden[0])
           : (manifest.diff.find((d) => d.id === 'princess') ?? manifest.diff[0]);
     if (!scene) return null;
-    const imgKey = 'imageA' in scene ? (scene as { imageA: string }).imageA : (scene as { image: string }).image;
+    const sAny = scene as { imageA?: string; image?: string };
+    const imgKey = (sAny.image ?? sAny.imageA)!;
     const src = SCENE_THUMBS[imgKey] ?? SCENE_IMAGES[imgKey];
     return <Image source={src} style={styles.preview} />;
   };
