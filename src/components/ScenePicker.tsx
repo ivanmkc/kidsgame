@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SCENE_IMAGES } from '../assets/images';
+import { SCENE_IMAGES, SCENE_THUMBS } from '../assets/images';
 import { colors, fonts, shadows } from '../theme';
 
 export interface SceneOption {
@@ -40,7 +40,7 @@ export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
               testID={`scene-pick-${o.id}`}
               style={({ pressed }) => [styles.card, shadows.sticker, pressed && styles.pressed]}
             >
-              <Image source={SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
+              <Image source={SCENE_THUMBS[o.image] ?? SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
               <Text style={styles.name}>{o.name}</Text>
               {o.flagged ? (
                 <View style={styles.flagBadge} testID={`scene-flagged-${o.id}`}>
