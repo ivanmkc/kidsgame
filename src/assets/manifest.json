@@ -463,6 +463,158 @@
         }
       ],
       "level": "hard"
+    },
+    {
+      "id": "savanna",
+      "name": "Savanna",
+      "imageA": "diff/savanna_a.png",
+      "imageB": "diff/savanna_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 718,
+          "y": 477,
+          "w": 217,
+          "h": 163,
+          "what": "a lion cub in the grass appeared"
+        },
+        {
+          "x": 31,
+          "y": 481,
+          "w": 195,
+          "h": 234,
+          "what": "a colorful tropical bird appeared"
+        },
+        {
+          "x": 982,
+          "y": 297,
+          "w": 255,
+          "h": 263,
+          "what": "the baby elephant is missing"
+        },
+        {
+          "x": 1031,
+          "y": 578,
+          "w": 192,
+          "h": 142,
+          "what": "the tortoise is missing"
+        }
+      ]
+    },
+    {
+      "id": "bugs",
+      "name": "Bug Garden",
+      "imageA": "diff/bugs_a.png",
+      "imageB": "diff/bugs_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 819,
+          "y": 21,
+          "w": 148,
+          "h": 177,
+          "what": "a dragonfly appeared"
+        },
+        {
+          "x": 436,
+          "y": 595,
+          "w": 181,
+          "h": 125,
+          "what": "a little pillbug appeared"
+        },
+        {
+          "x": 1029,
+          "y": 521,
+          "w": 178,
+          "h": 171,
+          "what": "the cricket is missing"
+        },
+        {
+          "x": 706,
+          "y": 566,
+          "w": 145,
+          "h": 154,
+          "what": "the caterpillar on a twig is missing"
+        }
+      ]
+    },
+    {
+      "id": "party",
+      "name": "Party",
+      "imageA": "diff/party_a.png",
+      "imageB": "diff/party_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 494,
+          "y": 483,
+          "w": 152,
+          "h": 220,
+          "what": "a red toy robot appeared"
+        },
+        {
+          "x": 237,
+          "y": 551,
+          "w": 212,
+          "h": 154,
+          "what": "a sleeping orange cat appeared"
+        },
+        {
+          "x": 28,
+          "y": 472,
+          "w": 180,
+          "h": 231,
+          "what": "the toy sailboat is missing"
+        },
+        {
+          "x": 694,
+          "y": 500,
+          "w": 103,
+          "h": 199,
+          "what": "the pinwheel toy is missing"
+        }
+      ]
+    },
+    {
+      "id": "unicorn",
+      "name": "Unicorn Meadow",
+      "imageA": "diff/unicorn_a.png",
+      "imageB": "diff/unicorn_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 1071,
+          "y": 554,
+          "w": 149,
+          "h": 161,
+          "what": "a bluebird appeared"
+        },
+        {
+          "x": 827,
+          "y": 342,
+          "w": 144,
+          "h": 145,
+          "what": "a baby unicorn appeared"
+        },
+        {
+          "x": 75,
+          "y": 415,
+          "w": 85,
+          "h": 115,
+          "what": "the pink butterfly is missing"
+        },
+        {
+          "x": 702,
+          "y": 264,
+          "w": 107,
+          "h": 143,
+          "what": "the floating star wand is missing"
+        }
+      ]
     }
   ],
   "hidden": [
