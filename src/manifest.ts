@@ -15,6 +15,7 @@ export interface DiffScene {
   id: string;
   name: string;
   flagged?: boolean;
+  level?: 'easy' | 'medium' | 'hard';
   imageA: string;
   imageB: string;
   w: number;
@@ -32,6 +33,7 @@ export interface HiddenScene {
   id: string;
   name: string;
   flagged?: boolean;
+  level?: 'easy' | 'medium' | 'hard';
   image: string;
   w: number;
   h: number;

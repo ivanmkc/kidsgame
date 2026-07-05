@@ -2,11 +2,13 @@ import React, { useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
+import { sfx } from '../../sound';
 import { CATEGORY_TEXT } from '../iconCategories';
 import { makeOddOneRound } from './logic';
 
@@ -29,11 +31,15 @@ export function OddOneGame({ onHome, difficulty }: Props) {
   const [round, setRound] = useState(() => makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
   const [score, setScore] = useState(0);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [timerKey, setTimerKey] = useState(0);
+  const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const onPick = (idx: number) => {
     if (won) return;
     if (idx === round.oddIndex) {
+      sfx.good();
       const next = score + 1;
       setScore(next);
       setWrongIdx(null);
@@ -41,12 +47,14 @@ export function OddOneGame({ onHome, difficulty }: Props) {
         setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
       }
     } else {
+      sfx.wrong();
       setWrongIdx(idx);
       setTimeout(() => setWrongIdx((w) => (w === idx ? null : w)), 450);
     }
   };
 
   const reset = () => {
+    setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongIdx(null);
@@ -70,7 +78,12 @@ export function OddOneGame({ onHome, difficulty }: Props) {
       title="Odd One Out"
       subtitle={subtitle}
       onBack={onHome}
-      right={<ScoreChip label={`🔍 ${score}/${roundsToWin}`} testID="oddone-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="oddone-timer" /> : null}
+          <ScoreChip label={`🔍 ${score}/${roundsToWin}`} testID="oddone-score" />
+        </View>
+      }
     >
       <View style={styles.board}>
         <View style={[styles.question, shadows.soft]} testID={`oddone-question-${round.baseCategory}`}>
@@ -100,7 +113,7 @@ export function OddOneGame({ onHome, difficulty }: Props) {
       <WinOverlay
         visible={won}
         message={'Super spotter! You found them all!'}
-        onPlayAgain={reset}
+        onNext={reset} nextLabel={'Next Round ▶️'}
         onHome={onHome}
       />
     </GameShell>

@@ -2,12 +2,14 @@ import React, { useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS, SPOTIT_SHADOWS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
+import { sfx } from '../../sound';
 import { ShadowDifficulty, makeShadowRound } from './logic';
 
 interface Props {
@@ -30,11 +32,15 @@ export function ShadowGame({ onHome, difficulty }: Props) {
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(0);
+  const [timerKey, setTimerKey] = useState(0);
+  const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const onPick = (icon: string) => {
     if (won) return;
     if (icon === round.answer) {
+      sfx.good();
       setCelebrate((c) => c + 1);
       const next = score + 1;
       setScore(next);
@@ -43,12 +49,14 @@ export function ShadowGame({ onHome, difficulty }: Props) {
         setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
       }
     } else {
+      sfx.wrong();
       setWrong(icon);
       setTimeout(() => setWrong((w) => (w === icon ? null : w)), 450);
     }
   };
 
   const reset = () => {
+    setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrong(null);
@@ -64,7 +72,12 @@ export function ShadowGame({ onHome, difficulty }: Props) {
       title="Shadow Match"
       subtitle={diff.transform ? 'Tricky! The shadow is twisted around' : 'Whose shadow is this?'}
       onBack={onHome}
-      right={<ScoreChip label={`🌙 ${score}/${roundsToWin}`} testID="shadow-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="shadow-timer" /> : null}
+          <ScoreChip label={`🌙 ${score}/${roundsToWin}`} testID="shadow-score" />
+        </View>
+      }
     >
       <View style={styles.board}>
         <View
@@ -112,7 +125,7 @@ export function ShadowGame({ onHome, difficulty }: Props) {
       <WinOverlay
         visible={won}
         message={'Shadow wizard! You matched them all!'}
-        onPlayAgain={reset}
+        onNext={reset} nextLabel={'Next Round ▶️'}
         onHome={onHome}
       />
     </GameShell>

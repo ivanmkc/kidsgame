@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { sfx } from '../sound';
 import { colors, darken, fonts, shadows } from '../theme';
 import { ChunkyButton } from './ChunkyButton';
 import { Confetti } from './Confetti';
@@ -7,11 +8,13 @@ import { Confetti } from './Confetti';
 interface Props {
   visible: boolean;
   message: string;
-  onPlayAgain: () => void;
+  /** Advance to fresh content — next scene or a new random round set. */
+  onNext: () => void;
   onHome: () => void;
+  nextLabel?: string;
 }
 
-export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
+export function WinOverlay({ visible, message, onNext, onHome, nextLabel }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
   const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
   // Tap shield: a kid hammering the final answer would otherwise punch
@@ -21,6 +24,7 @@ export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
 
   useEffect(() => {
     if (visible) {
+      sfx.win();
       setArmed(false);
       const t = setTimeout(() => setArmed(true), 600);
       scale.setValue(0.3);
@@ -61,7 +65,7 @@ export function WinOverlay({ visible, message, onPlayAgain, onHome }: Props) {
           ))}
         </View>
         <Text style={styles.message}>{message}</Text>
-        <ChunkyButton label="Play Again 🔁" color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onPlayAgain()} testID="play-again" minWidth={224} />
+        <ChunkyButton label={nextLabel ?? 'Next Level ▶️'} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={224} />
         <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
       </Animated.View>
     </Pressable>

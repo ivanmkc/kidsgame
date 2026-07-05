@@ -44,34 +44,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 933,
-          "y": 362,
-          "w": 119,
-          "h": 103,
+          "x": 941,
+          "y": 367,
+          "w": 104,
+          "h": 94,
           "what": "a pink sea snail appeared"
         },
         {
-          "x": 346,
-          "y": 110,
-          "w": 153,
-          "h": 122,
+          "x": 351,
+          "y": 111,
+          "w": 138,
+          "h": 113,
           "what": "a blue starfish appeared"
         },
         {
-          "x": 782,
-          "y": 98,
-          "w": 172,
-          "h": 162,
+          "x": 786,
+          "y": 107,
+          "w": 169,
+          "h": 148,
           "what": "the octopus peeking out is missing"
         },
         {
           "x": 635,
-          "y": 544,
-          "w": 223,
-          "h": 172,
+          "y": 546,
+          "w": 221,
+          "h": 164,
           "what": "the purple sea urchin is missing"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "trains",
@@ -82,34 +83,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 640,
-          "y": 533,
-          "w": 169,
-          "h": 165,
+          "x": 642,
+          "y": 538,
+          "w": 167,
+          "h": 154,
           "what": "a red suitcase appeared"
         },
         {
-          "x": 942,
+          "x": 946,
           "y": 551,
-          "w": 153,
-          "h": 100,
+          "w": 142,
+          "h": 89,
           "what": "a cat sleeping on a bench appeared"
         },
         {
-          "x": 135,
-          "y": 543,
-          "w": 199,
-          "h": 153,
+          "x": 134,
+          "y": 549,
+          "w": 197,
+          "h": 141,
           "what": "the wooden crate of apples is missing"
         },
         {
           "x": 190,
-          "y": 169,
-          "w": 145,
-          "h": 202,
+          "y": 168,
+          "w": 143,
+          "h": 203,
           "what": "the bouquet of balloons tied to a post is missing"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "dinos",
@@ -120,34 +122,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 696,
+          "x": 694,
           "y": 34,
-          "w": 219,
+          "w": 221,
           "h": 134,
           "what": "a pterodactyl flying appeared"
         },
         {
-          "x": 111,
-          "y": 316,
-          "w": 92,
-          "h": 103,
+          "x": 122,
+          "y": 315,
+          "w": 74,
+          "h": 98,
           "what": "a butterfly appeared"
         },
         {
-          "x": 1091,
-          "y": 458,
-          "w": 134,
-          "h": 112,
+          "x": 1090,
+          "y": 459,
+          "w": 136,
+          "h": 103,
           "what": "the orange dinosaur is missing"
         },
         {
-          "x": 665,
+          "x": 671,
           "y": 501,
-          "w": 109,
-          "h": 122,
+          "w": 102,
+          "h": 121,
           "what": "the white dinosaur egg is missing"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "camping",
@@ -158,34 +161,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 594,
-          "y": 348,
-          "w": 258,
-          "h": 146,
+          "x": 650,
+          "y": 347,
+          "w": 202,
+          "h": 147,
           "what": "a friendly raccoon peeking appeared"
         },
         {
-          "x": 983,
-          "y": 377,
-          "w": 148,
-          "h": 293,
+          "x": 982,
+          "y": 375,
+          "w": 147,
+          "h": 291,
           "what": "a acoustic guitar appeared"
         },
         {
-          "x": 63,
-          "y": 543,
-          "w": 163,
-          "h": 100,
+          "x": 62,
+          "y": 542,
+          "w": 164,
+          "h": 101,
           "what": "the sleeping bag rolled up is missing"
         },
         {
-          "x": 535,
-          "y": 371,
-          "w": 81,
-          "h": 106,
+          "x": 545,
+          "y": 379,
+          "w": 65,
+          "h": 89,
           "what": "the canteen is missing"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "farm",
@@ -196,35 +200,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 918,
-          "y": 493,
-          "w": 120,
-          "h": 111,
+          "x": 917,
+          "y": 492,
+          "w": 121,
+          "h": 109,
           "what": "a wooden bucket appeared"
         },
         {
-          "x": 1152,
-          "y": 436,
-          "w": 98,
-          "h": 95,
+          "x": 1151,
+          "y": 435,
+          "w": 99,
+          "h": 91,
           "what": "a white duck appeared"
         },
         {
-          "x": 399,
+          "x": 403,
           "y": 497,
-          "w": 228,
-          "h": 223,
+          "w": 223,
+          "h": 176,
           "what": "the red tractor toy is missing"
         },
         {
-          "x": 145,
+          "x": 148,
           "y": 535,
-          "w": 114,
-          "h": 175,
+          "w": 105,
+          "h": 172,
           "what": "the grey rabbit is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "party",
@@ -235,35 +239,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 25,
+          "x": 24,
           "y": 310,
-          "w": 117,
-          "h": 193,
+          "w": 119,
+          "h": 141,
           "what": "a toy sailboat appeared"
         },
         {
-          "x": 939,
-          "y": 403,
-          "w": 165,
-          "h": 191,
+          "x": 938,
+          "y": 402,
+          "w": 167,
+          "h": 156,
           "what": "a rocking horse appeared"
         },
         {
-          "x": 1146,
-          "y": 331,
-          "w": 108,
-          "h": 160,
+          "x": 1144,
+          "y": 330,
+          "w": 111,
+          "h": 122,
           "what": "the golden trophy is missing"
         },
         {
-          "x": 245,
-          "y": 344,
-          "w": 97,
-          "h": 259,
+          "x": 243,
+          "y": 343,
+          "w": 100,
+          "h": 205,
           "what": "the pinwheel toy is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "unicorn",
@@ -274,35 +278,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 1114,
-          "y": 467,
-          "w": 111,
-          "h": 144,
+          "x": 1119,
+          "y": 471,
+          "w": 107,
+          "h": 107,
           "what": "a pink butterfly appeared"
         },
         {
-          "x": 71,
-          "y": 121,
-          "w": 100,
-          "h": 102,
+          "x": 69,
+          "y": 120,
+          "w": 95,
+          "h": 77,
           "what": "a bluebird appeared"
         },
         {
-          "x": 188,
-          "y": 357,
-          "w": 197,
-          "h": 254,
+          "x": 211,
+          "y": 413,
+          "w": 119,
+          "h": 143,
           "what": "the floating star wand is missing"
         },
         {
-          "x": 296,
-          "y": 213,
-          "w": 224,
-          "h": 214,
+          "x": 352,
+          "y": 237,
+          "w": 146,
+          "h": 135,
           "what": "the pot of gold is missing"
         }
       ],
-      "flagged": true
+      "level": "hard"
     },
     {
       "id": "construction",
@@ -313,35 +317,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 30,
-          "y": 540,
-          "w": 163,
-          "h": 144,
+          "x": 36,
+          "y": 539,
+          "w": 152,
+          "h": 140,
           "what": "a red toolbox appeared"
         },
         {
           "x": 728,
-          "y": 540,
-          "w": 149,
-          "h": 180,
+          "y": 541,
+          "w": 148,
+          "h": 134,
           "what": "a warning sign appeared"
         },
         {
-          "x": 197,
+          "x": 203,
           "y": 266,
-          "w": 233,
-          "h": 209,
+          "w": 227,
+          "h": 156,
           "what": "the cement mixer truck is missing"
         },
         {
-          "x": 450,
-          "y": 546,
-          "w": 115,
-          "h": 121,
+          "x": 451,
+          "y": 545,
+          "w": 114,
+          "h": 115,
           "what": "the yellow hard hat on a post is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "beach",
@@ -352,35 +356,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 1104,
-          "y": 305,
-          "w": 148,
-          "h": 175,
+          "x": 1102,
+          "y": 304,
+          "w": 145,
+          "h": 135,
           "what": "a seagull appeared"
         },
         {
-          "x": 961,
-          "y": 584,
-          "w": 134,
-          "h": 114,
+          "x": 959,
+          "y": 583,
+          "w": 136,
+          "h": 112,
           "what": "a starfish appeared"
         },
         {
-          "x": 663,
+          "x": 662,
           "y": 523,
           "w": 168,
-          "h": 168,
+          "h": 135,
           "what": "the pair of flip-flops is missing"
         },
         {
-          "x": 695,
-          "y": 45,
-          "w": 114,
-          "h": 160,
+          "x": 704,
+          "y": 43,
+          "w": 107,
+          "h": 113,
           "what": "the sailboat on the horizon is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "snow",
@@ -391,35 +395,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 1109,
-          "y": 117,
-          "w": 157,
-          "h": 199,
+          "x": 1125,
+          "y": 173,
+          "w": 120,
+          "h": 108,
           "what": "a pair of ice skates appeared"
         },
         {
-          "x": 1108,
+          "x": 1117,
           "y": 28,
-          "w": 121,
-          "h": 180,
+          "w": 108,
+          "h": 125,
           "what": "a red cardinal bird appeared"
         },
         {
-          "x": 1130,
-          "y": 552,
-          "w": 126,
-          "h": 127,
+          "x": 1137,
+          "y": 558,
+          "w": 120,
+          "h": 121,
           "what": "the gift box in the snow is missing"
         },
         {
-          "x": 896,
-          "y": 503,
-          "w": 117,
-          "h": 182,
+          "x": 895,
+          "y": 501,
+          "w": 118,
+          "h": 148,
           "what": "the penguin is missing"
         }
       ],
-      "flagged": true
+      "level": "hard"
     },
     {
       "id": "bugs",
@@ -430,35 +434,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 849,
-          "y": 506,
-          "w": 184,
-          "h": 152,
+          "x": 856,
+          "y": 493,
+          "w": 171,
+          "h": 123,
           "what": "a cricket appeared"
         },
         {
-          "x": 448,
-          "y": 536,
-          "w": 172,
-          "h": 141,
+          "x": 451,
+          "y": 535,
+          "w": 166,
+          "h": 111,
           "what": "a rolled-up pillbug appeared"
         },
         {
-          "x": 1069,
-          "y": 491,
-          "w": 138,
-          "h": 153,
+          "x": 1077,
+          "y": 492,
+          "w": 121,
+          "h": 114,
           "what": "the firefly with a glow is missing"
         },
         {
-          "x": 51,
-          "y": 439,
-          "w": 305,
-          "h": 281,
+          "x": 75,
+          "y": 458,
+          "w": 262,
+          "h": 225,
           "what": "the dragonfly is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "aquarium",
@@ -469,35 +473,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 906,
-          "y": 501,
-          "w": 211,
-          "h": 151,
+          "x": 916,
+          "y": 507,
+          "w": 193,
+          "h": 116,
           "what": "a sea turtle appeared"
         },
         {
-          "x": 688,
-          "y": 121,
-          "w": 133,
-          "h": 224,
+          "x": 697,
+          "y": 120,
+          "w": 121,
+          "h": 172,
           "what": "a pink jellyfish appeared"
         },
         {
-          "x": 345,
-          "y": 455,
-          "w": 97,
-          "h": 205,
+          "x": 354,
+          "y": 461,
+          "w": 77,
+          "h": 146,
           "what": "the diver figurine is missing"
         },
         {
-          "x": 1008,
-          "y": 238,
-          "w": 153,
-          "h": 159,
+          "x": 1015,
+          "y": 237,
+          "w": 146,
+          "h": 122,
           "what": "the pufferfish puffed up is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "playground",
@@ -508,35 +512,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 1058,
-          "y": 367,
-          "w": 40,
-          "h": 81,
+          "x": 1057,
+          "y": 365,
+          "w": 42,
+          "h": 83,
           "what": "a water bottle on the bench appeared"
         },
         {
-          "x": 674,
+          "x": 673,
           "y": 552,
-          "w": 106,
-          "h": 110,
+          "w": 108,
+          "h": 107,
           "what": "a red kick ball appeared"
         },
         {
-          "x": 167,
-          "y": 449,
-          "w": 128,
-          "h": 103,
+          "x": 175,
+          "y": 448,
+          "w": 117,
+          "h": 81,
           "what": "the toy dump truck in the sandbox is missing"
         },
         {
-          "x": 453,
-          "y": 601,
-          "w": 130,
-          "h": 77,
+          "x": 450,
+          "y": 600,
+          "w": 135,
+          "h": 73,
           "what": "the paper airplane is missing"
         }
       ],
-      "flagged": true
+      "level": "hard"
     },
     {
       "id": "savanna",
@@ -547,35 +551,35 @@
       "h": 720,
       "diffs": [
         {
-          "x": 517,
-          "y": 398,
-          "w": 181,
-          "h": 170,
+          "x": 536,
+          "y": 395,
+          "w": 149,
+          "h": 118,
           "what": "a lion cub in the grass appeared"
         },
         {
-          "x": 929,
+          "x": 937,
           "y": 221,
-          "w": 115,
+          "w": 107,
           "h": 127,
           "what": "a colorful hornbill bird appeared"
         },
         {
           "x": 724,
           "y": 549,
-          "w": 163,
-          "h": 109,
+          "w": 154,
+          "h": 104,
           "what": "the tortoise is missing"
         },
         {
-          "x": 62,
+          "x": 70,
           "y": 426,
-          "w": 176,
-          "h": 192,
+          "w": 165,
+          "h": 143,
           "what": "the baby elephant is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "ocean",
@@ -593,10 +597,10 @@
           "what": "a purple octopus appeared"
         },
         {
-          "x": 407,
-          "y": 579,
-          "w": 182,
-          "h": 122,
+          "x": 463,
+          "y": 599,
+          "w": 126,
+          "h": 102,
           "what": "a spiral seashell appeared"
         },
         {
@@ -609,12 +613,12 @@
         {
           "x": 209,
           "y": 475,
-          "w": 288,
+          "w": 233,
           "h": 239,
           "what": "the treasure chest is missing"
         }
       ],
-      "flagged": true
+      "level": "easy"
     },
     {
       "id": "princess",
@@ -653,7 +657,7 @@
           "what": "the treasure chest full of jewels is missing"
         }
       ],
-      "flagged": true
+      "level": "easy"
     },
     {
       "id": "music",
@@ -692,7 +696,7 @@
           "what": "the golden trumpet is missing"
         }
       ],
-      "flagged": true
+      "level": "easy"
     },
     {
       "id": "space",
@@ -711,15 +715,15 @@
         },
         {
           "x": 373,
-          "y": 518,
-          "w": 183,
-          "h": 153,
+          "y": 572,
+          "w": 128,
+          "h": 99,
           "what": "a flying saucer appeared"
         },
         {
-          "x": 466,
+          "x": 522,
           "y": 515,
-          "w": 149,
+          "w": 93,
           "h": 147,
           "what": "the green alien waving is missing"
         },
@@ -731,7 +735,7 @@
           "what": "the purple planet is missing"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "pirate",
@@ -770,7 +774,7 @@
           "what": "the black pirate flag is missing"
         }
       ],
-      "flagged": true
+      "level": "easy"
     }
   ],
   "hidden": [
@@ -826,7 +830,8 @@
           "h": 67,
           "thumb": "hidden/toybox_t_duck.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "ballroom",
@@ -880,7 +885,8 @@
           "h": 107,
           "thumb": "hidden/ballroom_t_teddy.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "fairy",
@@ -934,7 +940,8 @@
           "h": 91,
           "thumb": "hidden/fairy_t_snail.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "cabin",
@@ -988,7 +995,8 @@
           "h": 76,
           "thumb": "hidden/cabin_t_mitten.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "shed",
@@ -1042,7 +1050,8 @@
           "h": 104,
           "thumb": "hidden/shed_t_spider.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "treasure",
@@ -1096,7 +1105,8 @@
           "h": 98,
           "thumb": "hidden/treasure_t_skullhat.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "petshop",
@@ -1150,7 +1160,8 @@
           "h": 158,
           "thumb": "hidden/petshop_t_goldfish.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "space_station",
@@ -1204,7 +1215,8 @@
           "h": 94,
           "thumb": "hidden/space_station_t_planet.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "pond",
@@ -1258,7 +1270,8 @@
           "h": 100,
           "thumb": "hidden/pond_t_beaver.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "workshop",
@@ -1313,7 +1326,7 @@
           "thumb": "hidden/workshop_t_brush.png"
         }
       ],
-      "flagged": true
+      "level": "easy"
     },
     {
       "id": "kitchenb",
@@ -1368,7 +1381,7 @@
           "thumb": "hidden/kitchenb_t_pretzel.png"
         }
       ],
-      "flagged": true
+      "level": "medium"
     },
     {
       "id": "kitchen",
@@ -1423,7 +1436,7 @@
           "thumb": "hidden/kitchen_t_jam.png"
         }
       ],
-      "flagged": true
+      "level": "hard"
     },
     {
       "id": "picnic",
@@ -1478,7 +1491,7 @@
           "thumb": "hidden/picnic_t_cookie.png"
         }
       ],
-      "flagged": true
+      "level": "medium"
     }
   ]
 }

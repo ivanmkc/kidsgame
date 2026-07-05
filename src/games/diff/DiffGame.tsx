@@ -2,22 +2,25 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  filter?: DifficultyFilter;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPicker }: Props) {
+export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
+  const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
   const [hintId, setHintId] = useState<string | null>(null);
@@ -53,9 +56,9 @@ export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPic
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to play?"
-          options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: d.imageA, flagged: d.flagged }))}
+          options={visible.map((d) => ({ id: d.id, name: d.name, image: d.imageA, flagged: d.flagged, level: d.level }))}
           onPick={onPickScene}
-          onSurprise={() => onPickScene(manifest.diff[Math.floor(Math.random() * manifest.diff.length)].id)}
+          onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
         />
       </GameShell>
     );
@@ -63,6 +66,8 @@ export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPic
 
   const total = scene.diffs.length;
   const won = found.length === total && total > 0;
+  const showTimer = settingsFor(difficulty).timer;
+  const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
   const boxes = scene.diffs.map((d, i) => ({ id: String(i), box: d }));
   const ar = scene.w / scene.h;
 
@@ -134,7 +139,12 @@ export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPic
       title="Find the Difference"
       subtitle={`${scene.name} — ${total} sneaky changes!`}
       onBack={onBackToPicker}
-      right={<ScoreChip label={`🔍 ${found.length}/${total}`} testID="diff-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="diff-timer" /> : null}
+          <ScoreChip label={`🔍 ${found.length}/${total}`} testID="diff-score" />
+        </View>
+      }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={isLandscape ? styles.rowWrap : styles.colWrap}>{pictures}</View>
@@ -147,7 +157,11 @@ export function DiffGame({ onHome, difficulty, sceneId, onPickScene, onBackToPic
       <WinOverlay
         visible={won}
         message={'Eagle eyes! You found every difference!'}
-        onPlayAgain={onBackToPicker}
+        onNext={() => {
+          const pool = visible.some((d) => d.id === scene.id) ? visible : manifest.diff;
+          const ids = pool.map((d) => d.id);
+          onPickScene(ids[(ids.indexOf(scene.id) + 1) % ids.length]);
+        }}
         onHome={onHome}
       />
     </GameShell>

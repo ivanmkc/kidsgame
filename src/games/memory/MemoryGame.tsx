@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
@@ -25,7 +26,10 @@ export function MemoryGame({ onHome, difficulty }: Props) {
   const [matched, setMatched] = useState<string[]>([]);
   const [moves, setMoves] = useState(0);
   const lockRef = useRef(false);
+  const [timerKey, setTimerKey] = useState(0);
+  const showTimer = settingsFor(difficulty).timer;
   const won = matched.length * 2 === board.length;
+  const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const prevPairs = useRef(pairs);
   useEffect(() => {
@@ -61,6 +65,7 @@ export function MemoryGame({ onHome, difficulty }: Props) {
   };
 
   const reset = () => {
+    setTimerKey((k) => k + 1);
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     setFaceUp([]);
     setMatched([]);
@@ -88,7 +93,12 @@ export function MemoryGame({ onHome, difficulty }: Props) {
       title="Memory Match"
       subtitle={`Find all ${pairs} pairs`}
       onBack={onHome}
-      right={<ScoreChip label={`🧠 ${matched.length}/${pairs}`} testID="memory-score" />}
+      right={
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="memory-timer" /> : null}
+          <ScoreChip label={`🧠 ${matched.length}/${pairs}`} testID="memory-score" />
+        </View>
+      }
     >
       <View style={styles.boardWrap}>
         <View style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }]}>
@@ -108,7 +118,7 @@ export function MemoryGame({ onHome, difficulty }: Props) {
       <WinOverlay
         visible={won}
         message={'Amazing memory! You matched them all!'}
-        onPlayAgain={reset}
+        onNext={reset} nextLabel={'Next Round ▶️'}
         onHome={onHome}
       />
     </GameShell>
