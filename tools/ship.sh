@@ -18,8 +18,11 @@ import json
 ledger = set(json.load(open('tools/quality_ledger.json'))['clean'])
 m = json.load(open('src/assets/manifest.json'))
 before = (len(m['diff']), len(m['hidden']))
-m['diff'] = [d for d in m['diff'] if d['id'] in ledger]
-m['hidden'] = [h for h in m['hidden'] if h['id'] in ledger]
+import os
+def has_files(e):
+    return all(os.path.exists('assets/game/' + e[k]) for k in ('imageA', 'imageB', 'image') if k in e)
+m['diff'] = [d for d in m['diff'] if d['id'] in ledger and has_files(d)]
+m['hidden'] = [h for h in m['hidden'] if h['id'] in ledger and has_files(h)]
 for coll in ('diff', 'hidden'):
     for e in m[coll]:
         e.pop('flagged', None)  # nothing unverified ships, so no badges
