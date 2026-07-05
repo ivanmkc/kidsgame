@@ -244,10 +244,7 @@ def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image
             continue
         after_crop = _crop(out, rect, pad=60)
         if _ask_pro(
-            f"The first picture shows the original scene with a {short}; the second shows the same spot after removal. In the SECOND picture, is every trace of the {short} completely gone — including its shadow, reflection, footprints, ripples, strings, and anything it was holding or attached to — with NOTHING new drawn in its place?",
-            [before_crop, after_crop],
-        ) and _ask_pro(
-            "Compare the two pictures. In the second, does the area show clean natural scenery with nothing else altered — no smudges, leftover outlines, orphaned shadows or footprints, and no OTHER objects changed, moved, or redrawn?",
+            f"The first picture shows the original scene with a {short}; the second shows the same spot after it was removed. Judge at the size a child sees the whole 1280px scene: faint tone or texture shifts that would be invisible at game size are ACCEPTABLE. Answer YES only if, in the SECOND picture: the {short} is fully gone with no visible ghost shape, leftover part, orphaned shadow/footprints/ripples/strings, no eye-catching smudge patch, NOTHING new drawn in its place, and no OTHER object changed or redrawn.",
             [before_crop, after_crop],
         ):
             return out
