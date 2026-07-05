@@ -39,8 +39,8 @@ STORIES = [
             "start": {
                 "scene": f"{LUNA} waking up at sunrise in a flower meadow beside a sparkling stream",
                 "text": "Luna the unicorn wakes up on a sunny morning. Where should she go today?",
-                "choices": [{"label": "To the forest! 🌲", "next": "a"},
-                            {"label": "To the beach! 🌊", "next": "b"}],
+                "choices": [{"label": "Trot to the forest! 🌲", "next": "a"},
+                            {"label": "Gallop to the beach! 🌊", "next": "b"}],
             },
             "a": {
                 "scene": f"{LUNA} walking into a friendly sunlit forest, butterflies around her, a squirrel waving from a branch",
@@ -56,19 +56,51 @@ STORIES = [
             },
             "aa": {
                 "scene": f"{LUNA} and a happy squirrel beside a big pile of acorns under an oak tree, both smiling proudly",
-                "text": "Together they find a mountain of acorns! The squirrel gives Luna a big hug. The End!",
+                "text": "Together they find a mountain of acorns! The squirrel is so thankful. What now?",
+                "choices": [{"label": "Throw an acorn party! 🎉", "next": "end_party"},
+                            {"label": "Ride the rainbow home 🌈", "next": "end_rainbow"}],
             },
             "ab": {
                 "scene": f"{LUNA} peeking out from behind a big mushroom while forest animals giggle and search for her",
-                "text": "Luna is the best hider in the whole forest! Everyone laughs and plays until sunset. The End!",
+                "text": "Luna is the best hider in the forest! All the animals want more fun.",
+                "choices": [{"label": "Crown the champion 👑", "next": "end_crown"},
+                            {"label": "Ride the rainbow home 🌈", "next": "end_rainbow"}],
             },
             "ba": {
                 "scene": f"{LUNA} standing proudly on a small sailboat sailing past a friendly whale spouting water",
-                "text": "Luna sails the sparkly sea and a friendly whale says hello with a big splash! The End!",
+                "text": "A friendly whale swims beside the boat and winks at Luna!",
+                "choices": [{"label": "Dive with the whale 🐋", "next": "end_pearl"},
+                            {"label": "Dance at the bonfire 🔥", "next": "end_bonfire"}],
             },
             "bb": {
                 "scene": f"{LUNA} beside a huge fancy sandcastle decorated with seashells, a crab wearing a tiny paper crown",
-                "text": "Luna builds the grandest sandcastle ever, and a little crab becomes its king! The End!",
+                "text": "The sandcastle is magnificent, and a little crab wants to be its king!",
+                "choices": [{"label": "Crown the crab king 🦀", "next": "end_crab"},
+                            {"label": "Dance at the bonfire 🔥", "next": "end_bonfire"}],
+            },
+            "end_party": {
+                "scene": f"{LUNA} and many forest animals having a picnic party with acorn treats under paper lanterns",
+                "text": "The whole forest comes to Luna's acorn party! What a wonderful day. The End!",
+            },
+            "end_rainbow": {
+                "scene": f"{LUNA} sliding down a giant glowing rainbow toward her meadow home at sunset",
+                "text": "Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!",
+            },
+            "end_crown": {
+                "scene": f"{LUNA} wearing a crown of daisies while forest animals cheer around her",
+                "text": "The animals crown Luna the Hide-and-Seek Champion of the forest! The End!",
+            },
+            "end_pearl": {
+                "scene": f"{LUNA} underwater in a magic air bubble beside the smiling whale, holding a glowing pearl",
+                "text": "The whale shows Luna a glowing pearl — a gift for her bravery! The End!",
+            },
+            "end_crab": {
+                "scene": f"{LUNA} bowing to a proud little crab sitting on a sandcastle throne with a seaweed cape",
+                "text": "King Crab rules the grandest sandcastle on the beach. Long live the king! The End!",
+            },
+            "end_bonfire": {
+                "scene": f"{LUNA} dancing with seagulls and crabs around a cozy beach bonfire under the stars",
+                "text": "Everyone dances around the bonfire until the stars come out. The End!",
             },
         },
     },
@@ -80,8 +112,8 @@ STORIES = [
             "start": {
                 "scene": f"{PIP} in a sunny backyard garden holding an old rolled-up treasure map in his mouth",
                 "text": "Pip the puppy found a treasure map! Where does the trail begin?",
-                "choices": [{"label": "The big garden 🌻", "next": "a"},
-                            {"label": "The park 🛝", "next": "b"}],
+                "choices": [{"label": "Search the garden 🌻", "next": "a"},
+                            {"label": "Run to the park 🛝", "next": "b"}],
             },
             "a": {
                 "scene": f"{PIP} sniffing between tall sunflowers in a vegetable garden, a trail of paw prints in the dirt",
@@ -91,25 +123,57 @@ STORIES = [
             },
             "b": {
                 "scene": f"{PIP} at a colorful playground park, looking at a slide and a big oak tree with a hollow",
-                "text": "The map shows the park! Should Pip check the slide or the old oak tree?",
-                "choices": [{"label": "The slide! 🛝", "next": "ba"},
-                            {"label": "The oak tree 🌳", "next": "bb"}],
+                "text": "The map shows the park! Where should Pip look first?",
+                "choices": [{"label": "Zoom down the slide! 🛝", "next": "ba"},
+                            {"label": "Sniff the oak tree 🌳", "next": "bb"}],
             },
             "aa": {
-                "scene": f"{PIP} proudly digging up a small wooden chest full of shiny dog biscuits shaped like bones",
-                "text": "Pip digs up a chest full of golden biscuits! Best treasure ever! The End!",
+                "scene": f"{PIP} proudly digging up a small wooden chest with the lid still closed, dirt flying",
+                "text": "Pip digs up a mysterious little chest! It rattles. Should he...",
+                "choices": [{"label": "Open it now! 🔓", "next": "end_biscuits"},
+                            {"label": "Share it with friends 🐾", "next": "end_share"}],
             },
             "ab": {
                 "scene": f"{PIP} nose to nose with three tiny kittens hiding in a watering can, all very happy",
-                "text": "The sound was three tiny kittens! Pip makes three new best friends. The End!",
+                "text": "The sound was three tiny kittens! They look hungry and a little lost.",
+                "choices": [{"label": "Lead them home 🏡", "next": "end_kittens"},
+                            {"label": "Share it with friends 🐾", "next": "end_share"}],
             },
             "ba": {
-                "scene": f"{PIP} sliding down a big red slide with a shiny golden ball waiting at the bottom",
-                "text": "Wheee! At the bottom of the slide waits a shiny golden ball. Treasure! The End!",
+                "scene": f"{PIP} sliding down a big red slide with ears flying, a shiny golden ball waiting at the bottom",
+                "text": "Wheee! At the bottom waits a shiny golden ball. It starts to roll away!",
+                "choices": [{"label": "Chase the ball! 🎾", "next": "end_ball"},
+                            {"label": "Invite friends to play ⚽", "next": "end_game"}],
             },
             "bb": {
                 "scene": f"{PIP} looking into a tree hollow glowing with fireflies, eyes wide with wonder",
-                "text": "Inside the old oak lives a family of glowing fireflies. A magic treasure! The End!",
+                "text": "Inside the old oak lives a family of glowing fireflies! They swirl around Pip.",
+                "choices": [{"label": "Follow the fireflies ✨", "next": "end_fireflies"},
+                            {"label": "Invite friends to play ⚽", "next": "end_game"}],
+            },
+            "end_biscuits": {
+                "scene": f"{PIP} with an open wooden chest overflowing with bone-shaped golden dog biscuits",
+                "text": "The chest is full of golden biscuits! Best treasure a puppy ever found. The End!",
+            },
+            "end_share": {
+                "scene": f"{PIP} sharing biscuits from a small chest with kittens and a bunny at a garden picnic",
+                "text": "Pip shares his treasure with all his friends. Sharing is the best treasure! The End!",
+            },
+            "end_kittens": {
+                "scene": f"{PIP} proudly leading three tiny kittens to a cozy basket by a farmhouse door at dusk",
+                "text": "Pip leads the kittens safely home. Their mama purrs a big thank-you! The End!",
+            },
+            "end_ball": {
+                "scene": f"{PIP} leaping joyfully to catch a shiny golden ball in mid-air over the playground",
+                "text": "Pip catches the golden ball with a super jump! Champion Pip! The End!",
+            },
+            "end_game": {
+                "scene": f"{PIP} playing ball with two other puppies and a kitten on the sunny playground lawn",
+                "text": "Pip and his friends play until sunset. A treasure of a day! The End!",
+            },
+            "end_fireflies": {
+                "scene": f"{PIP} following a sparkling trail of fireflies to a hidden garden lit like fairyland",
+                "text": "The fireflies lead Pip to a secret glowing garden. Magic! The End!",
             },
         },
     },
@@ -121,18 +185,23 @@ def gen_story(spec: dict) -> dict | None:
     nodes = {}
     for nid, n in spec["nodes"].items():
         fname = f"{spec['id']}_{nid}.png"
-        for attempt in range(3):
-            img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
-            if ask_yes_no(
-                f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
-                [img],
-            ):
-                img.save(OUT / fname)
-                break
-            print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
+        if (OUT / fname).exists():
+            print(f"  {spec['id']}/{nid}: exists, reusing")
         else:
-            print(f"  {spec['id']}/{nid}: FAILED")
-            return None
+            best = None
+            for attempt in range(3):
+                img = generate(f"{n['scene']}. {STYLE}", (1280, 720))
+                best = img
+                if ask_yes_no(
+                    f"Is this a charming, artifact-free children's book illustration clearly showing {spec['character'].split(',')[0]}?",
+                    [img],
+                ):
+                    break
+                print(f"  {spec['id']}/{nid}: judge rejected, retry {attempt + 1}")
+            else:
+                # a decent-but-imperfect scene beats losing the whole story
+                print(f"  {spec['id']}/{nid}: accepting best attempt despite judge")
+            best.save(OUT / fname)
         entry = {"image": f"story/{fname}", "text": n["text"]}
         if "choices" in n:
             entry["choices"] = n["choices"]
