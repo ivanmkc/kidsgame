@@ -32,6 +32,18 @@ import { isMuted, setMuted, sfx } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
 
+// Kids drag fingers across the screen constantly — kill text/image
+// selection and the long-press callout globally (web only).
+if (typeof document !== 'undefined' && !document.getElementById('kgb-noselect')) {
+  const st = document.createElement('style');
+  st.id = 'kgb-noselect';
+  st.textContent = `
+    *, *::before, *::after { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    img { -webkit-user-drag: none; pointer-events: inherit; }
+  `;
+  document.head.appendChild(st);
+}
+
 export default function App() {
   useFonts({
     Baloo2_600SemiBold,

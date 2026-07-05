@@ -44,7 +44,7 @@ for (const h of manifest.hidden) {
   }
 }
 for (const st of manifest.stories ?? []) {
-  for (const n of Object.values(st.nodes)) sceneFiles.add(n.image);
+  for (const n of Object.values(st.nodes)) { sceneFiles.add(n.image); if (n.scare) sceneFiles.add(n.scare.pop); }
 }
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);
