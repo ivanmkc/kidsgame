@@ -291,6 +291,14 @@ def _recolor_verified(img: Image.Image, item: dict, theme_id: str) -> tuple[Imag
 # ---------------------------------------------------------------- diff ----
 
 def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
+    """Pooled differences: N independent verified changes from ONE base.
+
+    Each pool entry is a patch (the changed-state crop) the app composites
+    over the base at play time — 3-4 drawn at random per playthrough,
+    random side each, so a level never plays the same twice. Removals are
+    independent (no branch chains): a failure just shrinks the pool, and
+    the recolor rescue turns hostile spots into color-change entries.
+    """
     rng = random.Random(seed)
     for attempt in range(3):
         objs = rng.sample(theme["adds"], len(theme["adds"]))
@@ -317,86 +325,53 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         if len(usable) < NUM_DIFFS:
             print(f"  {theme['id']}: only {len(usable)}/{NUM_DIFFS} segmentable objects, re-render {attempt + 1}")
             continue
-        picked = usable[:NUM_DIFFS]
-        spares = usable[NUM_DIFFS:]
-        rng.shuffle(picked)
-        spares_ab = [spares[0::2], spares[1::2]]
 
-        # A loses the first two (they exist only in B → "appeared");
-        # B loses the other two (exist only in A → "missing"). The branches
-        # start from the same base and never touch the same pixels
-        # (hitboxes are non-overlapping by the gate), so they run in
-        # parallel; within a branch removals chain sequentially.
-        def run_branch(items: list[dict], spare: list[dict], phrase: str) -> tuple[Image.Image, list[dict]] | None:
-            # A stubborn object (busy background) shouldn't cost a whole
-            # re-render: swap in a spare segmented object instead.
-            img = base
-            out = []
-            queue = list(items)
-            failed = []
-            while queue and len(out) < 2:
-                item = queue.pop(0)
-                nxt = _remove_verified(img, item, theme["id"])
-                if nxt is None:
-                    failed.append(item)
-                    if spare:
-                        sub = spare.pop(0)
-                        print(f"  {theme['id']}: swapping '{_short(item['obj'])}' -> spare '{_short(sub['obj'])}'")
-                        queue.append(sub)
-                    continue
-                hx, hy, hw, hh = _change_hitbox(img, nxt, item["seg"])
-                img = nxt
-                out.append({"x": hx, "y": hy, "w": hw, "h": hh,
-                            "what": phrase.format(_short(item["obj"]))})
-            # Rescue: recolor differences need no background inpaint at all.
-            while failed and len(out) < 2:
-                item = failed.pop(0)
-                r = _recolor_verified(img, item, theme["id"])
+        def build_entry(item: dict) -> tuple[dict, Image.Image] | None:
+            short = _short(item["obj"])
+            out = _remove_verified(base, item, theme["id"])
+            kind = "remove"
+            if out is None:
+                r = _recolor_verified(base, item, theme["id"])
                 if r is None:
-                    continue
-                img, caption = r
-                hx, hy, hw, hh = _hitbox(item["seg"])
-                out.append({"x": hx, "y": hy, "w": hw, "h": hh, "what": caption})
-            if len(out) < 2:
-                return None
-            return img, out
+                    return None
+                out, kind = r[0], "recolor"
+            hx, hy, hw, hh = _change_hitbox(base, out, item["seg"])
+            patch = out.crop((hx, hy, hx + hw, hy + hh))
+            return ({"x": hx, "y": hy, "w": hw, "h": hh,
+                     "name": short, "kind": kind}, patch)
 
-        with ThreadPoolExecutor(2) as ex:
-            fa = ex.submit(run_branch, picked[:2], spares_ab[0], "a {} appeared")
-            fb = ex.submit(run_branch, picked[2:], spares_ab[1], "the {} is missing")
-            ra, rb = fa.result(), fb.result()
-        if ra is None or rb is None:
-            continue
-        img_a, diffs_a = ra
-        img_b, diffs_b = rb
-        diffs = diffs_a + diffs_b
-        if any(_boxes_clash((p["x"], p["y"], p["w"], p["h"]),
-                            (q["x"], q["y"], q["w"], q["h"]), pad=12)
-               for i, p in enumerate(diffs) for q in diffs[i + 1:]):
-            print(f"  {theme['id']}: final hotspots collide, re-render")
+        with ThreadPoolExecutor(3) as ex:
+            built = list(ex.map(build_entry, usable))
+        pool = []
+        for entry, patch in [b for b in built if b]:
+            # final hitboxes can grow past the seg-bbox check — keep-first
+            if any(_boxes_clash((entry["x"], entry["y"], entry["w"], entry["h"]),
+                                (q["x"], q["y"], q["w"], q["h"]), pad=12) for q in pool):
+                print(f"  {theme['id']}: pool entry '{entry['name']}' clashes, dropped")
+                continue
+            slug = entry["name"].replace(" ", "_")[:24]
+            fname = f"{theme['id']}_d_{len(pool)}_{slug}.png"
+            patch.save(out_dir / fname)
+            entry["patch"] = f"diff/{fname}"
+            pool.append(entry)
+        if len(pool) < NUM_DIFFS:
+            print(f"  {theme['id']}: pool {len(pool)}/{NUM_DIFFS}, re-render {attempt + 1}")
             continue
 
-        if not strict_min(
-            "These are picture A and picture B of a spot-the-difference puzzle for children. Do they show the same scene with a few clear object differences?",
-            "Look carefully at both pictures: are they free of broken patches, pasted-on rectangles, smudges, or style clashes?",
-            [img_a, img_b],
-        ) or ask_yes_no(
+        if ask_yes_no(
             "Look carefully at this children's illustration. Are there any pale/white rectangular patches, erased-looking smears, half-erased ghost objects, or blurry spots that look like editing mistakes? Answer YES if you see ANY such artifact.",
-            [img_a],
-        ) or ask_yes_no(
-            "Look carefully at this children's illustration. Are there any pale/white rectangular patches, erased-looking smears, half-erased ghost objects, or blurry spots that look like editing mistakes? Answer YES if you see ANY such artifact.",
-            [img_b],
+            [base],
         ):
-            print(f"  {theme['id']}: whole-scene judge rejected the pair")
+            print(f"  {theme['id']}: base artifact hunt rejected")
             continue
 
-        img_a.save(out_dir / f"{theme['id']}_a.png")
-        img_b.save(out_dir / f"{theme['id']}_b.png")
-        print(f"  diff scene OK: {theme['id']} ({[d['what'] for d in diffs]})")
+        base.save(out_dir / f"{theme['id']}_base.png")
+        print(f"  diff scene OK: {theme['id']} (pool of {len(pool)}: "
+              f"{[e['name'] + ('*' if e['kind'] == 'recolor' else '') for e in pool]})")
         return {
             "id": theme["id"], "name": theme["name"],
-            "imageA": f"diff/{theme['id']}_a.png", "imageB": f"diff/{theme['id']}_b.png",
-            "w": W, "h": H, "diffs": diffs,
+            "image": f"diff/{theme['id']}_base.png",
+            "w": W, "h": H, "pool": pool,
         }
     return None
 
