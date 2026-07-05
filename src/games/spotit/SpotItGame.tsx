@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -52,7 +52,15 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
+  const [elapsed, setElapsed] = useState(0);
   const won = score >= roundsToWin;
+
+  useEffect(() => {
+    if (won) return;
+    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [won]);
+  const mmss = `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`;
 
   const nextRound = () => {
     setRound(dealRound(rngRef.current, deck));
@@ -77,6 +85,7 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongFlash(null);
+    setElapsed(0);
     nextRound();
   };
 
@@ -93,7 +102,12 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
       title="Spot It!"
       subtitle="Tap the picture that is on BOTH cards"
       onBack={onHome}
-      right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
+      right={
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <ScoreChip label={`⏱ ${mmss}`} testID="spotit-timer" />
+          <ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />
+        </View>
+      }
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
         <DealIn key={`t${roundKey}`} from={-1}>
@@ -106,7 +120,7 @@ export function SpotItGame({ onHome, difficulty, seed }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Sharp eyes! You spotted them all!'}
+        message={`You matched them all in ${mmss}! ⏱`}
         onPlayAgain={reset}
         onHome={onHome}
       />
