@@ -5,8 +5,8 @@ import { ChunkyButton } from '../../components/ChunkyButton';
 import { Confetti } from '../../components/Confetti';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
-import { manifest, StoryNode } from '../../manifest';
-import { say, sfx } from '../../sound';
+import { SCENE_AR, manifest, StoryNode } from '../../manifest';
+import { say, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
 interface Props {
@@ -28,9 +28,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
 
   const node: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
 
-  useEffect(() => {
-    if (node) say(node.text);
-  }, [node]);
+  useSay(node?.text ?? null);
 
   const { width, height } = useWindowDimensions();
 
@@ -48,7 +46,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   }
   if (!node) return null;
 
-  const ar = 1280 / 720;
+  const ar = SCENE_AR;
   const imgW = Math.min(width - 24, (height - 84 - 190) * ar, 900);
   const isEnd = !node.choices || node.choices.length === 0;
 

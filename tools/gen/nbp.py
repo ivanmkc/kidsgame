@@ -105,15 +105,22 @@ def generate(prompt: str, size: tuple[int, int] | None = None) -> Image.Image:
     return img if size is None else aspect_fit(img, size)
 
 
+import functools
+
+
+@functools.lru_cache(maxsize=8)
+def _ref_bytes(path: str) -> bytes:
+    buf = io.BytesIO()
+    Image.open(path).convert("RGB").save(buf, "PNG")
+    return buf.getvalue()
+
+
 def generate_with_ref(prompt: str, ref_path, size: tuple[int, int] | None = None) -> Image.Image:
     """Text + reference image -> RGB image. The reference pins character
     identity across independent story-scene renders."""
-    from pathlib import Path
-    buf = io.BytesIO()
-    Image.open(Path(ref_path)).convert("RGB").save(buf, "PNG")
     parts = [
         types.Part(text="Reference image (character identity to preserve):"),
-        types.Part(inline_data=types.Blob(mime_type="image/png", data=buf.getvalue())),
+        types.Part(inline_data=types.Blob(mime_type="image/png", data=_ref_bytes(str(ref_path)))),
         types.Part(text=prompt),
     ]
     data = _call([types.Content(role="user", parts=parts)])

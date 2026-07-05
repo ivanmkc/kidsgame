@@ -4,6 +4,7 @@ import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { ScenePicker, SceneOption } from '../../components/ScenePicker';
+import { allSceneOptions } from '../sceneOptions';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
@@ -20,17 +21,10 @@ interface Props {
   onBackToPicker: () => void;
 }
 
-function puzzleOptions(filter: DifficultyFilter): SceneOption[] {
-  return [
-    ...manifest.diff.filter((d) => inFilter(d.level, filter))
-      .map((d) => ({ id: `d-${d.id}`, name: d.name, image: (d.image ?? d.imageA)!, flagged: d.flagged, level: d.level })),
-    ...manifest.hidden.filter((h) => inFilter(h.level, filter))
-      .map((h) => ({ id: `h-${h.id}`, name: h.name, image: h.image, flagged: h.flagged, level: h.level })),
-  ];
-}
+
 
 export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
-  const options = puzzleOptions(filter);
+  const options = allSceneOptions(filter);
   const picked = options.find((o) => o.id === sceneId) ?? null;
   const settings = settingsFor(difficulty);
   const cols = settings.puzzleCols;

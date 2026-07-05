@@ -9,7 +9,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { say, sfx } from '../../sound';
+import { sfx, useSay } from '../../sound';
 import { RulesRound, makeRules, makeRulesRound } from './logic';
 
 interface Props {
@@ -46,12 +46,9 @@ export function RulesGame({ onHome, difficulty }: Props) {
   const won = roundIdx >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
-  useEffect(() => {
-    if (won) return;
-    say(round.isRecall
-      ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
-      : round.rule.label);
-  }, [round, won]);
+  useSay(won ? null : round.isRecall
+    ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
+    : round.rule.label);
 
   const onTile = (i: number) => {
     if (won || tapped.includes(i)) return;

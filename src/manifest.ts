@@ -83,3 +83,10 @@ export function pickScene<T>(scenes: T[], avoidIndex?: number): { scene: T; inde
   }
   return { scene: scenes[index], index };
 }
+
+export const SCENE_AR = 16 / 9;
+
+/** The one place that knows both diff schemas (pooled base vs legacy A/B). */
+export function baseImage(s: DiffScene): string {
+  return (s.image ?? s.imageA)!;
+}
