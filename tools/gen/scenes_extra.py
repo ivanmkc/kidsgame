@@ -68,7 +68,7 @@ EXTRA_HIDDEN_THEMES = [
      "targets": [("cocoa", "a mug of hot cocoa with marshmallows"), ("mitten", "a red knitted mitten"), ("cat", "a sleeping ginger cat"), ("candle", "a lit candle"), ("book", "a red storybook"), ("pinecone", "a big pinecone"), ("scarf", "a striped scarf"), ("bell", "a golden bell")]},
     {"id": "candyshop", "name": "Candy Shop",
      "base": "A colorful candy shop interior: jars of candies on shelves, a striped awning over the counter, lollipop stands, a weighing scale, candy bins, a cash register.",
-     "targets": [("gumball", "a gumball machine"), ("bear", "a big red gummy bear"), ("popsicle", "a two-color popsicle"), ("cake", "a tiny frosted cake"), ("swirl", "a giant rainbow swirl lollipop"), ("chocolate", "a chocolate bar with one bite missing"), ("jar", "a jar of striped candy canes"), ("macaron", "a stack of pastel macarons")]},
+     "targets": [("gumball", "a gumball machine"), ("bear", "a big red gummy bear"), ("popsicle", "a two-color popsicle"), ("cake", "a tiny frosted cake"), ("bunny", "a white plush bunny on a shelf"), ("chocolate", "a chocolate bar with one bite missing"), ("jar", "a jar of striped candy canes"), ("macaron", "a stack of pastel macarons")]},
     {"id": "shed", "name": "Garden Shed",
      "base": "A friendly garden shed interior: potting bench with clay pots, hanging tools, seed packets, a watering can, a coiled hose, plant shelves, sunbeams through a dusty window.",
      "targets": [("mouse", "a plump field mouse"), ("ladybug", "a big ladybug"), ("boot", "a yellow rain boot"), ("pumpkin", "a small pumpkin"), ("bird", "a robin on a shelf"), ("carrot", "a bunch of carrots"), ("spider", "a friendly cartoon spider"), ("apple", "a shiny red apple")]},

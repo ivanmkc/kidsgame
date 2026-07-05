@@ -441,8 +441,12 @@ def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
                 # the theme: 5 hidden themes exhausted 8 rounds this way.
                 from fix_thumbs import redraw
                 sprite = redraw(item["obj"], scene_crop)
-                if sprite is None:
-                    print(f"  {theme['id']}: '{item['tid']}' chip unusable + redraw failed, next target")
+                if sprite is None or not strict_min(
+                    f"The first image is a sticker, the second a scene crop. Does the sticker show the SAME {item['obj']} as in the scene — same colors, same design, complete and not cut off at the image edges?",
+                    f"Would a young child instantly recognize the sticker as {item['obj']}?",
+                    [sprite, scene_crop] if sprite is not None else [scene_crop],
+                ):
+                    print(f"  {theme['id']}: '{item['tid']}' chip unusable + redraw failed match gate, next target")
                     continue
                 print(f"  {theme['id']}: '{item['tid']}' chip redrawn from scene reference")
                 chip = sprite
