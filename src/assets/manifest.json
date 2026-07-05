@@ -78,7 +78,8 @@
           "kind": "remove",
           "patch": "diff/farm_d_3_wooden_bucket.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "ocean",
@@ -123,52 +124,8 @@
           "kind": "remove",
           "patch": "diff/ocean_d_3_spiral_seashell.png"
         }
-      ]
-    },
-    {
-      "id": "space",
-      "name": "Space",
-      "image": "diff/space_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 720,
-          "y": 453,
-          "w": 179,
-          "h": 214,
-          "name": "astronaut floating",
-          "kind": "recolor",
-          "patch": "diff/space_d_0_astronaut_floating.png"
-        },
-        {
-          "x": 938,
-          "y": 315,
-          "w": 131,
-          "h": 219,
-          "name": "green alien waving",
-          "kind": "remove",
-          "patch": "diff/space_d_1_green_alien_waving.png"
-        },
-        {
-          "x": 288,
-          "y": 358,
-          "w": 120,
-          "h": 120,
-          "name": "purple planet",
-          "kind": "recolor",
-          "patch": "diff/space_d_2_purple_planet.png"
-        },
-        {
-          "x": 185,
-          "y": 547,
-          "w": 136,
-          "h": 131,
-          "name": "flying saucer",
-          "kind": "remove",
-          "patch": "diff/space_d_3_flying_saucer.png"
-        }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "princess",
@@ -213,7 +170,8 @@
           "kind": "recolor",
           "patch": "diff/princess_d_3_golden_crown_on_a_cushio.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "unicorn",
@@ -276,7 +234,8 @@
           "kind": "remove",
           "patch": "diff/unicorn_d_5_pot_of_gold.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "dinos",
@@ -330,7 +289,8 @@
           "kind": "remove",
           "patch": "diff/dinos_d_4_orange_dinosaur.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "beach",
@@ -374,17 +334,9 @@
           "name": "starfish",
           "kind": "recolor",
           "patch": "diff/beach_d_3_starfish.png"
-        },
-        {
-          "x": 786,
-          "y": 568,
-          "w": 90,
-          "h": 124,
-          "name": "ice cream cone in the sand",
-          "kind": "remove",
-          "patch": "diff/beach_d_4_ice_cream_cone_in_the_sa.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "snow",
@@ -438,142 +390,8 @@
           "kind": "recolor",
           "patch": "diff/snow_d_4_lantern_on_a_pole.png"
         }
-      ]
-    },
-    {
-      "id": "candy",
-      "name": "Candy Land",
-      "image": "diff/candy_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 372,
-          "y": 510,
-          "w": 181,
-          "h": 177,
-          "name": "slice of layer cake",
-          "kind": "remove",
-          "patch": "diff/candy_d_0_slice_of_layer_cake.png"
-        },
-        {
-          "x": 48,
-          "y": 314,
-          "w": 121,
-          "h": 167,
-          "name": "cupcake with a cherry",
-          "kind": "recolor",
-          "patch": "diff/candy_d_1_cupcake_with_a_cherry.png"
-        },
-        {
-          "x": 759,
-          "y": 409,
-          "w": 123,
-          "h": 261,
-          "name": "strawberry milkshake with a straw",
-          "kind": "recolor",
-          "patch": "diff/candy_d_2_strawberry_milkshake_wit.png"
-        },
-        {
-          "x": 1084,
-          "y": 405,
-          "w": 168,
-          "h": 178,
-          "name": "donut with sprinkles",
-          "kind": "remove",
-          "patch": "diff/candy_d_3_donut_with_sprinkles.png"
-        }
-      ]
-    },
-    {
-      "id": "tidepool",
-      "name": "Tide Pool",
-      "image": "diff/tidepool_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 171,
-          "y": 100,
-          "w": 182,
-          "h": 199,
-          "name": "blue starfish",
-          "kind": "remove",
-          "patch": "diff/tidepool_d_0_blue_starfish.png"
-        },
-        {
-          "x": 908,
-          "y": 101,
-          "w": 201,
-          "h": 212,
-          "name": "octopus peeking out",
-          "kind": "remove",
-          "patch": "diff/tidepool_d_1_octopus_peeking_out.png"
-        },
-        {
-          "x": 402,
-          "y": 30,
-          "w": 201,
-          "h": 223,
-          "name": "purple sea urchin",
-          "kind": "remove",
-          "patch": "diff/tidepool_d_2_purple_sea_urchin.png"
-        },
-        {
-          "x": 937,
-          "y": 533,
-          "w": 204,
-          "h": 187,
-          "name": "pink sea snail",
-          "kind": "remove",
-          "patch": "diff/tidepool_d_3_pink_sea_snail.png"
-        }
-      ]
-    },
-    {
-      "id": "bugs",
-      "name": "Bug Garden",
-      "image": "diff/bugs_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 709,
-          "y": 206,
-          "w": 159,
-          "h": 191,
-          "name": "dragonfly",
-          "kind": "remove",
-          "patch": "diff/bugs_d_0_dragonfly.png"
-        },
-        {
-          "x": 443,
-          "y": 201,
-          "w": 142,
-          "h": 126,
-          "name": "caterpillar on a twig",
-          "kind": "remove",
-          "patch": "diff/bugs_d_1_caterpillar_on_a_twig.png"
-        },
-        {
-          "x": 1030,
-          "y": 382,
-          "w": 184,
-          "h": 130,
-          "name": "cricket",
-          "kind": "remove",
-          "patch": "diff/bugs_d_2_cricket.png"
-        },
-        {
-          "x": 671,
-          "y": 581,
-          "w": 128,
-          "h": 81,
-          "name": "pillbug",
-          "kind": "recolor",
-          "patch": "diff/bugs_d_3_pillbug.png"
-        }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "aquarium",
@@ -618,7 +436,8 @@
           "kind": "remove",
           "patch": "diff/aquarium_d_3_pufferfish_puffed_up.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "playground",
@@ -663,7 +482,8 @@
           "kind": "remove",
           "patch": "diff/playground_d_3_skipping_rope.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "savanna",
@@ -707,17 +527,9 @@
           "name": "colorful tropical bird",
           "kind": "remove",
           "patch": "diff/savanna_d_3_colorful_tropical_bird.png"
-        },
-        {
-          "x": 1066,
-          "y": 213,
-          "w": 164,
-          "h": 167,
-          "name": "baby elephant",
-          "kind": "remove",
-          "patch": "diff/savanna_d_4_baby_elephant.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "pirate",
@@ -762,7 +574,8 @@
           "kind": "recolor",
           "patch": "diff/pirate_d_3_friendly_shark_fin_in_th.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "trains",
@@ -807,7 +620,8 @@
           "kind": "recolor",
           "patch": "diff/trains_d_3_bouquet_of_balloons_tied.png"
         }
-      ]
+      ],
+      "level": "easy"
     }
   ],
   "hidden": [
@@ -872,7 +686,8 @@
           "h": 150,
           "thumb": "hidden/jungle_t_egg.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "ballroom",
@@ -898,15 +713,6 @@
           "w": 93,
           "h": 108,
           "thumb": "hidden/ballroom_t_frog.png"
-        },
-        {
-          "id": "crown",
-          "label": "a golden crown on a cushion",
-          "x": 93,
-          "y": 528,
-          "w": 108,
-          "h": 89,
-          "thumb": "hidden/ballroom_t_crown.png"
         },
         {
           "id": "gift",
@@ -944,7 +750,8 @@
           "h": 103,
           "thumb": "hidden/ballroom_t_mirror.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "picnic",
@@ -1007,7 +814,8 @@
           "h": 122,
           "thumb": "hidden/picnic_t_juice.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "cabin",
@@ -1070,7 +878,8 @@
           "h": 243,
           "thumb": "hidden/cabin_t_scarf.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "treasure",
@@ -1132,17 +941,9 @@
           "w": 176,
           "h": 181,
           "thumb": "hidden/treasure_t_compass.png"
-        },
-        {
-          "id": "pearl",
-          "label": "a giant pearl in an open shell",
-          "x": 895,
-          "y": 532,
-          "w": 75,
-          "h": 72,
-          "thumb": "hidden/treasure_t_pearl.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "kitchenb",
@@ -1205,7 +1006,8 @@
           "h": 95,
           "thumb": "hidden/kitchenb_t_mouse.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "workshop",
@@ -1268,7 +1070,8 @@
           "h": 112,
           "thumb": "hidden/workshop_t_top.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "space_station",
@@ -1321,17 +1124,267 @@
           "w": 130,
           "h": 152,
           "thumb": "hidden/space_station_t_helmet.png"
-        },
-        {
-          "id": "planet",
-          "label": "a small striped planet model",
-          "x": 977,
-          "y": 167,
-          "w": 196,
-          "h": 137,
-          "thumb": "hidden/space_station_t_planet.png"
         }
-      ]
+      ],
+      "level": "easy"
+    }
+  ],
+  "stories": [
+    {
+      "id": "luna",
+      "title": "Luna's Big Day",
+      "nodes": {
+        "start": {
+          "image": "story/luna_start.png",
+          "text": "Luna the unicorn wakes up on a sunny morning. Where should she go today?",
+          "choices": [
+            {
+              "label": "Trot to the forest! \ud83c\udf32",
+              "next": "a"
+            },
+            {
+              "label": "Gallop to the beach! \ud83c\udf0a",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/luna_a.png",
+          "text": "In the forest, a little squirrel waves hello. It looks like it needs help!",
+          "choices": [
+            {
+              "label": "Help find acorns \ud83c\udf30",
+              "next": "aa"
+            },
+            {
+              "label": "Play hide and seek \ud83d\ude48",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/luna_b.png",
+          "text": "At the beach, Luna finds a little sailboat. The sea sparkles!",
+          "choices": [
+            {
+              "label": "Sail away! \u26f5",
+              "next": "ba"
+            },
+            {
+              "label": "Build a sandcastle \ud83c\udff0",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/luna_aa.png",
+          "text": "Together they find a mountain of acorns! The squirrel is so thankful. What now?",
+          "choices": [
+            {
+              "label": "Throw an acorn party! \ud83c\udf89",
+              "next": "end_party"
+            },
+            {
+              "label": "Ride the rainbow home \ud83c\udf08",
+              "next": "end_rainbow"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/luna_ab.png",
+          "text": "Luna is the best hider in the forest! All the animals want more fun.",
+          "choices": [
+            {
+              "label": "Crown the champion \ud83d\udc51",
+              "next": "end_crown"
+            },
+            {
+              "label": "Ride the rainbow home \ud83c\udf08",
+              "next": "end_rainbow"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/luna_ba.png",
+          "text": "A friendly whale swims beside the boat and winks at Luna!",
+          "choices": [
+            {
+              "label": "Dive with the whale \ud83d\udc0b",
+              "next": "end_pearl"
+            },
+            {
+              "label": "Dance at the bonfire \ud83d\udd25",
+              "next": "end_bonfire"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/luna_bb.png",
+          "text": "The sandcastle is magnificent, and a little crab wants to be its king!",
+          "choices": [
+            {
+              "label": "Crown the crab king \ud83e\udd80",
+              "next": "end_crab"
+            },
+            {
+              "label": "Dance at the bonfire \ud83d\udd25",
+              "next": "end_bonfire"
+            }
+          ]
+        },
+        "end_party": {
+          "image": "story/luna_end_party.png",
+          "text": "The whole forest comes to Luna's acorn party! What a wonderful day. The End!"
+        },
+        "end_rainbow": {
+          "image": "story/luna_end_rainbow.png",
+          "text": "Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!"
+        },
+        "end_crown": {
+          "image": "story/luna_end_crown.png",
+          "text": "The animals crown Luna the Hide-and-Seek Champion of the forest! The End!"
+        },
+        "end_pearl": {
+          "image": "story/luna_end_pearl.png",
+          "text": "The whale shows Luna a glowing pearl \u2014 a gift for her bravery! The End!"
+        },
+        "end_crab": {
+          "image": "story/luna_end_crab.png",
+          "text": "King Crab rules the grandest sandcastle on the beach. Long live the king! The End!"
+        },
+        "end_bonfire": {
+          "image": "story/luna_end_bonfire.png",
+          "text": "Everyone dances around the bonfire until the stars come out. The End!"
+        }
+      }
+    },
+    {
+      "id": "pip",
+      "title": "Pip Finds a Treasure",
+      "nodes": {
+        "start": {
+          "image": "story/pip_start.png",
+          "text": "Pip the puppy found a treasure map! Where does the trail begin?",
+          "choices": [
+            {
+              "label": "Search the garden \ud83c\udf3b",
+              "next": "a"
+            },
+            {
+              "label": "Run to the park \ud83d\udedd",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/pip_a.png",
+          "text": "Sniff sniff! The trail leads through the sunflowers. Pip hears a sound...",
+          "choices": [
+            {
+              "label": "Dig here! \ud83d\udd73\ufe0f",
+              "next": "aa"
+            },
+            {
+              "label": "Follow the sound \ud83d\udc42",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/pip_b.png",
+          "text": "The map shows the park! Where should Pip look first?",
+          "choices": [
+            {
+              "label": "Zoom down the slide! \ud83d\udedd",
+              "next": "ba"
+            },
+            {
+              "label": "Sniff the oak tree \ud83c\udf33",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/pip_aa.png",
+          "text": "Pip digs up a mysterious little chest! It rattles. Should he...",
+          "choices": [
+            {
+              "label": "Open it now! \ud83d\udd13",
+              "next": "end_biscuits"
+            },
+            {
+              "label": "Share it with friends \ud83d\udc3e",
+              "next": "end_share"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/pip_ab.png",
+          "text": "The sound was three tiny kittens! They look hungry and a little lost.",
+          "choices": [
+            {
+              "label": "Lead them home \ud83c\udfe1",
+              "next": "end_kittens"
+            },
+            {
+              "label": "Share it with friends \ud83d\udc3e",
+              "next": "end_share"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/pip_ba.png",
+          "text": "Wheee! At the bottom waits a shiny golden ball. It starts to roll away!",
+          "choices": [
+            {
+              "label": "Chase the ball! \ud83c\udfbe",
+              "next": "end_ball"
+            },
+            {
+              "label": "Invite friends to play \u26bd",
+              "next": "end_game"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/pip_bb.png",
+          "text": "Inside the old oak lives a family of glowing fireflies! They swirl around Pip.",
+          "choices": [
+            {
+              "label": "Follow the fireflies \u2728",
+              "next": "end_fireflies"
+            },
+            {
+              "label": "Invite friends to play \u26bd",
+              "next": "end_game"
+            }
+          ]
+        },
+        "end_biscuits": {
+          "image": "story/pip_end_biscuits.png",
+          "text": "The chest is full of golden biscuits! Best treasure a puppy ever found. The End!"
+        },
+        "end_share": {
+          "image": "story/pip_end_share.png",
+          "text": "Pip shares his treasure with all his friends. Sharing is the best treasure! The End!"
+        },
+        "end_kittens": {
+          "image": "story/pip_end_kittens.png",
+          "text": "Pip leads the kittens safely home. Their mama purrs a big thank-you! The End!"
+        },
+        "end_ball": {
+          "image": "story/pip_end_ball.png",
+          "text": "Pip catches the golden ball with a super jump! Champion Pip! The End!"
+        },
+        "end_game": {
+          "image": "story/pip_end_game.png",
+          "text": "Pip and his friends play until sunset. A treasure of a day! The End!"
+        },
+        "end_fireflies": {
+          "image": "story/pip_end_fireflies.png",
+          "text": "The fireflies lead Pip to a secret glowing garden. Magic! The End!"
+        }
+      }
     }
   ]
 }

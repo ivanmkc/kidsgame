@@ -13,6 +13,8 @@ fi
 cd "$(dirname "$0")/.."
 
 cp src/assets/manifest.json /tmp/kgb_manifest_full.json
+# any gate failure must still restore the working manifest
+trap 'cp /tmp/kgb_manifest_full.json src/assets/manifest.json' EXIT
 python3 - <<'PYEOF'
 import json
 ledger = set(json.load(open('tools/quality_ledger.json'))['clean'])
