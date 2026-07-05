@@ -122,7 +122,9 @@ def sam_segment_batch(img: Image.Image, prompts: list[str], tag: str = "") -> di
         gcloud_ssh(VM, ZONE, f"mkdir -p ~/kgb/{run}")
         gcloud_scp_up(VM, ZONE, str(local / "scene.jpg"), f"~/kgb/{run}/scene.jpg")
         gcloud_scp_up(VM, ZONE, str(local / "batch.py"), f"~/kgb/{run}/batch.py")
-        out = gcloud_ssh(VM, ZONE, f"cd ~/sam3_repo && python3 ~/kgb/{run}/batch.py", timeout=900)
+        # Pinned venv (torch 2.12.1/torchvision 0.27.1): immune to other
+        # sessions' pip --user installs, which broke the shared env once.
+        out = gcloud_ssh(VM, ZONE, f"cd ~/sam3_repo && ~/sam3_venv/bin/python ~/kgb/{run}/batch.py", timeout=900)
         if "BATCH_DONE" not in out:
             raise RuntimeError(f"sam batch {tag} did not finish: ...{out[-400:]}")
         gcloud_ssh(VM, ZONE, f"cd ~/kgb/{run} && tar czf out.tgz out")
