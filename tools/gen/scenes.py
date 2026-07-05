@@ -167,15 +167,32 @@ if os.environ.get("KGB_EXTRA_THEMES") == "1":
 
 
 def _grid_rects(cols: int, rows: int, n: int, rng: random.Random,
-                margin: int = 24, avoid: list[dict] | None = None) -> list[tuple[int, int, int, int]]:
+                margin: int = 24, avoid: list[dict] | None = None,
+                img: Image.Image | None = None) -> list[tuple[int, int, int, int]]:
     """Pick n grid cells (skipping cells that overlap `avoid` boxes).
 
     Row 0 is excluded: a rect in the sky band leaves NBP nothing to place an
     object ON, so grounded adds end up floating (bottle-in-the-sky).
+
+    When `img` is given, cells are ranked quiet-first by gradient energy
+    (with jitter so scenes don't all use the same spots): a random cell can
+    land half-on-top of existing scenery, and the add then paints over or
+    visually truncates the object under it.
     """
     cells = [(c, r) for c in range(cols) for r in range(1, rows)]
-    rng.shuffle(cells)
     cw, ch = W // cols, H // rows
+    if img is not None:
+        g = np.asarray(img.convert("L").resize((W // 8, H // 8)), np.float32)
+        gy, gx = np.gradient(g)
+        gm = np.hypot(gx, gy)
+        scw, sch = cw // 8, ch // 8
+
+        def busy(c: int, r: int) -> float:
+            return float(gm[r * sch:(r + 1) * sch, c * scw:(c + 1) * scw].mean())
+
+        cells.sort(key=lambda cr: busy(*cr) * rng.uniform(0.75, 1.35))
+    else:
+        rng.shuffle(cells)
     rects = []
     for c, r in cells:
         if len(rects) == n:
@@ -295,6 +312,16 @@ def _try_edit(theme_id: str, current: Image.Image, rect: tuple[int, int, int, in
         if changed < MIN_CHANGE or changed * mask_px < MIN_CHANGE_PX:
             print(f"  {theme_id}: {tag} change {changed:.2f} too small, retry {attempt + 1}")
             continue
+        # Clipping gate: an object drawn out to the crop boundary gets sliced
+        # mid-body by the composite. The changed blob must clear the rect
+        # edges beyond the erosion band, or the edit is rejected outright.
+        hit = changed_bbox(current, edited, rect, pad=0)
+        clr = EDGE_ERODE_PX + 6
+        rx, ry, rw, rh = rect
+        if hit is None or hit[0] < rx + clr or hit[1] < ry + clr or \
+           hit[0] + hit[2] > rx + rw - clr or hit[1] + hit[3] > ry + rh - clr:
+            print(f"  {theme_id}: {tag} object touches crop edge (clipped), retry {attempt + 1}")
+            continue
         imgs = ([_crop(base_for_judge, rect, pad=60), _crop(edited, rect, pad=60)]
                 if judge_images == "pair" else [_crop(edited, rect, pad=60)])
         if not strict_min(q1, q2, imgs):
@@ -325,7 +352,7 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
     rng = random.Random(seed)
     base = generate(f"{theme['base']} {SCENE_STYLE}", (W, H))
 
-    rects = _grid_rects(4, 3, NUM_DIFFS, rng)
+    rects = _grid_rects(4, 3, NUM_DIFFS, rng, img=base)
     all_objs = rng.sample(theme["adds"], len(theme["adds"]))
     # A and B evolve independently from the same base - run both add-chains
     # in parallel (each branch stays sequential internally).
@@ -347,7 +374,9 @@ def _gen_diff_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None:
                     "current background, colors and objects exactly as they are - "
                     "just draw the new object on top of them, naturally placed ON "
                     "the ground or a surface (never floating in the sky), bold and "
-                    "clearly visible, matching the art style. Do NOT repaint the "
+                    "clearly visible, matching the art style. The ENTIRE object "
+                    "must sit well inside the marked area with clear space around "
+                    "it - it must not touch the area's edges. Do NOT repaint the "
                     "backdrop.",
                     "These two crops are from a spot-the-difference game for young children. Is there a clearly visible new object in the second crop?",
                     "Does the newly added object look naturally drawn into the illustration - no pasted-on box, no white patch behind it, no style clash?",
@@ -440,7 +469,7 @@ def _gen_hidden_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None
     if base is None:
         return None
 
-    rects = _grid_rects(5, 3, NEEDED_TARGETS, rng, margin=30)
+    rects = _grid_rects(5, 3, NEEDED_TARGETS, rng, margin=30, img=base)
     current = base
     targets = []
     for rect in rects:
@@ -455,7 +484,8 @@ def _gen_hidden_scene_once(theme: dict, out_dir: Path, seed: int) -> dict | None
                     "current background, colors and objects exactly as they are — "
                     "just draw the new object on top of them, naturally placed, "
                     "medium-sized and clearly drawn, colorful and cute, fully "
-                    "visible, matching the art style. Do NOT repaint the backdrop.",
+                    "visible and ENTIRELY inside the marked area with clear space "
+                    "around it (never touching its edges), matching the art style. Do NOT repaint the backdrop.",
                     f"Does this image crop contain {desc}?",
                     f"Does {desc} look naturally drawn into the scene (not pasted on) and recognizable to a young child?",
                     base_for_judge=current, attempts=1, tag=f"'{tid}'",
