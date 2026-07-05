@@ -41,6 +41,15 @@ for (const h of manifest.hidden) {
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);
 }
+lines.push('};', '', '// small jpg derivatives for picker cards (fall back to full image)');
+lines.push('export const SCENE_THUMBS: Record<string, number> = {');
+const thumbable = new Set();
+for (const d of manifest.diff) thumbable.add(d.imageA);
+for (const h of manifest.hidden) thumbable.add(h.image);
+for (const f of [...thumbable].sort()) {
+  const t = f.replace(/\.(png|jpg)$/, '_thumb.jpg');
+  if (exists(t)) lines.push(`  '${f}': require('../../assets/game/${t}'),`);
+}
 lines.push('};', '', 'export const UI_IMAGES = {');
 for (const f of fs.readdirSync(path.join(root, 'assets/game/ui')).sort()) {
   const key = f.replace(/\.(png|jpg)$/, '');

@@ -14,7 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
+import { SCENE_THUMBS, SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
 import { HiddenGame } from './src/games/hidden/HiddenGame';
@@ -138,7 +138,8 @@ function Menu({
           ? (manifest.hidden.find((h) => h.id === 'ballroom') ?? manifest.hidden[0])
           : (manifest.diff.find((d) => d.id === 'princess') ?? manifest.diff[0]);
     if (!scene) return null;
-    const src = 'imageA' in scene ? SCENE_IMAGES[(scene as { imageA: string }).imageA] : SCENE_IMAGES[(scene as { image: string }).image];
+    const imgKey = 'imageA' in scene ? (scene as { imageA: string }).imageA : (scene as { image: string }).image;
+    const src = SCENE_THUMBS[imgKey] ?? SCENE_IMAGES[imgKey];
     return <Image source={src} style={styles.preview} />;
   };
 

@@ -729,6 +729,82 @@
           "what": "the frog wearing a tiny crown changed color!"
         }
       ]
+    },
+    {
+      "id": "snow",
+      "name": "Snowy Village",
+      "imageA": "diff/snow_a.png",
+      "imageB": "diff/snow_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 1041,
+          "y": 76,
+          "w": 125,
+          "h": 194,
+          "what": "a red cardinal bird appeared"
+        },
+        {
+          "x": 1089,
+          "y": 391,
+          "w": 103,
+          "h": 133,
+          "what": "a penguin appeared"
+        },
+        {
+          "x": 823,
+          "y": 571,
+          "w": 135,
+          "h": 116,
+          "what": "the pair of ice skates is missing"
+        },
+        {
+          "x": 1091,
+          "y": 547,
+          "w": 123,
+          "h": 119,
+          "what": "the gift box in the snow is missing"
+        }
+      ]
+    },
+    {
+      "id": "pirate",
+      "name": "Pirate Cove",
+      "imageA": "diff/pirate_a.png",
+      "imageB": "diff/pirate_b.png",
+      "w": 1280,
+      "h": 720,
+      "diffs": [
+        {
+          "x": 23,
+          "y": 597,
+          "w": 184,
+          "h": 91,
+          "what": "the spyglass on the sand changed color!"
+        },
+        {
+          "x": 239,
+          "y": 507,
+          "w": 151,
+          "h": 89,
+          "what": "the golden coin pile changed color!"
+        },
+        {
+          "x": 1019,
+          "y": 572,
+          "w": 108,
+          "h": 106,
+          "what": "the friendly shark fin in the water changed color!"
+        },
+        {
+          "x": 521,
+          "y": 358,
+          "w": 126,
+          "h": 92,
+          "what": "the black pirate flag changed color!"
+        }
+      ]
     }
   ],
   "hidden": [

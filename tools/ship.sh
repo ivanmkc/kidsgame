@@ -32,6 +32,7 @@ PYEOF
 
 python3 tools/tighten_hitboxes.py > /dev/null
 python3 tools/rate_levels.py
+python3 tools/gen_thumbs.py
 node tools/gen_images_ts.mjs
 npx tsc --noEmit
 npx vitest run src/games/__tests__/logic.test.ts 2>&1 | grep -E "Test Files|Tests "
