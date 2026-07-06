@@ -856,6 +856,60 @@
           "patch": "diff/music_d_4_microphone_on_a_stand.png"
         }
       ]
+    },
+    {
+      "id": "bakery",
+      "name": "Bakery",
+      "image": "diff/bakery_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 35,
+          "y": 514,
+          "w": 234,
+          "h": 173,
+          "name": "basket of croissants",
+          "kind": "recolor",
+          "patch": "diff/bakery_d_0_basket_of_croissants.png"
+        },
+        {
+          "x": 1069,
+          "y": 561,
+          "w": 156,
+          "h": 110,
+          "name": "gingerbread man cookie",
+          "kind": "remove",
+          "patch": "diff/bakery_d_1_gingerbread_man_cookie.png"
+        },
+        {
+          "x": 467,
+          "y": 489,
+          "w": 187,
+          "h": 108,
+          "name": "pie with a slice missing",
+          "kind": "recolor",
+          "patch": "diff/bakery_d_2_pie_with_a_slice_missing.png"
+        },
+        {
+          "x": 739,
+          "y": 568,
+          "w": 160,
+          "h": 108,
+          "name": "strawberry tart",
+          "kind": "recolor",
+          "patch": "diff/bakery_d_3_strawberry_tart.png"
+        },
+        {
+          "x": 23,
+          "y": 297,
+          "w": 83,
+          "h": 147,
+          "name": "milk bottle",
+          "kind": "recolor",
+          "patch": "diff/bakery_d_4_milk_bottle.png"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1485,6 +1539,78 @@
           "w": 72,
           "h": 74,
           "thumb": "hidden/fairy_t_gem.png"
+        }
+      ]
+    },
+    {
+      "id": "toybox",
+      "name": "Toy Room",
+      "image": "hidden/toybox.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "ball",
+          "label": "a red and white beach ball",
+          "x": 641,
+          "y": 383,
+          "w": 120,
+          "h": 119,
+          "thumb": "hidden/toybox_t_ball.png"
+        },
+        {
+          "id": "robot",
+          "label": "a small blue toy robot",
+          "x": 991,
+          "y": 309,
+          "w": 73,
+          "h": 119,
+          "thumb": "hidden/toybox_t_robot.png"
+        },
+        {
+          "id": "dino",
+          "label": "a green toy dinosaur",
+          "x": 1101,
+          "y": 178,
+          "w": 117,
+          "h": 112,
+          "thumb": "hidden/toybox_t_dino.png"
+        },
+        {
+          "id": "duck",
+          "label": "a yellow rubber duck",
+          "x": 225,
+          "y": 263,
+          "w": 74,
+          "h": 68,
+          "thumb": "hidden/toybox_t_duck.png"
+        },
+        {
+          "id": "boat",
+          "label": "a little toy sailboat",
+          "x": 341,
+          "y": 176,
+          "w": 89,
+          "h": 103,
+          "thumb": "hidden/toybox_t_boat.png"
+        },
+        {
+          "id": "snail",
+          "label": "a smiling cartoon snail",
+          "x": 275,
+          "y": 64,
+          "w": 111,
+          "h": 93,
+          "thumb": "hidden/toybox_t_snail.png"
+        },
+        {
+          "id": "drum",
+          "label": "a little toy drum",
+          "x": 810,
+          "y": 569,
+          "w": 127,
+          "h": 110,
+          "thumb": "hidden/toybox_t_drum.png"
         }
       ]
     }

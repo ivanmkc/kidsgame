@@ -44,7 +44,11 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
   }, []);
 
   const { width, height } = useWindowDimensions();
+  const stageRef = useRef<View | null>(null);
   const stageFrame = useRef({ x: 0, y: 0, w: 1, h: 1 });
+  const measureStage = () => {
+    stageRef.current?.measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
+  };
   const [ghost, setGhost] = useState<{ icon: string; x: number; y: number } | null>(null);
 
   if (!picked) {
@@ -99,13 +103,10 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
     >
       <View style={styles.wrap}>
         <View
+          ref={stageRef}
           style={[styles.stage, shadows.sticker, { width: stageW, height: stageH }]}
           testID="sticker-stage"
-          onLayout={(e) => {
-            // measure in window space for tray-drag drops
-            (e.target as unknown as { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void })
-              .measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
-          }}
+          onLayout={measureStage}
         >
           <Image source={SCENE_IMAGES[picked.image] ?? SCENE_THUMBS[picked.image]} style={{ width: stageW, height: stageH }} resizeMode="cover" />
           {placed.map((s) => (
