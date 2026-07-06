@@ -32,13 +32,17 @@ json.dump(m, open('src/assets/manifest.json', 'w'), indent=2)
 print(f"ship manifest: {before} -> {len(m['diff'])} diff + {len(m['hidden'])} hidden (ledger-verified only)")
 PYEOF
 
+python3 tools/check_pool_pixels.py   # invisible-difference gate (hard fail)
 python3 tools/tighten_hitboxes.py > /dev/null
 python3 tools/rate_levels.py
 python3 tools/gen_thumbs.py
 node tools/gen_images_ts.mjs
 npx tsc --noEmit
 npx vitest run src/games/__tests__/logic.test.ts 2>&1 | grep -E "Test Files|Tests "
+BUILD_ID=$(git rev-parse --short HEAD)-$(python3 -c "import time; print(int(time.time()))")
+printf "// GENERATED at ship time\nexport const KGB_BUILD = '%s';\n" "$BUILD_ID" > src/assets/build.ts
 npx expo export --platform web 2>&1 | tail -1
+printf '{"build": "%s"}\n' "$BUILD_ID" > dist/version.json
 npx gh-pages -d dist --nojekyll -m "deploy: ledger-verified content only" 2>&1 | tail -1
 
 # restore full working manifest for generation to keep extending

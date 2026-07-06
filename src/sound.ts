@@ -71,6 +71,21 @@ export function stopNarration(): void {
   step();
 }
 
+/** Speak several lines in order (story text, then the spoken choice menu).
+ *  Uses clip 'ended' chaining; any new say()/stopNarration() cancels. */
+export function saySequence(texts: string[]): void {
+  const rest = texts.filter(Boolean);
+  if (!rest.length) return;
+  say(rest[0]);
+  if (rest.length > 1 && narration) {
+    const cur = narration;
+    cur.addEventListener('ended', () => {
+      // only continue if nothing replaced us meanwhile
+      if (narration === cur) saySequence(rest.slice(1));
+    }, { once: true });
+  }
+}
+
 /** Read instructions aloud for pre-readers. Pre-rendered SoTA clips
  *  (Gemini TTS, generated offline) play when available; Web Speech only
  *  covers strings that slipped the generator. */

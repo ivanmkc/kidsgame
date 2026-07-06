@@ -6,7 +6,7 @@ import { Confetti } from '../../components/Confetti';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { SCENE_AR, manifest, StoryNode, StoryScare } from '../../manifest';
-import { say, sfx, useSay } from '../../sound';
+import { say, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
 interface Props {
@@ -28,7 +28,11 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
 
   const node: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
 
-  useSay(node?.text ?? null);
+  useEffect(() => {
+    if (!node) return;
+    const menu = (node.choices ?? []).map((c) => c.label);
+    saySequence(menu.length ? [node.text, 'What should happen next?', menu[0], 'or...', menu[1] ?? ''] : [node.text]);
+  }, [node]);
 
   const { width, height } = useWindowDimensions();
 
@@ -94,6 +98,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
                 ]}
               >
                 <Image source={SCENE_IMAGES[c.icon]} style={styles.pickImg} resizeMode="contain" />
+                <Text style={styles.pickCaption} numberOfLines={1}>{c.label}</Text>
               </Pressable>
             ) : (
               <ChunkyButton
@@ -204,8 +209,8 @@ const styles = StyleSheet.create({
   },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
   pickTile: {
-    width: 170,
-    height: 150,
+    width: 190,
+    height: 178,
     borderRadius: 24,
     borderWidth: 5,
     backgroundColor: colors.paper,
@@ -213,5 +218,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 8,
   },
-  pickImg: { width: '100%', height: '100%' },
+  pickImg: { width: '100%', height: 118 },
+  pickCaption: { fontFamily: fonts.displayMed, fontSize: 13, color: colors.ink, textAlign: 'center', marginTop: 4 },
 });

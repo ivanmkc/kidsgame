@@ -51,16 +51,19 @@ def gen_icon(sid: str, nid: str, idx: int, label: str) -> str | None:
         data = _call([types.Content(role="user", parts=[
             *refs,
             types.Part(text=(
-                f"A single bold, simple storybook picture-button illustrating the choice: "
-                f"\"{subject}\". One clear subject a 3-year-old instantly understands, "
-                "centered, filling most of the frame, on a plain solid bright magenta "
-                "background (#FF00FF). Nothing else. No text, no letters.")),
+                f"A small square storybook thumbnail SHOWING THE HERO FROM THE REFERENCE "
+                f"IMAGE actively doing this: \"{subject}\". The action must be obvious at "
+                "a glance to a 3-year-old — hero mid-motion, destination or object visible, "
+                "bright and simple, minimal background. Square composition. No text.")),
         ])])
-        sprite, coverage = key_out_magenta(Image.open(io.BytesIO(data)).convert("RGB"), out_size=380)
-        if 0.10 <= coverage <= 0.97:
-            best = sprite
+        img = Image.open(io.BytesIO(data)).convert("RGB")
+        side = min(img.size)
+        img = img.crop(((img.width - side) // 2, (img.height - side) // 2,
+                        (img.width + side) // 2, (img.height + side) // 2)).resize((380, 380))
+        sprite, coverage = img, 0.5  # full thumbnail, no keying
+        best = sprite
         if best is not None and ask_yes_no(
-            f"Would a 3-year-old understand this picture as \"{subject}\"? It must be a single clean subject with no text.",
+            f"Does this thumbnail clearly show the story hero doing: \"{subject}\"? Would a 3-year-old get the choice at a glance? No text allowed.",
             [sprite],
         ):
             sprite.save(OUT / fname)
