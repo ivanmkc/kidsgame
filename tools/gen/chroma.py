@@ -73,7 +73,8 @@ def _despill_edges(sprite: Image.Image, bg_color: np.ndarray) -> Image.Image:
     trans = Image.fromarray(((a < 128) * 255).astype(np.uint8), "L").filter(ImageFilter.MaxFilter(11))
     edge = np.asarray(trans) > 0
     spill = (a > 0) & edge & (hue | near_bg)
-    if spill.any():
-        arr[spill, 3] = 0
-        return Image.fromarray(arr.astype(np.uint8), "RGBA")
-    return sprite
+    arr[spill, 3] = 0
+    # zero RGB under transparency: alpha-naive viewers (and any straight
+    # convert('RGB')) would otherwise resurrect the keyed-out backdrop
+    arr[arr[..., 3] == 0, :3] = 0
+    return Image.fromarray(arr.astype(np.uint8), "RGBA")
