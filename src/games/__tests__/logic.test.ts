@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
-import { SYMBOLS, buildDeck, dealRound, sharedSymbol } from '../spotit/logic';
+import { SYMBOLS, buildDeck, dealDuelRound, dealRound, hintAfterMs, leaderDealDelayMs, sharedSymbol } from '../spotit/logic';
 
 const ASSETS = join(__dirname, '../../../assets/game');
 
@@ -37,6 +37,50 @@ describe('spot it deck', () => {
       expect(round.top).toContain(round.answer);
       expect(round.bottom).toContain(round.answer);
     }
+  });
+});
+
+describe('spot it duel', () => {
+  const deck = buildDeck();
+  const key = (c: number[]) => [...c].sort((x, y) => x - y).join(',');
+
+  it('deals 3 distinct cards; answers validate via sharedSymbol; answerA !== answerB', () => {
+    const rng = makeRng(7);
+    for (let r = 0; r < 300; r++) {
+      const d = dealDuelRound(rng, deck);
+      expect(new Set([key(d.center), key(d.a), key(d.b)]).size).toBe(3);
+      expect(sharedSymbol(d.a, d.center)).toBe(d.answerA);
+      expect(sharedSymbol(d.b, d.center)).toBe(d.answerB);
+      expect(d.center).toContain(d.answerA);
+      expect(d.center).toContain(d.answerB);
+      expect(d.answerA).not.toBe(d.answerB);
+    }
+  });
+
+  it('is deterministic for a given seed', () => {
+    const rng1 = makeRng(1234);
+    const rng2 = makeRng(1234);
+    for (let r = 0; r < 20; r++) {
+      expect(dealDuelRound(rng1, deck)).toEqual(dealDuelRound(rng2, deck));
+    }
+  });
+
+  it('leaderDealDelayMs: 0 below a 2-lead, then 400·(lead−1) capped at 1200ms', () => {
+    expect(leaderDealDelayMs(0, 0)).toBe(0);
+    expect(leaderDealDelayMs(1, 0)).toBe(0);
+    expect(leaderDealDelayMs(0, 3)).toBe(0); // trailing kid never waits
+    expect(leaderDealDelayMs(2, 0)).toBe(400);
+    expect(leaderDealDelayMs(3, 0)).toBe(800);
+    expect(leaderDealDelayMs(4, 0)).toBe(1200);
+    expect(leaderDealDelayMs(9, 0)).toBe(1200); // cap
+  });
+
+  it('hintAfterMs: no hint unless trailing by ≥2, then baseSecs·1000', () => {
+    expect(hintAfterMs(0, 0, 3)).toBe(Infinity);
+    expect(hintAfterMs(0, 1, 3)).toBe(Infinity);
+    expect(hintAfterMs(3, 1, 3)).toBe(Infinity); // leader gets no hint
+    expect(hintAfterMs(0, 2, 3)).toBe(3000);
+    expect(hintAfterMs(1, 4, 5)).toBe(5000);
   });
 });
 

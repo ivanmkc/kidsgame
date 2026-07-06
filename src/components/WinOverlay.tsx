@@ -8,13 +8,17 @@ import { Confetti } from './Confetti';
 interface Props {
   visible: boolean;
   message: string;
+  /** Kind runner-up line under the message (duel modes). */
+  sub?: string;
+  /** Extra content between message and buttons — star rows / player chips. */
+  stats?: React.ReactNode;
   /** Advance to fresh content — next scene or a new random round set. */
   onNext: () => void;
   onHome: () => void;
   nextLabel?: string;
 }
 
-export function WinOverlay({ visible, message, onNext, onHome, nextLabel }: Props) {
+export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextLabel }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
   const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
   // Tap shield: a kid hammering the final answer would otherwise punch
@@ -65,6 +69,8 @@ export function WinOverlay({ visible, message, onNext, onHome, nextLabel }: Prop
           ))}
         </View>
         <Text style={styles.message}>{message}</Text>
+        {sub ? <Text style={styles.sub}>{sub}</Text> : null}
+        {stats ?? null}
         <ChunkyButton label={nextLabel ?? 'Next Level ▶️'} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={224} />
         <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
       </Animated.View>
@@ -99,4 +105,5 @@ const styles = StyleSheet.create({
   star: { fontSize: 38 },
   starBig: { fontSize: 54, marginBottom: 2 },
   message: { fontSize: 25, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
+  sub: { fontSize: 16, fontFamily: fonts.bodyReg, color: colors.inkSoft, textAlign: 'center', marginTop: -6 },
 });
