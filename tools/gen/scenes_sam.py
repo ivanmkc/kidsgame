@@ -423,7 +423,7 @@ def _chip_whole(chip: Image.Image) -> bool:
 def gen_hidden_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
     rng = random.Random(seed)
     for attempt in range(3):
-        chosen = rng.sample(theme["targets"], min(8, len(theme["targets"])))
+        chosen = rng.sample(theme["targets"], min(10, len(theme["targets"])))
         descs = [t[1] for t in chosen]
         base = generate(
             f"{theme['base']} Also include each of these, drawn exactly once, small "
