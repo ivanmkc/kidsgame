@@ -27,11 +27,31 @@ import { StoryGame } from './src/games/story/StoryGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
+import { KGB_BUILD } from './src/assets/build';
 import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
 import { useTwoPlayer } from './src/multiplayer';
-import { isMuted, say, setMuted, sfx } from './src/sound';
+import { isMuted, say, setMuted, sfx, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
+
+// Stale-cache self-heal: hashed JS is cached as immutable, so an old
+// cached index.html pins an outdated bundle forever (invisible-diff bug
+// class). Compare the baked build id against version.json (no-store) and
+// reload once when they diverge.
+if (typeof document !== 'undefined' && typeof fetch !== 'undefined') {
+  const baked = KGB_BUILD;
+  fetch('version.json', { cache: 'no-store' })
+    .then((r) => r.json())
+    .then((v) => {
+      if (baked && v.build && v.build !== baked && !sessionStorage.getItem('kgb.reloaded')) {
+        sessionStorage.setItem('kgb.reloaded', '1');
+        location.reload();
+      } else if (v.build === baked) {
+        sessionStorage.removeItem('kgb.reloaded');
+      }
+    })
+    .catch(() => { /* offline: fine */ });
+}
 
 // Kids drag fingers across the screen constantly — kill text/image
 // selection and the long-press callout globally (web only).
@@ -56,6 +76,7 @@ export default function App() {
   const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
+  useEffect(() => { stopNarration(); }, [route]);
   const parts = routeParts(route);
   const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story'];
   // A stale/mistyped hash must never strand a kid on a blank page.
