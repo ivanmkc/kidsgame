@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTIES } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
-import { buildBoard } from '../memory/logic';
+import { PlayerIx } from '../../multiplayer';
+import { DuelState, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from '../memory/logic';
 import { isSolved, makePuzzle, swap } from '../puzzle/logic';
 
 describe('memory match', () => {
@@ -16,6 +17,56 @@ describe('memory match', () => {
       for (const n of counts.values()) expect(n).toBe(2);
       expect(new Set(board.map((c) => c.key)).size).toBe(board.length);
     }
+  });
+});
+
+describe('memory duel', () => {
+  it('a match keeps the turn and credits the scorer (classic extra-turn)', () => {
+    const s = duelResolve(duelInit(0), true);
+    expect(s.turn).toBe(0);
+    expect(s.pairs).toEqual([1, 0]);
+    const s2 = duelResolve(duelInit(1), true);
+    expect(s2.turn).toBe(1);
+    expect(s2.pairs).toEqual([0, 1]);
+  });
+
+  it('a miss flips the turn and credits nobody', () => {
+    const s = duelResolve(duelInit(0), false);
+    expect(s.turn).toBe(1);
+    expect(s.pairs).toEqual([0, 0]);
+    const s2 = duelResolve(s, false);
+    expect(s2.turn).toBe(0);
+    expect(s2.pairs).toEqual([0, 0]);
+  });
+
+  it('random full games: pair credits always sum to totalPairs', () => {
+    for (let seed = 1; seed <= 40; seed++) {
+      const rng = makeRng(seed);
+      const totalPairs = 4 + Math.floor(rng() * 5);
+      let s: DuelState = duelInit(rng() < 0.5 ? 0 : 1);
+      let remaining = totalPairs;
+      while (remaining > 0) {
+        const isMatch = rng() < 0.4;
+        if (isMatch) remaining -= 1;
+        s = duelResolve(s, isMatch);
+      }
+      expect(s.pairs[0] + s.pairs[1]).toBe(totalPairs);
+    }
+  });
+
+  it('duelWinner: both ways and the tie', () => {
+    expect(duelWinner({ turn: 0, pairs: [3, 1] })).toBe(0);
+    expect(duelWinner({ turn: 1, pairs: [1, 3] })).toBe(1);
+    expect(duelWinner({ turn: 0, pairs: [2, 2] })).toBe('tie');
+  });
+
+  it('nextStarter: the loser starts the rematch; ties alternate from the last mover', () => {
+    expect(nextStarter({ turn: 0, pairs: [3, 1] })).toBe(1);
+    expect(nextStarter({ turn: 1, pairs: [1, 3] })).toBe(0);
+    expect(nextStarter({ turn: 0, pairs: [2, 2] })).toBe(1);
+    expect(nextStarter({ turn: 1, pairs: [2, 2] })).toBe(0);
+    const _typecheck: PlayerIx = nextStarter({ turn: 0, pairs: [0, 1] });
+    expect(_typecheck).toBe(0);
   });
 });
 
@@ -54,6 +105,10 @@ describe('difficulty table', () => {
     expect(easy.rulesTiles).toBeLessThan(medium.rulesTiles);
     expect(medium.rulesTiles).toBeLessThan(hard.rulesTiles);
     expect(hard.rulesRecallFrom).toBeLessThan(medium.rulesRecallFrom);
+    expect(easy.duelWins).toBeLessThan(medium.duelWins);
+    expect(medium.duelWins).toBeLessThan(hard.duelWins);
+    expect(easy.duelHintSecs).toBeLessThan(medium.duelHintSecs);
+    expect(medium.duelHintSecs).toBeLessThan(hard.duelHintSecs);
   });
 
   it('memory pairs never exceed available icons', () => {

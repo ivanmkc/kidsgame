@@ -7,29 +7,53 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
+import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng } from '../../rng';
+import { say, sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
-import { MemoryCard, buildBoard } from './logic';
+import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from './logic';
 
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  twoPlayerEnabled?: boolean;
 }
 
-export function MemoryGame({ onHome, difficulty }: Props) {
+export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
   const settings = settingsFor(difficulty);
   const pairs = settings.memoryPairs;
+  // All hooks unconditionally at top; ModePicker is conditional JSX in the
+  // single return — never an early return (repo hard rule).
+  const [mode, setMode] = useState<'solo' | '2p' | null>(twoPlayerEnabled ? null : 'solo');
+  const duel = mode === '2p';
   const [board, setBoard] = useState<MemoryCard[]>(() =>
     buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs)
   );
   const [faceUp, setFaceUp] = useState<number[]>([]);
   const [matched, setMatched] = useState<string[]>([]);
+  const [matchedBy, setMatchedBy] = useState<Record<string, PlayerIx>>({});
+  const [duelState, setDuelState] = useState<DuelState>(() => duelInit(Math.random() < 0.5 ? 0 : 1));
   const [moves, setMoves] = useState(0);
   const lockRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
-  const showTimer = settingsFor(difficulty).timer;
+  const showTimer = settingsFor(difficulty).timer && mode !== '2p';
   const won = matched.length * 2 === board.length;
-  const elapsed = useElapsed(showTimer && !won, timerKey);
+  const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
+
+  // Turn halo pulse — restarted whenever the turn changes.
+  const halo = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!duel) return;
+    halo.setValue(1);
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(halo, { toValue: 0.65, duration: 700, useNativeDriver: true }),
+        Animated.timing(halo, { toValue: 1, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [duel, duelState.turn, halo]);
 
   const prevPairs = useRef(pairs);
   useEffect(() => {
@@ -41,10 +65,29 @@ export function MemoryGame({ onHome, difficulty }: Props) {
     setFaceUp([]);
     setMatched([]);
     setMoves(0);
-  }, [pairs]);
+    // scores must not leak across boards
+    setMatchedBy({});
+    const starter = nextStarter(duelState);
+    setDuelState(duelInit(starter));
+    if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
+  }, [pairs]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Kind spoken recap; the word "lose" never appears.
+  useEffect(() => {
+    if (!won || !duel) return;
+    const w = duelWinner(duelState);
+    if (w === 'tie') {
+      say(`It's a tie! You both found ${duelState.pairs[0]} pairs!`);
+    } else {
+      const l = nextTurn(w);
+      say(`${MP_PLAYERS[w].name} wins! ${MP_PLAYERS[w].name} found ${duelState.pairs[w]} pairs and ${MP_PLAYERS[l].name} found ${duelState.pairs[l]} pairs. Great game, both of you!`);
+    }
+  }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onFlip = (card: MemoryCard) => {
+    if (mode === null) return; // inert while the 1P/2P picker is up
     if (lockRef.current || won) return;
+    if (faceUp.length >= 2) return; // multi-touch hardening
     if (faceUp.includes(card.key) || matched.includes(card.icon)) return;
     const next = [...faceUp, card.key];
     setFaceUp(next);
@@ -54,11 +97,26 @@ export function MemoryGame({ onHome, difficulty }: Props) {
       if (a.icon === b.icon) {
         setMatched((m) => [...m, a.icon]);
         setFaceUp([]);
+        if (duel) {
+          sfx.good();
+          const scorer = duelState.turn;
+          setMatchedBy((mb) => ({ ...mb, [a.icon]: scorer }));
+          setDuelState((d) => duelResolve(d, true));
+          const lastPair = (matched.length + 1) * 2 === board.length;
+          // ONE combined utterance — say() cancels prior speech.
+          if (!lastPair) say(`${MP_PLAYERS[scorer].name} found a pair! Go again!`);
+        }
       } else {
+        if (duel) sfx.wrong();
         lockRef.current = true;
         setTimeout(() => {
           setFaceUp([]);
           lockRef.current = false;
+          if (duel) {
+            // turn signal lands exactly when input unlocks
+            setDuelState((d) => duelResolve(d, false));
+            say(`${MP_PLAYERS[nextTurn(duelState.turn)].name}'s turn!`);
+          }
         }, 750);
       }
     }
@@ -71,6 +129,11 @@ export function MemoryGame({ onHome, difficulty }: Props) {
     setMatched([]);
     setMoves(0);
     lockRef.current = false;
+    // scores must not leak across boards; the non-winner starts the rematch
+    setMatchedBy({});
+    const starter = nextStarter(duelState);
+    setDuelState(duelInit(starter));
+    if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
   };
 
   const { width, height } = useWindowDimensions();
@@ -80,12 +143,31 @@ export function MemoryGame({ onHome, difficulty }: Props) {
   const cols = isLandscape ? Math.ceil(count / 2) : count <= 8 ? 2 : count <= 12 ? 3 : 4;
   const rows = Math.ceil(count / cols);
   const gap = 12;
-  const availW = Math.min(width - 32, 1100);
-  const availH = height - 84 - 64; // header + moves line
+  const availW = Math.min(width - 32, 1100) - (duel ? 26 : 0); // halo padding
+  const availH = height - 84 - (duel ? 92 : 64); // header + chips/moves line
   const cardW = Math.min(
     (availW - (cols - 1) * gap) / cols,
     (availH - (rows - 1) * gap) / rows / 1.15,
     150
+  );
+
+  const turnPlayer = MP_PLAYERS[duelState.turn];
+  const winner = duelWinner(duelState);
+
+  const boardView = (
+    <View style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }]}>
+      {board.map((card) => (
+        <FlipCard
+          key={card.key}
+          card={card}
+          size={cardW}
+          up={faceUp.includes(card.key) || matched.includes(card.icon)}
+          matched={matched.includes(card.icon)}
+          ownerColor={matchedBy[card.icon] !== undefined ? MP_PLAYERS[matchedBy[card.icon]].color : undefined}
+          onFlip={() => onFlip(card)}
+        />
+      ))}
+    </View>
   );
 
   return (
@@ -101,37 +183,77 @@ export function MemoryGame({ onHome, difficulty }: Props) {
       }
     >
       <View style={styles.boardWrap}>
-        <View style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }]}>
-          {board.map((card) => (
-            <FlipCard
-              key={card.key}
-              card={card}
-              size={cardW}
-              up={faceUp.includes(card.key) || matched.includes(card.icon)}
-              matched={matched.includes(card.icon)}
-              onFlip={() => onFlip(card)}
+        {duel ? (
+          <View style={{ padding: 13 }}>
+            <Animated.View
+              pointerEvents="none"
+              testID="memory-turn-halo"
+              accessibilityLabel={`${turnPlayer.name}'s turn`}
+              style={[
+                styles.halo,
+                {
+                  borderColor: turnPlayer.color,
+                  shadowColor: turnPlayer.color,
+                  opacity: halo,
+                },
+              ]}
             />
-          ))}
-        </View>
-        <Text style={styles.moves} testID="memory-moves">Moves: {moves}</Text>
+            {boardView}
+          </View>
+        ) : (
+          boardView
+        )}
+        {duel ? (
+          <View style={styles.chipsRow}>
+            <PlayerChip player={0} count={duelState.pairs[0]} active={duelState.turn === 0 && !won} testID="memory-duel-chip-0" />
+            <PlayerChip player={1} count={duelState.pairs[1]} active={duelState.turn === 1 && !won} testID="memory-duel-chip-1" />
+          </View>
+        ) : (
+          <Text style={styles.moves} testID="memory-moves">Moves: {moves}</Text>
+        )}
       </View>
       <WinOverlay
         visible={won}
-        message={'Amazing memory! You matched them all!'}
-        onNext={reset} nextLabel={'Next Round ▶️'}
+        message={
+          duel
+            ? winner === 'tie'
+              ? `It's a tie! You both found ${duelState.pairs[0]} pairs!`
+              : `${MP_PLAYERS[winner].name} wins! Great game, both of you!`
+            : 'Amazing memory! You matched them all!'
+        }
+        stats={
+          duel ? (
+            <View style={styles.winStats} testID="memory-win-stats">
+              {([0, 1] as PlayerIx[]).map((ix) => (
+                <View key={ix} style={styles.winStatCol}>
+                  <Text style={styles.crown}>{winner === ix || winner === 'tie' ? '👑' : ' '}</Text>
+                  <PlayerChip player={ix} count={duelState.pairs[ix]} active={winner === ix || winner === 'tie'} testID={`memory-win-chip-${ix}`} />
+                </View>
+              ))}
+            </View>
+          ) : undefined
+        }
+        onNext={reset} nextLabel={duel ? 'Rematch ▶️' : 'Next Round ▶️'}
         onHome={onHome}
       />
+      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
     </GameShell>
   );
 }
 
+function tint(hex: string, alpha: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+}
+
 function FlipCard({
-  card, size, up, matched, onFlip,
+  card, size, up, matched, ownerColor, onFlip,
 }: {
   card: MemoryCard;
   size: number;
   up: boolean;
   matched: boolean;
+  ownerColor?: string;
   onFlip: () => void;
 }) {
   const t = useRef(new Animated.Value(0)).current;
@@ -169,6 +291,7 @@ function FlipCard({
           styles.faceUp,
           shadows.soft,
           matched && styles.faceMatched,
+          matched && ownerColor ? { borderColor: ownerColor, backgroundColor: tint(ownerColor, 0.12) } : null,
           { transform: [{ perspective: 700 }, { rotateY: backRot }] },
         ]}
       >
@@ -186,6 +309,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
+  halo: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 5,
+    borderRadius: 24,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.55,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 12,
+  },
+  winStats: { flexDirection: 'row', gap: 22, alignItems: 'flex-end', justifyContent: 'center' },
+  winStatCol: { alignItems: 'center', gap: 4 },
+  crown: { fontSize: 24, height: 30 },
   face: {
     position: 'absolute',
     top: 0,

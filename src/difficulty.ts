@@ -40,6 +40,8 @@ export interface DifficultySettings {
   rulesRounds: number;
   rulesTiles: number;
   rulesRecallFrom: number; // round index where memory-check rounds may start (Infinity = never)
+  duelWins: number;     // Spot-It duel: stars to win the match
+  duelHintSecs: number; // Spot-It duel: sparkle hint delay for a kid trailing by >=2
 }
 
 export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
@@ -50,6 +52,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     diffHint: true, timer: false,
     diffDraw: 3, hiddenDraw: 5,
     rulesRounds: 10, rulesTiles: 6, rulesRecallFrom: Infinity,
+    duelWins: 3, duelHintSecs: 3,
   },
   medium: {
     label: 'Medium', emoji: '🌟',
@@ -58,6 +61,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     diffHint: false, timer: true,
     diffDraw: 4, hiddenDraw: 6,
     rulesRounds: 10, rulesTiles: 8, rulesRecallFrom: 6,
+    duelWins: 5, duelHintSecs: 4,
   },
   hard: {
     label: 'Hard', emoji: '🔥',
@@ -66,6 +70,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     diffHint: false, timer: true,
     diffDraw: 4, hiddenDraw: 6,
     rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
+    duelWins: 7, duelHintSecs: 5,
   },
 };
 

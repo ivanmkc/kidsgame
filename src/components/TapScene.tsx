@@ -12,6 +12,7 @@ interface Props {
   boxes: { id: string; box: Box }[];
   overlays?: { box: Box; source: number }[]; // patch crops composited over the base
   foundIds: string[];
+  ringColors?: Record<string, string>; // per-box FoundRing color (co-op finder tint)
   hintId?: string | null; // temporarily flash this box's ring (easy mode)
   onHit: (id: string) => void;
   onMiss: () => void;
@@ -21,7 +22,7 @@ interface Props {
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, hintId, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, onHit, onMiss, testIDPrefix,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -78,7 +79,7 @@ export function TapScene({
             onPress={() => (found ? undefined : onHit(id))}
             style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
           >
-            {found ? <FoundRing /> : hintId === id ? <HintRing /> : null}
+            {found ? <FoundRing color={ringColors?.[id]} /> : hintId === id ? <HintRing /> : null}
           </Pressable>
         );
       })}
@@ -86,7 +87,7 @@ export function TapScene({
   );
 }
 
-function FoundRing() {
+function FoundRing({ color }: { color?: string }) {
   const pop = useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
     Animated.spring(pop, { toValue: 1, useNativeDriver: true, friction: 4 }).start();
@@ -95,7 +96,11 @@ function FoundRing() {
     <>
       <Animated.View
         pointerEvents="none"
-        style={[styles.ring, { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] }]}
+        style={[
+          styles.ring,
+          { borderColor: color ?? colors.ring },
+          { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] },
+        ]}
       />
       <SparkleBurst trigger="found" />
     </>

@@ -28,7 +28,8 @@ import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
 import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
-import { isMuted, setMuted, sfx } from './src/sound';
+import { useTwoPlayer } from './src/multiplayer';
+import { isMuted, say, setMuted, sfx } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
 
@@ -40,6 +41,7 @@ export default function App() {
     Nunito_700Bold,
   });
   const [filter, setFilter] = useState<DifficultyFilter>(() => loadFilter());
+  const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
   const parts = routeParts(route);
@@ -57,9 +59,9 @@ export default function App() {
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
       {screen === 'menu' && (
-        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} />
+        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} />
       )}
-      {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} />}
       {screen === 'diff' && (
         <DiffGame
           onHome={goHome}
@@ -75,6 +77,7 @@ export default function App() {
           onHome={goHome}
           difficulty={difficulty}
           filter={filter}
+          twoPlayerEnabled={twoPlayer}
           sceneId={param}
           onPickScene={(id) => navigate(`hidden/${id}`)}
           onBackToPicker={() => navigate('hidden')}
@@ -96,7 +99,7 @@ export default function App() {
           onBackToPicker={() => navigate('story')}
         />
       )}
-      {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} />}
       {screen === 'rules' && <RulesGame onHome={goHome} difficulty={difficulty} />}
@@ -128,11 +131,13 @@ const GAME_CARDS = [
 ];
 
 function Menu({
-  filter, onPickFilter, onNavigate,
+  filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer,
 }: {
   filter: DifficultyFilter;
   onPickFilter: (f: DifficultyFilter) => void;
   onNavigate: (r: string) => void;
+  twoPlayer: boolean;
+  onToggleTwoPlayer: (on: boolean) => void;
 }) {
   const [muted, setMutedState] = React.useState(isMuted());
   const toggleMute = () => {
@@ -200,6 +205,20 @@ function Menu({
                   style={[styles.diffChip, styles.soundChip]}
                 >
                   <Text style={styles.diffText}>{muted ? '🔇' : '🔊'}</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    const on = !twoPlayer;
+                    onToggleTwoPlayer(on);
+                    sfx.tap();
+                    if (on) say('Two player mode is on!');
+                  }}
+                  testID="mp-toggle"
+                  accessibilityRole="button"
+                  accessibilityLabel="Two player mode"
+                  style={[styles.diffChip, styles.soundChip, twoPlayer && styles.diffChipOn]}
+                >
+                  <Text style={[styles.diffText, twoPlayer && styles.diffTextOn]}>👯</Text>
                 </Pressable>
               </View>
             </View>
