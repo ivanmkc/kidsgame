@@ -16,13 +16,14 @@ interface Props {
   hintId?: string | null; // temporarily flash this box's ring (easy mode)
   onHit: (id: string) => void;
   onMiss: () => void;
+  onAssetLoad?: () => void; // fired once per image (base + each overlay), load or error
   testIDPrefix: string;
 }
 
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, onHit, onMiss, onAssetLoad, testIDPrefix,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -44,11 +45,13 @@ export function TapScene({
     <Animated.View
       style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight, transform: [{ translateX: shake }] }]}
     >
-      <Image source={source} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+      <Image source={source} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" onLoad={onAssetLoad} onError={onAssetLoad} />
       {(overlays ?? []).map((o, i) => (
         <Image
           key={`ov${i}`}
           source={o.source}
+          onLoad={onAssetLoad}
+          onError={onAssetLoad}
           style={{
             position: 'absolute',
             left: o.box.x * scale,
