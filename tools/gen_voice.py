@@ -79,7 +79,7 @@ def collect_lines() -> list[tuple[str, str]]:
     for n in range(1, 11):
         lines.setdefault(f"Memory check! Do rule number {n} again. Do you remember it?", STYLES["instruction"])
     lines.setdefault("What should happen next?", STYLES["choice"])
-    lines.setdefault("or...", STYLES["choice"])
+    lines.setdefault("or maybe...", STYLES["choice"])
     lines.setdefault("How many players?", STYLES["instruction"])
     lines.setdefault("Two player mode is on!", STYLES["instruction"])
     return sorted(lines.items())
@@ -89,12 +89,22 @@ def fname_for(text: str) -> str:
     return hashlib.sha1(spoken_form(text).encode()).hexdigest()[:16] + ".mp3"
 
 
+# some lines are too short for the TTS quality filter — speak a richer
+# form under the same map key
+TTS_OVERRIDES = {
+    "or maybe...": "Orrr... maybe...",
+    "Hug Great-Grandcat 💜": "Give Great-Grandcat a great big hug!",
+    "Be Mo, but louder! 📣": "Be Mo... but louder!",
+    "Scare the Principal back 😈": "Scare the Principal right back!",
+}
+
+
 def synth(job: tuple[str, str]) -> bool:
     text, style = job
     out = VOICE_DIR / fname_for(text)
     if out.exists():
         return True
-    say = spoken_form(text)
+    say = spoken_form(TTS_OVERRIDES.get(text, text))
     for attempt in range(3):
         try:
             resp = client().models.generate_content(
