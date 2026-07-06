@@ -31,7 +31,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   useEffect(() => {
     if (!node) return;
     const menu = (node.choices ?? []).map((c) => c.label);
-    saySequence(menu.length ? [node.text, 'What should happen next?', menu[0], 'or...', menu[1] ?? ''] : [node.text]);
+    saySequence(menu.length ? [node.text, 'What should happen next?', ...menu] : [node.text]);
   }, [node]);
 
   const { width, height } = useWindowDimensions();

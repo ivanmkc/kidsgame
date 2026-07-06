@@ -1851,11 +1851,13 @@
           "choices": [
             {
               "label": "Trot to the forest! \ud83c\udf32",
-              "next": "a"
+              "next": "a",
+              "icon": "story/luna_start_c0.png"
             },
             {
               "label": "Gallop to the beach! \ud83c\udf0a",
-              "next": "b"
+              "next": "b",
+              "icon": "story/luna_start_c1.png"
             }
           ]
         },
@@ -1865,11 +1867,13 @@
           "choices": [
             {
               "label": "Help find acorns \ud83c\udf30",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/luna_a_c0.png"
             },
             {
               "label": "Play hide and seek \ud83d\ude48",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/luna_a_c1.png"
             }
           ]
         },
@@ -1879,11 +1883,13 @@
           "choices": [
             {
               "label": "Sail away! \u26f5",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/luna_b_c0.png"
             },
             {
               "label": "Build a sandcastle \ud83c\udff0",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/luna_b_c1.png"
             }
           ]
         },
@@ -1893,11 +1899,13 @@
           "choices": [
             {
               "label": "Throw an acorn party! \ud83c\udf89",
-              "next": "end_party"
+              "next": "end_party",
+              "icon": "story/luna_aa_c0.png"
             },
             {
               "label": "Ride the rainbow home \ud83c\udf08",
-              "next": "end_rainbow"
+              "next": "end_rainbow",
+              "icon": "story/luna_aa_c1.png"
             }
           ]
         },
@@ -1907,11 +1915,13 @@
           "choices": [
             {
               "label": "Crown the champion \ud83d\udc51",
-              "next": "end_crown"
+              "next": "end_crown",
+              "icon": "story/luna_ab_c0.png"
             },
             {
               "label": "Ride the rainbow home \ud83c\udf08",
-              "next": "end_rainbow"
+              "next": "end_rainbow",
+              "icon": "story/luna_ab_c1.png"
             }
           ]
         },
@@ -1921,11 +1931,13 @@
           "choices": [
             {
               "label": "Dive with the whale \ud83d\udc0b",
-              "next": "end_pearl"
+              "next": "end_pearl",
+              "icon": "story/luna_ba_c0.png"
             },
             {
               "label": "Dance at the bonfire \ud83d\udd25",
-              "next": "end_bonfire"
+              "next": "end_bonfire",
+              "icon": "story/luna_ba_c1.png"
             }
           ]
         },
@@ -1935,11 +1947,13 @@
           "choices": [
             {
               "label": "Crown the crab king \ud83e\udd80",
-              "next": "end_crab"
+              "next": "end_crab",
+              "icon": "story/luna_bb_c0.png"
             },
             {
               "label": "Dance at the bonfire \ud83d\udd25",
-              "next": "end_bonfire"
+              "next": "end_bonfire",
+              "icon": "story/luna_bb_c1.png"
             }
           ]
         },
@@ -1979,11 +1993,13 @@
           "choices": [
             {
               "label": "Search the garden \ud83c\udf3b",
-              "next": "a"
+              "next": "a",
+              "icon": "story/pip_start_c0.png"
             },
             {
               "label": "Run to the park \ud83d\udedd",
-              "next": "b"
+              "next": "b",
+              "icon": "story/pip_start_c1.png"
             }
           ]
         },
@@ -1993,11 +2009,13 @@
           "choices": [
             {
               "label": "Dig here! \ud83d\udd73\ufe0f",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/pip_a_c0.png"
             },
             {
               "label": "Follow the sound \ud83d\udc42",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/pip_a_c1.png"
             }
           ]
         },
@@ -2007,11 +2025,13 @@
           "choices": [
             {
               "label": "Zoom down the slide! \ud83d\udedd",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/pip_b_c0.png"
             },
             {
               "label": "Sniff the oak tree \ud83c\udf33",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/pip_b_c1.png"
             }
           ]
         },
@@ -2021,11 +2041,13 @@
           "choices": [
             {
               "label": "Open it now! \ud83d\udd13",
-              "next": "end_biscuits"
+              "next": "end_biscuits",
+              "icon": "story/pip_aa_c0.png"
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
-              "next": "end_share"
+              "next": "end_share",
+              "icon": "story/pip_aa_c1.png"
             }
           ]
         },
@@ -2035,11 +2057,13 @@
           "choices": [
             {
               "label": "Lead them home \ud83c\udfe1",
-              "next": "end_kittens"
+              "next": "end_kittens",
+              "icon": "story/pip_ab_c0.png"
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
-              "next": "end_share"
+              "next": "end_share",
+              "icon": "story/pip_ab_c1.png"
             }
           ]
         },
@@ -2049,11 +2073,13 @@
           "choices": [
             {
               "label": "Chase the ball! \ud83c\udfbe",
-              "next": "end_ball"
+              "next": "end_ball",
+              "icon": "story/pip_ba_c0.png"
             },
             {
               "label": "Invite friends to play \u26bd",
-              "next": "end_game"
+              "next": "end_game",
+              "icon": "story/pip_ba_c1.png"
             }
           ]
         },
@@ -2063,11 +2089,13 @@
           "choices": [
             {
               "label": "Follow the fireflies \u2728",
-              "next": "end_fireflies"
+              "next": "end_fireflies",
+              "icon": "story/pip_bb_c0.png"
             },
             {
               "label": "Invite friends to play \u26bd",
-              "next": "end_game"
+              "next": "end_game",
+              "icon": "story/pip_bb_c1.png"
             }
           ]
         },
@@ -2107,11 +2135,13 @@
           "choices": [
             {
               "label": "Creep through the front door \ud83d\udeaa",
-              "next": "a"
+              "next": "a",
+              "icon": "story/whisper_start_c0.png"
             },
             {
               "label": "Sneak around the back \ud83c\udf19",
-              "next": "b"
+              "next": "b",
+              "icon": "story/whisper_start_c1.png"
             }
           ],
           "scare": {
@@ -2131,11 +2161,13 @@
           "choices": [
             {
               "label": "Climb the creaky stairs \ud83d\udd6f\ufe0f",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/whisper_a_c0.png"
             },
             {
               "label": "Follow the skittering sound \ud83d\udc3e",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/whisper_a_c1.png"
             }
           ],
           "scare": {
@@ -2155,11 +2187,13 @@
           "choices": [
             {
               "label": "Go down into the cellar \ud83d\udd26",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/whisper_b_c0.png"
             },
             {
               "label": "Tiptoe to the greenhouse \ud83c\udf3f",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/whisper_b_c1.png"
             }
           ],
           "scare": {
@@ -2179,11 +2213,13 @@
           "choices": [
             {
               "label": "Hug Great-Grandcat \ud83d\udc9c",
-              "next": "end_family"
+              "next": "end_family",
+              "icon": "story/whisper_aa_c0.png"
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_aa_c1.png"
             }
           ]
         },
@@ -2193,11 +2229,13 @@
           "choices": [
             {
               "label": "Join story time \ud83d\udcd6",
-              "next": "end_owls"
+              "next": "end_owls",
+              "icon": "story/whisper_ab_c0.png"
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_ab_c1.png"
             }
           ],
           "scare": {
@@ -2217,11 +2255,13 @@
           "choices": [
             {
               "label": "Share the jam \ud83e\uded9",
-              "next": "end_feast"
+              "next": "end_feast",
+              "icon": "story/whisper_ba_c0.png"
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_ba_c1.png"
             }
           ],
           "scare": {
@@ -2241,11 +2281,13 @@
           "choices": [
             {
               "label": "Cheer for the Phantom \ud83e\uddb8",
-              "next": "end_phantom"
+              "next": "end_phantom",
+              "icon": "story/whisper_bb_c0.png"
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_bb_c1.png"
             }
           ],
           "scare": {
@@ -2291,11 +2333,13 @@
           "choices": [
             {
               "label": "Go to Scaring Class \ud83c\udf93",
-              "next": "a"
+              "next": "a",
+              "icon": "story/scareschool_start_c0.png"
             },
             {
               "label": "Explore the lunchroom \ud83c\udf5d",
-              "next": "b"
+              "next": "b",
+              "icon": "story/scareschool_start_c1.png"
             }
           ],
           "scare": {
@@ -2315,11 +2359,13 @@
           "choices": [
             {
               "label": "Practice a tiny boo \ud83d\ude2e",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/scareschool_a_c0.png"
             },
             {
               "label": "Ask Blobbina for tips \ud83d\udc97",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/scareschool_a_c1.png"
             }
           ]
         },
@@ -2329,11 +2375,13 @@
           "choices": [
             {
               "label": "Have a noodle-arm contest \ud83d\udcaa",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/scareschool_b_c0.png"
             },
             {
               "label": "Sit with the Twins \ud83d\udde3\ufe0f",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/scareschool_b_c1.png"
             }
           ],
           "scare": {
@@ -2353,11 +2401,13 @@
           "choices": [
             {
               "label": "Do the tiny boo now \ud83c\udfa4",
-              "next": "end_boo"
+              "next": "end_boo",
+              "icon": "story/scareschool_aa_c0.png"
             },
             {
               "label": "Team up with the Twins \ud83e\udd1d",
-              "next": "end_team"
+              "next": "end_team",
+              "icon": "story/scareschool_aa_c1.png"
             }
           ]
         },
@@ -2367,11 +2417,13 @@
           "choices": [
             {
               "label": "Be Mo, but louder! \ud83d\udce3",
-              "next": "end_boo"
+              "next": "end_boo",
+              "icon": "story/scareschool_ab_c0.png"
             },
             {
               "label": "Scare the Principal back \ud83d\ude08",
-              "next": "end_growl"
+              "next": "end_growl",
+              "icon": "story/scareschool_ab_c1.png"
             }
           ],
           "scare": {
@@ -2391,11 +2443,13 @@
           "choices": [
             {
               "label": "Pudding party! \ud83c\udf6e",
-              "next": "end_pudding"
+              "next": "end_pudding",
+              "icon": "story/scareschool_ba_c0.png"
             },
             {
               "label": "Clean up together \ud83e\uddfd",
-              "next": "end_team"
+              "next": "end_team",
+              "icon": "story/scareschool_ba_c1.png"
             }
           ]
         },
@@ -2405,11 +2459,13 @@
           "choices": [
             {
               "label": "Declare everyone winners \ud83c\udfc6",
-              "next": "end_team"
+              "next": "end_team",
+              "icon": "story/scareschool_bb_c0.png"
             },
             {
               "label": "Try the trash-can trick \ud83d\uddd1\ufe0f",
-              "next": "end_pudding"
+              "next": "end_pudding",
+              "icon": "story/scareschool_bb_c1.png"
             }
           ],
           "scare": {
