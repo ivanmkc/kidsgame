@@ -45,7 +45,7 @@ function play(name: Name, volume = 0.5): void {
 export const sfx = {
   tap(): void { play('tap', 0.35); },
   good(): void { play('good', 0.5); },
-  wrong(): void { play('wrong', 0.4); },
+  wrong(volume = 0.4): void { play('wrong', volume); },
   flip(): void { play('flip', 0.35); },
   win(): void { play('win', 0.6); },
   boing(): void { play('boing', 0.6); },

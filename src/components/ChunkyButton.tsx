@@ -5,7 +5,7 @@ import { fonts } from '../theme';
 // Kid-app "chunky" 3D button: solid face on a darker base edge; pressing
 // squashes it onto the base, releasing springs back.
 export function ChunkyButton({
-  label, color, darkColor, onPress, testID, minWidth = 200, fontSize = 19,
+  label, color, darkColor, onPress, testID, minWidth = 200, fontSize = 19, paddingVertical = 13,
 }: {
   label: string;
   color: string;
@@ -14,6 +14,7 @@ export function ChunkyButton({
   testID?: string;
   minWidth?: number;
   fontSize?: number;
+  paddingVertical?: number;
 }) {
   const press = useRef(new Animated.Value(0)).current;
   return (
@@ -27,7 +28,7 @@ export function ChunkyButton({
       <Animated.View
         style={[
           styles.face,
-          { backgroundColor: color, minWidth },
+          { backgroundColor: color, minWidth, paddingVertical },
           { transform: [{ translateY: press.interpolate({ inputRange: [0, 1], outputRange: [-5, -1] }) }] },
         ]}
       >
