@@ -622,6 +622,240 @@
         }
       ],
       "level": "easy"
+    },
+    {
+      "id": "party",
+      "name": "Party",
+      "image": "diff/party_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 1132,
+          "y": 177,
+          "w": 141,
+          "h": 138,
+          "name": "golden trophy",
+          "kind": "recolor",
+          "patch": "diff/party_d_0_golden_trophy.png"
+        },
+        {
+          "x": 277,
+          "y": 444,
+          "w": 146,
+          "h": 192,
+          "name": "toy sailboat",
+          "kind": "remove",
+          "patch": "diff/party_d_1_toy_sailboat.png"
+        },
+        {
+          "x": 740,
+          "y": 523,
+          "w": 180,
+          "h": 124,
+          "name": "sleeping orange cat",
+          "kind": "recolor",
+          "patch": "diff/party_d_2_sleeping_orange_cat.png"
+        },
+        {
+          "x": 953,
+          "y": 244,
+          "w": 156,
+          "h": 202,
+          "name": "red toy robot",
+          "kind": "recolor",
+          "patch": "diff/party_d_3_red_toy_robot.png"
+        }
+      ]
+    },
+    {
+      "id": "construction",
+      "name": "Construction Site",
+      "image": "diff/construction_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 693,
+          "y": 505,
+          "w": 173,
+          "h": 177,
+          "name": "red toolbox",
+          "kind": "remove",
+          "patch": "diff/construction_d_0_red_toolbox.png"
+        },
+        {
+          "x": 500,
+          "y": 434,
+          "w": 128,
+          "h": 110,
+          "name": "yellow hard hat on a post",
+          "kind": "recolor",
+          "patch": "diff/construction_d_1_yellow_hard_hat_on_a_pos.png"
+        },
+        {
+          "x": 926,
+          "y": 527,
+          "w": 313,
+          "h": 173,
+          "name": "stack of wooden planks",
+          "kind": "remove",
+          "patch": "diff/construction_d_2_stack_of_wooden_planks.png"
+        },
+        {
+          "x": 341,
+          "y": 394,
+          "w": 122,
+          "h": 140,
+          "name": "warning sign",
+          "kind": "recolor",
+          "patch": "diff/construction_d_3_warning_sign.png"
+        }
+      ]
+    },
+    {
+      "id": "candy",
+      "name": "Candy Land",
+      "image": "diff/candy_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 1093,
+          "y": 520,
+          "w": 156,
+          "h": 149,
+          "name": "slice of layer cake",
+          "kind": "recolor",
+          "patch": "diff/candy_d_0_slice_of_layer_cake.png"
+        },
+        {
+          "x": 57,
+          "y": 326,
+          "w": 101,
+          "h": 169,
+          "name": "waffle ice cream cone",
+          "kind": "remove",
+          "patch": "diff/candy_d_1_waffle_ice_cream_cone.png"
+        },
+        {
+          "x": 907,
+          "y": 491,
+          "w": 122,
+          "h": 186,
+          "name": "cupcake with a cherry",
+          "kind": "remove",
+          "patch": "diff/candy_d_2_cupcake_with_a_cherry.png"
+        },
+        {
+          "x": 246,
+          "y": 336,
+          "w": 110,
+          "h": 189,
+          "name": "strawberry milkshake with a straw",
+          "kind": "remove",
+          "patch": "diff/candy_d_3_strawberry_milkshake_wit.png"
+        }
+      ]
+    },
+    {
+      "id": "tidepool",
+      "name": "Tide Pool",
+      "image": "diff/tidepool_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 56,
+          "y": 172,
+          "w": 177,
+          "h": 110,
+          "name": "blue starfish",
+          "kind": "recolor",
+          "patch": "diff/tidepool_d_0_blue_starfish.png"
+        },
+        {
+          "x": 650,
+          "y": 480,
+          "w": 202,
+          "h": 180,
+          "name": "purple sea urchin",
+          "kind": "recolor",
+          "patch": "diff/tidepool_d_1_purple_sea_urchin.png"
+        },
+        {
+          "x": 689,
+          "y": 251,
+          "w": 140,
+          "h": 109,
+          "name": "floating feather",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_2_floating_feather.png"
+        },
+        {
+          "x": 1085,
+          "y": 559,
+          "w": 167,
+          "h": 138,
+          "name": "sand dollar",
+          "kind": "remove",
+          "patch": "diff/tidepool_d_3_sand_dollar.png"
+        }
+      ]
+    },
+    {
+      "id": "music",
+      "name": "Music Room",
+      "image": "diff/music_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 671,
+          "y": 567,
+          "w": 240,
+          "h": 111,
+          "name": "golden trumpet",
+          "kind": "remove",
+          "patch": "diff/music_d_0_golden_trumpet.png"
+        },
+        {
+          "x": 1114,
+          "y": 52,
+          "w": 118,
+          "h": 156,
+          "name": "metronome",
+          "kind": "recolor",
+          "patch": "diff/music_d_1_metronome.png"
+        },
+        {
+          "x": 48,
+          "y": 529,
+          "w": 206,
+          "h": 153,
+          "name": "red accordion",
+          "kind": "recolor",
+          "patch": "diff/music_d_2_red_accordion.png"
+        },
+        {
+          "x": 1002,
+          "y": 562,
+          "w": 251,
+          "h": 119,
+          "name": "violin case",
+          "kind": "recolor",
+          "patch": "diff/music_d_3_violin_case.png"
+        },
+        {
+          "x": 400,
+          "y": 461,
+          "w": 113,
+          "h": 245,
+          "name": "microphone on a stand",
+          "kind": "recolor",
+          "patch": "diff/music_d_4_microphone_on_a_stand.png"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1127,6 +1361,132 @@
         }
       ],
       "level": "easy"
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "image": "hidden/kitchen.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "teapot",
+          "label": "a blue teapot",
+          "x": 580,
+          "y": 380,
+          "w": 104,
+          "h": 86,
+          "thumb": "hidden/kitchen_t_teapot.png"
+        },
+        {
+          "id": "clock",
+          "label": "a red alarm clock",
+          "x": 41,
+          "y": 527,
+          "w": 83,
+          "h": 95,
+          "thumb": "hidden/kitchen_t_clock.png"
+        },
+        {
+          "id": "cheese",
+          "label": "a wedge of yellow cheese",
+          "x": 747,
+          "y": 285,
+          "w": 86,
+          "h": 64,
+          "thumb": "hidden/kitchen_t_cheese.png"
+        },
+        {
+          "id": "cupcake",
+          "label": "a pink frosted cupcake",
+          "x": 133,
+          "y": 27,
+          "w": 79,
+          "h": 87,
+          "thumb": "hidden/kitchen_t_cupcake.png"
+        },
+        {
+          "id": "donut",
+          "label": "a pink frosted donut",
+          "x": 529,
+          "y": 237,
+          "w": 93,
+          "h": 91,
+          "thumb": "hidden/kitchen_t_donut.png"
+        },
+        {
+          "id": "fish",
+          "label": "a goldfish in a round bowl",
+          "x": 1101,
+          "y": 243,
+          "w": 167,
+          "h": 161,
+          "thumb": "hidden/kitchen_t_fish.png"
+        }
+      ]
+    },
+    {
+      "id": "fairy",
+      "name": "Fairy Garden",
+      "image": "hidden/fairy.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "bluebird",
+          "label": "a plump little bluebird",
+          "x": 891,
+          "y": 510,
+          "w": 196,
+          "h": 171,
+          "thumb": "hidden/fairy_t_bluebird.png"
+        },
+        {
+          "id": "hedgehog",
+          "label": "a small brown hedgehog",
+          "x": 454,
+          "y": 374,
+          "w": 101,
+          "h": 90,
+          "thumb": "hidden/fairy_t_hedgehog.png"
+        },
+        {
+          "id": "teacup",
+          "label": "a pink teacup",
+          "x": 303,
+          "y": 536,
+          "w": 119,
+          "h": 83,
+          "thumb": "hidden/fairy_t_teacup.png"
+        },
+        {
+          "id": "star",
+          "label": "a glowing golden star",
+          "x": 1113,
+          "y": 46,
+          "w": 106,
+          "h": 102,
+          "thumb": "hidden/fairy_t_star.png"
+        },
+        {
+          "id": "snail",
+          "label": "a little snail with a spiral shell",
+          "x": 73,
+          "y": 324,
+          "w": 112,
+          "h": 112,
+          "thumb": "hidden/fairy_t_snail.png"
+        },
+        {
+          "id": "gem",
+          "label": "a sparkling pink gem",
+          "x": 181,
+          "y": 617,
+          "w": 72,
+          "h": 74,
+          "thumb": "hidden/fairy_t_gem.png"
+        }
+      ]
     }
   ],
   "stories": [

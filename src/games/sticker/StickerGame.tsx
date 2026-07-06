@@ -44,6 +44,8 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
   }, []);
 
   const { width, height } = useWindowDimensions();
+  const stageFrame = useRef({ x: 0, y: 0, w: 1, h: 1 });
+  const [ghost, setGhost] = useState<{ icon: string; x: number; y: number } | null>(null);
 
   if (!picked) {
     return (
@@ -63,15 +65,15 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
   const stageW = Math.min(width - 24, (height - 84 - trayH - 24) * ar, 1100);
   const stageH = stageW / ar;
 
-  const addSticker = (icon: string) => {
+  const addSticker = (icon: string, at?: { x: number; y: number }) => {
     sfx.tap();
     setPlaced((p) => [
       ...p,
       {
         key: nextKey.current++,
         icon,
-        x: 0.3 + Math.random() * 0.4,
-        y: 0.3 + Math.random() * 0.35,
+        x: at ? Math.min(0.95, Math.max(0, at.x)) : 0.3 + Math.random() * 0.4,
+        y: at ? Math.min(0.95, Math.max(0, at.y)) : 0.3 + Math.random() * 0.35,
         size: 0.09 + Math.random() * 0.03,
       },
     ]);
@@ -96,7 +98,15 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
       }
     >
       <View style={styles.wrap}>
-        <View style={[styles.stage, shadows.sticker, { width: stageW, height: stageH }]} testID="sticker-stage">
+        <View
+          style={[styles.stage, shadows.sticker, { width: stageW, height: stageH }]}
+          testID="sticker-stage"
+          onLayout={(e) => {
+            // measure in window space for tray-drag drops
+            (e.target as unknown as { measureInWindow: (cb: (x: number, y: number, w: number, h: number) => void) => void })
+              .measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
+          }}
+        >
           <Image source={SCENE_IMAGES[picked.image] ?? SCENE_THUMBS[picked.image]} style={{ width: stageW, height: stageH }} resizeMode="cover" />
           {placed.map((s) => (
             <DraggableSticker
@@ -111,21 +121,69 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: trayH, width: '100%' }} contentContainerStyle={styles.tray}>
           {manifest.spotit.icons.map((icon) => (
-            <Pressable
+            <TrayItem
               key={icon}
-              onPress={() => addSticker(icon)}
-              testID={`sticker-tray-${icon}`}
-              accessibilityLabel={`Add ${icon} sticker`}
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.trayItem, shadows.soft, pressed && { transform: [{ scale: 0.9 }] }]}
-            >
-              <Image source={SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
-            </Pressable>
+              icon={icon}
+              onTap={() => addSticker(icon)}
+              onDragMove={(px, py) => setGhost({ icon, x: px, y: py })}
+              onDrop={(px, py) => {
+                setGhost(null);
+                const f = stageFrame.current;
+                if (px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h) {
+                  addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 });
+                }
+              }}
+            />
           ))}
         </ScrollView>
-        <Text style={styles.hint}>Tap a sticker to add it · drag to move · double-tap to pop it!</Text>
+        <Text style={styles.hint}>Drag a sticker into the picture · drag to move · double-tap to pop it!</Text>
+      </View>
+      {ghost ? (
+        <View pointerEvents="none" style={{ position: 'absolute', left: ghost.x - 36, top: ghost.y - 36, width: 72, height: 72, zIndex: 50 }}>
+          <Image source={SPOTIT_ICONS[ghost.icon]} style={{ width: '100%', height: '100%', opacity: 0.85 }} resizeMode="contain" />
+        </View>
+      ) : null}
+      <View style={{ display: 'none' }}>
       </View>
     </GameShell>
+  );
+}
+
+function TrayItem({ icon, onTap, onDragMove, onDrop }: {
+  icon: string;
+  onTap: () => void;
+  onDragMove: (pageX: number, pageY: number) => void;
+  onDrop: (pageX: number, pageY: number) => void;
+}) {
+  const live = useRef({ onTap, onDragMove, onDrop });
+  live.current = { onTap, onDragMove, onDrop };
+  const responder = useRef<ReturnType<typeof PanResponder.create> | null>(null);
+  if (!responder.current) {
+    responder.current = PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (e, g) => {
+        if (Math.abs(g.dx) + Math.abs(g.dy) > 6) {
+          live.current.onDragMove(e.nativeEvent.pageX, e.nativeEvent.pageY);
+        }
+      },
+      onPanResponderRelease: (e, g) => {
+        if (Math.abs(g.dx) + Math.abs(g.dy) < 6) {
+          live.current.onTap();
+        } else {
+          live.current.onDrop(e.nativeEvent.pageX, e.nativeEvent.pageY);
+        }
+      },
+    });
+  }
+  return (
+    <View
+      {...responder.current.panHandlers}
+      testID={`sticker-tray-${icon}`}
+      accessibilityLabel={`Add ${icon} sticker`}
+      style={[styles.trayItem, shadows.soft]}
+    >
+      <Image source={SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+    </View>
   );
 }
 

@@ -103,14 +103,26 @@ def _gen_pop(spec: dict, nid: str, prompt: str) -> str | None:
 
 
 def _locate_scare(img: Image.Image, spot: str, tag: str) -> tuple[int, int, int, int] | None:
-    """SAM finds the dare region; loose gates (any confident mask, sane size)."""
+    """SAM finds the dare region; loose gates. Cartoon phrasing often misses
+    ("the wobbling supply closet"), so retry with progressively simpler
+    noun phrases (last two words, then last word)."""
+    words = spot.replace("the ", "").split()
+    prompts = [spot]
+    if len(words) >= 2:
+        prompts.append(" ".join(words[-2:]))
+    prompts.append(words[-1])
     try:
-        segs = sam_segment_batch(img, [spot], tag=tag)
+        segs = sam_segment_batch(img, list(dict.fromkeys(prompts)), tag=tag)
     except Exception as e:  # noqa: BLE001
         print(f"  {tag}: SAM failed ({str(e)[:100]})")
         return None
-    cands = segs.get(spot, [])
-    if not cands or cands[0]["score"] < 0.3:
+    cands = []
+    for pr in prompts:
+        got = segs.get(pr, [])
+        if got and got[0]["score"] >= 0.3:
+            cands = got
+            break
+    if not cands:
         return None
     x0, y0, x1, y1 = cands[0]["bbox"]
     if (x1 - x0) * (y1 - y0) < 2500:
