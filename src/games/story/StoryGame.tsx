@@ -80,7 +80,22 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
           </View>
         ) : (
           <View style={styles.choices}>
-            {node.choices!.map((c, i) => (
+            {node.choices!.map((c, i) => c.icon ? (
+              <Pressable
+                key={c.next}
+                onPress={() => { sfx.tap(); say(c.label); setNodeId(c.next); }}
+                testID={`story-choice-${c.next}`}
+                accessibilityLabel={c.label}
+                accessibilityRole="button"
+                style={({ pressed }) => [
+                  styles.pickTile, shadows.sticker,
+                  { borderColor: i === 0 ? colors.teal : colors.gold },
+                  pressed && { transform: [{ scale: 0.95 }] },
+                ]}
+              >
+                <Image source={SCENE_IMAGES[c.icon]} style={styles.pickImg} resizeMode="contain" />
+              </Pressable>
+            ) : (
               <ChunkyButton
                 key={c.next}
                 label={`${c.label}`}
@@ -188,4 +203,15 @@ const styles = StyleSheet.create({
     maxWidth: 640,
   },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
+  pickTile: {
+    width: 170,
+    height: 150,
+    borderRadius: 24,
+    borderWidth: 5,
+    backgroundColor: colors.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
+  pickImg: { width: '100%', height: '100%' },
 });

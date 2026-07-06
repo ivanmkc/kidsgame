@@ -53,6 +53,7 @@ export interface HiddenScene {
 export interface StoryChoice {
   label: string;
   next: string;
+  icon?: string; // illustrated button — pre-readers pick by picture
 }
 
 export interface StoryScare extends Box {

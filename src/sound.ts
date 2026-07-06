@@ -52,16 +52,32 @@ export const sfx = {
   thunder(): void { play('thunder', 0.75); },
 };
 
-/** Read instructions aloud for pre-readers (Web Speech API). */
+import { VOICE } from './assets/voice';
+
+let narration: HTMLAudioElement | null = null;
+
+/** Read instructions aloud for pre-readers. Pre-rendered SoTA clips
+ *  (Gemini TTS, generated offline) play when available; Web Speech only
+ *  covers strings that slipped the generator. */
 export function say(text: string): void {
-  if (muted || Platform.OS !== 'web' || typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (muted || Platform.OS !== 'web' || typeof window === 'undefined') return;
+  const spoken = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
   try {
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim());
+    window.speechSynthesis?.cancel();
+    if (narration) { narration.pause(); narration = null; }
+    const clip = VOICE[spoken];
+    if (clip && window.Audio) {
+      narration = new window.Audio(`voice/${clip}`);
+      narration.volume = 0.85;
+      void narration.play().catch(() => { /* pre-gesture: ignore */ });
+      return;
+    }
+    if (!window.speechSynthesis) return;
+    const u = new SpeechSynthesisUtterance(spoken);
     u.rate = 0.92;
     u.pitch = 1.12;
     window.speechSynthesis.speak(u);
-  } catch { /* no voices: stay silent */ }
+  } catch { /* audio unavailable: stay silent */ }
 }
 
 import React from 'react';
