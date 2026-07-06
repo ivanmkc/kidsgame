@@ -27,6 +27,7 @@ export const UI_IMAGES = p;`;
     },
   ],
   test: {
+    exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '.claude/**'],
     environment: 'node',
   },
 });
