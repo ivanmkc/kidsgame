@@ -44,7 +44,11 @@ for (const h of manifest.hidden) {
   }
 }
 for (const st of manifest.stories ?? []) {
-  for (const n of Object.values(st.nodes)) { sceneFiles.add(n.image); if (n.scare) sceneFiles.add(n.scare.pop); }
+  for (const n of Object.values(st.nodes)) {
+    sceneFiles.add(n.image);
+    if (n.scare) sceneFiles.add(n.scare.pop);
+    for (const c of n.choices ?? []) if (c.icon) sceneFiles.add(c.icon);
+  }
 }
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);
@@ -57,6 +61,12 @@ for (const h of manifest.hidden) thumbable.add(h.image);
 for (const f of [...thumbable].sort()) {
   const t = f.replace(/\.(png|jpg)$/, '_thumb.jpg');
   if (exists(t)) lines.push(`  '${f}': require('../../assets/game/${t}'),`);
+}
+lines.push('};', '', 'export const DRESSUP_ICONS: Record<string, number> = {');
+for (const name of manifest.dressup ?? []) {
+  if (exists(`dressup/${name}.png`)) {
+    lines.push(`  ${name}: require('../../assets/game/dressup/${name}.png'),`);
+  }
 }
 lines.push('};', '', 'export const UI_IMAGES = {');
 for (const f of fs.readdirSync(path.join(root, 'assets/game/ui')).sort()) {

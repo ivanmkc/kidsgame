@@ -56,6 +56,21 @@ import { VOICE } from './assets/voice';
 
 let narration: HTMLAudioElement | null = null;
 
+/** Fade the current narration out fast (~250ms) — screen switches must
+ *  not carry a voice from the previous game. */
+export function stopNarration(): void {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  try { window.speechSynthesis?.cancel(); } catch { /* ok */ }
+  const a = narration;
+  if (!a) return;
+  narration = null;
+  const step = () => {
+    if (a.volume > 0.08) { a.volume = Math.max(0, a.volume - 0.12); setTimeout(step, 30); }
+    else { a.pause(); }
+  };
+  step();
+}
+
 /** Read instructions aloud for pre-readers. Pre-rendered SoTA clips
  *  (Gemini TTS, generated offline) play when available; Web Speech only
  *  covers strings that slipped the generator. */

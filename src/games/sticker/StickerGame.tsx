@@ -1,11 +1,12 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { Animated, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
+import { DRESSUP_ICONS, SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { SCENE_AR } from '../../manifest';
 import { manifest } from '../../manifest';
 import { allSceneOptions } from '../sceneOptions';
+import { Touch2, pinchTransform } from './pinch';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 
@@ -22,6 +23,7 @@ interface Placed {
   x: number; // scene-relative 0..1
   y: number;
   size: number; // scene-relative width fraction
+  rotation: number; // degrees
 }
 
 const BACKDROPS = allSceneOptions('all');
@@ -41,6 +43,10 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
 
   const moveSticker = useCallback((key: number, x: number, y: number) => {
     setPlaced((p) => p.map((s) => (s.key === key ? { ...s, x, y } : s)));
+  }, []);
+
+  const transformSticker = useCallback((key: number, size: number, rotation: number) => {
+    setPlaced((p) => p.map((s) => (s.key === key ? { ...s, size, rotation } : s)));
   }, []);
 
   const { width, height } = useWindowDimensions();
@@ -79,6 +85,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
         x: at ? Math.min(0.95, Math.max(0, at.x)) : 0.3 + Math.random() * 0.4,
         y: at ? Math.min(0.95, Math.max(0, at.y)) : 0.3 + Math.random() * 0.35,
         size: 0.09 + Math.random() * 0.03,
+        rotation: 0,
       },
     ]);
   };
@@ -117,11 +124,12 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
               stageH={stageH}
               onMove={moveSticker}
               onPop={popSticker}
+              onTransform={transformSticker}
             />
           ))}
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: trayH, width: '100%' }} contentContainerStyle={styles.tray}>
-          {manifest.spotit.icons.map((icon) => (
+          {[...(manifest.dressup ?? []), ...manifest.spotit.icons].map((icon) => (
             <TrayItem
               key={icon}
               icon={icon}
@@ -141,7 +149,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
       </View>
       {ghost ? (
         <View pointerEvents="none" style={{ position: 'absolute', left: ghost.x - 36, top: ghost.y - 36, width: 72, height: 72, zIndex: 50 }}>
-          <Image source={SPOTIT_ICONS[ghost.icon]} style={{ width: '100%', height: '100%', opacity: 0.85 }} resizeMode="contain" />
+          <Image source={DRESSUP_ICONS[ghost.icon] ?? SPOTIT_ICONS[ghost.icon]} style={{ width: '100%', height: '100%', opacity: 0.85 }} resizeMode="contain" />
         </View>
       ) : null}
       <View style={{ display: 'none' }}>
@@ -183,25 +191,27 @@ function TrayItem({ icon, onTap, onDragMove, onDrop }: {
       accessibilityLabel={`Add ${icon} sticker`}
       style={[styles.trayItem, shadows.soft]}
     >
-      <Image source={SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+      <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
     </View>
   );
 }
 
 const DraggableSticker = React.memo(function DraggableSticker({
-  placed, stageW, stageH, onMove, onPop,
+  placed, stageW, stageH, onMove, onPop, onTransform,
 }: {
   placed: Placed;
   stageW: number;
   stageH: number;
   onMove: (key: number, x: number, y: number) => void;
   onPop: (key: number) => void;
+  onTransform: (key: number, size: number, rotation: number) => void;
 }) {
   const size = placed.size * stageW;
   // The PanResponder is created ONCE; everything it needs at release time
   // flows through refs so re-renders never rebuild gesture plumbing.
-  const live = useRef({ placed, stageW, stageH, onMove, onPop });
-  live.current = { placed, stageW, stageH, onMove, onPop };
+  const live = useRef({ placed, stageW, stageH, onMove, onPop, onTransform });
+  live.current = { placed, stageW, stageH, onMove, onPop, onTransform };
+  const pinchStart = useRef<{ t: Touch2; size: number; rotation: number } | null>(null);
   const pan = useRef<Animated.ValueXY | null>(null);
   if (!pan.current) pan.current = new Animated.ValueXY({ x: 0, y: 0 });
   const lastTap = useRef(0);
@@ -210,9 +220,29 @@ const DraggableSticker = React.memo(function DraggableSticker({
     responder.current = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) + Math.abs(g.dy) > 4,
-      onPanResponderMove: Animated.event([null, { dx: pan.current.x, dy: pan.current.y }], { useNativeDriver: false }),
+      onPanResponderMove: (e, g) => {
+        const touches = e.nativeEvent.touches;
+        if (touches && touches.length >= 2) {
+          // two fingers: pinch to resize, twist to rotate
+          const t: Touch2 = { x0: touches[0].pageX, y0: touches[0].pageY, x1: touches[1].pageX, y1: touches[1].pageY };
+          const { placed: pl, onTransform: tf } = live.current;
+          if (!pinchStart.current) {
+            pinchStart.current = { t, size: pl.size, rotation: pl.rotation };
+            return;
+          }
+          const { size, rotation } = pinchTransform(pinchStart.current.t, t, pinchStart.current.size, pinchStart.current.rotation);
+          tf(pl.key, size, rotation);
+          return;
+        }
+        Animated.event([null, { dx: pan.current!.x, dy: pan.current!.y }], { useNativeDriver: false })(e, g);
+      },
       onPanResponderRelease: (_e, g) => {
         const { placed: pl, stageW: w, stageH: h, onMove: mv, onPop: pop } = live.current;
+        if (pinchStart.current) {
+          pinchStart.current = null;
+          pan.current!.setValue({ x: 0, y: 0 });
+          return;
+        }
         if (Math.abs(g.dx) + Math.abs(g.dy) < 6) {
           const now = Date.now();
           if (now - lastTap.current < 350) pop(pl.key);
@@ -237,10 +267,10 @@ const DraggableSticker = React.memo(function DraggableSticker({
         top: placed.y * stageH,
         width: size,
         height: size,
-        transform: pan.current.getTranslateTransform(),
+        transform: [...pan.current.getTranslateTransform(), { rotate: `${placed.rotation}deg` }],
       }}
     >
-      <Image source={SPOTIT_ICONS[placed.icon]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+      <Image source={DRESSUP_ICONS[placed.icon] ?? SPOTIT_ICONS[placed.icon]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
     </Animated.View>
   );
 });

@@ -184,3 +184,19 @@ describe('rule time', () => {
     }
   });
 });
+
+describe('sticker pinch transform', () => {
+  it('scales size with finger distance and clamps', async () => {
+    const { pinchTransform } = await import('../sticker/pinch');
+    const start = { x0: 100, y0: 100, x1: 200, y1: 100 };
+    const wider = { x0: 50, y0: 100, x1: 250, y1: 100 };
+    expect(pinchTransform(start, wider, 0.1, 0).size).toBeCloseTo(0.2);
+    expect(pinchTransform(start, wider, 0.3, 0).size).toBe(0.32); // clamp
+  });
+  it('rotates with finger angle', async () => {
+    const { pinchTransform } = await import('../sticker/pinch');
+    const start = { x0: 100, y0: 100, x1: 200, y1: 100 };
+    const turned = { x0: 100, y0: 100, x1: 100, y1: 200 }; // 90deg
+    expect(pinchTransform(start, turned, 0.1, 10).rotation).toBeCloseTo(100);
+  });
+});
