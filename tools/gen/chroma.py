@@ -56,12 +56,24 @@ def key_out_magenta(img: Image.Image, out_size: int = 256) -> tuple[Image.Image,
     canvas[oy:oy + h, ox:ox + w] = rgba
     coverage = float((rgba[..., 3] > 0).mean())
     sprite = resize_rgba(canvas, out_size)
-    # post-resize guard: any surviving pixel still near the backdrop color is
-    # spill — drop it (legit pinks sit far from the sampled backdrop median)
-    arr = np.asarray(sprite, np.int16)
-    spill = (arr[..., 3] > 0) & (np.abs(arr[..., :3] - bg_color).sum(-1) < 140)
-    if spill.any():
-        arr = arr.copy()
-        arr[spill, 3] = 0
-        sprite = Image.fromarray(arr.astype(np.uint8), "RGBA")
+    sprite = _despill_edges(sprite, bg_color)
     return sprite, coverage
+
+
+def _despill_edges(sprite: Image.Image, bg_color: np.ndarray) -> Image.Image:
+    """Kill residual key spill: anti-aliased object/backdrop boundary pixels
+    survive the absolute-distance key as darker magenta blends. Any pixel that
+    is magenta-HUED (R and B both well above G — legit pinks have G close to
+    B) and sits within 2px of transparency is spill, whatever its brightness."""
+    from PIL import ImageFilter
+    arr = np.asarray(sprite, np.int16).copy()
+    r, g, b, a = arr[..., 0], arr[..., 1], arr[..., 2], arr[..., 3]
+    hue = (np.minimum(r, b) > g + 50) & (np.minimum(r, b) > 60)
+    near_bg = np.abs(arr[..., :3] - bg_color).sum(-1) < 160
+    trans = Image.fromarray(((a < 128) * 255).astype(np.uint8), "L").filter(ImageFilter.MaxFilter(11))
+    edge = np.asarray(trans) > 0
+    spill = (a > 0) & edge & (hue | near_bg)
+    if spill.any():
+        arr[spill, 3] = 0
+        return Image.fromarray(arr.astype(np.uint8), "RGBA")
+    return sprite
