@@ -395,7 +395,8 @@ def _chip(scene: Image.Image, seg: dict) -> Image.Image:
     canvas = np.zeros((side, side, 4), np.uint8)
     oy, ox = (side - ch) // 2, (side - cw) // 2
     canvas[oy:oy + ch, ox:ox + cw] = rgba
-    img = Image.fromarray(canvas).resize((256, 256), Image.Resampling.LANCZOS)
+    from gen.chroma import resize_rgba
+    img = resize_rgba(canvas, 256)
     # 1px feather so the cutout edge doesn't look razor-cut on the card
     a = img.getchannel("A").filter(ImageFilter.GaussianBlur(1))
     img.putalpha(a)
