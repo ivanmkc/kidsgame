@@ -1500,7 +1500,8 @@
           "choices": [
             {
               "label": "Trot to the forest! \ud83c\udf32",
-              "next": "a"
+              "next": "a",
+              "icon": "story/luna_start_c0.png"
             },
             {
               "label": "Gallop to the beach! \ud83c\udf0a",
@@ -1518,7 +1519,8 @@
             },
             {
               "label": "Play hide and seek \ud83d\ude48",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/luna_a_c1.png"
             }
           ]
         },
@@ -1528,11 +1530,13 @@
           "choices": [
             {
               "label": "Sail away! \u26f5",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/luna_b_c0.png"
             },
             {
               "label": "Build a sandcastle \ud83c\udff0",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/luna_b_c1.png"
             }
           ]
         },
@@ -1542,11 +1546,13 @@
           "choices": [
             {
               "label": "Throw an acorn party! \ud83c\udf89",
-              "next": "end_party"
+              "next": "end_party",
+              "icon": "story/luna_aa_c0.png"
             },
             {
               "label": "Ride the rainbow home \ud83c\udf08",
-              "next": "end_rainbow"
+              "next": "end_rainbow",
+              "icon": "story/luna_aa_c1.png"
             }
           ]
         },
@@ -1560,7 +1566,8 @@
             },
             {
               "label": "Ride the rainbow home \ud83c\udf08",
-              "next": "end_rainbow"
+              "next": "end_rainbow",
+              "icon": "story/luna_ab_c1.png"
             }
           ]
         },
@@ -1570,11 +1577,13 @@
           "choices": [
             {
               "label": "Dive with the whale \ud83d\udc0b",
-              "next": "end_pearl"
+              "next": "end_pearl",
+              "icon": "story/luna_ba_c0.png"
             },
             {
               "label": "Dance at the bonfire \ud83d\udd25",
-              "next": "end_bonfire"
+              "next": "end_bonfire",
+              "icon": "story/luna_ba_c1.png"
             }
           ]
         },
@@ -1584,11 +1593,13 @@
           "choices": [
             {
               "label": "Crown the crab king \ud83e\udd80",
-              "next": "end_crab"
+              "next": "end_crab",
+              "icon": "story/luna_bb_c0.png"
             },
             {
               "label": "Dance at the bonfire \ud83d\udd25",
-              "next": "end_bonfire"
+              "next": "end_bonfire",
+              "icon": "story/luna_bb_c1.png"
             }
           ]
         },
@@ -1628,11 +1639,13 @@
           "choices": [
             {
               "label": "Search the garden \ud83c\udf3b",
-              "next": "a"
+              "next": "a",
+              "icon": "story/pip_start_c0.png"
             },
             {
               "label": "Run to the park \ud83d\udedd",
-              "next": "b"
+              "next": "b",
+              "icon": "story/pip_start_c1.png"
             }
           ]
         },
@@ -1642,7 +1655,8 @@
           "choices": [
             {
               "label": "Dig here! \ud83d\udd73\ufe0f",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/pip_a_c0.png"
             },
             {
               "label": "Follow the sound \ud83d\udc42",
@@ -1656,11 +1670,13 @@
           "choices": [
             {
               "label": "Zoom down the slide! \ud83d\udedd",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/pip_b_c0.png"
             },
             {
               "label": "Sniff the oak tree \ud83c\udf33",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/pip_b_c1.png"
             }
           ]
         },
@@ -1674,7 +1690,8 @@
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
-              "next": "end_share"
+              "next": "end_share",
+              "icon": "story/pip_aa_c1.png"
             }
           ]
         },
@@ -1688,7 +1705,8 @@
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
-              "next": "end_share"
+              "next": "end_share",
+              "icon": "story/pip_ab_c1.png"
             }
           ]
         },
@@ -1698,7 +1716,8 @@
           "choices": [
             {
               "label": "Chase the ball! \ud83c\udfbe",
-              "next": "end_ball"
+              "next": "end_ball",
+              "icon": "story/pip_ba_c0.png"
             },
             {
               "label": "Invite friends to play \u26bd",
@@ -1712,11 +1731,13 @@
           "choices": [
             {
               "label": "Follow the fireflies \u2728",
-              "next": "end_fireflies"
+              "next": "end_fireflies",
+              "icon": "story/pip_bb_c0.png"
             },
             {
               "label": "Invite friends to play \u26bd",
-              "next": "end_game"
+              "next": "end_game",
+              "icon": "story/pip_bb_c1.png"
             }
           ]
         },
@@ -1743,6 +1764,364 @@
         "end_fireflies": {
           "image": "story/pip_end_fireflies.png",
           "text": "The fireflies lead Pip to a secret glowing garden. Magic! The End!"
+        }
+      }
+    },
+    {
+      "id": "whisper",
+      "title": "The Whispering House",
+      "nodes": {
+        "start": {
+          "image": "story/whisper_start.png",
+          "text": "Milo must fetch grandma's key from the old house on the hill. The wind whispers his name...",
+          "choices": [
+            {
+              "label": "Creep through the front door \ud83d\udeaa",
+              "next": "a"
+            },
+            {
+              "label": "Sneak around the back \ud83c\udf19",
+              "next": "b",
+              "icon": "story/whisper_start_c1.png"
+            }
+          ],
+          "scare": {
+            "x": 989,
+            "y": 324,
+            "w": 291,
+            "h": 156,
+            "pop": "story/whisper_start_pop.png",
+            "sting": "thunder",
+            "reveal": "Just an old crow! It was sleeping in the bush. Keep going, Milo...",
+            "delay": 1600
+          }
+        },
+        "a": {
+          "image": "story/whisper_a.png",
+          "text": "The hallway is dark and TOO quiet. Something is scratching inside the closet... it knows Milo is there.",
+          "choices": [
+            {
+              "label": "Climb the creaky stairs \ud83d\udd6f\ufe0f",
+              "next": "aa"
+            },
+            {
+              "label": "Follow the skittering sound \ud83d\udc3e",
+              "next": "ab"
+            }
+          ],
+          "scare": {
+            "x": 72,
+            "y": 388,
+            "w": 124,
+            "h": 234,
+            "pop": "story/whisper_a_pop.png",
+            "sting": "thunder",
+            "reveal": "A soggy raccoon! 'Sorry,' he sniffles, 'I was cold.' He points upstairs with his tail.",
+            "delay": 1900
+          }
+        },
+        "b": {
+          "image": "story/whisper_b.png",
+          "text": "In the garden, the fog moves like it's alive. The cellar door groans open by itself. Something breathes down there.",
+          "choices": [
+            {
+              "label": "Go down into the cellar \ud83d\udd26",
+              "next": "ba",
+              "icon": "story/whisper_b_c0.png"
+            },
+            {
+              "label": "Tiptoe to the greenhouse \ud83c\udf3f",
+              "next": "bb"
+            }
+          ],
+          "scare": {
+            "x": 634,
+            "y": 213,
+            "w": 296,
+            "h": 324,
+            "pop": "story/whisper_b_pop.png",
+            "sting": "thunder",
+            "reveal": "Three hedgehogs in one scarf! They were hiding from the storm. The smallest one giggles.",
+            "delay": 1700
+          }
+        },
+        "aa": {
+          "image": "story/whisper_aa.png",
+          "text": "Upstairs, a music box plays all by itself... and the door at the end of the hall is RATTLING.",
+          "choices": [
+            {
+              "label": "Hug Great-Grandcat \ud83d\udc9c",
+              "next": "end_family"
+            },
+            {
+              "label": "Ask about the key \ud83d\udddd\ufe0f",
+              "next": "end_key",
+              "icon": "story/whisper_aa_c1.png"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/whisper_ab.png",
+          "text": "In the library the whispers are LOUD now. The big chair creaks. Something's tail twitches behind it...",
+          "choices": [
+            {
+              "label": "Join story time \ud83d\udcd6",
+              "next": "end_owls",
+              "icon": "story/whisper_ab_c0.png"
+            },
+            {
+              "label": "Ask about the key \ud83d\udddd\ufe0f",
+              "next": "end_key"
+            }
+          ],
+          "scare": {
+            "x": 689,
+            "y": 228,
+            "w": 458,
+            "h": 492,
+            "pop": "story/whisper_ab_pop.png",
+            "sting": "thunder",
+            "reveal": "The whisperers are owls! It's their midnight book club. 'Shhh,' says the owl, smiling.",
+            "delay": 1800
+          }
+        },
+        "ba": {
+          "image": "story/whisper_ba.png",
+          "text": "The cellar glows with a hundred little jars. But on the wall \u2014 a HUGE monster shadow rises!",
+          "choices": [
+            {
+              "label": "Share the jam \ud83e\uded9",
+              "next": "end_feast",
+              "icon": "story/whisper_ba_c0.png"
+            },
+            {
+              "label": "Ask about the key \ud83d\udddd\ufe0f",
+              "next": "end_key"
+            }
+          ],
+          "scare": {
+            "x": 735,
+            "y": 33,
+            "w": 382,
+            "h": 491,
+            "pop": "story/whisper_ba_pop.png",
+            "sting": "thunder",
+            "reveal": "The giant monster is... a tiny chef mouse and his candle! He offers Milo blackberry jam.",
+            "delay": 1900
+          }
+        },
+        "bb": {
+          "image": "story/whisper_bb.png",
+          "text": "The greenhouse plants sway... but there is no wind. And that tall white shape was NOT there before.",
+          "choices": [
+            {
+              "label": "Cheer for the Phantom \ud83e\uddb8",
+              "next": "end_phantom",
+              "icon": "story/whisper_bb_c0.png"
+            },
+            {
+              "label": "Ask about the key \ud83d\udddd\ufe0f",
+              "next": "end_key"
+            }
+          ],
+          "scare": {
+            "x": 724,
+            "y": 104,
+            "w": 247,
+            "h": 450,
+            "pop": "story/whisper_bb_pop.png",
+            "sting": "thunder",
+            "reveal": "A heron in a bedsheet! 'I am the Garden Phantom!' she announces proudly. Nobody is scared.",
+            "delay": 1700
+          }
+        },
+        "end_family": {
+          "image": "story/whisper_end_family.png",
+          "text": "Milo and Great-Grandcat share midnight tea and stories until the storm passes. The End!"
+        },
+        "end_key": {
+          "image": "story/whisper_end_key.png",
+          "text": "Milo found grandma's key! And as he leaves... something in the window waves goodbye. The End?"
+        },
+        "end_owls": {
+          "image": "story/whisper_end_owls.png",
+          "text": "Milo stays for owl story time. The spooky house isn't spooky at all \u2014 just full of readers. The End!"
+        },
+        "end_feast": {
+          "image": "story/whisper_end_feast.png",
+          "text": "A midnight jam feast with Chef Mouse! Milo's whiskers are purple with blackberry. The End!"
+        },
+        "end_phantom": {
+          "image": "story/whisper_end_phantom.png",
+          "text": "The Garden Phantom leads a midnight parade, and Milo is the lantern-bearer. The End!"
+        }
+      }
+    },
+    {
+      "id": "scareschool",
+      "title": "Scare School",
+      "nodes": {
+        "start": {
+          "image": "story/scareschool_start.png",
+          "text": "It's Mo's first day at Scare School \u2014 where little monsters learn to be scary. Mo is NOT scary. Yet.",
+          "choices": [
+            {
+              "label": "Go to Scaring Class \ud83c\udf93",
+              "next": "a"
+            },
+            {
+              "label": "Explore the lunchroom \ud83c\udf5d",
+              "next": "b"
+            }
+          ],
+          "scare": {
+            "x": 1075,
+            "y": 489,
+            "w": 132,
+            "h": 113,
+            "pop": "story/scareschool_start_pop.png",
+            "sting": "boing",
+            "reveal": "RAAH! Hee hee! 'Thorry,' lisps Fangsley through his teeth. 'Firtht-day tradition!'",
+            "delay": 0
+          }
+        },
+        "a": {
+          "image": "story/scareschool_a.png",
+          "text": "In Scaring Class, everyone practices their scary face. Mo's scary face just looks... adorable. The supply closet wobbles.",
+          "choices": [
+            {
+              "label": "Practice a tiny boo \ud83d\ude2e",
+              "next": "aa",
+              "icon": "story/scareschool_a_c0.png"
+            },
+            {
+              "label": "Ask Blobbina for tips \ud83d\udc97",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/scareschool_b.png",
+          "text": "Lunch is worm spaghetti and eyeball pudding (it's just grapes). Something under the lunch counter is giggling...",
+          "choices": [
+            {
+              "label": "Have a noodle-arm contest \ud83d\udcaa",
+              "next": "ba"
+            },
+            {
+              "label": "Sit with the Twins \ud83d\udde3\ufe0f",
+              "next": "bb",
+              "icon": "story/scareschool_b_c1.png"
+            }
+          ],
+          "scare": {
+            "x": 0,
+            "y": 117,
+            "w": 1078,
+            "h": 273,
+            "pop": "story/scareschool_b_pop.png",
+            "sting": "boing",
+            "reveal": "Sir Stretch was folded under there ALL MORNING waiting! 'Worth it,' he says, un-crumpling.",
+            "delay": 0
+          }
+        },
+        "aa": {
+          "image": "story/scareschool_aa.png",
+          "text": "The Scary Talent Show! Every monster did a big scare. Now it's Mo's turn. The gym goes silent... the curtain behind Mo ripples.",
+          "choices": [
+            {
+              "label": "Do the tiny boo now \ud83c\udfa4",
+              "next": "end_boo",
+              "icon": "story/scareschool_aa_c0.png"
+            },
+            {
+              "label": "Team up with the Twins \ud83e\udd1d",
+              "next": "end_team",
+              "icon": "story/scareschool_aa_c1.png"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/scareschool_ab.png",
+          "text": "Blobbina's secret: 'Being scary is just being YOU, but louder.' The funhouse mirror behind them darkens...",
+          "choices": [
+            {
+              "label": "Be Mo, but louder! \ud83d\udce3",
+              "next": "end_boo",
+              "icon": "story/scareschool_ab_c0.png"
+            },
+            {
+              "label": "Scare the Principal back \ud83d\ude08",
+              "next": "end_growl"
+            }
+          ],
+          "scare": {
+            "x": 629,
+            "y": 189,
+            "w": 167,
+            "h": 259,
+            "pop": "story/scareschool_ab_pop.png",
+            "sting": "boing",
+            "reveal": "It's just Principal Growlbert on juice break! His shadow is scarier than he is. 'Carry on!'",
+            "delay": 0
+          }
+        },
+        "ba": {
+          "image": "story/scareschool_ba.png",
+          "text": "Mo wins the noodle-arm contest by becoming the ball! But the pudding cart is rolling away by itself...",
+          "choices": [
+            {
+              "label": "Pudding party! \ud83c\udf6e",
+              "next": "end_pudding",
+              "icon": "story/scareschool_ba_c0.png"
+            },
+            {
+              "label": "Clean up together \ud83e\uddfd",
+              "next": "end_team",
+              "icon": "story/scareschool_ba_c1.png"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/scareschool_bb.png",
+          "text": "The Twins can't agree whose scare is best. They ask Mo to judge. Behind them, the trash can tiptoes away...",
+          "choices": [
+            {
+              "label": "Declare everyone winners \ud83c\udfc6",
+              "next": "end_team",
+              "icon": "story/scareschool_bb_c0.png"
+            },
+            {
+              "label": "Try the trash-can trick \ud83d\uddd1\ufe0f",
+              "next": "end_pudding"
+            }
+          ],
+          "scare": {
+            "x": 37,
+            "y": 0,
+            "w": 135,
+            "h": 154,
+            "pop": "story/scareschool_bb_pop.png",
+            "sting": "boing",
+            "reveal": "Trash-can Blobbina! Both Twin heads agree for the FIRST TIME EVER: that was the best scare.",
+            "delay": 0
+          }
+        },
+        "end_boo": {
+          "image": "story/scareschool_end_boo.png",
+          "text": "Mo whispers the tiniest 'boo' ever... and the whole school faints \u2014 from laughing! Scariest Sound trophy: MO! The End!"
+        },
+        "end_team": {
+          "image": "story/scareschool_end_team.png",
+          "text": "Scares are better together! Mo and the whole class take a bow. Best first day ever. The End!"
+        },
+        "end_growl": {
+          "image": "story/scareschool_end_growl.png",
+          "text": "Mo scares the PRINCIPAL! Growlbert laughs so hard his glasses fog up. Instant legend. The End!"
+        },
+        "end_pudding": {
+          "image": "story/scareschool_end_pudding.png",
+          "text": "The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!"
         }
       }
     }
