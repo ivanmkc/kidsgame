@@ -1000,6 +1000,51 @@
           "patch": "diff/bugs_d_3_cricket.png"
         }
       ]
+    },
+    {
+      "id": "camping",
+      "name": "Campsite",
+      "image": "diff/camping_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 1056,
+          "y": 369,
+          "w": 200,
+          "h": 315,
+          "name": "acoustic guitar",
+          "kind": "recolor",
+          "patch": "diff/camping_d_0_acoustic_guitar.png"
+        },
+        {
+          "x": 66,
+          "y": 282,
+          "w": 147,
+          "h": 255,
+          "name": "friendly raccoon peeking",
+          "kind": "remove",
+          "patch": "diff/camping_d_1_friendly_raccoon_peeking.png"
+        },
+        {
+          "x": 774,
+          "y": 562,
+          "w": 187,
+          "h": 124,
+          "name": "sleeping bag rolled up",
+          "kind": "recolor",
+          "patch": "diff/camping_d_2_sleeping_bag_rolled_up.png"
+        },
+        {
+          "x": 281,
+          "y": 594,
+          "w": 103,
+          "h": 113,
+          "name": "canteen",
+          "kind": "remove",
+          "patch": "diff/camping_d_3_canteen.png"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1836,6 +1881,195 @@
           "w": 141,
           "h": 133,
           "thumb": "hidden/orchard_t_hedgehog.png"
+        }
+      ]
+    },
+    {
+      "id": "fairground",
+      "name": "Fairground",
+      "image": "hidden/fairground.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "lantern",
+          "label": "a round red paper lantern",
+          "x": 1128,
+          "y": 263,
+          "w": 146,
+          "h": 171,
+          "thumb": "hidden/fairground_t_lantern.png"
+        },
+        {
+          "id": "pinwheel",
+          "label": "a rainbow pinwheel",
+          "x": 17,
+          "y": 534,
+          "w": 103,
+          "h": 141,
+          "thumb": "hidden/fairground_t_pinwheel.png"
+        },
+        {
+          "id": "apple",
+          "label": "a shiny candy apple",
+          "x": 1173,
+          "y": 529,
+          "w": 92,
+          "h": 93,
+          "thumb": "hidden/fairground_t_apple.png"
+        },
+        {
+          "id": "ticket",
+          "label": "a roll of golden tickets",
+          "x": 959,
+          "y": 522,
+          "w": 151,
+          "h": 82,
+          "thumb": "hidden/fairground_t_ticket.png"
+        },
+        {
+          "id": "goldfish",
+          "label": "a goldfish in a clear water bag",
+          "x": 884,
+          "y": 387,
+          "w": 83,
+          "h": 66,
+          "thumb": "hidden/fairground_t_goldfish.png"
+        },
+        {
+          "id": "bunny",
+          "label": "a white rabbit in a magician's top hat",
+          "x": 114,
+          "y": 347,
+          "w": 90,
+          "h": 117,
+          "thumb": "hidden/fairground_t_bunny.png"
+        }
+      ]
+    },
+    {
+      "id": "shed",
+      "name": "Garden Shed",
+      "image": "hidden/shed.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "pumpkin",
+          "label": "a small pumpkin",
+          "x": 425,
+          "y": 569,
+          "w": 118,
+          "h": 114,
+          "thumb": "hidden/shed_t_pumpkin.png"
+        },
+        {
+          "id": "ladybug",
+          "label": "a big ladybug",
+          "x": 1071,
+          "y": 449,
+          "w": 131,
+          "h": 99,
+          "thumb": "hidden/shed_t_ladybug.png"
+        },
+        {
+          "id": "bird",
+          "label": "a robin on a shelf",
+          "x": 1057,
+          "y": 22,
+          "w": 118,
+          "h": 98,
+          "thumb": "hidden/shed_t_bird.png"
+        },
+        {
+          "id": "spider",
+          "label": "a friendly cartoon spider",
+          "x": 160,
+          "y": 261,
+          "w": 111,
+          "h": 70,
+          "thumb": "hidden/shed_t_spider.png"
+        },
+        {
+          "id": "carrot",
+          "label": "a bunch of carrots",
+          "x": 685,
+          "y": 454,
+          "w": 221,
+          "h": 118,
+          "thumb": "hidden/shed_t_carrot.png"
+        },
+        {
+          "id": "apple",
+          "label": "a shiny red apple",
+          "x": 575,
+          "y": 336,
+          "w": 85,
+          "h": 93,
+          "thumb": "hidden/shed_t_apple.png"
+        }
+      ]
+    },
+    {
+      "id": "tent",
+      "name": "Inside the Tent",
+      "image": "hidden/tent.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "thermos",
+          "label": "a green thermos",
+          "x": 718,
+          "y": 350,
+          "w": 85,
+          "h": 165,
+          "thumb": "hidden/tent_t_thermos.png"
+        },
+        {
+          "id": "sock",
+          "label": "a red striped sock",
+          "x": 137,
+          "y": 75,
+          "w": 87,
+          "h": 163,
+          "thumb": "hidden/tent_t_sock.png"
+        },
+        {
+          "id": "flashlight",
+          "label": "a yellow flashlight",
+          "x": 101,
+          "y": 434,
+          "w": 164,
+          "h": 94,
+          "thumb": "hidden/tent_t_flashlight.png"
+        },
+        {
+          "id": "marshmallow",
+          "label": "a bag of marshmallows",
+          "x": 468,
+          "y": 442,
+          "w": 130,
+          "h": 112,
+          "thumb": "hidden/tent_t_marshmallow.png"
+        },
+        {
+          "id": "harmonica",
+          "label": "a shiny harmonica",
+          "x": 177,
+          "y": 586,
+          "w": 168,
+          "h": 105,
+          "thumb": "hidden/tent_t_harmonica.png"
+        },
+        {
+          "id": "compass",
+          "label": "a round compass",
+          "x": 779,
+          "y": 541,
+          "w": 86,
+          "h": 80,
+          "thumb": "hidden/tent_t_compass.png"
         }
       ]
     }
