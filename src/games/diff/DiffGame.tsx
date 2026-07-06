@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
@@ -24,8 +24,9 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
-  const [loaded, setLoaded] = useState(0);
+  const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
+  const wrapRef = useRef<View>(null);
   const [hintId, setHintId] = useState<string | null>(null);
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -43,15 +44,15 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
   };
 
   // Hold the round invisible until every image (both bases + all patch
-  // overlays) has decoded — a late-arriving patch would flicker in and
-  // give the difference away. Timeout guard: never blank the game forever.
+  // overlays) has fully loaded — a late-arriving patch would flicker in
+  // and give the difference away. Timeout guard: never blank the game forever.
   useEffect(() => {
     setFound([]);
     setHintId(null);
-    setLoaded(0);
+    setReady(false);
     setForceReady(false);
     armHintTimer();
-    const t = setTimeout(() => setForceReady(true), 2500);
+    const t = setTimeout(() => setForceReady(true), 8000);
     return () => {
       clearTimeout(t);
       if (idleTimer.current) clearTimeout(idleTimer.current);
@@ -79,7 +80,26 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
   const won = found.length === total && total > 0;
   const expectedAssets = 2 + overlaysA.length + overlaysB.length;
-  const ready = forceReady || loaded >= expectedAssets;
+
+  // react-native-web's Image onLoad fires once the DIMENSIONS are known —
+  // before the bytes finish streaming — so poll the real <img> elements
+  // under the round container until every one is fully complete.
+  useEffect(() => {
+    if (ready) return;
+    const iv = setInterval(() => {
+      const node = wrapRef.current as unknown as { querySelectorAll?: (sel: string) => ArrayLike<HTMLImageElement> } | null;
+      if (!node?.querySelectorAll) {
+        setReady(true); // non-DOM platform: no gate needed
+        return;
+      }
+      const imgs = Array.from(node.querySelectorAll('img'));
+      if (imgs.length >= expectedAssets && imgs.every((im) => im.complete && im.naturalWidth > 0)) {
+        setReady(true);
+      }
+    }, 80);
+    return () => clearInterval(iv);
+  }, [ready, sceneId, expectedAssets]);
+  const showRound = ready || forceReady;
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
   const srcA = scene ? SCENE_IMAGES[baseImage(scene)] : 0;
@@ -143,7 +163,6 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
           hintId={hintId}
           onHit={onHit}
           onMiss={() => {}}
-          onAssetLoad={() => setLoaded((n) => n + 1)}
           testIDPrefix="left"
         />
       </View>
@@ -160,7 +179,6 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
           hintId={hintId}
           onHit={onHit}
           onMiss={() => {}}
-          onAssetLoad={() => setLoaded((n) => n + 1)}
           testIDPrefix="right"
         />
       </View>
@@ -180,7 +198,12 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[isLandscape ? styles.rowWrap : styles.colWrap, !ready && styles.hiddenUntilLoaded]}>{pictures}</View>
+        <View ref={wrapRef} style={[isLandscape ? styles.rowWrap : styles.colWrap, !showRound && styles.hiddenUntilLoaded]}>{pictures}</View>
+        {!showRound ? (
+          <View pointerEvents="none" style={styles.loadingWrap} testID="diff-loading">
+            <ActivityIndicator size="large" color={colors.inkSoft} />
+          </View>
+        ) : null}
         {settings.diffHint && hintAvailable && !won ? (
           <Pressable onPress={showHint} testID="diff-hint" accessibilityLabel="Show a hint" accessibilityRole="button" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
             <Text style={styles.hintText}>💡 Hint</Text>
@@ -202,6 +225,7 @@ const styles = StyleSheet.create({
   rowWrap: { flexDirection: 'row', gap: 16, justifyContent: 'center', alignItems: 'flex-start' },
   colWrap: { flexDirection: 'column', gap: 8, alignItems: 'center' },
   hiddenUntilLoaded: { opacity: 0 },
+  loadingWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   sceneBlock: { alignItems: 'center' },
   label: { fontSize: 14, fontFamily: fonts.displayMed, color: colors.inkSoft, marginBottom: 2 },
   hintBtn: {
