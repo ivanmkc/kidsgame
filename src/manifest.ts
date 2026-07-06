@@ -78,6 +78,7 @@ export interface Story {
 
 export interface Manifest {
   spotit: { icons: string[] };
+  dressup?: string[];
   stories?: Story[];
   diff: DiffScene[];
   hidden: HiddenScene[];

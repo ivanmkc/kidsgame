@@ -46,6 +46,7 @@ def gen_icon(sid: str, nid: str, idx: int, label: str) -> str | None:
         return f"story/{fname}"
     subject = EMOJI.sub("", label).strip().rstrip("!?.")
     refs = _ref_parts(sid)
+    best = None
     for attempt in range(3):
         data = _call([types.Content(role="user", parts=[
             *refs,
@@ -56,7 +57,9 @@ def gen_icon(sid: str, nid: str, idx: int, label: str) -> str | None:
                 "background (#FF00FF). Nothing else. No text, no letters.")),
         ])])
         sprite, coverage = key_out_magenta(Image.open(io.BytesIO(data)).convert("RGB"), out_size=380)
-        if 0.15 <= coverage <= 0.97 and ask_yes_no(
+        if 0.10 <= coverage <= 0.97:
+            best = sprite
+        if best is not None and ask_yes_no(
             f"Would a 3-year-old understand this picture as \"{subject}\"? It must be a single clean subject with no text.",
             [sprite],
         ):
@@ -64,7 +67,12 @@ def gen_icon(sid: str, nid: str, idx: int, label: str) -> str | None:
             print(f"  icon OK: {sid}/{nid}[{idx}] {subject!r}")
             return f"story/{fname}"
         print(f"  icon retry {attempt + 1}: {sid}/{nid}[{idx}] (cov={coverage:.2f})")
-    print(f"  icon FAILED: {sid}/{nid}[{idx}] — button stays text")
+    if best is not None:
+        # pre-readers need pictures: a serviceable icon beats a text button
+        best.save(OUT / fname)
+        print(f"  icon accepted-best: {sid}/{nid}[{idx}]")
+        return f"story/{fname}"
+    print(f"  icon FAILED entirely: {sid}/{nid}[{idx}] — button stays text+voice")
     return None
 
 

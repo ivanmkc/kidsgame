@@ -910,6 +910,96 @@
           "patch": "diff/bakery_d_4_milk_bottle.png"
         }
       ]
+    },
+    {
+      "id": "space",
+      "name": "Space",
+      "image": "diff/space_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 709,
+          "y": 536,
+          "w": 91,
+          "h": 165,
+          "name": "green alien waving",
+          "kind": "recolor",
+          "patch": "diff/space_d_0_green_alien_waving.png"
+        },
+        {
+          "x": 468,
+          "y": 493,
+          "w": 144,
+          "h": 212,
+          "name": "astronaut floating",
+          "kind": "remove",
+          "patch": "diff/space_d_1_astronaut_floating.png"
+        },
+        {
+          "x": 908,
+          "y": 543,
+          "w": 118,
+          "h": 105,
+          "name": "flying saucer",
+          "kind": "recolor",
+          "patch": "diff/space_d_2_flying_saucer.png"
+        },
+        {
+          "x": 244,
+          "y": 541,
+          "w": 145,
+          "h": 134,
+          "name": "purple planet",
+          "kind": "recolor",
+          "patch": "diff/space_d_3_purple_planet.png"
+        }
+      ]
+    },
+    {
+      "id": "bugs",
+      "name": "Bug Garden",
+      "image": "diff/bugs_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 676,
+          "y": 476,
+          "w": 169,
+          "h": 149,
+          "name": "dragonfly",
+          "kind": "remove",
+          "patch": "diff/bugs_d_0_dragonfly.png"
+        },
+        {
+          "x": 190,
+          "y": 518,
+          "w": 231,
+          "h": 108,
+          "name": "caterpillar on a twig",
+          "kind": "remove",
+          "patch": "diff/bugs_d_1_caterpillar_on_a_twig.png"
+        },
+        {
+          "x": 1014,
+          "y": 562,
+          "w": 132,
+          "h": 70,
+          "name": "pillbug",
+          "kind": "remove",
+          "patch": "diff/bugs_d_2_pillbug.png"
+        },
+        {
+          "x": 1022,
+          "y": 382,
+          "w": 180,
+          "h": 131,
+          "name": "cricket",
+          "kind": "remove",
+          "patch": "diff/bugs_d_3_cricket.png"
+        }
+      ]
     }
   ],
   "hidden": [
@@ -1613,6 +1703,141 @@
           "thumb": "hidden/toybox_t_drum.png"
         }
       ]
+    },
+    {
+      "id": "dinonest",
+      "name": "Dino Nest",
+      "image": "hidden/dinonest.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "frog",
+          "label": "a plump green frog",
+          "x": 930,
+          "y": 492,
+          "w": 137,
+          "h": 124,
+          "thumb": "hidden/dinonest_t_frog.png"
+        },
+        {
+          "id": "snail",
+          "label": "a big snail",
+          "x": 1040,
+          "y": 189,
+          "w": 148,
+          "h": 119,
+          "thumb": "hidden/dinonest_t_snail.png"
+        },
+        {
+          "id": "bone",
+          "label": "a big cartoon bone",
+          "x": 317,
+          "y": 546,
+          "w": 276,
+          "h": 147,
+          "thumb": "hidden/dinonest_t_bone.png"
+        },
+        {
+          "id": "dragonfly",
+          "label": "a red dragonfly",
+          "x": 335,
+          "y": 177,
+          "w": 117,
+          "h": 101,
+          "thumb": "hidden/dinonest_t_dragonfly.png"
+        },
+        {
+          "id": "babydino",
+          "label": "a baby dinosaur hatching from an egg",
+          "x": 713,
+          "y": 251,
+          "w": 108,
+          "h": 127,
+          "thumb": "hidden/dinonest_t_babydino.png"
+        },
+        {
+          "id": "beetle",
+          "label": "a shiny blue beetle",
+          "x": 54,
+          "y": 507,
+          "w": 117,
+          "h": 93,
+          "thumb": "hidden/dinonest_t_beetle.png"
+        },
+        {
+          "id": "footprint",
+          "label": "a big muddy dinosaur footprint",
+          "x": 642,
+          "y": 586,
+          "w": 210,
+          "h": 119,
+          "thumb": "hidden/dinonest_t_footprint.png"
+        }
+      ]
+    },
+    {
+      "id": "orchard",
+      "name": "Apple Orchard",
+      "image": "hidden/orchard.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "butterfly",
+          "label": "a yellow butterfly",
+          "x": 1154,
+          "y": 528,
+          "w": 87,
+          "h": 86,
+          "thumb": "hidden/orchard_t_butterfly.png"
+        },
+        {
+          "id": "squirrel",
+          "label": "a red squirrel",
+          "x": 33,
+          "y": 190,
+          "w": 131,
+          "h": 118,
+          "thumb": "hidden/orchard_t_squirrel.png"
+        },
+        {
+          "id": "crow",
+          "label": "a plump black crow",
+          "x": 1041,
+          "y": 369,
+          "w": 128,
+          "h": 123,
+          "thumb": "hidden/orchard_t_crow.png"
+        },
+        {
+          "id": "basket",
+          "label": "a basket overflowing with apples",
+          "x": 688,
+          "y": 515,
+          "w": 151,
+          "h": 141,
+          "thumb": "hidden/orchard_t_basket.png"
+        },
+        {
+          "id": "worm",
+          "label": "a happy worm popping out of an apple",
+          "x": 336,
+          "y": 524,
+          "w": 145,
+          "h": 146,
+          "thumb": "hidden/orchard_t_worm.png"
+        },
+        {
+          "id": "hedgehog",
+          "label": "a hedgehog carrying an apple",
+          "x": 897,
+          "y": 570,
+          "w": 141,
+          "h": 133,
+          "thumb": "hidden/orchard_t_hedgehog.png"
+        }
+      ]
     }
   ],
   "stories": [
@@ -1631,7 +1856,8 @@
             },
             {
               "label": "Gallop to the beach! \ud83c\udf0a",
-              "next": "b"
+              "next": "b",
+              "icon": "story/luna_start_c1.png"
             }
           ]
         },
@@ -1641,7 +1867,8 @@
           "choices": [
             {
               "label": "Help find acorns \ud83c\udf30",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/luna_a_c0.png"
             },
             {
               "label": "Play hide and seek \ud83d\ude48",
@@ -1688,7 +1915,8 @@
           "choices": [
             {
               "label": "Crown the champion \ud83d\udc51",
-              "next": "end_crown"
+              "next": "end_crown",
+              "icon": "story/luna_ab_c0.png"
             },
             {
               "label": "Ride the rainbow home \ud83c\udf08",
@@ -1786,7 +2014,8 @@
             },
             {
               "label": "Follow the sound \ud83d\udc42",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/pip_a_c1.png"
             }
           ]
         },
@@ -1812,7 +2041,8 @@
           "choices": [
             {
               "label": "Open it now! \ud83d\udd13",
-              "next": "end_biscuits"
+              "next": "end_biscuits",
+              "icon": "story/pip_aa_c0.png"
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
@@ -1827,7 +2057,8 @@
           "choices": [
             {
               "label": "Lead them home \ud83c\udfe1",
-              "next": "end_kittens"
+              "next": "end_kittens",
+              "icon": "story/pip_ab_c0.png"
             },
             {
               "label": "Share it with friends \ud83d\udc3e",
@@ -1847,7 +2078,8 @@
             },
             {
               "label": "Invite friends to play \u26bd",
-              "next": "end_game"
+              "next": "end_game",
+              "icon": "story/pip_ba_c1.png"
             }
           ]
         },
@@ -1903,7 +2135,8 @@
           "choices": [
             {
               "label": "Creep through the front door \ud83d\udeaa",
-              "next": "a"
+              "next": "a",
+              "icon": "story/whisper_start_c0.png"
             },
             {
               "label": "Sneak around the back \ud83c\udf19",
@@ -1928,11 +2161,13 @@
           "choices": [
             {
               "label": "Climb the creaky stairs \ud83d\udd6f\ufe0f",
-              "next": "aa"
+              "next": "aa",
+              "icon": "story/whisper_a_c0.png"
             },
             {
               "label": "Follow the skittering sound \ud83d\udc3e",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/whisper_a_c1.png"
             }
           ],
           "scare": {
@@ -1957,7 +2192,8 @@
             },
             {
               "label": "Tiptoe to the greenhouse \ud83c\udf3f",
-              "next": "bb"
+              "next": "bb",
+              "icon": "story/whisper_b_c1.png"
             }
           ],
           "scare": {
@@ -1977,7 +2213,8 @@
           "choices": [
             {
               "label": "Hug Great-Grandcat \ud83d\udc9c",
-              "next": "end_family"
+              "next": "end_family",
+              "icon": "story/whisper_aa_c0.png"
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
@@ -1997,7 +2234,8 @@
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_ab_c1.png"
             }
           ],
           "scare": {
@@ -2022,7 +2260,8 @@
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_ba_c1.png"
             }
           ],
           "scare": {
@@ -2047,7 +2286,8 @@
             },
             {
               "label": "Ask about the key \ud83d\udddd\ufe0f",
-              "next": "end_key"
+              "next": "end_key",
+              "icon": "story/whisper_bb_c1.png"
             }
           ],
           "scare": {
@@ -2093,11 +2333,13 @@
           "choices": [
             {
               "label": "Go to Scaring Class \ud83c\udf93",
-              "next": "a"
+              "next": "a",
+              "icon": "story/scareschool_start_c0.png"
             },
             {
               "label": "Explore the lunchroom \ud83c\udf5d",
-              "next": "b"
+              "next": "b",
+              "icon": "story/scareschool_start_c1.png"
             }
           ],
           "scare": {
@@ -2122,7 +2364,8 @@
             },
             {
               "label": "Ask Blobbina for tips \ud83d\udc97",
-              "next": "ab"
+              "next": "ab",
+              "icon": "story/scareschool_a_c1.png"
             }
           ]
         },
@@ -2132,7 +2375,8 @@
           "choices": [
             {
               "label": "Have a noodle-arm contest \ud83d\udcaa",
-              "next": "ba"
+              "next": "ba",
+              "icon": "story/scareschool_b_c0.png"
             },
             {
               "label": "Sit with the Twins \ud83d\udde3\ufe0f",
@@ -2178,7 +2422,8 @@
             },
             {
               "label": "Scare the Principal back \ud83d\ude08",
-              "next": "end_growl"
+              "next": "end_growl",
+              "icon": "story/scareschool_ab_c1.png"
             }
           ],
           "scare": {
@@ -2219,7 +2464,8 @@
             },
             {
               "label": "Try the trash-can trick \ud83d\uddd1\ufe0f",
-              "next": "end_pudding"
+              "next": "end_pudding",
+              "icon": "story/scareschool_bb_c1.png"
             }
           ],
           "scare": {
@@ -2251,5 +2497,23 @@
         }
       }
     }
+  ],
+  "dressup": [
+    "dress_pink",
+    "dress_blue",
+    "tutu",
+    "crown",
+    "tiara",
+    "wizard_hat",
+    "sun_hat",
+    "wings_fairy",
+    "wings_butterfly",
+    "cape",
+    "sunglasses",
+    "bowtie",
+    "necklace",
+    "boots",
+    "wand",
+    "umbrella"
   ]
 }
