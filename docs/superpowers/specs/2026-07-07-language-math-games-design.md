@@ -70,3 +70,22 @@ art gen needed) or one NBP thumb each if the tile look is weak.
 (2) First Sounds + Rhyme Time, (3) Count/Compare/Sums, (4) Word Builder.
 Icon + voice generation run by the orchestrator; integration, menu, playtest,
 ship by the orchestrator.
+
+## Multi-language modes (Ivan, mid-brainstorm): EN / 日本語 / 普通话 / 廣東話
+
+- Global 🌐 language chip (cycles, persisted `kgb.lang.v1`) shown on the two
+  suite sections + home header. Affects games meaningfully, never fakes it:
+  - **First Sounds → "First Words" in JA/cmn/yue**: prompt = target-language
+    word ("どれが いぬ？"), confirmation bilingual ("いぬ! Dog!"). Same engine.
+  - **Letter Hunt → Kana Hunt in JA** (hiragana あ〜の subset, spoken "あ! a!").
+    In cmn/yue Letter Hunt stays English.
+  - **All four number games count in the selected language** (いち・に・さん /
+    yī èr sān / jat1 ji6 saam1); JA/zh hard tier uses 一二三…十 numeral tiles.
+  - Rhyme Time, Word Builder, letter-sound tier: English phonics — EN-only in
+    every mode (small EN badge on their cards when another language is active).
+- `src/lang.ts`: language state + per-language tables (icon words w/ kana/hanzi
+  + romanization caption for parents, numbers 1–20, prompt templates).
+- TTS: gen_voice grows a per-language voice/style config; Gemini TTS covers
+  ja/cmn; **probe yue first** — fallback Cloud TTS Chirp3-HD yue voice. Clips
+  keyed by sha1(text) as today (script-text hashes fine).
+- Analytics: track('lang', {mode}) on toggle.
