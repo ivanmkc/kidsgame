@@ -168,6 +168,20 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
             }}
           >
             <Image source={SCENE_IMAGES[node.image]} style={{ width: imgW, height: imgH }} resizeMode="cover" />
+            {isEnd && node.video && Platform.OS === 'web' ? (
+              // the ending scene comes alive: gentle looping ambient clip
+              // over the still (which doubles as the loading poster)
+              <View style={StyleSheet.absoluteFill} pointerEvents="none" testID="story-end-clip">
+                {React.createElement('video', {
+                  src: node.video,
+                  autoPlay: true,
+                  muted: true,
+                  loop: true,
+                  playsInline: true,
+                  style: { width: '100%', height: '100%', objectFit: 'cover' },
+                })}
+              </View>
+            ) : null}
             {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
             {hasHots && !clip
               ? node.choices!.map((c, i) => (

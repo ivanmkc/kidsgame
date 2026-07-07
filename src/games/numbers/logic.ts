@@ -41,18 +41,27 @@ export interface NumberSettings {
 
 export function settingsForNumbers(
   difficulty: 'easy' | 'medium' | 'hard', lang: Lang,
+  script: 'arabic' | 'han' | 'auto' = 'auto',
 ): NumberSettings {
-  const useHan = difficulty === 'hard' && lang !== 'en';
+  // Ivan: script must be a player choice in ja/cmn/yue, not hard-tier-only.
+  const useHan = lang !== 'en' && (script === 'han' || (script === 'auto' && difficulty === 'hard'));
   // Non-EN skips 0 — the number tables in lang.ts start at 1, so speaking
   // "0" would fall back to raw arabic.
   const min = lang === 'en' ? 0 : 1;
   if (difficulty === 'easy')   return { rounds: 8,  tiles: 5, min, max: 5,  useHan: false };
-  if (difficulty === 'hard')   return { rounds: 12, tiles: 9, min: useHan ? 1 : min, max: useHan ? 10 : 20, useHan };
+  if (difficulty === 'hard')   return { rounds: 12, tiles: 9, min: useHan ? 1 : min, max: 20, useHan };
   return                              { rounds: 10, tiles: 7, min, max: 9,  useHan: false };
 }
 
+export function hanNumeral(n: number): string {
+  if (n <= 10) return HAN_NUMERALS[n - 1] ?? String(n);
+  if (n < 20) return `十${HAN_NUMERALS[n - 11]}`;
+  if (n === 20) return '二十';
+  return String(n);
+}
+
 function label(n: number, useHan: boolean): string {
-  return useHan ? (HAN_NUMERALS[n - 1] ?? String(n)) : String(n);
+  return useHan ? hanNumeral(n) : String(n);
 }
 
 function tileFor(n: number, useHan: boolean, isAnswer: boolean): NumberTile {
