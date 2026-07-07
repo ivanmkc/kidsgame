@@ -27,6 +27,7 @@ from gen.nbp import _call, generate, generate_with_ref  # noqa: E402
 from gen.sam_batch import sam_segment_batch  # noqa: E402
 from gen.scenes import SCENE_STYLE  # noqa: E402
 from gen.story_specs import RAINBOW_DOORS, SCARE_SCHOOL, TREASURE_TRAIL, WHISPERING_HOUSE  # noqa: E402
+from gen.story_lint import lint_spec  # noqa: E402
 from google.genai import types  # noqa: E402
 from PIL import Image  # noqa: E402
 
@@ -237,6 +238,12 @@ def main() -> None:
         cur = json.loads(MANIFEST.read_text())
         if any(s["id"] == spec["id"] for s in cur.get("stories", [])):
             print(f"{spec['id']}: already present, skipping")
+            continue
+        hard = [e for e in lint_spec(spec) if not e.startswith("warn:")]
+        if hard:
+            print(f"{spec['id']}: SPEC LINT FAILED — fix before generating:")
+            for e in hard:
+                print(f"  - {e}")
             continue
         got = gen_story(spec)
         cur = json.loads(MANIFEST.read_text())
