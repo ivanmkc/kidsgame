@@ -171,7 +171,7 @@
           "patch": "diff/princess_d_3_golden_crown_on_a_cushio.png"
         }
       ],
-      "level": "medium"
+      "level": "hard"
     },
     {
       "id": "unicorn",
@@ -235,7 +235,7 @@
           "patch": "diff/unicorn_d_5_pot_of_gold.png"
         }
       ],
-      "level": "easy"
+      "level": "medium"
     },
     {
       "id": "dinos",
@@ -666,7 +666,8 @@
           "kind": "recolor",
           "patch": "diff/party_d_3_red_toy_robot.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "construction",
@@ -711,7 +712,8 @@
           "kind": "recolor",
           "patch": "diff/construction_d_3_warning_sign.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "candy",
@@ -756,7 +758,8 @@
           "kind": "remove",
           "patch": "diff/candy_d_3_strawberry_milkshake_wit.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "tidepool",
@@ -801,7 +804,8 @@
           "kind": "remove",
           "patch": "diff/tidepool_d_3_sand_dollar.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "bakery",
@@ -855,7 +859,8 @@
           "kind": "recolor",
           "patch": "diff/bakery_d_4_milk_bottle.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "bugs",
@@ -900,7 +905,8 @@
           "kind": "remove",
           "patch": "diff/bugs_d_3_cricket.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "camping",
@@ -945,7 +951,8 @@
           "kind": "remove",
           "patch": "diff/camping_d_3_canteen.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "space",
@@ -990,7 +997,63 @@
           "kind": "recolor",
           "patch": "diff/space_d_3_blue_fuel_canister.png"
         }
-      ]
+      ],
+      "level": "hard"
+    },
+    {
+      "id": "music",
+      "name": "Music Room",
+      "image": "diff/music_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 470,
+          "y": 463,
+          "w": 179,
+          "h": 230,
+          "name": "blue ukulele",
+          "kind": "recolor",
+          "patch": "diff/music_d_0_blue_ukulele.png"
+        },
+        {
+          "x": 675,
+          "y": 398,
+          "w": 169,
+          "h": 152,
+          "name": "golden french horn",
+          "kind": "recolor",
+          "patch": "diff/music_d_1_golden_french_horn.png"
+        },
+        {
+          "x": 271,
+          "y": 455,
+          "w": 148,
+          "h": 82,
+          "name": "pair of bongo drums",
+          "kind": "recolor",
+          "patch": "diff/music_d_2_pair_of_bongo_drums.png"
+        },
+        {
+          "x": 879,
+          "y": 474,
+          "w": 130,
+          "h": 235,
+          "name": "black violin case",
+          "kind": "recolor",
+          "patch": "diff/music_d_3_black_violin_case.png"
+        },
+        {
+          "x": 1077,
+          "y": 466,
+          "w": 174,
+          "h": 190,
+          "name": "red accordion",
+          "kind": "remove",
+          "patch": "diff/music_d_4_red_accordion.png"
+        }
+      ],
+      "level": "medium"
     }
   ],
   "hidden": [
@@ -1558,7 +1621,8 @@
           "h": 161,
           "thumb": "hidden/kitchen_t_fish.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "fairy",
@@ -1621,7 +1685,8 @@
           "h": 74,
           "thumb": "hidden/fairy_t_gem.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "toybox",
@@ -1693,7 +1758,8 @@
           "h": 110,
           "thumb": "hidden/toybox_t_drum.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "dinonest",
@@ -1765,7 +1831,8 @@
           "h": 119,
           "thumb": "hidden/dinonest_t_footprint.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "orchard",
@@ -1828,7 +1895,8 @@
           "h": 133,
           "thumb": "hidden/orchard_t_hedgehog.png"
         }
-      ]
+      ],
+      "level": "easy"
     },
     {
       "id": "fairground",
@@ -1891,7 +1959,8 @@
           "h": 117,
           "thumb": "hidden/fairground_t_bunny.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "shed",
@@ -1954,7 +2023,8 @@
           "h": 93,
           "thumb": "hidden/shed_t_apple.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "tent",
@@ -2017,7 +2087,8 @@
           "h": 80,
           "thumb": "hidden/tent_t_compass.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "petshop",
@@ -2080,7 +2151,8 @@
           "h": 142,
           "thumb": "hidden/petshop_t_kitten.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "pond",
@@ -2143,7 +2215,8 @@
           "h": 127,
           "thumb": "hidden/pond_t_frog.png"
         }
-      ]
+      ],
+      "level": "medium"
     },
     {
       "id": "depot",
@@ -2206,7 +2279,8 @@
           "h": 98,
           "thumb": "hidden/depot_t_whistle.png"
         }
-      ]
+      ],
+      "level": "hard"
     },
     {
       "id": "candyshop",
@@ -2287,7 +2361,8 @@
           "h": 88,
           "thumb": "hidden/candyshop_t_chocolate.png"
         }
-      ]
+      ],
+      "level": "medium"
     }
   ],
   "stories": [
