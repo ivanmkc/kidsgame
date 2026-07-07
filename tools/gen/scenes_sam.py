@@ -311,8 +311,17 @@ def _recolor_verified(img: Image.Image, item: dict, theme_id: str, adjacent: boo
             print(f"  {theme_id}: recolor '{short}' -> {new} weak (ch={ch:.2f} drift={drift:.2f})")
             continue
         after_crop = _crop(out, rect, pad=40)
+        # Caption-as-verifier for "did the color take": an adjacent-hue
+        # shift is subtle BY DESIGN, so a judge asked for a "clearly
+        # changed" color says NO to exactly the edits we want. The caption
+        # is objective; the judge below checks only integrity.
+        seen = ask_text(f"In ONE word, what is the main color of the {short}?",
+                        [after_crop]).strip().lower()
+        if seen == cur or (seen in cur or cur in seen):
+            print(f"  {theme_id}: recolor '{short}' -> {new} didn't take (still reads {seen})")
+            continue
         if _ask_pro(
-            f"Two crops of the same spot. Is the {short} the SAME object in the SAME place in both, with ONLY its color clearly changed (now {new}), everything else identical — no artifacts, no shape change, background untouched?",
+            f"Two crops of the same spot. Is the {short} the SAME object in the SAME place with the SAME shape and size in both — no artifacts, nothing added or removed, and everything around the {short} unchanged? (Its color is different on purpose; judge everything EXCEPT the color.)",
             [before_crop, after_crop],
         ):
             return out, f"the {short} changed color!"
