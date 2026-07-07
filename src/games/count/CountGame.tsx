@@ -11,6 +11,7 @@ import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
 import { CountRound, PRAISE, PROMPTS, countSettings, makeCountRound } from './logic';
+import { spriteLT } from '../quizround/logic';
 
 interface Props {
   onHome: () => void;
@@ -97,7 +98,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const { width, height } = useWindowDimensions();
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 180, stageW * 0.85);
-  const critterSize = Math.max(38, Math.min(72, stageW / (round.n <= 4 ? 5 : round.n <= 7 ? 6 : 7)));
+  const critterSize = Math.min(Math.max(38, Math.min(72, stageW / (round.n <= 4 ? 5 : round.n <= 7 ? 6 : 7))), Math.max(30, stageH * 0.45));
 
   return (
     <GameShell
@@ -123,8 +124,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               icon={round.icon}
               tapped={tapped[i]}
               size={critterSize}
-              left={(p.x / 100) * stageW - critterSize / 2}
-              top={(p.y / 100) * stageH - critterSize / 2}
+              left={spriteLT(p.x, p.y, critterSize, stageW, stageH).left}
+              top={spriteLT(p.x, p.y, critterSize, stageW, stageH).top}
               onTap={() => tapCritter(i)}
               testID={`count-critter-${i}${tapped[i] ? '-tapped' : ''}`}
             />

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
+import { spriteLT } from '../quizround/logic';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -148,7 +149,7 @@ interface PlateProps {
 }
 
 function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
-  const critterSize = Math.max(28, Math.min(58, width / (data.count <= 3 ? 3.5 : data.count <= 6 ? 4.2 : 5)));
+  const critterSize = Math.min(Math.max(28, Math.min(58, width / (data.count <= 3 ? 3.5 : data.count <= 6 ? 4.2 : 5))), Math.max(24, height * 0.4));
   return (
     <Pressable
       onPress={onPress}
@@ -169,8 +170,7 @@ function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
           source={SPOTIT_ICONS[data.icon]}
           style={{
             position: 'absolute',
-            left: (p.x / 100) * width - critterSize / 2,
-            top: (p.y / 100) * height - critterSize / 2,
+            ...spriteLT(p.x, p.y, critterSize, width, height),
             width: critterSize,
             height: critterSize,
           }}
