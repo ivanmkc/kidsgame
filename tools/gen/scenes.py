@@ -62,8 +62,9 @@ DIFF_THEMES = [
     {
         "id": "space",
         "name": "Space",
-        "base": "A friendly outer space scene: big smiling planet with rings, stars, a crescent moon, a rocket flying, colorful nebula clouds, small asteroids.",
-        "adds": ["a small green alien waving", "a shiny satellite", "a shooting star", "a tiny flying saucer", "a purple planet", "an astronaut floating"],
+        "subtle": True,
+        "base": "A BUSY, richly detailed outer space scene: a space station with many round portholes, a big ringed planet and three small planets, dense star clusters, an asteroid field with cratered rocks, a comet with a tail, a rocket with portholes and fins, satellites, twinkling constellations connected by faint lines.",
+        "adds": ["a small red toolbox floating", "a little satellite dish antenna", "a tiny green flag planted on an asteroid", "a small blue fuel canister", "a little yellow toy magnet", "a small orange traffic cone floating"],
     },
     {
         "id": "princess",

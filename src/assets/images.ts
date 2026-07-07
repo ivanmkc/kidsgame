@@ -530,18 +530,30 @@ export const DRESSUP_ICONS: Record<string, number> = {
 };
 
 export const RHYME_SPRITES: Record<string, number> = {
+  bat: require('../../assets/game/rhyme/bat.png'),
   bear: require('../../assets/game/rhyme/bear.png'),
   bee: require('../../assets/game/rhyme/bee.png'),
+  boat: require('../../assets/game/rhyme/boat.png'),
+  box: require('../../assets/game/rhyme/box.png'),
   bun: require('../../assets/game/rhyme/bun.png'),
   cake: require('../../assets/game/rhyme/cake.png'),
+  clock: require('../../assets/game/rhyme/clock.png'),
+  coat: require('../../assets/game/rhyme/coat.png'),
+  goat: require('../../assets/game/rhyme/goat.png'),
+  hat: require('../../assets/game/rhyme/hat.png'),
   house: require('../../assets/game/rhyme/house.png'),
+  jar: require('../../assets/game/rhyme/jar.png'),
   moon: require('../../assets/game/rhyme/moon.png'),
   mouse: require('../../assets/game/rhyme/mouse.png'),
   pear: require('../../assets/game/rhyme/pear.png'),
+  rock: require('../../assets/game/rhyme/rock.png'),
+  snail: require('../../assets/game/rhyme/snail.png'),
   snake: require('../../assets/game/rhyme/snake.png'),
+  sock: require('../../assets/game/rhyme/sock.png'),
   spoon: require('../../assets/game/rhyme/spoon.png'),
   sun: require('../../assets/game/rhyme/sun.png'),
   tree: require('../../assets/game/rhyme/tree.png'),
+  whale: require('../../assets/game/rhyme/whale.png'),
 };
 
 export const UI_IMAGES = {

@@ -12,7 +12,7 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
+import { say, sfx, useSay } from '../../sound';
 import { isSolved, makePuzzle, swap } from './logic';
 
 interface Props {
@@ -60,10 +60,14 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
     return () => { if (peekTimer.current) clearTimeout(peekTimer.current); };
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useSay(picked ? 'Tap one piece, then tap another to swap them!' : 'Which picture do you want to solve?');
   const won = perm.length === size && isSolved(perm);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
+  useEffect(() => {
+    if (won) say('Puzzle master! Amazing!');
+  }, [won]);
   const { width, height } = useWindowDimensions();
 
   if (!picked) {
@@ -87,7 +91,7 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
     manifest.hidden.find((h) => `h-${h.id}` === picked.id);
   const ar = srcScene ? srcScene.w / srcScene.h : 16 / 9;
 
-  const availH = height - 84 - 44;
+  const availH = height - 150;
   const boardW = Math.min(width - 28, availH * ar, 1000);
   const boardH = boardW / ar;
   const tileW = boardW / cols;
@@ -184,7 +188,7 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
 }
 
 const styles = StyleSheet.create({
-  peekBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12 },
+  peekBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 11, paddingHorizontal: 12, minHeight: 44, justifyContent: 'center' },
   peekText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },
   board: { borderRadius: 18, overflow: 'hidden', backgroundColor: colors.card },

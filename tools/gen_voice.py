@@ -81,6 +81,23 @@ def collect_lines() -> list[tuple[str, str]]:
     lines.setdefault("What should happen next?", STYLES["choice"])
     lines.setdefault("Tap where you want to go!", STYLES["choice"])
     lines.setdefault("Rule Time! Do what the rule says as fast as you can.", STYLES["instruction"])
+    lines.setdefault('Where do you want to play?', STYLES["instruction"])
+    lines.setdefault('Where do you want to search?', STYLES["instruction"])
+    lines.setdefault('Which picture do you want to solve?', STYLES["instruction"])
+    lines.setdefault("Where's the party?", STYLES["instruction"])
+    lines.setdefault('Which story shall we read?', STYLES["instruction"])
+    lines.setdefault('Find all the sneaky changes!', STYLES["instruction"])
+    lines.setdefault('Find all the hidden things!', STYLES["instruction"])
+    lines.setdefault('Tap one piece, then tap another to swap them!', STYLES["instruction"])
+    lines.setdefault('Tap the picture that is on BOTH cards!', STYLES["instruction"])
+    lines.setdefault('Flip the cards and find the pairs!', STYLES["instruction"])
+    lines.setdefault('Whose shadow is that? Match it!', STYLES["instruction"])
+    lines.setdefault('Eagle eyes! You found every difference!', STYLES["instruction"])
+    lines.setdefault('Super detective! You found everything!', STYLES["instruction"])
+    lines.setdefault('Puzzle master! Amazing!', STYLES["instruction"])
+    lines.setdefault('Sharp eyes! You spotted them all!', STYLES["instruction"])
+    lines.setdefault('Amazing memory! You matched them all!', STYLES["instruction"])
+    lines.setdefault('Shadow wizard! You matched them all!', STYLES["instruction"])
     sl = ROOT / "tools" / "speech_lines.json"
     if sl.exists():
         for t in json.loads(sl.read_text()):

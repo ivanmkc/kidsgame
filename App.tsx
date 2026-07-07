@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   logo: { width: 104, height: 104 },
   logoSmall: { width: 72, height: 72 },
   heading: { fontSize: 36, fontFamily: fonts.display, color: colors.ink },
-  diffRow: { flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap', justifyContent: 'center' },
+  diffRow: { flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap', justifyContent: 'center' , maxWidth: '100%' },
   diffChip: {
     borderRadius: 14,
     paddingHorizontal: 14,

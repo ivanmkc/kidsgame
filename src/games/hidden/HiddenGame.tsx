@@ -12,7 +12,7 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng, sample } from '../../rng';
-import { sfx, useSay } from '../../sound';
+import { sfx, useSay, say } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 import { Find, coopDrawCount, countFor } from './coop';
 
@@ -31,6 +31,9 @@ interface Props {
 export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPlayerEnabled, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
+  // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
+  // flattening to medium hid the easy-mode hint/no-timer design entirely.
+  const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
 
   // ALL hooks live above the `if (!scene)` early return (repo hard rule).
   const [mode, setMode] = useState<'solo' | '2p' | null>(twoPlayerEnabled ? null : 'solo');
@@ -44,12 +47,12 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   const findsRef = useRef<Set<string>>(new Set());
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
 
-  const showTimer = settingsFor(difficulty).timer && !coop;
+  const showTimer = settingsFor(effDifficulty).timer && !coop;
 
   const drawn = useMemo(
     () => {
       if (!scene) return [];
-      const base = settingsFor(difficulty).hiddenDraw;
+      const base = settingsFor(effDifficulty).hiddenDraw;
       const n = coop ? coopDrawCount(base, scene.targets.length) : base;
       return sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, n);
     },
@@ -73,6 +76,10 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
   useSay(coop && scene && !won ? `${MP_PLAYERS[turn].name}'s turn!` : null);
+  useSay(scene ? (coop ? null : 'Find all the hidden things!') : 'Where do you want to search?');
+  useEffect(() => {
+    if (won && !coop) say('Super detective! You found everything!');
+  }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Gentle auto-hint: 15s with no find → pulse one random unfound target
   // ~2.5s. Resets on find/turn/scene.

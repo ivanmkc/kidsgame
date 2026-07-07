@@ -48,9 +48,9 @@ EXTRA_DIFF_THEMES = [
     {"id": "savanna", "name": "Savanna",
      "base": "A warm African savanna at golden hour: a friendly giraffe by an acacia tree, a zebra grazing, a watering hole, distant mountains, tall grass, a big orange sun.",
      "adds": ["a baby elephant", "a meerkat standing tall", "a colorful tropical bird", "a tortoise", "a lion cub in the grass", "a termite mound"]},
-    {"id": "music", "name": "Music Room",
-     "base": "A bright music room: an upright piano, a drum kit, a guitar on a stand, a xylophone, a music stand (blank pages), a shelf of maracas and tambourines, a big window.",
-     "adds": ["a golden trumpet", "a triangle instrument", "a red accordion", "a microphone on a stand", "a violin case", "a metronome"]},
+    {"id": "music", "name": "Music Room", "subtle": True,
+     "base": "A BUSY bright music room packed with detail: an upright piano with sheet music, a full drum kit, guitars on stands, a xylophone, music stands, shelves crowded with maracas, tambourines, bells and small instruments, posters-free walls with hanging instruments, a big window.",
+     "adds": ["a golden trumpet", "a triangle instrument", "a metronome", "a harmonica", "a recorder flute", "a small music box"]},
 ]
 
 EXTRA_HIDDEN_THEMES = [

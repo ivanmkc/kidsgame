@@ -84,6 +84,7 @@ export type UIKey =
   | 'shell.rhyme.sub'
   | 'shell.spell.title'
   | 'shell.spell.sub'
+  | 'spell.hearAgain'
   | 'shell.count.title'
   | 'shell.count.sub'
   | 'shell.compare.title'
@@ -279,6 +280,7 @@ const EN: Table = {
   'shell.rhyme.title': 'Rhyme Time',
   'shell.rhyme.sub': 'Tap the picture that rhymes',
   'shell.spell.title': 'Word Builder',
+  'spell.hearAgain': '🔊 Tap to hear again',
   'shell.spell.sub': 'Tap the letters in order to spell the word',
   'shell.count.title': 'Count With Me',
   'shell.count.sub': 'Tap every friend, then tell me how many',
@@ -473,6 +475,7 @@ const JA: Table = {
   'shell.rhyme.title': 'ライムタイム',
   'shell.rhyme.sub': 'おなじひびきの えを タップ',
   'shell.spell.title': 'ことばづくり',
+  'spell.hearAgain': '🔊 タップでもういちど聞く',
   'shell.spell.sub': 'もじを じゅんばんに タップして ことばを つくろう',
   'shell.count.title': 'いっしょにかぞえよう',
   'shell.count.sub': 'みんなを タップして いくつか おしえて',
@@ -666,6 +669,7 @@ const CMN: Table = {
   'shell.rhyme.title': '押韵配对',
   'shell.rhyme.sub': '点押韵的那张图',
   'shell.spell.title': '拼单词',
+  'spell.hearAgain': '🔊 点一下再听一次',
   'shell.spell.sub': '按顺序点字母拼出单词',
   'shell.count.title': '一起数一数',
   'shell.count.sub': '点每个小伙伴，然后告诉我一共几个',
@@ -859,6 +863,7 @@ const YUE: Table = {
   'shell.rhyme.title': '押韻配對',
   'shell.rhyme.sub': '撳押韻嗰張圖',
   'shell.spell.title': '砌單字',
+  'spell.hearAgain': '🔊 撳一下再聽一次',
   'shell.spell.sub': '順住次序撳字母，砌返個單字',
   'shell.count.title': '一齊數',
   'shell.count.sub': '撳每個朋友仔，然後話俾我聽有幾多個',

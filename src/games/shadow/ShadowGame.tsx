@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, {useRef, useState, useEffect } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS, SPOTIT_SHADOWS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
+import { sfx, say, useSay } from '../../sound';
 import { ShadowDifficulty, makeShadowRound } from './logic';
 
 interface Props {
@@ -38,6 +38,8 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  useSay('Whose shadow is that? Match it!');
+  useEffect(() => { if (won) say('Shadow wizard! You matched them all!'); }, [won]);
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const onPick = (icon: string) => {

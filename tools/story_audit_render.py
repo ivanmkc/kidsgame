@@ -36,7 +36,10 @@ def render(story_id: str, out_root: Path) -> int:
             dr.rectangle([h["x"], h["y"], h["x"] + h["w"], h["y"] + h["h"]], outline=col, width=6)
             dr.text((h["x"] + 6, min(700, h["y"] + h["h"] + 4)), c["label"][:40], fill=col)
         if n.get("bad"):
-            dr.text((10, 10), "OOPSIE ENDING", fill=(220, 60, 60))
+            # magenta banner = AUDIT OVERLAY, not scene content (a persona
+            # once mistook the plain label for baked-in text)
+            dr.rectangle([0, 0, 340, 30], fill=(255, 0, 255))
+            dr.text((8, 8), "[AUDIT OVERLAY] oopsie ending", fill=(255, 255, 255))
         img.save(d / f"{nid}.png")
     print(f"{story_id}: rendered {len(st['nodes'])} nodes -> {d}")
     return len(st["nodes"])

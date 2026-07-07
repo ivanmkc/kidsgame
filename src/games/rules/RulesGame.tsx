@@ -191,7 +191,7 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
 }
 
 const styles = StyleSheet.create({
-  remindBtn: { backgroundColor: colors.gold, borderRadius: 12, paddingVertical: 6, paddingHorizontal: 14, marginTop: 6, alignSelf: 'center' },
+  remindBtn: { backgroundColor: colors.gold, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 16, marginTop: 6, alignSelf: 'center', minHeight: 44, justifyContent: 'center' },
   remindText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
   ruleCard: {

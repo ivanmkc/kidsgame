@@ -108,8 +108,8 @@ const styles = StyleSheet.create({
   chipCompact: {
     backgroundColor: 'rgba(255,255,255,0.6)',
     borderRadius: 999,
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },

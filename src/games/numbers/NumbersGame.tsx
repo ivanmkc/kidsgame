@@ -27,6 +27,10 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<NumberRound>(() => makeNumberRound(rngRef.current, numSettings, lang));
+  // script toggle must re-skin the CURRENT round's tiles, not wait a round
+  useEffect(() => {
+    setRound(makeNumberRound(rngRef.current, numSettings, lang));
+  }, [script]); // eslint-disable-line react-hooks/exhaustive-deps
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -89,7 +93,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
               testID="numbers-script"
               accessibilityRole="button"
               accessibilityLabel="Switch numeral script"
-              style={{ backgroundColor: numSettings.useHan ? '#FFE9B8' : 'white', borderRadius: 12, borderWidth: 2, borderColor: '#E8C97A', paddingVertical: 6, paddingHorizontal: 10 }}
+              style={{ backgroundColor: numSettings.useHan ? '#FFE9B8' : 'white', borderRadius: 12, borderWidth: 2, borderColor: '#E8C97A', paddingVertical: 11, paddingHorizontal: 12, minHeight: 44, justifyContent: 'center' }}
             >
               <Text style={{ fontFamily: fonts.display, fontSize: 14, color: colors.ink }}>{numSettings.useHan ? '一二三' : '123'}</Text>
             </Pressable>
