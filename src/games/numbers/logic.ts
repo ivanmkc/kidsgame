@@ -48,9 +48,9 @@ export function settingsForNumbers(
   // Non-EN skips 0 — the number tables in lang.ts start at 1, so speaking
   // "0" would fall back to raw arabic.
   const min = lang === 'en' ? 0 : 1;
-  if (difficulty === 'easy')   return { rounds: 8,  tiles: 5, min, max: 5,  useHan: false };
+  if (difficulty === 'easy')   return { rounds: 8,  tiles: 5, min: useHan ? 1 : min, max: 5,  useHan };
   if (difficulty === 'hard')   return { rounds: 12, tiles: 9, min: useHan ? 1 : min, max: 20, useHan };
-  return                              { rounds: 10, tiles: 7, min, max: 9,  useHan: false };
+  return                              { rounds: 10, tiles: 7, min: useHan ? 1 : min, max: 9,  useHan };
 }
 
 export function hanNumeral(n: number): string {
