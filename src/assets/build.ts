@@ -1,2 +1,2 @@
 // GENERATED at ship time
-export const KGB_BUILD = 'f558176-1783414568';
+export const KGB_BUILD = '5628da2-1783418206';

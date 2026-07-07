@@ -236,7 +236,7 @@ RAINBOW_DOORS = {
         "ab": {
             "scene": f"{LUNA} bouncing high off the giant mushroom toward a treetop village at sunset. On the LEFT a long ROPE bridge with flags leading to a treehouse full of lanterns and party balloons, on the RIGHT a small FLUFFY white cloud with a friendly smiling face floating close by. Both large, fully visible, clearly separated",
             "text": "Boing! Luna bounces all the way up to a treetop village. A flaggy rope bridge leads to a lantern party, and a little smiling cloud floats up beside her. What should Luna do?",
-            "choices": [{"label": "Cross the rope bridge", "next": "end_party", "spot": "rope bridge"},
+            "choices": [{"label": "Cross the rope bridge", "next": "end_party_treetop", "spot": "rope bridge"},
                         {"label": "Hop on the friendly cloud", "next": "end_flight", "spot": "fluffy white cloud"}],
         },
         "ba": {
@@ -248,7 +248,7 @@ RAINBOW_DOORS = {
         "bb": {
             "scene": f"{LUNA} swinging up onto a moon balcony made of silver clouds. On the LEFT a big shiny BRASS telescope pointed at the twinkling sky, on the RIGHT a long curly SILVER slide spiraling from the balcony down toward a warm lit meadow far below. Both large, fully visible, clearly separated",
             "text": "The swing carries Luna to a balcony on the moon! A big brass telescope peeks at the stars, and a curly silver slide swooshes all the way home. What should Luna pick?",
-            "choices": [{"label": "Peek through the telescope", "next": "end_stars", "spot": "brass telescope"},
+            "choices": [{"label": "Peek through the telescope", "next": "end_stars_moon", "spot": "brass telescope"},
                         {"label": "Take the silver slide home", "next": "end_slip", "spot": "silver slide"}],
         },
         "end_dizzy": {
@@ -260,6 +260,14 @@ RAINBOW_DOORS = {
             "scene": "LUNA_SLIP_PLACEHOLDER",
             "text": "Wheee — TOO fast! The slippery silver slide plops Luna SPLAT into a puddle. Muddy mane! Straight home for a bath. Oopsie ending!",
             "bad": True,
+        },
+        "end_party_treetop": {
+            "scene": f"{LUNA} dancing at a joyful treetop lantern party just across the rope bridge, treehouse village at sunset, paper lanterns and balloons everywhere, cloud sheep and star bunnies dancing along",
+            "text": "Across the bridge, the treetop party is ON! Lanterns, balloons, and dancing till the stars peek out. Best. Bridge. Ever! The End!",
+        },
+        "end_stars_moon": {
+            "scene": f"{LUNA} at the big brass telescope on the silver moon balcony while glowing baby stars fly up and snuggle around her shoulders and rainbow mane, twinkling night sky",
+            "text": "Through the telescope Luna spots... baby stars! They fly right up to snuggle her on the moon balcony. Goodnight, little stars. The End!",
         },
         "end_party": {
             "scene": f"{LUNA} dancing at a joyful cloud carnival with cloud sheep, star bunnies and rainbow birds, ferris wheel and lanterns glowing, confetti of flower petals",
@@ -306,7 +314,7 @@ TREASURE_TRAIL = {
         "aa": {
             "scene": f"{PIP} in a grand treasure chamber deep in the cave. On the LEFT a GOLDEN door with a big crab-shaped lock glowing softly, on the RIGHT a shimmering WATERFALL curtain hiding something sparkly behind it. Both large, fully visible, clearly separated",
             "text": "A secret chamber! A golden door with a crab-shaped lock... and a shimmery waterfall hiding something sparkly. Where's the treasure, Pip?",
-            "choices": [{"label": "Open the golden crab door", "next": "end_chest", "spot": "golden door"},
+            "choices": [{"label": "Open the golden crab door", "next": "end_chest_cave", "spot": "golden door"},
                         {"label": "Peek behind the waterfall", "next": "end_soggy", "spot": "waterfall"}],
         },
         "ab": {
@@ -318,13 +326,13 @@ TREASURE_TRAIL = {
         "ba": {
             "scene": f"{PIP} on the palm-top lookout platform seeing the whole island. On the LEFT a ZIPLINE with a wooden handle running down toward an old friendly shipwreck on the beach, on the RIGHT a springy COCONUT catapult made of bent palm and vines loaded with one coconut. Both large, fully visible, clearly separated",
             "text": "From the top, Pip sees everything — even an old shipwreck on the beach! A zipline zooms right to it. And... is that a coconut catapult? Choose, Pip!",
-            "choices": [{"label": "Ride the zipline", "next": "end_chest", "spot": "zipline"},
+            "choices": [{"label": "Ride the zipline", "next": "end_chest_wreck", "spot": "zipline"},
                         {"label": "Boing the coconut catapult", "next": "end_boing", "spot": "coconut catapult"}],
         },
         "bb": {
             "scene": f"{PIP} landing with a soft thump on the deck of a friendly old shipwreck. On the LEFT the captain's big round SHIP WHEEL with a paw-print carved in the middle, on the RIGHT a colorful PARROT on a perch wearing a tiny pirate hat, squawking happily. Both large, fully visible, clearly separated",
             "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' Who should Pip see?",
-            "choices": [{"label": "Spin the captain's wheel", "next": "end_chest", "spot": "ship wheel"},
+            "choices": [{"label": "Spin the captain's wheel", "next": "end_chest_wreck", "spot": "ship wheel"},
                         {"label": "Say hi to the parrot", "next": "end_friends", "spot": "parrot"}],
         },
         "end_soggy": {
@@ -337,9 +345,13 @@ TREASURE_TRAIL = {
             "text": "BOING! The coconut catapult flings Pip aaaall the way back to the start of the beach. Sandy bottom. Zero treasure. Oopsie ending!",
             "bad": True,
         },
-        "end_chest": {
-            "scene": f"{PIP} opening a huge overflowing treasure chest of golden dog bones, shiny balls and squeaky toys, golden light on his amazed face, confetti",
-            "text": "X marks the spot! The chest is full of golden bones and squeaky toys — puppy treasure! Pip is RICH! The End!",
+        "end_chest_cave": {
+            "scene": f"{PIP} in a glittering cave treasure chamber, the golden crab-lock door swung wide open behind him, opening a huge treasure chest overflowing with golden dog bones, shiny balls and squeaky toys, crystal light sparkling everywhere",
+            "text": "The crab door swings open — and there it is! A chest of golden bones and squeaky toys, deep in the sparkly cave. X marks the spot! The End!",
+        },
+        "end_chest_wreck": {
+            "scene": f"{PIP} on the deck of the friendly old shipwreck, an opened treasure chest overflowing with golden dog bones and squeaky toys beside the captain's wheel, the parrot in a tiny pirate hat cheering, turquoise sea behind",
+            "text": "Right there on the pirate ship — the treasure chest! Golden bones, squeaky toys, and a cheering parrot. X marks the spot! The End!",
         },
         "end_splash": {
             "scene": f"{PIP} splashing joyfully in the turquoise lagoon with a crab, a parrot and rainbow bubbles everywhere, treasure map floating like a little boat",

@@ -41,4 +41,6 @@ yarn-error.*
 /android
 __pycache__/
 *.pyc
-.claude/
+.claude/worktrees/
+.claude/settings.local.json
+audit_out/

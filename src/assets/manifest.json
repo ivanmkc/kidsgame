@@ -3123,7 +3123,7 @@
           "choices": [
             {
               "label": "Cross the rope bridge",
-              "next": "end_party",
+              "next": "end_party_treetop",
               "hot": {
                 "x": 140,
                 "y": 300,
@@ -3179,7 +3179,7 @@
           "choices": [
             {
               "label": "Peek through the telescope",
-              "next": "end_stars",
+              "next": "end_stars_moon",
               "hot": {
                 "x": 34,
                 "y": 37,
@@ -3226,6 +3226,14 @@
           "image": "story/doors_end_slip.png",
           "text": "Wheee \u2014 TOO fast! The slippery silver slide plops Luna SPLAT into a puddle. Muddy mane! Straight home for a bath. Oopsie ending!",
           "bad": true
+        },
+        "end_party_treetop": {
+          "image": "story/doors_end_party_treetop.png",
+          "text": "Across the bridge, the treetop party is ON! Lanterns, balloons, and dancing till the stars peek out. Best. Bridge. Ever! The End!"
+        },
+        "end_stars_moon": {
+          "image": "story/doors_end_stars_moon.png",
+          "text": "Through the telescope Luna spots... baby stars! They fly right up to snuggle her on the moon balcony. Goodnight, little stars. The End!"
         }
       }
     },
@@ -3323,7 +3331,7 @@
           "choices": [
             {
               "label": "Open the golden crab door",
-              "next": "end_chest",
+              "next": "end_chest_cave",
               "hot": {
                 "x": 0,
                 "y": 0,
@@ -3379,7 +3387,7 @@
           "choices": [
             {
               "label": "Ride the zipline",
-              "next": "end_chest",
+              "next": "end_chest_wreck",
               "hot": {
                 "x": 122,
                 "y": 564,
@@ -3407,7 +3415,7 @@
           "choices": [
             {
               "label": "Spin the captain's wheel",
-              "next": "end_chest",
+              "next": "end_chest_wreck",
               "hot": {
                 "x": 15,
                 "y": 44,
@@ -3429,10 +3437,6 @@
             }
           ]
         },
-        "end_chest": {
-          "image": "story/trail_end_chest.png",
-          "text": "X marks the spot! The chest is full of golden bones and squeaky toys \u2014 puppy treasure! Pip is RICH! The End!"
-        },
         "end_splash": {
           "image": "story/trail_end_splash.png",
           "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah \u2014 but it's close!) The End!"
@@ -3450,6 +3454,14 @@
           "image": "story/trail_end_boing.png",
           "text": "BOING! The coconut catapult flings Pip aaaall the way back to the start of the beach. Sandy bottom. Zero treasure. Oopsie ending!",
           "bad": true
+        },
+        "end_chest_cave": {
+          "image": "story/trail_end_chest_cave.png",
+          "text": "The crab door swings open \u2014 and there it is! A chest of golden bones and squeaky toys, deep in the sparkly cave. X marks the spot! The End!"
+        },
+        "end_chest_wreck": {
+          "image": "story/trail_end_chest_wreck.png",
+          "text": "Right there on the pirate ship \u2014 the treasure chest! Golden bones, squeaky toys, and a cheering parrot. X marks the spot! The End!"
         }
       }
     }
