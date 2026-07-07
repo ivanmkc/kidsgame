@@ -10,6 +10,7 @@ import { makeRng } from '../../rng';
 import { colors, fonts, shadows  } from '../../theme';
 import { saySequence, sfx } from '../../sound';
 import { NumberRound, makeNumberRound, settingsForNumbers } from './logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -35,6 +36,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
+  useWinLine(won, t(lang, 'win.numbers'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
 

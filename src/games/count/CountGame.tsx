@@ -12,6 +12,7 @@ import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
 import { CountRound, PRAISE, PROMPTS, countSettings, makeCountRound } from './logic';
 import { spriteLT } from '../quizround/logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -35,6 +36,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  useWinLine(won, t(lang, 'win.count'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.

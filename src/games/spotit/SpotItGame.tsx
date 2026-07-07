@@ -59,7 +59,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
   useSay(locked ? null : 'Tap the picture that is on BOTH cards!');
-  useEffect(() => { if (won) say('Sharp eyes! You spotted them all!'); }, [won]);
+  useEffect(() => { if (won) say(t(lang, 'win.spotit')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
   const mmss = fmtTime(elapsed);

@@ -12,6 +12,7 @@ import { makeRng } from '../../rng';
 import { say, sayThen, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { RHYME_ICONS } from '../language/rhymeAssets';
+import { useWinLine } from '../winlines';
 import {
   SpellRound, SpellTile,
   charLine, decoyAlphabetFor, decoysFor, linesForWord, makeRound,
@@ -50,6 +51,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
 
   const wordCount = gameWordsRef.current.length;
   const won = wordCount > 0 && wordIdx >= wordCount;
+  useWinLine(won, t(lang, 'win.spell', { n: wordCount }));
 
   // Fresh round → speak the intro + slowly-spelled word (chained).
   useEffect(() => {

@@ -12,6 +12,7 @@ import { RHYME_ICONS } from '../language/rhymeAssets';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx } from '../../sound';
+import { useWinLine } from '../winlines';
 import {
   RhymeRound, availableEntries, canPlay, effectiveLang, makeRhymeRound,
   playableFamilies, settingsForRhyme,
@@ -48,6 +49,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = playable && roundIdx >= roundsToWin;
+  useWinLine(won, t(lang, 'win.rhyme'));
   const elapsed = useElapsed(showTimer && !won && playable, timerKey);
   const { width, height } = useWindowDimensions();
 

@@ -11,6 +11,7 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
+import { useWinLine } from '../winlines';
 import {
   CompareRound, FEWER_PROMPT, MORE_PROMPT, PRAISE, Side,
   compareSettings, makeCompareRound,
@@ -36,6 +37,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  useWinLine(won, t(lang, 'win.compare'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const promptFor = (r: CompareRound) => (r.ask === 'more' ? MORE_PROMPT[lang] : FEWER_PROMPT[lang]);

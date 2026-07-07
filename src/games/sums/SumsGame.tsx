@@ -13,6 +13,7 @@ import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx, say } from '../../sound';
 import { PLUS, PRAISE, QUESTION, SumsRound, makeSumsRound, sumsSettings } from './logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -33,6 +34,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
+  useWinLine(won, t(lang, 'win.sums'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Speak "a plus b, how many now?" once per round object (repeat sums still

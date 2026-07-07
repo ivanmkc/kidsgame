@@ -66,7 +66,7 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
   useEffect(() => {
-    if (won) say('Puzzle master! Amazing!');
+    if (won) say(t(lang, 'win.puzzle'));
   }, [won]);
   const { width, height } = useWindowDimensions();
 

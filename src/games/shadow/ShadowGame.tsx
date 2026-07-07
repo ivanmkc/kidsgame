@@ -42,7 +42,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   useSay('Whose shadow is that? Match it!');
-  useEffect(() => { if (won) say('Shadow wizard! You matched them all!'); }, [won]);
+  useEffect(() => { if (won) say(t(lang, 'win.shadow')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   const onPick = (icon: string) => {

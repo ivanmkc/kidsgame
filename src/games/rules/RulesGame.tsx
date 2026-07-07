@@ -13,6 +13,7 @@ import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, saySequence, sfx } from '../../sound';
 import { RulesRound, makeRules, makeRulesRound } from './logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -56,6 +57,7 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
+  useWinLine(won, t(lang, 'win.rules'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Speak the game intro once, then every rule aloud — pre-readers play

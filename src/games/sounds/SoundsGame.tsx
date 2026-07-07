@@ -12,6 +12,7 @@ import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx } from '../../sound';
 import { SoundsRound, makeSoundsRound, settingsForSounds } from './logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -33,6 +34,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
+  useWinLine(won, t(lang, lang === 'en' ? 'win.sounds' : 'win.soundsWords'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
 

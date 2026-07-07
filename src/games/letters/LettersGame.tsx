@@ -10,6 +10,7 @@ import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { say, sfx } from '../../sound';
 import { LetterRound, makeLetterRound, settingsForLetters } from './logic';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -28,6 +29,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
+  useWinLine(won, t(lang, tier === 'kana' ? 'win.lettersKana' : 'win.letters'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
 
