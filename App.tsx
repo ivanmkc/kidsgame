@@ -255,7 +255,7 @@ function Menu({
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
               <Text style={styles.heading}>Kids Game Box</Text>
               <View style={styles.diffRow}>
-                <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} />
+                <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} verbose />
                 <Pressable
                   onPress={onCycleLang}
                   testID="lang-cycle"
@@ -265,8 +265,6 @@ function Menu({
                 >
                   <Text style={styles.diffText}>{LANGS.find((l) => l.id === lang)?.emoji} {LANGS.find((l) => l.id === lang)?.label}</Text>
                 </Pressable>
-                <InstallChip />
-                <ShareChip />
                 <Pressable
                   onPress={toggleMute}
                   testID="sound-toggle"
@@ -274,7 +272,7 @@ function Menu({
                   accessibilityLabel={muted ? 'Turn sound on' : 'Turn sound off'}
                   style={[styles.diffChip, styles.soundChip]}
                 >
-                  <Text style={styles.diffText}>{muted ? '🔇' : '🔊'}</Text>
+                  <Text style={styles.diffText}>{muted ? '🔇 Muted' : '🔊 Sound'}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => {
@@ -288,7 +286,7 @@ function Menu({
                   accessibilityLabel="Two player mode"
                   style={[styles.diffChip, styles.soundChip, twoPlayer && styles.diffChipOn]}
                 >
-                  <Text style={[styles.diffText, twoPlayer && styles.diffTextOn]}>👯</Text>
+                  <Text style={[styles.diffText, twoPlayer && styles.diffTextOn]}>👯 2 Players{twoPlayer ? ' ✓' : ''}</Text>
                 </Pressable>
               </View>
             </View>
@@ -325,6 +323,15 @@ function Menu({
             </Reveal>
           ))}
         </View>
+        <Reveal delay={240}>
+          <View style={styles.grownups}>
+            <Text style={styles.grownupsHead}>For grown-ups 🧑‍🍼</Text>
+            <View style={styles.grownupsRow}>
+              <InstallChip />
+              <ShareChip />
+            </View>
+          </View>
+        </Reveal>
       </ScrollView>
     </AppBackground>
   );
@@ -551,8 +558,8 @@ function InstallChip() {
   };
   return (
     <>
-      <Pressable onPress={onPress} testID="install-app" accessibilityRole="button" accessibilityLabel="Add to home screen" style={[styles.diffChip, styles.soundChip]}>
-        <Text style={styles.diffText}>📲</Text>
+      <Pressable onPress={onPress} testID="install-app" accessibilityRole="button" accessibilityLabel="Add to home screen" style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
+        <Text style={styles.grownupsBtnText}>📲 Add to Home Screen</Text>
       </Pressable>
       {showIosHelp ? (
         <View style={styles.iosHelp} testID="install-ios-help">
@@ -582,8 +589,8 @@ function ShareChip() {
   };
   return (
     <>
-      <Pressable onPress={onPress} testID="share-app" accessibilityRole="button" accessibilityLabel="Share with other parents" style={[styles.diffChip, styles.soundChip]}>
-        <Text style={styles.diffText}>{copied ? '\u2705' : '\ud83d\udce4'}</Text>
+      <Pressable onPress={onPress} testID="share-app" accessibilityRole="button" accessibilityLabel="Share with other parents" style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
+        <Text style={styles.grownupsBtnText}>{copied ? '\u2705 Link copied!' : '\ud83d\udce4 Share with Parents'}</Text>
       </Pressable>
       {copied ? (
         <View style={styles.iosHelp}><Text style={styles.iosHelpText}>Link copied!</Text></View>
@@ -628,7 +635,7 @@ const styles = StyleSheet.create({
   logo: { width: 104, height: 104 },
   logoSmall: { width: 72, height: 72 },
   heading: { fontSize: 36, fontFamily: fonts.display, color: colors.ink },
-  diffRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
+  diffRow: { flexDirection: 'row', gap: 8, marginTop: 6, flexWrap: 'wrap', justifyContent: 'center' },
   diffChip: {
     borderRadius: 14,
     paddingHorizontal: 14,
@@ -638,6 +645,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   soundChip: { paddingHorizontal: 10 },
+  grownups: { alignItems: 'center', marginTop: 26, marginBottom: 10, gap: 8 },
+  grownupsHead: { fontFamily: fonts.displayMed, fontSize: 15, color: colors.inkSoft },
+  grownupsRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center' },
+  grownupsBtn: {
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: colors.blush,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  grownupsBtnText: { fontFamily: fonts.displayMed, fontSize: 14, color: colors.ink },
   diffChipOn: { backgroundColor: colors.gold },
   diffText: { fontSize: 14, fontFamily: fonts.body, color: colors.inkSoft },
   diffTextOn: { color: colors.ink },
