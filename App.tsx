@@ -42,7 +42,7 @@ import { DiffScene, baseImage, manifest } from './src/manifest';
 import { KGB_BUILD } from './src/assets/build';
 import { DifficultyFilter, difficultyOf, loadFilter, nextFilter, saveFilter } from './src/difficulty';
 import { useTwoPlayer } from './src/multiplayer';
-import { isMuted, say, setMuted, sfx, stopNarration, setSpeechLang } from './src/sound';
+import { isMuted, say, setMuted, sfx, setSpeechLang, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
 
@@ -94,7 +94,10 @@ export default function App() {
   const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
-  useEffect(() => { stopNarration(); track('view'); }, [route]);
+  // nav.navigate/popstate cancel the previous screen's narration synchronously
+  // (before React commits) — see src/nav.ts. Doing it here in an after-mount
+  // effect races the child's mount-effect say() and silences round 1.
+  useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
   const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums'];
   // A stale/mistyped hash must never strand a kid on a blank page.
@@ -219,6 +222,7 @@ function Menu({
     const m = !muted;
     setMuted(m);
     setMutedState(m);
+    if (m) stopNarration(); // 🔇 must silence the CURRENT voice too
     if (!m) sfx.good();
   };
   const { width, height } = useWindowDimensions();
