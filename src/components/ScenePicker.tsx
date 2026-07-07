@@ -68,8 +68,9 @@ export function ScenePicker({ title, options, onPick, onSurprise, filterChip }: 
 
 // One button, tap to cycle All -> Easy -> Medium -> Hard. Lives on the home
 // header AND inside level pickers so the filter travels with the kid.
-export function FilterCycleChip({ filter, onCycle }: { filter: DifficultyFilter; onCycle: () => void }) {
+export function FilterCycleChip({ filter, onCycle, verbose }: { filter: DifficultyFilter; onCycle: () => void; verbose?: boolean }) {
   const cur = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
+  const label = verbose ? `${cur.emoji} ${cur.id === 'all' ? 'All levels' : `${cur.label} levels`}` : `${cur.emoji} ${cur.label}`;
   return (
     <Pressable
       onPress={onCycle}
@@ -78,7 +79,7 @@ export function FilterCycleChip({ filter, onCycle }: { filter: DifficultyFilter;
       accessibilityLabel={`Difficulty: ${cur.label}. Tap to change`}
       style={({ pressed }) => [styles.filterChip, shadows.soft, pressed && styles.pressed]}
     >
-      <Text style={styles.filterText}>{cur.emoji} {cur.label}</Text>
+      <Text style={styles.filterText}>{label}</Text>
     </Pressable>
   );
 }
