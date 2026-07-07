@@ -78,7 +78,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   useSay(coop && scene && !won ? `${MP_PLAYERS[turn].name}'s turn!` : null);
   useSay(scene ? (coop ? null : 'Find all the hidden things!') : 'Where do you want to search?');
   useEffect(() => {
-    if (won && !coop) say('Super detective! You found everything!');
+    if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Gentle auto-hint: 15s with no find → pulse one random unfound target

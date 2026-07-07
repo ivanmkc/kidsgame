@@ -42,7 +42,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   const showTimer = settingsFor(difficulty).timer && mode !== '2p';
   const won = matched.length * 2 === board.length;
   useSay(duel ? null : 'Flip the cards and find the pairs!');
-  useEffect(() => { if (won && !duel) say('Amazing memory! You matched them all!'); }, [won]);
+  useEffect(() => { if (won && !duel) say(t(lang, 'win.memory')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
 
   // Turn halo pulse — restarted whenever the turn changes.

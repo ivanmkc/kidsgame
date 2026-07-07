@@ -111,7 +111,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
     return () => clearInterval(iv);
   }, [ready, sceneId, expectedAssets]);
   useEffect(() => {
-    if (won) say('Eagle eyes! You found every difference!');
+    if (won) say(t(lang, 'win.diff'));
   }, [won]);
   const showRound = ready || forceReady;
   const showTimer = settingsFor(effDifficulty).timer;
