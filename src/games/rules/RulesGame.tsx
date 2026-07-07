@@ -9,7 +9,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { sfx, useSay } from '../../sound';
+import { say, saySequence, sfx } from '../../sound';
 import { RulesRound, makeRules, makeRulesRound } from './logic';
 
 interface Props {
@@ -46,9 +46,21 @@ export function RulesGame({ onHome, difficulty }: Props) {
   const won = roundIdx >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
-  useSay(won ? null : round.isRecall
-    ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
-    : round.rule.label);
+  // Speak the game intro once, then every rule aloud — pre-readers play
+  // entirely by ear here.
+  const introDone = useRef(false);
+  useEffect(() => {
+    if (won) return;
+    const line = round.isRecall
+      ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
+      : round.rule.label;
+    if (!introDone.current) {
+      introDone.current = true;
+      saySequence(['Rule Time! Do what the rule says as fast as you can.', line]);
+    } else {
+      say(line);
+    }
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
     if (won || tapped.includes(i)) return;

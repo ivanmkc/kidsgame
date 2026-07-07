@@ -56,6 +56,28 @@ import { VOICE } from './assets/voice';
 
 let narration: HTMLAudioElement | null = null;
 
+// Browsers block audio before the first user gesture, so a deep link's
+// opening narration would die silently. Remember what we tried to say and
+// replay it the moment the kid first touches the screen.
+let audioUnlocked = false;
+let pendingNarration: string[] | null = null;
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  const onFirstGesture = () => {
+    audioUnlocked = true;
+    window.removeEventListener('pointerdown', onFirstGesture, true);
+    window.removeEventListener('touchstart', onFirstGesture, true);
+    window.removeEventListener('keydown', onFirstGesture, true);
+    if (pendingNarration) {
+      const p = pendingNarration;
+      pendingNarration = null;
+      saySequence(p);
+    }
+  };
+  window.addEventListener('pointerdown', onFirstGesture, true);
+  window.addEventListener('touchstart', onFirstGesture, true);
+  window.addEventListener('keydown', onFirstGesture, true);
+}
+
 /** Fade the current narration out fast (~250ms) — screen switches must
  *  not carry a voice from the previous game. */
 export function stopNarration(): void {
@@ -76,7 +98,7 @@ export function stopNarration(): void {
 export function saySequence(texts: string[]): void {
   const rest = texts.filter(Boolean);
   if (!rest.length) return;
-  say(rest[0]);
+  say(rest[0], rest);
   if (rest.length > 1 && narration) {
     const cur = narration;
     cur.addEventListener('ended', () => {
@@ -89,7 +111,7 @@ export function saySequence(texts: string[]): void {
 /** Read instructions aloud for pre-readers. Pre-rendered SoTA clips
  *  (Gemini TTS, generated offline) play when available; Web Speech only
  *  covers strings that slipped the generator. */
-export function say(text: string): void {
+export function say(text: string, sequence?: string[]): void {
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined') return;
   const spoken = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
   try {
@@ -99,13 +121,18 @@ export function say(text: string): void {
     if (clip && window.Audio) {
       narration = new window.Audio(`voice/${clip}`);
       narration.volume = 0.85;
-      void narration.play().catch(() => { /* pre-gesture: ignore */ });
+      narration.play().then(() => { audioUnlocked = true; }).catch(() => {
+        // blocked pre-gesture: replay the whole line-up on first touch
+        if (!audioUnlocked) pendingNarration = sequence ?? [text];
+      });
       return;
     }
     if (!window.speechSynthesis) return;
+    if (!audioUnlocked) pendingNarration = sequence ?? [text];
     const u = new SpeechSynthesisUtterance(spoken);
     u.rate = 0.92;
     u.pitch = 1.12;
+    u.onstart = () => { audioUnlocked = true; if (pendingNarration?.[0] === text) pendingNarration = null; };
     window.speechSynthesis.speak(u);
   } catch { /* audio unavailable: stay silent */ }
 }

@@ -6,6 +6,7 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { SCENE_AR } from '../../manifest';
 import { manifest } from '../../manifest';
 import { allSceneOptions } from '../sceneOptions';
+import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
@@ -28,12 +29,24 @@ interface Placed {
 
 const BACKDROPS = allSceneOptions('all');
 
+// Sticker drawer categories (Infinity Nikki-style): one tab per bucket so
+// nothing ever needs a scroll marathon. Buckets mirror the ones kids
+// already know from Rule Time / Odd One Out.
+const TRAY_TABS: { id: string; emoji: string; name: string }[] = [
+  { id: 'dressup', emoji: '👗', name: 'Dress-Up' },
+  { id: 'animals', emoji: '🐾', name: 'Animals' },
+  { id: 'nature', emoji: '🌈', name: 'Nature' },
+  { id: 'food', emoji: '🍎', name: 'Food' },
+  { id: 'things', emoji: '🚗', name: 'Toys' },
+];
+
 // Free-play toy mode: no win state, no timer — just decorate a scene with
 // stickers. Tap a tray sticker to drop it, drag to move, double-tap to pop.
 export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Props) {
   const backdrops = BACKDROPS;
   const picked = backdrops.find((b) => b.id === sceneId) ?? null;
   const [placed, setPlaced] = useState<Placed[]>([]);
+  const [tab, setTab] = useState('dressup');
   const nextKey = useRef(1);
 
   const popSticker = useCallback((key: number) => {
@@ -71,8 +84,11 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
   }
 
   const ar = SCENE_AR;
-  const trayH = 96;
-  const stageW = Math.min(width - 24, (height - 84 - trayH - 24) * ar, 1100);
+  const trayItems: string[] = tab === 'dressup' ? (manifest.dressup ?? []) : (ICON_CATEGORIES[tab] ?? []);
+  const itemsPerRow = Math.max(6, Math.floor(Math.min(width - 24, 1100) / 74));
+  const trayRows = Math.max(1, Math.ceil(trayItems.length / itemsPerRow));
+  const trayH = 46 + trayRows * 72;
+  const stageW = Math.min(width - 24, (height - 84 - trayH - 40) * ar, 1100);
   const stageH = stageW / ar;
 
   const addSticker = (icon: string, at?: { x: number; y: number }) => {
@@ -128,8 +144,23 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
             />
           ))}
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ maxHeight: trayH, width: '100%' }} contentContainerStyle={styles.tray}>
-          {[...(manifest.dressup ?? []), ...manifest.spotit.icons].map((icon) => (
+        <View style={styles.tabRow}>
+          {TRAY_TABS.map((t) => (
+            <Pressable
+              key={t.id}
+              onPress={() => { sfx.tap(); setTab(t.id); }}
+              testID={`sticker-tab-${t.id}`}
+              accessibilityLabel={`${t.name} stickers`}
+              accessibilityRole="button"
+              style={[styles.tabChip, shadows.soft, tab === t.id && styles.tabChipOn]}
+            >
+              <Text style={styles.tabEmoji}>{t.emoji}</Text>
+              <Text style={[styles.tabLabel, tab === t.id && styles.tabLabelOn]}>{t.name}</Text>
+            </Pressable>
+          ))}
+        </View>
+        <View style={styles.tray}>
+          {trayItems.map((icon) => (
             <TrayItem
               key={icon}
               icon={icon}
@@ -144,7 +175,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
               }}
             />
           ))}
-        </ScrollView>
+        </View>
         <Text style={styles.hint}>Drag a sticker into the picture · drag to move · double-tap to pop it!</Text>
       </View>
       {ghost ? (
@@ -278,10 +309,26 @@ const DraggableSticker = React.memo(function DraggableSticker({
 const styles = StyleSheet.create({
   wrap: { flex: 1, alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 8 },
   stage: { borderRadius: 22, overflow: 'hidden', backgroundColor: colors.card, borderWidth: 5, borderColor: colors.card },
-  tray: { flexDirection: 'row', gap: 10, paddingHorizontal: 8, alignItems: 'center' },
+  tray: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', maxWidth: 1100 },
+  tabRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  tabChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.paper,
+    borderRadius: 999,
+    borderWidth: 3,
+    borderColor: colors.blush,
+    paddingVertical: 5,
+    paddingHorizontal: 12,
+  },
+  tabChipOn: { backgroundColor: colors.gold, borderColor: colors.gold },
+  tabEmoji: { fontSize: 18 },
+  tabLabel: { fontFamily: fonts.displayMed, fontSize: 13, color: colors.inkSoft },
+  tabLabelOn: { color: colors.ink },
   trayItem: {
-    width: 72,
-    height: 72,
+    width: 64,
+    height: 64,
     borderRadius: 18,
     backgroundColor: colors.paper,
     borderWidth: 3,

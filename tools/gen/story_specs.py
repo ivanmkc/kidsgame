@@ -60,7 +60,7 @@ WHISPERING_HOUSE = {
         },
         "aa": {
             "scene": f"{MILO} at the top of the stairs in a dusty attic corridor, moonlight stripes through shutters, an old music box on a table glowing softly, a door at the end rattling",
-            "text": "Upstairs, a music box plays all by itself... and the door at the end of the hall is RATTLING.",
+            "text": "Upstairs, a music box plays all by itself... and the door at the end of the hall RATTLES. Then a soft voice purrs: 'Milo? Is that you, little one?' It's Great-Grandcat!",
             "scare": {"spot": "the rattling door at the end of the hall", "pop": "a joyful old ghost-grey cat in a nightcap bursting through with open arms",
                       "reveal": "It's Great-Grandcat Whiskers! 'Visitors! Finally!' he laughs. He knows where the key is...", "sting": "thunder", "delay": 2000},
             "choices": [{"label": "Hug Great-Grandcat 💜", "next": "end_family"},
@@ -68,7 +68,7 @@ WHISPERING_HOUSE = {
         },
         "ab": {
             "scene": f"{MILO} in a grand dark library, books floating gently off shelves, a big armchair facing away with something's tail visible, whispering sounds all around",
-            "text": "In the library the whispers are LOUD now. The big chair creaks. Something's tail twitches behind it...",
+            "text": "In the library the whispers are LOUD now. The big chair creaks. Something's tail twitches behind it... and a kind voice hoots: 'Who-o-o wants a story?'",
             "scare": {"spot": "the big armchair facing away", "pop": "a wide-eyed owl librarian in tiny spectacles spinning around with a book",
                       "reveal": "The whisperers are owls! It's their midnight book club. 'Shhh,' says the owl, smiling.", "sting": "thunder", "delay": 1800},
             "choices": [{"label": "Join story time 📖", "next": "end_owls"},
@@ -76,7 +76,7 @@ WHISPERING_HOUSE = {
         },
         "ba": {
             "scene": f"{MILO} in a stone cellar full of glowing jars of preserves, shadows dancing on walls, one giant shadow of a monster cast on the far wall from something small behind a shelf",
-            "text": "The cellar glows with a hundred little jars. But on the wall — a HUGE monster shadow rises!",
+            "text": "The cellar glows with a hundred little jam jars. A HUGE monster shadow rises on the wall! But look closer... it's a teeny-tiny mouse in a chef's hat, holding jam toast.",
             "scare": {"spot": "the shelf casting the giant monster shadow", "pop": "a tiny proud mouse in a chef hat holding a candle, taking a bow",
                       "reveal": "The giant monster is... a tiny chef mouse and his candle! He offers Milo blackberry jam.", "sting": "thunder", "delay": 1900},
             "choices": [{"label": "Share the jam 🫙", "next": "end_feast"},
@@ -84,7 +84,7 @@ WHISPERING_HOUSE = {
         },
         "bb": {
             "scene": f"{MILO} inside a moonlit greenhouse of silver plants, vines swaying with no wind, a tall shape draped in a white sheet standing among the pots",
-            "text": "The greenhouse plants sway... but there is no wind. And that tall white shape was NOT there before.",
+            "text": "The greenhouse plants sway... but there is no wind. And that tall white shape was NOT there before. It giggles a friendly little giggle. Could it be... a Garden Phantom?",
             "scare": {"spot": "the tall shape draped in a white sheet", "pop": "a tall friendly heron wearing the sheet like a cape, striking a heroic pose",
                       "reveal": "A heron in a bedsheet! 'I am the Garden Phantom!' she announces proudly. Nobody is scared.", "sting": "thunder", "delay": 1700},
             "choices": [{"label": "Cheer for the Phantom 🦸", "next": "end_phantom"},
@@ -92,23 +92,23 @@ WHISPERING_HOUSE = {
         },
         "end_family": {
             "scene": f"{MILO} and a ghost-grey old cat in a nightcap having midnight tea by candlelight in the attic, warm and cozy, storm visible through window",
-            "text": "Milo and Great-Grandcat share midnight tea and stories until the storm passes. The End!",
+            "text": "Milo and Great-Grandcat share midnight tea and stories until the storm passes. And peeking out of the teapot — grandma's key! The End!",
         },
         "end_key": {
             "scene": f"{MILO} walking out the front gate holding an ornate golden key glowing warmly, and in the lit window behind him a gentle shadowy figure waving goodbye",
-            "text": "Milo found grandma's key! And as he leaves... something in the window waves goodbye. The End?",
+            "text": "Milo asked so nicely that his new friend fetched grandma's key! And as he leaves... something in the window waves goodbye. The End?",
         },
         "end_owls": {
             "scene": f"{MILO} curled among owls in tiny spectacles around a glowing storybook in the library, cozy candlelight",
-            "text": "Milo stays for owl story time. The spooky house isn't spooky at all — just full of readers. The End!",
+            "text": "Milo stays for owl story time. The spooky house isn't spooky at all — just full of readers. And Grandpa Owl's bookmark? It's grandma's key! The End!",
         },
         "end_feast": {
             "scene": f"{MILO} and a chef mouse feasting on jam and bread atop a barrel in the glowing cellar, jars lighting the scene like lanterns",
-            "text": "A midnight jam feast with Chef Mouse! Milo's whiskers are purple with blackberry. The End!",
+            "text": "A midnight jam feast with Chef Mouse! Milo's whiskers are sticky with strawberry. And Chef Mouse knows JUST where grandma's key is. The End!",
         },
         "end_phantom": {
             "scene": f"{MILO} marching in a proud little parade behind a heron wearing a bedsheet cape through the moonlit garden, hedgehogs following",
-            "text": "The Garden Phantom leads a midnight parade, and Milo is the lantern-bearer. The End!",
+            "text": "The Garden Phantom leads a midnight parade — hedgehogs in a line! — and Milo is the lantern-bearer. And look what the Phantom found in the flowers: grandma's key! The End!",
         },
     },
 }
@@ -132,7 +132,7 @@ SCARE_SCHOOL = {
         },
         "a": {
             "scene": f"{MO} at a school desk in a classroom where {CAST.split(', Fangsley')[0]}) writes 'BOO 101' gestures on a chalkboard, other little monsters practicing scary faces",
-            "text": "In Scaring Class, everyone practices their scary face. Mo's scary face just looks... adorable. The supply closet wobbles.",
+            "text": "In Scaring Class, Principal Growlbert teaches BOO 101. Mo's scary face just looks... adorable. The supply closet wobbles — someone tiny in there is giggling too!",
             "scare": {"spot": "the wobbling supply closet", "pop": "Blobbina the round jiggly pink blob monster with long eyelashes bouncing out mid-jiggle",
                       "reveal": "BLOB! Blobbina jiggles so hard everyone falls off their chairs laughing. 'Ten points!' says the Principal.", "sting": "boing", "delay": 0},
             "choices": [{"label": "Practice a tiny boo 😮", "next": "aa"},
@@ -156,11 +156,11 @@ SCARE_SCHOOL = {
         },
         "ab": {
             "scene": f"{MO} and Blobbina the pink blob monster practicing scares in front of funhouse mirrors, their reflections stretched hilariously",
-            "text": "Blobbina's secret: 'Being scary is just being YOU, but louder.' The funhouse mirror behind them darkens...",
+            "text": "Blobbina's secret: 'Being scary is just being YOU — your way!' The funhouse mirror behind them darkens...",
             "scare": {"spot": "the darkened funhouse mirror", "pop": "Principal Growlbert the huge shaggy purple monster with glasses stepping out of the mirror-dark holding a juice box",
                       "reveal": "It's just Principal Growlbert on juice break! His shadow is scarier than he is. 'Carry on!'", "sting": "boing", "delay": 0},
-            "choices": [{"label": "Be Mo, but louder! 📣", "next": "end_boo"},
-                        {"label": "Scare the Principal back 😈", "next": "end_growl"}],
+            "choices": [{"label": "Try the teeny-tiniest boo 🤫", "next": "end_boo"},
+                        {"label": "Scare Principal Growlbert back 😈", "next": "end_growl"}],
         },
         "ba": {
             "scene": f"{MO} wrapped gently in Sir Stretch's noodle arms like a swing, being swung across the lunchroom while monsters cheer",
@@ -180,19 +180,19 @@ SCARE_SCHOOL = {
         },
         "end_boo": {
             "scene": f"{MO} on the gym stage saying a tiny boo into a big microphone while every cast monster faints backward dramatically with happy faces, confetti falling",
-            "text": "Mo whispers the tiniest 'boo' ever... and the whole school faints — from laughing! Scariest Sound trophy: MO! The End!",
+            "text": "At the big talent show, Mo whispers the tiniest 'boo' ever... and the whole school tumbles over laughing! The giggly closet ghost giggles loudest of all. Scariest Sound winner: MO! The End!",
         },
         "end_team": {
             "scene": f"{MO} and all the cast monsters taking a group bow on stage under a banner of scribbled monster drawings, arms and noodle-arms around each other",
-            "text": "Scares are better together! Mo and the whole class take a bow. Best first day ever. The End!",
+            "text": "Scares are better together! The whole school piles onto the big stage, and Mo and the class take a bow. Best first day ever. The End!",
         },
         "end_growl": {
             "scene": f"Principal Growlbert the huge purple monster leaping in surprise spilling his juice box while tiny {MO} says boo behind him, teachers applauding",
-            "text": "Mo scares the PRINCIPAL! Growlbert laughs so hard his glasses fog up. Instant legend. The End!",
+            "text": "Mo sneaks up and — BOO! Principal Growlbert jumps so high his juice goes flying! He laughs until his glasses fog up. Instant legend. The End!",
         },
         "end_pudding": {
             "scene": f"{MO} and the cast monsters in a joyful pudding food-fight in the lunchroom, pudding everywhere, everyone laughing",
-            "text": "The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!",
+            "text": "The tiptoeing trash can tips over — it was FULL of pudding! The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!",
         },
     },
 }
@@ -257,7 +257,7 @@ RAINBOW_DOORS = {
         },
         "end_cozy": {
             "scene": f"{LUNA} curled up by a crackling fireplace inside the cozy cloud cottage, sipping cocoa with marshmallows with a kindly old cloud sheep in spectacles",
-            "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Cloud. Luna purrs like a kitten. The End!",
+            "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Sheep. Luna purrs like a kitten. The End!",
         },
         "end_stars": {
             "scene": f"{LUNA} asleep in the moonbeam nest with glowing baby stars snuggled all around her like a blanket, one baby star on her head",
@@ -308,7 +308,7 @@ TREASURE_TRAIL = {
         "ba": {
             "scene": f"{PIP} on the palm-top lookout platform seeing the whole island. On the LEFT a ZIPLINE with a wooden handle running down toward an old friendly shipwreck on the beach, on the RIGHT a springy COCONUT catapult made of bent palm and vines loaded with one coconut. Both large, fully visible, clearly separated",
             "text": "From the top, Pip sees everything — even an old shipwreck on the beach! A zipline zooms right to it. And... is that a coconut catapult? Choose, Pip!",
-            "choices": [{"label": "Zip to the shipwreck", "next": "end_chest", "spot": "zipline"},
+            "choices": [{"label": "Ride the zipline", "next": "end_chest", "spot": "zipline"},
                         {"label": "Boing the coconut catapult", "next": "end_splash", "spot": "coconut catapult"}],
         },
         "bb": {
