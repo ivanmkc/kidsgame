@@ -3,10 +3,12 @@ import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'r
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { ScenePicker, SceneOption } from '../../components/ScenePicker';
+import { FilterCycleChip, ScenePicker, SceneOption } from '../../components/ScenePicker';
 import { allSceneOptions } from '../sceneOptions';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, settingsFor, nextFilter } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -17,15 +19,18 @@ interface Props {
   onHome: () => void;
   difficulty: Difficulty;
   filter?: DifficultyFilter;
+  onFilter?: (f: DifficultyFilter) => void;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
+  lang?: Lang;
 }
 
 
 
-export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
+export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const options = allSceneOptions(filter);
+  const allOptions = allSceneOptions('all').map((o) => ({ ...o, dimmed: !options.some((v) => v.id === o.id) }));
   const picked = options.find((o) => o.id === sceneId) ?? null;
   const settings = settingsFor(difficulty);
   const cols = settings.puzzleCols;
@@ -63,12 +68,14 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
 
   if (!picked) {
     return (
-      <GameShell title="Picture Puzzle" subtitle="Choose a picture" onBack={onHome}>
+      <GameShell title={t(lang, 'shell.puzzle.title')} subtitle={t(lang, 'shell.puzzle.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
-          title="Which picture do you want to solve?"
-          options={options}
+          title={t(lang, 'picker.puzzle')}
+          lang={lang}
+          options={allOptions}
           onPick={onPickScene}
           onSurprise={() => onPickScene(options[Math.floor(Math.random() * options.length)].id)}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
         />
       </GameShell>
     );
@@ -101,9 +108,11 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
 
   return (
     <GameShell
-      title="Picture Puzzle"
-      subtitle={`${picked.name} — tap two pieces to swap them`}
+      title={t(lang, 'shell.puzzle.title')}
+      subtitle={t(lang, 'shell.puzzle.subPlay', { name: picked.name })}
       onBack={onBackToPicker}
+      backKind="picker"
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="puzzle-timer" /> : null}
@@ -115,7 +124,7 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
             accessibilityRole="button"
             style={({ pressed }) => [styles.peekBtn, shadows.soft, pressed && { opacity: 0.8 }]}
           >
-            <Text style={styles.peekText}>🖼️ Peek</Text>
+            <Text style={styles.peekText}>{t(lang, 'puzzle.peek')}</Text>
           </Pressable>
         </View>
       }
@@ -158,16 +167,17 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
             />
           ) : null}
         </View>
-        <Text style={styles.hint}>Tap one piece, then tap another to swap them!</Text>
+        <Text style={styles.hint}>{t(lang, 'puzzle.hint')}</Text>
       </View>
       <WinOverlay
         visible={won}
-        message={'Puzzle master! Amazing!'}
+        message={t(lang, 'win.puzzle')}
         onNext={() => {
           const ids = options.map((o) => o.id);
           onPickScene(ids[(ids.indexOf(picked.id) + 1) % ids.length]);
         }}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

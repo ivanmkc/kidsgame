@@ -7,6 +7,8 @@ import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor, nextFilter } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng, sample } from '../../rng';
@@ -23,9 +25,10 @@ interface Props {
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
+  lang?: Lang;
 }
 
-export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPlayerEnabled, sceneId, onPickScene, onBackToPicker }: Props) {
+export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPlayerEnabled, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
 
@@ -91,13 +94,14 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   if (!scene) {
     return (
-      <GameShell title="Hidden Objects" subtitle="Choose a scene" onBack={onHome}>
+      <GameShell title={t(lang, 'shell.hidden.title')} subtitle={t(lang, 'shell.hidden.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
-          title="Where do you want to search?"
+          title={t(lang, 'picker.hidden')}
+          lang={lang}
           options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged, level: h.level, dimmed: !inFilter(h.level, filter) }))}
           onPick={(id) => { if (mode !== null) onPickScene(id); }}
           onSurprise={() => { if (mode !== null) onPickScene(visible[Math.floor(Math.random() * visible.length)].id); }}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
         />
         {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
       </GameShell>
@@ -138,9 +142,11 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   return (
     <GameShell
-      title="Hidden Objects"
-      subtitle={`${scene.name} — can you find all of these?`}
+      title={t(lang, 'shell.hidden.title')}
+      subtitle={t(lang, 'shell.hidden.subPlay', { name: scene.name })}
       onBack={onBackToPicker}
+      backKind="picker"
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {coop ? (
@@ -193,9 +199,10 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={coop ? 'Great teamwork! You found them all together! 🦊🐰' : 'Super detective! You found everything!'}
+        message={coop ? t(lang, 'win.hiddenCoop') : t(lang, 'win.hidden')}
         onNext={() => onPickScene(nextSceneId(manifest.hidden, visible, scene.id))}
         onHome={onHome}
+        lang={lang}
       />
       {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
     </GameShell>

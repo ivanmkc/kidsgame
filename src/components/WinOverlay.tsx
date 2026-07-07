@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Lang } from '../lang';
+import { t } from '../i18n';
 import { sfx } from '../sound';
 import { colors, darken, fonts, shadows } from '../theme';
 import { ChunkyButton } from './ChunkyButton';
@@ -16,9 +18,11 @@ interface Props {
   onNext: () => void;
   onHome: () => void;
   nextLabel?: string;
+  /** Selects the localized default button labels (Next Level / All Games). */
+  lang?: Lang;
 }
 
-export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextLabel }: Props) {
+export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextLabel, lang = 'en' }: Props) {
   const scale = useRef(new Animated.Value(0.3)).current;
   const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
   // Tap shield: a kid hammering the final answer would otherwise punch
@@ -71,8 +75,8 @@ export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextL
         <Text style={styles.message}>{message}</Text>
         {sub ? <Text style={styles.sub}>{sub}</Text> : null}
         {stats ?? null}
-        <ChunkyButton label={nextLabel ?? 'Next Level ▶️'} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={224} />
-        <ChunkyButton label="All Games 🏠" color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
+        <ChunkyButton label={nextLabel ?? t(lang, 'overlay.next')} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={224} />
+        <ChunkyButton label={t(lang, 'overlay.allGames')} color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
       </Animated.View>
     </Pressable>
   );

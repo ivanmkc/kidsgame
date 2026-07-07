@@ -6,6 +6,8 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng } from '../../rng';
@@ -17,9 +19,10 @@ interface Props {
   onHome: () => void;
   difficulty: Difficulty;
   twoPlayerEnabled?: boolean;
+  lang?: Lang;
 }
 
-export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
+export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }: Props) {
   const settings = settingsFor(difficulty);
   const pairs = settings.memoryPairs;
   // All hooks unconditionally at top; ModePicker is conditional JSX in the
@@ -97,8 +100,8 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
       if (a.icon === b.icon) {
         setMatched((m) => [...m, a.icon]);
         setFaceUp([]);
+        sfx.good();
         if (duel) {
-          sfx.good();
           const scorer = duelState.turn;
           setMatchedBy((mb) => ({ ...mb, [a.icon]: scorer }));
           setDuelState((d) => duelResolve(d, true));
@@ -172,9 +175,10 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
 
   return (
     <GameShell
-      title="Memory Match"
-      subtitle={`Find all ${pairs} pairs`}
+      title={t(lang, 'shell.memory.title')}
+      subtitle={t(lang, 'shell.memory.sub', { n: pairs })}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="memory-timer" /> : null}
@@ -209,7 +213,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
             <PlayerChip player={1} count={duelState.pairs[1]} active={duelState.turn === 1 && !won} testID="memory-duel-chip-1" />
           </View>
         ) : (
-          <Text style={styles.moves} testID="memory-moves">Moves: {moves}</Text>
+          <Text style={styles.moves} testID="memory-moves">{t(lang, 'memory.moves', { n: moves })}</Text>
         )}
       </View>
       <WinOverlay
@@ -217,10 +221,11 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
         message={
           duel
             ? winner === 'tie'
-              ? `It's a tie! You both found ${duelState.pairs[0]} pairs!`
-              : `${MP_PLAYERS[winner].name} wins! Great game, both of you!`
-            : 'Amazing memory! You matched them all!'
+              ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
+              : t(lang, 'win.memoryWinner', { name: MP_PLAYERS[winner].name })
+            : t(lang, 'win.memory')
         }
+        lang={lang}
         stats={
           duel ? (
             <View style={styles.winStats} testID="memory-win-stats">
@@ -233,7 +238,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled }: Props) {
             </View>
           ) : undefined
         }
-        onNext={reset} nextLabel={duel ? 'Rematch ▶️' : 'Next Round ▶️'}
+        onNext={reset} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
         onHome={onHome}
       />
       {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}

@@ -3,6 +3,8 @@ import { Animated, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text,
 import { DRESSUP_ICONS, SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
+import { Lang } from '../../lang';
+import { t, UIKey } from '../../i18n';
 import { SCENE_AR } from '../../manifest';
 import { manifest } from '../../manifest';
 import { allSceneOptions } from '../sceneOptions';
@@ -16,6 +18,7 @@ interface Props {
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
+  lang?: Lang;
 }
 
 interface Placed {
@@ -32,17 +35,19 @@ const BACKDROPS = allSceneOptions('all');
 // Sticker drawer categories (Infinity Nikki-style): one tab per bucket so
 // nothing ever needs a scroll marathon. Buckets mirror the ones kids
 // already know from Rule Time / Odd One Out.
-const TRAY_TABS: { id: string; emoji: string; name: string }[] = [
-  { id: 'dressup', emoji: '👗', name: 'Dress-Up' },
-  { id: 'animals', emoji: '🐾', name: 'Animals' },
-  { id: 'nature', emoji: '🌈', name: 'Nature' },
-  { id: 'food', emoji: '🍎', name: 'Food' },
-  { id: 'things', emoji: '🚗', name: 'Toys' },
+// TRAY_TABS references i18n keys instead of raw labels so each language
+// picks up its own translation at render time.
+const TRAY_TABS: { id: string; emoji: string; nameKey: UIKey }[] = [
+  { id: 'dressup', emoji: '👗', nameKey: 'sticker.tab.dressup' },
+  { id: 'animals', emoji: '🐾', nameKey: 'sticker.tab.animals' },
+  { id: 'nature', emoji: '🌈', nameKey: 'sticker.tab.nature' },
+  { id: 'food', emoji: '🍎', nameKey: 'sticker.tab.food' },
+  { id: 'things', emoji: '🚗', nameKey: 'sticker.tab.things' },
 ];
 
 // Free-play toy mode: no win state, no timer — just decorate a scene with
 // stickers. Tap a tray sticker to drop it, drag to move, double-tap to pop.
-export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Props) {
+export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const backdrops = BACKDROPS;
   const picked = backdrops.find((b) => b.id === sceneId) ?? null;
   const [placed, setPlaced] = useState<Placed[]>([]);
@@ -72,9 +77,10 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
 
   if (!picked) {
     return (
-      <GameShell title="Sticker Party" subtitle="Pick a place to decorate" onBack={onHome}>
+      <GameShell title={t(lang, 'shell.sticker.title')} subtitle={t(lang, 'shell.sticker.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
-          title="Where's the party?"
+          title={t(lang, 'picker.sticker')}
+          lang={lang}
           options={backdrops}
           onPick={(id) => { setPlaced([]); onPickScene(id); }}
           onSurprise={() => { setPlaced([]); onPickScene(backdrops[Math.floor(Math.random() * backdrops.length)].id); }}
@@ -109,18 +115,20 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
 
   return (
     <GameShell
-      title="Sticker Party"
-      subtitle={`${picked.name} — decorate it your way!`}
+      title={t(lang, 'shell.sticker.title')}
+      subtitle={t(lang, 'shell.sticker.subPlay', { name: picked.name })}
       onBack={onBackToPicker}
+      backKind="picker"
+      lang={lang}
       right={
         <Pressable
-          onPress={() => { sfx.wrong(); setPlaced([]); }}
+          onPress={() => { sfx.flip(); setPlaced([]); }}
           testID="sticker-clear"
           accessibilityLabel="Clear all stickers"
           accessibilityRole="button"
           style={({ pressed }) => [styles.clearBtn, shadows.soft, pressed && { opacity: 0.8 }]}
         >
-          <Text style={styles.clearText}>🧹 Clear</Text>
+          <Text style={styles.clearText}>{t(lang, 'sticker.clear')}</Text>
         </Pressable>
       }
     >
@@ -145,19 +153,22 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
           ))}
         </View>
         <View style={styles.tabRow}>
-          {TRAY_TABS.map((t) => (
-            <Pressable
-              key={t.id}
-              onPress={() => { sfx.tap(); setTab(t.id); }}
-              testID={`sticker-tab-${t.id}`}
-              accessibilityLabel={`${t.name} stickers`}
-              accessibilityRole="button"
-              style={[styles.tabChip, shadows.soft, tab === t.id && styles.tabChipOn]}
-            >
-              <Text style={styles.tabEmoji}>{t.emoji}</Text>
-              <Text style={[styles.tabLabel, tab === t.id && styles.tabLabelOn]}>{t.name}</Text>
-            </Pressable>
-          ))}
+          {TRAY_TABS.map((tt) => {
+            const name = t(lang, tt.nameKey);
+            return (
+              <Pressable
+                key={tt.id}
+                onPress={() => { sfx.tap(); setTab(tt.id); }}
+                testID={`sticker-tab-${tt.id}`}
+                accessibilityLabel={`${name} stickers`}
+                accessibilityRole="button"
+                style={[styles.tabChip, shadows.soft, tab === tt.id && styles.tabChipOn]}
+              >
+                <Text style={styles.tabEmoji}>{tt.emoji}</Text>
+                <Text style={[styles.tabLabel, tab === tt.id && styles.tabLabelOn]}>{name}</Text>
+              </Pressable>
+            );
+          })}
         </View>
         <View style={styles.tray}>
           {trayItems.map((icon) => (
@@ -176,7 +187,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker }: Pr
             />
           ))}
         </View>
-        <Text style={styles.hint}>Drag a sticker into the picture · drag to move · double-tap to pop it!</Text>
+        <Text style={styles.hint}>{t(lang, 'sticker.hint')}</Text>
       </View>
       {ghost ? (
         <View pointerEvents="none" style={{ position: 'absolute', left: ghost.x - 36, top: ghost.y - 36, width: 72, height: 72, zIndex: 50 }}>

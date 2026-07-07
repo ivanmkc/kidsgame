@@ -7,16 +7,21 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty } from '../../difficulty';
 import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { makeRng } from '../../rng';
-import { say, saySequence, sfx } from '../../sound';
+import { say, sayThen, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { RHYME_ICONS } from '../language/rhymeAssets';
-import { SpellRound, SpellTile, decoysFor, linesForWord, makeRound, pickGameWords, wordPool, wordsPerGame } from './logic';
+import {
+  SpellRound, SpellTile,
+  charLine, decoyAlphabetFor, decoysFor, linesForWord, makeRound,
+  pickGameWords, wordPool, wordsPerGame,
+} from './logic';
 
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
-  lang: Lang; // accepted for menu wiring; English-only per phonics convention
+  lang: Lang; // en → English letters; ja → kana; cmn/yue → hanzi
 }
 
 // Some words come from the rhyme pack — cover both maps in one lookup.
@@ -24,10 +29,11 @@ function iconFor(icon: string): number | undefined {
   return SPOTIT_ICONS[icon] ?? RHYME_ICONS[icon];
 }
 
-export function SpellGame({ onHome, difficulty }: Props) {
+export function SpellGame({ onHome, difficulty, lang }: Props) {
   // All hooks unconditionally at the top — no early returns.
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const pool = useMemo(() => wordPool(SPOTIT_ICONS, RHYME_ICONS), []);
+  const pool = useMemo(() => wordPool(lang, SPOTIT_ICONS, RHYME_ICONS), [lang]);
+  const alphabet = useMemo(() => decoyAlphabetFor(lang, pool), [lang, pool]);
   const totalWords = wordsPerGame(difficulty);
   const decoys = decoysFor(difficulty);
 
@@ -35,13 +41,12 @@ export function SpellGame({ onHome, difficulty }: Props) {
   const gameWordsRef = useRef(pickGameWords(rngRef.current, pool, difficulty));
   const [wordIdx, setWordIdx] = useState(0);
   const [round, setRound] = useState<SpellRound>(() =>
-    makeRound(rngRef.current, gameWordsRef.current[0], decoys),
+    makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
   );
   const [placedIds, setPlacedIds] = useState<number[]>([]); // tile ids in slot order
   const [wrongId, setWrongId] = useState<number | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
-  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const wordCount = gameWordsRef.current.length;
   const won = wordCount > 0 && wordIdx >= wordCount;
@@ -55,33 +60,30 @@ export function SpellGame({ onHome, difficulty }: Props) {
 
   useEffect(() => () => {
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
-    if (advanceTimer.current) clearTimeout(advanceTimer.current);
   }, []);
 
   const filled = placedIds.length;
-  const expected = round.letters[filled];
+  const expected = round.chars[filled];
 
   const onTile = (tile: SpellTile) => {
     if (won || placedIds.includes(tile.id)) return;
-    if (filled >= round.letters.length) return; // guarded during the 1s advance delay
-    if (tile.letter === expected) {
+    if (filled >= round.chars.length) return; // guarded during the 1s advance delay
+    if (tile.char === expected) {
       sfx.good();
-      say(`${expected}!`);
+      say(charLine(expected, round.word.lang));
       const nextPlaced = [...placedIds, tile.id];
       setPlacedIds(nextPlaced);
-      if (nextPlaced.length === round.letters.length) {
+      if (nextPlaced.length === round.chars.length) {
         setCelebrate((c) => c + 1);
         const { done } = linesForWord(round.word);
-        say(done);
-        if (advanceTimer.current) clearTimeout(advanceTimer.current);
-        advanceTimer.current = setTimeout(() => {
+        sayThen([done], () => {
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
-            setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys));
+            setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
             setPlacedIds([]);
           }
           setWordIdx(nextI);
-        }, 1700);
+        });
       }
     } else {
       sfx.wrong();
@@ -98,30 +100,31 @@ export function SpellGame({ onHome, difficulty }: Props) {
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
     setPlacedIds([]);
-    setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys));
+    setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
     setGameKey((k) => k + 1);
   };
 
   const { width, height } = useWindowDimensions();
-  const slotCount = round.letters.length;
+  const slotCount = round.chars.length;
   const tileCount = round.tiles.length;
   const bigIcon = Math.min(width * 0.4, height * 0.28, 220);
   const slot = Math.min((Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount, 68);
   const tileSize = Math.min((Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount, 74);
 
-  const placedLetters = placedIds.map((id) => round.tiles.find((t) => t.id === id)?.letter ?? '');
+  const placedChars = placedIds.map((id) => round.tiles.find((t) => t.id === id)?.char ?? '');
 
   return (
     <GameShell
-      title="Word Builder"
-      subtitle="Tap the letters in order to spell the word"
+      title={t(lang, 'shell.spell.title')}
+      subtitle={t(lang, 'shell.spell.sub')}
       onBack={onHome}
+      lang={lang}
       right={<ScoreChip label={`🔤 ${Math.min(wordIdx, wordCount)}/${wordCount}`} testID="spell-score" />}
     >
       <View style={styles.board} key={gameKey}>
         <Pressable
           onPress={() => { sfx.tap(); saySequence([linesForWord(round.word).ask, linesForWord(round.word).spell]); }}
-          accessibilityLabel={`Hear the word ${round.word.en}`}
+          accessibilityLabel={`Hear the word ${round.word.text}`}
           accessibilityRole="button"
           style={({ pressed }) => [styles.iconCard, shadows.soft, pressed && styles.pressed]}
           testID={`spell-word-${round.word.icon}`}
@@ -129,22 +132,23 @@ export function SpellGame({ onHome, difficulty }: Props) {
           {iconFor(round.word.icon) ? (
             <Image source={iconFor(round.word.icon)} style={{ width: bigIcon, height: bigIcon }} resizeMode="contain" />
           ) : (
-            <Text style={styles.iconFallback}>{round.word.en}</Text>
+            <Text style={styles.iconFallback}>{round.word.text}</Text>
           )}
+          {round.word.roman ? <Text style={styles.romanCaption}>{round.word.roman}</Text> : null}
           <Text style={styles.speakerHint}>🔊 Tap to hear again</Text>
         </Pressable>
 
         <View style={[styles.slotRow, { gap: 10 }]}>
-          {round.letters.map((_, i) => {
-            const filledLetter = placedLetters[i];
-            const done = !!filledLetter;
+          {round.chars.map((_, i) => {
+            const filledChar = placedChars[i];
+            const done = !!filledChar;
             return (
               <View
                 key={i}
                 testID={`spell-slot-${i}`}
                 style={[styles.slot, shadows.soft, { width: slot, height: slot * 1.15 }, done && styles.slotDone]}
               >
-                {done ? <Text style={styles.slotText}>{filledLetter}</Text> : null}
+                {done ? <Text style={styles.slotText}>{filledChar}</Text> : null}
                 {done ? <SparkleBurst trigger={`${gameKey}-${wordIdx}-${i}`} count={4} size={11} /> : null}
               </View>
             );
@@ -170,10 +174,11 @@ export function SpellGame({ onHome, difficulty }: Props) {
       {celebrate ? <Confetti count={22} /> : null}
       <WinOverlay
         visible={won}
-        message={`Great spelling! You built ${wordCount} words!`}
+        message={t(lang, 'win.spell', { n: wordCount })}
         onNext={reset}
-        nextLabel={'Play Again ▶️'}
+        nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );
@@ -215,7 +220,7 @@ function LetterTile({
       <Pressable
         onPress={onPress}
         testID={`spell-tile-${tile.id}`}
-        accessibilityLabel={`Letter ${tile.letter}`}
+        accessibilityLabel={`Letter ${tile.char}`}
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.tile,
@@ -224,7 +229,7 @@ function LetterTile({
           pressed && styles.pressed,
         ]}
       >
-        <Text style={styles.tileText}>{tile.letter}</Text>
+        <Text style={styles.tileText}>{tile.char}</Text>
       </Pressable>
     </Animated.View>
   );
@@ -243,6 +248,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   iconFallback: { fontFamily: fonts.display, fontSize: 40, color: colors.ink },
+  romanCaption: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.inkSoft, letterSpacing: 0.5 },
   speakerHint: { fontFamily: fonts.bodyReg, fontSize: 12, color: colors.inkSoft },
   slotRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   slot: {

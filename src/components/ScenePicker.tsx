@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS } from '../assets/images';
 import { DifficultyFilter, FILTERS } from '../difficulty';
+import { Lang } from '../lang';
+import { t, UIKey } from '../i18n';
 import { colors, fonts, shadows } from '../theme';
 
 export interface SceneOption {
@@ -24,7 +26,7 @@ interface Props {
 }
 
 // Pre-game theme chooser: one big tappable card per scene.
-export function ScenePicker({ title, options, onPick, onSurprise, filterChip }: Props) {
+export function ScenePicker({ title, options, onPick, onSurprise, filterChip, lang = 'en' }: Props & { lang?: Lang }) {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <Text style={styles.title}>{title}</Text>
@@ -34,7 +36,7 @@ export function ScenePicker({ title, options, onPick, onSurprise, filterChip }: 
           testID="scene-surprise"
           style={({ pressed }) => [styles.surprise, shadows.soft, pressed && styles.pressed]}
         >
-          <Text style={styles.surpriseText}>🎲 Surprise me!</Text>
+          <Text style={styles.surpriseText}>{t(lang, 'picker.surprise')}</Text>
         </Pressable>
         {filterChip}
       </View>
@@ -68,15 +70,26 @@ export function ScenePicker({ title, options, onPick, onSurprise, filterChip }: 
 
 // One button, tap to cycle All -> Easy -> Medium -> Hard. Lives on the home
 // header AND inside level pickers so the filter travels with the kid.
-export function FilterCycleChip({ filter, onCycle, verbose }: { filter: DifficultyFilter; onCycle: () => void; verbose?: boolean }) {
+export function FilterCycleChip({ filter, onCycle, verbose, lang = 'en' }: { filter: DifficultyFilter; onCycle: () => void; verbose?: boolean; lang?: Lang }) {
   const cur = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
-  const label = verbose ? `${cur.emoji} ${cur.id === 'all' ? 'All levels' : `${cur.label} levels`}` : `${cur.emoji} ${cur.label}`;
+  // Two levels of i18n keys keeps the tables flat: short 'filter.easy' for the
+  // header, verbose 'filter.easyLevels' inside pickers where the extra word
+  // reminds kids they're choosing a level set.
+  const shortKey: UIKey = `filter.${cur.id}` as UIKey;
+  const longKey: UIKey =
+    cur.id === 'all' ? 'filter.allLevels'
+    : cur.id === 'easy' ? 'filter.easyLevels'
+    : cur.id === 'medium' ? 'filter.mediumLevels'
+    : 'filter.hardLevels';
+  const label = verbose
+    ? `${cur.emoji} ${t(lang, longKey)}`
+    : `${cur.emoji} ${t(lang, shortKey)}`;
   return (
     <Pressable
       onPress={onCycle}
       testID="difficulty-cycle"
       accessibilityRole="button"
-      accessibilityLabel={`Difficulty: ${cur.label}. Tap to change`}
+      accessibilityLabel={t(lang, 'a11y.diffCycle', { name: t(lang, shortKey) })}
       style={({ pressed }) => [styles.filterChip, shadows.soft, pressed && styles.pressed]}
     >
       <Text style={styles.filterText}>{label}</Text>

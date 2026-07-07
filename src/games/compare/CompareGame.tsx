@@ -6,9 +6,10 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang, numberWord } from '../../lang';
+import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { say, saySequence, sfx } from '../../sound';
+import { say, sayThen, sfx } from '../../sound';
 import {
   CompareRound, FEWER_PROMPT, MORE_PROMPT, PRAISE, Side,
   compareSettings, makeCompareRound,
@@ -49,16 +50,15 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       setLocked(true);
       const winningSide = round.correctSide === 'left' ? round.left : round.right;
-      saySequence([numberWord(lang, winningSide.count).t, PRAISE[lang]]);
       const nextScore = score + 1;
       setScore(nextScore);
-      if (nextScore < roundsToWin) {
-        setTimeout(() => {
+      sayThen([numberWord(lang, winningSide.count).t, PRAISE[lang]], () => {
+        if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
           setWrongSide(null);
           setLocked(false);
-        }, 900);
-      }
+        }
+      });
     } else {
       sfx.wrong();
       setWrongSide(side);
@@ -83,9 +83,10 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title="More or Less"
-      subtitle={round.ask === 'fewer' ? 'Tap the side with fewer' : 'Tap the side with more'}
+      title={t(lang, 'shell.compare.title')}
+      subtitle={round.ask === 'fewer' ? t(lang, 'shell.compare.subFewer') : t(lang, 'shell.compare.subMore')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="compare-timer" /> : null}
@@ -125,10 +126,11 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Sharp eyes! You compared like a champ!'}
+        message={t(lang, 'win.compare')}
         onNext={reset}
-        nextLabel={'Play Again ▶️'}
+        nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

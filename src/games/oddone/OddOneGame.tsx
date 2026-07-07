@@ -5,6 +5,8 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -15,6 +17,7 @@ import { makeOddOneRound } from './logic';
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  lang?: Lang;
 }
 
 function oddSettings(d: Difficulty): { n: number } {
@@ -24,7 +27,7 @@ function oddSettings(d: Difficulty): { n: number } {
   return { n: 4 };
 }
 
-export function OddOneGame({ onHome, difficulty }: Props) {
+export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const { n } = oddSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -77,13 +80,14 @@ export function OddOneGame({ onHome, difficulty }: Props) {
     150
   );
 
-  const subtitle = 'Find the one that does not belong';
+  const subtitle = t(lang, 'shell.oddone.sub');
 
   return (
     <GameShell
-      title="Odd One Out"
+      title={t(lang, 'shell.oddone.title')}
       subtitle={subtitle}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="oddone-timer" /> : null}
@@ -118,9 +122,10 @@ export function OddOneGame({ onHome, difficulty }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Super spotter! You found them all!'}
-        onNext={reset} nextLabel={'Next Round ▶️'}
+        message={t(lang, 'win.oddone')}
+        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

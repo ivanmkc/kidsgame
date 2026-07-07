@@ -5,6 +5,8 @@ import { ChunkyButton } from '../../components/ChunkyButton';
 import { Confetti } from '../../components/Confetti';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare } from '../../manifest';
 import { say, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
@@ -14,12 +16,13 @@ interface Props {
   sceneId?: string; // story id
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
+  lang?: Lang;
 }
 
 // A narrated picture story where the kid steers: every node is spoken
 // aloud (pre-readers), two big choices branch the tale, four endings per
 // story make replays genuinely different.
-export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Props) {
+export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const stories = manifest.stories ?? [];
   const story = stories.find((s) => s.id === sceneId) ?? null;
   const [nodeId, setNodeId] = useState('start');
@@ -73,9 +76,10 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
 
   if (!story) {
     return (
-      <GameShell title="Story Path" subtitle="Pick a story" onBack={onHome}>
+      <GameShell title={t(lang, 'shell.story.title')} subtitle={t(lang, 'shell.story.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
-          title="Which story shall we read?"
+          title={t(lang, 'picker.story')}
+          lang={lang}
           options={stories.map((s) => ({ id: s.id, name: s.title, image: s.nodes.start.image }))}
           onPick={onPickScene}
           onSurprise={() => stories.length && onPickScene(stories[Math.floor(Math.random() * stories.length)].id)}
@@ -147,7 +151,8 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   const ty = zoomTarget ? (imgH / 2 - zoomTarget.cy) * ZOOM : 0;
 
   return (
-    <GameShell title="Story Path" subtitle={story.title} onBack={onBackToPicker}>
+    <GameShell title={t(lang, 'shell.story.title')} subtitle={story.title} onBack={onBackToPicker}
+      backKind="picker" lang={lang}>
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker]}>
           <Animated.View
@@ -201,7 +206,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
           <View style={styles.choices}>
             {node.bad ? (
               <ChunkyButton
-                label="Oops! Try another way ↩️"
+                label={t(lang, 'story.tryAgain')}
                 color={colors.gold}
                 darkColor={darken(colors.gold)}
                 onPress={goBack}
@@ -210,7 +215,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
               />
             ) : null}
             <ChunkyButton
-              label={node.bad ? 'Start over 📖' : 'The End! Read again 📖'}
+              label={node.bad ? t(lang, 'story.startOver') : t(lang, 'story.readAgain')}
               color={colors.green}
               darkColor={darken(colors.green)}
               onPress={() => { if (!node.bad) sfx.win(); hist.current = []; setNodeId('start'); }}
@@ -218,7 +223,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
               minWidth={230}
             />
             <ChunkyButton
-              label="All Stories 🏠"
+              label={t(lang, 'story.allStories')}
               color={colors.purple}
               darkColor={darken(colors.purple)}
               onPress={onBackToPicker}

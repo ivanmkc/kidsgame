@@ -49,6 +49,12 @@ def _judge_clip(mp4: Path, hero: str, action: str) -> bool:
         frames = [Image.open(p) for p in sorted(Path(td).glob("f_*.png"))]
         if not frames:
             return False
+        if action.startswith("__ending__:"):
+            return ask_yes_no(
+                "These are frames from a short looping ending animation for a kids' storybook. "
+                "Judge YES only if the scene stays composed (nobody leaves frame), characters "
+                "are consistent, motion is gentle/celebratory, and there is no garbled text or "
+                "heavy distortion.", frames)
         return ask_yes_no(
             f"These are frames from a short animation clip, in time order. Does {hero} move to "
             f"perform this action: \"{action}\"? Judge YES only if the hero is clearly the same "
@@ -57,17 +63,25 @@ def _judge_clip(mp4: Path, hero: str, action: str) -> bool:
 
 
 def gen_clip(sid: str, nid: str, idx: int, label: str, spot: str) -> str | None:
-    fname = f"{sid}_{nid}_{idx}.mp4"
+    fname = f"{sid}_{nid}_end.mp4" if idx == -1 else f"{sid}_{nid}_{idx}.mp4"
     if (OUT / fname).exists():
         print(f"  {fname}: exists")
         return f"story-video/{fname}"
     hero_name, hero_desc = HEROES[sid]
     first = (SCENES / f"{sid}_{nid}.png").read_bytes()
     action = label.rstrip("!.")
-    prompt = (f"{hero_desc}. Starting from this exact scene, {hero_name} performs the action: "
-              f"{action} — moving toward and interacting with the {spot}. Gentle storybook "
-              f"animation, soft cheerful movement, the camera follows the hero. Bright "
-              f"children's picture-book style, consistent with the first frame. No text.")
+    if label.startswith("__ending__:"):
+        mood_and_beat = label.split(":", 1)[1]
+        prompt = (f"{hero_desc}. Animate this exact final storybook scene coming alive: "
+                  f"{mood_and_beat}. Small looping-friendly motion — characters sway, "
+                  f"bounce or dance in place, confetti/stars/water drift, nobody leaves "
+                  f"frame, composition stays identical to the first frame throughout. "
+                  f"Bright children's picture-book style. No text.")
+    else:
+        prompt = (f"{hero_desc}. Starting from this exact scene, {hero_name} performs the action: "
+                  f"{action} — moving toward and interacting with the {spot}. Gentle storybook "
+                  f"animation, soft cheerful movement, the camera follows the hero. Bright "
+                  f"children's picture-book style, consistent with the first frame. No text.")
     for attempt in range(2):
         try:
             op = client().models.generate_videos(
@@ -120,12 +134,18 @@ def main() -> None:
                 if "hot" in c:
                     # spot lives in the spec; label carries the action either way
                     jobs.append((st["id"], nid, idx, c["label"]))
+            if not n.get("choices"):
+                # ending nodes: gentle ambient animation of the final scene
+                mood = "comic, bouncy" if n.get("bad") else "joyful, gentle"
+                jobs.append((st["id"], nid, -1,
+                             f"__ending__:{mood}: {n['text'][:120]}"))
     print(f"{len(jobs)} clips to generate")
     from gen.story_specs import RAINBOW_DOORS, TREASURE_TRAIL
     SPECS = {"doors": RAINBOW_DOORS, "trail": TREASURE_TRAIL}
     def run(j):
         sid, nid, idx, label = j
-        spot = SPECS[sid]["nodes"][nid]["choices"][idx].get("spot", "chosen thing")
+        spot = ("" if idx == -1
+                else SPECS[sid]["nodes"][nid]["choices"][idx].get("spot", "chosen thing"))
         return (j, gen_clip(sid, nid, idx, label, spot))
     with ThreadPoolExecutor(2) as ex:
         results = list(ex.map(run, jobs))
@@ -135,7 +155,10 @@ def main() -> None:
         if not path:
             continue
         st = next(s for s in m["stories"] if s["id"] == sid)
-        st["nodes"][nid]["choices"][idx]["video"] = path
+        if idx == -1:
+            st["nodes"][nid]["video"] = path
+        else:
+            st["nodes"][nid]["choices"][idx]["video"] = path
         wired += 1
     MANIFEST.write_text(json.dumps(m, indent=2) + "\n")
     print(f"wired {wired}/{len(jobs)} videos into the manifest")

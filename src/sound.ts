@@ -48,7 +48,7 @@ export const sfx = {
   wrong(volume = 0.4): void { play('wrong', volume); },
   flip(): void { play('flip', 0.35); },
   win(): void { play('win', 0.6); },
-  boing(): void { play('boing', 0.6); },
+  boing(volume = 0.6): void { play('boing', volume); },
   thunder(): void { play('thunder', 0.75); },
 };
 
@@ -74,6 +74,10 @@ function getNarration(): HTMLAudioElement | null {
     narration = new window.Audio();
     narration.preload = 'auto';
     narration.volume = 0.85;
+    // Clips were synthesized at a gentle read-aloud pace; kids process
+    // fine and slow drags — one global knob brings it to natural speed
+    // (pitch is preserved by default in modern browsers).
+    narration.playbackRate = 1.15;
     // A tiny debug hook (e2e tests count 'playing' events) — free to keep
     // in production, easier than re-wiring instrumentation each debug pass.
     narration.addEventListener('playing', () => {
@@ -187,6 +191,7 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
       // gesture) instead of new Audio() (which would need unlocking again).
       a.volume = 0.85;
       a.src = `voice/${clip}`;
+      a.playbackRate = 1.15;
       if (onEnded) {
         a.onended = () => { if (token === currentToken) onEnded(); };
       }
@@ -199,7 +204,7 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
     // Web Speech fallback for lines the pre-render pipeline missed.
     if (!window.speechSynthesis) return;
     const u = new SpeechSynthesisUtterance(spoken);
-    u.rate = 0.92;
+    u.rate = 1.0;
     u.pitch = 1.12;
     u.onstart = () => { audioUnlocked = true; if (pendingNarration?.[0] === text) pendingNarration = null; };
     if (onEnded) u.onend = () => { if (token === currentToken) onEnded(); };
@@ -209,20 +214,36 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
 
 /** Speak several lines in order (story text, then the spoken choice menu).
  *  Any new say()/saySequence()/stopNarration() supersedes the queue. */
-export function saySequence(texts: string[]): void {
+export function saySequence(texts: string[], onDone?: () => void): void {
   const rest = texts.filter(Boolean);
-  if (!rest.length) return;
+  if (!rest.length) { onDone?.(); return; }
   currentToken++;
   const myToken = currentToken;
   if (!audioUnlocked && Platform.OS === 'web' && typeof window !== 'undefined' && !muted) {
     pendingNarration = rest.slice();
   }
   const step = (i: number) => {
-    if (i >= rest.length) return;
-    if (myToken !== currentToken) return; // superseded
+    if (myToken !== currentToken) return; // superseded — no onDone (caller's cap handles it)
+    if (i >= rest.length) { onDone?.(); return; }
     playClip(rest[i], myToken, () => step(i + 1));
   };
   step(0);
+}
+
+/** Speak lines, then run `done` exactly once — for round advances that
+ *  must WAIT for the celebration to finish (a fixed timeout races the
+ *  speech and the next round's prompt cuts it off). Guards: muted or
+ *  non-web fires after a short beat; a hard cap fires even if the clip
+ *  stalls or the sequence is superseded mid-way. */
+export function sayThen(texts: string[], done: () => void, capMs = 9000): void {
+  let fired = false;
+  const fire = () => { if (!fired) { fired = true; done(); } };
+  if (muted || Platform.OS !== 'web' || typeof window === 'undefined') {
+    setTimeout(fire, 600);
+    return;
+  }
+  const cap = setTimeout(fire, capMs);
+  saySequence(texts, () => { clearTimeout(cap); fire(); });
 }
 
 /** Read instructions aloud for pre-readers. Pre-rendered SoTA clips

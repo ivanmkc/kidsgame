@@ -25,8 +25,13 @@ bash tools/ship.sh                        # gated deploy (after audits pass)
 1. Data only — nodes: `scene` (image prompt), `text` (read aloud, short and
    punchy for a 4-year-old), `choices: [{label, next, spot}]`, optional
    `scare {spot,pop,reveal,sting,delay}`, endings may set `bad: True`.
-2. Structure: 2 choices per fork, ≥3 decisions on the shallowest path,
-   ≥3 endings, ≥1 bad ending (text ends "Oopsie ending!", comic not sad —
+2. Structure (raised 2026-07-07, Ivan: books were "too short... less dumb"):
+   2 choices per fork, ≥4 decisions on EVERY path (14-20 nodes), ≥4 endings,
+   ≥1 bad ending. Narrative bar: the hero has a WANT and an obstacle;
+   mid-story consequences carry forward (early item/kindness pays off
+   later); callbacks/motifs; one clever twist per book; endings resolve the
+   want differently per path; prose has wit for the parent reading aloud —
+   no filler beats (text ends "Oopsie ending!", comic not sad —
    muddy mane, flung back to the start — never scary or punishing).
 3. Hotspots: `spot` ≤4 words, color+noun ("round red door"). SAM misses
    wordy phrases and THIN/AMBIENT things (strings, sticks, glass, waterlines,

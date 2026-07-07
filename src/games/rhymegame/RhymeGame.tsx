@@ -6,11 +6,12 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { RHYME_ICONS } from '../language/rhymeAssets';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { saySequence, sfx } from '../../sound';
+import { sayThen, saySequence, sfx } from '../../sound';
 import {
   RhymeRound, availableEntries, canPlay, makeRhymeRound, playableFamilies, settingsForRhyme,
 } from './logic';
@@ -24,7 +25,7 @@ interface Props {
 // Rhyme Time. EN-only in every mode — rhyme is a specifically-English
 // phonics skill, so JA/cmn/yue also see the English game. Tolerates a
 // half-populated RHYME_ICONS atlas (uses only families with ≥2 icons).
-export function RhymeGame({ onHome, difficulty, lang: _lang }: Props) {
+export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin, tiles: tileCount } = settingsForRhyme(difficulty);
   const entries = availableEntries(manifest.spotit.icons);
   const playable = canPlay(entries);
@@ -52,14 +53,13 @@ export function RhymeGame({ onHome, difficulty, lang: _lang }: Props) {
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
-      saySequence(round.confirmLines);
       const nextIdx = roundIdx + 1;
-      setTimeout(() => {
+      sayThen(round.confirmLines, () => {
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(makeRhymeRound(rngRef.current, entries, tileCount, round.target.icon));
         }
-      }, 700);
+      });
     } else {
       sfx.wrong();
       setWrongIdx(i);
@@ -89,9 +89,10 @@ export function RhymeGame({ onHome, difficulty, lang: _lang }: Props) {
 
   return (
     <GameShell
-      title="Rhyme Time"
-      subtitle="Tap the picture that rhymes"
+      title={t(lang, 'shell.rhyme.title')}
+      subtitle={t(lang, 'shell.rhyme.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="rhyme-timer" /> : null}
@@ -108,7 +109,7 @@ export function RhymeGame({ onHome, difficulty, lang: _lang }: Props) {
           <>
             {showComingSoonBanner ? (
               <View style={[styles.banner, shadows.soft]} testID="rhyme-fewer-banner">
-                <Text style={styles.bannerText}>More rhymes coming soon! 🎶</Text>
+                <Text style={styles.bannerText}>{t(lang, 'rhyme.comingSoon')}</Text>
               </View>
             ) : null}
             {round ? (
@@ -144,9 +145,10 @@ export function RhymeGame({ onHome, difficulty, lang: _lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Rhyme master! Great ears!'}
-        onNext={reset} nextLabel={'Play Again ▶️'}
+        message={t(lang, 'win.rhyme')}
+        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

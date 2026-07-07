@@ -18,6 +18,7 @@ import {
 import { SCENE_THUMBS, SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
 import { track } from './src/analytics';
 import { Lang, LANGS, loadLang, nextLang, saveLang } from './src/lang';
+import { t } from './src/i18n';
 import { LettersGame } from './src/games/letters/LettersGame';
 import { NumbersGame } from './src/games/numbers/NumbersGame';
 import { SoundsGame } from './src/games/sounds/SoundsGame';
@@ -26,6 +27,7 @@ import { CountGame } from './src/games/count/CountGame';
 import { CompareGame } from './src/games/compare/CompareGame';
 import { SumsGame } from './src/games/sums/SumsGame';
 import { SpellGame } from './src/games/spell/SpellGame';
+import { FeedbackChip } from './src/components/Feedback';
 import { FilterCycleChip } from './src/components/ScenePicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
@@ -123,7 +125,7 @@ export default function App() {
       {screen === 'menu' && (
         <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} lang={lang} onCycleLang={cycleLang} />
       )}
-      {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} />}
+      {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'diff' && (
         <DiffGame
           onHome={goHome}
@@ -133,6 +135,7 @@ export default function App() {
           sceneId={param}
           onPickScene={(id) => navigate(`diff/${id}`)}
           onBackToPicker={() => navigate('diff')}
+          lang={lang}
         />
       )}
       {screen === 'hidden' && (
@@ -145,6 +148,7 @@ export default function App() {
           sceneId={param}
           onPickScene={(id) => navigate(`hidden/${id}`)}
           onBackToPicker={() => navigate('hidden')}
+          lang={lang}
         />
       )}
       {screen === 'sticker' && (
@@ -153,6 +157,7 @@ export default function App() {
           sceneId={param}
           onPickScene={(id) => navigate(`sticker/${id}`)}
           onBackToPicker={() => navigate('sticker')}
+          lang={lang}
         />
       )}
       {screen === 'story' && (
@@ -161,49 +166,61 @@ export default function App() {
           sceneId={param}
           onPickScene={(id) => navigate(`story/${id}`)}
           onBackToPicker={() => navigate('story')}
+          lang={lang}
         />
       )}
-      {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} />}
-      {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} />}
-      {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} />}
-      {screen === 'rules' && <RulesGame onHome={goHome} difficulty={difficulty} />}
+      {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
+      {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'rules' && <RulesGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'puzzle' && (
         <PuzzleGame
           onHome={goHome}
           difficulty={difficulty}
           filter={filter}
+          onFilter={pickFilter}
           sceneId={param}
           onPickScene={(id) => navigate(`puzzle/${id}`)}
           onBackToPicker={() => navigate('puzzle')}
+          lang={lang}
         />
       )}
     </SafeAreaView>
   );
 }
 
-const WORD_CARDS = [
-  { route: 'letters', color: '#E85D75', title: 'Letter Hunt', blurb: 'Find the letter — quick, before it hides!', preview: 'icons0' },
-  { route: 'sounds', color: '#5DA9E8', title: 'First Sounds', blurb: 'Which one starts with that sound?', preview: 'icons8' },
-  { route: 'rhyme', color: '#9C6FD6', title: 'Rhyme Time', blurb: 'Frog... dog! Find what rhymes!', preview: 'icons13' },
-  { route: 'spell', color: '#4FB06D', title: 'Word Builder', blurb: 'Tap the letters to build the word!', preview: 'icons20' },
+// Card catalogue: route (drives testID + navigation) + color + preview key
+// + i18n key root. Titles/blurbs resolve at render time via t(lang, ...) so
+// the language chip flips the whole menu without a remount. `key` is
+// strongly typed so `card.${key}.title` composes to a valid UIKey.
+type CardKey =
+  | 'letters' | 'sounds' | 'rhyme' | 'spell'
+  | 'count' | 'numbers' | 'compare' | 'sums'
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story';
+interface CardDef { route: string; color: string; key: CardKey; preview: string }
+const WORD_CARDS: CardDef[] = [
+  { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
+  { route: 'sounds', color: '#5DA9E8', key: 'sounds', preview: 'icons8' },
+  { route: 'rhyme', color: '#9C6FD6', key: 'rhyme', preview: 'icons13' },
+  { route: 'spell', color: '#4FB06D', key: 'spell', preview: 'icons20' },
 ];
-const NUMBER_CARDS = [
-  { route: 'count', color: '#E8A24F', title: 'Count With Me', blurb: 'Tap and count every little critter!', preview: 'icons0' },
-  { route: 'numbers', color: '#3E9BB8', title: 'Number Hunt', blurb: 'Find the number — one, two, three!', preview: 'icons8' },
-  { route: 'compare', color: '#D66FA8', title: 'More or Less', blurb: 'Which side has more treats?', preview: 'icons13' },
-  { route: 'sums', color: '#7A6FD6', title: 'Little Sums', blurb: 'One more hops in — how many now?', preview: 'icons20' },
+const NUMBER_CARDS: CardDef[] = [
+  { route: 'count', color: '#E8A24F', key: 'count', preview: 'icons0' },
+  { route: 'numbers', color: '#3E9BB8', key: 'numbers', preview: 'icons8' },
+  { route: 'compare', color: '#D66FA8', key: 'compare', preview: 'icons13' },
+  { route: 'sums', color: '#7A6FD6', key: 'sums', preview: 'icons20' },
 ];
-const GAME_CARDS = [
-  { route: 'spotit', color: colors.red, title: 'Spot It!', blurb: 'Find the matching picture on both cards', preview: 'icons0' },
-  { route: 'diff', color: colors.teal, title: 'Find the Difference', blurb: 'What changed between the two pictures?', preview: 'diff' },
-  { route: 'hidden', color: colors.purple, title: 'Hidden Objects', blurb: 'Hunt for the secret things in the scene', preview: 'hidden' },
-  { route: 'memory', color: colors.green, title: 'Memory Match', blurb: 'Flip the cards and find the pairs', preview: 'icons8' },
-  { route: 'puzzle', color: colors.gold, title: 'Picture Puzzle', blurb: 'Put the mixed-up picture back together', preview: 'puzzle' },
-  { route: 'shadow', color: colors.ink, title: 'Shadow Match', blurb: 'Whose shadow is that? Match it!', preview: 'icons13' },
-  { route: 'oddone', color: '#E8874F', title: 'Odd One Out', blurb: 'Which one does not belong?', preview: 'icons20' },
-  { route: 'rules', color: '#3E9BB8', title: 'Rule Time!', blurb: 'Follow the rule — tap the right ones!', preview: 'rules' },
-  { route: 'sticker', color: '#D66FA8', title: 'Sticker Party', blurb: 'Decorate scenes with silly stickers!', preview: 'icons0' },
-  { route: 'story', color: '#7A6FD6', title: 'Story Path', blurb: 'Pick what happens next in the tale!', preview: 'story' },
+const GAME_CARDS: CardDef[] = [
+  { route: 'spotit', color: colors.red, key: 'spotit', preview: 'icons0' },
+  { route: 'diff', color: colors.teal, key: 'diff', preview: 'diff' },
+  { route: 'hidden', color: colors.purple, key: 'hidden', preview: 'hidden' },
+  { route: 'memory', color: colors.green, key: 'memory', preview: 'icons8' },
+  { route: 'puzzle', color: colors.gold, key: 'puzzle', preview: 'puzzle' },
+  { route: 'shadow', color: colors.ink, key: 'shadow', preview: 'icons13' },
+  { route: 'oddone', color: '#E8874F', key: 'oddone', preview: 'icons20' },
+  { route: 'rules', color: '#3E9BB8', key: 'rules', preview: 'rules' },
+  { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
+  { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
 ];
 
 function Menu({
@@ -257,14 +274,14 @@ function Menu({
           <View style={styles.headerRow}>
             <BobbingLogo small={isLandscape} />
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
-              <Text style={styles.heading}>Kids Game Box</Text>
+              <Text style={styles.heading}>{t(lang, 'menu.heading')}</Text>
               <View style={styles.diffRow}>
-                <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} verbose />
+                <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} verbose lang={lang} />
                 <Pressable
                   onPress={onCycleLang}
                   testID="lang-cycle"
                   accessibilityRole="button"
-                  accessibilityLabel={`Language: ${LANGS.find((l) => l.id === lang)?.label}. Tap to change`}
+                  accessibilityLabel={t(lang, 'a11y.langCycle', { name: LANGS.find((l) => l.id === lang)?.label ?? '' })}
                   style={[styles.diffChip, styles.soundChip]}
                 >
                   <Text style={styles.diffText}>{LANGS.find((l) => l.id === lang)?.emoji} {LANGS.find((l) => l.id === lang)?.label}</Text>
@@ -273,24 +290,26 @@ function Menu({
                   onPress={toggleMute}
                   testID="sound-toggle"
                   accessibilityRole="button"
-                  accessibilityLabel={muted ? 'Turn sound on' : 'Turn sound off'}
+                  accessibilityLabel={muted ? t(lang, 'a11y.soundOn') : t(lang, 'a11y.soundOff')}
                   style={[styles.diffChip, styles.soundChip]}
                 >
-                  <Text style={styles.diffText}>{muted ? '🔇 Muted' : '🔊 Sound'}</Text>
+                  <Text style={styles.diffText}>{muted ? t(lang, 'chip.muted') : t(lang, 'chip.sound')}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => {
                     const on = !twoPlayer;
                     onToggleTwoPlayer(on);
                     sfx.tap();
+                    // Spoken cue stays English on purpose — voice clips are keyed
+                    // per language elsewhere; this trigger only speaks in EN.
                     if (on) say('Two player mode is on!');
                   }}
                   testID="mp-toggle"
                   accessibilityRole="button"
-                  accessibilityLabel="Two player mode"
+                  accessibilityLabel={t(lang, 'a11y.twoPlayer')}
                   style={[styles.diffChip, styles.soundChip, twoPlayer && styles.diffChipOn]}
                 >
-                  <Text style={[styles.diffText, twoPlayer && styles.diffTextOn]}>👯 2 Players{twoPlayer ? ' ✓' : ''}</Text>
+                  <Text style={[styles.diffText, twoPlayer && styles.diffTextOn]}>{twoPlayer ? t(lang, 'chip.twoPlayersOn') : t(lang, 'chip.twoPlayers')}</Text>
                 </Pressable>
               </View>
             </View>
@@ -301,8 +320,8 @@ function Menu({
             <Reveal key={g.route} delay={120 + i * 80}>
               <GameCard
                 color={g.color}
-                title={g.title}
-                blurb={g.blurb}
+                title={t(lang, `card.${g.key}.title` as const)}
+                blurb={t(lang, `card.${g.key}.blurb` as const)}
                 onPress={() => onNavigate(g.route)}
                 testID={`menu-${g.route}`}
                 preview={previewFor(g.preview)}
@@ -311,28 +330,29 @@ function Menu({
             </Reveal>
           ))}
         </View>
-        <Reveal delay={200}><Text style={styles.sectionHead}>Word Games 🔤</Text></Reveal>
+        <Reveal delay={200}><Text style={styles.sectionHead}>{t(lang, 'menu.word')}</Text></Reveal>
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {WORD_CARDS.map((g, i) => (
             <Reveal key={g.route} delay={160 + i * 80}>
-              <GameCard color={g.color} title={g.title} blurb={g.blurb} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
         </View>
-        <Reveal delay={220}><Text style={styles.sectionHead}>Number Games 🔢</Text></Reveal>
+        <Reveal delay={220}><Text style={styles.sectionHead}>{t(lang, 'menu.number')}</Text></Reveal>
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {NUMBER_CARDS.map((g, i) => (
             <Reveal key={g.route} delay={180 + i * 80}>
-              <GameCard color={g.color} title={g.title} blurb={g.blurb} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
         </View>
         <Reveal delay={240}>
           <View style={styles.grownups}>
-            <Text style={styles.grownupsHead}>For grown-ups 🧑‍🍼</Text>
+            <Text style={styles.grownupsHead}>{t(lang, 'menu.grownups')}</Text>
             <View style={styles.grownupsRow}>
-              <InstallChip />
-              <ShareChip />
+              <InstallChip lang={lang} />
+              <ShareChip lang={lang} />
+              <FeedbackChip lang={lang} />
             </View>
           </View>
         </Reveal>
@@ -541,7 +561,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function InstallChip() {
+function InstallChip({ lang }: { lang: Lang }) {
   const [showIosHelp, setShowIosHelp] = useState(false);
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
   const standalone = window.matchMedia?.('(display-mode: standalone)').matches
@@ -562,25 +582,27 @@ function InstallChip() {
   };
   return (
     <>
-      <Pressable onPress={onPress} testID="install-app" accessibilityRole="button" accessibilityLabel="Add to home screen" style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
-        <Text style={styles.grownupsBtnText}>📲 Add to Home Screen</Text>
+      <Pressable onPress={onPress} testID="install-app" accessibilityRole="button" accessibilityLabel={t(lang, 'install.iosHint')} style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
+        <Text style={styles.grownupsBtnText}>{t(lang, 'grownups.install')}</Text>
       </Pressable>
       {showIosHelp ? (
         <View style={styles.iosHelp} testID="install-ios-help">
-          <Text style={styles.iosHelpText}>Tap Share {'\u2191'} then {'\u201C'}Add to Home Screen{'\u201D'}</Text>
+          <Text style={styles.iosHelpText}>{t(lang, 'install.iosHelp')}</Text>
         </View>
       ) : null}
     </>
   );
 }
 
-function ShareChip() {
+function ShareChip({ lang }: { lang: Lang }) {
   const [copied, setCopied] = useState(false);
   if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
   const onPress = async () => {
     sfx.tap();
     track('share_tap');
     const url = 'https://ivanmkc.github.io/kidsgame/';
+    // OS share sheet preview stays English on purpose \u2014 that text goes to
+    // the recipient's chat/mail app, not to the current viewer's UI.
     const data = { title: 'Kids Game Box', text: 'Free picture games and talking storybooks for little kids!', url };
     try {
       if (navigator.share) await navigator.share(data);
@@ -593,11 +615,11 @@ function ShareChip() {
   };
   return (
     <>
-      <Pressable onPress={onPress} testID="share-app" accessibilityRole="button" accessibilityLabel="Share with other parents" style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
-        <Text style={styles.grownupsBtnText}>{copied ? '\u2705 Link copied!' : '\ud83d\udce4 Share with Parents'}</Text>
+      <Pressable onPress={onPress} testID="share-app" accessibilityRole="button" accessibilityLabel={t(lang, 'grownups.share')} style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}>
+        <Text style={styles.grownupsBtnText}>{copied ? t(lang, 'grownups.copied') : t(lang, 'grownups.share')}</Text>
       </Pressable>
       {copied ? (
-        <View style={styles.iosHelp}><Text style={styles.iosHelpText}>Link copied!</Text></View>
+        <View style={styles.iosHelp}><Text style={styles.iosHelpText}>{t(lang, 'share.copied')}</Text></View>
       ) : null}
     </>
   );

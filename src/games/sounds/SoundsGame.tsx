@@ -6,10 +6,11 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { saySequence, sfx } from '../../sound';
+import { sayThen, saySequence, sfx } from '../../sound';
 import { SoundsRound, makeSoundsRound, settingsForSounds } from './logic';
 
 interface Props {
@@ -44,16 +45,15 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
-      // Say the confirmation chime, then advance a beat later so the kid
-      // hears the reward before the next prompt lands.
-      saySequence(round.confirmLines);
+      // Wait for the confirmation chime to finish before advancing — otherwise
+      // the next round's prompt say() cancels the celebration mid-word.
       const nextIdx = roundIdx + 1;
-      setTimeout(() => {
+      sayThen(round.confirmLines, () => {
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount, round.tiles[i].icon));
         }
-      }, 650);
+      });
     } else {
       sfx.wrong();
       setWrongIdx(i);
@@ -81,9 +81,10 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={lang === 'en' ? 'First Sounds' : 'First Words'}
-      subtitle={lang === 'en' ? 'Tap the picture that starts with the sound' : 'Tap the picture you hear'}
+      title={lang === 'en' ? t(lang, 'shell.sounds.titleEn') : t(lang, 'shell.sounds.titleWords')}
+      subtitle={lang === 'en' ? t(lang, 'shell.sounds.subEn') : t(lang, 'shell.sounds.subWord')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="sounds-timer" /> : null}
@@ -119,9 +120,10 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={lang === 'en' ? 'Sound spotter! Great listening!' : 'Word spotter! Great listening!'}
-        onNext={reset} nextLabel={'Play Again ▶️'}
+        message={lang === 'en' ? t(lang, 'win.sounds') : t(lang, 'win.soundsWords')}
+        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

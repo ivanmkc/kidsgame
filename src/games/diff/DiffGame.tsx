@@ -7,6 +7,8 @@ import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { baseImage, manifest } from '../../manifest';
 import { makeRng, sample } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -19,9 +21,10 @@ interface Props {
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
+  lang?: Lang;
 }
 
-export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker }: Props) {
+export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
@@ -29,6 +32,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   const [forceReady, setForceReady] = useState(false);
   const wrapRef = useRef<View>(null);
   const [hintId, setHintId] = useState<string | null>(null);
+  const [hintRegion, setHintRegion] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,6 +54,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   useEffect(() => {
     setFound([]);
     setHintId(null);
+    setHintRegion(null);
     setReady(false);
     setForceReady(false);
     armHintTimer();
@@ -109,13 +114,14 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 
   if (!scene) {
     return (
-      <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
+      <GameShell title={t(lang, 'shell.diff.title')} subtitle={t(lang, 'shell.diff.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
-          title="Where do you want to play?"
+          title={t(lang, 'picker.diff')}
+          lang={lang}
           options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: baseImage(d), flagged: d.flagged, level: d.level, dimmed: !inFilter(d.level, filter) }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
         />
       </GameShell>
     );
@@ -138,22 +144,48 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
     if (won) return;
     setFound((f) => (f.includes(id) ? f : [...f, id]));
     if (hintId === id) setHintId(null);
+    setHintRegion(null);
     armHintTimer();
   };
 
+  // Hint = a BIG search area that contains exactly ONE remaining difference,
+  // jittered so the target is never centered — narrows the hunt without
+  // handing over the answer.
   const showHint = () => {
-    const remaining = boxes.map((b) => b.id).filter((id) => !found.includes(id));
+    const remaining = boxes.filter((b) => !found.includes(b.id));
     if (remaining.length === 0) return;
-    setHintId(remaining[Math.floor(Math.random() * remaining.length)]);
+    const target = remaining[Math.floor(Math.random() * remaining.length)];
+    const RW = Math.round(scene.w * 0.45);
+    const RH = Math.round(scene.h * 0.55);
+    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+    const overlaps = (r: { x: number; y: number; w: number; h: number }, b: typeof target) =>
+      !(b.box.x > r.x + r.w || b.box.x + b.box.w < r.x || b.box.y > r.y + r.h || b.box.y + b.box.h < r.y);
+    let best: { x: number; y: number; w: number; h: number } | null = null;
+    for (let tries = 0; tries < 40; tries++) {
+      const ox = Math.random() * Math.max(1, RW - target.box.w);
+      const oy = Math.random() * Math.max(1, RH - target.box.h);
+      const r = {
+        x: clamp(Math.round(target.box.x - ox), 0, scene.w - RW),
+        y: clamp(Math.round(target.box.y - oy), 0, scene.h - RH),
+        w: RW,
+        h: RH,
+      };
+      if (!overlaps(r, target)) continue;
+      const hits = remaining.filter((b) => overlaps(r, b)).length;
+      if (hits === 1) { best = r; break; }
+      if (!best) best = r; // fallback: at least contains the target
+    }
+    if (!best) return;
+    setHintRegion(best);
     if (hintTimer.current) clearTimeout(hintTimer.current);
-    hintTimer.current = setTimeout(() => setHintId(null), 2200);
+    hintTimer.current = setTimeout(() => setHintRegion(null), 3200);
     armHintTimer(); // one peek, then back to earning it
   };
 
   const pictures = (
     <>
       <View style={styles.sceneBlock}>
-        <Text style={styles.label}>Picture A</Text>
+        <Text style={styles.label}>{t(lang, 'diff.pictureA')}</Text>
         <TapScene
           source={srcA}
           overlays={overlaysA}
@@ -163,13 +195,14 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
           boxes={boxes}
           foundIds={found}
           hintId={hintId}
+          hintRegion={hintRegion}
           onHit={onHit}
           onMiss={() => {}}
           testIDPrefix="left"
         />
       </View>
       <View style={styles.sceneBlock}>
-        <Text style={styles.label}>Picture B</Text>
+        <Text style={styles.label}>{t(lang, 'diff.pictureB')}</Text>
         <TapScene
           source={srcB}
           overlays={overlaysB}
@@ -179,6 +212,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
           boxes={boxes}
           foundIds={found}
           hintId={hintId}
+          hintRegion={hintRegion}
           onHit={onHit}
           onMiss={() => {}}
           testIDPrefix="right"
@@ -189,9 +223,11 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 
   return (
     <GameShell
-      title="Find the Difference"
-      subtitle={`${scene.name} — ${total} sneaky changes!`}
+      title={t(lang, 'shell.diff.title')}
+      subtitle={t(lang, 'shell.diff.subPlay', { name: scene.name, n: total })}
       onBack={onBackToPicker}
+      backKind="picker"
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="diff-timer" /> : null}
@@ -208,15 +244,16 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
         ) : null}
         {settings.diffHint && hintAvailable && !won ? (
           <Pressable onPress={showHint} testID="diff-hint" accessibilityLabel="Show a hint" accessibilityRole="button" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
-            <Text style={styles.hintText}>💡 Hint</Text>
+            <Text style={styles.hintText}>{t(lang, 'diff.hint')}</Text>
           </Pressable>
         ) : null}
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={'Eagle eyes! You found every difference!'}
+        message={t(lang, 'win.diff')}
         onNext={() => onPickScene(nextSceneId(manifest.diff, visible, scene.id))}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

@@ -6,9 +6,10 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang, numberWord } from '../../lang';
+import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { say, saySequence, sfx } from '../../sound';
+import { say, sayThen, sfx } from '../../sound';
 import { CountRound, PRAISE, PROMPTS, countSettings, makeCountRound } from './logic';
 
 interface Props {
@@ -48,10 +49,14 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     setTapped(next);
     const n = next.filter(Boolean).length;
     sfx.tap();
-    say(numberWord(lang, n).t);
+    const line = numberWord(lang, n).t;
     if (n >= round.n) {
-      // small delay so the last count word gets to speak before the prompt
-      setTimeout(() => setPhase('quiz'), 550);
+      // Chain the phase switch on speech completion so the "How many?"
+      // prompt (fired by the phase-change useEffect) doesn't cut the last
+      // count word mid-syllable.
+      sayThen([line], () => setPhase('quiz'));
+    } else {
+      say(line);
     }
   };
 
@@ -59,18 +64,17 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     if (won || phase !== 'quiz') return;
     if (v === round.answer) {
       sfx.good();
-      saySequence([numberWord(lang, round.answer).t, PRAISE[lang]]);
       const nextScore = score + 1;
       setScore(nextScore);
-      if (nextScore < roundsToWin) {
-        setTimeout(() => {
+      sayThen([numberWord(lang, round.answer).t, PRAISE[lang]], () => {
+        if (nextScore < roundsToWin) {
           const nr = makeCountRound(rngRef.current, difficulty);
           setRound(nr);
           setTapped(new Array(nr.n).fill(false));
           setPhase('count');
           setWrongPick(null);
-        }, 650);
-      }
+        }
+      });
     } else {
       sfx.wrong();
       setWrongPick(v);
@@ -97,9 +101,10 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title="Count With Me"
-      subtitle="Tap every friend, then tell me how many"
+      title={t(lang, 'shell.count.title')}
+      subtitle={t(lang, 'shell.count.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="count-timer" /> : null}
@@ -158,10 +163,11 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Amazing counter! You got them all!'}
+        message={t(lang, 'win.count')}
         onNext={reset}
-        nextLabel={'Play Again ▶️'}
+        nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );
