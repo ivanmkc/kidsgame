@@ -22,7 +22,9 @@ export const SPOTIT_ICONS = p;
 export const SPOTIT_SHADOWS = p;
 export const SCENE_IMAGES = p;
 export const SCENE_THUMBS = p;
-export const UI_IMAGES = p;`;
+export const UI_IMAGES = p;
+export const DRESSUP_ICONS = p;
+export const RHYME_SPRITES = Object.fromEntries(['sun','bun','cake','snake','bear','pear','moon','spoon','tree','bee','house','mouse'].map(k => [k, 1]));`;
       },
     },
   ],

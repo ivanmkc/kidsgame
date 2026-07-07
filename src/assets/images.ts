@@ -332,8 +332,10 @@ export const SCENE_IMAGES: Record<string, number> = {
   'story/doors_ba.png': require('../../assets/game/story/doors_ba.png'),
   'story/doors_bb.png': require('../../assets/game/story/doors_bb.png'),
   'story/doors_end_cozy.png': require('../../assets/game/story/doors_end_cozy.png'),
+  'story/doors_end_dizzy.png': require('../../assets/game/story/doors_end_dizzy.png'),
   'story/doors_end_flight.png': require('../../assets/game/story/doors_end_flight.png'),
   'story/doors_end_party.png': require('../../assets/game/story/doors_end_party.png'),
+  'story/doors_end_slip.png': require('../../assets/game/story/doors_end_slip.png'),
   'story/doors_end_stars.png': require('../../assets/game/story/doors_end_stars.png'),
   'story/doors_start.png': require('../../assets/game/story/doors_start.png'),
   'story/luna_a.png': require('../../assets/game/story/luna_a.png'),
@@ -425,8 +427,10 @@ export const SCENE_IMAGES: Record<string, number> = {
   'story/trail_b.png': require('../../assets/game/story/trail_b.png'),
   'story/trail_ba.png': require('../../assets/game/story/trail_ba.png'),
   'story/trail_bb.png': require('../../assets/game/story/trail_bb.png'),
+  'story/trail_end_boing.png': require('../../assets/game/story/trail_end_boing.png'),
   'story/trail_end_chest.png': require('../../assets/game/story/trail_end_chest.png'),
   'story/trail_end_friends.png': require('../../assets/game/story/trail_end_friends.png'),
+  'story/trail_end_soggy.png': require('../../assets/game/story/trail_end_soggy.png'),
   'story/trail_end_splash.png': require('../../assets/game/story/trail_end_splash.png'),
   'story/trail_start.png': require('../../assets/game/story/trail_start.png'),
   'story/whisper_a.png': require('../../assets/game/story/whisper_a.png'),
@@ -525,6 +529,21 @@ export const DRESSUP_ICONS: Record<string, number> = {
   boots: require('../../assets/game/dressup/boots.png'),
   wand: require('../../assets/game/dressup/wand.png'),
   umbrella: require('../../assets/game/dressup/umbrella.png'),
+};
+
+export const RHYME_SPRITES: Record<string, number> = {
+  bear: require('../../assets/game/rhyme/bear.png'),
+  bee: require('../../assets/game/rhyme/bee.png'),
+  bun: require('../../assets/game/rhyme/bun.png'),
+  cake: require('../../assets/game/rhyme/cake.png'),
+  house: require('../../assets/game/rhyme/house.png'),
+  moon: require('../../assets/game/rhyme/moon.png'),
+  mouse: require('../../assets/game/rhyme/mouse.png'),
+  pear: require('../../assets/game/rhyme/pear.png'),
+  snake: require('../../assets/game/rhyme/snake.png'),
+  spoon: require('../../assets/game/rhyme/spoon.png'),
+  sun: require('../../assets/game/rhyme/sun.png'),
+  tree: require('../../assets/game/rhyme/tree.png'),
 };
 
 export const UI_IMAGES = {
