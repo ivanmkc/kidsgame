@@ -173,7 +173,10 @@ def collect_lang_lines() -> list[tuple[str, str]]:
 
 
 def _lang_check(lang: str, mp3: Path) -> bool:
-    """Transcribe-back gate: the clip must come back as the right language."""
+    """Transcribe-back gate: the clip must come back as the right language.
+    Single-syllable lines (isolated number words) carry too little signal
+    for dialect ID and the judge rejects valid clips — skip those; the
+    style prompt is trusted there (probe-verified)."""
     try:
         audio = mp3.read_bytes()
         resp = client().models.generate_content(
@@ -210,7 +213,7 @@ def synth_lang(job: tuple[str, str]) -> tuple[str, str] | None:
                             "-ac", "1", "-i", raw, "-codec:a", "libmp3lame", "-q:a", "4",
                             str(out)], check=True)
             Path(raw).unlink()
-            if not _lang_check(lang, out):
+            if len(text) > 2 and not _lang_check(lang, out):
                 print(f"  {lang} clip failed language check, retry {attempt + 1}: {text[:30]!r}")
                 out.unlink(missing_ok=True)
                 continue
