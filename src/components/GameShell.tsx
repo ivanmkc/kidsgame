@@ -40,8 +40,8 @@ export function GameShell({ title, subtitle, onBack, right, children, backKind =
           {backKind === 'picker' ? <Text style={styles.backLabel}>{BACK_LEVELS[lang]}</Text> : null}
         </Pressable>
         <View style={styles.titles}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{title}</Text>
+          {subtitle ? <Text style={styles.subtitle} numberOfLines={2}>{subtitle}</Text> : null}
         </View>
         <View style={styles.right}>{right}<FeedbackChip compact lang={lang} /></View>
       </View>
@@ -87,10 +87,10 @@ const styles = StyleSheet.create({
   backLabel: { fontFamily: fonts.displayMed, fontSize: 11, color: colors.inkSoft, marginTop: -2 },
   pressed: { opacity: 0.6, transform: [{ scale: 0.94 }] },
   backText: { fontSize: 26 },
-  titles: { flex: 1 },
-  title: { fontSize: 24, fontFamily: fonts.display, color: colors.ink },
+  titles: { flex: 1, minWidth: 0 },
+  title: { fontSize: 24, fontFamily: fonts.display, color: colors.ink, flexShrink: 1 },
   subtitle: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: -2 },
-  right: { minWidth: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
+  right: { flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
   chip: {
     backgroundColor: colors.card,
     borderRadius: 999,

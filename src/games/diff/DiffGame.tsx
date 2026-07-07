@@ -1,3 +1,4 @@
+import { say, useSay } from '../../sound';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
@@ -27,6 +28,10 @@ interface Props {
 export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
+  // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
+  // flattening to medium hid the easy-mode hint/no-timer design entirely.
+  const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
+  useSay(scene ? 'Find all the sneaky changes!' : 'Where do you want to play?');
   const [found, setFound] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
@@ -36,7 +41,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const settings = settingsFor(difficulty);
+  const settings = settingsFor(effDifficulty);
 
   // The hint button stays hidden until the kid is genuinely stuck (~20s
   // without a find), and hides again after each use — no hint spamming.
@@ -74,7 +79,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   const { boxes, overlaysA, overlaysB, total } = useMemo(() => {
     const rng = makeRng(Math.floor(Math.random() * 1e9));
     const round = scene?.pool && scene.image
-      ? sample(rng, scene.pool, settingsFor(difficulty).diffDraw)
+      ? sample(rng, scene.pool, settingsFor(effDifficulty).diffDraw)
           .map((p) => ({ box: p, patch: p.patch as string | undefined, patchOnA: rng() < 0.5 }))
       : (scene?.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
     return {
@@ -105,8 +110,11 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
     }, 80);
     return () => clearInterval(iv);
   }, [ready, sceneId, expectedAssets]);
+  useEffect(() => {
+    if (won) say('Eagle eyes! You found every difference!');
+  }, [won]);
   const showRound = ready || forceReady;
-  const showTimer = settingsFor(difficulty).timer;
+  const showTimer = settingsFor(effDifficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
   const srcA = scene ? SCENE_IMAGES[baseImage(scene)] : 0;
   const srcB = scene ? SCENE_IMAGES[(scene.imageB ?? scene.image)!] : 0;

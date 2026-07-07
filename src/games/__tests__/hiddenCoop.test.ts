@@ -82,6 +82,7 @@ describe('HiddenGame render with the 2P toggle OFF', () => {
       React.createElement(HiddenGame, {
         onHome: noop,
         difficulty: 'medium',
+        filter: 'medium', // pin: under 'all' the scene's own badge level governs (audit fix)
         twoPlayerEnabled: false,
         sceneId: manifest.hidden[0].id,
         onPickScene: noop,

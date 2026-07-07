@@ -8,7 +8,7 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare } from '../../manifest';
-import { say, saySequence, sfx } from '../../sound';
+import { say, saySequence, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
 interface Props {
@@ -59,6 +59,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     saySequence(menu.length ? [node.text, lead, ...menu] : [node.text]);
   }, [node]);
 
+  useSay(story ? null : 'Which story shall we read?');
   const { width, height } = useWindowDimensions();
 
   // Arrow keys page through the story like a book: left = back, right =
@@ -93,7 +94,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const isEnd = !node.choices || node.choices.length === 0;
   const hasHots = !isEnd && node.choices!.every((c) => c.hot);
   // hotspot nodes have no button row below, so the picture gets the room
-  const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 190)) * ar, 900);
+  const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 250)) * ar, 900);
   const imgH = imgW / ar;
 
   const advance = (next: string) => {
@@ -261,7 +262,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 ]}
               >
                 <Image source={SCENE_IMAGES[c.icon]} style={styles.pickImg} resizeMode="contain" />
-                <Text style={styles.pickCaption} numberOfLines={1}>{c.label}</Text>
+                <Text style={styles.pickCaption} numberOfLines={2}>{c.label}</Text>
               </Pressable>
             ) : (
               <ChunkyButton
@@ -361,6 +362,7 @@ function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
         testID="story-scare"
         accessibilityLabel="Something is hiding here"
         accessibilityRole="button"
+        hitSlop={12}
         style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
       >
         {!popped ? (

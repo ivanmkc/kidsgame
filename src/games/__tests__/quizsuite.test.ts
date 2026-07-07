@@ -193,16 +193,20 @@ describe('sounds: quiz round', () => {
 });
 
 describe('rhyme: quiz round', () => {
-  const entries = availableEntries(manifest.spotit.icons);
+  const RHYME_LANGS: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+  const iconsList = manifest.spotit.icons;
+  const entriesEn = availableEntries('en', iconsList);
 
-  it('has at least two playable families with the current asset set', () => {
-    expect(canPlay(entries)).toBe(true);
-    expect(Object.keys(playableFamilies(entries)).length).toBeGreaterThanOrEqual(2);
+  it('has at least two playable EN families with the current asset set', () => {
+    expect(canPlay(entriesEn)).toBe(true);
+    expect(Object.keys(playableFamilies(entriesEn)).length).toBeGreaterThanOrEqual(2);
   });
 
-  it('tiles distinct, exactly ONE same-family choice, target NOT in tiles', () => {
+  it.each(RHYME_LANGS)('tiles distinct, exactly ONE same-family choice, target NOT in tiles (%s)', (lang) => {
+    const entries = availableEntries(lang, iconsList);
+    if (!canPlay(entries)) return; // language mode falls back to EN — covered by 'en' iteration.
     for (const seed of SEEDS) {
-      const r = makeRhymeRound(makeRng(seed), entries, 3);
+      const r = makeRhymeRound(makeRng(seed), entries, 3, lang);
       expect(r.tiles).toHaveLength(3);
       expect(new Set(r.tiles.map((t) => t.icon)).size).toBe(3);
       expect(r.tiles.some((t) => t.icon === r.target.icon)).toBe(false);
@@ -217,16 +221,126 @@ describe('rhyme: quiz round', () => {
     }
   });
 
-  it('speechLines: non-empty, unique, contains prompt+confirm for each round produced', () => {
-    const lines = new Set(rhymeSpeechLines(manifest.spotit.icons));
+  it('speechLines: non-empty, unique, contains prompt+confirm for every round produced (all langs)', () => {
+    const lines = new Set(rhymeSpeechLines(iconsList));
     expect(lines.size).toBeGreaterThan(0);
-    for (const seed of SEEDS.slice(0, 60)) {
-      const r = makeRhymeRound(makeRng(seed), entries, 3);
-      expect(lines.has(r.promptLine)).toBe(true);
-      for (const line of r.confirmLines) expect(lines.has(line)).toBe(true);
+    for (const lang of RHYME_LANGS) {
+      const entries = availableEntries(lang, iconsList);
+      if (!canPlay(entries)) continue;
+      for (const seed of SEEDS.slice(0, 60)) {
+        const r = makeRhymeRound(makeRng(seed), entries, 3, lang);
+        for (const line of r.promptLines) if (line) expect(lines.has(line)).toBe(true);
+        for (const line of r.confirmLines) expect(lines.has(line)).toBe(true);
+      }
     }
     // uniqueness
-    const asArray = rhymeSpeechLines(manifest.spotit.icons);
+    const asArray = rhymeSpeechLines(iconsList);
     expect(new Set(asArray).size).toBe(asArray.length);
+  });
+
+  it('speechLines spans every language whose pool clears the fallback bar', () => {
+    const arr = rhymeSpeechLines(iconsList);
+    // EN classic celebration
+    expect(arr).toContain('They rhyme!');
+    // JA/CMN/YUE ask lines — the fixed prompt clip for each mode
+    expect(arr).toContain('おなじ おとで おわるのは どれ？');
+    expect(arr).toContain('哪个词的结尾一样？');
+    expect(arr).toContain('邊個字尾音一樣呀？');
+    // A representative celebration line for each non-EN mode
+    expect(arr.some((l) => l.endsWith('！おなじ おと！'))).toBe(true);
+    expect(arr.some((l) => l.endsWith('！押韵！'))).toBe(true);
+    expect(arr.some((l) => l.endsWith('！好啱音！'))).toBe(true);
+  });
+});
+
+describe('rhyme: per-language families', () => {
+  const iconsList = manifest.spotit.icons;
+  const RHYME_LANGS: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+
+  it.each(RHYME_LANGS)('%s: every playable-family member shares the family key', (lang) => {
+    const entries = availableEntries(lang, iconsList);
+    const families = playableFamilies(entries);
+    for (const [key, members] of Object.entries(families)) {
+      expect(members.length).toBeGreaterThanOrEqual(2);
+      for (const m of members) {
+        expect(m.rhymeKey, `${lang}: ${m.icon} in family ${key}`).toBe(key);
+      }
+    }
+  });
+
+  it.each(['ja', 'cmn', 'yue'] as const)('%s: pool has ≥3 icon-backed families (no EN fallback)', (lang) => {
+    const entries = availableEntries(lang, iconsList);
+    const families = playableFamilies(entries);
+    expect(Object.keys(families).length).toBeGreaterThanOrEqual(3);
+    expect(effectiveLang(lang, iconsList)).toBe(lang);
+  });
+
+  it('effectiveLang: EN always stays EN; a starved pool falls back to EN', () => {
+    expect(effectiveLang('en', iconsList)).toBe('en');
+    // Starve the icon set to just one WORDS entry — no non-EN pool will
+    // clear 3 families, so every non-EN mode must fall back to EN.
+    const starved = ['dog'];
+    for (const lang of ['ja', 'cmn', 'yue'] as const) {
+      expect(effectiveLang(lang, starved)).toBe('en');
+    }
+  });
+
+  it('non-EN pools never draw from RHYME_WORDS (EN-only atlas)', () => {
+    const rhymeIcons = new Set(RHYME_WORDS.map((w) => w.icon));
+    for (const lang of ['ja', 'cmn', 'yue'] as const) {
+      const entries = availableEntries(lang, iconsList);
+      for (const e of entries) expect(rhymeIcons.has(e.icon)).toBe(false);
+    }
+  });
+
+  it('non-EN entries carry native word + romanization; EN entries are bare', () => {
+    const en = availableEntries('en', iconsList);
+    for (const e of en) {
+      expect(e.word).toBe(e.en);
+      expect(e.roman).toBe('');
+    }
+    for (const lang of ['ja', 'cmn', 'yue'] as const) {
+      const entries = availableEntries(lang, iconsList);
+      if (!entries.length) continue;
+      for (const e of entries) {
+        expect(e.word.length).toBeGreaterThan(0);
+        expect(e.word).not.toBe(e.en);
+        expect(e.roman.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  // Guard against a wandering finger typing an ambiguous per-lang rhyme
+  // key — if two languages ever collided their rhyme namespaces we'd want
+  // that surface immediately, but the fields are separate by design so
+  // this just documents the shape.
+  it('WORDS: per-lang rhyme fields never overlap the EN rhymeKey', () => {
+    const enKeys = new Set(WORDS.map((w: WordEntry) => w.rhymeKey).filter(Boolean) as string[]);
+    // Non-EN keys are drawn from a completely different vocabulary (kana
+    // moras / pinyin finals / Jyutping finals), so no accidental collision
+    // is possible today — but if someone later tries to reuse 'og' as a
+    // ja key this test breaks first.
+    for (const w of WORDS) {
+      for (const k of [w.jaRhyme, w.cmnRhyme, w.yueRhyme]) {
+        if (!k) continue;
+        expect(enKeys.has(k), `${w.icon}: per-lang key '${k}' collides with EN rhymeKey`).toBe(false);
+      }
+    }
+  });
+});
+
+describe('rhyme: settings scale with pool size', () => {
+  it('≥8 families: easy/medium/hard = 8/10/12 rounds', () => {
+    expect(settingsForRhyme('easy', 8)).toEqual({ rounds: 8, tiles: 3 });
+    expect(settingsForRhyme('medium', 8)).toEqual({ rounds: 10, tiles: 3 });
+    expect(settingsForRhyme('hard', 8)).toEqual({ rounds: 12, tiles: 3 });
+    expect(settingsForRhyme('hard', 20)).toEqual({ rounds: 12, tiles: 3 });
+  });
+
+  it('lean pool (<8 families): hard tier stays at 10 rounds (no over-replay)', () => {
+    expect(settingsForRhyme('easy', 5)).toEqual({ rounds: 8, tiles: 3 });
+    expect(settingsForRhyme('medium', 5)).toEqual({ rounds: 10, tiles: 3 });
+    expect(settingsForRhyme('hard', 5)).toEqual({ rounds: 10, tiles: 3 });
+    expect(settingsForRhyme('hard', 3)).toEqual({ rounds: 10, tiles: 3 });
   });
 });

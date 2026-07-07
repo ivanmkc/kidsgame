@@ -11,7 +11,7 @@ import { manifest } from '../../manifest';
 import { allSceneOptions } from '../sceneOptions';
 import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
-import { sfx } from '../../sound';
+import { sfx, useSay } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 import { cacheKey, callMagic, publicUrlReachable, resolvePublicImageUrl } from './magic';
 
@@ -185,6 +185,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     stageRef.current?.measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
   };
   const [ghost, setGhost] = useState<{ icon: string; x: number; y: number } | null>(null);
+  useSay(picked ? null : "Where's the party?");
 
   if (!picked) {
     return (
@@ -570,8 +571,8 @@ const styles = StyleSheet.create({
   // inside can still receive taps.
   magicSlot: { position: 'absolute', top: -14, right: -14, alignItems: 'flex-end' },
   magicBtn: {
-    width: 34,
-    height: 34,
+    width: 44,
+    height: 44,
     borderRadius: 17,
     backgroundColor: colors.gold,
     borderWidth: 2,

@@ -135,7 +135,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
             <Text style={styles.iconFallback}>{round.word.text}</Text>
           )}
           {round.word.roman ? <Text style={styles.romanCaption}>{round.word.roman}</Text> : null}
-          <Text style={styles.speakerHint}>🔊 Tap to hear again</Text>
+          <Text style={styles.speakerHint}>{t(lang, 'spell.hearAgain')}</Text>
         </Pressable>
 
         <View style={[styles.slotRow, { gap: 10 }]}>

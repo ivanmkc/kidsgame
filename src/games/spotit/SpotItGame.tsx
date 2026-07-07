@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, {useMemo, useRef, useState, useEffect } from 'react';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -8,7 +8,7 @@ import { t } from '../../i18n';
 import { ModePicker } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { colors } from '../../theme';
-import { sfx } from '../../sound';
+import { sfx, say, useSay } from '../../sound';
 import { TimerRing, fmtTime, useElapsed } from '../../components/TimerRing';
 import { DealIn, Slot, SpotCard, layoutSlots } from './cards';
 import { buildDeck, dealRound } from './logic';
@@ -58,6 +58,8 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
   const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
+  useSay(locked ? null : 'Tap the picture that is on BOTH cards!');
+  useEffect(() => { if (won) say('Sharp eyes! You spotted them all!'); }, [won]);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
   const mmss = fmtTime(elapsed);

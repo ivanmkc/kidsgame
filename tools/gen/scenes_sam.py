@@ -259,7 +259,16 @@ def _remove_verified(img: Image.Image, item: dict, theme_id: str) -> Image.Image
 _PALETTE = ["red", "blue", "green", "purple", "orange", "pink", "yellow", "teal"]
 
 
-def _recolor_verified(img: Image.Image, item: dict, theme_id: str) -> tuple[Image.Image, str] | None:
+_ADJACENT_HUES = {
+    "red": ["orange", "pink"], "orange": ["red", "yellow"], "yellow": ["orange", "gold"],
+    "gold": ["yellow", "orange"], "green": ["teal", "lime"], "teal": ["green", "blue"],
+    "blue": ["teal", "purple"], "purple": ["blue", "pink"], "pink": ["purple", "red"],
+    "brown": ["orange", "red"], "white": ["cream", "silver"], "gray": ["silver", "blue"],
+    "grey": ["silver", "blue"], "black": ["gray", "purple"], "silver": ["gray", "white"],
+}
+
+
+def _recolor_verified(img: Image.Image, item: dict, theme_id: str, adjacent: bool = False) -> tuple[Image.Image, str] | None:
     """Color-change difference: no background inpaint, so no trace is
     possible by construction — the rescue mechanic for backdrops where
     removals can't be invisible (snow, sand, dense decoration)."""
@@ -268,7 +277,11 @@ def _recolor_verified(img: Image.Image, item: dict, theme_id: str) -> tuple[Imag
     rect = _hitbox(item["seg"])
     before_crop = _crop(img, rect, pad=40)
     cur = ask_text(f"In ONE word, what is the main color of the {short}?", [before_crop]).strip().lower()
-    choices = [c for c in _PALETTE if c not in cur]
+    if adjacent:
+        # subtle scenes: shift to a NEIGHBORING hue — spottable but not glaring
+        choices = [c for c in _ADJACENT_HUES.get(cur, _PALETTE) if c not in cur] or [c for c in _PALETTE if c not in cur]
+    else:
+        choices = [c for c in _PALETTE if c not in cur]
     for new in _r.sample(choices, min(3, len(choices))):
         mask = _dilated(item["seg"]["mask"], 6)
         out, ch, drift = nbp_edit(
@@ -276,8 +289,10 @@ def _recolor_verified(img: Image.Image, item: dict, theme_id: str) -> tuple[Imag
             f"the exact same {short} in the exact same position with the same shape and "
             f"outline, but colored {new} instead of {cur}. Change ONLY its color; the "
             f"background must stay pixel-identical.",
-            composite_mask=_dilated(item["seg"]["mask"], 12))
-        if drift > 0.10 or ch < 0.12:
+            # accept back ONLY the object + a hairline: the 12px band let
+            # NBP paint glow halos and redraw neighbors (space audit blockers)
+            composite_mask=_dilated(item["seg"]["mask"], 3))
+        if drift > 0.04 or ch < 0.12:
             print(f"  {theme_id}: recolor '{short}' -> {new} weak (ch={ch:.2f} drift={drift:.2f})")
             continue
         after_crop = _crop(out, rect, pad=40)
@@ -318,10 +333,12 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
         except Exception as e:  # noqa: BLE001 — VM hiccup: next attempt re-renders anyway
             print(f"  {theme['id']}: SAM batch failed ({str(e)[:120]})")
             continue
+        subtle = bool(theme.get("subtle"))
+        cap = MAX_AREA * 0.5 if subtle else MAX_AREA
         with ThreadPoolExecutor(4) as ex:
             refined = list(ex.map(
                 lambda op: (op[0], _refined_seg(base, op[1], segs.get(op[1], []),
-                                                f"{theme['id']}/{op[1]}")),
+                                                f"{theme['id']}/{op[1]}", max_area=cap)),
                 zip(objs, prompts)))
         usable = _drop_overlaps([{"obj": o, "seg": s} for o, s in refined if s])
         if len(usable) < NUM_DIFFS:
@@ -330,13 +347,25 @@ def gen_diff_scene(theme: dict, out_dir: Path, seed: int) -> dict | None:
 
         def build_entry(item: dict) -> tuple[dict, Image.Image] | None:
             short = _short(item["obj"])
-            out = _remove_verified(base, item, theme["id"])
-            kind = "remove"
-            if out is None:
-                r = _recolor_verified(base, item, theme["id"])
-                if r is None:
-                    return None
-                out, kind = r[0], "recolor"
+            if subtle:
+                # subtle scenes: adjacent-hue recolor FIRST (a removal on a
+                # sparse backdrop is a billboard); removal only as fallback
+                r = _recolor_verified(base, item, theme["id"], adjacent=True)
+                if r is not None:
+                    out, kind = r[0], "recolor"
+                else:
+                    out = _remove_verified(base, item, theme["id"])
+                    kind = "remove"
+                    if out is None:
+                        return None
+            else:
+                out = _remove_verified(base, item, theme["id"])
+                kind = "remove"
+                if out is None:
+                    r = _recolor_verified(base, item, theme["id"])
+                    if r is None:
+                        return None
+                    out, kind = r[0], "recolor"
             hx, hy, hw, hh = _change_hitbox(base, out, item["seg"])
             patch = out.crop((hx, hy, hx + hw, hy + hh))
             return ({"x": hx, "y": hy, "w": hw, "h": hh,

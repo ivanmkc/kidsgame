@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng } from '../../rng';
-import { say, sfx } from '../../sound';
+import { say, sfx, useSay } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from './logic';
 
@@ -41,6 +41,8 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer && mode !== '2p';
   const won = matched.length * 2 === board.length;
+  useSay(duel ? null : 'Flip the cards and find the pairs!');
+  useEffect(() => { if (won && !duel) say('Amazing memory! You matched them all!'); }, [won]);
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
 
   // Turn halo pulse — restarted whenever the turn changes.
