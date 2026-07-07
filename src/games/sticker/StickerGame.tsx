@@ -1,8 +1,9 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Animated, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, Easing, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { DRESSUP_ICONS, SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
+import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
 import { SCENE_AR } from '../../manifest';
@@ -12,6 +13,7 @@ import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
 import { sfx } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
+import { cacheKey, callMagic, publicUrlReachable, resolvePublicImageUrl } from './magic';
 
 interface Props {
   onHome: () => void;
@@ -31,6 +33,10 @@ interface Placed {
 }
 
 const BACKDROPS = allSceneOptions('all');
+const DRESSUP_SET = new Set(manifest.dressup ?? []);
+
+// Phase of the AI-magic call for a single placed sticker.
+type MagicPhase = 'idle' | 'pending' | 'done';
 
 // Sticker drawer categories (Infinity Nikki-style): one tab per bucket so
 // nothing ever needs a scroll marathon. Buckets mirror the ones kids
@@ -54,9 +60,58 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   const [tab, setTab] = useState('dressup');
   const nextKey = useRef(1);
 
+  // AI magic state: current backdrop override (data URL of the magicked
+  // photo), per-sticker phase, per-scene cache, one-in-flight guard.
+  // All keyed off the scene id so switching scenes wipes cleanly.
+  const [magicBackdrop, setMagicBackdrop] = useState<string | null>(null);
+  const [magicPhase, setMagicPhase] = useState<Record<number, MagicPhase>>({});
+  const [pendingKey, setPendingKey] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [magicBurst, setMagicBurst] = useState(0);
+  const magicCache = useRef<Map<string, string>>(new Map());
+  const magicAborts = useRef<Map<number, AbortController>>(new Map());
+
+  // Whether ✨ can even work in this environment. We resolve the public
+  // URL of the backdrop and HEAD-check it once per scene; if it 404s
+  // (usually because a local dev build's asset hash isn't on the live
+  // site yet), we simply hide the ✨ affordance — the sticker still works
+  // as a normal overlay. `null` = unknown yet.
+  const publicImageUrl = useMemo(() => {
+    if (!picked) return null;
+    const src = SCENE_IMAGES[picked.image] ?? SCENE_THUMBS[picked.image];
+    return resolvePublicImageUrl(src);
+  }, [picked]);
+  const [magicReachable, setMagicReachable] = useState<boolean | null>(null);
+  useEffect(() => {
+    setMagicReachable(null);
+    if (!publicImageUrl) { setMagicReachable(false); return; }
+    const ac = new AbortController();
+    void publicUrlReachable(publicImageUrl, ac.signal).then(setMagicReachable);
+    return () => ac.abort();
+  }, [publicImageUrl]);
+
+  // Scene change / Clear: cancel everything, wipe caches. Live requests
+  // resolve into a no-op because we abort their signals.
+  const resetMagic = useCallback(() => {
+    magicAborts.current.forEach((c) => c.abort());
+    magicAborts.current.clear();
+    magicCache.current.clear();
+    setMagicBackdrop(null);
+    setMagicPhase({});
+    setPendingKey(null);
+    setToast(null);
+  }, []);
+  useEffect(() => { resetMagic(); }, [sceneId, resetMagic]);
+  useEffect(() => () => { magicAborts.current.forEach((c) => c.abort()); }, []);
+
   const popSticker = useCallback((key: number) => {
     sfx.flip();
     setPlaced((p) => p.filter((s) => s.key !== key));
+    // Abandoning a sticker mid-magic — cancel the in-flight call.
+    const ac = magicAborts.current.get(key);
+    if (ac) { ac.abort(); magicAborts.current.delete(key); }
+    setMagicPhase((m) => { const { [key]: _drop, ...rest } = m; return rest; });
+    setPendingKey((k) => (k === key ? null : k));
   }, []);
 
   const moveSticker = useCallback((key: number, x: number, y: number) => {
@@ -66,6 +121,62 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   const transformSticker = useCallback((key: number, size: number, rotation: number) => {
     setPlaced((p) => p.map((s) => (s.key === key ? { ...s, size, rotation } : s)));
   }, []);
+
+  const flashToast = useCallback((msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 3000);
+  }, []);
+
+  const runMagic = useCallback((sticker: Placed) => {
+    if (!picked || !publicImageUrl) return;
+    if (pendingKey !== null && pendingKey !== sticker.key) return; // one at a time
+    sfx.tap();
+    // Center of the sticker in scene-relative coords — that's where the
+    // model should paint the wearable onto whoever's standing there.
+    const cx = Math.min(0.99, Math.max(0.01, sticker.x + sticker.size / 2));
+    const cy = Math.min(0.99, Math.max(0.01, sticker.y + sticker.size / 2));
+    const key = cacheKey(picked.id, sticker.icon, cx, cy);
+
+    const applySuccess = (dataUrl: string) => {
+      setMagicBackdrop(dataUrl);
+      setMagicPhase((m) => ({ ...m, [sticker.key]: 'done' }));
+      setPlaced((p) => p.filter((s) => s.key !== sticker.key));
+      setPendingKey(null);
+      setMagicBurst((n) => n + 1);
+      sfx.win();
+    };
+
+    const hit = magicCache.current.get(key);
+    if (hit) { applySuccess(hit); return; }
+
+    setMagicPhase((m) => ({ ...m, [sticker.key]: 'pending' }));
+    setPendingKey(sticker.key);
+    const ac = new AbortController();
+    magicAborts.current.set(sticker.key, ac);
+    const timeout = setTimeout(() => ac.abort(), 90_000);
+
+    void callMagic({ imageUrl: publicImageUrl, x: cx, y: cy, item: sticker.icon }, { signal: ac.signal })
+      .then((res) => {
+        clearTimeout(timeout);
+        magicAborts.current.delete(sticker.key);
+        if (!res.ok || !res.image_b64) {
+          setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
+          setPendingKey((k) => (k === sticker.key ? null : k));
+          flashToast('The magic fizzled — try again!');
+          return;
+        }
+        const dataUrl = `data:image/png;base64,${res.image_b64}`;
+        magicCache.current.set(key, dataUrl);
+        applySuccess(dataUrl);
+      })
+      .catch(() => {
+        clearTimeout(timeout);
+        magicAborts.current.delete(sticker.key);
+        setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
+        setPendingKey((k) => (k === sticker.key ? null : k));
+        flashToast('The magic fizzled — try again!');
+      });
+  }, [picked, publicImageUrl, pendingKey, flashToast]);
 
   const { width, height } = useWindowDimensions();
   const stageRef = useRef<View | null>(null);
@@ -122,7 +233,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
       lang={lang}
       right={
         <Pressable
-          onPress={() => { sfx.flip(); setPlaced([]); }}
+          onPress={() => { sfx.flip(); setPlaced([]); resetMagic(); }}
           testID="sticker-clear"
           accessibilityLabel="Clear all stickers"
           accessibilityRole="button"
@@ -139,18 +250,52 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
           testID="sticker-stage"
           onLayout={measureStage}
         >
-          <Image source={SCENE_IMAGES[picked.image] ?? SCENE_THUMBS[picked.image]} style={{ width: stageW, height: stageH }} resizeMode="cover" />
-          {placed.map((s) => (
-            <DraggableSticker
-              key={s.key}
-              placed={s}
-              stageW={stageW}
-              stageH={stageH}
-              onMove={moveSticker}
-              onPop={popSticker}
-              onTransform={transformSticker}
+          {magicBackdrop ? (
+            <Image
+              source={{ uri: magicBackdrop }}
+              style={{ width: stageW, height: stageH }}
+              resizeMode="cover"
+              testID="magic-backdrop"
             />
-          ))}
+          ) : (
+            <Image source={SCENE_IMAGES[picked.image] ?? SCENE_THUMBS[picked.image]} style={{ width: stageW, height: stageH }} resizeMode="cover" />
+          )}
+          {placed.map((s) => {
+            const phase: MagicPhase = magicPhase[s.key] ?? 'idle';
+            const isDressup = DRESSUP_SET.has(s.icon);
+            const magicVisible = isDressup && magicReachable === true && phase !== 'done';
+            const magicEnabled = magicVisible && (pendingKey === null || pendingKey === s.key);
+            return (
+              <DraggableSticker
+                key={s.key}
+                placed={s}
+                stageW={stageW}
+                stageH={stageH}
+                onMove={moveSticker}
+                onPop={popSticker}
+                onTransform={transformSticker}
+                pending={phase === 'pending'}
+                magicButton={magicVisible ? (
+                  <MagicButton
+                    stickerKey={s.key}
+                    pending={phase === 'pending'}
+                    disabled={!magicEnabled}
+                    onPress={() => runMagic(s)}
+                  />
+                ) : null}
+              />
+            );
+          })}
+          {magicBurst > 0 ? (
+            <View pointerEvents="none" style={StyleSheet.absoluteFill} testID="magic-burst">
+              <SparkleBurst count={12} size={26} trigger={magicBurst} />
+            </View>
+          ) : null}
+          {toast ? (
+            <View pointerEvents="none" style={styles.toast} testID="magic-toast">
+              <Text style={styles.toastText}>{toast}</Text>
+            </View>
+          ) : null}
         </View>
         <View style={styles.tabRow}>
           {TRAY_TABS.map((tt) => {
@@ -239,7 +384,7 @@ function TrayItem({ icon, onTap, onDragMove, onDrop }: {
 }
 
 const DraggableSticker = React.memo(function DraggableSticker({
-  placed, stageW, stageH, onMove, onPop, onTransform,
+  placed, stageW, stageH, onMove, onPop, onTransform, pending, magicButton,
 }: {
   placed: Placed;
   stageW: number;
@@ -247,8 +392,24 @@ const DraggableSticker = React.memo(function DraggableSticker({
   onMove: (key: number, x: number, y: number) => void;
   onPop: (key: number) => void;
   onTransform: (key: number, size: number, rotation: number) => void;
+  pending?: boolean;
+  magicButton?: React.ReactNode;
 }) {
   const size = placed.size * stageW;
+  // Gentle pulse while the model works — visual reassurance that
+  // something IS happening during the ~30s wait.
+  const pulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!pending) { pulse.setValue(1); return; }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 0.55, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pending, pulse]);
   // The PanResponder is created ONCE; everything it needs at release time
   // flows through refs so re-renders never rebuild gesture plumbing.
   const live = useRef({ placed, stageW, stageH, onMove, onPop, onTransform });
@@ -312,10 +473,63 @@ const DraggableSticker = React.memo(function DraggableSticker({
         transform: [...pan.current.getTranslateTransform(), { rotate: `${placed.rotation}deg` }],
       }}
     >
-      <Image source={DRESSUP_ICONS[placed.icon] ?? SPOTIT_ICONS[placed.icon]} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+      <Animated.Image
+        source={DRESSUP_ICONS[placed.icon] ?? SPOTIT_ICONS[placed.icon]}
+        style={{ width: '100%', height: '100%', opacity: pulse }}
+        resizeMode="contain"
+      />
+      {magicButton ? (
+        <View pointerEvents="box-none" style={styles.magicSlot}>
+          {magicButton}
+        </View>
+      ) : null}
     </Animated.View>
   );
 });
+
+// Small tappable ✨ badge that lives in the top-right corner of a
+// placed dressup sticker. While pending it swaps to a rotating label
+// so the kid sees the magic in flight; a second "adding the magic
+// touches…" label kicks in past 30s so the wait doesn't feel dead.
+function MagicButton({ stickerKey, pending, disabled, onPress }: {
+  stickerKey: number;
+  pending: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const [long, setLong] = useState(false);
+  useEffect(() => {
+    if (!pending) { setLong(false); return; }
+    const to = setTimeout(() => setLong(true), 30_000);
+    return () => clearTimeout(to);
+  }, [pending]);
+  if (pending) {
+    return (
+      <View testID={`magic-pending-${stickerKey}`} style={styles.magicPending}>
+        <Text style={styles.magicPendingText}>
+          {long ? 'Adding the magic touches…' : 'Doing magic… ✨'}
+        </Text>
+      </View>
+    );
+  }
+  return (
+    <Pressable
+      testID={`magic-btn-${stickerKey}`}
+      accessibilityLabel="Make it real"
+      accessibilityRole="button"
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.magicBtn,
+        shadows.soft,
+        disabled && { opacity: 0.4 },
+        pressed && !disabled && { transform: [{ scale: 0.92 }] },
+      ]}
+    >
+      <Text style={styles.magicBtnText}>✨</Text>
+    </Pressable>
+  );
+}
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 8 },
@@ -350,4 +564,42 @@ const styles = StyleSheet.create({
   clearBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 14 },
   clearText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 12 },
+  // A slot anchored to the top-right corner of the sticker that lives
+  // OUTSIDE the sticker's PanResponder-active area: pointerEvents="box-none"
+  // means drag/pinch/pop keep working on the sticker itself, but the button
+  // inside can still receive taps.
+  magicSlot: { position: 'absolute', top: -14, right: -14, alignItems: 'flex-end' },
+  magicBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: colors.gold,
+    borderWidth: 2,
+    borderColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  magicBtnText: { fontSize: 16 },
+  magicPending: {
+    backgroundColor: colors.paper,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.gold,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    maxWidth: 180,
+  },
+  magicPendingText: { fontFamily: fonts.bodyReg, fontSize: 11, color: colors.ink },
+  toast: {
+    position: 'absolute',
+    top: 12,
+    alignSelf: 'center',
+    backgroundColor: colors.paper,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: colors.blush,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+  },
+  toastText: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.ink },
 });

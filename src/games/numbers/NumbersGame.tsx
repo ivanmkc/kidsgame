@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions  } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -7,7 +7,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang, numberWord } from '../../lang';
 import { t } from '../../i18n';
 import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
+import { colors, fonts, shadows  } from '../../theme';
 import { saySequence, sfx } from '../../sound';
 import { NumberRound, makeNumberRound, settingsForNumbers } from './logic';
 
@@ -21,7 +21,8 @@ interface Props {
 // swaps arabic tiles for han numerals so recognition transfers across
 // scripts.
 export function NumbersGame({ onHome, difficulty, lang }: Props) {
-  const numSettings = settingsForNumbers(difficulty, lang);
+  const [script, setScript] = useState<'arabic' | 'han' | 'auto'>('auto');
+  const numSettings = settingsForNumbers(difficulty, lang, script);
   const { rounds: roundsToWin } = numSettings;
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [roundIdx, setRoundIdx] = useState(0);
@@ -82,6 +83,17 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="numbers-timer" /> : null}
+          {lang !== 'en' ? (
+            <Pressable
+              onPress={() => { sfx.tap(); setScript(numSettings.useHan ? 'arabic' : 'han'); }}
+              testID="numbers-script"
+              accessibilityRole="button"
+              accessibilityLabel="Switch numeral script"
+              style={{ backgroundColor: numSettings.useHan ? '#FFE9B8' : 'white', borderRadius: 12, borderWidth: 2, borderColor: '#E8C97A', paddingVertical: 6, paddingHorizontal: 10 }}
+            >
+              <Text style={{ fontFamily: fonts.display, fontSize: 14, color: colors.ink }}>{numSettings.useHan ? '一二三' : '123'}</Text>
+            </Pressable>
+          ) : null}
           <ScoreChip label={`🔢 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`} testID="numbers-score" />
         </View>
       }

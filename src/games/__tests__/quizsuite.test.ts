@@ -17,10 +17,10 @@ import {
   makeSoundsRound, settingsForSounds, speechLines as soundsSpeechLines,
 } from '../sounds/logic';
 import {
-  availableEntries, canPlay, makeRhymeRound, playableFamilies,
-  speechLines as rhymeSpeechLines,
+  availableEntries, canPlay, effectiveLang, makeRhymeRound, playableFamilies,
+  settingsForRhyme, speechLines as rhymeSpeechLines,
 } from '../rhymegame/logic';
-import { WORDS } from '../language/words';
+import { RHYME_WORDS, WORDS, WordEntry } from '../language/words';
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i + 1);
 
@@ -115,7 +115,7 @@ describe('numbers: quiz round', () => {
   it.each(['ja', 'cmn', 'yue'] as const)('%s hard tier: han-numeral tiles', (lang) => {
     const s = settingsForNumbers('hard', lang);
     expect(s.useHan).toBe(true);
-    const HAN = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+    const HAN = ['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十'];
     for (const seed of SEEDS.slice(0, 60)) {
       const r = makeNumberRound(makeRng(seed), s, lang);
       expect(r.useHan).toBe(true);

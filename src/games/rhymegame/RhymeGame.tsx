@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -13,29 +13,36 @@ import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx } from '../../sound';
 import {
-  RhymeRound, availableEntries, canPlay, makeRhymeRound, playableFamilies, settingsForRhyme,
+  RhymeRound, availableEntries, canPlay, effectiveLang, makeRhymeRound,
+  playableFamilies, settingsForRhyme,
 } from './logic';
 
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
-  lang: Lang; // EN-only game; lang is accepted for orchestrator uniformity.
+  lang: Lang;
 }
 
-// Rhyme Time. EN-only in every mode — rhyme is a specifically-English
-// phonics skill, so JA/cmn/yue also see the English game. Tolerates a
-// half-populated RHYME_ICONS atlas (uses only families with ≥2 icons).
+// Rhyme Time. EN plays the English rhyme pool; JA/CMN/YUE build native
+// final-sound families (see logic.ts + words.ts). A non-EN mode with a
+// thin pool (<3 families) falls back to EN silently. Tolerates a half-
+// populated RHYME_ICONS atlas (uses only families with ≥2 icons).
 export function RhymeGame({ onHome, difficulty, lang }: Props) {
-  const { rounds: roundsToWin, tiles: tileCount } = settingsForRhyme(difficulty);
-  const entries = availableEntries(manifest.spotit.icons);
+  const iconsList = manifest.spotit.icons;
+  // Memoise so React sees a stable identity across renders — otherwise
+  // useEffect below would re-fire every render and re-narrate the prompt.
+  const gameLang = useMemo(() => effectiveLang(lang, iconsList), [lang, iconsList]);
+  const entries = useMemo(() => availableEntries(gameLang, iconsList), [gameLang, iconsList]);
+  const families = useMemo(() => playableFamilies(entries), [entries]);
+  const familyCount = Object.keys(families).length;
+  const { rounds: roundsToWin, tiles: tileCount } = settingsForRhyme(difficulty, familyCount);
   const playable = canPlay(entries);
-  const familyCount = Object.keys(playableFamilies(entries)).length;
   const showComingSoonBanner = familyCount < 3;
 
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RhymeRound | null>(
-    () => (playable ? makeRhymeRound(rngRef.current, entries, tileCount) : null),
+    () => (playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
@@ -45,7 +52,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const { width, height } = useWindowDimensions();
 
   useEffect(() => {
-    if (round && !won) saySequence([round.promptLine]);
+    if (round && !won) saySequence(round.promptLines);
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
@@ -57,14 +64,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
       sayThen(round.confirmLines, () => {
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
-          setRound(makeRhymeRound(rngRef.current, entries, tileCount, round.target.icon));
+          setRound(makeRhymeRound(rngRef.current, entries, tileCount, gameLang, round.target.icon));
         }
       });
     } else {
       sfx.wrong();
       setWrongIdx(i);
       setTimeout(() => setWrongIdx((w) => (w === i ? null : w)), 450);
-      saySequence([round.promptLine]);
+      saySequence(round.promptLines);
     }
   };
 
@@ -72,7 +79,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
-    setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount) : null);
+    setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null);
     setWrongIdx(null);
   };
 
@@ -116,7 +123,8 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
               <>
                 <View style={[styles.prompt, shadows.soft]} testID={`rhyme-prompt-${round.target.icon}`}>
                   <Image source={iconFor(round.target.icon, round.target.bucket)} style={styles.targetIcon} resizeMode="contain" />
-                  <Text style={styles.promptText}>{round.promptLine}</Text>
+                  <Text style={styles.promptText}>{round.displayPrompt}</Text>
+                  {round.caption ? <Text style={styles.caption}>{round.caption}</Text> : null}
                 </View>
                 <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
                   {round.tiles.map((t, i) => (
@@ -169,6 +177,7 @@ const styles = StyleSheet.create({
   },
   targetIcon: { width: 110, height: 110 },
   promptText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
+  caption: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.inkSoft, marginTop: 2 },
   banner: {
     backgroundColor: colors.blush,
     borderRadius: 16,
