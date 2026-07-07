@@ -5,7 +5,7 @@ import { ChunkyButton } from '../../components/ChunkyButton';
 import { Confetti } from '../../components/Confetti';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
-import { SCENE_AR, manifest, StoryNode, StoryScare } from '../../manifest';
+import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare } from '../../manifest';
 import { say, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
@@ -24,14 +24,28 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   const story = stories.find((s) => s.id === sceneId) ?? null;
   const [nodeId, setNodeId] = useState('start');
 
-  useEffect(() => setNodeId('start'), [sceneId]);
+  // Tap-to-dive: choices with in-scene hotspots zoom the camera INTO the
+  // tapped spot (door, slide, boat...) before the story advances.
+  const zoom = useRef(new Animated.Value(0)).current;
+  const [zoomTarget, setZoomTarget] = useState<{ cx: number; cy: number } | null>(null);
+  const animating = useRef(false);
+
+  useEffect(() => {
+    setNodeId('start');
+    zoom.setValue(0);
+    setZoomTarget(null);
+    animating.current = false;
+  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const node: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
 
   useEffect(() => {
     if (!node) return;
-    const menu = (node.choices ?? []).map((c) => c.label);
-    saySequence(menu.length ? [node.text, 'What should happen next?', ...menu] : [node.text]);
+    const cs = node.choices ?? [];
+    const menu = cs.map((c) => c.label);
+    const hots = cs.length > 0 && cs.every((c) => c.hot);
+    const lead = hots ? 'Tap where you want to go!' : 'What should happen next?';
+    saySequence(menu.length ? [node.text, lead, ...menu] : [node.text]);
   }, [node]);
 
   const { width, height } = useWindowDimensions();
@@ -51,15 +65,55 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   if (!node) return null;
 
   const ar = SCENE_AR;
-  const imgW = Math.min(width - 24, (height - 84 - 190) * ar, 900);
   const isEnd = !node.choices || node.choices.length === 0;
+  const hasHots = !isEnd && node.choices!.every((c) => c.hot);
+  // hotspot nodes have no button row below, so the picture gets the room
+  const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 190)) * ar, 900);
+  const imgH = imgW / ar;
+
+  const ZOOM = 2.4;
+  const diveInto = (c: StoryChoice) => {
+    if (animating.current || !c.hot) return;
+    animating.current = true;
+    sfx.tap();
+    say(c.label);
+    const s = imgW / 1280;
+    setZoomTarget({ cx: (c.hot.x + c.hot.w / 2) * s, cy: (c.hot.y + c.hot.h / 2) * s });
+    zoom.setValue(0);
+    Animated.timing(zoom, { toValue: 1, duration: 600, useNativeDriver: true }).start(() => {
+      setNodeId(c.next);
+      zoom.setValue(0);
+      setZoomTarget(null);
+      animating.current = false;
+    });
+  };
+  const tx = zoomTarget ? (imgW / 2 - zoomTarget.cx) * ZOOM : 0;
+  const ty = zoomTarget ? (imgH / 2 - zoomTarget.cy) * ZOOM : 0;
 
   return (
     <GameShell title="Story Path" subtitle={story.title} onBack={onBackToPicker}>
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker]}>
-          <Image source={SCENE_IMAGES[node.image]} style={{ width: imgW, height: imgW / ar }} resizeMode="cover" />
-          {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
+          <Animated.View
+            style={{
+              width: imgW,
+              height: imgH,
+              opacity: zoom.interpolate({ inputRange: [0, 0.75, 1], outputRange: [1, 1, 0] }),
+              transform: [
+                { translateX: zoom.interpolate({ inputRange: [0, 1], outputRange: [0, tx] }) },
+                { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [0, ty] }) },
+                { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [1, ZOOM] }) },
+              ],
+            }}
+          >
+            <Image source={SCENE_IMAGES[node.image]} style={{ width: imgW, height: imgH }} resizeMode="cover" />
+            {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
+            {hasHots
+              ? node.choices!.map((c, i) => (
+                  <ChoiceSpot key={c.next} choice={c} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
+                ))
+              : null}
+          </Animated.View>
           {isEnd ? <Confetti /> : null}
         </View>
         <Text style={styles.text} testID={`story-text-${nodeId}`}>{node.text}</Text>
@@ -82,7 +136,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
               minWidth={230}
             />
           </View>
-        ) : (
+        ) : hasHots ? null : (
           <View style={styles.choices}>
             {node.choices!.map((c, i) => c.icon ? (
               <Pressable
@@ -115,6 +169,46 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
         )}
       </ScrollView>
     </GameShell>
+  );
+}
+
+// An in-scene choice: the door/slide/boat itself glows gently and the kid
+// taps it directly — no buttons off the picture. The glow breathes so
+// pre-readers spot both options without any text.
+function ChoiceSpot({ choice, index, scale, onPick }: {
+  choice: StoryChoice; index: number; scale: number; onPick: () => void;
+}) {
+  const pulse = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 750, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 750, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [pulse]);
+  const h = choice.hot!;
+  const color = index === 0 ? colors.teal : colors.gold;
+  return (
+    <Pressable
+      onPress={onPick}
+      testID={`story-choice-${choice.next}`}
+      accessibilityLabel={choice.label}
+      accessibilityRole="button"
+      style={{ position: 'absolute', left: h.x * scale, top: h.y * scale, width: h.w * scale, height: h.h * scale }}
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.hotGlow,
+          {
+            borderColor: color,
+            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.95] }),
+            transform: [{ scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.05] }) }],
+          },
+        ]}
+      />
+    </Pressable>
   );
 }
 
@@ -191,6 +285,12 @@ function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
 }
 
 const styles = StyleSheet.create({
+  hotGlow: {
+    flex: 1,
+    borderRadius: 18,
+    borderWidth: 5,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+  },
   shimmer: {
     flex: 1,
     borderRadius: 999,

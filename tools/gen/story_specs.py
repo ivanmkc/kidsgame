@@ -196,3 +196,138 @@ SCARE_SCHOOL = {
         },
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# Hotspot-native books: choices live IN the scene. Every choice carries a
+# `spot` (a SAM-locatable phrase for the drawn affordance) and the scene
+# prompt composes BOTH affordances large, distinct, and clearly separated
+# (left/right). The kid taps the door itself — no buttons.
+
+RAINBOW_DOORS = {
+    "id": "doors",
+    "title": "The Two-Door House",
+    "character": LUNA,
+    "nodes": {
+        "start": {
+            "scene": f"{LUNA} standing in a flowery meadow before a small crooked floating cottage that has TWO front doors side by side: on the LEFT a round bright RED door with a big carved golden sun, on the RIGHT a tall arched deep BLUE door with a big carved silver moon. Both doors large, fully visible, clearly separated",
+            "text": "Luna found a tiny floating house with two magic doors! The red sun door hums with warm light. The blue moon door twinkles with tiny stars. Which door should Luna open?",
+            "choices": [{"label": "Open the red sun door", "next": "a", "spot": "round red door"},
+                        {"label": "Open the blue moon door", "next": "b", "spot": "tall blue door"}],
+        },
+        "a": {
+            "scene": f"{LUNA} stepping into a sunny garden in the clouds, golden light everywhere. On the LEFT a shiny GOLDEN spiral slide curling down from a cloud hill, on the RIGHT a giant RED-capped bouncy mushroom with white spots like a trampoline. Both large, fully visible, clearly separated",
+            "text": "Behind the red door is a garden in the clouds! A golden slide curls down the hill, and a giant bouncy mushroom goes boing... boing... Where should Luna play?",
+            "choices": [{"label": "Whoosh down the golden slide", "next": "aa", "spot": "golden spiral slide"},
+                        {"label": "Bounce on the big mushroom", "next": "ab", "spot": "giant red mushroom"}],
+        },
+        "b": {
+            "scene": f"{LUNA} stepping into a magical night garden under swirling stars. On the LEFT a little WOODEN boat glowing with fireflies floating on a starlit pond, on the RIGHT a SILVER crescent-moon swing hanging from a star on silver ropes. Both large, fully visible, clearly separated",
+            "text": "Behind the blue door is a night garden full of stars! A firefly boat bobs on the pond, and a silver moon swing sways from a star. What should Luna ride?",
+            "choices": [{"label": "Sail the firefly boat", "next": "ba", "spot": "wooden boat"},
+                        {"label": "Swing on the moon swing", "next": "bb", "spot": "silver moon swing"}],
+        },
+        "aa": {
+            "scene": f"{LUNA} landing at the bottom of the golden slide in a valley of candy-colored clouds. On the LEFT a RAINBOW ferris wheel made of clouds turning slowly, on the RIGHT a cozy little cloud cottage with a puffing chimney and warm windows. Both large, fully visible, clearly separated",
+            "text": "Wheee! The slide lands in a candy-cloud valley. A rainbow ferris wheel spins slowly, and a cozy cloud cottage puffs warm little smoke rings. Where to now?",
+            "choices": [{"label": "Ride the rainbow wheel", "next": "end_party", "spot": "rainbow ferris wheel"},
+                        {"label": "Knock at the cloud cottage", "next": "end_cozy", "spot": "cloud cottage"}],
+        },
+        "ab": {
+            "scene": f"{LUNA} bouncing high off the giant mushroom toward a treetop village at sunset. On the LEFT a long ROPE bridge with flags leading to a treehouse full of lanterns and party balloons, on the RIGHT a small FLUFFY white cloud with a friendly smiling face floating close by. Both large, fully visible, clearly separated",
+            "text": "Boing! Luna bounces all the way up to a treetop village. A flaggy rope bridge leads to a lantern party, and a little smiling cloud floats up beside her. What should Luna do?",
+            "choices": [{"label": "Cross the rope bridge", "next": "end_party", "spot": "rope bridge"},
+                        {"label": "Hop on the friendly cloud", "next": "end_flight", "spot": "fluffy white cloud"}],
+        },
+        "ba": {
+            "scene": f"{LUNA} in the glowing firefly boat arriving at a tiny island where baby stars sleep. On the LEFT a big soft NEST woven of moonbeams full of dozing glowing baby stars, on the RIGHT a small striped MOON lighthouse with a spiral staircase and a bright lamp. Both large, fully visible, clearly separated",
+            "text": "The firefly boat sails to Star Island, where baby stars snore tiny sparkly snores. There's a soft moonbeam nest, and a little striped lighthouse. Where should Luna go?",
+            "choices": [{"label": "Snuggle into the star nest", "next": "end_stars", "spot": "nest of baby stars"},
+                        {"label": "Climb the little lighthouse", "next": "end_flight", "spot": "striped lighthouse"}],
+        },
+        "bb": {
+            "scene": f"{LUNA} swinging up onto a moon balcony made of silver clouds. On the LEFT a big shiny BRASS telescope pointed at the twinkling sky, on the RIGHT a long curly SILVER slide spiraling from the balcony down toward a warm lit meadow far below. Both large, fully visible, clearly separated",
+            "text": "The swing carries Luna to a balcony on the moon! A big brass telescope peeks at the stars, and a curly silver slide swooshes all the way home. What should Luna pick?",
+            "choices": [{"label": "Peek through the telescope", "next": "end_stars", "spot": "brass telescope"},
+                        {"label": "Take the silver slide home", "next": "end_cozy", "spot": "silver slide"}],
+        },
+        "end_party": {
+            "scene": f"{LUNA} dancing at a joyful cloud carnival with cloud sheep, star bunnies and rainbow birds, ferris wheel and lanterns glowing, confetti of flower petals",
+            "text": "Luna dances all evening at the cloud carnival with her new friends. Best. Door. Ever! The End!",
+        },
+        "end_cozy": {
+            "scene": f"{LUNA} curled up by a crackling fireplace inside the cozy cloud cottage, sipping cocoa with marshmallows with a kindly old cloud sheep in spectacles",
+            "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Cloud. Luna purrs like a kitten. The End!",
+        },
+        "end_stars": {
+            "scene": f"{LUNA} asleep in the moonbeam nest with glowing baby stars snuggled all around her like a blanket, one baby star on her head",
+            "text": "The baby stars snuggle Luna like a sparkly blanket. Shhh... goodnight, Luna. The End!",
+        },
+        "end_flight": {
+            "scene": f"{LUNA} flying home across a pink sunset sky on the back of the smiling fluffy cloud, her rainbow mane streaming, the little two-door house tiny below",
+            "text": "The friendly cloud flies Luna all the way home, loop-de-loop! 'Same time tomorrow?' it whispers. The End!",
+        },
+    },
+}
+
+TREASURE_TRAIL = {
+    "id": "trail",
+    "title": "Pip's Treasure Trail",
+    "character": PIP,
+    "nodes": {
+        "start": {
+            "scene": f"{PIP} on a sunny beach holding a crinkly treasure map in his mouth. On the LEFT a dark mysterious CAVE mouth in a seaside cliff with glowing crystals inside, on the RIGHT a wobbly ROPE bridge with wooden planks crossing a turquoise lagoon toward a jungle. Both large, fully visible, clearly separated",
+            "text": "Pip found a treasure map! X marks the spot. The trail splits: a sparkly crystal cave in the cliff, or a wobbly rope bridge over the lagoon. Which way, Pip?",
+            "choices": [{"label": "Into the crystal cave", "next": "a", "spot": "dark cave mouth"},
+                        {"label": "Across the rope bridge", "next": "b", "spot": "rope bridge"}],
+        },
+        "a": {
+            "scene": f"{PIP} inside a glittering cave lit by friendly green glowworms. On the LEFT a tunnel whose walls sparkle with PURPLE and PINK crystals, on the RIGHT a little RED wooden row boat with oars resting on an underground stream. Both large, fully visible, clearly separated",
+            "text": "Inside, glowworms light the cave like tiny lanterns. A crystal tunnel sparkles purple and pink, and a little red row boat rocks on an underground stream. Which way to the treasure?",
+            "choices": [{"label": "Through the crystal tunnel", "next": "aa", "spot": "purple crystal tunnel"},
+                        {"label": "Row the little red boat", "next": "ab", "spot": "red row boat"}],
+        },
+        "b": {
+            "scene": f"{PIP} in a bright jungle clearing after the bridge. On the LEFT a very tall LOOKOUT palm tree with a rope ladder going up to a small wooden platform, on the RIGHT a thick green jungle VINE hanging like a swing over a mossy gully. Both large, fully visible, clearly separated",
+            "text": "The jungle is buzzing and green! A rope ladder climbs a tall lookout palm, and a fat jungle vine swings over the gully. How should Pip go?",
+            "choices": [{"label": "Climb the lookout palm", "next": "ba", "spot": "rope ladder"},
+                        {"label": "Swing on the jungle vine", "next": "bb", "spot": "green jungle vine"}],
+        },
+        "aa": {
+            "scene": f"{PIP} in a grand treasure chamber deep in the cave. On the LEFT a GOLDEN door with a big crab-shaped lock glowing softly, on the RIGHT a shimmering WATERFALL curtain hiding something sparkly behind it. Both large, fully visible, clearly separated",
+            "text": "A secret chamber! A golden door with a crab-shaped lock... and a shimmery waterfall hiding something sparkly. Where's the treasure, Pip?",
+            "choices": [{"label": "Open the golden crab door", "next": "end_chest", "spot": "golden door"},
+                        {"label": "Peek behind the waterfall", "next": "end_splash", "spot": "waterfall"}],
+        },
+        "ab": {
+            "scene": f"{PIP} rowing the little red boat across a huge underground lagoon glowing blue. On the LEFT a tiny striped LIGHTHOUSE on a rock with a warm lamp and a waving crab beside it, on the RIGHT a burbling BUBBLE geyser making giant rainbow bubbles rise from the water. Both large, fully visible, clearly separated",
+            "text": "The stream opens into a secret glowing lagoon! A tiny lighthouse blinks hello — there's a crab waving! And over there, a geyser burps giant rainbow bubbles. Where to?",
+            "choices": [{"label": "Visit the lighthouse crab", "next": "end_friends", "spot": "striped lighthouse"},
+                        {"label": "Chase the rainbow bubbles", "next": "end_splash", "spot": "bubble geyser"}],
+        },
+        "ba": {
+            "scene": f"{PIP} on the palm-top lookout platform seeing the whole island. On the LEFT a ZIPLINE with a wooden handle running down toward an old friendly shipwreck on the beach, on the RIGHT a springy COCONUT catapult made of bent palm and vines loaded with one coconut. Both large, fully visible, clearly separated",
+            "text": "From the top, Pip sees everything — even an old shipwreck on the beach! A zipline zooms right to it. And... is that a coconut catapult? Choose, Pip!",
+            "choices": [{"label": "Zip to the shipwreck", "next": "end_chest", "spot": "zipline"},
+                        {"label": "Boing the coconut catapult", "next": "end_splash", "spot": "coconut catapult"}],
+        },
+        "bb": {
+            "scene": f"{PIP} landing with a soft thump on the deck of a friendly old shipwreck. On the LEFT the captain's big round SHIP WHEEL with a paw-print carved in the middle, on the RIGHT a colorful PARROT on a perch wearing a tiny pirate hat, squawking happily. Both large, fully visible, clearly separated",
+            "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' Who should Pip see?",
+            "choices": [{"label": "Spin the captain's wheel", "next": "end_chest", "spot": "ship wheel"},
+                        {"label": "Say hi to the parrot", "next": "end_friends", "spot": "parrot"}],
+        },
+        "end_chest": {
+            "scene": f"{PIP} opening a huge overflowing treasure chest of golden dog bones, shiny balls and squeaky toys, golden light on his amazed face, confetti",
+            "text": "X marks the spot! The chest is full of golden bones and squeaky toys — puppy treasure! Pip is RICH! The End!",
+        },
+        "end_splash": {
+            "scene": f"{PIP} splashing joyfully in the turquoise lagoon with a crab, a parrot and rainbow bubbles everywhere, treasure map floating like a little boat",
+            "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah — but it's close!) The End!",
+        },
+        "end_friends": {
+            "scene": f"{PIP} at a beach picnic at sunset with a crab in a chef hat, a parrot in a pirate hat and a gentle whale peeking from the water, sharing sandwiches on a checkered blanket",
+            "text": "Crab makes sandwiches, Parrot tells pirate jokes, and Whale sprays a rainbow. Treasure friends forever! The End!",
+        },
+    },
+}

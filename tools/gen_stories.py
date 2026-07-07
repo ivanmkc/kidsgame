@@ -26,7 +26,7 @@ from gen.judge import ask_yes_no  # noqa: E402
 from gen.nbp import _call, generate, generate_with_ref  # noqa: E402
 from gen.sam_batch import sam_segment_batch  # noqa: E402
 from gen.scenes import SCENE_STYLE  # noqa: E402
-from gen.story_specs import SCARE_SCHOOL, WHISPERING_HOUSE  # noqa: E402
+from gen.story_specs import RAINBOW_DOORS, SCARE_SCHOOL, TREASURE_TRAIL, WHISPERING_HOUSE  # noqa: E402
 from google.genai import types  # noqa: E402
 from PIL import Image  # noqa: E402
 
@@ -34,7 +34,7 @@ ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 
-STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL]
+STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL]
 
 
 def _story_style(spec: dict) -> str:
@@ -133,6 +133,25 @@ def _locate_scare(img: Image.Image, spot: str, tag: str) -> tuple[int, int, int,
     return (x0, y0, x1 - x0, y1 - y0)
 
 
+def _spots_distinct(boxes: list) -> bool:
+    """Hotspots must be separately tappable: no overlap (16px pad), centers
+    well apart, and neither so huge it swallows the scene."""
+    for bx in boxes:
+        if bx[2] * bx[3] > 0.30 * 1280 * 720:
+            return False
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            (ax, ay, aw, ah), (bx, by, bw, bh) = boxes[i], boxes[j]
+            pad = 16
+            if not (ax - pad > bx + bw or bx - pad > ax + aw or ay - pad > by + bh or by - pad > ay + ah):
+                return False
+            acx, acy = ax + aw / 2, ay + ah / 2
+            bcx, bcy = bx + bw / 2, by + bh / 2
+            if ((acx - bcx) ** 2 + (acy - bcy) ** 2) ** 0.5 < 240:
+                return False
+    return True
+
+
 def _gen_node(spec: dict, nid: str, n: dict) -> dict:
     fname = f"{spec['id']}_{nid}.png"
     ref = _ref_path(spec)
@@ -162,7 +181,24 @@ def _gen_node(spec: dict, nid: str, n: dict) -> dict:
 
     entry: dict = {"image": f"story/{fname}", "text": n["text"]}
     if "choices" in n:
-        entry["choices"] = n["choices"]
+        chs = [{"label": c["label"], "next": c["next"], **({"icon": c["icon"]} if c.get("icon") else {})}
+               for c in n["choices"]]
+        # hotspot choices: SAM locates each declared spot IN the scene so the
+        # kid taps the door itself. All-or-nothing per node — one missing or
+        # ambiguous spot means the node falls back to buttons, never to a
+        # lopsided half-hotspot UI.
+        spots = [c.get("spot") for c in n["choices"]]
+        if all(spots):
+            scene_img = Image.open(OUT / fname)
+            boxes = [_locate_scare(scene_img, s, f"{spec['id']}/{nid}/c{i}")
+                     for i, s in enumerate(spots)]
+            if all(boxes) and _spots_distinct(boxes):
+                for c, b in zip(chs, boxes):
+                    c["hot"] = {"x": b[0], "y": b[1], "w": b[2], "h": b[3]}
+                print(f"  {spec['id']}/{nid}: hotspots wired {boxes}")
+            else:
+                print(f"  {spec['id']}/{nid}: hotspots DROPPED (missing/overlapping) — buttons fallback")
+        entry["choices"] = chs
 
     if "scare" in n:
         sc = n["scare"]
