@@ -3519,6 +3519,788 @@
           "video": "story-video/trail_end_chest_wreck_end.mp4"
         }
       }
+    },
+    {
+      "id": "night",
+      "title": "The Night Market Mystery",
+      "nodes": {
+        "start": {
+          "image": "story/night_start.png",
+          "text": "Grandma's prize melon is STOLEN \u2014 and dawn is only ten lanterns away! The thief left dango paw prints heading two ways. Which way, Detective Milo?",
+          "choices": [
+            {
+              "label": "Take the fishy alley",
+              "next": "a",
+              "hot": {
+                "x": 2,
+                "y": 28,
+                "w": 429,
+                "h": 485
+              },
+              "video": "story-video/night_start_0.mp4"
+            },
+            {
+              "label": "Take the sweet lane",
+              "next": "b",
+              "hot": {
+                "x": 867,
+                "y": 0,
+                "w": 410,
+                "h": 475
+              },
+              "video": "story-video/night_start_1.mp4"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/night_a.png",
+          "text": "The fish-seller is fast asleep. Milo tucks a lucky fish-scale charm in his pocket \u2014 dragons and scaly folk love these! He'll bring it back later. Up the nets to the roof, or down into the pickle barrel?",
+          "choices": [
+            {
+              "label": "Climb the net baskets",
+              "next": "aa",
+              "hot": {
+                "x": 36,
+                "y": 72,
+                "w": 174,
+                "h": 181
+              },
+              "video": "story-video/night_a_0.mp4"
+            },
+            {
+              "label": "Into the pickle barrel",
+              "next": "ab",
+              "hot": {
+                "x": 942,
+                "y": 392,
+                "w": 338,
+                "h": 328
+              },
+              "video": "story-video/night_a_1.mp4"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/night_b.png",
+          "text": "In the square, a hungry crow eyes Milo's last dumpling. He shares it, and the crow caws a big thank-you. The trail forks \u2014 jasmine garden, or mochi lane?",
+          "choices": [
+            {
+              "label": "Sneak into the jasmine garden",
+              "next": "ba"
+            },
+            {
+              "label": "Run down the mochi lane",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/night_aa.png",
+          "text": "On the rooftop, market cats blink hi. The trail smudges two ways: up the blue bell tower rope, or down through the bathhouse steam-vent?",
+          "choices": [
+            {
+              "label": "Climb the bell tower",
+              "next": "m1",
+              "hot": {
+                "x": 111,
+                "y": 0,
+                "w": 288,
+                "h": 612
+              },
+              "video": "story-video/night_aa_0.mp4"
+            },
+            {
+              "label": "Slip through the vent",
+              "next": "m2",
+              "hot": {
+                "x": 896,
+                "y": 200,
+                "w": 291,
+                "h": 288
+              },
+              "video": "story-video/night_aa_1.mp4"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/night_ab.png",
+          "text": "Barrels tower up. Glow-fish jars light the way. Two ways out: the big brass bell-cart heading to the temple, or the little wooden door?",
+          "choices": [
+            {
+              "label": "Hop on the bell cart",
+              "next": "m1"
+            },
+            {
+              "label": "Slip through the door",
+              "next": "m2"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/night_ba.png",
+          "text": "The jasmine garden hushes. Fireflies drift by like little lanterns. Two bridges: the red courtyard bridge, or the koi bridge toward the wharf?",
+          "choices": [
+            {
+              "label": "Cross the red bridge",
+              "next": "m3"
+            },
+            {
+              "label": "Cross the koi bridge",
+              "next": "m4"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/night_bb.png",
+          "text": "The dango trail thickens \u2014 the crow lands with a caw and points! Slip under the big purple stage curtain, or hop the honey-cart toward the docks?",
+          "choices": [
+            {
+              "label": "Slip under the curtain",
+              "next": "m3",
+              "hot": {
+                "x": 317,
+                "y": 102,
+                "w": 170,
+                "h": 407
+              },
+              "video": "story-video/night_bb_0.mp4"
+            },
+            {
+              "label": "Hop the honey cart",
+              "next": "m4",
+              "hot": {
+                "x": 893,
+                "y": 178,
+                "w": 256,
+                "h": 285
+              },
+              "video": "story-video/night_bb_1.mp4"
+            }
+          ]
+        },
+        "m1": {
+          "image": "story/night_m1.png",
+          "text": "The tower! And the melon \u2014 with a tiny snoring DRAGON curled around it, cheek to the rind. Show the mackerel charm and tiptoe up, or peek at the golden bell weights first?",
+          "choices": [
+            {
+              "label": "Show the mackerel charm",
+              "next": "end_bell_dragon",
+              "hot": {
+                "x": 37,
+                "y": 62,
+                "w": 264,
+                "h": 311
+              },
+              "video": "story-video/night_m1_0.mp4"
+            },
+            {
+              "label": "Peek at the bell weights",
+              "next": "end_bell_bounce",
+              "hot": {
+                "x": 940,
+                "y": 150,
+                "w": 320,
+                "h": 420
+              },
+              "video": "story-video/night_m1_1.mp4"
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/night_m2.png",
+          "text": "Steam curls. There's the melon \u2014 bobbing beside a friendly fox spirit! Bow politely (charm out) and ask, or skid across the wet tiles to grab it fast?",
+          "choices": [
+            {
+              "label": "Bow at the pool",
+              "next": "end_bath_soak"
+            },
+            {
+              "label": "Skid across tiles",
+              "next": "end_soy_barrel"
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/night_m3.png",
+          "text": "GOTCHA! A baby dragon, hugging the melon like her missing egg. The crow lands helpfully. Pop the gold confetti to celebrate, or bring her to the stone dragon shrine to swap?",
+          "choices": [
+            {
+              "label": "Pop the confetti",
+              "next": "end_court_confetti"
+            },
+            {
+              "label": "Take her to the shrine",
+              "next": "end_court_reveal"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/night_m4.png",
+          "text": "The melon is FLOATING \u2014 an otter paddles off in a leaf-boat and the melon bobs along behind! The crow caws directions. Row the orange boat after them, or hop the splashy red koi for a shortcut?",
+          "choices": [
+            {
+              "label": "Row the orange boat",
+              "next": "end_wharf_otter",
+              "hot": {
+                "x": 0,
+                "y": 381,
+                "w": 354,
+                "h": 186
+              },
+              "video": "story-video/night_m4_0.mp4"
+            },
+            {
+              "label": "Leap onto the splashy koi",
+              "next": "end_koi_splash",
+              "hot": {
+                "x": 1011,
+                "y": 293,
+                "w": 159,
+                "h": 305
+              },
+              "video": "story-video/night_m4_1.mp4"
+            }
+          ]
+        },
+        "end_bell_dragon": {
+          "image": "story/night_end_bell_dragon.png",
+          "text": "The charm calms her! The dragon-child gives the melon back \u2014 'Sorry, I thought it was my egg!' Dawn bell chimes. Case closed! The End!",
+          "video": "story-video/night_end_bell_dragon_end.mp4"
+        },
+        "end_bell_bounce": {
+          "image": "story/night_end_bell_bounce.png",
+          "text": "The weights TUMBLE \u2014 and startle the tiny dragon awake! She scampers off, and the melon rolls right into a mouse chef's rope-nest. 'I'll keep it safe till morning!' the chef bows. Case closed! The End!",
+          "video": "story-video/night_end_bell_bounce_end.mp4"
+        },
+        "end_bath_soak": {
+          "image": "story/night_end_bath_soak.png",
+          "text": "The fox spirit smiles: 'I only wanted to keep it warm \u2014 melon soup is best warm!' She hands it over with a wink. Case closed! The End!",
+          "video": "story-video/night_end_bath_soak_end.mp4"
+        },
+        "end_soy_barrel": {
+          "image": "story/night_end_soy_barrel.png",
+          "text": "SKIDDDD \u2014 SPLOOOOSH! Milo dives straight into the soy barrel. Salty whiskers, no melon. Grandma cheers him up with pickles anyway. Oopsie ending!",
+          "video": "story-video/night_end_soy_barrel_end.mp4"
+        },
+        "end_court_reveal": {
+          "image": "story/night_end_court_reveal.png",
+          "text": "The stone dragon glows \u2014 the shrine has a real dragon egg waiting inside for her sibling! The melon comes home. Baby dragon smiles wide. Case closed! The End!",
+          "video": "story-video/night_end_court_reveal_end.mp4"
+        },
+        "end_court_confetti": {
+          "image": "story/night_end_court_confetti.png",
+          "text": "BOOM \u2014 gold confetti! The whole night market wakes up cheering. The dragon-child gives the melon back and asks to help sell them next week. Case closed! The End!",
+          "video": "story-video/night_end_court_confetti_end.mp4"
+        },
+        "end_wharf_otter": {
+          "image": "story/night_end_wharf_otter.png",
+          "text": "The otter mistook the melon for a floating snack (fair!). Milo trades half a fish-cracker for it. Melon home in time for grandma's opening, and the crow sings them all the way there. Case closed! The End!",
+          "video": "story-video/night_end_wharf_otter_end.mp4"
+        },
+        "end_koi_splash": {
+          "image": "story/night_end_koi_splash.png",
+          "text": "The koi flips \u2014 SPLASH! Milo becomes a very wet detective, and the melon bobs away down the river. The crow laughs from the lantern rope, and grandma laughs hardest of all. Oopsie ending!",
+          "video": "story-video/night_end_koi_splash_end.mp4"
+        }
+      }
+    },
+    {
+      "id": "deep",
+      "title": "Mo and the Baby Glowfish",
+      "nodes": {
+        "start": {
+          "image": "story/deep_start.png",
+          "text": "A baby glowfish wandered from its tide-pool home! Mo lifts the shell-lantern \u2014 a bubble trail forks two ways. We have to get her home before the sun comes up! Kelp forest, or coral reef?",
+          "choices": [
+            {
+              "label": "Swim into the kelp",
+              "next": "a"
+            },
+            {
+              "label": "Swim to the coral",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/deep_a.png",
+          "text": "A little glowworm friend hitches a ride \u2014 'I'll light your way!' Two paths: down the pink anemone gully, or up to the giant clam's pearl light?",
+          "choices": [
+            {
+              "label": "Down the gully",
+              "next": "aa"
+            },
+            {
+              "label": "To the giant clam",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/deep_b.png",
+          "text": "A sad hermit crab! Mo trades a shiny pebble and \u2014 'A coral horn! Toot for help!' Two paths: the orange pufferfish tunnel, or hop on the sea turtle?",
+          "choices": [
+            {
+              "label": "Through the tunnel",
+              "next": "ba",
+              "hot": {
+                "x": 48,
+                "y": 48,
+                "w": 471,
+                "h": 390
+              },
+              "video": "story-video/deep_b_0.mp4"
+            },
+            {
+              "label": "Ride the sea turtle",
+              "next": "bb",
+              "hot": {
+                "x": 743,
+                "y": 72,
+                "w": 532,
+                "h": 368
+              },
+              "video": "story-video/deep_b_1.mp4"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/deep_aa.png",
+          "text": "The gully opens onto TWO wonders. A soft glow from deep in a kelp cave \u2014 or the arch of a whale's white bones humming like a wind chime?",
+          "choices": [
+            {
+              "label": "Enter the kelp cave",
+              "next": "m1"
+            },
+            {
+              "label": "Under the whale bones",
+              "next": "m2"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/deep_ab.png",
+          "text": "The clam-pearl lights the whole seafloor! Two ways: through a mossy green door into the kelp cave, or under the white whale rib?",
+          "choices": [
+            {
+              "label": "Through the green door",
+              "next": "m1"
+            },
+            {
+              "label": "Under the whale rib",
+              "next": "m2"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/deep_ba.png",
+          "text": "Out the tunnel \u2014 WONDER! On one side a jelly grove glows like paper lanterns. On the other, a purple coral castle with pointy towers. Which way?",
+          "choices": [
+            {
+              "label": "Into the jelly grove",
+              "next": "m3"
+            },
+            {
+              "label": "To the coral castle",
+              "next": "m4"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/deep_bb.png",
+          "text": "The turtle glides past two sights. A giant blue jelly-crown pulses near the grove; a big purple coral gate leads to a castle. 'You pick, Mo!' says the turtle.",
+          "choices": [
+            {
+              "label": "To the jelly crown",
+              "next": "m3"
+            },
+            {
+              "label": "Through the coral gate",
+              "next": "m4"
+            }
+          ]
+        },
+        "m1": {
+          "image": "story/deep_m1.png",
+          "text": "In the cave \u2014 a baby ANGLERFISH, not a glowfish! She thought Mo's lantern was the moon. Glowworm agrees: 'Guide her home!' Snuggle her to the glow-nest, or wave the lantern crab over?",
+          "choices": [
+            {
+              "label": "To the glow nest",
+              "next": "end_cave_reveal",
+              "hot": {
+                "x": 72,
+                "y": 364,
+                "w": 479,
+                "h": 284
+              },
+              "video": "story-video/deep_m1_0.mp4"
+            },
+            {
+              "label": "Wave the lantern crab",
+              "next": "end_lantern_crab",
+              "hot": {
+                "x": 839,
+                "y": 326,
+                "w": 380,
+                "h": 327
+              },
+              "video": "story-video/deep_m1_1.mp4"
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/deep_m2.png",
+          "text": "Under the whale ribs \u2014 it's a baby ANGLERFISH, not a glowfish! And she's stuck in a net! The whale-ghost hums a lullaby. Even the bubbles hush. Sing along to loosen the knots, or tug the tangled net free?",
+          "choices": [
+            {
+              "label": "Sing the lullaby",
+              "next": "end_whale_song"
+            },
+            {
+              "label": "Yank the fishing net",
+              "next": "end_whale_snag"
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/deep_m3.png",
+          "text": "There she is \u2014 a baby ANGLERFISH, thinking a mother jelly is a friendly moon! Toot the coral horn and float her home in pink jelly-arms, or take the wobbly snail carousel?",
+          "choices": [
+            {
+              "label": "Toot for the jelly",
+              "next": "end_jelly_hug"
+            },
+            {
+              "label": "Hop the snail carousel",
+              "next": "end_jelly_bounce"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/deep_m4.png",
+          "text": "The coral king holds her \u2014 a baby ANGLERFISH, not a jewel! She thought the castle windows were the moon! Toot the coral horn at the golden pearl table, or join the silver dance and let the beat call her home?",
+          "choices": [
+            {
+              "label": "Ask at the table",
+              "next": "end_castle_pearl"
+            },
+            {
+              "label": "Join the dance",
+              "next": "end_castle_dance"
+            }
+          ]
+        },
+        "end_cave_reveal": {
+          "image": "story/deep_end_cave_reveal.png",
+          "text": "'She's an anglerfish, not a glowfish!' Mo whispers. Mother anglerfish returns and kisses them both. Glowworm winks \u2014 'Told you my light was best!' The End!",
+          "video": "story-video/deep_end_cave_reveal_end.mp4"
+        },
+        "end_lantern_crab": {
+          "image": "story/deep_end_lantern_crab.png",
+          "text": "The lantern crab waves \u2014 'Follow me!' \u2014 and lights the baby's way home along the sand. Even glowworm gets a piggyback. Kelp-forest tucks them in. The End!",
+          "video": "story-video/deep_end_lantern_crab_end.mp4"
+        },
+        "end_whale_song": {
+          "image": "story/deep_end_whale_song.png",
+          "text": "The whale's lullaby loosens the knots \u2014 the baby anglerfish drifts free right into Mo's paws. 'Sing us home?' Mo asks. The whale-song does. The End!",
+          "video": "story-video/deep_end_whale_song_end.mp4"
+        },
+        "end_whale_snag": {
+          "image": "story/deep_end_whale_snag.png",
+          "text": "TUG! The net tangles MO instead. He floats upside-down like a confused jellyfish. Baby anglerfish taps his cheek. Whale-ghost bumps them both home. Oopsie ending!",
+          "video": "story-video/deep_end_whale_snag_end.mp4"
+        },
+        "end_jelly_hug": {
+          "image": "story/deep_end_jelly_hug.png",
+          "text": "TOOT \u2014 the jelly grove blooms! The mother-jelly cradles them both and floats them gently home to the tide pool. Softest ride ever. The End!",
+          "video": "story-video/deep_end_jelly_hug_end.mp4"
+        },
+        "end_jelly_bounce": {
+          "image": "story/deep_end_jelly_bounce.png",
+          "text": "BOING! BOING! The snail carousel is not for beginners. Mo pinballs through the grove, coral horn honking. Home... eventually. Salt-nose and giggles. Oopsie ending!",
+          "video": "story-video/deep_end_jelly_bounce_end.mp4"
+        },
+        "end_castle_pearl": {
+          "image": "story/deep_end_castle_pearl.png",
+          "text": "TOOT \u2014 the coral horn! The king bows: 'Ah, our little visitor!' He returns the baby anglerfish on a velvet cushion. Royal escort home. The End!",
+          "video": "story-video/deep_end_castle_pearl_end.mp4"
+        },
+        "end_castle_dance": {
+          "image": "story/deep_end_castle_dance.png",
+          "text": "The beat drops! Mo and the baby anglerfish twirl until the whole castle joins in. Danced all the way home. Best swim ever. The End!",
+          "video": "story-video/deep_end_castle_dance_end.mp4"
+        }
+      }
+    },
+    {
+      "id": "sky",
+      "title": "Pip's Balloon Race",
+      "nodes": {
+        "start": {
+          "image": "story/sky_start.png",
+          "text": "Pip's in the balloon race! First across the bakery finish wins the giant Cupcake Cup for Auntie Toast. Two shortcuts: the fast cloud tunnel, or the pretty rainbow bridge?",
+          "choices": [
+            {
+              "label": "Into the cloud tunnel",
+              "next": "a"
+            },
+            {
+              "label": "Over the rainbow bridge",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/sky_a.png",
+          "text": "A cloud sheep hands Pip a golden wind-charm \u2014 'For big windy sky!' Two ways forward: over the green windmill hill, or under the red rainbow arch?",
+          "choices": [
+            {
+              "label": "Over the windmill hill",
+              "next": "aa",
+              "hot": {
+                "x": 11,
+                "y": 349,
+                "w": 405,
+                "h": 371
+              },
+              "video": "story-video/sky_a_0.mp4"
+            },
+            {
+              "label": "Under the rainbow arch",
+              "next": "ab",
+              "hot": {
+                "x": 799,
+                "y": 139,
+                "w": 456,
+                "h": 293
+              },
+              "video": "story-video/sky_a_1.mp4"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/sky_b.png",
+          "text": "A shooting star zips past \u2014 Pip catches it in a jar! 'For luck!' Two ways forward: past the blue balloon carnival, or through the green kite tree?",
+          "choices": [
+            {
+              "label": "Past the carnival",
+              "next": "ba",
+              "hot": {
+                "x": 30,
+                "y": 48,
+                "w": 490,
+                "h": 455
+              },
+              "video": "story-video/sky_b_0.mp4"
+            },
+            {
+              "label": "Through the kite tree",
+              "next": "bb",
+              "hot": {
+                "x": 924,
+                "y": 12,
+                "w": 356,
+                "h": 599
+              },
+              "video": "story-video/sky_b_1.mp4"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/sky_aa.png",
+          "text": "The windmill hill catapults Pip UP! Two shortcuts split the sky: the narrow mountain pass, or the floating golden lantern city.",
+          "choices": [
+            {
+              "label": "Fly through the mountain pass",
+              "next": "m1"
+            },
+            {
+              "label": "Fly to the lantern city",
+              "next": "m2"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/sky_ab.png",
+          "text": "Ribbons whip past the balloon! The wind-charm hums. Two shortcuts appear: the snowy mountain gap, or the warm floating lantern city.",
+          "choices": [
+            {
+              "label": "Fly to the mountain gap",
+              "next": "m1"
+            },
+            {
+              "label": "Fly to the lantern city",
+              "next": "m2"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/sky_ba.png",
+          "text": "Carnival horns cheer! Star-jar glows. Two shortcuts: the spinning silver starfish station, or the pink bakery cliff with a giant cupcake on top.",
+          "choices": [
+            {
+              "label": "To the star station",
+              "next": "m3"
+            },
+            {
+              "label": "Fly to the bakery cliff",
+              "next": "m4"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/sky_bb.png",
+          "text": "Kites tickle the balloon! Star-jar shines lucky! Two shortcuts open: the silver starfish platform ahead, or the pink flour-dusted bakery cliff to the right.",
+          "choices": [
+            {
+              "label": "Hop on the platform",
+              "next": "m3",
+              "hot": {
+                "x": 35,
+                "y": 45,
+                "w": 370,
+                "h": 366
+              },
+              "video": "story-video/sky_bb_0.mp4"
+            },
+            {
+              "label": "Fly to the pink cliff",
+              "next": "m4",
+              "hot": {
+                "x": 921,
+                "y": 237,
+                "w": 359,
+                "h": 483
+              },
+              "video": "story-video/sky_bb_1.mp4"
+            }
+          ]
+        },
+        "m1": {
+          "image": "story/sky_m1.png",
+          "text": "The mountain howls \u2014 the wind-charm sings back! The golden eagle offers a boost. Ride the eagle to the finish, or wave hi to the snowmen first?",
+          "choices": [
+            {
+              "label": "Grab the eagle boost",
+              "next": "end_eagle_boost",
+              "hot": {
+                "x": 57,
+                "y": 126,
+                "w": 527,
+                "h": 468
+              },
+              "video": "story-video/sky_m1_0.mp4"
+            },
+            {
+              "label": "Wave to the snowmen",
+              "next": "end_snow_stall",
+              "hot": {
+                "x": 915,
+                "y": 470,
+                "w": 365,
+                "h": 208
+              },
+              "video": "story-video/sky_m1_1.mp4"
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/sky_m2.png",
+          "text": "The lantern-city cheers! The wind-charm holds the balloon steady. Sail through the gold finish-gate, or ride the firework spray in with a bang?",
+          "choices": [
+            {
+              "label": "Fly through the gold gate",
+              "next": "end_lantern_arrival"
+            },
+            {
+              "label": "Ride the fireworks",
+              "next": "end_lantern_fireworks"
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/sky_m3.png",
+          "text": "The starfish station spins! Pip's star-jar glows bright \u2014 real luck! Aim the silver swirl-launcher toward the bakery, or ride the rainbow confetti geyser up?",
+          "choices": [
+            {
+              "label": "Ride the swirl launcher",
+              "next": "end_star_swirl"
+            },
+            {
+              "label": "Ride the confetti geyser up",
+              "next": "end_star_shower"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/sky_m4.png",
+          "text": "The bakery bluff! The Cup is a GIANT CUPCAKE \u2014 Auntie Toast's masterpiece! Land smoothly on the cupcake pedestal, or ride the yellow chimney straight up to victory?",
+          "choices": [
+            {
+              "label": "Land on the cupcake",
+              "next": "end_bakery_win",
+              "hot": {
+                "x": 98,
+                "y": 112,
+                "w": 303,
+                "h": 388
+              },
+              "video": "story-video/sky_m4_0.mp4"
+            },
+            {
+              "label": "Ride the yellow chimney",
+              "next": "end_bakery_bake",
+              "hot": {
+                "x": 942,
+                "y": 223,
+                "w": 338,
+                "h": 497
+              },
+              "video": "story-video/sky_m4_1.mp4"
+            }
+          ]
+        },
+        "end_eagle_boost": {
+          "image": "story/sky_end_eagle_boost.png",
+          "text": "The eagle tows the balloon like a kite! Pip zooms over the ribbon in FIRST. Auntie Toast hands over the Cupcake Cup \u2014 'For my winner!' The End!",
+          "video": "story-video/sky_end_eagle_boost_end.mp4"
+        },
+        "end_snow_stall": {
+          "image": "story/sky_end_snow_stall.png",
+          "text": "SNOWMAN CHOIR AMBUSH! They CHEER and pour cocoa. Pip can't leave \u2014 they're too polite. Race missed. Toastiest snowman party ever. Oopsie ending!",
+          "video": "story-video/sky_end_snow_stall_end.mp4"
+        },
+        "end_lantern_arrival": {
+          "image": "story/sky_end_lantern_arrival.png",
+          "text": "Straight through the lantern-city finish gate! Every lantern chimes at once. The Cupcake Cup gleams in the morning. Pip WINS! The End!",
+          "video": "story-video/sky_end_lantern_arrival_end.mp4"
+        },
+        "end_lantern_fireworks": {
+          "image": "story/sky_end_lantern_fireworks.png",
+          "text": "BOOM \u2014 the firework spray carries Pip up and over the finish! Sparks turn to sprinkles on the Cupcake Cup. Loudest, brightest win ever! The End!",
+          "video": "story-video/sky_end_lantern_fireworks_end.mp4"
+        },
+        "end_star_swirl": {
+          "image": "story/sky_end_star_swirl.png",
+          "text": "SPROING! A swirl of cloud-smoke, and Pip spirals right to the finish. Star-jar wish granted! The Cupcake Cup is his. The End!",
+          "video": "story-video/sky_end_star_swirl_end.mp4"
+        },
+        "end_star_shower": {
+          "image": "story/sky_end_star_shower.png",
+          "text": "WHOOSH \u2014 up the geyser! Pip is CONFETTI-COVERED and completely turned around. Star-jar giggles. The pink cupcake cliff drifts past far away. Second-to-last, but the sparkliest. Oopsie ending!",
+          "video": "story-video/sky_end_star_shower_end.mp4"
+        },
+        "end_bakery_win": {
+          "image": "story/sky_end_bakery_win.png",
+          "text": "Landing gear down \u2014 plop! Right on the giant cupcake. Auntie Toast pins a sprinkle-medal on Pip: 'Take the whole Cupcake Cup home!' The End!",
+          "video": "story-video/sky_end_bakery_win_end.mp4"
+        },
+        "end_bakery_bake": {
+          "image": "story/sky_end_bakery_bake.png",
+          "text": "UP the chimney! Pip skids down onto the cupcake and BECOMES the frosting. Icing whiskers, icing tail. Baker's helper of the year! The End!",
+          "video": "story-video/sky_end_bakery_bake_end.mp4"
+        }
+      }
     }
   ],
   "dressup": [
