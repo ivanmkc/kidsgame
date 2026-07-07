@@ -79,9 +79,18 @@ def lint_spec(spec: dict) -> list[str]:
 def main() -> int:
     import sys
     sys.path.insert(0, __file__.rsplit("/", 2)[0])
-    from gen.story_specs import RAINBOW_DOORS, SCARE_SCHOOL, TREASURE_TRAIL, WHISPERING_HOUSE
+    from gen.story_specs import (
+        DEEP_SEA,
+        NIGHT_MARKET,
+        RAINBOW_DOORS,
+        SCARE_SCHOOL,
+        SKY_RACE,
+        TREASURE_TRAIL,
+        WHISPERING_HOUSE,
+    )
     bad = 0
-    for spec in (WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL):
+    for spec in (WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL,
+                 NIGHT_MARKET, DEEP_SEA, SKY_RACE):
         errs = lint_spec(spec)
         print(f"{spec['id']}: {'OK' if not errs else f'{len(errs)} issue(s)'}")
         for e in errs:

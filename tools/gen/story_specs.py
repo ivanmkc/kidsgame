@@ -363,3 +363,361 @@ TREASURE_TRAIL = {
         },
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# New hotspot books (2026-07): raised bar — WANT + obstacle on page 1,
+# 4-decision-deep paths, shared mid-hubs (branch stays location-coherent
+# because both parents come from the same side of the tree), per-branch
+# callbacks paid off at the mids, one clever twist per book.
+
+NIGHT_MARKET_STYLE = (
+    "Warm night-market children's picture-book illustration: paper "
+    "lanterns glowing gold and red, deep indigo sky, cozy shadows, "
+    "steam rising from stalls, cobblestone streets. Landscape "
+    "orientation. No text, no letters, no watermark, no people."
+)
+
+NIGHT_MARKET = {
+    "id": "night",
+    "title": "The Night Market Mystery",
+    "character": MILO,
+    "style": NIGHT_MARKET_STYLE,
+    "nodes": {
+        "start": {
+            "scene": f"{MILO} at his grandma's empty market stall in a bustling glowing night market, sticky dango-glaze paw prints leading two ways from the empty melon crate. On the LEFT a bright RED torii gate opening onto a dark fishy alley of crates, on the RIGHT a bright PINK paper-lantern arch opening onto a jasmine-scented sweet lane. Both large, fully visible, clearly separated",
+            "text": "Grandma's prize melon is STOLEN — and dawn is only ten lanterns away! The thief left dango paw prints heading two ways. Which way, Detective Milo?",
+            "choices": [{"label": "Take the fishy alley", "next": "a", "spot": "red torii gate"},
+                        {"label": "Take the sweet lane", "next": "b", "spot": "pink lantern arch"}],
+        },
+        "a": {
+            "scene": f"{MILO} in a moonlit fish alley beside a snoring old fishmonger crumpled asleep across crates, a lucky mackerel-scale charm on the stall counter. On the LEFT a tall stack of GREEN net baskets pinned like a ladder against a wall, on the RIGHT a fat WOODEN pickle barrel with the lid tilted open and paw prints on the rim. Both large, fully visible, clearly separated",
+            "text": "The fishmonger snores. Milo pockets a lucky mackerel-scale charm (he'll bring it back!). Up the nets to the rooftops, or down into the pickle warehouse?",
+            "choices": [{"label": "Climb the net baskets", "next": "aa", "spot": "green net baskets"},
+                        {"label": "Into the pickle barrel", "next": "ab", "spot": "wooden pickle barrel"}],
+        },
+        "b": {
+            "scene": f"{MILO} in the glowing lantern square feeding his last dumpling to a hungry black market CROW that caws happily, dango trail forking. On the LEFT a moonlit JADE garden gate framing glowing jasmine, on the RIGHT a red MOCHI shop archway hung with round pink and white sweets. Both large, fully visible, clearly separated",
+            "text": "In the square, a hungry crow eyes Milo's last dumpling. He shares it (kindness pays!) and the crow caws thanks. The trail forks — jasmine garden, or mochi lane?",
+            "choices": [{"label": "Into the jasmine garden", "next": "ba", "spot": "jade garden gate"},
+                        {"label": "Down the mochi lane", "next": "bb", "spot": "red mochi arch"}],
+        },
+        "aa": {
+            "scene": f"{MILO} crouched on a moonlit tiled rooftop among sleeping market cats, the melon trail smudged toward two places. On the LEFT the tall BLUE bell tower rising over the market with a rope ladder dangling, on the RIGHT a curling column of STEAM from a wooden BATHHOUSE vent between the tiles. Both large, fully visible, clearly separated",
+            "text": "On the rooftop, market cats blink hi. The trail smudges two ways: up the blue bell tower rope, or down through the bathhouse steam-vent?",
+            "choices": [{"label": "Climb the bell tower", "next": "m1", "spot": "blue bell tower"},
+                        {"label": "Slip through the vent", "next": "m2", "spot": "wooden bathhouse vent"}],
+        },
+        "ab": {
+            "scene": f"{MILO} inside a dim pickle warehouse of enormous barrels, glow-fish in jars lighting the shelves. On the LEFT a big BRASS bell-cart stacked with barrels marked TEMPLE, on the RIGHT a low round WOODEN service door with a bathhouse steam-cloud carved above it. Both large, fully visible, clearly separated",
+            "text": "Barrels loom, glow-fish jars light the way. Two ways out: a brass bell-cart bound for the temple tower, or the low bathhouse service door?",
+            "choices": [{"label": "Hop on the bell cart", "next": "m1", "spot": "brass bell cart"},
+                        {"label": "Through the wooden door", "next": "m2", "spot": "wooden bathhouse door"}],
+        },
+        "ba": {
+            "scene": f"{MILO} in a moonlit jasmine garden of glowing white flowers, fireflies drifting, the friendly crow following overhead. On the LEFT a wide RED lacquered courtyard bridge lit by lanterns, on the RIGHT a curved WOODEN koi-pond bridge leading toward glinting wharf water. Both large, fully visible, clearly separated",
+            "text": "The jasmine garden hushes. The crow flaps overhead — kindness pays! Two bridges: the red courtyard bridge, or the koi bridge toward the wharf?",
+            "choices": [{"label": "Cross the red bridge", "next": "m3", "spot": "red lacquered bridge"},
+                        {"label": "Cross the koi bridge", "next": "m4", "spot": "wooden koi bridge"}],
+        },
+        "bb": {
+            "scene": f"{MILO} in a sweet mochi lane of round pink and white shops, dango trail thick as jam, the crow perched cheerfully on a shopfront. On the LEFT a big PURPLE curtain drawn across a courtyard theatre with a mochi cart parked outside, on the RIGHT a rolling YELLOW honey-cart rumbling downhill toward the wharf. Both large, fully visible, clearly separated",
+            "text": "The dango trail thickens — the crow lands with a caw and points! Slip under the courtyard theatre curtain, or hop the honey-cart toward the wharf?",
+            "choices": [{"label": "Under the curtain", "next": "m3", "spot": "purple theatre curtain"},
+                        {"label": "Hop the honey cart", "next": "m4", "spot": "yellow honey cart"}],
+        },
+        "m1": {
+            "scene": f"{MILO} on the top platform of the blue bell tower under a huge bronze bell, moonlight everywhere. On the LEFT a tiny sleeping BABY DRAGON curled around a green melon breathing sparkles, on the RIGHT a dusty rope room with a stack of GOLDEN bell weights and a startled mouse in a chef hat. Both large, fully visible, clearly separated",
+            "text": "The tower! And the melon — with a tiny snoring DRAGON curled around it, cheek to the rind. Show the mackerel charm and tiptoe up, or peek at the golden bell weights first?",
+            "choices": [{"label": "Show the mackerel charm", "next": "end_bell_dragon", "spot": "sleeping baby dragon"},
+                        {"label": "Peek the bell weights", "next": "end_bell_bounce", "spot": "golden bell weights"}],
+        },
+        "m2": {
+            "scene": f"{MILO} on the wooden bathhouse walkway in warm steam, the melon just visible bobbing in the hot spring. On the LEFT the big STEAMY hot pool with a friendly fox spirit gently petting a green melon, on the RIGHT a slippery WHITE tiled floor beside a huge open dark SOY sauce barrel. Both large, fully visible, clearly separated",
+            "text": "Steam curls. There's the melon — bobbing beside a friendly fox spirit! Bow politely (charm out) and ask, or skid across the wet tiles to grab it fast?",
+            "choices": [{"label": "Bow at the pool", "next": "end_bath_soak", "spot": "steamy hot pool"},
+                        {"label": "Skid across tiles", "next": "end_soy_barrel", "spot": "white slippery tiles"}],
+        },
+        "m3": {
+            "scene": f"{MILO} arriving at a moonlit courtyard stage, the CROW landing on his shoulder. In the middle, a small BABY DRAGON caught red-clawed hugging the green melon like an egg, blinking. On the LEFT a heap of GOLD confetti-cannons rigged for the moon festival, on the RIGHT a small STONE dragon shrine with a friendly stone-dragon face. Both large, fully visible, clearly separated",
+            "text": "GOTCHA! A baby dragon, hugging the melon like her missing egg. The crow lands helpfully. Pop the gold confetti to celebrate, or bring her to the stone dragon shrine to swap?",
+            "choices": [{"label": "Pop the confetti", "next": "end_court_confetti", "spot": "gold confetti cannons"},
+                        {"label": "To the dragon shrine", "next": "end_court_reveal", "spot": "stone dragon shrine"}],
+        },
+        "m4": {
+            "scene": f"{MILO} on the wharf under strings of lanterns, the CROW circling above. In the water, the green melon floats past on a leaf-boat paddled by a plump river OTTER. On the LEFT a small ORANGE rowboat tied at the pier with an oar ready, on the RIGHT a big RED koi splashing over a wet plank right beside Milo's paws. Both large, fully visible, clearly separated",
+            "text": "The melon is FLOATING — an otter paddles it home in a leaf-boat! The crow caws directions. Row the orange boat after them, or hop the splashy red koi for a shortcut?",
+            "choices": [{"label": "Row the orange boat", "next": "end_wharf_otter", "spot": "orange row boat"},
+                        {"label": "Leap the splashy koi", "next": "end_koi_splash", "spot": "big red koi"}],
+        },
+        "end_bell_dragon": {
+            "scene": f"{MILO} on the moonlit bell-tower platform, mackerel charm in his paw, a tiny sparkling BABY DRAGON gently placing the green melon into a padded basket while the bronze bell chimes softly, dawn glow beginning",
+            "text": "The charm calms her! The dragon-child gives the melon back — 'Sorry, I thought it was my egg!' Dawn bell chimes. Case closed! The End!",
+        },
+        "end_bell_bounce": {
+            "scene": f"{MILO} in the bell-tower rope room with a tumble of GOLDEN bell weights rolling under a very proud mouse chef, the green melon rolling out from a nest of ropes, dawn light through the shutter",
+            "text": "The weights TUMBLE — a hidden mouse-chef pantry! And there, packed in ropes for safekeeping: grandma's melon. Mouse chef bows. Case closed! The End!",
+        },
+        "end_bath_soak": {
+            "scene": f"{MILO} bowing beside a friendly FOX SPIRIT at the steamy bathhouse hot spring, the green melon floating between them like a bath toy, mackerel charm glowing softly on the ledge, dawn light",
+            "text": "The fox spirit smiles: 'I only wanted to keep it warm — melon soup is best warm!' She hands it over with a wink. Case closed! The End!",
+        },
+        "end_soy_barrel": {
+            "scene": f"{MILO} covered head to whiskers in dark SOY SAUCE splashing from a giant open soy barrel in the bathhouse, wide-eyed startled cats above, no melon in sight",
+            "text": "SKIDDDD — SPLOOOOSH! Milo dives straight into the soy barrel. Salty whiskers, no melon. Grandma cheers him up with pickles anyway. Oopsie ending!",
+            "bad": True,
+        },
+        "end_court_reveal": {
+            "scene": f"{MILO} at the stone dragon shrine handing the green melon to a small BABY DRAGON as the stone dragon statue lights up glowing, the market CROW perched on Milo's shoulder, dawn glow",
+            "text": "The stone dragon glows — the shrine has a real dragon egg waiting inside for her sibling! The melon comes home. Baby dragon smiles wide. Case closed! The End!",
+        },
+        "end_court_confetti": {
+            "scene": f"{MILO} in a burst of GOLD confetti on the moonlit courtyard stage, a joyful BABY DRAGON handing over the green melon, the market CROW flying overhead pulling ribbons, the whole market waking to cheer",
+            "text": "BOOM — gold confetti! The whole night market wakes up cheering. The dragon-child gives the melon back and asks to help sell them next week. Case closed! The End!",
+        },
+        "end_wharf_otter": {
+            "scene": f"{MILO} in the little orange rowboat under wharf lanterns beside a plump river OTTER, both grinning as they lift the green melon out of a leaf-boat together at dawn",
+            "text": "The otter mistook the melon for a floating snack (fair!). Milo trades half a fish-cracker for it. Melon home in time for grandma's opening. Case closed! The End!",
+        },
+        "end_koi_splash": {
+            "scene": f"{MILO} splashing SPLAT into the koi pond at the wharf, a big red KOI leaping above with a triumphant look, the melon leaf-boat drifting far off toward the dawn horizon",
+            "text": "The koi flips — SPLASH! Milo becomes a very wet detective. The melon sails off into the sunrise. Grandma laughs so hard she forgets to be mad. Oopsie ending!",
+            "bad": True,
+        },
+    },
+}
+
+
+DEEP_SEA_STYLE = (
+    "Bioluminescent deep-sea children's picture-book illustration: "
+    "cool teal and violet water, glowing corals, drifting bubbles, "
+    "soft ocean light, curling seaweed, gentle currents. Landscape "
+    "orientation. No text, no letters, no watermark, no people."
+)
+
+DEEP_SEA = {
+    "id": "deep",
+    "title": "Mo and the Baby Glowfish",
+    "character": MO,
+    "style": DEEP_SEA_STYLE,
+    "nodes": {
+        "start": {
+            "scene": f"{MO} bobbing at a starlit tide pool holding a glowing shell-lantern, a tiny trail of glowing bubbles leading off into the sea two ways. On the LEFT a swaying dark GREEN kelp forest with fish darting between fronds, on the RIGHT a bright PINK coral arch buzzing with rainbow fish. Both large, fully visible, clearly separated",
+            "text": "A baby glowfish wandered from its tide-pool home! Mo lifts the shell-lantern — a bubble trail forks two ways. The tide returns at dawn. Kelp forest, or coral reef?",
+            "choices": [{"label": "Into the kelp forest", "next": "a", "spot": "green kelp forest"},
+                        {"label": "Onto the coral reef", "next": "b", "spot": "pink coral arch"}],
+        },
+        "a": {
+            "scene": f"{MO} inside a dim green kelp forest lit by his shell-lantern and a friendly tiny GLOWWORM riding on his nub. On the LEFT a narrow PINK ANEMONE gully bristling with soft glowing anemones, on the RIGHT a huge TAN GIANT clam propped open with a shimmering pearl inside. Both large, fully visible, clearly separated",
+            "text": "A little glowworm friend hitches a ride — 'I'll light your way!' Two paths: down the pink anemone gully, or up to the giant clam's pearl light?",
+            "choices": [{"label": "Down the gully", "next": "aa", "spot": "pink anemone gully"},
+                        {"label": "To the giant clam", "next": "ab", "spot": "tan giant clam"}],
+        },
+        "b": {
+            "scene": f"{MO} on the rainbow coral reef beside a hermit CRAB pouting over an empty shell, receiving a small CORAL HORN for a shiny pebble he traded. On the LEFT a bright ORANGE pufferfish tunnel of round puffed cheeks, on the RIGHT a big GREEN sea turtle drifting close, saddle-shell ready. Both large, fully visible, clearly separated",
+            "text": "A glum hermit crab! Mo trades a shiny pebble and — 'A coral horn! Toot for help!' Two paths: the orange pufferfish tunnel, or hop on the sea turtle?",
+            "choices": [{"label": "Through the tunnel", "next": "ba", "spot": "orange pufferfish tunnel"},
+                        {"label": "Ride the sea turtle", "next": "bb", "spot": "green sea turtle"}],
+        },
+        "aa": {
+            "scene": f"{MO} at the far end of the anemone gully, glowworm bright on his nub. On the LEFT a DARK KELP cave mouth glowing softly from within, on the RIGHT a huge WHITE WHALE skeleton arched over the sand like a natural gate. Both large, fully visible, clearly separated",
+            "text": "The gully opens onto TWO wonders. A soft glow from deep in a kelp cave — or the arch of a whale's white bones humming like a wind chime?",
+            "choices": [{"label": "Enter the kelp cave", "next": "m1", "spot": "dark kelp cave"},
+                        {"label": "Under the whale bones", "next": "m2", "spot": "white whale skeleton"}],
+        },
+        "ab": {
+            "scene": f"{MO} up beside the giant clam's pearl, glowworm bright. On the LEFT a mossy GREEN sunken door in the seafloor labelled KELP CAVE, on the RIGHT a colossal WHITE WHALE rib jutting from the sand pointing the way. Both large, fully visible, clearly separated",
+            "text": "The clam-pearl lights the whole seafloor! Two ways: through a mossy green door into the kelp cave, or under the white whale rib?",
+            "choices": [{"label": "Through the green door", "next": "m1", "spot": "green mossy door"},
+                        {"label": "Under the whale rib", "next": "m2", "spot": "white whale rib"}],
+        },
+        "ba": {
+            "scene": f"{MO} floating out of the pufferfish tunnel into open water, coral horn tied to his side. On the LEFT a shimmering PINK JELLY grove of glowing jellyfish drifting like paper lanterns, on the RIGHT a tall PURPLE CORAL castle with turrets rising over the reef. Both large, fully visible, clearly separated",
+            "text": "Out the tunnel — WONDER! On one side a jelly grove pulses like paper lanterns. On the other, a purple coral castle with real turrets. Which way?",
+            "choices": [{"label": "Into the jelly grove", "next": "m3", "spot": "pink jelly grove"},
+                        {"label": "To the coral castle", "next": "m4", "spot": "purple coral castle"}],
+        },
+        "bb": {
+            "scene": f"{MO} on the back of a GREEN sea turtle drifting past two sights, coral horn tied to his side. On the LEFT a huge floating BLUE JELLY crown pulsing softly near a grove, on the RIGHT a wide PURPLE CORAL gate with turrets rising behind. Both large, fully visible, clearly separated",
+            "text": "The turtle glides past two sights. A giant blue jelly-crown pulses near the grove; a big purple coral gate leads to a castle. 'Your call, Mo,' says the turtle.",
+            "choices": [{"label": "To the jelly crown", "next": "m3", "spot": "blue jelly crown"},
+                        {"label": "Through the coral gate", "next": "m4", "spot": "purple coral gate"}],
+        },
+        "m1": {
+            "scene": f"{MO} inside a glowing kelp cave, glowworm shining bright on his nub. In the middle, a shy BABY ANGLERFISH curled up mistaking Mo's lantern for the moon. On the LEFT a bright soft NEST of GLOWING plants where the anglerfish rests, on the RIGHT a friendly LANTERN CRAB waving a bright lantern claw. Both large, fully visible, clearly separated",
+            "text": "In the cave — a baby ANGLERFISH, not a glowfish! She thought Mo's lantern was the moon. Glowworm agrees: 'Guide her home!' Snuggle her to the glow-nest, or wave the lantern crab over?",
+            "choices": [{"label": "To the glow nest", "next": "end_cave_reveal", "spot": "glowing plant nest"},
+                        {"label": "Wave the lantern crab", "next": "end_lantern_crab", "spot": "friendly lantern crab"}],
+        },
+        "m2": {
+            "scene": f"{MO} under the great white whale skeleton, moonbeams filtering through. Inside the ribs, a soft glowing BABY ANGLERFISH tangled in old fishing net. On the LEFT a shimmering GHOSTLY BLUE whale spirit singing a lullaby in the water, on the RIGHT a knotted grey OLD FISHING net drifting in the current. Both large, fully visible, clearly separated",
+            "text": "Under the whale ribs — the baby's stuck in a net! The whale-ghost hums a lullaby. Glowworm hushes for it. Sing along to loosen the knots, or tug the tangled net free?",
+            "choices": [{"label": "Sing the lullaby", "next": "end_whale_song", "spot": "ghostly blue whale"},
+                        {"label": "Yank the fishing net", "next": "end_whale_snag", "spot": "old fishing net"}],
+        },
+        "m3": {
+            "scene": f"{MO} floating into the jelly grove with the coral horn ready. Between glowing jellies, a shy BABY ANGLERFISH curls up beside a giant mother jelly. On the LEFT a BIG PINK jellyfish reaching out gentle glowing tentacles, on the RIGHT a spinning SILVER SNAIL carousel of round shells bouncing jellies gently. Both large, fully visible, clearly separated",
+            "text": "There she is — a baby ANGLERFISH, thinking a mother jelly is a friendly moon! Toot the coral horn and float her home in pink jelly-arms, or take the wobbly snail carousel?",
+            "choices": [{"label": "Toot for the jelly", "next": "end_jelly_hug", "spot": "big pink jellyfish"},
+                        {"label": "Hop the snail carousel", "next": "end_jelly_bounce", "spot": "silver snail carousel"}],
+        },
+        "m4": {
+            "scene": f"{MO} at the door of the coral castle. Inside, a coral KING holds a shy BABY ANGLERFISH like a tiny lost jewel. On the LEFT a GOLDEN PEARL table where the king polishes a found pearl, on the RIGHT a big SILVER DANCE floor pulsing with music as sea creatures twirl. Both large, fully visible, clearly separated",
+            "text": "The coral king holds her — a baby ANGLERFISH, not a jewel! Toot the coral horn to claim her at the golden pearl table, or join the silver dance and let the beat call her home?",
+            "choices": [{"label": "Claim at the table", "next": "end_castle_pearl", "spot": "golden pearl table"},
+                        {"label": "Join the dance", "next": "end_castle_dance", "spot": "silver dance floor"}],
+        },
+        "end_cave_reveal": {
+            "scene": f"{MO} tucking a tiny BABY ANGLERFISH into a bright soft NEST of glowing plants deep in the kelp cave, glowworm perched on his nub as a nightlight, mother anglerfish returning with a smile, warm bioluminescent glow",
+            "text": "'She's an anglerfish, not a glowfish!' Mo whispers. Mother anglerfish returns and kisses them both. Glowworm winks — 'Told you my light was best!' The End!",
+        },
+        "end_lantern_crab": {
+            "scene": f"{MO} outside the kelp cave watching a friendly LANTERN CRAB guide a tiny BABY ANGLERFISH along the seafloor by bright claw-light, glowworm riding on Mo's nub, kelp swaying",
+            "text": "The lantern crab waves — 'Follow me!' — and lights the baby's way home along the sand. Even glowworm gets a piggyback. Kelp-forest tucks them in. The End!",
+        },
+        "end_whale_song": {
+            "scene": f"{MO} inside the whale-rib arch, a ghostly BLUE WHALE singing softly as the fishing net floats free and a tiny BABY ANGLERFISH swims right into Mo's paws, glowworm cheering, moonlit water",
+            "text": "The whale's lullaby loosens the knots — the baby anglerfish drifts free right into Mo's paws. 'Sing us home?' Mo asks. The whale-song does. The End!",
+        },
+        "end_whale_snag": {
+            "scene": f"{MO} tangled comically upside-down in the OLD FISHING net floating under the whale ribs, seaweed hat askew, the BABY ANGLERFISH poking a fin at his cheek with concern, glowworm rolling laughing",
+            "text": "TUG! The net tangles MO instead. He floats upside-down like a confused jellyfish. Baby anglerfish taps his cheek. Whale-ghost bumps them both home. Oopsie ending!",
+            "bad": True,
+        },
+        "end_jelly_hug": {
+            "scene": f"{MO} being gently lifted by a BIG PINK jellyfish with a tiny BABY ANGLERFISH curled at his belly, jelly-grove glowing all around, coral horn tucked away, mother jelly smiling",
+            "text": "TOOT — the jelly grove blooms! The mother-jelly cradles them both and floats them gently home to the tide pool. Softest ride ever. The End!",
+        },
+        "end_jelly_bounce": {
+            "scene": f"{MO} bouncing haphazardly across silvery SNAIL shells like trampolines in the jelly grove, coral horn honking accidentally, BABY ANGLERFISH clinging to his ear, bubbles everywhere",
+            "text": "BOING! BOING! The snail carousel is not for beginners. Mo pinballs through the grove, coral horn honking. Home... eventually. Salt-nose and giggles. Oopsie ending!",
+            "bad": True,
+        },
+        "end_castle_pearl": {
+            "scene": f"{MO} at the golden PEARL TABLE in the coral castle receiving a tiny glowing BABY ANGLERFISH from a smiling coral king, courtiers of rainbow fish bowing gently, coral horn on the table",
+            "text": "TOOT — the coral horn! The king bows: 'Ah, your little cousin!' He returns the baby anglerfish on a velvet cushion. Royal escort home. The End!",
+        },
+        "end_castle_dance": {
+            "scene": f"{MO} spinning on the SILVER DANCE floor of the coral castle with a joyful BABY ANGLERFISH twirling on his head, rainbow fish and sea horses dancing all around, coral horn tooting time",
+            "text": "The beat drops! Mo and the baby anglerfish twirl until the whole castle joins in. Danced all the way home. Best swim ever. The End!",
+        },
+    },
+}
+
+
+SKY_RACE_STYLE = (
+    "Bright morning sky children's picture-book illustration: pastel "
+    "clouds like cotton candy, colorful hot-air balloons, soft blue "
+    "sky, drifting streamers, warm sunrise light, cheerful and airy. "
+    "Landscape orientation. No text, no letters, no watermark, no "
+    "people."
+)
+
+SKY_RACE = {
+    "id": "sky",
+    "title": "Pip's Balloon Race",
+    "character": PIP,
+    "style": SKY_RACE_STYLE,
+    "nodes": {
+        "start": {
+            "scene": f"{PIP} in a patchwork red-and-yellow hot-air balloon at a bright sunrise starting line, race flags waving. On the LEFT a puffy WHITE cloud tunnel curling through the sky like a smoke-ring, on the RIGHT a wide RAINBOW BRIDGE arcing between fluffy cloud platforms. Both large, fully visible, clearly separated",
+            "text": "Pip's in the balloon race! First across the bakery finish wins the Cup for Auntie Toast. Two shortcuts: fast-and-tricky cloud tunnel, or safe-and-scenic rainbow bridge?",
+            "choices": [{"label": "Into the cloud tunnel", "next": "a", "spot": "white cloud tunnel"},
+                        {"label": "Over the rainbow bridge", "next": "b", "spot": "rainbow bridge"}],
+        },
+        "a": {
+            "scene": f"{PIP} in his balloon inside the puffy cloud tunnel, a friendly CLOUD SHEEP handing him a tiny golden WIND-CHARM. On the LEFT a swirling GREEN windmill hill rising through the clouds, on the RIGHT a giant RED rainbow arch made of ribbons overhead. Both large, fully visible, clearly separated",
+            "text": "A cloud sheep hands Pip a golden wind-charm — 'For headwinds!' Two ways forward: over the green windmill hill, or under the red rainbow arch?",
+            "choices": [{"label": "Over the windmill hill", "next": "aa", "spot": "green windmill hill"},
+                        {"label": "Under the rainbow arch", "next": "ab", "spot": "red rainbow arch"}],
+        },
+        "b": {
+            "scene": f"{PIP} in his balloon on the rainbow bridge catching a SHOOTING STAR in a jar mid-flight. On the LEFT a giant BLUE carnival tent for balloons hanging in the sky, on the RIGHT a huge GREEN kite tree tangled with paper kites. Both large, fully visible, clearly separated",
+            "text": "A shooting star zips past — Pip catches it in a jar! 'For luck!' Two ways forward: past the blue balloon carnival, or through the green kite tree?",
+            "choices": [{"label": "Past the carnival", "next": "ba", "spot": "blue carnival tent"},
+                        {"label": "Through the kite tree", "next": "bb", "spot": "green kite tree"}],
+        },
+        "aa": {
+            "scene": f"{PIP} in his balloon over the windmill hill, wind-charm swinging bright. On the LEFT a jagged WHITE mountain pass squeezed between two snowy peaks, on the RIGHT a floating GOLD lantern city hanging from a huge cloud on chains. Both large, fully visible, clearly separated",
+            "text": "The windmill hill catapults Pip UP! Two shortcuts split the sky: the narrow mountain pass, or the floating golden lantern city.",
+            "choices": [{"label": "Aim the mountain pass", "next": "m1", "spot": "white mountain pass"},
+                        {"label": "Aim the lantern city", "next": "m2", "spot": "gold lantern city"}],
+        },
+        "ab": {
+            "scene": f"{PIP} in his balloon through the red rainbow arch, wind-charm glowing warm. On the LEFT a snowy WHITE mountain gap flashing between two peaks, on the RIGHT a warm ORANGE floating city of paper lanterns swaying on chains. Both large, fully visible, clearly separated",
+            "text": "Ribbons whip past the balloon! The wind-charm hums. Two shortcuts appear: the snowy mountain gap, or the warm floating lantern city.",
+            "choices": [{"label": "For the mountain gap", "next": "m1", "spot": "white mountain gap"},
+                        {"label": "For the lantern city", "next": "m2", "spot": "orange lantern city"}],
+        },
+        "ba": {
+            "scene": f"{PIP} in his balloon drifting past the blue carnival, star-jar tucked in the basket glowing. On the LEFT a big STAR-shaped SILVER balloon station spinning slowly, on the RIGHT a PINK bakery-bluff cliff with a giant iced cupcake on top. Both large, fully visible, clearly separated",
+            "text": "Carnival horns cheer! Star-jar glows. Two shortcuts: the spinning silver starfish station, or the pink bakery-bluff with a giant cupcake for a landmark.",
+            "choices": [{"label": "To the star station", "next": "m3", "spot": "silver star station"},
+                        {"label": "For the bakery bluff", "next": "m4", "spot": "pink bakery bluff"}],
+        },
+        "bb": {
+            "scene": f"{PIP} in his balloon threading between paper kites in the kite tree, star-jar glowing bright. On the LEFT a huge SILVER star-shaped balloon platform spinning, on the RIGHT a warm PINK cliff dusted with flour beneath a big cupcake beacon. Both large, fully visible, clearly separated",
+            "text": "Kites tickle the balloon! Star-jar giggles luck. Two shortcuts open: the silver starfish platform ahead, or the pink flour-dusted bakery cliff to the right.",
+            "choices": [{"label": "Board the platform", "next": "m3", "spot": "silver star platform"},
+                        {"label": "To the pink cliff", "next": "m4", "spot": "pink flour cliff"}],
+        },
+        "m1": {
+            "scene": f"{PIP} in his balloon inside the narrow mountain pass, wind-charm ringing bright. On the LEFT a huge friendly GOLDEN eagle offering a talon-boost, on the RIGHT a SNOWY LEDGE with a whole village of waving snowmen mid-cheer. Both large, fully visible, clearly separated",
+            "text": "The mountain howls — the wind-charm sings back! The golden eagle offers a boost. Ride the eagle to the finish, or wave hi to the snowmen first?",
+            "choices": [{"label": "Grab the eagle boost", "next": "end_eagle_boost", "spot": "golden eagle"},
+                        {"label": "Wave to the snowmen", "next": "end_snow_stall", "spot": "snowy ledge"}],
+        },
+        "m2": {
+            "scene": f"{PIP} in his balloon among lanterns of the floating city, wind-charm steadying the ride. On the LEFT a huge GOLD LANTERN gate marked FINISH twinkling in the wind, on the RIGHT a warm crowd of paper lantern-balloons launching a COLORFUL FIREWORK spray upward. Both large, fully visible, clearly separated",
+            "text": "The lantern-city cheers! The wind-charm keeps the balloon steady in gusts. Sail through the gold finish-gate, or ride the firework spray in with a bang?",
+            "choices": [{"label": "Through the gold gate", "next": "end_lantern_arrival", "spot": "gold lantern gate"},
+                        {"label": "Ride the fireworks", "next": "end_lantern_fireworks", "spot": "colorful firework spray"}],
+        },
+        "m3": {
+            "scene": f"{PIP} in his balloon docking on the silvery starfish balloon station, star-jar glowing bright. On the LEFT a spinning SILVER swirl-launcher that fires balloons like slingshots, on the RIGHT a shimmering RAINBOW confetti geyser bursting straight up. Both large, fully visible, clearly separated",
+            "text": "The starfish station spins! Pip's star-jar glows bright — real luck! Aim the silver swirl-launcher toward the bakery, or ride the rainbow confetti geyser up?",
+            "choices": [{"label": "Fire the launcher", "next": "end_star_swirl", "spot": "silver swirl launcher"},
+                        {"label": "Up the confetti geyser", "next": "end_star_shower", "spot": "rainbow confetti geyser"}],
+        },
+        "m4": {
+            "scene": f"{PIP} in his balloon nearing the pink bakery bluff, star-jar sparkling like a compass. On the LEFT a GIANT WHITE frosted cupcake the size of a house on a pedestal (the Cup!), on the RIGHT a huge YELLOW oven chimney billowing warm cake-scented steam. Both large, fully visible, clearly separated",
+            "text": "The bakery bluff! The Cup is a GIANT CUPCAKE — Auntie Toast's masterpiece! Land smoothly on the cupcake pedestal, or ride the yellow chimney straight up to victory?",
+            "choices": [{"label": "Land on the cupcake", "next": "end_bakery_win", "spot": "giant white cupcake"},
+                        {"label": "Ride the yellow chimney", "next": "end_bakery_bake", "spot": "yellow oven chimney"}],
+        },
+        "end_eagle_boost": {
+            "scene": f"{PIP} in his balloon being pulled joyfully by a huge GOLDEN EAGLE over the finish ribbon at the pink bakery bluff, a giant frosted cupcake trophy waiting, sunrise sky, wind-charm still ringing",
+            "text": "The eagle tows the balloon like a kite! Pip zooms over the ribbon in FIRST. Auntie Toast hands over the Cupcake Cup — 'For my winner!' The End!",
+        },
+        "end_snow_stall": {
+            "scene": f"{PIP} in his balloon parked on the SNOWY mountain ledge surrounded by a whole choir of cheering snowmen, sipping cocoa from a snowman's mug, the pink bakery cliff far away in the sunrise",
+            "text": "SNOWMAN CHOIR AMBUSH! They CHEER and pour cocoa. Pip can't leave — they're too polite. Race missed. Toastiest snowman party ever. Oopsie ending!",
+            "bad": True,
+        },
+        "end_lantern_arrival": {
+            "scene": f"{PIP} in his balloon gliding through a big glowing GOLD LANTERN gate marked FINISH above the pink bakery, cupcake trophy waiting, floating lantern city cheering behind, sunrise",
+            "text": "Straight through the lantern-city finish gate! Every lantern chimes at once. The Cupcake Cup gleams in the morning. Pip WINS! The End!",
+        },
+        "end_lantern_fireworks": {
+            "scene": f"{PIP} in his balloon riding a shower of colorful FIREWORKS across the finish line at the bakery bluff, cupcake trophy sparkling below, sunrise sky exploding with color",
+            "text": "BOOM — the firework spray carries Pip up and over the finish! Sparks turn to sprinkles on the Cupcake Cup. Loudest, brightest win ever! The End!",
+        },
+        "end_star_swirl": {
+            "scene": f"{PIP} in his balloon fired by the SILVER SWIRL LAUNCHER spiralling gracefully toward the pink bakery finish, star-jar glowing bright, cupcake trophy waiting, sunrise",
+            "text": "SPROING! The silver launcher spins Pip in a perfect spiral to the finish. Star-jar wish granted! The Cupcake Cup is his. The End!",
+        },
+        "end_star_shower": {
+            "scene": f"{PIP} in his balloon covered head to paw in RAINBOW CONFETTI atop the star-station, star-jar sparkling but the pink bakery cliff visible far away, laughing crowd of racing balloons zooming past",
+            "text": "WHOOSH — up the geyser! Pip is CONFETTI-COVERED and completely turned around. Star-jar giggles. Second-to-last, but the sparkliest. Oopsie ending!",
+            "bad": True,
+        },
+        "end_bakery_win": {
+            "scene": f"{PIP} in his balloon touching down softly on a GIANT white frosted CUPCAKE pedestal at the pink bakery bluff, Auntie Toast the baker cheering with a sprinkle-medal, sunrise",
+            "text": "Landing gear down — plop! Right on the giant cupcake. Auntie Toast pins a sprinkle-medal on Pip: 'Take the whole Cupcake Cup home!' The End!",
+        },
+        "end_bakery_bake": {
+            "scene": f"{PIP} standing atop the giant iced cupcake with icing all over his floppy ears, a YELLOW OVEN CHIMNEY puffing warm steam behind him, bakers cheering, sunrise sky",
+            "text": "UP the chimney! Pip skids down onto the cupcake and BECOMES the frosting. Icing whiskers, icing tail. Baker's helper of the year! The End!",
+        },
+    },
+}

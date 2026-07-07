@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import google.genai as genai
 from gen.judge import ask_yes_no
 from gen.nbp import PROJECT
-from gen.story_specs import LUNA, PIP
+from gen.story_specs import LUNA, MILO, MO, PIP
 from google.genai import types
 from PIL import Image
 
@@ -30,7 +30,8 @@ SCENES = ROOT / "assets" / "game" / "story"
 OUT = ROOT / "public" / "story-video"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 MODEL = "veo-3.0-fast-generate-001"
-HEROES = {"doors": ("Luna", LUNA), "trail": ("Pip", PIP)}
+HEROES = {"doors": ("Luna", LUNA), "trail": ("Pip", PIP),
+          "night": ("Milo", MILO), "deep": ("Mo", MO), "sky": ("Pip", PIP)}
 
 import threading
 _tls = threading.local()
@@ -140,8 +141,9 @@ def main() -> None:
                 jobs.append((st["id"], nid, -1,
                              f"__ending__:{mood}: {n['text'][:120]}"))
     print(f"{len(jobs)} clips to generate")
-    from gen.story_specs import RAINBOW_DOORS, TREASURE_TRAIL
-    SPECS = {"doors": RAINBOW_DOORS, "trail": TREASURE_TRAIL}
+    from gen.story_specs import DEEP_SEA, NIGHT_MARKET, RAINBOW_DOORS, SKY_RACE, TREASURE_TRAIL
+    SPECS = {"doors": RAINBOW_DOORS, "trail": TREASURE_TRAIL,
+             "night": NIGHT_MARKET, "deep": DEEP_SEA, "sky": SKY_RACE}
     def run(j):
         sid, nid, idx, label = j
         spot = ("" if idx == -1

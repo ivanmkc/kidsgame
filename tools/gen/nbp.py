@@ -182,6 +182,23 @@ def edit(base: Image.Image, mask: np.ndarray, prompt: str,
     mask_s = np.asarray(Image.fromarray((mask * 255).astype(np.uint8), "L").resize(small)) > 127
     changed_outside = float((diff_s[~mask_s] > 45).mean()) if (~mask_s).any() else 0.0
 
+    # With a composite_mask the caller keeps ONLY object+hairline pixels, so
+    # what matters is the seam BAND around the object (halos, redrawn
+    # neighbors — the space-v1 blockers), not whole-frame re-render noise:
+    # busy scenes carry an irreducible global floor (~0.09 in a packed music
+    # room) that would reject every edit regardless of quality.
+    if composite_mask is not None:
+        import cv2
+        ring = cv2.dilate((composite_mask * 255).astype(np.uint8),
+                          np.ones((37, 37), np.uint8)) > 127
+        ring &= ~composite_mask
+        small4 = (max(1, base.width // 4), max(1, base.height // 4))
+        b4 = np.asarray(base.filter(ImageFilter.GaussianBlur(2)).resize(small4), np.int16)
+        o4 = np.asarray(out.filter(ImageFilter.GaussianBlur(2)).resize(small4), np.int16)
+        ring4 = np.asarray(Image.fromarray((ring * 255).astype(np.uint8), "L").resize(small4)) > 127
+        d4 = np.abs(o4 - b4).sum(-1)
+        changed_outside = float((d4[ring4] > 45).mean()) if ring4.any() else 0.0
+
     # Composite ONLY the changed pixels (the object), not the whole rect:
     # NBP re-renders the patch with a slight tone shift, so blending the
     # full rect leaves a visible soft rectangle around the object. The
