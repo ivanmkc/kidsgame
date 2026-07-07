@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { stopNarration } from './sound';
 
 // Route strings: 'players' | 'menu' | '<game>' | '<game>/<sceneId>'.
 // On web the route lives in the URL hash so browser back/forward work; on
@@ -18,7 +19,12 @@ export function useRoute(): [string, (r: string, opts?: { replace?: boolean }) =
 
   useEffect(() => {
     if (!isWeb) return;
-    const onPop = () => setRoute(readHash());
+    // Cancel the previous screen's narration BEFORE React commits the
+    // new tree. If we deferred this to an after-mount useEffect, React
+    // would run the child's mount-effect say() FIRST and then our
+    // parent-effect stopNarration() would fade out the fresh clip — the
+    // "first round is silent" bug the kids kept hitting.
+    const onPop = () => { stopNarration(); setRoute(readHash()); };
     window.addEventListener('popstate', onPop);
     window.addEventListener('hashchange', onPop);
     return () => {
@@ -28,6 +34,10 @@ export function useRoute(): [string, (r: string, opts?: { replace?: boolean }) =
   }, []);
 
   const navigate = (r: string, opts?: { replace?: boolean }) => {
+    // Runs synchronously inside the click handler — before the state
+    // update triggers a re-render. This is why the new screen's mount
+    // effect sees a clean slate and its opening say() is not interrupted.
+    if (isWeb) stopNarration();
     setRoute(r);
     if (isWeb) {
       const url = `#/${r}`;
