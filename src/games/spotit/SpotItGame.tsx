@@ -3,6 +3,8 @@ import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { ModePicker } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { colors } from '../../theme';
@@ -17,29 +19,31 @@ interface Props {
   difficulty: Difficulty;
   seed?: number;
   twoPlayerEnabled?: boolean;
+  lang?: Lang;
 }
 
 // Thin shell: mode state + ModePicker only. All gameplay hooks live inside
 // SpotItSolo / SpotItDuel so hook order here never varies.
-export function SpotItGame({ onHome, difficulty, seed, twoPlayerEnabled }: Props) {
+export function SpotItGame({ onHome, difficulty, seed, twoPlayerEnabled, lang = 'en' }: Props) {
   const [mode, setMode] = useState<'solo' | '2p' | null>(twoPlayerEnabled ? null : 'solo');
   return (
     <>
       {mode === '2p' ? (
-        <SpotItDuel onHome={onHome} difficulty={difficulty} seed={seed} />
+        <SpotItDuel onHome={onHome} difficulty={difficulty} seed={seed} lang={lang} />
       ) : (
-        <SpotItSolo onHome={onHome} difficulty={difficulty} seed={seed} locked={mode === null} />
+        <SpotItSolo onHome={onHome} difficulty={difficulty} seed={seed} locked={mode === null} lang={lang} />
       )}
       {mode === null ? <ModePicker onPick={setMode} /> : null}
     </>
   );
 }
 
-function SpotItSolo({ onHome, difficulty, seed, locked }: {
+function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   onHome: () => void;
   difficulty: Difficulty;
   seed?: number;
   locked: boolean;
+  lang: Lang;
 }) {
   const deck = useMemo(() => buildDeck(), []);
   const roundsToWin = settingsFor(difficulty).spotitRounds;
@@ -97,9 +101,10 @@ function SpotItSolo({ onHome, difficulty, seed, locked }: {
 
   return (
     <GameShell
-      title="Spot It!"
-      subtitle="Tap the picture that is on BOTH cards"
+      title={t(lang, 'shell.spotit.title')}
+      subtitle={t(lang, 'shell.spotit.sub')}
       onBack={onHome}
+      lang={lang}
       right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
@@ -119,9 +124,10 @@ function SpotItSolo({ onHome, difficulty, seed, locked }: {
       </View>
       <WinOverlay
         visible={won}
-        message={showTimer ? `You matched them all in ${mmss}! ⏱` : 'Sharp eyes! You spotted them all!'}
-        onNext={reset} nextLabel={'Next Round ▶️'}
+        message={showTimer ? t(lang, 'win.spotitTimed', { time: mmss }) : t(lang, 'win.spotit')}
+        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

@@ -14,6 +14,7 @@ interface Props {
   foundIds: string[];
   ringColors?: Record<string, string>; // per-box FoundRing color (co-op finder tint)
   hintId?: string | null; // temporarily flash this box's ring (easy mode)
+  hintRegion?: Box | null; // big search-area hint: contains exactly one diff, jittered off-center
   onHit: (id: string) => void;
   onMiss: () => void;
   testIDPrefix: string;
@@ -22,7 +23,7 @@ interface Props {
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -60,6 +61,18 @@ export function TapScene({
         />
       ))}
       <View pointerEvents="none" style={styles.hairline} />
+      {hintRegion ? (
+        <View
+          pointerEvents="none"
+          testID={`${testIDPrefix}-hint-region`}
+          style={[styles.hintRegion, {
+            left: hintRegion.x * scale,
+            top: hintRegion.y * scale,
+            width: hintRegion.w * scale,
+            height: hintRegion.h * scale,
+          }]}
+        />
+      ) : null}
       <Pressable
         style={StyleSheet.absoluteFill}
         onPress={miss}
@@ -154,6 +167,13 @@ const styles = StyleSheet.create({
     borderColor: colors.ring,
     borderRadius: 999,
     backgroundColor: 'rgba(95,191,110,0.16)',
+  },
+  hintRegion: {
+    position: 'absolute',
+    borderRadius: 26,
+    borderWidth: 5,
+    borderColor: 'rgba(255,194,75,0.95)',
+    backgroundColor: 'rgba(255,214,110,0.12)',
   },
   hint: {
     flex: 1,

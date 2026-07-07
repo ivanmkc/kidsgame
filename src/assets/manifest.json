@@ -804,60 +804,6 @@
       ]
     },
     {
-      "id": "music",
-      "name": "Music Room",
-      "image": "diff/music_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 671,
-          "y": 567,
-          "w": 240,
-          "h": 111,
-          "name": "golden trumpet",
-          "kind": "remove",
-          "patch": "diff/music_d_0_golden_trumpet.png"
-        },
-        {
-          "x": 1114,
-          "y": 52,
-          "w": 118,
-          "h": 156,
-          "name": "metronome",
-          "kind": "recolor",
-          "patch": "diff/music_d_1_metronome.png"
-        },
-        {
-          "x": 48,
-          "y": 529,
-          "w": 206,
-          "h": 153,
-          "name": "red accordion",
-          "kind": "recolor",
-          "patch": "diff/music_d_2_red_accordion.png"
-        },
-        {
-          "x": 1002,
-          "y": 562,
-          "w": 251,
-          "h": 119,
-          "name": "violin case",
-          "kind": "recolor",
-          "patch": "diff/music_d_3_violin_case.png"
-        },
-        {
-          "x": 400,
-          "y": 461,
-          "w": 113,
-          "h": 245,
-          "name": "microphone on a stand",
-          "kind": "recolor",
-          "patch": "diff/music_d_4_microphone_on_a_stand.png"
-        }
-      ]
-    },
-    {
       "id": "bakery",
       "name": "Bakery",
       "image": "diff/bakery_base.png",
@@ -908,51 +854,6 @@
           "name": "milk bottle",
           "kind": "recolor",
           "patch": "diff/bakery_d_4_milk_bottle.png"
-        }
-      ]
-    },
-    {
-      "id": "space",
-      "name": "Space",
-      "image": "diff/space_base.png",
-      "w": 1280,
-      "h": 720,
-      "pool": [
-        {
-          "x": 709,
-          "y": 536,
-          "w": 91,
-          "h": 165,
-          "name": "green alien waving",
-          "kind": "recolor",
-          "patch": "diff/space_d_0_green_alien_waving.png"
-        },
-        {
-          "x": 468,
-          "y": 493,
-          "w": 144,
-          "h": 212,
-          "name": "astronaut floating",
-          "kind": "remove",
-          "patch": "diff/space_d_1_astronaut_floating.png"
-        },
-        {
-          "x": 908,
-          "y": 543,
-          "w": 118,
-          "h": 105,
-          "name": "flying saucer",
-          "kind": "recolor",
-          "patch": "diff/space_d_2_flying_saucer.png"
-        },
-        {
-          "x": 244,
-          "y": 541,
-          "w": 145,
-          "h": 134,
-          "name": "purple planet",
-          "kind": "recolor",
-          "patch": "diff/space_d_3_purple_planet.png"
         }
       ]
     },
@@ -1043,6 +944,51 @@
           "name": "canteen",
           "kind": "remove",
           "patch": "diff/camping_d_3_canteen.png"
+        }
+      ]
+    },
+    {
+      "id": "space",
+      "name": "Space",
+      "image": "diff/space_base.png",
+      "w": 1280,
+      "h": 720,
+      "pool": [
+        {
+          "x": 944,
+          "y": 209,
+          "w": 79,
+          "h": 86,
+          "name": "orange traffic cone floating",
+          "kind": "remove",
+          "patch": "diff/space_d_0_orange_traffic_cone_floa.png"
+        },
+        {
+          "x": 164,
+          "y": 457,
+          "w": 115,
+          "h": 139,
+          "name": "satellite dish antenna",
+          "kind": "recolor",
+          "patch": "diff/space_d_1_satellite_dish_antenna.png"
+        },
+        {
+          "x": 920,
+          "y": 29,
+          "w": 113,
+          "h": 89,
+          "name": "red toolbox floating",
+          "kind": "recolor",
+          "patch": "diff/space_d_2_red_toolbox_floating.png"
+        },
+        {
+          "x": 367,
+          "y": 523,
+          "w": 81,
+          "h": 92,
+          "name": "blue fuel canister",
+          "kind": "recolor",
+          "patch": "diff/space_d_3_blue_fuel_canister.png"
         }
       ]
     }
@@ -2471,7 +2417,7 @@
         },
         "end_crown": {
           "image": "story/luna_end_crown.png",
-          "text": "The animals crown Luna the Hide-and-Seek Champion of the forest! The End!"
+          "text": "The animals weave Luna a crown of daisies \u2014 Hide-and-Seek Champion of the whole forest! The End!"
         },
         "end_pearl": {
           "image": "story/luna_end_pearl.png",
@@ -2483,7 +2429,7 @@
         },
         "end_bonfire": {
           "image": "story/luna_end_bonfire.png",
-          "text": "Down on the twinkly beach, everyone dances around the bonfire until the stars come out. The End!"
+          "text": "Luna hurries to the glowing bonfire on the twinkly beach, and everyone dances until the stars come out. The End!"
         }
       }
     },
@@ -2557,7 +2503,7 @@
         },
         "ab": {
           "image": "story/pip_ab.png",
-          "text": "The sound was three tiny kittens \u2014 playing right on the map's X! 'Mew! Mew! We're hungry and a little lost.'",
+          "text": "The sound was three tiny kittens, peeking out of an old watering can! 'Mew! Mew! We're hungry and a little lost.'",
           "choices": [
             {
               "label": "Lead them home \ud83c\udfe1",
@@ -2743,10 +2689,10 @@
             }
           ],
           "scare": {
-            "x": 689,
-            "y": 228,
-            "w": 458,
-            "h": 492,
+            "x": 711,
+            "y": 163,
+            "w": 501,
+            "h": 557,
             "pop": "story/whisper_ab_pop.png",
             "sting": "thunder",
             "reveal": "The whisperers are owls! It's their midnight book club. 'Shhh,' says the owl, smiling.",
@@ -2871,7 +2817,17 @@
               "next": "ab",
               "icon": "story/scareschool_a_c1.png"
             }
-          ]
+          ],
+          "scare": {
+            "x": 1021,
+            "y": 24,
+            "w": 116,
+            "h": 513,
+            "pop": "story/scareschool_a_pop.png",
+            "sting": "boing",
+            "reveal": "BLOB! Blobbina jiggles so hard everyone falls off their chairs laughing. 'Ten points!' says the Principal.",
+            "delay": 0
+          }
         },
         "b": {
           "image": "story/scareschool_b.png",
@@ -2917,7 +2873,7 @@
         },
         "ab": {
           "image": "story/scareschool_ab.png",
-          "text": "Blobbina's secret: 'Being scary is just being YOU \u2014 your way!' The funhouse mirror behind them darkens...",
+          "text": "Blobbina pulls Mo down the hall to the Mirror Room. Her secret: 'Being scary is just being YOU \u2014 your way!' The funhouse mirror behind them darkens...",
           "choices": [
             {
               "label": "Try the teeny-tiniest boo \ud83e\udd2b",
@@ -2955,7 +2911,17 @@
               "next": "end_team",
               "icon": "story/scareschool_ba_c1.png"
             }
-          ]
+          ],
+          "scare": {
+            "x": 917,
+            "y": 362,
+            "w": 339,
+            "h": 345,
+            "pop": "story/scareschool_ba_pop.png",
+            "sting": "boing",
+            "reveal": "Fangsley was IN the pudding! 'Thith ith the betht day of my life,' he says, dripping.",
+            "delay": 0
+          }
         },
         "bb": {
           "image": "story/scareschool_bb.png",
@@ -2989,7 +2955,7 @@
         },
         "end_team": {
           "image": "story/scareschool_end_team.png",
-          "text": "Scares are better together! The whole school piles onto the big stage, and Mo and the class take a bow. Best first day ever. The End!"
+          "text": "Scares are better together! When the mess is tidied and the cheering starts, the whole school parades to the auditorium and piles onto the big stage. Mo and the class take a bow. Best first day ever. The End!"
         },
         "end_growl": {
           "image": "story/scareschool_end_growl.png",
@@ -2997,7 +2963,7 @@
         },
         "end_pudding": {
           "image": "story/scareschool_end_pudding.png",
-          "text": "The tiptoeing trash can tips over \u2014 it was FULL of pudding! The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!"
+          "text": "CRASH! SPLAT! Pudding flies EVERYWHERE \u2014 it's the Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!"
         }
       }
     },
@@ -3203,37 +3169,45 @@
         },
         "end_party": {
           "image": "story/doors_end_party.png",
-          "text": "Luna dances all evening at the cloud carnival with her new friends. Best. Door. Ever! The End!"
+          "text": "Round and round Luna rides the rainbow wheel, then dances all evening with the cloud sheep and star bunnies. Best. Door. Ever! The End!",
+          "video": "story-video/doors_end_party_end.mp4"
         },
         "end_cozy": {
           "image": "story/doors_end_cozy.png",
-          "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Sheep. Luna purrs like a kitten. The End!"
+          "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Sheep. Luna purrs like a kitten. The End!",
+          "video": "story-video/doors_end_cozy_end.mp4"
         },
         "end_stars": {
           "image": "story/doors_end_stars.png",
-          "text": "The baby stars snuggle Luna like a sparkly blanket. Shhh... goodnight, Luna. The End!"
+          "text": "The baby stars snuggle Luna like a sparkly blanket. Shhh... goodnight, Luna. The End!",
+          "video": "story-video/doors_end_stars_end.mp4"
         },
         "end_flight": {
           "image": "story/doors_end_flight.png",
-          "text": "The friendly cloud flies Luna all the way home, loop-de-loop! 'Same time tomorrow?' it whispers. The End!"
+          "text": "The friendly cloud flies Luna all the way home, loop-de-loop! 'Same time tomorrow?' it whispers. The End!",
+          "video": "story-video/doors_end_flight_end.mp4"
         },
         "end_dizzy": {
           "image": "story/doors_end_dizzy.png",
           "text": "Whoa \u2014 the lighthouse lamp is SO bright! Luna goes all dizzy and slides right back down to the boat. Home early, blinking little stars. Oopsie ending!",
-          "bad": true
+          "bad": true,
+          "video": "story-video/doors_end_dizzy_end.mp4"
         },
         "end_slip": {
           "image": "story/doors_end_slip.png",
           "text": "Wheee \u2014 TOO fast! The slippery silver slide plops Luna SPLAT into a puddle. Muddy mane! Straight home for a bath. Oopsie ending!",
-          "bad": true
+          "bad": true,
+          "video": "story-video/doors_end_slip_end.mp4"
         },
         "end_party_treetop": {
           "image": "story/doors_end_party_treetop.png",
-          "text": "Across the bridge, the treetop party is ON! Lanterns, balloons, and dancing till the stars peek out. Best. Bridge. Ever! The End!"
+          "text": "Across the bridge, the treetop party is ON! Lanterns, balloons, and dancing till the stars peek out. Best. Bridge. Ever! The End!",
+          "video": "story-video/doors_end_party_treetop_end.mp4"
         },
         "end_stars_moon": {
           "image": "story/doors_end_stars_moon.png",
-          "text": "Through the telescope Luna spots... baby stars! They fly right up to snuggle her on the moon balcony. Goodnight, little stars. The End!"
+          "text": "Through the telescope Luna spots... baby stars! They fly right up to snuggle her on the moon balcony. Goodnight, little stars. The End!",
+          "video": "story-video/doors_end_stars_moon_end.mp4"
         }
       }
     },
@@ -3333,10 +3307,10 @@
               "label": "Open the golden crab door",
               "next": "end_chest_cave",
               "hot": {
-                "x": 0,
-                "y": 0,
-                "w": 477,
-                "h": 568
+                "x": 76,
+                "y": 96,
+                "w": 293,
+                "h": 486
               },
               "video": "story-video/trail_aa_0.mp4"
             },
@@ -3344,10 +3318,10 @@
               "label": "Peek behind the waterfall",
               "next": "end_soggy",
               "hot": {
-                "x": 949,
+                "x": 860,
                 "y": 0,
-                "w": 331,
-                "h": 568
+                "w": 330,
+                "h": 540
               },
               "video": "story-video/trail_aa_1.mp4"
             }
@@ -3411,7 +3385,7 @@
         },
         "bb": {
           "image": "story/trail_bb.png",
-          "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' Who should Pip see?",
+          "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' What should Pip try?",
           "choices": [
             {
               "label": "Spin the captain's wheel",
@@ -3439,29 +3413,35 @@
         },
         "end_splash": {
           "image": "story/trail_end_splash.png",
-          "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah \u2014 but it's close!) The End!"
+          "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah \u2014 but it's close!) The End!",
+          "video": "story-video/trail_end_splash_end.mp4"
         },
         "end_friends": {
           "image": "story/trail_end_friends.png",
-          "text": "Crab makes sandwiches, Parrot tells pirate jokes, and Whale sprays a rainbow. Treasure friends forever! The End!"
+          "text": "Crab makes sandwiches, Parrot tells pirate jokes, and Whale pops up to say hello. Treasure friends forever! The End!",
+          "video": "story-video/trail_end_friends_end.mp4"
         },
         "end_soggy": {
           "image": "story/trail_end_soggy.png",
           "text": "SPLOOSH! Behind the waterfall is... just MORE water. Pip is soaked to the whiskers and the map went all drippy. Home for a warm towel. Oopsie ending!",
-          "bad": true
+          "bad": true,
+          "video": "story-video/trail_end_soggy_end.mp4"
         },
         "end_boing": {
           "image": "story/trail_end_boing.png",
           "text": "BOING! The coconut catapult flings Pip aaaall the way back to the start of the beach. Sandy bottom. Zero treasure. Oopsie ending!",
-          "bad": true
+          "bad": true,
+          "video": "story-video/trail_end_boing_end.mp4"
         },
         "end_chest_cave": {
           "image": "story/trail_end_chest_cave.png",
-          "text": "The crab door swings open \u2014 and there it is! A chest of golden bones and squeaky toys, deep in the sparkly cave. X marks the spot! The End!"
+          "text": "The crab door swings open \u2014 and there it is! A chest of golden bones and squeaky toys, deep in the sparkly cave. X marks the spot! The End!",
+          "video": "story-video/trail_end_chest_cave_end.mp4"
         },
         "end_chest_wreck": {
           "image": "story/trail_end_chest_wreck.png",
-          "text": "Right there on the pirate ship \u2014 the treasure chest! Golden bones, squeaky toys, and a cheering parrot. X marks the spot! The End!"
+          "text": "Right there on the pirate ship \u2014 the treasure chest! Golden bones, squeaky toys, and a cheering parrot. X marks the spot! The End!",
+          "video": "story-video/trail_end_chest_wreck_end.mp4"
         }
       }
     }

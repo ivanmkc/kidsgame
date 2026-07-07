@@ -1,32 +1,49 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FeedbackChip } from './Feedback';
+import { sfx } from '../sound';
+import { Lang } from '../lang';
 import { colors, fonts, shadows } from '../theme';
+
+// "Levels" back-affordance label per language. Kept inline (rather than
+// pulled through i18n.ts) because it's tightly bound to the ⬅️ chip only
+// this component renders.
+const BACK_LEVELS: Record<Lang, string> = {
+  en: 'Levels',
+  ja: 'レベル',
+  cmn: '关卡',
+  yue: '關卡',
+};
 
 interface Props {
   title: string;
   subtitle?: string;
+  backKind?: 'menu' | 'picker'; // 🏠 to game menu vs ⬅️ back to level picker
   onBack: () => void;
   right?: React.ReactNode;
   children: React.ReactNode;
+  /** Threaded to header FeedbackChip so the modal follows UI language. */
+  lang?: Lang;
 }
 
-export function GameShell({ title, subtitle, onBack, right, children }: Props) {
+export function GameShell({ title, subtitle, onBack, right, children, backKind = 'menu', lang = 'en' }: Props) {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
         <Pressable
-          onPress={onBack}
+          onPress={() => { sfx.tap(); onBack(); }}
           style={({ pressed }) => [styles.back, shadows.soft, pressed && styles.pressed]}
-          accessibilityLabel="Back to menu"
+          accessibilityLabel={backKind === 'picker' ? 'Back to level choices' : 'Back to menu'}
           testID="back-button"
         >
-          <Text style={styles.backText}>🏠</Text>
+          <Text style={styles.backText}>{backKind === 'picker' ? '⬅️' : '🏠'}</Text>
+          {backKind === 'picker' ? <Text style={styles.backLabel}>{BACK_LEVELS[lang]}</Text> : null}
         </Pressable>
         <View style={styles.titles}>
           <Text style={styles.title}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
-        <View style={styles.right}>{right}</View>
+        <View style={styles.right}>{right}<FeedbackChip compact lang={lang} /></View>
       </View>
       {children}
     </View>
@@ -67,12 +84,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  backLabel: { fontFamily: fonts.displayMed, fontSize: 11, color: colors.inkSoft, marginTop: -2 },
   pressed: { opacity: 0.6, transform: [{ scale: 0.94 }] },
   backText: { fontSize: 26 },
   titles: { flex: 1 },
   title: { fontSize: 24, fontFamily: fonts.display, color: colors.ink },
   subtitle: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: -2 },
-  right: { minWidth: 54, alignItems: 'flex-end' },
+  right: { minWidth: 54, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
   chip: {
     backgroundColor: colors.card,
     borderRadius: 999,

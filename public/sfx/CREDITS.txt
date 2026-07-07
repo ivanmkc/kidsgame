@@ -1,2 +1,19 @@
-Sound effects: "Interface Sounds" and "Jingle Sounds" by Kenney (kenney.nl)
-License: CC0 1.0 Universal (public domain). Credit appreciated, not required.
+Sound effects (all CC0 / public domain — no attribution required, but appreciated).
+
+tap.mp3, good.mp3, wrong.mp3, flip.mp3, win.mp3
+  Source: "Interface Sounds" and "Jingle Sounds" by Kenney (kenney.nl)
+  License: CC0 1.0 Universal (public domain)
+
+boing.mp3
+  Source: "100 CC0 SFX" pack, spring_07.ogg by rubberduck
+  URL: https://opengameart.org/content/100-cc0-sfx
+  License: CC0 1.0 Universal (public domain)
+  Processing: mono-mixed, silence-trimmed, -3 dB pre-limiter, encoded to 44.1 kHz mp3
+
+thunder.mp3
+  Source: "100 CC0 SFX #2" pack, sfx100v2_thunder_01.ogg by rubberduck
+  URL: https://opengameart.org/content/100-cc0-sfx-2
+  License: CC0 1.0 Universal (public domain)
+  Processing: mono-mixed, trimmed to 2.35s (skip lead-in, keep main clap + tail),
+              fade-in 0.25s / fade-out 0.5s, -4 dB attenuation for kid-safety,
+              encoded to 44.1 kHz mp3

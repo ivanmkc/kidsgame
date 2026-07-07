@@ -71,6 +71,7 @@ export interface StoryNode {
   choices?: StoryChoice[];
   scare?: StoryScare;
   bad?: boolean; // oopsie ending — no confetti, offer 'try another way'
+  video?: string; // ending nodes: gentle ambient Veo clip of the final scene
 }
 
 export interface Story {

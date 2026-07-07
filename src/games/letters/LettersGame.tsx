@@ -5,6 +5,7 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { say, sfx } from '../../sound';
@@ -75,9 +76,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={tier === 'kana' ? 'Kana Hunt' : 'Letter Hunt'}
-      subtitle={tier === 'sound' ? 'Which letter makes that sound?' : 'Tap the letter you hear'}
+      title={tier === 'kana' ? t(lang, 'shell.letters.titleKana') : t(lang, 'shell.letters.title')}
+      subtitle={tier === 'sound' ? t(lang, 'shell.letters.subSound') : t(lang, 'shell.letters.subTap')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="letters-timer" /> : null}
@@ -113,9 +115,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={tier === 'kana' ? 'Kana master! You found them all!' : 'Letter master! You found them all!'}
-        onNext={reset} nextLabel={'Play Again ▶️'}
+        message={tier === 'kana' ? t(lang, 'win.lettersKana') : t(lang, 'win.letters')}
+        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

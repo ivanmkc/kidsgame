@@ -5,6 +5,7 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang, numberWord } from '../../lang';
+import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { saySequence, sfx } from '../../sound';
@@ -74,9 +75,10 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={numSettings.useHan ? 'Number Hunt (漢数字)' : 'Number Hunt'}
-      subtitle={'Tap the number you hear'}
+      title={numSettings.useHan ? t(lang, 'shell.numbers.titleHan') : t(lang, 'shell.numbers.title')}
+      subtitle={t(lang, 'shell.numbers.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="numbers-timer" /> : null}
@@ -114,9 +116,10 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Number master! You found them all!'}
-        onNext={reset} nextLabel={'Play Again ▶️'}
+        message={t(lang, 'win.numbers')}
+        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

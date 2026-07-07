@@ -6,6 +6,8 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
@@ -15,12 +17,13 @@ import { RulesRound, makeRules, makeRulesRound } from './logic';
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  lang?: Lang;
 }
 
 // A gentle take on "Rules!": each round shows a rule ("Tap all the
 // ANIMALS!") and a tile grid; clear every match to advance. On hard, some
 // rounds only say "Do Rule #N again!" — you have to REMEMBER what it was.
-export function RulesGame({ onHome, difficulty }: Props) {
+export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const { rulesRounds: roundsToWin, rulesTiles: tileCount, rulesRecallFrom: recallFrom } =
     settingsFor(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -118,9 +121,10 @@ export function RulesGame({ onHome, difficulty }: Props) {
 
   return (
     <GameShell
-      title="Rule Time!"
-      subtitle="Do what the rule says as fast as you can"
+      title={t(lang, 'shell.rules.title')}
+      subtitle={t(lang, 'shell.rules.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="rules-timer" /> : null}
@@ -130,9 +134,9 @@ export function RulesGame({ onHome, difficulty }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.ruleCard, shadows.soft]} testID={`rules-rule-${round.rule.category}${round.isRecall ? '-recall' : ''}`}>
-          <Text style={styles.ruleNumber}>{round.isRecall ? 'Memory check!' : `Rule #${round.ruleNumber}`}</Text>
+          <Text style={styles.ruleNumber}>{round.isRecall ? t(lang, 'rules.memoryCheck') : t(lang, 'rules.ruleNumber', { n: round.ruleNumber })}</Text>
           <Text style={styles.ruleText}>
-            {round.isRecall && !reminded ? `Do Rule #${round.ruleNumber} again — remember it? 🤔` : round.rule.label}
+            {round.isRecall && !reminded ? t(lang, 'rules.doAgain', { n: round.ruleNumber }) : round.rule.label}
           </Text>
           {round.isRecall && !reminded ? (
             <Pressable
@@ -142,7 +146,7 @@ export function RulesGame({ onHome, difficulty }: Props) {
               accessibilityRole="button"
               style={({ pressed }) => [styles.remindBtn, shadows.soft, pressed && { opacity: 0.8 }]}
             >
-              <Text style={styles.remindText}>💡 Remind me!</Text>
+              <Text style={styles.remindText}>{t(lang, 'rules.remind')}</Text>
             </Pressable>
           ) : null}
         </View>
@@ -172,14 +176,15 @@ export function RulesGame({ onHome, difficulty }: Props) {
           })}
         </View>
         <Text style={styles.hint} testID="rules-progress">
-          Found {tapped.length} of {round.matchCount}
+          {t(lang, 'rules.progress', { found: tapped.length, total: round.matchCount })}
         </Text>
       </View>
       <WinOverlay
         visible={won}
-        message={'Rule master! You followed every rule!'}
-        onNext={reset} nextLabel={'Next Round ▶️'}
+        message={t(lang, 'win.rules')}
+        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

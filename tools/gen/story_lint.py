@@ -71,6 +71,8 @@ def lint_spec(spec: dict) -> list[str]:
             errs.append(f"warn: ending '{end}' has parents {parents[end]} — verify its scene is location-coherent from EVERY path, else split bespoke")
     if "start" in ids and min_depth("start", frozenset()) < 3:
         errs.append("shallowest path has <3 decisions — kids need >=3 choices per read")
+    elif "start" in ids and min_depth("start", frozenset()) < 4:
+        errs.append("warn: shallowest path has 3 decisions — NEW books need >=4 (Ivan: stories too short)")
     return errs
 
 

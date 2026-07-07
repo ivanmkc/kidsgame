@@ -6,6 +6,8 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -15,6 +17,7 @@ import { ShadowDifficulty, makeShadowRound } from './logic';
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
+  lang?: Lang;
 }
 
 function shadowDifficulty(d: Difficulty): ShadowDifficulty {
@@ -24,7 +27,7 @@ function shadowDifficulty(d: Difficulty): ShadowDifficulty {
   return { choices: 3, categoryDistractors: false, transform: false };
 }
 
-export function ShadowGame({ onHome, difficulty }: Props) {
+export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const diff = shadowDifficulty(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -69,9 +72,10 @@ export function ShadowGame({ onHome, difficulty }: Props) {
 
   return (
     <GameShell
-      title="Shadow Match"
-      subtitle={diff.transform ? 'Tricky! The shadow is twisted around' : 'Whose shadow is this?'}
+      title={t(lang, 'shell.shadow.title')}
+      subtitle={diff.transform ? t(lang, 'shell.shadow.subTricky') : t(lang, 'shell.shadow.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="shadow-timer" /> : null}
@@ -119,14 +123,15 @@ export function ShadowGame({ onHome, difficulty }: Props) {
           ))}
         </View>
         <Text style={styles.hint}>
-          {diff.transform ? 'It might be flipped or turned — look at the shape!' : 'Tap the sticker that makes the shadow!'}
+          {diff.transform ? t(lang, 'shadow.hintTricky') : t(lang, 'shadow.hint')}
         </Text>
       </View>
       <WinOverlay
         visible={won}
-        message={'Shadow wizard! You matched them all!'}
-        onNext={reset} nextLabel={'Next Round ▶️'}
+        message={t(lang, 'win.shadow')}
+        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

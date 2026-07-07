@@ -6,10 +6,11 @@ import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang, numberWord } from '../../lang';
+import { t } from '../../i18n';
 import { Position } from '../count/logic';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { saySequence, sfx, say } from '../../sound';
+import { sayThen, saySequence, sfx, say } from '../../sound';
 import { PLUS, PRAISE, QUESTION, SumsRound, makeSumsRound, sumsSettings } from './logic';
 
 interface Props {
@@ -52,7 +53,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     if (won) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
     for (let i = 0; i < round.b; i++) {
-      timers.push(setTimeout(() => sfx.boing(), 400 + i * 250));
+      timers.push(setTimeout(() => sfx.boing(0.35), 400 + i * 250));
     }
     return () => timers.forEach(clearTimeout);
   }, [round, won]);
@@ -62,16 +63,15 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     if (v === round.sum) {
       sfx.good();
       setLocked(true);
-      saySequence([numberWord(lang, round.sum).t, PRAISE[lang]]);
       const nextScore = score + 1;
       setScore(nextScore);
-      if (nextScore < roundsToWin) {
-        setTimeout(() => {
+      sayThen([numberWord(lang, round.sum).t, PRAISE[lang]], () => {
+        if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
           setWrongPick(null);
           setLocked(false);
-        }, 900);
-      }
+        }
+      });
     } else {
       sfx.wrong();
       setWrongPick(v);
@@ -97,9 +97,10 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title="Little Sums"
-      subtitle="See them add up, then tell me the total"
+      title={t(lang, 'shell.sums.title')}
+      subtitle={t(lang, 'shell.sums.sub')}
       onBack={onHome}
+      lang={lang}
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="sums-timer" /> : null}
@@ -163,10 +164,11 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={'Sum superstar! You added them all!'}
+        message={t(lang, 'win.sums')}
         onNext={reset}
-        nextLabel={'Play Again ▶️'}
+        nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );

@@ -1,0 +1,5 @@
+flask==3.0.*
+gunicorn==22.*
+google-genai>=1.0.0
+Pillow>=10.0.0
+requests>=2.31.0

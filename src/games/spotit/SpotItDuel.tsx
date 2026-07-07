@@ -3,6 +3,8 @@ import { Animated, StyleSheet, Text, View, useWindowDimensions } from 'react-nat
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { MP_PLAYERS, PlayerIx } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { say, sfx } from '../../sound';
@@ -14,6 +16,7 @@ interface Props {
   onHome: () => void;
   difficulty: Difficulty;
   seed?: number;
+  lang?: Lang;
 }
 
 type Phase = 'ready' | 'play' | 'roundEnd' | 'matchEnd';
@@ -31,7 +34,7 @@ const ZONE_PLAYER: Record<ZoneId, PlayerIx> = { a: 0, b: 1 };
 // Competitive same-device duel: bottom zone = Foxy (player 0), top zone =
 // Bunny (player 1, rotated 180° in portrait). Each kid hunts a DIFFERENT
 // answer between her own card and her upright copy of the shared center card.
-export function SpotItDuel({ onHome, difficulty, seed }: Props) {
+export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   const deck = useMemo(() => buildDeck(), []);
   const settings = settingsFor(difficulty);
   const winsNeeded = settings.duelWins;
@@ -204,9 +207,10 @@ export function SpotItDuel({ onHome, difficulty, seed }: Props) {
 
   return (
     <GameShell
-      title="Spot It! Duel"
-      subtitle="Each of you: find YOUR match with the middle card!"
+      title={t(lang, 'shell.spotitDuel.title')}
+      subtitle={t(lang, 'shell.spotitDuel.sub')}
       onBack={onHome}
+      lang={lang}
       right={<ScoreChip label={`🦊 ${scores.a} · ${scores.b} 🐰`} testID="spotit-duel-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
@@ -224,8 +228,10 @@ export function SpotItDuel({ onHome, difficulty, seed }: Props) {
       </View>
       <WinOverlay
         visible={phase === 'matchEnd'}
-        message={`🏆 ${winner.name} wins!`}
-        sub={`${loser.emoji} ${loser.name} spotted ${loserScore} ${loserScore === 1 ? 'star' : 'stars'} — great eyes!`}
+        message={t(lang, 'win.spotitDuel', { name: winner.name })}
+        sub={t(lang, loserScore === 1 ? 'win.spotitDuelSubOne' : 'win.spotitDuelSub', {
+          emoji: loser.emoji, name: loser.name, n: loserScore,
+        })}
         stats={
           <View style={styles.statsCol}>
             <StarPips player={0} score={scores.a} total={winsNeeded} testID="duel-final-score-a" />
@@ -233,8 +239,9 @@ export function SpotItDuel({ onHome, difficulty, seed }: Props) {
           </View>
         }
         onNext={rematch}
-        nextLabel="Rematch ⚔️"
+        nextLabel={t(lang, 'overlay.rematchDuel')}
         onHome={onHome}
+        lang={lang}
       />
     </GameShell>
   );
