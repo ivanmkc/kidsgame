@@ -54,6 +54,12 @@ export const sfx = {
 
 import { VOICE } from './assets/voice';
 
+// Active speech language for pre-rendered clip lookup. Mandarin and
+// Cantonese share written forms ('一' reads yi vs jat), so non-English
+// clips are keyed 'lang|text'; English stays keyed by plain text.
+let speechLang = 'en';
+export function setSpeechLang(l: string): void { speechLang = l; }
+
 let narration: HTMLAudioElement | null = null;
 
 // Browsers block audio before the first user gesture, so a deep link's
@@ -117,7 +123,7 @@ export function say(text: string, sequence?: string[]): void {
   try {
     window.speechSynthesis?.cancel();
     if (narration) { narration.pause(); narration = null; }
-    const clip = VOICE[spoken];
+    const clip = (speechLang !== 'en' ? VOICE[`${speechLang}|${spoken}`] : undefined) ?? VOICE[spoken];
     if (clip && window.Audio) {
       narration = new window.Audio(`voice/${clip}`);
       narration.volume = 0.85;
