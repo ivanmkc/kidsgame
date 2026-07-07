@@ -5,7 +5,7 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty, settingsFor, shadowSettings } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -17,16 +17,9 @@ interface Props {
   difficulty: Difficulty;
 }
 
-function shadowDifficulty(d: Difficulty): ShadowDifficulty {
-  // medium+ turns on mental rotation and confusable same-category options
-  if (d === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
-  if (d === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
-  return { choices: 3, categoryDistractors: false, transform: false };
-}
-
 export function ShadowGame({ onHome, difficulty }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
-  const diff = shadowDifficulty(difficulty);
+  const diff: ShadowDifficulty = shadowSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
   const [score, setScore] = useState(0);
