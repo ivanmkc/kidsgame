@@ -54,6 +54,7 @@ export interface StoryChoice {
   label: string;
   next: string;
   icon?: string; // illustrated button — pre-readers pick by picture
+  hot?: Box; // in-scene hotspot — the kid taps the door itself
 }
 
 export interface StoryScare extends Box {
