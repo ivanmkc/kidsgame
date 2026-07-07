@@ -78,6 +78,44 @@ export function settingsFor(d: Difficulty | undefined): DifficultySettings {
   return DIFFICULTIES[d ?? 'medium'];
 }
 
+/** Shadow Match: medium+ turns on mental rotation and confusable same-category options. */
+export function shadowSettings(d: Difficulty): { choices: number; categoryDistractors: boolean; transform: boolean } {
+  if (d === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
+  if (d === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
+  return { choices: 3, categoryDistractors: false, transform: false };
+}
+
+/** Odd One Out: "which one does not belong?" — always categorical; harder = more items. */
+export function oddSettings(d: Difficulty): { n: number } {
+  if (d === 'hard') return { n: 9 };
+  if (d === 'medium') return { n: 6 };
+  return { n: 4 };
+}
+
+/**
+ * Menu-card summary of what the selected difficulty means for one game,
+ * derived from the same settings the game plays with (so it can't drift).
+ * null = free play, difficulty doesn't apply.
+ */
+export function cardDetail(route: string, f: DifficultyFilter): string | null {
+  const d = difficultyOf(f);
+  const s = DIFFICULTIES[d];
+  switch (route) {
+    case 'spotit': return `${s.spotitRounds} rounds${s.timer ? ' · ⏱️' : ''}`;
+    case 'diff': return `${s.diffDraw} differences${s.diffHint ? ' · 💡 hints' : ''}`;
+    case 'hidden': return `${s.hiddenDraw} hidden things`;
+    case 'memory': return `${s.memoryPairs} pairs`;
+    case 'puzzle': return `${s.puzzleCols}×${s.puzzleRows} pieces`;
+    case 'shadow': {
+      const sh = shadowSettings(d);
+      return `${sh.choices} shadows${sh.transform ? ' · spinning' : ''}`;
+    }
+    case 'oddone': return `${oddSettings(d).n} tiles`;
+    case 'rules': return `${s.rulesTiles} tiles${s.rulesRecallFrom !== Infinity ? ' · memory check' : ''}`;
+    default: return null;
+  }
+}
+
 export const FILTERS: { id: DifficultyFilter; label: string; emoji: string }[] = [
   { id: 'all', label: 'All', emoji: '🎨' },
   { id: 'easy', label: 'Easy', emoji: '😊' },
