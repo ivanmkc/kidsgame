@@ -68,6 +68,11 @@ for (const name of manifest.dressup ?? []) {
     lines.push(`  ${name}: require('../../assets/game/dressup/${name}.png'),`);
   }
 }
+lines.push('};', '', 'export const RHYME_SPRITES: Record<string, number> = {');
+for (const f of (fs.existsSync(path.join(root, 'assets/game/rhyme')) ? fs.readdirSync(path.join(root, 'assets/game/rhyme')).sort() : [])) {
+  const key = f.replace(/\.(png|jpg)$/, '');
+  lines.push(`  ${key}: require('../../assets/game/rhyme/${f}'),`);
+}
 lines.push('};', '', 'export const UI_IMAGES = {');
 for (const f of fs.readdirSync(path.join(root, 'assets/game/ui')).sort()) {
   const key = f.replace(/\.(png|jpg)$/, '');

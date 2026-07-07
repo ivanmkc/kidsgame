@@ -17,6 +17,15 @@ import {
 } from 'react-native';
 import { SCENE_THUMBS, SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
 import { track } from './src/analytics';
+import { Lang, LANGS, loadLang, nextLang, saveLang } from './src/lang';
+import { LettersGame } from './src/games/letters/LettersGame';
+import { NumbersGame } from './src/games/numbers/NumbersGame';
+import { SoundsGame } from './src/games/sounds/SoundsGame';
+import { RhymeGame } from './src/games/rhymegame/RhymeGame';
+import { CountGame } from './src/games/count/CountGame';
+import { CompareGame } from './src/games/compare/CompareGame';
+import { SumsGame } from './src/games/sums/SumsGame';
+import { SpellGame } from './src/games/spell/SpellGame';
 import { FilterCycleChip } from './src/components/ScenePicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
@@ -33,7 +42,7 @@ import { DiffScene, baseImage, manifest } from './src/manifest';
 import { KGB_BUILD } from './src/assets/build';
 import { DifficultyFilter, difficultyOf, loadFilter, nextFilter, saveFilter } from './src/difficulty';
 import { useTwoPlayer } from './src/multiplayer';
-import { isMuted, say, setMuted, sfx, stopNarration } from './src/sound';
+import { isMuted, say, setMuted, sfx, stopNarration, setSpeechLang } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
 
@@ -76,12 +85,18 @@ export default function App() {
     Nunito_700Bold,
   });
   const [filter, setFilter] = useState<DifficultyFilter>(() => loadFilter());
+  const [lang, setLang] = useState<Lang>(() => loadLang());
+  useEffect(() => { setSpeechLang(lang); }, [lang]);
+  const cycleLang = () => {
+    const l = nextLang(lang);
+    setLang(l); saveLang(l); setSpeechLang(l); sfx.tap(); track('lang', { mode: l });
+  };
   const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
   useEffect(() => { stopNarration(); track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const screen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const param = parts.param;
@@ -94,8 +109,16 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
+      {screen === 'letters' && <LettersGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'numbers' && <NumbersGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'sounds' && <SoundsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'rhyme' && <RhymeGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'spell' && <SpellGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'count' && <CountGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'compare' && <CompareGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'sums' && <SumsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'menu' && (
-        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} />
+        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} lang={lang} onCycleLang={cycleLang} />
       )}
       {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} />}
       {screen === 'diff' && (
@@ -155,6 +178,18 @@ export default function App() {
   );
 }
 
+const WORD_CARDS = [
+  { route: 'letters', color: '#E85D75', title: 'Letter Hunt', blurb: 'Find the letter — quick, before it hides!', preview: 'icons0' },
+  { route: 'sounds', color: '#5DA9E8', title: 'First Sounds', blurb: 'Which one starts with that sound?', preview: 'icons8' },
+  { route: 'rhyme', color: '#9C6FD6', title: 'Rhyme Time', blurb: 'Frog... dog! Find what rhymes!', preview: 'icons13' },
+  { route: 'spell', color: '#4FB06D', title: 'Word Builder', blurb: 'Tap the letters to build the word!', preview: 'icons20' },
+];
+const NUMBER_CARDS = [
+  { route: 'count', color: '#E8A24F', title: 'Count With Me', blurb: 'Tap and count every little critter!', preview: 'icons0' },
+  { route: 'numbers', color: '#3E9BB8', title: 'Number Hunt', blurb: 'Find the number — one, two, three!', preview: 'icons8' },
+  { route: 'compare', color: '#D66FA8', title: 'More or Less', blurb: 'Which side has more treats?', preview: 'icons13' },
+  { route: 'sums', color: '#7A6FD6', title: 'Little Sums', blurb: 'One more hops in — how many now?', preview: 'icons20' },
+];
 const GAME_CARDS = [
   { route: 'spotit', color: colors.red, title: 'Spot It!', blurb: 'Find the matching picture on both cards', preview: 'icons0' },
   { route: 'diff', color: colors.teal, title: 'Find the Difference', blurb: 'What changed between the two pictures?', preview: 'diff' },
@@ -169,8 +204,10 @@ const GAME_CARDS = [
 ];
 
 function Menu({
-  filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer,
+  filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer, lang, onCycleLang,
 }: {
+  lang: Lang;
+  onCycleLang: () => void;
   filter: DifficultyFilter;
   onPickFilter: (f: DifficultyFilter) => void;
   onNavigate: (r: string) => void;
@@ -219,6 +256,15 @@ function Menu({
               <Text style={styles.heading}>Kids Game Box</Text>
               <View style={styles.diffRow}>
                 <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} />
+                <Pressable
+                  onPress={onCycleLang}
+                  testID="lang-cycle"
+                  accessibilityRole="button"
+                  accessibilityLabel={`Language: ${LANGS.find((l) => l.id === lang)?.label}. Tap to change`}
+                  style={[styles.diffChip, styles.soundChip]}
+                >
+                  <Text style={styles.diffText}>{LANGS.find((l) => l.id === lang)?.emoji} {LANGS.find((l) => l.id === lang)?.label}</Text>
+                </Pressable>
                 <InstallChip />
                 <ShareChip />
                 <Pressable
@@ -260,6 +306,22 @@ function Menu({
                 preview={previewFor(g.preview)}
                 width={cardWidth}
               />
+            </Reveal>
+          ))}
+        </View>
+        <Reveal delay={200}><Text style={styles.sectionHead}>Word Games 🔤</Text></Reveal>
+        <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
+          {WORD_CARDS.map((g, i) => (
+            <Reveal key={g.route} delay={160 + i * 80}>
+              <GameCard color={g.color} title={g.title} blurb={g.blurb} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+            </Reveal>
+          ))}
+        </View>
+        <Reveal delay={220}><Text style={styles.sectionHead}>Number Games 🔢</Text></Reveal>
+        <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
+          {NUMBER_CARDS.map((g, i) => (
+            <Reveal key={g.route} delay={180 + i * 80}>
+              <GameCard color={g.color} title={g.title} blurb={g.blurb} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
         </View>
@@ -531,6 +593,14 @@ function ShareChip() {
 }
 
 const styles = StyleSheet.create({
+  sectionHead: {
+    fontFamily: fonts.display,
+    fontSize: 22,
+    color: colors.ink,
+    marginTop: 18,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
   iosHelp: {
     position: 'absolute',
     top: 46,
