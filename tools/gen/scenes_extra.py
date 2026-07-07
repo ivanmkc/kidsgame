@@ -50,7 +50,7 @@ EXTRA_DIFF_THEMES = [
      "adds": ["a baby elephant", "a meerkat standing tall", "a colorful tropical bird", "a tortoise", "a lion cub in the grass", "a termite mound"]},
     {"id": "music", "name": "Music Room", "subtle": True,
      "base": "A BUSY bright music room packed with detail: an upright piano with sheet music, a full drum kit, guitars on stands, a xylophone, music stands, shelves crowded with maracas, tambourines, bells and small instruments, posters-free walls with hanging instruments, a big window.",
-     "adds": ["a golden trumpet", "a triangle instrument", "a metronome", "a harmonica", "a recorder flute", "a small music box"]},
+     "adds": ["a red accordion", "a golden french horn", "a blue ukulele", "a pair of bongo drums", "a gramophone with a brass horn", "a black violin case"]},
 ]
 
 EXTRA_HIDDEN_THEMES = [
