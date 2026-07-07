@@ -303,7 +303,11 @@ def _recolor_verified(img: Image.Image, item: dict, theme_id: str, adjacent: boo
             # accept back ONLY the object + a hairline: the 12px band let
             # NBP paint glow halos and redraw neighbors (space audit blockers)
             composite_mask=_dilated(item["seg"]["mask"], 3))
-        if drift > 0.04 or ch < 0.12:
+        # ring drift is a coarse re-render guard only: the 3px accept-back
+        # composite makes halos structurally impossible and the pro-judge
+        # crop question arbitrates visual quality — 0.04 (inherited from
+        # the old whole-frame gate) rejected every edit in busy scenes.
+        if drift > 0.25 or ch < 0.12:
             print(f"  {theme_id}: recolor '{short}' -> {new} weak (ch={ch:.2f} drift={drift:.2f})")
             continue
         after_crop = _crop(out, rect, pad=40)
