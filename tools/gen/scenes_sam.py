@@ -139,10 +139,21 @@ def _refined_seg(scene: Image.Image, label: str, cands: list[dict], tag: str,
                     temperature=0.1, response_mime_type="application/json",
                     http_options=_t.HttpOptions(timeout=120_000)),
             )
-            # raw_decode: the model occasionally appends prose/whitespace
-            # after the JSON object even with a JSON response mime type.
-            d = _json.JSONDecoder().raw_decode((resp.text or "").strip())[0]
-            pick, another = int(d["pick"]), bool(d["another_elsewhere"])
+            # raw_decode first; the model also decorates INSIDE the object
+            # ("false (label 3 is partial)") even with a JSON mime type, so
+            # fall back to field extraction before burning the attempt.
+            txt = (resp.text or "").strip()
+            try:
+                d = _json.JSONDecoder().raw_decode(txt)[0]
+                pick, another = int(d["pick"]), bool(d["another_elsewhere"])
+            except (ValueError, KeyError):
+                import re as _re
+                mp = _re.search(r'"pick"\s*:\s*(-?\d+)', txt)
+                ma = _re.search(r'"another_elsewhere"\s*:\s*(true|false)', txt)
+                if not (mp and ma):
+                    print(f"  {tag}: refine reply unparseable: {txt[:120]!r}")
+                    raise
+                pick, another = int(mp.group(1)), ma.group(1) == "true"
             if pick < 0 or pick >= len(pre) or another:
                 return None
             return pre[pick]
