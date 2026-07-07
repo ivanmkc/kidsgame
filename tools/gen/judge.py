@@ -16,7 +16,7 @@ from google.genai import types
 
 from .nbp import client
 
-_JUDGE_CANDIDATES = ["gemini-3.1-flash", "gemini-2.5-flash"]
+_JUDGE_CANDIDATES = ["gemini-3.1-flash", "gemini-3-flash-preview", "gemini-2.5-flash"]
 _judge_model: str | None = None
 
 
