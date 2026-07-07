@@ -251,7 +251,7 @@ function Menu({
     if (key === 'icons8') return <MemoryPreview />;
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
-    if (key === 'rules') return <RulesPreview />;
+    if (key === 'rules') return <RulesPreview lang={lang} />;
 
     const scene =
       key === 'diff'
@@ -468,11 +468,11 @@ function ShadowPreview() {
 }
 
 // Rule Time preview: a mini rule banner over tiles
-function RulesPreview() {
+function RulesPreview({ lang }: { lang: Lang }) {
   const icons = manifest.spotit.icons;
   return (
     <View style={[styles.iconRow, { backgroundColor: 'rgba(62,155,184,0.10)', flexDirection: 'column', gap: 6 }]}>
-      <View style={styles.miniRule}><Text style={styles.miniRuleText}>Tap all the ANIMALS! 🐾</Text></View>
+      <View style={styles.miniRule}><Text style={styles.miniRuleText}>{t(lang, 'card.rules.banner')}</Text></View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {[0, 18, 3, 24].map((idx, i) => (
           <View key={i} style={[styles.previewTile, { width: 46, height: 46, borderColor: [0, 3].includes(idx) ? colors.green : colors.blush }]}>
@@ -520,9 +520,14 @@ function GameCard({
     <Pressable
       onPress={onPress}
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={`${title} — ${blurb}`}
       style={({ pressed }) => [styles.gameCard, shadows.sticker, { borderColor: color, width }, pressed && styles.pressed]}
     >
-      <View style={styles.previewWrap}>{preview}</View>
+      {/* decorative preview: keep it out of the accessible name */}
+      <View style={styles.previewWrap} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden>
+        {preview}
+      </View>
       <View style={styles.cardBody}>
         <Text style={[styles.gameTitle, { color }]}>{title}</Text>
         <Text style={styles.gameBlurb}>{blurb}</Text>

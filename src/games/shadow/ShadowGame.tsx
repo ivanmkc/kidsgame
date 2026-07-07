@@ -31,7 +31,10 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const diff = shadowDifficulty(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+  // Warm-up: the session's first round is never rotated/mirrored — a
+  // pre-reader gets one easy win before mental rotation kicks in.
+  const warmup = { ...diff, transform: false };
+  const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, warmup));
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(0);
@@ -51,7 +54,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
       setScore(next);
       setWrong(null);
       if (next < roundsToWin) {
-        setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+        setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, score === 0 ? warmup : diff));
       }
     } else {
       sfx.wrong();
@@ -65,7 +68,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrong(null);
-    setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+    setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, warmup));
   };
 
   const { width, height } = useWindowDimensions();
@@ -75,7 +78,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   return (
     <GameShell
       title={t(lang, 'shell.shadow.title')}
-      subtitle={diff.transform ? t(lang, 'shell.shadow.subTricky') : t(lang, 'shell.shadow.sub')}
+      subtitle={(round.rotation !== 0 || round.mirrored) ? t(lang, 'shell.shadow.subTricky') : t(lang, 'shell.shadow.sub')}
       onBack={onHome}
       lang={lang}
       right={
