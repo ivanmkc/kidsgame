@@ -72,9 +72,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    // On narrow screens the chip cluster wraps to its own line instead of
+    // crushing the title stack (RNW has no adjustsFontSizeToFit).
+    flexWrap: 'wrap',
     paddingHorizontal: 14,
     paddingVertical: 10,
     gap: 12,
+    rowGap: 8,
   },
   back: {
     width: 54,
@@ -87,10 +91,10 @@ const styles = StyleSheet.create({
   backLabel: { fontFamily: fonts.displayMed, fontSize: 11, color: colors.inkSoft, marginTop: -2 },
   pressed: { opacity: 0.6, transform: [{ scale: 0.94 }] },
   backText: { fontSize: 26 },
-  titles: { flex: 1, minWidth: 0 },
+  titles: { flex: 1, minWidth: 150 },
   title: { fontSize: 24, fontFamily: fonts.display, color: colors.ink, flexShrink: 1 },
   subtitle: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: -2 },
-  right: { flexShrink: 0, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8 },
+  right: { flexShrink: 0, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginLeft: 'auto', maxWidth: '100%' },
   chip: {
     backgroundColor: colors.card,
     borderRadius: 999,

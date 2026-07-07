@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
+import { spriteLT } from '../quizround/logic';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -93,7 +94,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 200, stageW * 0.72);
   const total = round.a + round.b;
-  const critterSize = Math.max(40, Math.min(70, stageW / (total <= 4 ? 5 : total <= 7 ? 6 : 7)));
+  const critterSize = Math.min(Math.max(40, Math.min(70, stageW / (total <= 4 ? 5 : total <= 7 ? 6 : 7))), Math.max(30, stageH * 0.45));
 
   return (
     <GameShell
@@ -190,8 +191,7 @@ function StaticCritter({ icon, size, stageW, stageH, pos, testID }: CritterViewP
       testID={testID}
       style={{
         position: 'absolute',
-        left: (pos.x / 100) * stageW - size / 2,
-        top: (pos.y / 100) * stageH - size / 2,
+        ...spriteLT(pos.x, pos.y, size, stageW, stageH),
         width: size,
         height: size,
       }}
@@ -216,8 +216,7 @@ function Incoming({ icon, size, stageW, stageH, pos, delay, testID }: IncomingPr
       testID={testID}
       style={{
         position: 'absolute',
-        left: (pos.x / 100) * stageW - size / 2,
-        top: (pos.y / 100) * stageH - size / 2,
+        ...spriteLT(pos.x, pos.y, size, stageW, stageH),
         width: size,
         height: size,
         opacity: t,

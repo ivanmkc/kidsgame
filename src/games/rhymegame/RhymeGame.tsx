@@ -85,11 +85,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
 
   const cols = tileCount;
   const gap = 14;
-  const tile = Math.min(
+  // Kid-thumb floor of 44px: in short (landscape) viewports the PROMPT
+  // shrinks, never the answer tiles.
+  const tile = Math.max(44, Math.min(
     (Math.min(width - 32, 620) - (cols - 1) * gap) / cols,
     (height - 84 - 260) / 1,
     160,
-  );
+  ));
+  const promptIcon = Math.max(56, Math.min(110, height - 84 - tile * 1.2 - 150));
 
   const iconFor = (icon: string, bucket: 'spotit' | 'rhyme') =>
     bucket === 'rhyme' ? RHYME_ICONS[icon] : SPOTIT_ICONS[icon];
@@ -122,7 +125,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
             {round ? (
               <>
                 <View style={[styles.prompt, shadows.soft]} testID={`rhyme-prompt-${round.target.icon}`}>
-                  <Image source={iconFor(round.target.icon, round.target.bucket)} style={styles.targetIcon} resizeMode="contain" />
+                  <Image source={iconFor(round.target.icon, round.target.bucket)} style={{ width: promptIcon, height: promptIcon }} resizeMode="contain" />
                   <Text style={styles.promptText}>{round.displayPrompt}</Text>
                   {round.caption ? <Text style={styles.caption}>{round.caption}</Text> : null}
                 </View>

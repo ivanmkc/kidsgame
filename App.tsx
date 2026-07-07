@@ -273,7 +273,7 @@ function Menu({
         <Reveal delay={0}>
           <View style={styles.headerRow}>
             <BobbingLogo small={isLandscape} />
-            <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
+            <View style={{ alignItems: isLandscape ? 'flex-start' : 'center', flexShrink: 1, minWidth: 0, maxWidth: '100%' }}>
               <Text style={styles.heading}>{t(lang, 'menu.heading')}</Text>
               <View style={styles.diffRow}>
                 <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} verbose lang={lang} />

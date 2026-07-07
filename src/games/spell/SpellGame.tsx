@@ -107,9 +107,14 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const { width, height } = useWindowDimensions();
   const slotCount = round.chars.length;
   const tileCount = round.tiles.length;
-  const bigIcon = Math.min(width * 0.4, height * 0.28, 220);
   const slot = Math.min((Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount, 68);
   const tileSize = Math.min((Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount, 74);
+  const shortH = height < 480;
+  const bigIcon = Math.max(56, Math.min(
+    width * 0.4,
+    height - 84 - slot * 1.15 - tileSize * 1.15 - (shortH ? 130 : 190),
+    220,
+  ));
 
   const placedChars = placedIds.map((id) => round.tiles.find((t) => t.id === id)?.char ?? '');
 
@@ -121,7 +126,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       lang={lang}
       right={<ScoreChip label={`🔤 ${Math.min(wordIdx, wordCount)}/${wordCount}`} testID="spell-score" />}
     >
-      <View style={styles.board} key={gameKey}>
+      <View style={[styles.board, shortH && { gap: 10 }]} key={gameKey}>
         <Pressable
           onPress={() => { sfx.tap(); saySequence([linesForWord(round.word).ask, linesForWord(round.word).spell]); }}
           accessibilityLabel={`Hear the word ${round.word.text}`}
@@ -135,7 +140,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
             <Text style={styles.iconFallback}>{round.word.text}</Text>
           )}
           {round.word.roman ? <Text style={styles.romanCaption}>{round.word.roman}</Text> : null}
-          <Text style={styles.speakerHint}>{t(lang, 'spell.hearAgain')}</Text>
+          {shortH ? null : <Text style={styles.speakerHint}>{t(lang, 'spell.hearAgain')}</Text>}
         </Pressable>
 
         <View style={[styles.slotRow, { gap: 10 }]}>
@@ -236,7 +241,7 @@ function LetterTile({
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 18, paddingHorizontal: 16 },
+  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 18, paddingHorizontal: 16, minHeight: 0, overflow: 'hidden' },
   iconCard: {
     backgroundColor: colors.card,
     borderRadius: 24,
