@@ -151,7 +151,14 @@ export function makeRound(
 ): SpellRound {
   const chars = word.chars.slice();
   const banned = new Set(chars);
-  const decoyPool = alphabet.filter((c) => !banned.has(c));
+  // Decoys prefer the target's own script: a katakana word with hiragana
+  // decoys lets a kid dismiss them without reading (and vice versa).
+  const scriptOf = (c: string) =>
+    /[\u30a0-\u30ff]/.test(c) ? 'kata' : /[\u3040-\u309f]/.test(c) ? 'hira' : 'other';
+  const targetScript = scriptOf(chars[0]);
+  let decoyPool = alphabet.filter((c) => !banned.has(c));
+  const sameScript = decoyPool.filter((c) => scriptOf(c) === targetScript);
+  if (sameScript.length >= decoyCount) decoyPool = sameScript;
   const decoys = shuffle(rng, decoyPool).slice(0, Math.min(decoyCount, decoyPool.length));
   const combined = [...chars, ...decoys];
   const shuffled = shuffle(rng, combined);
