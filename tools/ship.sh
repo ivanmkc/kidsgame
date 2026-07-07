@@ -43,6 +43,18 @@ BUILD_ID=$(git rev-parse --short HEAD)-$(python3 -c "import time; print(int(time
 printf "// GENERATED at ship time\nexport const KGB_BUILD = '%s';\n" "$BUILD_ID" > src/assets/build.ts
 npx expo export --platform web 2>&1 | tail -1
 printf '{"build": "%s"}\n' "$BUILD_ID" > dist/version.json
+# PWA: inject manifest + iOS meta into the exported page (Metro owns index.html)
+PWA_TAGS='<link rel="manifest" href="manifest.json"/><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/><meta name="theme-color" content="#FFC24B"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-title" content="Kids Games"/><meta name="mobile-web-app-capable" content="yes"/>'
+python3 - "$PWA_TAGS" <<'PYEOF'
+import sys
+from pathlib import Path
+tags = sys.argv[1]
+p = Path('dist/index.html')
+html = p.read_text()
+assert '</head>' in html and 'rel="manifest"' not in html
+p.write_text(html.replace('</head>', tags + '</head>'))
+print('PWA tags injected')
+PYEOF
 npx gh-pages -d dist --nojekyll -m "deploy: ledger-verified content only" 2>&1 | tail -1
 
 # restore full working manifest for generation to keep extending

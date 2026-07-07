@@ -3,10 +3,10 @@ import { Animated, Image, ScrollView, StyleSheet, Text, View, useWindowDimension
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { ScenePicker } from '../../components/ScenePicker';
+import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor, nextFilter } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng, sample } from '../../rng';
@@ -18,13 +18,14 @@ interface Props {
   onHome: () => void;
   difficulty: Difficulty;
   filter?: DifficultyFilter;
+  onFilter?: (f: DifficultyFilter) => void;
   twoPlayerEnabled?: boolean;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function HiddenGame({ onHome, difficulty, filter = 'all', twoPlayerEnabled, sceneId, onPickScene, onBackToPicker }: Props) {
+export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPlayerEnabled, sceneId, onPickScene, onBackToPicker }: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
 
@@ -93,9 +94,10 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', twoPlayerEnable
       <GameShell title="Hidden Objects" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to search?"
-          options={visible.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged, level: h.level }))}
+          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged, level: h.level, dimmed: !inFilter(h.level, filter) }))}
           onPick={(id) => { if (mode !== null) onPickScene(id); }}
           onSurprise={() => { if (mode !== null) onPickScene(visible[Math.floor(Math.random() * visible.length)].id); }}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
         />
         {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
       </GameShell>

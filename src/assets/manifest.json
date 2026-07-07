@@ -3017,7 +3017,8 @@
                 "y": 15,
                 "w": 298,
                 "h": 285
-              }
+              },
+              "video": "story-video/doors_start_0.mp4"
             },
             {
               "label": "Open the blue moon door",
@@ -3027,7 +3028,8 @@
                 "y": 39,
                 "w": 233,
                 "h": 363
-              }
+              },
+              "video": "story-video/doors_start_1.mp4"
             }
           ]
         },
@@ -3043,7 +3045,8 @@
                 "y": 46,
                 "w": 360,
                 "h": 558
-              }
+              },
+              "video": "story-video/doors_a_0.mp4"
             },
             {
               "label": "Bounce on the big mushroom",
@@ -3053,7 +3056,8 @@
                 "y": 22,
                 "w": 502,
                 "h": 467
-              }
+              },
+              "video": "story-video/doors_a_1.mp4"
             }
           ]
         },
@@ -3069,7 +3073,8 @@
                 "y": 409,
                 "w": 377,
                 "h": 157
-              }
+              },
+              "video": "story-video/doors_b_0.mp4"
             },
             {
               "label": "Swing on the moon swing",
@@ -3079,7 +3084,8 @@
                 "y": 0,
                 "w": 335,
                 "h": 562
-              }
+              },
+              "video": "story-video/doors_b_1.mp4"
             }
           ]
         },
@@ -3095,7 +3101,8 @@
                 "y": 0,
                 "w": 526,
                 "h": 487
-              }
+              },
+              "video": "story-video/doors_aa_0.mp4"
             },
             {
               "label": "Knock at the cloud cottage",
@@ -3105,7 +3112,8 @@
                 "y": 0,
                 "w": 514,
                 "h": 386
-              }
+              },
+              "video": "story-video/doors_aa_1.mp4"
             }
           ]
         },
@@ -3121,7 +3129,8 @@
                 "y": 300,
                 "w": 649,
                 "h": 311
-              }
+              },
+              "video": "story-video/doors_ab_0.mp4"
             },
             {
               "label": "Hop on the friendly cloud",
@@ -3131,7 +3140,8 @@
                 "y": 44,
                 "w": 293,
                 "h": 208
-              }
+              },
+              "video": "story-video/doors_ab_1.mp4"
             }
           ]
         },
@@ -3147,17 +3157,19 @@
                 "y": 217,
                 "w": 545,
                 "h": 343
-              }
+              },
+              "video": "story-video/doors_ba_0.mp4"
             },
             {
               "label": "Climb the little lighthouse",
-              "next": "end_flight",
+              "next": "end_dizzy",
               "hot": {
                 "x": 956,
                 "y": 56,
                 "w": 178,
                 "h": 455
-              }
+              },
+              "video": "story-video/doors_ba_1.mp4"
             }
           ]
         },
@@ -3173,17 +3185,19 @@
                 "y": 37,
                 "w": 432,
                 "h": 474
-              }
+              },
+              "video": "story-video/doors_bb_0.mp4"
             },
             {
               "label": "Take the silver slide home",
-              "next": "end_cozy",
+              "next": "end_slip",
               "hot": {
                 "x": 944,
                 "y": 24,
                 "w": 296,
                 "h": 684
-              }
+              },
+              "video": "story-video/doors_bb_1.mp4"
             }
           ]
         },
@@ -3202,6 +3216,16 @@
         "end_flight": {
           "image": "story/doors_end_flight.png",
           "text": "The friendly cloud flies Luna all the way home, loop-de-loop! 'Same time tomorrow?' it whispers. The End!"
+        },
+        "end_dizzy": {
+          "image": "story/doors_end_dizzy.png",
+          "text": "Whoa \u2014 the lighthouse lamp is SO bright! Luna goes all dizzy and slides right back down to the boat. Home early, blinking little stars. Oopsie ending!",
+          "bad": true
+        },
+        "end_slip": {
+          "image": "story/doors_end_slip.png",
+          "text": "Wheee \u2014 TOO fast! The slippery silver slide plops Luna SPLAT into a puddle. Muddy mane! Straight home for a bath. Oopsie ending!",
+          "bad": true
         }
       }
     },
@@ -3221,7 +3245,8 @@
                 "y": 46,
                 "w": 407,
                 "h": 445
-              }
+              },
+              "video": "story-video/trail_start_0.mp4"
             },
             {
               "label": "Across the rope bridge",
@@ -3231,7 +3256,8 @@
                 "y": 110,
                 "w": 340,
                 "h": 390
-              }
+              },
+              "video": "story-video/trail_start_1.mp4"
             }
           ]
         },
@@ -3247,7 +3273,8 @@
                 "y": 44,
                 "w": 411,
                 "h": 430
-              }
+              },
+              "video": "story-video/trail_a_0.mp4"
             },
             {
               "label": "Row the little red boat",
@@ -3257,7 +3284,8 @@
                 "y": 489,
                 "w": 383,
                 "h": 194
-              }
+              },
+              "video": "story-video/trail_a_1.mp4"
             }
           ]
         },
@@ -3273,7 +3301,8 @@
                 "y": 195,
                 "w": 201,
                 "h": 427
-              }
+              },
+              "video": "story-video/trail_b_0.mp4"
             },
             {
               "label": "Swing on the jungle vine",
@@ -3283,7 +3312,8 @@
                 "y": 0,
                 "w": 466,
                 "h": 524
-              }
+              },
+              "video": "story-video/trail_b_1.mp4"
             }
           ]
         },
@@ -3299,17 +3329,19 @@
                 "y": 0,
                 "w": 477,
                 "h": 568
-              }
+              },
+              "video": "story-video/trail_aa_0.mp4"
             },
             {
               "label": "Peek behind the waterfall",
-              "next": "end_splash",
+              "next": "end_soggy",
               "hot": {
                 "x": 949,
                 "y": 0,
                 "w": 331,
                 "h": 568
-              }
+              },
+              "video": "story-video/trail_aa_1.mp4"
             }
           ]
         },
@@ -3325,7 +3357,8 @@
                 "y": 182,
                 "w": 121,
                 "h": 328
-              }
+              },
+              "video": "story-video/trail_ab_0.mp4"
             },
             {
               "label": "Chase the rainbow bubbles",
@@ -3335,7 +3368,8 @@
                 "y": 0,
                 "w": 226,
                 "h": 540
-              }
+              },
+              "video": "story-video/trail_ab_1.mp4"
             }
           ]
         },
@@ -3351,17 +3385,19 @@
                 "y": 564,
                 "w": 257,
                 "h": 131
-              }
+              },
+              "video": "story-video/trail_ba_0.mp4"
             },
             {
               "label": "Boing the coconut catapult",
-              "next": "end_splash",
+              "next": "end_boing",
               "hot": {
                 "x": 1024,
                 "y": 400,
                 "w": 174,
                 "h": 182
-              }
+              },
+              "video": "story-video/trail_ba_1.mp4"
             }
           ]
         },
@@ -3377,7 +3413,8 @@
                 "y": 44,
                 "w": 448,
                 "h": 471
-              }
+              },
+              "video": "story-video/trail_bb_0.mp4"
             },
             {
               "label": "Say hi to the parrot",
@@ -3387,7 +3424,8 @@
                 "y": 31,
                 "w": 324,
                 "h": 327
-              }
+              },
+              "video": "story-video/trail_bb_1.mp4"
             }
           ]
         },
@@ -3402,6 +3440,16 @@
         "end_friends": {
           "image": "story/trail_end_friends.png",
           "text": "Crab makes sandwiches, Parrot tells pirate jokes, and Whale sprays a rainbow. Treasure friends forever! The End!"
+        },
+        "end_soggy": {
+          "image": "story/trail_end_soggy.png",
+          "text": "SPLOOSH! Behind the waterfall is... just MORE water. Pip is soaked to the whiskers and the map went all drippy. Home for a warm towel. Oopsie ending!",
+          "bad": true
+        },
+        "end_boing": {
+          "image": "story/trail_end_boing.png",
+          "text": "BOING! The coconut catapult flings Pip aaaall the way back to the start of the beach. Sandy bottom. Zero treasure. Oopsie ending!",
+          "bad": true
         }
       }
     }

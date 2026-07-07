@@ -3,10 +3,10 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWi
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { ScenePicker } from '../../components/ScenePicker';
+import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { TapScene } from '../../components/TapScene';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor } from '../../difficulty';
+import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId, settingsFor } from '../../difficulty';
 import { baseImage, manifest } from '../../manifest';
 import { makeRng, sample } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -15,12 +15,13 @@ interface Props {
   onHome: () => void;
   difficulty: Difficulty;
   filter?: DifficultyFilter;
+  onFilter?: (f: DifficultyFilter) => void;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
 }
 
-export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickScene, onBackToPicker }: Props) {
+export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker }: Props) {
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   const [found, setFound] = useState<string[]>([]);
@@ -111,9 +112,10 @@ export function DiffGame({ onHome, difficulty, filter = 'all', sceneId, onPickSc
       <GameShell title="Find the Difference" subtitle="Choose a scene" onBack={onHome}>
         <ScenePicker
           title="Where do you want to play?"
-          options={visible.map((d) => ({ id: d.id, name: d.name, image: baseImage(d), flagged: d.flagged, level: d.level }))}
+          options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: baseImage(d), flagged: d.flagged, level: d.level, dimmed: !inFilter(d.level, filter) }))}
           onPick={onPickScene}
           onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
         />
       </GameShell>
     );

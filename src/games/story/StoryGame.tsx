@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { ChunkyButton } from '../../components/ChunkyButton';
 import { Confetti } from '../../components/Confetti';
@@ -28,12 +28,19 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   // tapped spot (door, slide, boat...) before the story advances.
   const zoom = useRef(new Animated.Value(0)).current;
   const [zoomTarget, setZoomTarget] = useState<{ cx: number; cy: number } | null>(null);
+  // Veo action clip playing over the scene (the hero DOES the tapped action)
+  const [clip, setClip] = useState<{ src: string; next: string } | null>(null);
   const animating = useRef(false);
+  // breadcrumb trail for Go back / Try another way (+ redo for arrow keys)
+  const hist = useRef<string[]>([]);
+  const redo = useRef<string[]>([]);
 
   useEffect(() => {
     setNodeId('start');
     zoom.setValue(0);
     setZoomTarget(null);
+    setClip(null);
+    hist.current = [];
     animating.current = false;
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -41,6 +48,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
 
   useEffect(() => {
     if (!node) return;
+    if (!node.choices?.length && node.bad) sfx.boing();
     const cs = node.choices ?? [];
     const menu = cs.map((c) => c.label);
     const hots = cs.length > 0 && cs.every((c) => c.hot);
@@ -49,6 +57,19 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   }, [node]);
 
   const { width, height } = useWindowDimensions();
+
+  // Arrow keys page through the story like a book: left = back, right =
+  // forward again (redo). Web only; refs keep the handler stable.
+  const nav = useRef({ back: () => {}, fwd: () => {} });
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') nav.current.back();
+      if (e.key === 'ArrowRight') nav.current.fwd();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (!story) {
     return (
@@ -71,21 +92,56 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
   const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 190)) * ar, 900);
   const imgH = imgW / ar;
 
+  const advance = (next: string) => {
+    hist.current.push(nodeId);
+    redo.current = [];
+    setNodeId(next);
+  };
+  const goBack = () => {
+    const prev = hist.current.pop();
+    if (prev) {
+      sfx.tap();
+      redo.current.push(nodeId);
+      setNodeId(prev);
+    }
+  };
+  const goForward = () => {
+    const next = redo.current.pop();
+    if (next) {
+      sfx.tap();
+      hist.current.push(nodeId);
+      setNodeId(next);
+    }
+  };
+
+  nav.current = { back: goBack, fwd: goForward };
+
   const ZOOM = 2.4;
   const diveInto = (c: StoryChoice) => {
     if (animating.current || !c.hot) return;
     animating.current = true;
     sfx.tap();
     say(c.label);
+    // Veo clip of the hero doing the action, when one exists; zoom otherwise
+    if (c.video && Platform.OS === 'web') {
+      setClip({ src: c.video, next: c.next });
+      return;
+    }
     const s = imgW / 1280;
     setZoomTarget({ cx: (c.hot.x + c.hot.w / 2) * s, cy: (c.hot.y + c.hot.h / 2) * s });
     zoom.setValue(0);
     Animated.timing(zoom, { toValue: 1, duration: 600, useNativeDriver: true }).start(() => {
-      setNodeId(c.next);
+      advance(c.next);
       zoom.setValue(0);
       setZoomTarget(null);
       animating.current = false;
     });
+  };
+  const onClipDone = () => {
+    const p = clip;
+    setClip(null);
+    animating.current = false;
+    if (p) advance(p.next);
   };
   const tx = zoomTarget ? (imgW / 2 - zoomTarget.cx) * ZOOM : 0;
   const ty = zoomTarget ? (imgH / 2 - zoomTarget.cy) * ZOOM : 0;
@@ -108,22 +164,56 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
           >
             <Image source={SCENE_IMAGES[node.image]} style={{ width: imgW, height: imgH }} resizeMode="cover" />
             {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
-            {hasHots
+            {hasHots && !clip
               ? node.choices!.map((c, i) => (
                   <ChoiceSpot key={c.next} choice={c} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
                 ))
               : null}
           </Animated.View>
-          {isEnd ? <Confetti /> : null}
+          {clip && Platform.OS === 'web' ? (
+            <View style={StyleSheet.absoluteFill} testID="story-clip">
+              {React.createElement('video', {
+                src: clip.src,
+                autoPlay: true,
+                muted: true,
+                playsInline: true,
+                onEnded: onClipDone,
+                onError: onClipDone,
+                style: { width: '100%', height: '100%', objectFit: 'cover' },
+              })}
+            </View>
+          ) : null}
+          {!isEnd && !clip && hist.current.length > 0 ? (
+            <Pressable
+              onPress={goBack}
+              testID="story-back"
+              accessibilityLabel="Go back one page"
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.backChip, shadows.soft, pressed && { opacity: 0.7 }]}
+            >
+              <Text style={styles.backChipText}>↩️</Text>
+            </Pressable>
+          ) : null}
+          {isEnd && !node.bad ? <Confetti /> : null}
         </View>
         <Text style={styles.text} testID={`story-text-${nodeId}`}>{node.text}</Text>
         {isEnd ? (
           <View style={styles.choices}>
+            {node.bad ? (
+              <ChunkyButton
+                label="Oops! Try another way ↩️"
+                color={colors.gold}
+                darkColor={darken(colors.gold)}
+                onPress={goBack}
+                testID="story-try-again"
+                minWidth={230}
+              />
+            ) : null}
             <ChunkyButton
-              label="The End! Read again 📖"
+              label={node.bad ? 'Start over 📖' : 'The End! Read again 📖'}
               color={colors.green}
               darkColor={darken(colors.green)}
-              onPress={() => { sfx.win(); setNodeId('start'); }}
+              onPress={() => { if (!node.bad) sfx.win(); hist.current = []; setNodeId('start'); }}
               testID="story-restart"
               minWidth={230}
             />
@@ -141,7 +231,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
             {node.choices!.map((c, i) => c.icon ? (
               <Pressable
                 key={c.next}
-                onPress={() => { sfx.tap(); say(c.label); setNodeId(c.next); }}
+                onPress={() => { sfx.tap(); say(c.label); hist.current.push(nodeId); setNodeId(c.next); }}
                 testID={`story-choice-${c.next}`}
                 accessibilityLabel={c.label}
                 accessibilityRole="button"
@@ -160,7 +250,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker }: Prop
                 label={`${c.label}`}
                 color={i === 0 ? colors.teal : colors.gold}
                 darkColor={darken(i === 0 ? colors.teal : colors.gold)}
-                onPress={() => { sfx.tap(); say(c.label); setNodeId(c.next); }}
+                onPress={() => { sfx.tap(); say(c.label); hist.current.push(nodeId); setNodeId(c.next); }}
                 testID={`story-choice-${c.next}`}
                 minWidth={230}
               />
@@ -285,6 +375,18 @@ function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
 }
 
 const styles = StyleSheet.create({
+  backChip: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(255,255,255,0.88)',
+    borderRadius: 999,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backChipText: { fontSize: 20 },
   hotGlow: {
     flex: 1,
     borderRadius: 18,

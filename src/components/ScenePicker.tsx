@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS } from '../assets/images';
+import { DifficultyFilter, FILTERS } from '../difficulty';
 import { colors, fonts, shadows } from '../theme';
 
 export interface SceneOption {
@@ -9,6 +10,7 @@ export interface SceneOption {
   image: string; // manifest-relative path
   flagged?: boolean; // not yet quality-verified — show a warning badge
   level?: 'easy' | 'medium' | 'hard';
+  dimmed?: boolean; // outside the current difficulty filter — visible but greyed
 }
 
 const LEVEL_EMOJI = { easy: '😊', medium: '🌟', hard: '🔥' } as const;
@@ -18,27 +20,31 @@ interface Props {
   options: SceneOption[];
   onPick: (id: string) => void;
   onSurprise: () => void;
+  filterChip?: React.ReactNode; // the difficulty cycle button, when levels apply
 }
 
 // Pre-game theme chooser: one big tappable card per scene.
-export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
+export function ScenePicker({ title, options, onPick, onSurprise, filterChip }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <Text style={styles.title}>{title}</Text>
-      <Pressable
-        onPress={onSurprise}
-        testID="scene-surprise"
-        style={({ pressed }) => [styles.surprise, shadows.soft, pressed && styles.pressed]}
-      >
-        <Text style={styles.surpriseText}>🎲 Surprise me!</Text>
-      </Pressable>
+      <View style={styles.headerRow}>
+        <Pressable
+          onPress={onSurprise}
+          testID="scene-surprise"
+          style={({ pressed }) => [styles.surprise, shadows.soft, pressed && styles.pressed]}
+        >
+          <Text style={styles.surpriseText}>🎲 Surprise me!</Text>
+        </Pressable>
+        {filterChip}
+      </View>
       <View style={styles.grid}>
         {options.map((o, i) => (
           <PopIn key={o.id} delay={60 + i * 70} tilt={(i % 2 === 0 ? -1 : 1) * 0.9}>
             <Pressable
               onPress={() => onPick(o.id)}
               testID={`scene-pick-${o.id}`}
-              style={({ pressed }) => [styles.card, shadows.sticker, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.card, shadows.sticker, o.dimmed && styles.dimmed, pressed && styles.pressed]}
             >
               <Image source={SCENE_THUMBS[o.image] ?? SCENE_IMAGES[o.image]} style={styles.thumb} resizeMode="cover" />
               <Text style={styles.name}>{o.name}</Text>
@@ -57,6 +63,23 @@ export function ScenePicker({ title, options, onPick, onSurprise }: Props) {
         ))}
       </View>
     </ScrollView>
+  );
+}
+
+// One button, tap to cycle All -> Easy -> Medium -> Hard. Lives on the home
+// header AND inside level pickers so the filter travels with the kid.
+export function FilterCycleChip({ filter, onCycle }: { filter: DifficultyFilter; onCycle: () => void }) {
+  const cur = FILTERS.find((f) => f.id === filter) ?? FILTERS[0];
+  return (
+    <Pressable
+      onPress={onCycle}
+      testID="difficulty-cycle"
+      accessibilityRole="button"
+      accessibilityLabel={`Difficulty: ${cur.label}. Tap to change`}
+      style={({ pressed }) => [styles.filterChip, shadows.soft, pressed && styles.pressed]}
+    >
+      <Text style={styles.filterText}>{cur.emoji} {cur.label}</Text>
+    </Pressable>
   );
 }
 
@@ -88,7 +111,6 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingVertical: 12,
     paddingHorizontal: 26,
-    marginBottom: 14,
   },
   surpriseText: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
   grid: {
@@ -108,6 +130,17 @@ const styles = StyleSheet.create({
     borderColor: colors.card,
   },
   pressed: { opacity: 0.8, transform: [{ scale: 0.97 }] },
+  dimmed: { opacity: 0.32 },
+  headerRow: { flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 14 },
+  filterChip: {
+    backgroundColor: colors.paper,
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: colors.blush,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+  },
+  filterText: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
   thumb: { width: '100%', height: 120 },
   flagBadge: {
     position: 'absolute',
