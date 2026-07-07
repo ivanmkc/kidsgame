@@ -26,7 +26,15 @@ from gen.judge import ask_yes_no  # noqa: E402
 from gen.nbp import _call, generate, generate_with_ref  # noqa: E402
 from gen.sam_batch import sam_segment_batch  # noqa: E402
 from gen.scenes import SCENE_STYLE  # noqa: E402
-from gen.story_specs import RAINBOW_DOORS, SCARE_SCHOOL, TREASURE_TRAIL, WHISPERING_HOUSE  # noqa: E402
+from gen.story_specs import (  # noqa: E402
+    DEEP_SEA,
+    NIGHT_MARKET,
+    RAINBOW_DOORS,
+    SCARE_SCHOOL,
+    SKY_RACE,
+    TREASURE_TRAIL,
+    WHISPERING_HOUSE,
+)
 from gen.story_lint import lint_spec  # noqa: E402
 from google.genai import types  # noqa: E402
 from PIL import Image  # noqa: E402
@@ -35,7 +43,8 @@ ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 
-STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL]
+STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL,
+           NIGHT_MARKET, DEEP_SEA, SKY_RACE]
 
 
 def _story_style(spec: dict) -> str:
