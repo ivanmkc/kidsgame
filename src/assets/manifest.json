@@ -2072,6 +2072,276 @@
           "thumb": "hidden/tent_t_compass.png"
         }
       ]
+    },
+    {
+      "id": "petshop",
+      "name": "Pet Shop",
+      "image": "hidden/petshop.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "parakeet",
+          "label": "a blue parakeet",
+          "x": 923,
+          "y": 84,
+          "w": 80,
+          "h": 113,
+          "thumb": "hidden/petshop_t_parakeet.png"
+        },
+        {
+          "id": "turtle",
+          "label": "a tiny pet turtle",
+          "x": 403,
+          "y": 586,
+          "w": 97,
+          "h": 63,
+          "thumb": "hidden/petshop_t_turtle.png"
+        },
+        {
+          "id": "puppy",
+          "label": "a beagle puppy in a basket",
+          "x": 697,
+          "y": 554,
+          "w": 207,
+          "h": 116,
+          "thumb": "hidden/petshop_t_puppy.png"
+        },
+        {
+          "id": "bunny",
+          "label": "a lop-eared bunny",
+          "x": 98,
+          "y": 462,
+          "w": 183,
+          "h": 143,
+          "thumb": "hidden/petshop_t_bunny.png"
+        },
+        {
+          "id": "hamster",
+          "label": "a hamster in a wheel",
+          "x": 750,
+          "y": 216,
+          "w": 79,
+          "h": 77,
+          "thumb": "hidden/petshop_t_hamster.png"
+        },
+        {
+          "id": "kitten",
+          "label": "a grey kitten with a ball of yarn",
+          "x": 1113,
+          "y": 531,
+          "w": 146,
+          "h": 142,
+          "thumb": "hidden/petshop_t_kitten.png"
+        }
+      ]
+    },
+    {
+      "id": "pond",
+      "name": "Frog Pond",
+      "image": "hidden/pond.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "bench",
+          "label": "a small wooden bench",
+          "x": 29,
+          "y": 30,
+          "w": 227,
+          "h": 191,
+          "thumb": "hidden/pond_t_bench.png"
+        },
+        {
+          "id": "ball",
+          "label": "a beach ball in the grass",
+          "x": 409,
+          "y": 94,
+          "w": 112,
+          "h": 112,
+          "thumb": "hidden/pond_t_ball.png"
+        },
+        {
+          "id": "boot",
+          "label": "a red rubber rain boot",
+          "x": 680,
+          "y": 580,
+          "w": 106,
+          "h": 114,
+          "thumb": "hidden/pond_t_boot.png"
+        },
+        {
+          "id": "boat",
+          "label": "a tiny paper boat",
+          "x": 440,
+          "y": 533,
+          "w": 98,
+          "h": 71,
+          "thumb": "hidden/pond_t_boat.png"
+        },
+        {
+          "id": "mushroom",
+          "label": "a red spotted mushroom",
+          "x": 840,
+          "y": 607,
+          "w": 102,
+          "h": 110,
+          "thumb": "hidden/pond_t_mushroom.png"
+        },
+        {
+          "id": "frog",
+          "label": "a fat green frog on a lily pad",
+          "x": 160,
+          "y": 504,
+          "w": 132,
+          "h": 127,
+          "thumb": "hidden/pond_t_frog.png"
+        }
+      ]
+    },
+    {
+      "id": "depot",
+      "name": "Train Depot",
+      "image": "hidden/depot.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "cone",
+          "label": "an orange traffic cone",
+          "x": 7,
+          "y": 532,
+          "w": 96,
+          "h": 108,
+          "thumb": "hidden/depot_t_cone.png"
+        },
+        {
+          "id": "cat",
+          "label": "a black and white cat",
+          "x": 1162,
+          "y": 429,
+          "w": 114,
+          "h": 80,
+          "thumb": "hidden/depot_t_cat.png"
+        },
+        {
+          "id": "pigeon",
+          "label": "a plump pigeon",
+          "x": 799,
+          "y": 47,
+          "w": 79,
+          "h": 78,
+          "thumb": "hidden/depot_t_pigeon.png"
+        },
+        {
+          "id": "barrel",
+          "label": "a wooden barrel of apples",
+          "x": 310,
+          "y": 576,
+          "w": 122,
+          "h": 135,
+          "thumb": "hidden/depot_t_barrel.png"
+        },
+        {
+          "id": "wheelbarrow",
+          "label": "a green wheelbarrow",
+          "x": 759,
+          "y": 558,
+          "w": 206,
+          "h": 149,
+          "thumb": "hidden/depot_t_wheelbarrow.png"
+        },
+        {
+          "id": "whistle",
+          "label": "a golden train whistle",
+          "x": 10,
+          "y": 271,
+          "w": 92,
+          "h": 98,
+          "thumb": "hidden/depot_t_whistle.png"
+        }
+      ]
+    },
+    {
+      "id": "candyshop",
+      "name": "Candy Shop",
+      "image": "hidden/candyshop.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "piggybank",
+          "label": "a pink piggy bank on the counter",
+          "x": 369,
+          "y": 362,
+          "w": 119,
+          "h": 100,
+          "thumb": "hidden/candyshop_t_piggybank.png"
+        },
+        {
+          "id": "gumball",
+          "label": "a gumball machine",
+          "x": 10,
+          "y": 308,
+          "w": 107,
+          "h": 192,
+          "thumb": "hidden/candyshop_t_gumball.png"
+        },
+        {
+          "id": "bear",
+          "label": "a big red gummy bear",
+          "x": 1154,
+          "y": 551,
+          "w": 101,
+          "h": 149,
+          "thumb": "hidden/candyshop_t_bear.png"
+        },
+        {
+          "id": "scale",
+          "label": "a golden weighing scale",
+          "x": 1090,
+          "y": 9,
+          "w": 172,
+          "h": 145,
+          "thumb": "hidden/candyshop_t_scale.png"
+        },
+        {
+          "id": "bunny",
+          "label": "a white plush bunny on a shelf",
+          "x": 645,
+          "y": 150,
+          "w": 98,
+          "h": 149,
+          "thumb": "hidden/candyshop_t_bunny.png"
+        },
+        {
+          "id": "hat",
+          "label": "a striped party hat",
+          "x": 1163,
+          "y": 173,
+          "w": 79,
+          "h": 118,
+          "thumb": "hidden/candyshop_t_hat.png"
+        },
+        {
+          "id": "ladder",
+          "label": "a little red step ladder",
+          "x": 922,
+          "y": 430,
+          "w": 153,
+          "h": 211,
+          "thumb": "hidden/candyshop_t_ladder.png"
+        },
+        {
+          "id": "chocolate",
+          "label": "a chocolate bar with one bite missing",
+          "x": 47,
+          "y": 561,
+          "w": 117,
+          "h": 88,
+          "thumb": "hidden/candyshop_t_chocolate.png"
+        }
+      ]
     }
   ],
   "stories": [
@@ -2097,7 +2367,7 @@
         },
         "a": {
           "image": "story/luna_a.png",
-          "text": "In the forest, a little squirrel waves hello. It looks like it needs help!",
+          "text": "In the forest, a little squirrel waves hello. 'Will you play with me today?'",
           "choices": [
             {
               "label": "Help find acorns \ud83c\udf30",
@@ -2161,7 +2431,7 @@
         },
         "ba": {
           "image": "story/luna_ba.png",
-          "text": "A friendly whale swims beside the boat and winks at Luna!",
+          "text": "A friendly whale swims up and sprays a sparkly hello! Far away on the beach, a little bonfire starts to glow.",
           "choices": [
             {
               "label": "Dive with the whale \ud83d\udc0b",
@@ -2197,7 +2467,7 @@
         },
         "end_rainbow": {
           "image": "story/luna_end_rainbow.png",
-          "text": "Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!"
+          "text": "What a forest adventure! Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!"
         },
         "end_crown": {
           "image": "story/luna_end_crown.png",
@@ -2213,7 +2483,7 @@
         },
         "end_bonfire": {
           "image": "story/luna_end_bonfire.png",
-          "text": "Everyone dances around the bonfire until the stars come out. The End!"
+          "text": "Down on the twinkly beach, everyone dances around the bonfire until the stars come out. The End!"
         }
       }
     },
@@ -2287,7 +2557,7 @@
         },
         "ab": {
           "image": "story/pip_ab.png",
-          "text": "The sound was three tiny kittens! They look hungry and a little lost.",
+          "text": "The sound was three tiny kittens \u2014 playing right on the map's X! 'Mew! Mew! We're hungry and a little lost.'",
           "choices": [
             {
               "label": "Lead them home \ud83c\udfe1",
@@ -2295,7 +2565,7 @@
               "icon": "story/pip_ab_c0.png"
             },
             {
-              "label": "Share it with friends \ud83d\udc3e",
+              "label": "Dig up the treasure to share \ud83e\uddb4",
               "next": "end_share",
               "icon": "story/pip_ab_c1.png"
             }
@@ -2303,7 +2573,7 @@
         },
         "ba": {
           "image": "story/pip_ba.png",
-          "text": "Wheee! At the bottom waits a shiny golden ball. It starts to roll away!",
+          "text": "Wheee! At the bottom waits a shiny golden ball \u2014 the map's treasure! And it's rolling away!",
           "choices": [
             {
               "label": "Chase the ball! \ud83c\udfbe",
@@ -2319,7 +2589,7 @@
         },
         "bb": {
           "image": "story/pip_bb.png",
-          "text": "Inside the old oak lives a family of glowing fireflies! They swirl around Pip.",
+          "text": "The sun is setting at the old oak. Inside lives a family of glowing fireflies! They swirl around Pip.",
           "choices": [
             {
               "label": "Follow the fireflies \u2728",
@@ -2339,11 +2609,11 @@
         },
         "end_share": {
           "image": "story/pip_end_share.png",
-          "text": "Pip shares his treasure with all his friends. Sharing is the best treasure! The End!"
+          "text": "Pip opens the chest and shares the biscuits with everyone. Sharing is the best treasure! The End!"
         },
         "end_kittens": {
           "image": "story/pip_end_kittens.png",
-          "text": "Pip leads the kittens safely home. Their mama purrs a big thank-you! The End!"
+          "text": "Pip leads the kittens safely home before dark. Three sleepy thank-you mews! The End!"
         },
         "end_ball": {
           "image": "story/pip_end_ball.png",
@@ -2355,7 +2625,7 @@
         },
         "end_fireflies": {
           "image": "story/pip_end_fireflies.png",
-          "text": "The fireflies lead Pip to a secret glowing garden. Magic! The End!"
+          "text": "The fireflies lead Pip to a secret glowing garden \u2014 right where X marks the spot! Magic! The End!"
         }
       }
     },
@@ -2443,7 +2713,7 @@
         },
         "aa": {
           "image": "story/whisper_aa.png",
-          "text": "Upstairs, a music box plays all by itself... and the door at the end of the hall is RATTLING.",
+          "text": "Upstairs, a music box plays all by itself... and the door at the end of the hall RATTLES. Then a soft voice purrs: 'Milo? Is that you, little one?' It's Great-Grandcat!",
           "choices": [
             {
               "label": "Hug Great-Grandcat \ud83d\udc9c",
@@ -2459,7 +2729,7 @@
         },
         "ab": {
           "image": "story/whisper_ab.png",
-          "text": "In the library the whispers are LOUD now. The big chair creaks. Something's tail twitches behind it...",
+          "text": "In the library the whispers are LOUD now. The big chair creaks. Something's tail twitches behind it... and a kind voice hoots: 'Who-o-o wants a story?'",
           "choices": [
             {
               "label": "Join story time \ud83d\udcd6",
@@ -2485,7 +2755,7 @@
         },
         "ba": {
           "image": "story/whisper_ba.png",
-          "text": "The cellar glows with a hundred little jars. But on the wall \u2014 a HUGE monster shadow rises!",
+          "text": "The cellar glows with a hundred little jam jars. A HUGE monster shadow rises on the wall! But look closer... it's a teeny-tiny mouse in a chef's hat, holding jam toast.",
           "choices": [
             {
               "label": "Share the jam \ud83e\uded9",
@@ -2511,7 +2781,7 @@
         },
         "bb": {
           "image": "story/whisper_bb.png",
-          "text": "The greenhouse plants sway... but there is no wind. And that tall white shape was NOT there before.",
+          "text": "The greenhouse plants sway... but there is no wind. And that tall white shape was NOT there before. It giggles a friendly little giggle. Could it be... a Garden Phantom?",
           "choices": [
             {
               "label": "Cheer for the Phantom \ud83e\uddb8",
@@ -2537,23 +2807,23 @@
         },
         "end_family": {
           "image": "story/whisper_end_family.png",
-          "text": "Milo and Great-Grandcat share midnight tea and stories until the storm passes. The End!"
+          "text": "Milo and Great-Grandcat share midnight tea and stories until the storm passes. And peeking out of the teapot \u2014 grandma's key! The End!"
         },
         "end_key": {
           "image": "story/whisper_end_key.png",
-          "text": "Milo found grandma's key! And as he leaves... something in the window waves goodbye. The End?"
+          "text": "Milo asked so nicely that his new friend fetched grandma's key! And as he leaves... something in the window waves goodbye. The End?"
         },
         "end_owls": {
           "image": "story/whisper_end_owls.png",
-          "text": "Milo stays for owl story time. The spooky house isn't spooky at all \u2014 just full of readers. The End!"
+          "text": "Milo stays for owl story time. The spooky house isn't spooky at all \u2014 just full of readers. And Grandpa Owl's bookmark? It's grandma's key! The End!"
         },
         "end_feast": {
           "image": "story/whisper_end_feast.png",
-          "text": "A midnight jam feast with Chef Mouse! Milo's whiskers are purple with blackberry. The End!"
+          "text": "A midnight jam feast with Chef Mouse! Milo's whiskers are sticky with strawberry. And Chef Mouse knows JUST where grandma's key is. The End!"
         },
         "end_phantom": {
           "image": "story/whisper_end_phantom.png",
-          "text": "The Garden Phantom leads a midnight parade, and Milo is the lantern-bearer. The End!"
+          "text": "The Garden Phantom leads a midnight parade \u2014 hedgehogs in a line! \u2014 and Milo is the lantern-bearer. And look what the Phantom found in the flowers: grandma's key! The End!"
         }
       }
     },
@@ -2589,7 +2859,7 @@
         },
         "a": {
           "image": "story/scareschool_a.png",
-          "text": "In Scaring Class, everyone practices their scary face. Mo's scary face just looks... adorable. The supply closet wobbles.",
+          "text": "In Scaring Class, Principal Growlbert teaches BOO 101. Mo's scary face just looks... adorable. The supply closet wobbles \u2014 someone tiny in there is giggling too!",
           "choices": [
             {
               "label": "Practice a tiny boo \ud83d\ude2e",
@@ -2647,15 +2917,15 @@
         },
         "ab": {
           "image": "story/scareschool_ab.png",
-          "text": "Blobbina's secret: 'Being scary is just being YOU, but louder.' The funhouse mirror behind them darkens...",
+          "text": "Blobbina's secret: 'Being scary is just being YOU \u2014 your way!' The funhouse mirror behind them darkens...",
           "choices": [
             {
-              "label": "Be Mo, but louder! \ud83d\udce3",
+              "label": "Try the teeny-tiniest boo \ud83e\udd2b",
               "next": "end_boo",
               "icon": "story/scareschool_ab_c0.png"
             },
             {
-              "label": "Scare the Principal back \ud83d\ude08",
+              "label": "Scare Principal Growlbert back \ud83d\ude08",
               "next": "end_growl",
               "icon": "story/scareschool_ab_c1.png"
             }
@@ -2715,19 +2985,423 @@
         },
         "end_boo": {
           "image": "story/scareschool_end_boo.png",
-          "text": "Mo whispers the tiniest 'boo' ever... and the whole school faints \u2014 from laughing! Scariest Sound trophy: MO! The End!"
+          "text": "At the big talent show, Mo whispers the tiniest 'boo' ever... and the whole school tumbles over laughing! The giggly closet ghost giggles loudest of all. Scariest Sound winner: MO! The End!"
         },
         "end_team": {
           "image": "story/scareschool_end_team.png",
-          "text": "Scares are better together! Mo and the whole class take a bow. Best first day ever. The End!"
+          "text": "Scares are better together! The whole school piles onto the big stage, and Mo and the class take a bow. Best first day ever. The End!"
         },
         "end_growl": {
           "image": "story/scareschool_end_growl.png",
-          "text": "Mo scares the PRINCIPAL! Growlbert laughs so hard his glasses fog up. Instant legend. The End!"
+          "text": "Mo sneaks up and \u2014 BOO! Principal Growlbert jumps so high his juice goes flying! He laughs until his glasses fog up. Instant legend. The End!"
         },
         "end_pudding": {
           "image": "story/scareschool_end_pudding.png",
-          "text": "The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!"
+          "text": "The tiptoeing trash can tips over \u2014 it was FULL of pudding! The Great Pudding Party of Scare School! Even the lunch pot is laughing. The End!"
+        }
+      }
+    },
+    {
+      "id": "doors",
+      "title": "The Two-Door House",
+      "nodes": {
+        "start": {
+          "image": "story/doors_start.png",
+          "text": "Luna found a tiny floating house with two magic doors! The red sun door hums with warm light. The blue moon door twinkles with tiny stars. Which door should Luna open?",
+          "choices": [
+            {
+              "label": "Open the red sun door",
+              "next": "a",
+              "hot": {
+                "x": 547,
+                "y": 15,
+                "w": 298,
+                "h": 285
+              }
+            },
+            {
+              "label": "Open the blue moon door",
+              "next": "b",
+              "hot": {
+                "x": 897,
+                "y": 39,
+                "w": 233,
+                "h": 363
+              }
+            }
+          ]
+        },
+        "a": {
+          "image": "story/doors_a.png",
+          "text": "Behind the red door is a garden in the clouds! A golden slide curls down the hill, and a giant bouncy mushroom goes boing... boing... Where should Luna play?",
+          "choices": [
+            {
+              "label": "Whoosh down the golden slide",
+              "next": "aa",
+              "hot": {
+                "x": 133,
+                "y": 46,
+                "w": 360,
+                "h": 558
+              }
+            },
+            {
+              "label": "Bounce on the big mushroom",
+              "next": "ab",
+              "hot": {
+                "x": 763,
+                "y": 22,
+                "w": 502,
+                "h": 467
+              }
+            }
+          ]
+        },
+        "b": {
+          "image": "story/doors_b.png",
+          "text": "Behind the blue door is a night garden full of stars! A firefly boat bobs on the pond, and a silver moon swing sways from a star. What should Luna ride?",
+          "choices": [
+            {
+              "label": "Sail the firefly boat",
+              "next": "ba",
+              "hot": {
+                "x": 52,
+                "y": 409,
+                "w": 377,
+                "h": 157
+              }
+            },
+            {
+              "label": "Swing on the moon swing",
+              "next": "bb",
+              "hot": {
+                "x": 919,
+                "y": 0,
+                "w": 335,
+                "h": 562
+              }
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/doors_aa.png",
+          "text": "Wheee! The slide lands in a candy-cloud valley. A rainbow ferris wheel spins slowly, and a cozy cloud cottage puffs warm little smoke rings. Where to now?",
+          "choices": [
+            {
+              "label": "Ride the rainbow wheel",
+              "next": "end_party",
+              "hot": {
+                "x": 42,
+                "y": 0,
+                "w": 526,
+                "h": 487
+              }
+            },
+            {
+              "label": "Knock at the cloud cottage",
+              "next": "end_cozy",
+              "hot": {
+                "x": 737,
+                "y": 0,
+                "w": 514,
+                "h": 386
+              }
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/doors_ab.png",
+          "text": "Boing! Luna bounces all the way up to a treetop village. A flaggy rope bridge leads to a lantern party, and a little smiling cloud floats up beside her. What should Luna do?",
+          "choices": [
+            {
+              "label": "Cross the rope bridge",
+              "next": "end_party",
+              "hot": {
+                "x": 140,
+                "y": 300,
+                "w": 649,
+                "h": 311
+              }
+            },
+            {
+              "label": "Hop on the friendly cloud",
+              "next": "end_flight",
+              "hot": {
+                "x": 957,
+                "y": 44,
+                "w": 293,
+                "h": 208
+              }
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/doors_ba.png",
+          "text": "The firefly boat sails to Star Island, where baby stars snore tiny sparkly snores. There's a soft moonbeam nest, and a little striped lighthouse. Where should Luna go?",
+          "choices": [
+            {
+              "label": "Snuggle into the star nest",
+              "next": "end_stars",
+              "hot": {
+                "x": 30,
+                "y": 217,
+                "w": 545,
+                "h": 343
+              }
+            },
+            {
+              "label": "Climb the little lighthouse",
+              "next": "end_flight",
+              "hot": {
+                "x": 956,
+                "y": 56,
+                "w": 178,
+                "h": 455
+              }
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/doors_bb.png",
+          "text": "The swing carries Luna to a balcony on the moon! A big brass telescope peeks at the stars, and a curly silver slide swooshes all the way home. What should Luna pick?",
+          "choices": [
+            {
+              "label": "Peek through the telescope",
+              "next": "end_stars",
+              "hot": {
+                "x": 34,
+                "y": 37,
+                "w": 432,
+                "h": 474
+              }
+            },
+            {
+              "label": "Take the silver slide home",
+              "next": "end_cozy",
+              "hot": {
+                "x": 944,
+                "y": 24,
+                "w": 296,
+                "h": 684
+              }
+            }
+          ]
+        },
+        "end_party": {
+          "image": "story/doors_end_party.png",
+          "text": "Luna dances all evening at the cloud carnival with her new friends. Best. Door. Ever! The End!"
+        },
+        "end_cozy": {
+          "image": "story/doors_end_cozy.png",
+          "text": "Warm cocoa, marshmallows, and stories by the fire with Granny Sheep. Luna purrs like a kitten. The End!"
+        },
+        "end_stars": {
+          "image": "story/doors_end_stars.png",
+          "text": "The baby stars snuggle Luna like a sparkly blanket. Shhh... goodnight, Luna. The End!"
+        },
+        "end_flight": {
+          "image": "story/doors_end_flight.png",
+          "text": "The friendly cloud flies Luna all the way home, loop-de-loop! 'Same time tomorrow?' it whispers. The End!"
+        }
+      }
+    },
+    {
+      "id": "trail",
+      "title": "Pip's Treasure Trail",
+      "nodes": {
+        "start": {
+          "image": "story/trail_start.png",
+          "text": "Pip found a treasure map! X marks the spot. The trail splits: a sparkly crystal cave in the cliff, or a wobbly rope bridge over the lagoon. Which way, Pip?",
+          "choices": [
+            {
+              "label": "Into the crystal cave",
+              "next": "a",
+              "hot": {
+                "x": 60,
+                "y": 46,
+                "w": 407,
+                "h": 445
+              }
+            },
+            {
+              "label": "Across the rope bridge",
+              "next": "b",
+              "hot": {
+                "x": 900,
+                "y": 110,
+                "w": 340,
+                "h": 390
+              }
+            }
+          ]
+        },
+        "a": {
+          "image": "story/trail_a.png",
+          "text": "Inside, glowworms light the cave like tiny lanterns. A crystal tunnel sparkles purple and pink, and a little red row boat rocks on an underground stream. Which way to the treasure?",
+          "choices": [
+            {
+              "label": "Through the crystal tunnel",
+              "next": "aa",
+              "hot": {
+                "x": 57,
+                "y": 44,
+                "w": 411,
+                "h": 430
+              }
+            },
+            {
+              "label": "Row the little red boat",
+              "next": "ab",
+              "hot": {
+                "x": 810,
+                "y": 489,
+                "w": 383,
+                "h": 194
+              }
+            }
+          ]
+        },
+        "b": {
+          "image": "story/trail_b.png",
+          "text": "The jungle is buzzing and green! A rope ladder climbs a tall lookout palm, and a fat jungle vine swings over the gully. How should Pip go?",
+          "choices": [
+            {
+              "label": "Climb the lookout palm",
+              "next": "ba",
+              "hot": {
+                "x": 244,
+                "y": 195,
+                "w": 201,
+                "h": 427
+              }
+            },
+            {
+              "label": "Swing on the jungle vine",
+              "next": "bb",
+              "hot": {
+                "x": 717,
+                "y": 0,
+                "w": 466,
+                "h": 524
+              }
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/trail_aa.png",
+          "text": "A secret chamber! A golden door with a crab-shaped lock... and a shimmery waterfall hiding something sparkly. Where's the treasure, Pip?",
+          "choices": [
+            {
+              "label": "Open the golden crab door",
+              "next": "end_chest",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 477,
+                "h": 568
+              }
+            },
+            {
+              "label": "Peek behind the waterfall",
+              "next": "end_splash",
+              "hot": {
+                "x": 949,
+                "y": 0,
+                "w": 331,
+                "h": 568
+              }
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/trail_ab.png",
+          "text": "The stream opens into a secret glowing lagoon! A tiny lighthouse blinks hello \u2014 there's a crab waving! And over there, a geyser burps giant rainbow bubbles. Where to?",
+          "choices": [
+            {
+              "label": "Visit the lighthouse crab",
+              "next": "end_friends",
+              "hot": {
+                "x": 197,
+                "y": 182,
+                "w": 121,
+                "h": 328
+              }
+            },
+            {
+              "label": "Chase the rainbow bubbles",
+              "next": "end_splash",
+              "hot": {
+                "x": 922,
+                "y": 0,
+                "w": 226,
+                "h": 540
+              }
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/trail_ba.png",
+          "text": "From the top, Pip sees everything \u2014 even an old shipwreck on the beach! A zipline zooms right to it. And... is that a coconut catapult? Choose, Pip!",
+          "choices": [
+            {
+              "label": "Ride the zipline",
+              "next": "end_chest",
+              "hot": {
+                "x": 122,
+                "y": 564,
+                "w": 257,
+                "h": 131
+              }
+            },
+            {
+              "label": "Boing the coconut catapult",
+              "next": "end_splash",
+              "hot": {
+                "x": 1024,
+                "y": 400,
+                "w": 174,
+                "h": 182
+              }
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/trail_bb.png",
+          "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' Who should Pip see?",
+          "choices": [
+            {
+              "label": "Spin the captain's wheel",
+              "next": "end_chest",
+              "hot": {
+                "x": 15,
+                "y": 44,
+                "w": 448,
+                "h": 471
+              }
+            },
+            {
+              "label": "Say hi to the parrot",
+              "next": "end_friends",
+              "hot": {
+                "x": 912,
+                "y": 31,
+                "w": 324,
+                "h": 327
+              }
+            }
+          ]
+        },
+        "end_chest": {
+          "image": "story/trail_end_chest.png",
+          "text": "X marks the spot! The chest is full of golden bones and squeaky toys \u2014 puppy treasure! Pip is RICH! The End!"
+        },
+        "end_splash": {
+          "image": "story/trail_end_splash.png",
+          "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah \u2014 but it's close!) The End!"
+        },
+        "end_friends": {
+          "image": "story/trail_end_friends.png",
+          "text": "Crab makes sandwiches, Parrot tells pirate jokes, and Whale sprays a rainbow. Treasure friends forever! The End!"
         }
       }
     }

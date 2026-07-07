@@ -164,13 +164,14 @@ def _gen_node(spec: dict, nid: str, n: dict) -> dict:
             if use_ref:
                 img = generate_with_ref(
                     f"{n['scene']}. Characters must look IDENTICAL to the reference image — "
-                    f"same faces, colors, markings, proportions. {_story_style(spec)}",
+                    f"same faces, colors, markings, proportions. The hero appears EXACTLY "
+                    f"ONCE in the scene — never duplicated. {_story_style(spec)}",
                     ref, (1280, 720))
             else:
                 img = generate(f"{n['scene']}. {_story_style(spec)}", (1280, 720))
             best = img
             if ask_yes_no(
-                f"Is this a charming, artifact-free children's book illustration with no text, clearly showing {spec['character'].split(',')[0]}?",
+                f"Is this a charming, artifact-free children's book illustration with no text, showing {spec['character'].split(',')[0]} exactly ONCE (a single hero, not duplicated)?",
                 [img],
             ):
                 break

@@ -80,6 +80,7 @@ def collect_lines() -> list[tuple[str, str]]:
         lines.setdefault(f"Memory check! Do rule number {n} again. Do you remember it?", STYLES["instruction"])
     lines.setdefault("What should happen next?", STYLES["choice"])
     lines.setdefault("Tap where you want to go!", STYLES["choice"])
+    lines.setdefault("Rule Time! Do what the rule says as fast as you can.", STYLES["instruction"])
     lines.setdefault("or maybe...", STYLES["choice"])
     lines.setdefault("How many players?", STYLES["instruction"])
     lines.setdefault("Two player mode is on!", STYLES["instruction"])
