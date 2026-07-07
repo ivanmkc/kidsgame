@@ -1,0 +1,73 @@
+// Word metadata for the language games: English phonics (letter, spoken
+// sound, rhyme family) + toddler-standard translations. Romanization is a
+// caption for parents; kids play by ear.
+import { Lang } from '../../lang';
+
+export interface WordEntry {
+  icon: string; // key into SPOTIT_ICONS (or RHYME_ICONS for extras)
+  en: string;
+  letter: string; // uppercase initial for First Sounds / phonics
+  sound: string; // spoken phoneme cue, e.g. "duh" for D
+  rhymeKey?: string; // words sharing a key rhyme (og, ar, at...)
+  ja: string; jaR: string;
+  cmn: string; cmnR: string;
+  yue: string; yueR: string;
+}
+
+export const WORDS: WordEntry[] = [
+  { icon: 'dog', en: 'dog', letter: 'D', sound: 'duh', rhymeKey: 'og', ja: 'いぬ', jaR: 'inu', cmn: '狗', cmnR: 'gǒu', yue: '狗', yueR: 'gau' },
+  { icon: 'cat', en: 'cat', letter: 'C', sound: 'kuh', rhymeKey: 'at', ja: 'ねこ', jaR: 'neko', cmn: '猫', cmnR: 'māo', yue: '貓', yueR: 'maau' },
+  { icon: 'lion', en: 'lion', letter: 'L', sound: 'lll', ja: 'ライオン', jaR: 'raion', cmn: '狮子', cmnR: 'shīzi', yue: '獅子', yueR: 'si-zi' },
+  { icon: 'frog', en: 'frog', letter: 'F', sound: 'fff', rhymeKey: 'og', ja: 'かえる', jaR: 'kaeru', cmn: '青蛙', cmnR: 'qīngwā', yue: '青蛙', yueR: 'cing-waa' },
+  { icon: 'panda', en: 'panda', letter: 'P', sound: 'puh', ja: 'パンダ', jaR: 'panda', cmn: '熊猫', cmnR: 'xióngmāo', yue: '熊貓', yueR: 'hung-maau' },
+  { icon: 'fox', en: 'fox', letter: 'F', sound: 'fff', ja: 'きつね', jaR: 'kitsune', cmn: '狐狸', cmnR: 'húli', yue: '狐狸', yueR: 'wu-lei' },
+  { icon: 'monkey', en: 'monkey', letter: 'M', sound: 'mmm', ja: 'さる', jaR: 'saru', cmn: '猴子', cmnR: 'hóuzi', yue: '馬騮', yueR: 'maa-lau' },
+  { icon: 'pig', en: 'pig', letter: 'P', sound: 'puh', ja: 'ぶた', jaR: 'buta', cmn: '猪', cmnR: 'zhū', yue: '豬', yueR: 'zyu' },
+  { icon: 'rabbit', en: 'rabbit', letter: 'R', sound: 'rrr', ja: 'うさぎ', jaR: 'usagi', cmn: '兔子', cmnR: 'tùzi', yue: '兔仔', yueR: 'tou-zai' },
+  { icon: 'koala', en: 'koala', letter: 'K', sound: 'kuh', ja: 'コアラ', jaR: 'koara', cmn: '考拉', cmnR: 'kǎolā', yue: '樹熊', yueR: 'syu-hung' },
+  { icon: 'unicorn', en: 'unicorn', letter: 'U', sound: 'yoo', ja: 'ユニコーン', jaR: 'yunikoon', cmn: '独角兽', cmnR: 'dújiǎoshòu', yue: '獨角獸', yueR: 'duk-gok-sau' },
+  { icon: 'octopus', en: 'octopus', letter: 'O', sound: 'ah', ja: 'たこ', jaR: 'tako', cmn: '章鱼', cmnR: 'zhāngyú', yue: '八爪魚', yueR: 'baat-zaau-jyu' },
+  { icon: 'crab', en: 'crab', letter: 'C', sound: 'kuh', ja: 'かに', jaR: 'kani', cmn: '螃蟹', cmnR: 'pángxiè', yue: '蟹', yueR: 'haai' },
+  { icon: 'fish', en: 'fish', letter: 'F', sound: 'fff', ja: 'さかな', jaR: 'sakana', cmn: '鱼', cmnR: 'yú', yue: '魚', yueR: 'jyu' },
+  { icon: 'butterfly', en: 'butterfly', letter: 'B', sound: 'buh', ja: 'ちょうちょ', jaR: 'choucho', cmn: '蝴蝶', cmnR: 'húdié', yue: '蝴蝶', yueR: 'wu-dip' },
+  { icon: 'ladybug', en: 'ladybug', letter: 'L', sound: 'lll', ja: 'てんとうむし', jaR: 'tentoumushi', cmn: '瓢虫', cmnR: 'piáochóng', yue: '甲蟲', yueR: 'gaap-cung' },
+  { icon: 'blossom', en: 'flower', letter: 'F', sound: 'fff', ja: 'はな', jaR: 'hana', cmn: '花', cmnR: 'huā', yue: '花', yueR: 'faa' },
+  { icon: 'sunflower', en: 'sunflower', letter: 'S', sound: 'sss', ja: 'ひまわり', jaR: 'himawari', cmn: '向日葵', cmnR: 'xiàngrìkuí', yue: '向日葵', yueR: 'hoeng-jat-kwai' },
+  { icon: 'apple', en: 'apple', letter: 'A', sound: 'ah', ja: 'りんご', jaR: 'ringo', cmn: '苹果', cmnR: 'píngguǒ', yue: '蘋果', yueR: 'ping-gwo' },
+  { icon: 'banana', en: 'banana', letter: 'B', sound: 'buh', ja: 'バナナ', jaR: 'banana', cmn: '香蕉', cmnR: 'xiāngjiāo', yue: '香蕉', yueR: 'hoeng-ziu' },
+  { icon: 'strawberry', en: 'strawberry', letter: 'S', sound: 'sss', ja: 'いちご', jaR: 'ichigo', cmn: '草莓', cmnR: 'cǎoméi', yue: '士多啤梨', yueR: 'si-do-be-lei' },
+  { icon: 'pizza', en: 'pizza', letter: 'P', sound: 'puh', ja: 'ピザ', jaR: 'piza', cmn: '披萨', cmnR: 'pīsà', yue: '薄餅', yueR: 'bok-beng' },
+  { icon: 'icecream', en: 'ice cream', letter: 'I', sound: 'eye', ja: 'アイスクリーム', jaR: 'aisukuriimu', cmn: '冰淇淋', cmnR: 'bīngqílín', yue: '雪糕', yueR: 'syut-gou' },
+  { icon: 'balloon', en: 'balloon', letter: 'B', sound: 'buh', ja: 'ふうせん', jaR: 'fuusen', cmn: '气球', cmnR: 'qìqiú', yue: '氣球', yueR: 'hei-kau' },
+  { icon: 'car', en: 'car', letter: 'C', sound: 'kuh', rhymeKey: 'ar', ja: 'くるま', jaR: 'kuruma', cmn: '汽车', cmnR: 'qìchē', yue: '車', yueR: 'ce' },
+  { icon: 'plane', en: 'plane', letter: 'P', sound: 'puh', ja: 'ひこうき', jaR: 'hikouki', cmn: '飞机', cmnR: 'fēijī', yue: '飛機', yueR: 'fei-gei' },
+  { icon: 'rocket', en: 'rocket', letter: 'R', sound: 'rrr', ja: 'ロケット', jaR: 'roketto', cmn: '火箭', cmnR: 'huǒjiàn', yue: '火箭', yueR: 'fo-zin' },
+  { icon: 'soccer', en: 'ball', letter: 'B', sound: 'buh', ja: 'ボール', jaR: 'booru', cmn: '足球', cmnR: 'zúqiú', yue: '足球', yueR: 'zuk-kau' },
+  { icon: 'rainbow', en: 'rainbow', letter: 'R', sound: 'rrr', ja: 'にじ', jaR: 'niji', cmn: '彩虹', cmnR: 'cǎihóng', yue: '彩虹', yueR: 'coi-hung' },
+  { icon: 'star', en: 'star', letter: 'S', sound: 'sss', rhymeKey: 'ar', ja: 'ほし', jaR: 'hoshi', cmn: '星星', cmnR: 'xīngxing', yue: '星星', yueR: 'sing-sing' },
+  { icon: 'gift', en: 'present', letter: 'P', sound: 'puh', ja: 'プレゼント', jaR: 'purezento', cmn: '礼物', cmnR: 'lǐwù', yue: '禮物', yueR: 'lai-mat' },
+];
+
+// Extra rhyme-pair icons (assets/game/rhyme/, RHYME_ICONS map) — generated
+// by the icon pipeline; EN-only (used by Rhyme Time and Word Builder).
+export const RHYME_WORDS: { icon: string; en: string; letter: string; sound: string; rhymeKey: string }[] = [
+  { icon: 'sun', en: 'sun', letter: 'S', sound: 'sss', rhymeKey: 'un' },
+  { icon: 'bun', en: 'bun', letter: 'B', sound: 'buh', rhymeKey: 'un' },
+  { icon: 'cake', en: 'cake', letter: 'C', sound: 'kuh', rhymeKey: 'ake' },
+  { icon: 'snake', en: 'snake', letter: 'S', sound: 'sss', rhymeKey: 'ake' },
+  { icon: 'bear', en: 'bear', letter: 'B', sound: 'buh', rhymeKey: 'ear' },
+  { icon: 'pear', en: 'pear', letter: 'P', sound: 'puh', rhymeKey: 'ear' },
+  { icon: 'moon', en: 'moon', letter: 'M', sound: 'mmm', rhymeKey: 'oon' },
+  { icon: 'spoon', en: 'spoon', letter: 'S', sound: 'sss', rhymeKey: 'oon' },
+  { icon: 'tree', en: 'tree', letter: 'T', sound: 'tuh', rhymeKey: 'ee' },
+  { icon: 'bee', en: 'bee', letter: 'B', sound: 'buh', rhymeKey: 'ee' },
+  { icon: 'house', en: 'house', letter: 'H', sound: 'huh', rhymeKey: 'ouse' },
+  { icon: 'mouse', en: 'mouse', letter: 'M', sound: 'mmm', rhymeKey: 'ouse' },
+];
+
+export function wordFor(e: WordEntry, lang: Lang): { text: string; roman: string } {
+  if (lang === 'ja') return { text: e.ja, roman: e.jaR };
+  if (lang === 'cmn') return { text: e.cmn, roman: e.cmnR };
+  if (lang === 'yue') return { text: e.yue, roman: e.yueR };
+  return { text: e.en, roman: '' };
+}
