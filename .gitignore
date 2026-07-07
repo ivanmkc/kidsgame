@@ -41,3 +41,4 @@ yarn-error.*
 /android
 __pycache__/
 *.pyc
+.claude/
