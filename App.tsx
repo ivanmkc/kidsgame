@@ -28,7 +28,7 @@ import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
 import { KGB_BUILD } from './src/assets/build';
-import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
+import { DifficultyFilter, FILTERS, cardDetail, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
 import { useTwoPlayer } from './src/multiplayer';
 import { isMuted, say, setMuted, sfx, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
@@ -264,6 +264,7 @@ function Menu({
                 color={g.color}
                 title={g.title}
                 blurb={g.blurb}
+                detail={cardDetail(g.route, filter)}
                 onPress={() => onNavigate(g.route)}
                 testID={`menu-${g.route}`}
                 preview={previewFor(g.preview)}
@@ -422,11 +423,12 @@ function OddOnePreview() {
 }
 
 function GameCard({
-  color, title, blurb, preview, onPress, testID, width,
+  color, title, blurb, detail, preview, onPress, testID, width,
 }: {
   color: string;
   title: string;
   blurb: string;
+  detail: string | null;
   preview: React.ReactNode;
   onPress: () => void;
   testID: string;
@@ -442,11 +444,30 @@ function GameCard({
       <View style={styles.cardBody}>
         <Text style={[styles.gameTitle, { color }]}>{title}</Text>
         <Text style={styles.gameBlurb}>{blurb}</Text>
+        {detail && <DetailPill text={detail} color={color} testID={`${testID}-detail`} />}
       </View>
       <View style={[styles.playBadge, { backgroundColor: color }]}>
         <Text style={styles.playBadgeText}>PLAY</Text>
       </View>
     </Pressable>
+  );
+}
+
+// Pulses when its text changes so tapping a difficulty chip visibly
+// ripples through the cards.
+function DetailPill({ text, color, testID }: { text: string; color: string; testID: string }) {
+  const t = useRef(new Animated.Value(1)).current;
+  const prev = useRef(text);
+  useEffect(() => {
+    if (prev.current === text) return;
+    prev.current = text;
+    t.setValue(0.6);
+    Animated.spring(t, { toValue: 1, useNativeDriver: true, friction: 4 }).start();
+  }, [text, t]);
+  return (
+    <Animated.View style={[styles.detailPill, { borderColor: color, transform: [{ scale: t }] }]}>
+      <Text style={styles.detailText} testID={testID}>{text}</Text>
+    </Animated.View>
   );
 }
 
@@ -566,6 +587,16 @@ const styles = StyleSheet.create({
   },
   miniRuleText: { fontFamily: fonts.display, fontSize: 12, color: colors.ink },
   cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
+  detailPill: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    borderWidth: 2,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    backgroundColor: colors.card,
+  },
+  detailText: { fontSize: 12, fontFamily: fonts.body, color: colors.inkSoft },
   gameTitle: { fontSize: 22, fontFamily: fonts.display },
   gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },
   playBadge: {

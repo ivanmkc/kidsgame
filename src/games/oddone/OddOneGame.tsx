@@ -4,7 +4,7 @@ import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
+import { Difficulty, oddSettings, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
@@ -15,13 +15,6 @@ import { makeOddOneRound } from './logic';
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
-}
-
-function oddSettings(d: Difficulty): { n: number } {
-  // "which one does not belong?" — always categorical; harder = more items
-  if (d === 'hard') return { n: 9 };
-  if (d === 'medium') return { n: 6 };
-  return { n: 4 };
 }
 
 export function OddOneGame({ onHome, difficulty }: Props) {
