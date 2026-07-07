@@ -33,10 +33,17 @@ def rate(median_pct: float, easy_at: float, hard_at: float) -> str:
 
 def main() -> None:
     m = json.loads(MANIFEST.read_text())
+    BUMP = {"easy": "medium", "medium": "hard", "hard": "hard"}
     for e in m["diff"]:
         regions = e.get("pool") or e.get("diffs") or []
         pct = statistics.median(d["w"] * d["h"] for d in regions) / SCENE_PX * 100
-        e["level"] = rate(pct, DIFF_EASY, DIFF_HARD)
+        lvl = rate(pct, DIFF_EASY, DIFF_HARD)
+        # A recolor is harder to spot than an absence at the same size —
+        # subtle scenes are recolor-dominant by design, so area alone
+        # under-rates them.
+        if regions and sum(d.get("kind") == "recolor" for d in regions) * 2 >= len(regions):
+            lvl = BUMP[lvl]
+        e["level"] = lvl
     for e in m["hidden"]:
         pct = statistics.median(t["w"] * t["h"] for t in e["targets"]) / SCENE_PX * 100
         e["level"] = rate(pct, HIDDEN_EASY, HIDDEN_HARD)
