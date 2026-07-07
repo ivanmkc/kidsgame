@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
@@ -10,6 +10,7 @@ import { Difficulty, DifficultyFilter, inFilter, settingsFor } from '../../diffi
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
+import { sfx } from '../../sound';
 import { isSolved, makePuzzle, swap } from './logic';
 
 interface Props {
@@ -34,13 +35,24 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
   const [perm, setPerm] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
   const [moves, setMoves] = useState(0);
+  // Peek: flash the finished picture over the board for a few seconds
+  const [peek, setPeek] = useState(false);
+  const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showPeek = () => {
+    sfx.tap();
+    setPeek(true);
+    if (peekTimer.current) clearTimeout(peekTimer.current);
+    peekTimer.current = setTimeout(() => setPeek(false), 2500);
+  };
 
   useEffect(() => {
     if (picked) {
       setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), cols * rows));
       setSelected(null);
       setMoves(0);
+      setPeek(false);
     }
+    return () => { if (peekTimer.current) clearTimeout(peekTimer.current); };
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const won = perm.length === size && isSolved(perm);
@@ -96,6 +108,15 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="puzzle-timer" /> : null}
           <ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" />
+          <Pressable
+            onPress={showPeek}
+            testID="puzzle-peek"
+            accessibilityLabel="Peek at the finished picture"
+            accessibilityRole="button"
+            style={({ pressed }) => [styles.peekBtn, shadows.soft, pressed && { opacity: 0.8 }]}
+          >
+            <Text style={styles.peekText}>🖼️ Peek</Text>
+          </Pressable>
         </View>
       }
     >
@@ -129,6 +150,13 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
               </Pressable>
             );
           })}
+          {peek ? (
+            <Image
+              source={SCENE_IMAGES[picked.image]}
+              style={[StyleSheet.absoluteFill as object, { width: boardW, height: boardH }]}
+              testID="puzzle-peek-overlay"
+            />
+          ) : null}
         </View>
         <Text style={styles.hint}>Tap one piece, then tap another to swap them!</Text>
       </View>
@@ -146,6 +174,8 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', sceneId, onPick
 }
 
 const styles = StyleSheet.create({
+  peekBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 12 },
+  peekText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },
   board: { borderRadius: 18, overflow: 'hidden', backgroundColor: colors.card },
   tile: { position: 'absolute', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },

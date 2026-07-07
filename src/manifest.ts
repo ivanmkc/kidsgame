@@ -55,6 +55,7 @@ export interface StoryChoice {
   next: string;
   icon?: string; // illustrated button — pre-readers pick by picture
   hot?: Box; // in-scene hotspot — the kid taps the door itself
+  video?: string; // Veo action clip played on tap (public/story-video/)
 }
 
 export interface StoryScare extends Box {
@@ -69,6 +70,7 @@ export interface StoryNode {
   text: string;
   choices?: StoryChoice[];
   scare?: StoryScare;
+  bad?: boolean; // oopsie ending — no confetti, offer 'try another way'
 }
 
 export interface Story {

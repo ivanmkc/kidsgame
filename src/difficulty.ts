@@ -104,3 +104,8 @@ export function nextSceneId<T extends { id: string; level?: Difficulty }>(
   const ids = pool.map((s) => s.id);
   return ids[(ids.indexOf(currentId) + 1) % ids.length];
 }
+
+export function nextFilter(f: DifficultyFilter): DifficultyFilter {
+  const order = FILTERS.map((x) => x.id);
+  return order[(order.indexOf(f) + 1) % order.length];
+}

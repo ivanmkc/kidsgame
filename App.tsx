@@ -13,8 +13,11 @@ import {
   Text,
   View,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { SCENE_THUMBS, SCENE_IMAGES, SPOTIT_ICONS, SPOTIT_SHADOWS, UI_IMAGES } from './src/assets/images';
+import { track } from './src/analytics';
+import { FilterCycleChip } from './src/components/ScenePicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
 import { HiddenGame } from './src/games/hidden/HiddenGame';
@@ -28,7 +31,7 @@ import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
 import { KGB_BUILD } from './src/assets/build';
-import { DifficultyFilter, FILTERS, difficultyOf, loadFilter, saveFilter } from './src/difficulty';
+import { DifficultyFilter, difficultyOf, loadFilter, nextFilter, saveFilter } from './src/difficulty';
 import { useTwoPlayer } from './src/multiplayer';
 import { isMuted, say, setMuted, sfx, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
@@ -76,7 +79,7 @@ export default function App() {
   const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
-  useEffect(() => { stopNarration(); }, [route]);
+  useEffect(() => { stopNarration(); track('view'); }, [route]);
   const parts = routeParts(route);
   const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story'];
   // A stale/mistyped hash must never strand a kid on a blank page.
@@ -100,6 +103,7 @@ export default function App() {
           onHome={goHome}
           difficulty={difficulty}
           filter={filter}
+          onFilter={pickFilter}
           sceneId={param}
           onPickScene={(id) => navigate(`diff/${id}`)}
           onBackToPicker={() => navigate('diff')}
@@ -110,6 +114,7 @@ export default function App() {
           onHome={goHome}
           difficulty={difficulty}
           filter={filter}
+          onFilter={pickFilter}
           twoPlayerEnabled={twoPlayer}
           sceneId={param}
           onPickScene={(id) => navigate(`hidden/${id}`)}
@@ -213,23 +218,9 @@ function Menu({
             <View style={{ alignItems: isLandscape ? 'flex-start' : 'center' }}>
               <Text style={styles.heading}>Kids Game Box</Text>
               <View style={styles.diffRow}>
-                {FILTERS.map((f) => {
-                  const on = filter === f.id;
-                  return (
-                    <Pressable
-                      key={f.id}
-                      onPress={() => onPickFilter(f.id)}
-                      testID={`difficulty-${f.id}`}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${f.label} levels`}
-                      style={[styles.diffChip, on && styles.diffChipOn]}
-                    >
-                      <Text style={[styles.diffText, on && styles.diffTextOn]}>
-                        {f.emoji} {f.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} />
+                <InstallChip />
+                <ShareChip />
                 <Pressable
                   onPress={toggleMute}
                   testID="sound-toggle"
@@ -467,7 +458,91 @@ function Reveal({ delay, children }: { delay: number; children: React.ReactNode 
   );
 }
 
+// "Add to Home Screen": real install prompt on Android/Chrome; on iOS
+// Safari there is no API, so show the two-tap recipe instead.
+let deferredInstall: { prompt: () => Promise<void> } | null = null;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstall = e as unknown as { prompt: () => Promise<void> };
+  });
+}
+
+function InstallChip() {
+  const [showIosHelp, setShowIosHelp] = useState(false);
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  const standalone = window.matchMedia?.('(display-mode: standalone)').matches
+    || (window.navigator as { standalone?: boolean }).standalone === true;
+  if (standalone) return null;
+  const isIos = /iPad|iPhone|iPod/.test(window.navigator.userAgent)
+    || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+  const onPress = async () => {
+    sfx.tap();
+    track('install_tap', { kind: isIos ? 'ios' : deferredInstall ? 'prompt' : 'none' });
+    if (deferredInstall) {
+      await deferredInstall.prompt();
+      deferredInstall = null;
+    } else {
+      setShowIosHelp(true);
+      setTimeout(() => setShowIosHelp(false), 6000);
+    }
+  };
+  return (
+    <>
+      <Pressable onPress={onPress} testID="install-app" accessibilityRole="button" accessibilityLabel="Add to home screen" style={[styles.diffChip, styles.soundChip]}>
+        <Text style={styles.diffText}>📲</Text>
+      </Pressable>
+      {showIosHelp ? (
+        <View style={styles.iosHelp} testID="install-ios-help">
+          <Text style={styles.iosHelpText}>Tap Share {'\u2191'} then {'\u201C'}Add to Home Screen{'\u201D'}</Text>
+        </View>
+      ) : null}
+    </>
+  );
+}
+
+function ShareChip() {
+  const [copied, setCopied] = useState(false);
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return null;
+  const onPress = async () => {
+    sfx.tap();
+    track('share_tap');
+    const url = 'https://ivanmkc.github.io/kidsgame/';
+    const data = { title: 'Kids Game Box', text: 'Free picture games and talking storybooks for little kids!', url };
+    try {
+      if (navigator.share) await navigator.share(data);
+      else {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }
+    } catch { /* user cancelled */ }
+  };
+  return (
+    <>
+      <Pressable onPress={onPress} testID="share-app" accessibilityRole="button" accessibilityLabel="Share with other parents" style={[styles.diffChip, styles.soundChip]}>
+        <Text style={styles.diffText}>{copied ? '\u2705' : '\ud83d\udce4'}</Text>
+      </Pressable>
+      {copied ? (
+        <View style={styles.iosHelp}><Text style={styles.iosHelpText}>Link copied!</Text></View>
+      ) : null}
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
+  iosHelp: {
+    position: 'absolute',
+    top: 46,
+    right: 0,
+    backgroundColor: 'rgba(60,45,70,0.94)',
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    zIndex: 60,
+    maxWidth: 240,
+  },
+  iosHelpText: { color: 'white', fontSize: 13, fontFamily: 'System' },
   // overflow hidden clips the rn-web background IMG that otherwise renders
   // at its intrinsic width and forces horizontal scroll on small phones
   safe: { flex: 1, backgroundColor: colors.bg, overflow: 'hidden' },

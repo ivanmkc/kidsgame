@@ -40,6 +40,15 @@ export function RulesGame({ onHome, difficulty }: Props) {
   const [round, setRound] = useState<RulesRound>(() => buildRound(0));
   const [tapped, setTapped] = useState<number[]>([]);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [reminded, setReminded] = useState(false);
+  const remindTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const remind = () => {
+    sfx.tap();
+    say(round.rule.label);
+    setReminded(true);
+    if (remindTimer.current) clearTimeout(remindTimer.current);
+    remindTimer.current = setTimeout(() => setReminded(false), 2600);
+  };
   const [celebrate, setCelebrate] = useState(0);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -54,6 +63,7 @@ export function RulesGame({ onHome, difficulty }: Props) {
     const line = round.isRecall
       ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
       : round.rule.label;
+    setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
       saySequence(['Rule Time! Do what the rule says as fast as you can.', line]);
@@ -122,8 +132,19 @@ export function RulesGame({ onHome, difficulty }: Props) {
         <View style={[styles.ruleCard, shadows.soft]} testID={`rules-rule-${round.rule.category}${round.isRecall ? '-recall' : ''}`}>
           <Text style={styles.ruleNumber}>{round.isRecall ? 'Memory check!' : `Rule #${round.ruleNumber}`}</Text>
           <Text style={styles.ruleText}>
-            {round.isRecall ? `Do Rule #${round.ruleNumber} again — remember it? 🤔` : round.rule.label}
+            {round.isRecall && !reminded ? `Do Rule #${round.ruleNumber} again — remember it? 🤔` : round.rule.label}
           </Text>
+          {round.isRecall && !reminded ? (
+            <Pressable
+              onPress={remind}
+              testID="rules-remind"
+              accessibilityLabel="Remind me of the rule"
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.remindBtn, shadows.soft, pressed && { opacity: 0.8 }]}
+            >
+              <Text style={styles.remindText}>💡 Remind me!</Text>
+            </Pressable>
+          ) : null}
         </View>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
           {round.tiles.map((t, i) => {
@@ -165,6 +186,8 @@ export function RulesGame({ onHome, difficulty }: Props) {
 }
 
 const styles = StyleSheet.create({
+  remindBtn: { backgroundColor: colors.gold, borderRadius: 12, paddingVertical: 6, paddingHorizontal: 14, marginTop: 6, alignSelf: 'center' },
+  remindText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
   ruleCard: {
     backgroundColor: colors.gold,

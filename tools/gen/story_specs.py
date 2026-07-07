@@ -243,13 +243,23 @@ RAINBOW_DOORS = {
             "scene": f"{LUNA} in the glowing firefly boat arriving at a tiny island where baby stars sleep. On the LEFT a big soft NEST woven of moonbeams full of dozing glowing baby stars, on the RIGHT a small striped MOON lighthouse with a spiral staircase and a bright lamp. Both large, fully visible, clearly separated",
             "text": "The firefly boat sails to Star Island, where baby stars snore tiny sparkly snores. There's a soft moonbeam nest, and a little striped lighthouse. Where should Luna go?",
             "choices": [{"label": "Snuggle into the star nest", "next": "end_stars", "spot": "nest of baby stars"},
-                        {"label": "Climb the little lighthouse", "next": "end_flight", "spot": "striped lighthouse"}],
+                        {"label": "Climb the little lighthouse", "next": "end_dizzy", "spot": "striped lighthouse"}],
         },
         "bb": {
             "scene": f"{LUNA} swinging up onto a moon balcony made of silver clouds. On the LEFT a big shiny BRASS telescope pointed at the twinkling sky, on the RIGHT a long curly SILVER slide spiraling from the balcony down toward a warm lit meadow far below. Both large, fully visible, clearly separated",
             "text": "The swing carries Luna to a balcony on the moon! A big brass telescope peeks at the stars, and a curly silver slide swooshes all the way home. What should Luna pick?",
             "choices": [{"label": "Peek through the telescope", "next": "end_stars", "spot": "brass telescope"},
-                        {"label": "Take the silver slide home", "next": "end_cozy", "spot": "silver slide"}],
+                        {"label": "Take the silver slide home", "next": "end_slip", "spot": "silver slide"}],
+        },
+        "end_dizzy": {
+            "scene": "LUNA_DIZZY_PLACEHOLDER",
+            "text": "Whoa — the lighthouse lamp is SO bright! Luna goes all dizzy and slides right back down to the boat. Home early, blinking little stars. Oopsie ending!",
+            "bad": True,
+        },
+        "end_slip": {
+            "scene": "LUNA_SLIP_PLACEHOLDER",
+            "text": "Wheee — TOO fast! The slippery silver slide plops Luna SPLAT into a puddle. Muddy mane! Straight home for a bath. Oopsie ending!",
+            "bad": True,
         },
         "end_party": {
             "scene": f"{LUNA} dancing at a joyful cloud carnival with cloud sheep, star bunnies and rainbow birds, ferris wheel and lanterns glowing, confetti of flower petals",
@@ -297,7 +307,7 @@ TREASURE_TRAIL = {
             "scene": f"{PIP} in a grand treasure chamber deep in the cave. On the LEFT a GOLDEN door with a big crab-shaped lock glowing softly, on the RIGHT a shimmering WATERFALL curtain hiding something sparkly behind it. Both large, fully visible, clearly separated",
             "text": "A secret chamber! A golden door with a crab-shaped lock... and a shimmery waterfall hiding something sparkly. Where's the treasure, Pip?",
             "choices": [{"label": "Open the golden crab door", "next": "end_chest", "spot": "golden door"},
-                        {"label": "Peek behind the waterfall", "next": "end_splash", "spot": "waterfall"}],
+                        {"label": "Peek behind the waterfall", "next": "end_soggy", "spot": "waterfall"}],
         },
         "ab": {
             "scene": f"{PIP} rowing the little red boat across a huge underground lagoon glowing blue. On the LEFT a tiny striped LIGHTHOUSE on a rock with a warm lamp and a waving crab beside it, on the RIGHT a burbling BUBBLE geyser making giant rainbow bubbles rise from the water. Both large, fully visible, clearly separated",
@@ -309,13 +319,23 @@ TREASURE_TRAIL = {
             "scene": f"{PIP} on the palm-top lookout platform seeing the whole island. On the LEFT a ZIPLINE with a wooden handle running down toward an old friendly shipwreck on the beach, on the RIGHT a springy COCONUT catapult made of bent palm and vines loaded with one coconut. Both large, fully visible, clearly separated",
             "text": "From the top, Pip sees everything — even an old shipwreck on the beach! A zipline zooms right to it. And... is that a coconut catapult? Choose, Pip!",
             "choices": [{"label": "Ride the zipline", "next": "end_chest", "spot": "zipline"},
-                        {"label": "Boing the coconut catapult", "next": "end_splash", "spot": "coconut catapult"}],
+                        {"label": "Boing the coconut catapult", "next": "end_boing", "spot": "coconut catapult"}],
         },
         "bb": {
             "scene": f"{PIP} landing with a soft thump on the deck of a friendly old shipwreck. On the LEFT the captain's big round SHIP WHEEL with a paw-print carved in the middle, on the RIGHT a colorful PARROT on a perch wearing a tiny pirate hat, squawking happily. Both large, fully visible, clearly separated",
             "text": "Wheee! Pip lands on a real pirate ship! The captain's wheel has a paw print on it... and a parrot in a tiny hat squawks 'Pieces of kibble! Pieces of kibble!' Who should Pip see?",
             "choices": [{"label": "Spin the captain's wheel", "next": "end_chest", "spot": "ship wheel"},
                         {"label": "Say hi to the parrot", "next": "end_friends", "spot": "parrot"}],
+        },
+        "end_soggy": {
+            "scene": "PIP_SOGGY_PLACEHOLDER",
+            "text": "SPLOOSH! Behind the waterfall is... just MORE water. Pip is soaked to the whiskers and the map went all drippy. Home for a warm towel. Oopsie ending!",
+            "bad": True,
+        },
+        "end_boing": {
+            "scene": "PIP_BOING_PLACEHOLDER",
+            "text": "BOING! The coconut catapult flings Pip aaaall the way back to the start of the beach. Sandy bottom. Zero treasure. Oopsie ending!",
+            "bad": True,
         },
         "end_chest": {
             "scene": f"{PIP} opening a huge overflowing treasure chest of golden dog bones, shiny balls and squeaky toys, golden light on his amazed face, confetti",

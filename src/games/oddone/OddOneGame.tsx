@@ -8,7 +8,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { sfx, useSay } from '../../sound';
+import { say, sfx } from '../../sound';
 import { CATEGORY_TEXT } from '../iconCategories';
 import { makeOddOneRound } from './logic';
 
@@ -36,7 +36,11 @@ export function OddOneGame({ onHome, difficulty }: Props) {
   const won = score >= roundsToWin;
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
-  useSay(won ? null : CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
+  // Speak on EVERY round — keyed on the round object, not the text, so a
+  // repeated category still gets read aloud (kids play entirely by ear).
+  useEffect(() => {
+    if (!won) say(CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (idx: number) => {
     if (won) return;
