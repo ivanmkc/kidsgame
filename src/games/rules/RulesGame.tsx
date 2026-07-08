@@ -115,11 +115,12 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const cols = 3;
   const rows = Math.ceil(tileCount / cols);
   const gap = 12;
-  const tile = Math.min(
+  // 44px kid-thumb floor (mobile-Chrome audit measured 41px in landscape)
+  const tile = Math.max(44, Math.min(
     (Math.min(width - 32, 520) - (cols - 1) * gap) / cols,
     (height - 84 - 130 - (rows - 1) * gap) / rows,
     140
-  );
+  ));
 
   return (
     <GameShell
