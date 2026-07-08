@@ -25,10 +25,13 @@ echo "== 4/6 speech lines + voice clips (incl. lang-tagged)"
 KGB_DUMP=1 npx vitest run src/games/__tests__/speechdump.test.ts --silent >/dev/null
 python3 tools/gen_voice.py
 
-echo "== 5/6 bundle images"
+echo "== 5/7 bundle images"
 node tools/gen_images_ts.mjs
 
-echo "== 6/6 audit renders (feed these to the audit fleet before shipping)"
+echo "== 6/7 manifest rules verify (hotspot nav + no bracket text)"
+python3 tools/gen/story_lint.py --manifest
+
+echo "== 7/7 audit renders (feed these to the audit fleet before shipping)"
 python3 tools/story_audit_render.py "${IDS[@]}"
 
 echo

@@ -3,11 +3,12 @@ import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, Vie
 import { SCENE_IMAGES } from '../../assets/images';
 import { ChunkyButton } from '../../components/ChunkyButton';
 import { Confetti } from '../../components/Confetti';
+import { SparkleBurst } from '../../components/Sparkles';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
-import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare } from '../../manifest';
+import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
 import { say, saySequence, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
@@ -48,6 +49,42 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const node: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
+
+  // Precache what each choice leads to while the current page is read
+  // aloud: warm the browser HTTP cache for the next scenes' images and
+  // this node's action clips, so a tap cuts straight to the new page
+  // instead of a loading beat. Web only; RNW resolves require() refs to
+  // {uri} objects at runtime.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || !story || !node) return;
+    const urls: string[] = [];
+    const push = (src: unknown) => {
+      const uri = typeof src === 'string' ? src : (src as { uri?: string })?.uri;
+      if (uri) urls.push(uri);
+    };
+    for (const c of node.choices ?? []) {
+      const next = story.nodes[c.next];
+      if (next?.image) push(Image.resolveAssetSource ? Image.resolveAssetSource(SCENE_IMAGES[next.image]) : SCENE_IMAGES[next.image]);
+      if (c.video) urls.push(c.video);
+      if (next && !next.choices?.length && next.video) urls.push(next.video);
+    }
+    const cleanups: (() => void)[] = [];
+    for (const u of urls) {
+      if (u.endsWith('.mp4')) {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'video';
+        link.href = u;
+        document.head.appendChild(link);
+        cleanups.push(() => link.remove());
+      } else {
+        const im = new window.Image();
+        im.src = u;
+      }
+    }
+    return () => { cleanups.forEach((f) => f()); };
+  }, [story, node]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   useEffect(() => {
     if (!node) return;
@@ -184,6 +221,9 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               </View>
             ) : null}
             {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
+            {(node.fx ?? []).map((f, i) => (
+              <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} />
+            ))}
             {hasHots && !clip
               ? node.choices!.map((c, i) => (
                   <ChoiceSpot key={c.next} choice={c} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
@@ -203,17 +243,8 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               })}
             </View>
           ) : null}
-          {!isEnd && !clip && hist.current.length > 0 ? (
-            <Pressable
-              onPress={goBack}
-              testID="story-back"
-              accessibilityLabel="Go back one page"
-              accessibilityRole="button"
-              style={({ pressed }) => [styles.backChip, shadows.soft, pressed && { opacity: 0.7 }]}
-            >
-              <Text style={styles.backChipText}>↩️</Text>
-            </Pressable>
-          ) : null}
+          {/* No in-story back button: remembering the path IS the game.
+              Arrow keys remain as a desktop/dev affordance. */}
           {isEnd && !node.bad ? <Confetti /> : null}
         </View>
         <Text style={styles.text} testID={`story-text-${nodeId}`}>{node.text}</Text>
@@ -224,7 +255,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 label={t(lang, 'story.tryAgain')}
                 color={colors.gold}
                 darkColor={darken(colors.gold)}
-                onPress={goBack}
+                onPress={() => { hist.current = []; redo.current = []; setNodeId('start'); }}
                 testID="story-try-again"
                 minWidth={230}
               />
@@ -322,6 +353,53 @@ function ChoiceSpot({ choice, index, scale, onPick }: {
   );
 }
 
+// Non-nav surprise: a whisper-subtle shimmer invites a tap; tapping makes
+// the region itself bounce with a sparkle burst + sfx (+ optional spoken
+// line). Never navigates — a toy inside the page, re-tappable forever.
+function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
+  const bounce = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(0)).current;
+  const [burst, setBurst] = useState(0);
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 1400, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 0, duration: 1400, useNativeDriver: true }),
+      ])
+    ).start();
+  }, [pulse]);
+  const trigger = () => {
+    if (fx.sting === 'flip') sfx.flip(); else if (fx.sting === 'tap') sfx.tap(); else sfx.boing();
+    if (fx.line) say(fx.line);
+    setBurst((b) => b + 1);
+    bounce.setValue(0);
+    Animated.spring(bounce, { toValue: 1, friction: 3, useNativeDriver: true }).start(() => bounce.setValue(0));
+  };
+  return (
+    <Pressable
+      onPress={trigger}
+      testID="story-fx"
+      accessibilityLabel="Something fun is here"
+      accessibilityRole="button"
+      style={{ position: 'absolute', left: fx.x * scale, top: fx.y * scale, width: fx.w * scale, height: fx.h * scale }}
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.fxShimmer,
+          {
+            opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.06, 0.28] }),
+            transform: [
+              { scale: bounce.interpolate({ inputRange: [0, 0.5, 1], outputRange: [1, 1.12, 1] }) },
+            ],
+          },
+        ]}
+      />
+      {burst > 0 ? <SparkleBurst key={burst} trigger="found" /> : null}
+    </Pressable>
+  );
+}
+
 // The dare-spot: a soft shimmer marks the region; tapping it makes the
 // surprise SPRING out with a sting, then (after the story's beat) the
 // spoken reveal lands. Re-tappable forever — that's the toy.
@@ -408,6 +486,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backChipText: { fontSize: 20 },
+  fxShimmer: {
+    flex: 1,
+    borderRadius: 24,
+    backgroundColor: 'rgba(255,236,160,0.5)',
+  },
   hotGlow: {
     flex: 1,
     borderRadius: 18,

@@ -38,11 +38,21 @@ bash tools/ship.sh                        # gated deploy (after audits pass)
    bone shapes near a toy wall). The scene prompt MUST compose both
    affordances: "on the LEFT a …, on the RIGHT a …, both large, fully
    visible, clearly separated".
-4. BESPOKE ENDINGS: the lint warns when an ending has multiple parents.
+4. HOTSPOT NAV IS MANDATORY (Ivan 2026-07-08): every decision node must
+   end up with `hot` on BOTH choices in the built manifest — tile-button
+   fallback is a REGRESSION, not a fallback. If SAM misses, retry
+   simplified phrases, then hand-anchor from a gridded review sheet
+   (boxes <30% of scene, pairs distinct); if the affordance isn't drawn,
+   regen the scene so it is. `story_lint.py --manifest` enforces this
+   (plus: no bracket/parenthetical text in narration — reads badly in
+   TTS) and gates both gen_storybook.sh and ship.sh. There is NO in-story
+   back button — remembering the path is the game; oopsie endings restart
+   from the start node.
+5. BESPOKE ENDINGS: the lint warns when an ending has multiple parents.
    Split it (end_chest_cave / end_chest_wreck) unless every parent genuinely
    arrives at the same place. "X marks the spot on the wrong beach" is the
    failure mode; Ivan called it out — don't reuse ending scenes lazily.
-5. Register: `STORIES` in tools/gen_stories.py, `HEROES`+`SPECS` in
+6. Register: `STORIES` in tools/gen_stories.py, `HEROES`+`SPECS` in
    tools/gen_story_videos.py. Reuse hero descriptors (LUNA, PIP, MILO, MO).
 
 ## Quality gates (all required before ship)

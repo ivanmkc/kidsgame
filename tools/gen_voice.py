@@ -57,14 +57,36 @@ STYLES = {
     "instruction": "[cheerful, encouraging] ",
 }
 
+# Per-story narration direction: ONE consistent narrator voice per book and
+# named-character quote directions, applied identically to every line of
+# that book — narrator and character voicing can't drift between pages.
+# (Single prebuilt voice "Leda" everywhere; these tags shape delivery.)
+STORY_STYLES = {
+    "whisper": STYLES["whisper_text"],
+    "scareschool": STYLES["scareschool_text"],
+    "luna": "[warm, cozy bedtime storytelling, light wonder] ",
+    "doors": "[warm, cozy bedtime storytelling, light wonder] ",
+    "pip": "[bouncy, adventurous storytelling] ",
+    "trail": "[bouncy, adventurous storytelling] ",
+    "night": ("[warm cozy nighttime detective storytelling; voice quoted characters "
+              "distinctly and the SAME way every time: the fox spirit sly and velvety, "
+              "the mouse chef tiny and quick, the crow raspy and cheerful] "),
+    "deep": ("[gentle wonder-filled underwater storytelling; voice quoted characters "
+             "distinctly and the SAME way every time: the sea turtle slow and kindly, "
+             "the hermit crab gruff then delighted, the coral king deep and royal, "
+             "the whale-ghost soft and airy] "),
+    "sky": ("[bright breezy balloon-race storytelling; voice quoted characters "
+            "distinctly and the SAME way every time: the cloud sheep dreamy and fluffy, "
+            "Auntie Toast warm and hearty, snowmen chirpy in chorus] "),
+}
+
 
 def collect_lines() -> list[tuple[str, str]]:
     lines: dict[str, str] = {}
     m = json.loads(MANIFEST.read_text())
     for st in m.get("stories", []):
         spooky = st["id"] == "whisper"
-        school = st["id"] == "scareschool"
-        tstyle = STYLES["whisper_text"] if spooky else STYLES["scareschool_text"] if school else STYLES["gentle"]
+        tstyle = STORY_STYLES.get(st["id"], STYLES["gentle"])
         rstyle = STYLES["whisper_reveal"] if spooky else STYLES["scareschool_reveal"]
         for n in st["nodes"].values():
             lines.setdefault(n["text"], tstyle)
@@ -72,6 +94,9 @@ def collect_lines() -> list[tuple[str, str]]:
                 lines.setdefault(c["label"], STYLES["choice"])
             if "scare" in n:
                 lines.setdefault(n["scare"]["reveal"], rstyle)
+            for f in n.get("fx", []):
+                if f.get("line"):
+                    lines.setdefault(f["line"], rstyle)
     cat = (ROOT / "src" / "games" / "iconCategories.ts").read_text()
     for t in re.findall(r"tap: '([^']+)'", cat) + re.findall(r"not: '([^']+)'", cat):
         lines.setdefault(t, STYLES["instruction"])

@@ -140,7 +140,7 @@ SCARE_SCHOOL = {
         },
         "b": {
             "scene": f"{MO} in the monster lunchroom with floating trays of worm spaghetti and eyeball pudding, a lunch counter with a suspiciously grinning pot",
-            "text": "Lunch is worm spaghetti and eyeball pudding (it's just grapes). Something under the lunch counter is giggling...",
+            "text": "Lunch is worm spaghetti and eyeball pudding — don't worry, the eyeballs are just grapes! Something under the lunch counter is giggling...",
             "scare": {"spot": "under the lunch counter", "pop": "Sir Stretch the tall blue monster unfolding his impossibly long noodle arms in every direction",
                       "reveal": "Sir Stretch was folded under there ALL MORNING waiting! 'Worth it,' he says, un-crumpling.", "sting": "boing", "delay": 0},
             "choices": [{"label": "Have a noodle-arm contest 💪", "next": "ba"},
@@ -355,7 +355,7 @@ TREASURE_TRAIL = {
         },
         "end_splash": {
             "scene": f"{PIP} splashing joyfully in the turquoise lagoon with a crab, a parrot and rainbow bubbles everywhere, treasure map floating like a little boat",
-            "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah — but it's close!) The End!",
+            "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. Well... close enough! The End!",
         },
         "end_friends": {
             "scene": f"{PIP} at a beach picnic at sunset with a crab in a chef hat, a parrot in a pirate hat and a gentle whale peeking from the water, sharing sandwiches on a checkered blanket",
@@ -434,7 +434,7 @@ NIGHT_MARKET = {
         },
         "m2": {
             "scene": f"{MILO} on the wooden bathhouse walkway in warm steam, the melon just visible bobbing in the hot spring. On the LEFT the big STEAMY hot pool with a friendly fox spirit gently petting a green melon, on the RIGHT a slippery WHITE tiled floor beside a huge open dark SOY sauce barrel. Both large, fully visible, clearly separated",
-            "text": "Steam curls. There's the melon — bobbing beside a friendly fox spirit! Bow politely (charm out) and ask, or skid across the wet tiles to grab it fast?",
+            "text": "Steam curls. There's the melon — bobbing beside a friendly fox spirit! Hold out the lucky charm and bow politely, or skid across the wet tiles to grab it fast?",
             "choices": [{"label": "Bow at the pool", "next": "end_bath_soak", "spot": "steamy hot pool"},
                         {"label": "Skid across tiles", "next": "end_soy_barrel", "spot": "white slippery tiles"}],
         },
@@ -477,7 +477,7 @@ NIGHT_MARKET = {
         },
         "end_wharf_otter": {
             "scene": f"{MILO} in the little orange rowboat under wharf lanterns beside a plump river OTTER, both grinning as they lift the green melon out of a leaf-boat together at dawn",
-            "text": "The otter mistook the melon for a floating snack (fair!). Milo trades half a fish-cracker for it. Melon home in time for grandma's opening, and the crow sings them all the way there. Case closed! The End!",
+            "text": "The otter mistook the melon for a floating snack — an easy mistake! Milo trades half a fish-cracker for it. Melon home in time for grandma's opening, and the crow sings them all the way there. Case closed! The End!",
         },
         "end_koi_splash": {
             "scene": f"{MILO} splashing SPLAT into the koi pond at the wharf, a big red KOI leaping above with a triumphant look, the melon leaf-boat drifting far off toward the dawn horizon",

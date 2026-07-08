@@ -2906,7 +2906,7 @@
         },
         "b": {
           "image": "story/scareschool_b.png",
-          "text": "Lunch is worm spaghetti and eyeball pudding (it's just grapes). Something under the lunch counter is giggling...",
+          "text": "Lunch is worm spaghetti and eyeball pudding \u2014 don't worry, the eyeballs are just grapes! Something under the lunch counter is giggling...",
           "choices": [
             {
               "label": "Have a noodle-arm contest \ud83d\udcaa",
@@ -3488,7 +3488,7 @@
         },
         "end_splash": {
           "image": "story/trail_end_splash.png",
-          "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. (Nah \u2014 but it's close!) The End!",
+          "text": "SPLASH! Best swim ever, with bubbles and new friends. Maybe THIS was the real treasure. Well... close enough! The End!",
           "video": "story-video/trail_end_splash_end.mp4"
         },
         "end_friends": {
@@ -3586,11 +3586,32 @@
           "choices": [
             {
               "label": "Sneak into the jasmine garden",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 30,
+                "y": 10,
+                "w": 300,
+                "h": 420
+              }
             },
             {
               "label": "Run down the mochi lane",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 808,
+                "y": 0,
+                "w": 472,
+                "h": 478
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 560,
+              "y": 410,
+              "w": 230,
+              "h": 230,
+              "sting": "flip"
             }
           ]
         },
@@ -3628,11 +3649,23 @@
           "choices": [
             {
               "label": "Hop on the bell cart",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 40,
+                "y": 60,
+                "w": 560,
+                "h": 480
+              }
             },
             {
               "label": "Slip through the door",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 834,
+                "y": 57,
+                "w": 446,
+                "h": 522
+              }
             }
           ]
         },
@@ -3642,11 +3675,23 @@
           "choices": [
             {
               "label": "Cross the red bridge",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 60,
+                "y": 230,
+                "w": 380,
+                "h": 330
+              }
             },
             {
               "label": "Cross the koi bridge",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 658,
+                "y": 210,
+                "w": 566,
+                "h": 323
+              }
             }
           ]
         },
@@ -3708,15 +3753,27 @@
         },
         "m2": {
           "image": "story/night_m2.png",
-          "text": "Steam curls. There's the melon \u2014 bobbing beside a friendly fox spirit! Bow politely (charm out) and ask, or skid across the wet tiles to grab it fast?",
+          "text": "Steam curls. There's the melon \u2014 bobbing beside a friendly fox spirit! Hold out the lucky charm and bow politely, or skid across the wet tiles to grab it fast?",
           "choices": [
             {
               "label": "Bow at the pool",
-              "next": "end_bath_soak"
+              "next": "end_bath_soak",
+              "hot": {
+                "x": 0,
+                "y": 110,
+                "w": 500,
+                "h": 540
+              }
             },
             {
               "label": "Skid across tiles",
-              "next": "end_soy_barrel"
+              "next": "end_soy_barrel",
+              "hot": {
+                "x": 1041,
+                "y": 338,
+                "w": 206,
+                "h": 184
+              }
             }
           ]
         },
@@ -3726,11 +3783,32 @@
           "choices": [
             {
               "label": "Pop the confetti",
-              "next": "end_court_confetti"
+              "next": "end_court_confetti",
+              "hot": {
+                "x": 0,
+                "y": 290,
+                "w": 270,
+                "h": 380
+              }
             },
             {
               "label": "Take her to the shrine",
-              "next": "end_court_reveal"
+              "next": "end_court_reveal",
+              "hot": {
+                "x": 1000,
+                "y": 160,
+                "w": 280,
+                "h": 520
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 620,
+              "y": 250,
+              "w": 280,
+              "h": 380,
+              "sting": "boing"
             }
           ]
         },
@@ -3794,7 +3872,7 @@
         },
         "end_wharf_otter": {
           "image": "story/night_end_wharf_otter.png",
-          "text": "The otter mistook the melon for a floating snack (fair!). Milo trades half a fish-cracker for it. Melon home in time for grandma's opening, and the crow sings them all the way there. Case closed! The End!",
+          "text": "The otter mistook the melon for a floating snack \u2014 an easy mistake! Milo trades half a fish-cracker for it. Melon home in time for grandma's opening, and the crow sings them all the way there. Case closed! The End!",
           "video": "story-video/night_end_wharf_otter_end.mp4"
         },
         "end_koi_splash": {
@@ -3814,11 +3892,23 @@
           "choices": [
             {
               "label": "Swim into the kelp",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 0,
+                "y": 60,
+                "w": 330,
+                "h": 560
+              }
             },
             {
               "label": "Swim to the coral",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 760,
+                "y": 180,
+                "w": 470,
+                "h": 440
+              }
             }
           ]
         },
@@ -3828,11 +3918,32 @@
           "choices": [
             {
               "label": "Down the gully",
-              "next": "aa"
+              "next": "aa",
+              "hot": {
+                "x": 0,
+                "y": 10,
+                "w": 330,
+                "h": 640
+              }
             },
             {
               "label": "To the giant clam",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 750,
+                "y": 150,
+                "w": 500,
+                "h": 520
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 470,
+              "y": 170,
+              "w": 170,
+              "h": 140,
+              "sting": "tap"
             }
           ]
         },
@@ -3870,11 +3981,23 @@
           "choices": [
             {
               "label": "Enter the kelp cave",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 180,
+                "y": 120,
+                "w": 390,
+                "h": 470
+              }
             },
             {
               "label": "Under the whale bones",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 700,
+                "y": 30,
+                "w": 560,
+                "h": 490
+              }
             }
           ]
         },
@@ -3884,11 +4007,23 @@
           "choices": [
             {
               "label": "Through the green door",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 18,
+                "y": 62,
+                "w": 340,
+                "h": 555
+              }
             },
             {
               "label": "Under the whale rib",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 990,
+                "y": 60,
+                "w": 290,
+                "h": 600
+              }
             }
           ]
         },
@@ -3898,11 +4033,23 @@
           "choices": [
             {
               "label": "Into the jelly grove",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 360,
+                "h": 700
+              }
             },
             {
               "label": "To the coral castle",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 855,
+                "y": 13,
+                "w": 403,
+                "h": 485
+              }
             }
           ]
         },
@@ -3912,11 +4059,23 @@
           "choices": [
             {
               "label": "To the jelly crown",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 170,
+                "y": 97,
+                "w": 279,
+                "h": 248
+              }
             },
             {
               "label": "Through the coral gate",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 790,
+                "y": 300,
+                "w": 340,
+                "h": 320
+              }
             }
           ]
         },
@@ -3954,11 +4113,32 @@
           "choices": [
             {
               "label": "Sing the lullaby",
-              "next": "end_whale_song"
+              "next": "end_whale_song",
+              "hot": {
+                "x": 20,
+                "y": 48,
+                "w": 436,
+                "h": 477
+              }
             },
             {
               "label": "Yank the fishing net",
-              "next": "end_whale_snag"
+              "next": "end_whale_snag",
+              "hot": {
+                "x": 920,
+                "y": 180,
+                "w": 360,
+                "h": 450
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 700,
+              "y": 170,
+              "w": 200,
+              "h": 220,
+              "sting": "boing"
             }
           ]
         },
@@ -3968,11 +4148,23 @@
           "choices": [
             {
               "label": "Toot for the jelly",
-              "next": "end_jelly_hug"
+              "next": "end_jelly_hug",
+              "hot": {
+                "x": 40,
+                "y": 30,
+                "w": 450,
+                "h": 570
+              }
             },
             {
               "label": "Hop the snail carousel",
-              "next": "end_jelly_bounce"
+              "next": "end_jelly_bounce",
+              "hot": {
+                "x": 864,
+                "y": 313,
+                "w": 401,
+                "h": 342
+              }
             }
           ]
         },
@@ -3982,11 +4174,23 @@
           "choices": [
             {
               "label": "Ask at the table",
-              "next": "end_castle_pearl"
+              "next": "end_castle_pearl",
+              "hot": {
+                "x": 60,
+                "y": 230,
+                "w": 340,
+                "h": 240
+              }
             },
             {
               "label": "Join the dance",
-              "next": "end_castle_dance"
+              "next": "end_castle_dance",
+              "hot": {
+                "x": 870,
+                "y": 250,
+                "w": 360,
+                "h": 240
+              }
             }
           ]
         },
@@ -4042,11 +4246,32 @@
           "choices": [
             {
               "label": "Into the cloud tunnel",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 100,
+                "y": 150,
+                "w": 380,
+                "h": 410
+              }
             },
             {
               "label": "Over the rainbow bridge",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 840,
+                "y": 140,
+                "w": 390,
+                "h": 200
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 560,
+              "y": 330,
+              "w": 180,
+              "h": 180,
+              "sting": "flip"
             }
           ]
         },
@@ -4112,11 +4337,23 @@
           "choices": [
             {
               "label": "Fly through the mountain pass",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 20,
+                "y": 60,
+                "w": 300,
+                "h": 500
+              }
             },
             {
               "label": "Fly to the lantern city",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 940,
+                "y": 330,
+                "w": 330,
+                "h": 330
+              }
             }
           ]
         },
@@ -4126,11 +4363,23 @@
           "choices": [
             {
               "label": "Fly to the mountain gap",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 40,
+                "y": 120,
+                "w": 420,
+                "h": 500
+              }
             },
             {
               "label": "Fly to the lantern city",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 1060,
+                "y": 330,
+                "w": 220,
+                "h": 330
+              }
             }
           ]
         },
@@ -4140,11 +4389,23 @@
           "choices": [
             {
               "label": "To the star station",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 30,
+                "y": 30,
+                "w": 450,
+                "h": 500
+              }
             },
             {
               "label": "Fly to the bakery cliff",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 880,
+                "y": 40,
+                "w": 400,
+                "h": 640
+              }
             }
           ]
         },
@@ -4210,11 +4471,23 @@
           "choices": [
             {
               "label": "Fly through the gold gate",
-              "next": "end_lantern_arrival"
+              "next": "end_lantern_arrival",
+              "hot": {
+                "x": 10,
+                "y": 80,
+                "w": 450,
+                "h": 570
+              }
             },
             {
               "label": "Ride the fireworks",
-              "next": "end_lantern_fireworks"
+              "next": "end_lantern_fireworks",
+              "hot": {
+                "x": 922,
+                "y": 73,
+                "w": 272,
+                "h": 246
+              }
             }
           ]
         },
@@ -4224,11 +4497,32 @@
           "choices": [
             {
               "label": "Ride the swirl launcher",
-              "next": "end_star_swirl"
+              "next": "end_star_swirl",
+              "hot": {
+                "x": 40,
+                "y": 160,
+                "w": 560,
+                "h": 480
+              }
             },
             {
               "label": "Ride the confetti geyser up",
-              "next": "end_star_shower"
+              "next": "end_star_shower",
+              "hot": {
+                "x": 1077,
+                "y": 111,
+                "w": 201,
+                "h": 546
+              }
+            }
+          ],
+          "fx": [
+            {
+              "x": 850,
+              "y": 450,
+              "w": 110,
+              "h": 140,
+              "sting": "tap"
             }
           ]
         },
@@ -4320,5 +4614,17 @@
     "boots",
     "wand",
     "umbrella"
+  ],
+  "characters": [
+    "princess_pink",
+    "princess_blue",
+    "prince",
+    "knight",
+    "fairy",
+    "mermaid",
+    "wizard",
+    "ballerina",
+    "superhero_kid",
+    "dragon"
   ]
 }
