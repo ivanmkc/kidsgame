@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FeedbackChip } from './Feedback';
 import { sfx } from '../sound';
-import { Lang } from '../lang';
+import { Lang, LANGS } from '../lang';
+import { t } from '../i18n';
 import { colors, fonts, shadows } from '../theme';
 
 // "Levels" back-affordance label per language. Kept inline (rather than
@@ -14,6 +15,11 @@ const BACK_LEVELS: Record<Lang, string> = {
   cmn: '关卡',
   yue: '關卡',
 };
+
+// App wraps the game-routing layer in a provider; GameShell consumes.
+// Context (not prop-drilling) so 19 games don't have to relay a callback
+// they never touch — mirrors how the home menu's own chip cycles.
+export const LangContext = createContext<{ lang: Lang; onCycle: () => void } | null>(null);
 
 interface Props {
   title: string;
@@ -27,6 +33,7 @@ interface Props {
 }
 
 export function GameShell({ title, subtitle, onBack, right, children, backKind = 'menu', lang = 'en' }: Props) {
+  const langCtx = useContext(LangContext);
   return (
     <View style={styles.root}>
       <View style={styles.header}>
@@ -43,10 +50,31 @@ export function GameShell({ title, subtitle, onBack, right, children, backKind =
           <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle} numberOfLines={2}>{subtitle}</Text> : null}
         </View>
-        <View style={styles.right}>{right}<FeedbackChip compact lang={lang} /></View>
+        <View style={styles.right}>
+          {right}
+          {langCtx ? <LangCycleChip lang={langCtx.lang} onCycle={langCtx.onCycle} /> : null}
+          <FeedbackChip compact lang={lang} />
+        </View>
       </View>
       {children}
     </View>
+  );
+}
+
+// Compact 44px lang chip: globe + current-language emoji (🌐🌸). Tap cycles
+// through en→ja→cmn→yue exactly like the home-menu chip.
+function LangCycleChip({ lang, onCycle }: { lang: Lang; onCycle: () => void }) {
+  const meta = LANGS.find((l) => l.id === lang);
+  return (
+    <Pressable
+      onPress={onCycle}
+      testID="lang-cycle"
+      accessibilityRole="button"
+      accessibilityLabel={t(lang, 'a11y.langCycle', { name: meta?.label ?? '' })}
+      style={({ pressed }) => [styles.langChip, pressed && { opacity: 0.75 }]}
+    >
+      <Text style={styles.langChipText}>🌐{meta?.emoji ?? ''}</Text>
+    </Pressable>
   );
 }
 
@@ -68,7 +96,9 @@ export function ScoreChip({ label, testID }: { label: string; testID?: string })
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  // small bottom air: real Android Chrome overlays the URL bar over the
+  // last ~10px until scroll — keep gameplay rows off the very edge
+  root: { flex: 1, backgroundColor: colors.bg, paddingBottom: 10 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -102,4 +132,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   chipText: { fontSize: 16, fontFamily: fonts.body, color: colors.ink },
+  // Match FeedbackChip's compact size (44px round) so the header cluster
+  // reads as one row of equal-weight chrome.
+  langChip: {
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    borderRadius: 999,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  langChipText: { fontSize: 16 },
 });
