@@ -6,6 +6,10 @@ set -euo pipefail
 
 # A running generator mutates the manifest mid-build (merge-on-save) —
 # shipping during generation raced once and let failing tests through.
+# Story content rules (hotspot nav on every decision node, no bracket text
+# in narration) — built-manifest verification, hard gate.
+python3 tools/gen/story_lint.py --manifest || { echo "REFUSING TO SHIP: story manifest verify failed."; exit 1; }
+
 if pgrep -f "generate_assets.py" > /dev/null; then
   echo "REFUSING TO SHIP: generation loop is running (manifest would race)."
   exit 2

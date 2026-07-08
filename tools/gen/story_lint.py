@@ -99,5 +99,42 @@ def main() -> int:
     return 1 if bad else 0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and "--manifest" not in __import__("sys").argv:
     raise SystemExit(main())
+
+# ---------------------------------------------------------------- manifest --
+# Built-content verification (run with --manifest): the RULES above check
+# specs before generation; these check what actually ships.
+#   1. HOTSPOT NAV IS THE PRODUCT: every decision node must carry hot on
+#      BOTH choices — tile-button fallback is a regression (Ivan 2026-07-08),
+#      except books still mid-retrofit (LEGACY_TILE_OK, shrink to empty).
+#   2. NO BRACKET TEXT: parentheses read badly in TTS audio.
+LEGACY_TILE_OK = {"luna", "pip", "whisper", "scareschool"}  # retrofit in flight
+
+
+def verify_manifest() -> int:
+    import json
+    from pathlib import Path as _P
+    man = json.loads((_P(__file__).parent.parent.parent / "src" / "assets" / "manifest.json").read_text())
+    errors = []
+    for st in man.get("stories", []):
+        sid = st["id"]
+        for nid, n in st["nodes"].items():
+            text = n.get("text", "")
+            if "(" in text or ")" in text:
+                errors.append(f"{sid}/{nid}: bracket text in narration: {text[:60]!r}")
+            cs = n.get("choices", [])
+            if cs and not all(c.get("hot") for c in cs):
+                msg = f"{sid}/{nid}: decision node without full hotspot nav (tile fallback)"
+                if sid in LEGACY_TILE_OK:
+                    print(f"  legacy-warn: {msg}")
+                else:
+                    errors.append(msg)
+    for e in errors:
+        print(f"  ERROR: {e}")
+    print(f"manifest verify: {'FAIL' if errors else 'OK'} ({len(errors)} errors)")
+    return 1 if errors else 0
+
+
+if __name__ == "__main__" and "--manifest" in __import__("sys").argv:
+    raise SystemExit(verify_manifest())

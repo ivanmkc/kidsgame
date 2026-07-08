@@ -65,10 +65,18 @@ export interface StoryScare extends Box {
   delay: number;      // ms between pop and reveal (0 = instant comfort)
 }
 
+// Non-nav surprise spot: tap augments the scene (wiggle/sparkle/sfx +
+// optional spoken line) without navigating. Subtler shimmer than a scare.
+export interface StoryFx extends Box {
+  sting?: 'boing' | 'tap' | 'flip';
+  line?: string; // short spoken reaction (must have a voice clip)
+}
+
 export interface StoryNode {
   image: string;
   text: string;
   choices?: StoryChoice[];
+  fx?: StoryFx[];
   scare?: StoryScare;
   bad?: boolean; // oopsie ending — no confetti, offer 'try another way'
   video?: string; // ending nodes: gentle ambient Veo clip of the final scene
