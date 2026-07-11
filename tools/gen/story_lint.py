@@ -80,6 +80,8 @@ def main() -> int:
     import sys
     sys.path.insert(0, __file__.rsplit("/", 2)[0])
     from gen.story_specs import (
+        CLOUD_CASTLE,
+        COOKIE_CAPER,
         DEEP_SEA,
         NIGHT_MARKET,
         RAINBOW_DOORS,
@@ -87,10 +89,16 @@ def main() -> int:
         SKY_RACE,
         TREASURE_TRAIL,
         WHISPERING_HOUSE,
+        YOKAI_PARADE,
     )
     bad = 0
+    from gen.story_specs_wave2 import WAVE2
+    from gen.story_specs_wave3 import WAVE3
+    from gen.story_specs_wave4 import WAVE4
+    from gen.story_specs_wave5 import WAVE5
     for spec in (WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL,
-                 NIGHT_MARKET, DEEP_SEA, SKY_RACE):
+                 NIGHT_MARKET, DEEP_SEA, SKY_RACE, YOKAI_PARADE, CLOUD_CASTLE,
+                 COOKIE_CAPER, *WAVE2, *WAVE3, *WAVE4, *WAVE5):
         errs = lint_spec(spec)
         print(f"{spec['id']}: {'OK' if not errs else f'{len(errs)} issue(s)'}")
         for e in errs:

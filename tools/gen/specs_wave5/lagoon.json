@@ -1,0 +1,149 @@
+{
+  "id": "lagoon",
+  "title": "Pearl and the Falling Star",
+  "hero": "PEARL",
+  "style": "Iridescent watercolor washes with opal pinks, star-blues, seafoam greens, and gold-leaf accents, glowing bioluminescent water reflections. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the mossy edge of a hidden lagoon at night, cradling a flickering star-seed that pulses faint gold in her paws, the lagoon water glowing iridescent pink and blue where a falling star just dissolved, coral arches rising from the shallows trailing sea-silk vines, scattered starlight reflecting off the rippling surface. On the LEFT a turquoise coral arch draped in shimmering sea-silk threads curves over a shallow wading path, on the RIGHT a silver vine curtain of sea-silk strands hangs between two tall coral pillars over a deeper channel, both large, fully visible, clearly separated.",
+      "text": "A star just fell RIGHT into the lagoon and dissolved into a million colors, but it left behind this tiny seed pulsing in Pearl's paws — the old sea turtle said to plant it in the deep spring before it fades or the lagoon loses its glow FOREVER. Coral arch or vine curtain?",
+      "choices": [
+        {"label": "Wade through the coral arch", "next": "a", "spot": "turquoise coral arch"},
+        {"label": "Push through the vine curtain", "next": "b", "spot": "silver vine curtain"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} passes beneath a turquoise coral arch into a shimmering grotto, the star-seed pulsing in her satchel, the water glowing opal where her paws touch the surface, and a luminous singing pearl tucked in a coral crevice halfway up the arch glowing soft pink. On the LEFT a jade kelp garden with tall swaying emerald fronds stretches along the lagoon floor, on the RIGHT a rose anemone cluster with plump pink tentacles blooms against the grotto wall, both large, fully visible, clearly separated.",
+      "text": "Under the arch Pearl finds a little pearl wedged in the coral that SINGS when she touches it — a single clear note that makes the star-seed pulse brighter, so into the satchel it goes alongside the star-seed. Kelp garden or anemone cluster?",
+      "choices": [
+        {"label": "Swim into the kelp garden", "next": "aa", "spot": "jade kelp garden"},
+        {"label": "Climb the anemone cluster", "next": "ab", "spot": "rose anemone cluster"}
+      ],
+      "scare": {
+        "spot": "glowing coral crevice",
+        "pop": "a moray eel with bioluminescent turquoise stripes and two gleaming round eyes lunging up from the coral crevice with jaws wide open",
+        "reveal": "Oh! Just yawning after a long nap!",
+        "sting": "thunder",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} pushes through the silver vine curtain of sea-silk strands into a moonlit channel, the star-seed flickering in her satchel, silver threads trailing across her fur, and a moonstone shell resting on a flat rock beside the channel glowing faint blue. On the LEFT a cluster of amber tide pools with warm golden water sits on a rocky shelf above the channel, on the RIGHT a violet urchin ridge lined with round purple sea urchins stretches along the channel wall, both large, fully visible, clearly separated.",
+      "text": "The silk vines tingle like tiny electric eels and on the other side Pearl spots a moonstone shell that HUMS when she picks it up — it vibrates near the star-seed like they are old friends, which is adorable and also slightly weird. Tide pools or urchin ridge?",
+      "choices": [
+        {"label": "Hop across the tide pools", "next": "ba", "spot": "amber tide pools"},
+        {"label": "Scramble up the urchin ridge", "next": "bb", "spot": "violet urchin ridge"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} swims through a jade kelp garden with tall emerald fronds swaying gently, the singing pearl and star-seed both glowing in her satchel, small luminous fish darting between the kelp blades casting tiny light trails. On the LEFT a sapphire waterfall of glowing blue water pours down a coral wall into a deep pool, on the RIGHT a golden starfish ledge covered in bright gold starfish juts out over the lagoon depths, both large, fully visible, clearly separated.",
+      "text": "The kelp garden is like a glowing green forest and the singing pearl hums a note that parts the fronds — the star-seed is flickering faster now, fading a little, and Pearl can see two ways deeper into the lagoon. Sapphire waterfall or starfish ledge?",
+      "choices": [
+        {"label": "Dive under the waterfall", "next": "m1", "spot": "sapphire waterfall"},
+        {"label": "Climb the starfish ledge", "next": "m2", "spot": "golden starfish ledge"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} clings to the rose anemone cluster against the grotto wall, the singing pearl and star-seed glowing in her satchel, pink tentacles curling gently around her paws like soft fingers, a shimmer of reflected starlight on the wall above. On the LEFT a sapphire cascade of glowing blue water sheets down a coral face into a deep basin, on the RIGHT a golden starfish shelf studded with bright gold starfish extends over the lagoon below, both large, fully visible, clearly separated.",
+      "text": "The anemones are SO soft and they curl around Pearl's paws like little hugs — the singing pearl chimes a note that makes the anemones release her gently, and she can see two paths from up here while the star-seed flickers faster. Sapphire cascade or starfish shelf?",
+      "choices": [
+        {"label": "Slide down the cascade", "next": "m1", "spot": "sapphire cascade"},
+        {"label": "Hop across the starfish shelf", "next": "m2", "spot": "golden starfish shelf"}
+      ],
+      "scare": {
+        "spot": "shimmering tide pool",
+        "pop": "a purple octopus with two big curious round eyes reaching a gentle tentacle up from the tide pool and offering a tiny polished shell",
+        "reveal": "Here, you dropped this! Just being helpful!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "ba": {
+      "scene": "{HERO} hops across warm amber tide pools on a rocky shelf, the moonstone shell and star-seed glowing in her satchel, golden water reflecting wavering light onto the cave ceiling above, small hermit crabs scuttling between the pools. On the LEFT a crimson shell fortress made of stacked red and orange shells blocks a wide passage, on the RIGHT an emerald spring tunnel with green-glowing walls opens into darkness, both large, fully visible, clearly separated.",
+      "text": "The tide pools are warm as bathwater and the little hermit crabs wave their claws in greeting — then Pearl spots it: a FORTRESS made entirely of shells blocking the way to the deep spring, and she can hear bubbling behind it. Shell fortress or spring tunnel?",
+      "choices": [
+        {"label": "Approach the shell fortress", "next": "m3", "spot": "crimson shell fortress"},
+        {"label": "Sneak through the spring tunnel", "next": "m4", "spot": "emerald spring tunnel"}
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} scrambles along a violet urchin ridge lined with round purple sea urchins, the moonstone shell and star-seed glowing in her satchel, careful paws avoiding the spines, iridescent light shimmering off the urchin shells. On the LEFT a scarlet shell barricade of piled red and orange shells blocks a wide archway, on the RIGHT a jade spring passage with green-glowing crystal walls curves into the rock, both large, fully visible, clearly separated.",
+      "text": "The urchins are surprisingly friendly and roll aside to let Pearl pass — the moonstone shell vibrates harder the deeper she goes, and ahead she can see a MASSIVE pile of shells someone stacked on purpose to block the way. Shell barricade or spring passage?",
+      "choices": [
+        {"label": "Face the shell barricade", "next": "m3", "spot": "scarlet shell barricade"},
+        {"label": "Slip into the spring passage", "next": "m4", "spot": "jade spring passage"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands behind a sapphire waterfall at the edge of the deep spring, the singing pearl and star-seed both blazing bright in her satchel, the spring water glowing pure white below, ancient coral walls covered in star-shaped carvings surrounding the pool. On the LEFT a pink coral staircase spirals down to the spring surface with star-carved handrails, on the RIGHT a wide opal lily pad floats on the spring surface glowing with inner light, both large, fully visible, clearly separated.",
+      "text": "The deep spring is RIGHT THERE glowing like captured moonlight and the star-seed is flickering so fast it might go out any second — the singing pearl is hitting the highest note Pearl has ever heard, practically screaming HURRY. Coral staircase or lily pad?",
+      "choices": [
+        {"label": "Race down the coral staircase", "next": "end_spring_bloom", "spot": "pink coral staircase"},
+        {"label": "Leap onto the lily pad", "next": "end_seed_fade", "spot": "opal lily pad"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a golden starfish ledge overlooking the deep spring far below, the singing pearl and star-seed both pulsing in her satchel, bright gold starfish lining the ledge like a glowing railing, the spring's white light beaming up from the depths. On the LEFT a seafoam rope bridge of woven sea-silk stretches across the cavern to a ledge above the spring, on the RIGHT a tall coral slide curves steeply downward toward the glowing water, both large, fully visible, clearly separated.",
+      "text": "Pearl can SEE the deep spring from up here and it is GORGEOUS — pure white light beaming up from below, but the star-seed is fading fast and the singing pearl's note is getting wobbly, which probably means they are running out of time. Rope bridge or coral slide?",
+      "choices": [
+        {"label": "Cross the rope bridge", "next": "end_coral_light", "spot": "seafoam rope bridge"},
+        {"label": "Zoom down the coral slide", "next": "end_current_pull", "spot": "coral slide"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} faces the crimson shell fortress where a giant hermit crab with frightened eyes peers through a gap in the stacked shells, the moonstone shell and star-seed glowing in her satchel, bubble-puff tubes of different sizes poking out of the lagoon floor around her like natural bubble cannons. On the LEFT a cluster of tiny pink bubble tubes pokes up from the sand ready to fire rapid bursts, in the MIDDLE a single enormous azure bubble tube rises from the floor with a wide mouth, on the RIGHT a spiral orange bubble tube corkscrews up from a crack in the coral, all large, fully visible, clearly separated.",
+      "text": "The hermit crab SLAMS the shell gap shut and Pearl can hear him muttering about protecting the spring — the moonstone shell vibrates near the bubble tubes and they START GURGLING, ready to fire! Rapid tiny bubbles, one massive bubble, or spiral stream?",
+      "choices": [
+        {"label": "Fire rapid tiny bubbles", "next": "end_tiny_tickle", "spot": "pink bubble tubes"},
+        {"label": "Launch one massive bubble", "next": "end_mega_lift", "spot": "azure bubble tube"},
+        {"label": "Unleash spiral stream", "next": "end_spiral_heal", "spot": "orange spiral tube"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} creeps through a narrow emerald spring tunnel with green-glowing crystal walls, the moonstone shell and star-seed both pulsing in her satchel, the tunnel opening ahead into a small chamber where the hermit crab sits alone surrounded by broken shell pieces and wilted sea flowers, looking small and scared. On the LEFT a warm amber lantern fish sculpture carved into the wall glows beside the crab, on the RIGHT a cool blue spring pool bubbles gently just beyond the crab's reach, both large, fully visible, clearly separated.",
+      "text": "Pearl sneaks around the fortress and finds the crab from behind — he is NOT fearsome at all, just a scared little guy surrounded by broken shells, and his eyes go wide when he sees the star-seed glowing in Pearl's satchel. Lantern sculpture or spring pool?",
+      "choices": [
+        {"label": "Show him the lantern glow", "next": "end_shell_peace", "spot": "amber lantern sculpture"},
+        {"label": "Wade to the spring pool", "next": "end_crab_defender", "spot": "blue spring pool"}
+      ]
+    },
+    "end_spring_bloom": {
+      "scene": "{HERO} kneels at the bottom of the pink coral staircase planting the blazing star-seed into the deep spring, the singing pearl chiming a triumphant note in her paw, the spring water erupting in cascading waves of iridescent gold and pink and blue light, every coral in the lagoon lighting up like a constellation, and the old hermit crab watching through a crack in his fortress with tears of relief streaming down his shell.",
+      "text": "Pearl raced down the stairs and pressed the star-seed into the spring just as it flickered its LAST flicker — the water ERUPTED in a fountain of starlight so bright that every coral in the lagoon lit up like a birthday cake! The singing pearl chimed one perfect triumphant note and the hermit crab peeked out crying because the spring was HEALING just like it used to before it got polluted. He tore down his own fortress and became Pearl's defender on the swim home. The End!"
+    },
+    "end_seed_fade": {
+      "scene": "{HERO} sits on the wide opal lily pad in the middle of the deep spring, the star-seed dark and cold in her paws, the singing pearl silent in her satchel, the spring water dim and still, the lily pad slowly sinking under her weight as the last shimmer of starlight fades from the lagoon walls.",
+      "text": "Pearl leaped onto the lily pad but it started SINKING and she had to hold the star-seed up to keep it dry — by the time she scrambled to the center the seed had gone completely dark and cold like a tiny pebble. The singing pearl went silent, the lagoon dimmed, and Pearl sat on a sinking lily pad holding a regular old rock. Oopsie ending!",
+      "bad": true
+    },
+    "end_coral_light": {
+      "scene": "{HERO} crosses the seafoam rope bridge high above the deep spring, the singing pearl blazing in one paw and the star-seed in the other, then drops the star-seed perfectly into the white-glowing spring far below, the seed falling in a golden arc and hitting the water with a burst of prismatic light that turns the entire cavern into a cathedral of shifting opal colors, starfish on the ledge all pointing their arms toward the light.",
+      "text": "Pearl crossed the bridge and the singing pearl told her EXACTLY when to drop — the star-seed fell in a perfect golden arc and hit the spring with a FLASH so bright the whole cavern turned into a rainbow cathedral! The starfish all pointed at the light like tiny golden arrows and even the hermit crab came out of his fortress blinking because the spring was glowing clean and healthy again. He apologized for the barricade and promised to guard the spring FOR Pearl from now on. The End!"
+    },
+    "end_current_pull": {
+      "scene": "{HERO} tumbles down the steep coral slide into a fast underground current, the singing pearl bouncing away into the dark water, the star-seed slipping from her paws and being carried by the rushing current deeper and deeper into a dark tunnel away from the spring, Pearl spinning and tumbling in the cold swirling water.",
+      "text": "Pearl zoomed down the slide WAY too fast and splashed into a current that grabbed her like a water roller coaster with no brakes — the singing pearl bounced away into the dark and the star-seed slipped out of her paws and got carried off by the current into who-knows-where! Pearl washed up on a beach three coves over, soaking wet, star-seedless, and pearl-less. Oopsie ending!",
+      "bad": true
+    },
+    "end_tiny_tickle": {
+      "scene": "{HERO} stands behind the pink bubble tubes firing hundreds of tiny rapid bubbles at the crimson shell fortress, the moonstone shell vibrating with laughter in her satchel, the hermit crab tumbling out of his fortress giggling uncontrollably as tiny bubbles tickle every inch of his shell, the fortress walls crumbling gently as he rolls around laughing, the deep spring glowing bright behind the fallen shells.",
+      "text": "Pearl fired the tiny bubbles and they tickled the crab SO MUCH he fell out of his fortress laughing — turns out he built the whole thing because the last visitor POLLUTED the spring and his family got sick, and he was just trying to protect it! Pearl showed him the star-seed and he cried happy tears because it HEALS water. He helped her plant it and the spring exploded with light. Best bubble battle ever. The End!"
+    },
+    "end_mega_lift": {
+      "scene": "{HERO} watches as a single enormous iridescent bubble rises from the azure tube and lifts the ENTIRE crimson shell fortress off the ground, the hermit crab clinging to his floating fortress with wide amazed eyes, the deep spring revealed underneath glowing brilliant white, the moonstone shell chiming in Pearl's satchel as she plants the star-seed in the exposed spring.",
+      "text": "One MASSIVE bubble rose from the tube and lifted the entire shell fortress into the air like a hermit-crab hot air balloon — the crab held on with all his legs yelling THIS IS ACTUALLY AMAZING as the deep spring was revealed underneath! Pearl planted the star-seed and the spring burst with healing light. The crab floated gently down, saw his family's water was clean again, and burst into happy tears. He declared himself Pearl's official bodyguard. The End!"
+    },
+    "end_spiral_heal": {
+      "scene": "{HERO} watches as a spiral stream of golden bubbles corkscrews from the orange tube through tiny cracks in the crimson shell fortress, the bubbles carrying traces of star-seed light through the wall and into the deep spring on the other side, the spring erupting in spiraling ribbons of iridescent color, the hermit crab emerging from his fortress staring at the healed water in disbelief, the moonstone shell singing in Pearl's satchel.",
+      "text": "The spiral stream squeezed through every crack in the fortress and carried star-seed sparkle STRAIGHT into the spring — the water erupted in spiraling ribbons of color and the crab came out in total shock because the spring was CLEAN again! He confessed he built the fortress because a visitor polluted it and his babies got sick. Pearl hugged him and said the star heals everything. He tore down his own walls and carried Pearl on his shell all the way home. The End!"
+    },
+    "end_shell_peace": {
+      "scene": "{HERO} sits beside the small hermit crab in the tunnel chamber, the amber lantern sculpture casting warm gold light over both of them, the star-seed glowing gently in Pearl's outstretched paw, the crab reaching one trembling claw toward the light with hopeful eyes, wilted sea flowers around them beginning to straighten and glow as the star-seed's warmth spreads.",
+      "text": "Pearl showed the crab the star-seed and his whole face changed — he told her a visitor polluted the spring and his babies got sick, so he built the fortress to keep EVERYONE out because he was too scared to trust anyone again. The star-seed's glow touched the wilted flowers and they sprang back to life. The crab started crying, tore down his own fortress, and walked Pearl to the spring himself. They planted the seed together and the lagoon lit up like a thousand stars. The End!"
+    },
+    "end_crab_defender": {
+      "scene": "{HERO} wades into the cool blue spring pool just beyond the hermit crab, the star-seed blazing in her paw, the crab watching with huge eyes as Pearl plants the seed in the bubbling spring center, the water transforming from dim to brilliant iridescent white and blue and pink, the crab's broken shells around him beginning to mend and glow, the moonstone shell in Pearl's satchel singing one long clear note.",
+      "text": "Pearl stepped past the scared little crab and planted the star-seed right in the spring — the water BLAZED to life and the crab gasped because his broken shells started mending and the wilted flowers around him bloomed! He told Pearl his family got sick when someone polluted the spring and he had been guarding it alone ever since. Now it was healed. He stood up tall, cracked his biggest claw, and announced he was Pearl's personal bodyguard from this day forward. The End!"
+    }
+  }
+}

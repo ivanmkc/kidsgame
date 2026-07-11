@@ -1,0 +1,149 @@
+{
+  "id": "manor",
+  "title": "Willow and the Shifting Manor",
+  "hero": "WILLOW",
+  "style": "Edward Gorey pen-and-ink crosshatch — spidery lines, witch-purple shadows, moldy green highlights, cream parchment backgrounds, obsessive hatching, Victorian silhouettes. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands before a crumbling Victorian manor at night, crooked chimneys silhouetted against a purple sky, shutters hanging at odd angles, ivy crawling up the facade, and a faint orange glow flickering in an upper window where a cat's meow echoes. On the LEFT a gray grand staircase with a wrought-iron railing leads up to the front entrance, on the RIGHT a red brick corridor with a low arch runs along the side of the manor, both large, fully visible, clearly separated.",
+      "text": "Grandma's cat Pumpkin has been crying inside this creepy manor for THREE days and the rooms rearrange themselves when you look away — Willow heard a meow from upstairs and spotted a corridor sneaking along the side. Grand staircase or brick corridor?",
+      "choices": [
+        {"label": "Climb the grand staircase", "next": "a", "spot": "gray grand staircase"},
+        {"label": "Sneak through the corridor", "next": "b", "spot": "red brick corridor"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands in a grand entrance hall with peeling witch-purple wallpaper, a crooked crystal chandelier, a silver bell hanging from the carved wooden newel post at the bottom of the staircase, and an ornate gold painting frame on the wall that is completely EMPTY with tiny muddy footprints leading away from it across the checkered floor. On the LEFT an amber parlor archway leads to a room of dusty velvet-draped furniture, on the RIGHT a shadowy passage opens toward an ebony piano gleaming in the music room, both large, fully visible, clearly separated.",
+      "text": "Willow grabs the silver bell from the newel post and it FREEZES the room for one second — useful in a house that will not stop rearranging! One of the paintings is EMPTY with tiny footprints walking away from it, which is NOT how paintings work — parlor or music room?",
+      "choices": [
+        {"label": "Peek into the parlor", "next": "aa", "spot": "amber parlor archway"},
+        {"label": "Tiptoe to the music room", "next": "ab", "spot": "ebony piano"}
+      ],
+      "scare": {
+        "spot": "gold painting frame",
+        "pop": "a painted blue heron with two wide startled round eyes stepping delicately around the entrance hall corner leaving tiny painted footprints on the floor",
+        "reveal": "Squawk! I just wanted to stretch my legs! That frame is SO cramped!",
+        "sting": "thunder",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} creeps through the narrow red brick corridor with low arches, dusty copper pots hanging from hooks overhead, cobwebs stretching between old lanterns, and a ball of purple yarn trailing along the stone floor disappearing around the corner ahead. On the LEFT a black iron banister spirals upward beside a twisting staircase into flickering candlelight, on the RIGHT brown pantry shelves stacked with dusty jars and strange bottles open to one side, both large, fully visible, clearly separated.",
+      "text": "Willow spots a ball of purple yarn on the floor — that is Pumpkin's favorite toy, so the cat came THIS way — and she scoops it up to follow the trail. Spiral staircase or pantry?",
+      "choices": [
+        {"label": "Climb the spiral stairs", "next": "ba", "spot": "black iron banister"},
+        {"label": "Search the pantry", "next": "bb", "spot": "brown pantry shelves"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} steps into a dusty parlor draped in moth-eaten velvet, the silver bell in her hand, faded portraits with painted eyes that seem to follow her, an ancient harpsichord in the corner, and a badger in a velvet top hat and monocle peeking from behind a heavy green curtain across the room. On the LEFT a gray library archway with a cracked lintel leads to a dim room of towering bookshelves, on the RIGHT a green vine entrance choked with ivy opens to a glass-roofed conservatory, both large, fully visible, clearly separated.",
+      "text": "Willow sees a BADGER in a top hat peeking at her from behind the curtain, which is never a good sign — Pumpkin's meow echoes from deeper inside. Library or conservatory?",
+      "choices": [
+        {"label": "Head for the library", "next": "m1", "spot": "gray library archway"},
+        {"label": "Enter the conservatory", "next": "m2", "spot": "green vine entrance"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands in a shadowy music room where an ebony piano plays itself with ghostly chords, the silver bell in her hand, dusty sheet music fluttering off the stand, and a monocle glinting in the ornate mirror above the mantelpiece where a badger in a velvet top hat watches from behind a marble bust. On the LEFT a gray library archway with a cracked lintel leads to a dim room of towering bookshelves, on the RIGHT a green vine entrance choked with ivy opens to a glass-roofed conservatory glowing faintly green, both large, fully visible, clearly separated.",
+      "text": "The piano is playing ALL BY ITSELF and Willow can see a badger in a monocle watching her in the mirror — she rings the bell and the piano freezes mid-chord but the badger vanishes! Library or conservatory?",
+      "choices": [
+        {"label": "Chase him to the library", "next": "m1", "spot": "gray library archway"},
+        {"label": "Cut through the conservatory", "next": "m2", "spot": "green vine entrance"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} climbs the twisting spiral staircase as the steps rearrange beneath her boots, the purple yarn ball trailing behind her, candles flickering in iron sconces, a brass banister knob gleaming at the landing, and a tall suit of armor standing motionless in the shadows. On the LEFT a silver crystal chandelier hangs in a grand ballroom visible through tall arched panels with a checkerboard marble floor, on the RIGHT a crimson tower carpet on a narrow staircase spirals upward into candlelit shadow, both large, fully visible, clearly separated.",
+      "text": "The staircase just TWISTED while Willow was ON IT and rearranged three steps behind her — she grabs the railing and holds tight because this manor has absolutely no manners. Ballroom or tower?",
+      "choices": [
+        {"label": "Enter the ballroom", "next": "m3", "spot": "silver crystal chandelier"},
+        {"label": "Climb the tower", "next": "m4", "spot": "crimson tower carpet"}
+      ],
+      "scare": {
+        "spot": "brass banister knob",
+        "pop": "a tall suit of armor with two dark eye slits waving one gauntlet cheerfully as its helmet creaks open to reveal absolutely nothing inside",
+        "reveal": "Clank! Sorry! I wave at EVERYONE. It gets lonely up here.",
+        "sting": "thunder",
+        "delay": 1900
+      }
+    },
+    "bb": {
+      "scene": "{HERO} searches the cluttered pantry with tall brown shelves of dusty jars, the purple yarn ball in her hand trailing back the way she came, cobwebbed bottles of strange liquids in every color, and Pumpkin's tiny paw prints visible in the dust on the floor heading deeper. On the LEFT a hidden passage behind the shelves opens to a grand ballroom with a silver crystal chandelier and checkerboard floor, on the RIGHT a crimson tower carpet peeks through a trapdoor in the pantry ceiling leading upward, both large, fully visible, clearly separated.",
+      "text": "Pumpkin's paw prints are in the dust heading DEEPER and the yarn ball tugs gently in that direction like it remembers the way — Willow spots a hidden passage and a trapdoor above. Ballroom or tower?",
+      "choices": [
+        {"label": "Slip into the ballroom", "next": "m3", "spot": "silver crystal chandelier"},
+        {"label": "Pop through the trapdoor", "next": "m4", "spot": "crimson tower carpet"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in the dim library with towering bookshelves reaching to a vaulted ceiling, the silver bell in her hand, floorboards creaking ominously underfoot, and the badger sorcerer in his velvet top hat and monocle blocking the far aisle with a loaded potion catapult behind him. On the LEFT a round pink potion bottle glows softly on the catapult rack, on the RIGHT a tall green potion flask bubbles on the catapult rack, both large, fully visible, clearly separated.",
+      "text": "The badger aims his catapult and yells HALT but Willow has her OWN catapult and the floor is making very concerning creaking noises — pink sticky potion or green bouncy potion?",
+      "choices": [
+        {"label": "Load the pink potion", "next": "end_sticky_save", "spot": "pink potion bottle"},
+        {"label": "Load the green potion", "next": "end_bounce_out", "spot": "green potion flask"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} enters the glass-roofed conservatory choked with overgrown vines and enormous ferns, the silver bell in her hand, moonlight streaming through cracked glass panes, and the badger sorcerer crouching behind a toppled marble planter with his potion catapult aimed between two ferns. On the LEFT a stout purple potion jar trails smoky wisps on the catapult rack, on the RIGHT a round pink potion bottle glows softly on the catapult rack, both large, fully visible, clearly separated.",
+      "text": "The badger launches a vine-net from behind the planter and Willow dodges — she has one shot before he reloads! Purple smoky potion or pink sticky potion?",
+      "choices": [
+        {"label": "Load the purple potion", "next": "end_smoky_sneak", "spot": "purple potion jar"},
+        {"label": "Load the pink potion", "next": "end_pink_hug", "spot": "pink potion bottle"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} bursts into the grand ballroom with a cracked silver crystal chandelier hanging above a checkerboard marble floor, the purple yarn ball in her hand, and the badger sorcerer standing at the far end with his velvet top hat askew and a loaded potion catapult aimed across the dance floor. On the LEFT a tall green potion flask bubbles on the catapult rack, in the MIDDLE a round pink potion bottle glows on the catapult rack, on the RIGHT a stout purple potion jar trails smoky wisps on the catapult rack, all large, fully visible, clearly separated.",
+      "text": "The badger fires a chandelier-rattle spell and the whole room shakes — Willow has THREE potions and one chance before the floor shifts again! Green bouncy, pink sticky, or purple smoky?",
+      "choices": [
+        {"label": "Load the green potion", "next": "end_green_truce", "spot": "green potion flask"},
+        {"label": "Load the pink potion", "next": "end_pink_stuck", "spot": "pink potion bottle"},
+        {"label": "Load the purple potion", "next": "end_purple_truth", "spot": "purple potion jar"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} climbs into a circular tower room with a tall arched window showing the moonlit sky, the purple yarn ball in her hand with the yarn trail leading right to where the badger sorcerer stands in his velvet top hat blocking a small wooden landing, Pumpkin's meow clearly audible behind him. On the LEFT a tall green potion flask bubbles on a dusty shelf, on the RIGHT a stout purple potion jar trails smoky wisps on a dusty shelf, both large, fully visible, clearly separated.",
+      "text": "Pumpkin is RIGHT BEHIND the badger and he will NOT move from that landing — he looks worried, not mean, but Willow needs to get past! Green bouncy or purple smoky?",
+      "choices": [
+        {"label": "Grab the green potion", "next": "end_bouncy_bridge", "spot": "green potion flask"},
+        {"label": "Grab the purple potion", "next": "end_purple_reveal", "spot": "purple potion jar"}
+      ]
+    },
+    "end_sticky_save": {
+      "scene": "{HERO} launches the pink potion and it SPLATTERS across the creaking library floorboards just as they crack and start to fall, the sticky pink goo catching every board and holding them together like taffy, the badger sorcerer removing his top hat with a sigh of relief as Pumpkin the orange cat peeks out from behind a bookshelf, the silver bell chiming softly.",
+      "text": "The pink goo CAUGHT the falling floorboards like the world's stickiest safety net — turns out the floor was rotten over a BOTTOMLESS library pit and the badger was trying to stop Willow from falling through! He pulled off his top hat, bowed, and said he was grandma's old apprentice, guarding Pumpkin and the manor's terrible secret. Pumpkin purred from behind the bookshelf and Willow scooped her up on perfectly sticky-safe floors. The End!"
+    },
+    "end_bounce_out": {
+      "scene": "{HERO} launches the green potion and it EXPLODES on the library floor, sending books, shelves, and Willow bouncing in every direction, Willow rocketing off a bookshelf through the manor window and landing in the garden hedge with her hat over her eyes, the badger watching from the broken window shaking his head while Pumpkin the orange cat peers down from the windowsill.",
+      "text": "The bouncy potion turned the ENTIRE library into a trampoline park and Willow bounced off a bookshelf, off the ceiling, and straight OUT THE WINDOW into the garden hedge — she looked up to see Pumpkin sitting calmly on the windowsill and the badger shaking his head like this was the silliest witch he had ever seen. Back to the entrance! Oopsie ending!",
+      "bad": true
+    },
+    "end_smoky_sneak": {
+      "scene": "{HERO} launches the purple potion and thick violet smoke fills the conservatory, revealing glowing red lines on the floor marking every rotten board and hidden trap, the badger sorcerer stepping out of the smoke with his monocle off and his paws raised in peace as Pumpkin the orange cat sits in a safe corner behind an overturned pot, the silver bell chiming.",
+      "text": "The purple smoke revealed EVERYTHING — glowing red lines showed every rotten board and every trap, and the badger took off his monocle and said FINALLY someone who checks before stomping around! He was grandma's old apprentice guarding the manor from a bottomless pit under the conservatory. Pumpkin was purring in the one safe corner, and Willow carried her home on the marked-safe path. The End!"
+    },
+    "end_pink_hug": {
+      "scene": "{HERO} launches the pink potion but it arcs wrong and SPLATTERS on both Willow and the badger sorcerer, gluing them together in a sticky pink blob, both of them struggling and then laughing as Pumpkin the orange cat jumps into the sticky huddle and purrs, the silver bell stuck to the badger's monocle chiming faintly.",
+      "text": "The pink potion stuck Willow TO THE BADGER and for ten sticky seconds they struggled until the badger started LAUGHING — he said he was grandma's old apprentice and he was never the villain, he was trying to STOP Willow from stepping on the rotten floor! Pumpkin jumped into the sticky pile and purred and the three of them waddled home together like the world's most ridiculous team. The End!"
+    },
+    "end_green_truce": {
+      "scene": "{HERO} launches the green potion onto the cracked ballroom floor and it creates an enormous bouncy green trampoline surface over the dangerous cracks, the badger sorcerer bouncing once in surprise and then laughing with his top hat flying off, Pumpkin the orange cat bouncing gently down from the chandelier where she had been napping, the purple yarn ball bouncing alongside.",
+      "text": "The bouncy potion turned the rotten floor into the world's biggest trampoline and the badger bounced so high his top hat hit the chandelier — Pumpkin had been NAPPING up there! The badger caught his hat, caught the cat, and bounced them both to safety. He was grandma's old apprentice protecting Pumpkin from the cracked floor all along. Bounciest rescue in manor history. The End!"
+    },
+    "end_pink_stuck": {
+      "scene": "{HERO} launches the pink potion straight UP and it hits the cracked crystal chandelier which unsticks from the ceiling and swings down trailing sticky pink goo, catching Willow, the badger sorcerer, and Pumpkin the orange cat in a sticky sparkling tangle hanging three feet above the ballroom floor, all of them stuck and dangling.",
+      "text": "The pink potion hit the CHANDELIER and it swung down and scooped up Willow, the badger, AND Pumpkin in one giant sticky sparkly glob — now all three of them are dangling from the ceiling like the world's worst ornament. The badger sighs and says THIS is why he set up the traps. Somebody will find them eventually! Oopsie ending!",
+      "bad": true
+    },
+    "end_purple_truth": {
+      "scene": "{HERO} launches the purple potion and thick violet smoke fills the grand ballroom, revealing a glowing bottomless crack running across the entire dance floor, the badger sorcerer standing on the only safe strip of marble with his paws raised, Pumpkin the orange cat hiding behind the heavy ballroom curtains on the safe side, the purple yarn ball at Willow's feet.",
+      "text": "The smoke revealed a BOTTOMLESS CRACK running across the entire dance floor and the badger was standing on the only safe strip — he was not blocking Willow, he was blocking the PIT! He was grandma's old apprentice guarding every lost visitor from the manor's rotten secret. Willow followed the safe strip, grabbed Pumpkin from behind the curtains, and they all walked out together. The End!"
+    },
+    "end_bouncy_bridge": {
+      "scene": "{HERO} splashes the green potion across the rotten wooden landing and it inflates into a bouncy green bridge over the crumbling boards, the badger sorcerer hopping aside in surprise, Pumpkin the orange cat sitting in a cozy basket behind him with the purple yarn ball as a pillow, and Willow bouncing across to scoop the cat up.",
+      "text": "The bouncy potion turned the rotten landing into a TRAMPOLINE BRIDGE and Willow bounced right over the dangerous boards — the badger jumped aside and there was Pumpkin, curled in a cozy basket the badger had MADE for her! He was grandma's old apprentice and the rotten floor hid a bottomless drop, so he kept the cat safe and warm. Best babysitter badger ever. The End!"
+    },
+    "end_purple_reveal": {
+      "scene": "{HERO} smashes the purple potion on the tower floor and violet smoke swirls and clears to reveal the badger sorcerer standing on the ONLY solid floorboard in the whole landing, a cozy basket beside him with Pumpkin the orange cat sleeping peacefully inside using the purple yarn ball as a pillow, every other board glowing red with cracks showing bottomless darkness below.",
+      "text": "The smoke cleared and Willow saw it — every board glowed red with cracks except the ONE the badger was standing on, and right beside him Pumpkin was sleeping with the yarn as a pillow. He was grandma's old apprentice and the entire landing was a trap EXCEPT his spot. He had been standing guard for three days, feeding the cat treats and waiting for someone smart enough to look before stepping. The End!"
+    }
+  }
+}

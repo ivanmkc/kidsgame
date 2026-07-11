@@ -1,0 +1,241 @@
+{
+  "id": "thunder",
+  "title": "Nova and the Storm Peak",
+  "hero": "NOVA",
+  "style": "Dramatic chiaroscuro with ukiyo-e cloud swirls, indigo and charcoal mountain silhouettes, gold lightning bolts cracking across the sky, glowing lantern warmth against storm darkness. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the base of a jagged mountain pass in a raging lightning storm, a fragile glass lantern glowing warm gold in one paw, dark indigo clouds swirling above, crumbling stone steps leading upward into the howling wind. On the LEFT a slate stone bridge arches over a deep chasm with lightning flashing behind it, on the RIGHT an amber wind tunnel carved through the mountainside glows with reflected lantern light, both large, fully visible, clearly separated.",
+      "text": "The village beacon went dark and the ONLY way to relight it is to carry this very fragile, very breakable glass lantern across the stormiest mountain in the kingdom — Nova holds it tight and picks a path. Stone bridge or wind tunnel?",
+      "choices": [
+        {
+          "label": "Cross the stone bridge",
+          "next": "a",
+          "spot": "slate stone bridge"
+        },
+        {
+          "label": "Enter the wind tunnel",
+          "next": "b",
+          "spot": "amber wind tunnel"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} crosses a crumbling slate stone bridge over a deep chasm, the glass lantern glowing gold in one paw, lightning cracking across the indigo sky, a wool blanket snagged on a bridge post flapping in the wind, a tall granite rock spire jutting up from the chasm beside the bridge. On the LEFT a mossy green ledge with thick ferns clings to the mountainside above the bridge, on the RIGHT a turquoise crystal cave mouth sparkles with mineral deposits in the rock wall, both large, fully visible, clearly separated.",
+      "text": "Lightning flashes and the bridge SHAKES but Nova spots a wool blanket caught on a post — she wraps it around the lantern for protection because glass plus lightning storm equals bad math. Mossy ledge or crystal cave?",
+      "choices": [
+        {
+          "label": "Climb to the mossy ledge",
+          "next": "aa",
+          "spot": "mossy green ledge"
+        },
+        {
+          "label": "Duck into the crystal cave",
+          "next": "ab",
+          "spot": "turquoise crystal cave"
+        }
+      ],
+      "scare": {
+        "spot": "granite rock spire",
+        "pop": "a massive Storm Hawk with two burning golden eyes and wide dark wings swooping low past the granite rock spire, lightning illuminating its feathered silhouette against the indigo clouds",
+        "reveal": "Just a flyby! That hawk is looking for something else!",
+        "sting": "thunder",
+        "delay": 2000
+      }
+    },
+    "b": {
+      "scene": "{HERO} steps into an amber wind tunnel carved through the mountainside, the glass lantern flickering as gusts howl through, small wind gremlins with pointy ears zipping past overhead, a tattered feather cloak hanging from a rocky hook on the tunnel wall. On the LEFT a crumbling sandstone arch leads to a narrow ridge with clouds swirling below, on the RIGHT a charcoal thunder ridge stretches along the mountain spine with lightning rods jutting up from the rocks, both large, fully visible, clearly separated.",
+      "text": "Wind gremlins dive-bomb the lantern but Nova snatches a feather cloak off the wall and shields the flame — the gremlins chitter angrily but the cloak blocks every gust like a tiny windbreaker for fire. Crumbling arch or thunder ridge?",
+      "choices": [
+        {
+          "label": "Cross the crumbling arch",
+          "next": "ba",
+          "spot": "sandstone arch"
+        },
+        {
+          "label": "Trek the thunder ridge",
+          "next": "bb",
+          "spot": "charcoal thunder ridge"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands on a mossy green ledge high on the mountainside, the glass lantern wrapped in the wool blanket glowing warmly, ferns swaying in the storm wind, the mountain peak visible above through breaks in the dark clouds, lightning illuminating a path upward. On the LEFT a golden mountain cave mouth with smooth worn stones at its entrance opens in the cliff face, on the RIGHT an indigo summit trail of carved stone steps winds upward along the exposed ridge, both large, fully visible, clearly separated.",
+      "text": "From the ledge Nova can see the dark beacon at the very top AND a sheltered cave where she could catch her breath — the wind gremlins are circling above like tiny angry helicopters. Mountain cave or summit trail?",
+      "choices": [
+        {
+          "label": "Shelter in the cave",
+          "next": "m1",
+          "spot": "golden mountain cave"
+        },
+        {
+          "label": "Push up the trail",
+          "next": "m2",
+          "spot": "indigo summit trail"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands inside a turquoise crystal cave glittering with mineral deposits, the glass lantern wrapped in the wool blanket casting warm light on the crystal walls, wind howling at the cave entrance, a narrow passage leading deeper into the mountain. On the LEFT a golden mountain cave opening with worn smooth stones leads to a wider chamber deeper inside, on the RIGHT an indigo summit trail visible through a crack in the cave wall leads upward along the mountain face, both large, fully visible, clearly separated.",
+      "text": "The crystals catch the lantern light and scatter it like a hundred tiny stars — very pretty but the Storm Hawk's shadow just crossed the cave entrance, so moving is better than admiring geology. Mountain cave or summit trail?",
+      "choices": [
+        {
+          "label": "Go deeper into the cave",
+          "next": "m1",
+          "spot": "golden mountain cave"
+        },
+        {
+          "label": "Climb out to the trail",
+          "next": "m2",
+          "spot": "indigo summit trail"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} edges across a crumbling sandstone arch over a sea of clouds, the glass lantern shielded by the feather cloak, wind gremlins swooping alongside chattering urgently, the mountain peak looming ahead with the dark beacon tower at its summit. On the LEFT a copper boulder field with rounded weathered boulders stretches across a wide plateau, on the RIGHT a jade hawk perch juts out from the cliff face with deep talon marks scored into the stone, both large, fully visible, clearly separated.",
+      "text": "The wind gremlins keep pointing at the Storm Hawk circling above and then at Nova's lantern — they seem worried FOR her, which is confusing because five minutes ago they were dive-bombing her face. Boulder field or hawk perch?",
+      "choices": [
+        {
+          "label": "Cross the boulder field",
+          "next": "m3",
+          "spot": "copper boulder field"
+        },
+        {
+          "label": "Climb to the hawk perch",
+          "next": "m4",
+          "spot": "jade hawk perch"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} treks along a charcoal thunder ridge with lightning rods jutting from the rocks, the glass lantern shielded by the feather cloak, dark storm clouds pressing close, a large grey boulder sitting on the ridge path blocking the way forward. On the LEFT a copper boulder field with rounded weathered stones stretches across a wide mountain plateau, on the RIGHT a jade hawk perch juts out from the cliff face with deep claw marks scored into the stone, both large, fully visible, clearly separated.",
+      "text": "Lightning strikes a rod and the whole ridge glows blue for a second — and is that boulder in the path BREATHING? Boulder field or hawk perch?",
+      "choices": [
+        {
+          "label": "Cross the boulder field",
+          "next": "m3",
+          "spot": "copper boulder field"
+        },
+        {
+          "label": "Climb to the hawk perch",
+          "next": "m4",
+          "spot": "jade hawk perch"
+        }
+      ],
+      "scare": {
+        "spot": "grey boulder",
+        "pop": "a rumbling stone troll with two round mossy green eyes uncurling from the grey boulder, pebbles tumbling off its broad shoulders as it stretches awake against the stormy sky",
+        "reveal": "Grumble! Just napping through the storm, carry on little fox!",
+        "sting": "thunder",
+        "delay": 1900
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands inside a golden mountain cave with the glass lantern glowing on a flat stone, the wool blanket spread wide, wind gremlins rushing in through two gaps in the cave walls carrying gusts that threaten the flame, the Storm Hawk's shadow circling outside. On the LEFT a mossy green bundle of thick mountain moss sits piled beside the left gap in the cave wall, on the RIGHT a russet rock pile of heavy stacked stones sits beside the right gap in the cave wall, both large, fully visible, clearly separated.",
+      "text": "Wind gremlins pour through the gaps and the lantern flame dances wildly — Nova needs to block one gap FAST with whatever is handy, and this is basically a pillow fort but with rocks and moss. Moss bundle or rock pile?",
+      "choices": [
+        {
+          "label": "Stuff the moss bundle",
+          "next": "end_guardian",
+          "spot": "mossy green bundle"
+        },
+        {
+          "label": "Stack the rock pile",
+          "next": "end_crack",
+          "spot": "russet rock pile"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} climbs the exposed indigo summit trail of carved stone steps, the glass lantern wrapped in the wool blanket glowing against the dark storm, wind howling across the ridge, the beacon tower visible at the peak above, the Storm Hawk circling in the clouds. On the LEFT a bronze weather vane shaped like an arrow spins wildly on a stone cairn beside the trail, on the RIGHT a gold signal horn sits wedged between two rocks at the trail's edge, both large, fully visible, clearly separated.",
+      "text": "The beacon is SO close but the Storm Hawk keeps circling and the wind is trying to shove Nova off the mountain — she needs a plan and the trail offers two interesting objects. Weather vane or signal horn?",
+      "choices": [
+        {
+          "label": "Grab the weather vane",
+          "next": "end_redirect",
+          "spot": "bronze weather vane"
+        },
+        {
+          "label": "Blow the signal horn",
+          "next": "end_blown",
+          "spot": "gold signal horn"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} crouches in a copper boulder field on a wide mountain plateau, the glass lantern shielded by the feather cloak, wind gremlins hovering protectively around the lantern forming a tiny windbreak, the Storm Hawk diving from above. On the LEFT a scarlet cave overhang with a deep shadow underneath offers shelter from the sky, in the MIDDLE an amber stone tower rises from the boulders with a flat top catching lightning, on the RIGHT a teal stone passage cuts through the boulder field toward the beacon tower, all three large, fully visible, clearly separated.",
+      "text": "The wind gremlins are forming a tiny living shield around the lantern and NOW Nova gets it — they are not attacking, they are PROTECTING the light from the Storm Hawk that eats light. Cave, tower, or passage?",
+      "choices": [
+        {
+          "label": "Hide under the overhang",
+          "next": "end_sneak",
+          "spot": "scarlet cave overhang"
+        },
+        {
+          "label": "Climb the stone tower",
+          "next": "end_lightning",
+          "spot": "amber stone tower"
+        },
+        {
+          "label": "Sneak through the passage",
+          "next": "end_decoy",
+          "spot": "teal stone passage"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands on the jade hawk perch jutting from the cliff face, deep talon marks scored in the stone, the glass lantern shielded by the feather cloak, the Storm Hawk perched on a higher crag with two burning golden eyes staring down, wind gremlins hovering behind Nova protectively. On the LEFT a violet crystal outcrop sparkles with reflected lightning at the edge of the perch, on the RIGHT an iron chain bridge swings in the wind connecting the perch to the beacon tower, both large, fully visible, clearly separated.",
+      "text": "The Storm Hawk is RIGHT THERE staring at the lantern with hungry golden eyes and the wind gremlins are chittering battle plans behind Nova — time to make a move before that beak gets any closer. Crystal outcrop or chain bridge?",
+      "choices": [
+        {
+          "label": "Use the crystal outcrop",
+          "next": "end_dazzle",
+          "spot": "violet crystal outcrop"
+        },
+        {
+          "label": "Sprint the chain bridge",
+          "next": "end_swoop",
+          "spot": "iron chain bridge"
+        }
+      ]
+    },
+    "end_guardian": {
+      "scene": "{HERO} sits in the golden mountain cave with the lantern burning bright, the moss bundle stuffed snugly in the gap, wind gremlins curled up peacefully around the lantern like tiny furry guardians, the Storm Hawk's shadow retreating from the cave entrance as dawn light creeps in.",
+      "text": "The moss blocks the wind perfectly and the gremlins settle around the lantern like fuzzy little bodyguards — they WERE protecting it all along, and together they wait out the hawk and carry the flame safely to the beacon at dawn."
+    },
+    "end_crack": {
+      "scene": "{HERO} stacks heavy stones against the cave wall gap but the vibration knocks the glass lantern off the flat stone, a crack spreading across the glass, the flame flickering and dying as wind gremlins gasp in horror, the golden mountain cave going dark.",
+      "text": "The rocks stack solid but the THUD shakes the whole cave and the lantern tips off its stone and cracks — the flame sputters out and even the wind gremlins look heartbroken. Oopsie ending!",
+      "bad": true
+    },
+    "end_redirect": {
+      "scene": "{HERO} holds the bronze weather vane high on the summit trail as lightning strikes it, the bolt redirecting harmlessly past the lantern, the Storm Hawk screeching and wheeling away from the flash, the beacon tower glowing as the glass lantern's flame leaps through the air to relight it.",
+      "text": "Nova points the weather vane skyward and lightning follows the arrow AWAY from the lantern — the flash scares the Storm Hawk into next week and the beacon flame catches, sending golden light pouring across the valley."
+    },
+    "end_blown": {
+      "scene": "{HERO} blows the gold signal horn on the exposed summit trail, the blast of sound creating a visible shockwave in the storm, but the force of the horn blows the glass lantern's flame out, the lantern going dark as the Storm Hawk circles triumphantly.",
+      "text": "The horn blast echoes across three mountains and sounds AMAZING but it also blows out the lantern like a birthday candle — the Storm Hawk does a victory loop and Nova is standing in the dark holding a very loud empty horn. Oopsie ending!",
+      "bad": true
+    },
+    "end_sneak": {
+      "scene": "{HERO} crouches under the scarlet cave overhang with the glass lantern glowing, wind gremlins packed tightly around the flame creating a perfect windbreak, the Storm Hawk soaring overhead without spotting the hidden light, the beacon tower visible through a gap in the boulders ahead.",
+      "text": "The gremlins huddle so close around the lantern that it looks like a ball of fur with a glow inside — the Storm Hawk flies right past and Nova sneaks to the beacon while the big bird is busy looking confused."
+    },
+    "end_lightning": {
+      "scene": "{HERO} stands atop the amber stone tower with the glass lantern raised high, lightning striking the tower and channeling through the lantern, the glass glowing white-hot with amplified light, the Storm Hawk screeching and fleeing from the blinding flash, the distant beacon tower igniting from the reflected blaze.",
+      "text": "Lightning hits the tower and instead of breaking the lantern the bolt channels THROUGH it — the glass blazes so bright the Storm Hawk squawks and flaps away, and the beacon across the peak catches the light and roars to life."
+    },
+    "end_decoy": {
+      "scene": "{HERO} tiptoes through the teal stone passage between boulders, wind gremlins scattering ahead carrying tiny sparks from the lantern like glowing decoys, the Storm Hawk diving at the wrong lights far above, the beacon tower glowing at the end of the passage.",
+      "text": "The gremlins scatter ahead carrying tiny sparks and the Storm Hawk chases every wrong glow like a cat after laser dots — meanwhile Nova tiptoes through the passage with the real lantern and lights the beacon while the hawk is busy playing tag."
+    },
+    "end_dazzle": {
+      "scene": "{HERO} holds the glass lantern against the violet crystal outcrop, the crystals splitting the lantern light into a dazzling rainbow burst that blinds the Storm Hawk, the great bird tumbling away squawking, wind gremlins celebrating with tiny loop-de-loops as the beacon tower glows in the background.",
+      "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud — the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards."
+    },
+    "end_swoop": {
+      "scene": "{HERO} sprints across the iron chain bridge in howling wind, the glass lantern flickering wildly, the Storm Hawk swooping down with talons extended, wind gremlins diving at the hawk's face to slow it, the beacon tower just steps away at the end of the bridge.",
+      "text": "Nova RUNS and the gremlins throw themselves at the Storm Hawk like tiny furry missiles — the hawk swerves, Nova reaches the beacon, and the lantern's flame leaps home just as the first ray of dawn breaks through the storm."
+    }
+  }
+}

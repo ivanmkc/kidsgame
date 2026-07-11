@@ -27,6 +27,8 @@ from gen.nbp import _call, generate, generate_with_ref  # noqa: E402
 from gen.sam_batch import sam_segment_batch  # noqa: E402
 from gen.scenes import SCENE_STYLE  # noqa: E402
 from gen.story_specs import (  # noqa: E402
+    CLOUD_CASTLE,
+    COOKIE_CAPER,
     DEEP_SEA,
     NIGHT_MARKET,
     RAINBOW_DOORS,
@@ -34,6 +36,7 @@ from gen.story_specs import (  # noqa: E402
     SKY_RACE,
     TREASURE_TRAIL,
     WHISPERING_HOUSE,
+    YOKAI_PARADE,
 )
 from gen.story_lint import lint_spec  # noqa: E402
 from google.genai import types  # noqa: E402
@@ -43,8 +46,14 @@ ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "story"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 
+from gen.story_specs_wave2 import WAVE2  # noqa: E402
+from gen.story_specs_wave3 import WAVE3  # noqa: E402
+from gen.story_specs_wave4 import WAVE4  # noqa: E402
+from gen.story_specs_wave5 import WAVE5  # noqa: E402
+
 STORIES = [WHISPERING_HOUSE, SCARE_SCHOOL, RAINBOW_DOORS, TREASURE_TRAIL,
-           NIGHT_MARKET, DEEP_SEA, SKY_RACE]
+           NIGHT_MARKET, DEEP_SEA, SKY_RACE, YOKAI_PARADE, CLOUD_CASTLE,
+           COOKIE_CAPER] + WAVE2 + WAVE3 + WAVE4 + WAVE5
 
 
 def _story_style(spec: dict) -> str:
@@ -54,7 +63,9 @@ def _story_style(spec: dict) -> str:
 def _ref_path(spec: dict) -> Path:
     if "ref" in spec:
         return OUT / spec["ref"]["file"]
-    return OUT / f"{spec['id']}_start.png"
+    png = OUT / f"{spec['id']}_start.png"
+    # start scenes ship as JPEG after the size-optimization pass
+    return png if png.exists() else OUT / f"{spec['id']}_start.jpg"
 
 
 def _gen_ref(spec: dict) -> None:
@@ -162,9 +173,24 @@ def _spots_distinct(boxes: list) -> bool:
     return True
 
 
-def _gen_node(spec: dict, nid: str, n: dict) -> dict:
+# GEPA-promoted (2026-07-10, holdout 0.920 vs 0.867): chain each scene on its
+# PARENT scene image; layout-keep clause applies only when the location stays.
+_CONTINUITY_CLAUSE = (
+    "This scene continues the story from the reference image. If it is the SAME "
+    "place, maintain strict spatial layout: keep the exact same background "
+    "structure, opening positions, furniture placement, and major props in the "
+    "same spots — do not swap sides, delete key architecture, or introduce major "
+    "new background elements. If the description clearly moves to a NEW place, "
+    "keep only the hero, lighting logic and illustration style from the "
+    "reference and render the new location as described.")
+
+
+def _gen_node(spec: dict, nid: str, n: dict, parent_png: Path | None = None) -> dict:
     fname = f"{spec['id']}_{nid}.png"
     ref = _ref_path(spec)
+    chained = parent_png is not None and parent_png.exists()
+    if chained:
+        ref = parent_png
     if (OUT / fname).exists():
         print(f"  {spec['id']}/{nid}: scene exists, reusing")
     else:
@@ -172,10 +198,11 @@ def _gen_node(spec: dict, nid: str, n: dict) -> dict:
         use_ref = ref.exists() and not (nid == "start" and "ref" not in spec)
         for attempt in range(3):
             if use_ref:
+                cont = f" {_CONTINUITY_CLAUSE}" if chained else ""
                 img = generate_with_ref(
                     f"{n['scene']}. Characters must look IDENTICAL to the reference image — "
                     f"same faces, colors, markings, proportions. The hero appears EXACTLY "
-                    f"ONCE in the scene — never duplicated. {_story_style(spec)}",
+                    f"ONCE in the scene — never duplicated.{cont} {_story_style(spec)}",
                     ref, (1280, 720))
             else:
                 img = generate(f"{n['scene']}. {_story_style(spec)}", (1280, 720))
@@ -230,12 +257,28 @@ def _gen_node(spec: dict, nid: str, n: dict) -> dict:
 def gen_story(spec: dict) -> dict:
     OUT.mkdir(parents=True, exist_ok=True)
     _gen_ref(spec)
-    # the anchor scene renders first, everything else fans out
+    # GEPA-promoted chained conditioning: generate in topological waves so each
+    # node conditions on its parent's finished scene (first parent wins).
+    parent: dict[str, str] = {}
+    for pid, pn in spec["nodes"].items():
+        for c in pn.get("choices", []):
+            parent.setdefault(c["next"], pid)
     entries = {"start": _gen_node(spec, "start", spec["nodes"]["start"])}
-    rest = [(nid, n) for nid, n in spec["nodes"].items() if nid != "start"]
-    with ThreadPoolExecutor(3) as ex:
-        results = list(ex.map(lambda kv: (kv[0], _gen_node(spec, kv[0], kv[1])), rest))
-    entries.update(dict(results))
+    pending = {nid: n for nid, n in spec["nodes"].items() if nid != "start"}
+    while pending:
+        wave = [(nid, n) for nid, n in pending.items()
+                if parent.get(nid, "start") in entries]
+        if not wave:  # orphan nodes (unreachable): fall back to identity ref
+            wave = list(pending.items())
+        with ThreadPoolExecutor(3) as ex:
+            results = list(ex.map(
+                lambda kv: (kv[0], _gen_node(
+                    spec, kv[0], kv[1],
+                    OUT / f"{spec['id']}_{parent[kv[0]]}.png"
+                    if kv[0] in parent else None)), wave))
+        entries.update(dict(results))
+        for nid, _ in wave:
+            pending.pop(nid)
     return {"id": spec["id"], "title": spec["title"], "nodes": entries}
 
 
