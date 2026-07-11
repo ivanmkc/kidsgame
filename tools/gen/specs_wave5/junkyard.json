@@ -1,0 +1,248 @@
+{
+  "id": "junkyard",
+  "title": "Pip and the Midnight Howl",
+  "hero": "PIP",
+  "style": "Scrapbook mixed-media collage with torn paper edges, rust orange and burnt sienna surfaces, moonlight silver highlights, graphite pencil smudges, and found-object textures like corrugated metal and weathered wood. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the entrance of a towering scrapyard under a huge full moon, mountains of rusted cars and stacked appliances rising like metal cliffs, silver moonlight casting long shadows between the junk towers, and a faint howling echoing from deep inside the yard. On the LEFT a rust car canyon between two leaning towers of stacked cars creates a narrow passage with moonlight glinting off chrome bumpers, on the RIGHT a steel appliance alley lined with stacked washing machines and refrigerators stretches into silver-lit darkness, both large, fully visible, clearly separated.",
+      "text": "Something is HOWLING from the deepest part of the scrapyard and it sounds like a puppy in trouble — Pip's ears are standing straight up and his tail is wagging because rescuing things is his absolute favorite activity especially when it is midnight and slightly terrifying. Car canyon or appliance alley?",
+      "choices": [
+        {
+          "label": "Squeeze through car canyon",
+          "next": "a",
+          "spot": "rust car canyon"
+        },
+        {
+          "label": "Sneak down appliance alley",
+          "next": "b",
+          "spot": "steel appliance alley"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} squeezes through a narrow rust car canyon between leaning towers of stacked cars, moonlight glinting off cracked windshields and chrome bumpers, a small red magnet on a string dangling from the rearview mirror of an old sedan, and the howling growing louder from deeper inside. On the LEFT a rusty drum bridge of barrels laid end to end spans a dark gap between junk piles, on the RIGHT a black tire mountain of stacked rubber tires with climbing holds rises toward a moonlit ledge, both large, fully visible, clearly separated.",
+      "text": "The cars creak and groan like metal dinosaurs and hanging from a mirror Pip finds a red magnet on a string that CLICKS onto everything metal — into the satchel it goes because in a scrapyard a magnet is basically a magic wand. Drum bridge or tire mountain?",
+      "choices": [
+        {
+          "label": "Cross the drum bridge",
+          "next": "aa",
+          "spot": "rusty drum bridge"
+        },
+        {
+          "label": "Climb the tire mountain",
+          "next": "ab",
+          "spot": "black tire mountain"
+        }
+      ],
+      "scare": {
+        "spot": "rusty steering wheel",
+        "pop": "a raccoon wearing hubcap armor with two bright round bandit eyes crashing through the car window with a tremendous clang",
+        "reveal": "Whoa! Just testing my battle outfit!",
+        "sting": "thunder",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} creeps down a steel appliance alley lined with stacked washing machines and old refrigerators, moonlight catching the round glass porthole windows of the washers, a brass bell on a chain dangling from the handle of an old dryer, and the howling echoing off the metal walls growing sadder. On the LEFT a tin roof path of overlapping corrugated metal sheets laid flat over the mud creates a walkway between the stacks, on the RIGHT a silver clawfoot bathtub sitting upright on its iron feet between two refrigerators glows in the moonlight, both large, fully visible, clearly separated.",
+      "text": "Every washing machine looks like a robot face staring at Pip which is not creepy at ALL and hanging from a dryer handle he finds a brass bell that makes the prettiest chime when he taps it — into the satchel because musical things are always important in stories. Tin roof path or bathtub?",
+      "choices": [
+        {
+          "label": "Walk the tin roof path",
+          "next": "ba",
+          "spot": "tin roof path"
+        },
+        {
+          "label": "Hop into the bathtub",
+          "next": "bb",
+          "spot": "silver clawfoot bathtub"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} tiptoes across a rusty drum bridge of barrels spanning a dark gap between junk piles, the red magnet on a string swinging from his satchel and sticking to each barrel he passes, moonlight filtering down between towering scrap walls, and the howling coming from just beyond the next junk pile. On the LEFT a blue truck cab of an old pickup sits nose-down between two scrap heaps with its headlights dark, on the RIGHT a yellow school bus lies on its side with windows glowing faintly in the moonlight, both large, fully visible, clearly separated.",
+      "text": "The drums boom like thunder with every step and the magnet keeps sticking to things which makes sneaking EXTREMELY loud — the howling is so close now that Pip can feel it in his chest and whatever is making that sound needs help right NOW. Truck cab or school bus?",
+      "choices": [
+        {
+          "label": "Check the truck cab",
+          "next": "m1",
+          "spot": "blue truck cab"
+        },
+        {
+          "label": "Peek into the school bus",
+          "next": "m2",
+          "spot": "yellow school bus"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} scrambles up a black tire mountain of stacked rubber tires, the red magnet in his satchel clinking against metal bits embedded in the rubber, moonlit scrapyard spreading out below, and the howling rising from a deep spot just past the ridge of tires ahead. On the LEFT a chrome bumper ledge of stacked car bumpers creates a shiny stepping-stone path down the far side, on the RIGHT a canvas tarp slide of heavy brown tarp draped over a junk slope makes a slippery way down, both large, fully visible, clearly separated.",
+      "text": "Pip climbs the tires and from the top he can see the WHOLE scrapyard spread out in the moonlight like a metal mountain range — the howling is coming from a dark spot just below and his magnet is practically vibrating with excitement. Bumper ledge or tarp slide?",
+      "choices": [
+        {
+          "label": "Step along the bumper ledge",
+          "next": "m1",
+          "spot": "chrome bumper ledge"
+        },
+        {
+          "label": "Slide down the tarp",
+          "next": "m2",
+          "spot": "canvas tarp slide"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} walks along a tin roof path of corrugated metal sheets between towering appliance stacks, the brass bell in his satchel chiming softly with each step, moonlight making the metal shimmer silver, and a heavy green tarp draped over a large bulge beside the path with something warm underneath rising and falling gently. On the LEFT a copper pipe maze of tangled pipes and faucets branches off between two refrigerator stacks, on the RIGHT a bronze wheel archway made of old bicycle wheels wired together frames a passage into the inner scrapyard, both large, fully visible, clearly separated.",
+      "text": "The tin roof goes CLONG CLONG CLONG with every step which is basically announcing HEY EVERYONE PIP IS HERE and the howling ahead sounds SO sad — the brass bell chimes back at the howling like they are having a conversation. Pipe maze or wheel archway?",
+      "choices": [
+        {
+          "label": "Squeeze into the pipe maze",
+          "next": "m3",
+          "spot": "copper pipe maze"
+        },
+        {
+          "label": "Duck through the wheel arch",
+          "next": "m4",
+          "spot": "bronze wheel archway"
+        }
+      ],
+      "scare": {
+        "spot": "green tarp edge",
+        "pop": "a huge sleeping opossum with two beady surprised eyes yawning wide and showing every single pointy tooth while blinking awake under the green tarp",
+        "reveal": "Yaaawn! Best nap spot in the yard!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "bb": {
+      "scene": "{HERO} sits inside the silver clawfoot bathtub peering over the rim like a tiny ship captain, the brass bell in his satchel, moonlight flooding the tub interior, and a sealed washing machine with its round porthole window dark and still sitting right beside the bathtub with faint scratching sounds coming from inside. On the LEFT an iron radiator stack of old cast-iron radiators piled into steps leads up toward the inner scrapyard, on the RIGHT a shiny hubcap trail of hubcaps laid flat like stepping stones leads between two junk mountains, both large, fully visible, clearly separated.",
+      "text": "The bathtub is actually an EXCELLENT lookout post and Pip can see deeper into the scrapyard from here — the howling is definitely coming from the other side of that big junk wall and the brass bell chimes encouragingly like a tiny cheerleader. Radiator stack or hubcap trail?",
+      "choices": [
+        {
+          "label": "Climb the radiator stack",
+          "next": "m3",
+          "spot": "iron radiator stack"
+        },
+        {
+          "label": "Follow the hubcap trail",
+          "next": "m4",
+          "spot": "shiny hubcap trail"
+        }
+      ],
+      "scare": {
+        "spot": "washing machine porthole",
+        "pop": "a fat warty toad with two big golden eyes sitting on a nest of fluffy dryer lint staring calmly through the round washing machine porthole window",
+        "reveal": "Coziest spot in the whole yard, ribbit!",
+        "sting": "boing",
+        "delay": 1500
+      }
+    },
+    "m1": {
+      "scene": "{HERO} reaches the inner scrapyard where a massive scrap wall blocks the way forward, the howling coming from directly behind it, the red magnet in his paw pulling hard toward the metal wall, and a gap between junk piles showing a faint warm glow beyond. On the LEFT an orange crane hook dangling from an old construction crane arm overhead hangs within paw reach, on the RIGHT a tall silver hubcap tower stacked beside the scrap wall wobbles slightly in the breeze, both large, fully visible, clearly separated.",
+      "text": "The howling is RIGHT behind this wall and the magnet is pulling so hard Pip's whole arm is stretching — grab the crane hook to swing over or topple the hubcap tower to punch through. Crane hook or hubcap tower?",
+      "choices": [
+        {
+          "label": "Grab the crane hook",
+          "next": "end_crane_rescue",
+          "spot": "orange crane hook"
+        },
+        {
+          "label": "Topple the hubcap tower",
+          "next": "end_hubcap_avalanche",
+          "spot": "silver hubcap tower"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a high junk ridge looking down into a moonlit hollow where the howling echoes, the red magnet in his satchel vibrating and pointing downward, and two possible ways down visible in the silver light. On the LEFT a red fire escape ladder from an old building bolted to the side of the junk pile leads down into the hollow, on the RIGHT a grey drainpipe chute of a wide concrete pipe angled steeply downward disappears into shadow, both large, fully visible, clearly separated.",
+      "text": "Pip can see a faint glow at the bottom of the hollow where the howling is loudest and the magnet is pointing straight down like a compass — careful ladder climb or wild pipe slide. Fire escape or drainpipe?",
+      "choices": [
+        {
+          "label": "Climb down the fire escape",
+          "next": "end_ladder_discovery",
+          "spot": "red fire escape ladder"
+        },
+        {
+          "label": "Slide the drainpipe",
+          "next": "end_pipe_tumble",
+          "spot": "grey drainpipe chute"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} emerges into a wide clearing in the inner scrapyard where a massive gruff scarred tom-cat with battle-notched ears and a dented tin-can breastplate stands blocking all paths forward, three mud puddles of different sizes at Pip's feet, the brass bell in his satchel jingling, and the howling echoing from directly behind the tom-cat. On the LEFT a brown mud mound of packed wet earth sits beside a tall bent wire marking a high arc over the tom-cat, in the MIDDLE a tan mud puddle stretches flat at ground level aimed straight at the tom-cat's tin-can shield, on the RIGHT a shadowy scrap tunnel behind a broken fridge curves around the tom-cat's flank, all large, fully visible, clearly separated.",
+      "text": "MUD-BALL SIEGE — a scarred tom-cat the size of a watermelon blocks every path wearing a dented tin can like armor and looking EXTREMELY unimpressed. Pip has mud and determination. High lob over the top, fast roll at the shield, or sneak around the side?",
+      "choices": [
+        {
+          "label": "High lob over the top",
+          "next": "end_lob_splat",
+          "spot": "brown mud mound"
+        },
+        {
+          "label": "Fast ground-roll",
+          "next": "end_roll_clang",
+          "spot": "tan mud puddle"
+        },
+        {
+          "label": "Sneak around the side",
+          "next": "end_sneak_kittens",
+          "spot": "shadowy scrap tunnel"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} crawls through a gap in the junk wall and discovers a hidden alcove behind the tom-cat's patrol spot, the brass bell in his satchel chiming softly, a warm orange glow from a makeshift shelter built of car hoods and blankets, and tiny mewing sounds mixing with the howling from deeper inside. On the LEFT a tan kitten shelter lined with soft rags and cat blankets shows tiny kitten shapes curled up inside, on the RIGHT a rusted music box shaped like a sitting dog with a jammed winding gear sits on an overturned bucket under a dangling lightbulb, both large, fully visible, clearly separated.",
+      "text": "There is NO puppy — the howling is coming from a broken wind-up music box shaped like a dog and behind the tom-cat's tough-guy act is a cozy shelter full of sleeping KITTENS! The brass bell chimes and the music box rattles like they recognize each other. Kitten shelter or music box?",
+      "choices": [
+        {
+          "label": "Check on the kittens",
+          "next": "end_kitten_lullaby",
+          "spot": "tan kitten shelter"
+        },
+        {
+          "label": "Fix the music box",
+          "next": "end_gear_fix",
+          "spot": "rusted music box"
+        }
+      ]
+    },
+    "end_crane_rescue": {
+      "scene": "{HERO} swings over the scrap wall on the orange crane hook and lands in a hidden alcove where a wind-up music box shaped like a dog sits on a bucket with its gear jammed, the red magnet clicking onto the stuck gear and freeing it with a PING, the music box playing a sweet lullaby, a gruff scarred tom-cat appearing with tears in his two bright eyes, and a pile of sleeping kittens stirring happily in their warm blanket shelter at the sound of the melody.",
+      "text": "Pip swung over on the crane hook like a tiny action hero and landed right next to the music box — the magnet clicked onto the jammed gear and it popped free with a PING! The most beautiful lullaby started playing and the tom-cat appeared with actual tears because he had been trying to fix that melody for MONTHS. Turns out the tough old cat was sheltering a whole family of stray kittens and the music box was their bedtime song. The End!"
+    },
+    "end_hubcap_avalanche": {
+      "scene": "{HERO} pushes the silver hubcap tower and it crashes down in a tremendous clanging avalanche of spinning hubcaps bouncing everywhere, Pip buried up to his ears in a pile of dented hubcaps, the red magnet stuck to every hubcap at once pulling him in all directions, the scrap wall still standing, and the tom-cat peering down at the racket with two very unimpressed eyes and folded paws.",
+      "text": "Pip toppled the hubcap tower and it crashed down like the world's loudest cymbal solo — CLANG BANG CRASH — burying him in a pile of spinning hubcaps while the magnet stuck to ALL of them at once and turned him into a metal hedgehog! The wall did not budge, the howling stopped in confusion, and the tom-cat just stared down with his arms crossed. Oopsie ending!",
+      "bad": true
+    },
+    "end_ladder_discovery": {
+      "scene": "{HERO} climbs carefully down the red fire escape ladder into the moonlit hollow, the red magnet guiding him to a wind-up music box shaped like a dog sitting on a rusty shelf with its winding gear jammed, Pip's small paw reaching inside and turning the tiny gear with a satisfying click, the music box playing a sweet lullaby that fills the hollow, and a gruff tom-cat padding softly down the ladder behind Pip with two gentle grateful eyes as sleeping kittens stir in a nearby blanket nest.",
+      "text": "Pip climbed down carefully and found the music box right where the magnet pointed — it was NOT a puppy at all but a wind-up dog with a jammed gear and Pip's small paw was EXACTLY the right size to reach inside and turn it! The sweetest lullaby filled the hollow and the tom-cat appeared behind him looking ten years younger. He had been trying to fix it for months because the melody was the only thing that calmed his scared stray kittens. The End!"
+    },
+    "end_pipe_tumble": {
+      "scene": "{HERO} slides down the grey drainpipe chute at tremendous speed, shoots out the bottom into a mountain of soggy cardboard boxes, the red magnet flying out of his satchel and sticking to a distant pipe, Pip sitting in a pile of wet cardboard completely soaked and covered in shredded packing material, the howling continuing somewhere above and now further away than before.",
+      "text": "Pip shot down that pipe like a cannonball and LAUNCHED into a mountain of soggy cardboard boxes — completely soaked, covered in packing peanuts, and somehow FURTHER from the howling than when he started! The magnet flew away and stuck to a pipe on the other side of the yard and the mysterious howl will have to wait for a less dramatic rescue attempt. Oopsie ending!",
+      "bad": true
+    },
+    "end_lob_splat": {
+      "scene": "{HERO} lobs a mud ball in a high arc over the tom-cat's head and it splats perfectly on the tin-can breastplate from above with a magnificent SPLORCH, the tom-cat looks down at the mud dripping off his armor and starts laughing so hard his whiskers shake, Pip standing proud with muddy paws and the brass bell chiming in his satchel, and the tom-cat stepping aside to reveal a cozy kitten shelter and a broken music box behind him with the kittens peeking out with curious bright eyes.",
+      "text": "Pip lobbed the mud ball in a PERFECT arc and it splattered right on the tom-cat's tin can armor from above — SPLORCH! The old cat looked down at the mud, looked at Pip, and burst out laughing so hard he nearly fell over. Nobody had ever out-lobbed him before! He stepped aside and showed Pip his secret — a shelter full of kittens and a broken music box he could not fix. Pip's small paws reached the jammed gear and the sweetest lullaby filled the scrapyard while the brass bell chimed along. The End!"
+    },
+    "end_roll_clang": {
+      "scene": "{HERO} rolls a mud ball fast along the ground and it smacks the tom-cat's tin-can breastplate with a tremendous CLANG that echoes across the scrapyard, the tom-cat's armor spinning sideways, the old cat stumbling and then catching himself with a grudging grin with two impressed eyes, the brass bell in Pip's satchel ringing from the vibration, and the tom-cat stepping aside to reveal a kitten shelter glowing warm behind him with the broken music box on its bucket and kittens stirring at the noise.",
+      "text": "Pip rolled the mud ball so fast it hit the tin can with a CLANG heard three blocks away — the armor spun like a top and the tom-cat stumbled but caught himself with the most grudging grin a tough old cat has ever produced. He said FINE the kid has an arm and showed him the real reason he guards the yard — scared kittens and a broken music box. Pip fixed the jammed gear with one tiny paw turn and the brass bell and lullaby sang together. The End!"
+    },
+    "end_sneak_kittens": {
+      "scene": "{HERO} sneaks through the shadowy scrap tunnel around the tom-cat's flank and tumbles directly into the cozy kitten shelter, a dozen tiny kittens with bright round eyes blinking up at Pip from their blanket nest, the broken wind-up music box shaped like a dog sitting on an overturned bucket with its gear jammed, the brass bell in Pip's satchel chiming softly, and the tom-cat appearing behind Pip with two wide shocked eyes that soften into gratitude as Pip reaches into the music box and frees the tiny gear.",
+      "text": "Pip snuck around the side and tumbled right into the SECRET — a cozy shelter full of the cutest kittens he had ever seen all blinking up at him! The howling was just a broken music box shaped like a dog and the tom-cat appeared behind him looking SHOCKED that someone found his hiding spot. Pip reached his small paw into the music box, turned the jammed gear, and the brass bell and lullaby harmonized so sweetly that every kitten purred and the old tom-cat whispered thank you. The End!"
+    },
+    "end_kitten_lullaby": {
+      "scene": "{HERO} kneels beside the tan kitten shelter and gently shakes the brass bell, the soft chiming calming the restless kittens who curl tighter into their blankets, the tom-cat padding over with two soft grateful eyes, and Pip reaching over to the music box and fixing the jammed gear so the bell and the music box play together in harmony, moonlight flooding the cozy shelter as the kittens fall peacefully asleep.",
+      "text": "Pip shook the brass bell softly and every kitten stopped squirming and curled up like the chime was their favorite sound — then he reached over and fixed the music box gear and the bell and the lullaby played together in the most beautiful harmony! The tom-cat sat down beside Pip and said he had been guarding these kittens alone for months and nobody had ever been kind enough to come help. Sometimes the bravest rescue is a gentle one. The End!"
+    },
+    "end_gear_fix": {
+      "scene": "{HERO} reaches his small paw into the rusted music box and turns the tiny jammed gear with a satisfying click, the music box springing to life playing a sweet warbling lullaby that fills the hidden alcove, the kittens in their shelter stretching and purring at the familiar melody, the brass bell in Pip's satchel chiming along in perfect tune, and the gruff tom-cat appearing in the alcove entrance with two bright tearful eyes.",
+      "text": "Pip's paw was EXACTLY small enough to reach the jammed gear — click, turn, and the music box burst into the sweetest lullaby the scrapyard had ever heard! The brass bell chimed along in harmony and the tom-cat appeared with the biggest smile because this was the song that calmed his rescued kittens and he had not been able to play it for months. Every kitten purred in their sleep and Pip had the best midnight adventure of his whole life. The End!"
+    }
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "id": "grotto",
+  "title": "Pearl and the Singing Caves",
+  "hero": "PEARL",
+  "style": "Deep ocean blues and blacks with hot coral, magenta, and bioluminescent cyan, lit from within like an aquarium at night. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the mouth of a labyrinth of sea caves as the tide begins to rise, bioluminescent coral walls glowing cyan and magenta in the darkness, a haunting singing voice echoing from deep within the caves, water lapping at her paws. On the LEFT an azure crystal tunnel with walls of glowing blue crystals stretches into the rock, on the RIGHT a magenta coral passage lined with hot-pink bioluminescent coral curves into shadow, both large, fully visible, clearly separated.",
+      "text": "Something deep in the caves is SINGING and it sounds exactly like Pearl's lost cousin who vanished into these caves last full moon — the tide is rising and the caves flood chamber by chamber, so standing here debating is NOT an option. Crystal tunnel or coral passage?",
+      "choices": [
+        {"label": "Enter the crystal tunnel", "next": "a", "spot": "azure crystal tunnel"},
+        {"label": "Follow the coral passage", "next": "b", "spot": "magenta coral passage"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} wades through the azure crystal tunnel as water rises to her ankles, glowing blue crystals casting shifting light patterns on the walls, and an echo conch shell wedged between two crystals near the ceiling humming with the distant singing voice. On the LEFT a cobalt stalactite chamber with thick blue stone columns dripping into pools stretches ahead, on the RIGHT a teal phosphor pool glowing bright green fills a wide alcove in the tunnel wall, both large, fully visible, clearly separated.",
+      "text": "The singing is LOUDER in here and Pearl finds a conch shell stuck between two crystals that hums the same melody — she holds it to her ear and it whispers directions, which is creepy but helpful. The water is at her ankles and rising FAST. Stalactite chamber or phosphor pool?",
+      "choices": [
+        {"label": "Splash into the chamber", "next": "aa", "spot": "cobalt stalactite chamber"},
+        {"label": "Wade to the phosphor pool", "next": "ab", "spot": "teal phosphor pool"}
+      ],
+      "scare": {
+        "spot": "ceiling crystal bulge",
+        "pop": "a translucent jellyfish with a glowing magenta crown and two round luminous eyes descending slowly from the ceiling bulge trailing long shimmering tentacles",
+        "reveal": "Pardon me! Just floating through!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} squeezes through the magenta coral passage lined with hot-pink bioluminescent coral, water rising to her shins, the singing voice bouncing off every surface, and a small glow lantern made of living coral sitting on a ledge pulsing soft warm light. On the LEFT an indigo current channel where dark blue water flows swiftly between smooth rock walls opens ahead, on the RIGHT a crimson coral arch with thick red coral branches frames a flooded chamber beyond, both large, fully visible, clearly separated.",
+      "text": "The coral walls are SO bright they make Pearl's fur look pink and sitting on a ledge is a tiny lantern made of LIVING coral that pulses warm light in time with the singing — definitely going in the satchel, definitely not asking questions about alive lanterns. Current channel or coral arch?",
+      "choices": [
+        {"label": "Follow the current channel", "next": "ba", "spot": "indigo current channel"},
+        {"label": "Duck under the coral arch", "next": "bb", "spot": "crimson coral arch"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands in a wide cobalt stalactite chamber with thick blue stone columns rising from shallow pools, the echo conch humming louder in her satchel, water now up to her knees and slowly rising, the singing voice resonating between the stalactites making them vibrate and glow. On the LEFT a cyan echo hall with smooth curved walls stretches deeper into the caves, on the RIGHT a navy air shaft with a dark vertical opening leads upward where trapped air glimmers, both large, fully visible, clearly separated.",
+      "text": "The stalactites are VIBRATING with the singing and the echo conch is practically screaming directions — the water is at Pearl's knees now and two paths go deeper, one echoing with song and one leading to trapped air pockets above. Echo hall or air shaft?",
+      "choices": [
+        {"label": "Follow the echo hall", "next": "m1", "spot": "cyan echo hall"},
+        {"label": "Climb the air shaft", "next": "m2", "spot": "navy air shaft"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} crouches beside the teal phosphor pool in the tunnel alcove, the echo conch humming in her satchel, the pool glowing bright green with strange shapes moving beneath the surface, water rising around the alcove edges. On the LEFT a turquoise song corridor with walls carved in wave patterns stretches ahead toward the singing, on the RIGHT an indigo breathing chamber with a high domed ceiling and trapped air above waterline opens through a gap, both large, fully visible, clearly separated.",
+      "text": "The phosphor pool is beautiful but something underneath keeps tugging at the water — the echo conch hums a warning note and Pearl decides NOT to put her paws in the glowy green mystery liquid. The water is rising and the singing is getting CLOSER. Song corridor or breathing chamber?",
+      "choices": [
+        {"label": "Run down the song corridor", "next": "m1", "spot": "turquoise song corridor"},
+        {"label": "Swim to the breathing chamber", "next": "m2", "spot": "indigo breathing chamber"}
+      ],
+      "scare": {
+        "spot": "submerged stone arch",
+        "pop": "a pale cave crab with two bright lantern-like glowing eyes reaching up from under the submerged arch holding a lost golden crown piece in one claw",
+        "reveal": "Been saving this for someone! Take it!",
+        "sting": "thunder",
+        "delay": 1700
+      }
+    },
+    "ba": {
+      "scene": "{HERO} wades through the indigo current channel with dark blue water flowing swiftly around her waist, the glow lantern blazing warm in her satchel, the singing voice pulling her forward through the rushing water, smooth rock walls narrowing ahead. On the LEFT a coral red grotto entrance with thick bioluminescent coral framing a vast dark chamber opens where the singing is loudest, on the RIGHT a gold sand bank rises above the waterline with dry warm sand catching the lantern glow, both large, fully visible, clearly separated.",
+      "text": "The current is STRONG and Pearl has to grab the walls to keep from being swept — the glow lantern blazes brighter the deeper she goes, and the singing is coming from a massive dark chamber ahead that feels like it is BREATHING. Grotto entrance or sand bank?",
+      "choices": [
+        {"label": "Enter the grotto", "next": "m3", "spot": "coral red grotto"},
+        {"label": "Rest on the sand bank", "next": "m4", "spot": "gold sand bank"}
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} ducks under the crimson coral arch into a flooded chamber, the glow lantern pulsing in her satchel, red coral branches reaching across the ceiling like veins, the water chest-deep and the walls pulsing with a slow rhythmic glow like a giant heartbeat. On the LEFT a magenta cavern mouth with tall glowing walls opens into a vast echoing space where the singing booms, on the RIGHT an amber tidal ledge sits just above the waterline with shell formations and calm water beyond, both large, fully visible, clearly separated.",
+      "text": "The walls are PULSING like a heartbeat and Pearl can feel it in her chest — the glow lantern pulses in the same rhythm and the singing is so loud now it fills the water like it is coming from the ROCKS themselves. Cavern mouth or tidal ledge?",
+      "choices": [
+        {"label": "Swim to the cavern mouth", "next": "m3", "spot": "magenta cavern mouth"},
+        {"label": "Climb the tidal ledge", "next": "m4", "spot": "amber tidal ledge"}
+      ],
+      "scare": {
+        "spot": "pulsing coral wall",
+        "pop": "a bioluminescent sea slug with two big round glowing cyan eyes stretching out from the pulsing coral wall trailing ribbons of soft pink light",
+        "reveal": "Just the cave's heartbeat monitor! All healthy!",
+        "sting": "boing",
+        "delay": 1500
+      }
+    },
+    "m1": {
+      "scene": "{HERO} emerges into a narrow echo hall where the singing voice is so loud the water vibrates, the echo conch in her satchel resonating at the same pitch, the walls covered in ancient coral carvings of sea creatures, water up to her chest and rising, two passages ahead. On the LEFT a pearl-white grotto with smooth walls glows at the end of a short passage where the singing seems to originate, on the RIGHT a dark flooded tunnel with black water stretches lower and deeper into the caves, both large, fully visible, clearly separated.",
+      "text": "The echo conch and the singing voice are hitting the EXACT same note and the water is vibrating — Pearl can see a glowing white grotto where the voice might be, but the water is at her CHEST and one of these passages leads deeper underwater. White grotto or dark tunnel?",
+      "choices": [
+        {"label": "Swim to the white grotto", "next": "end_song_found", "spot": "pearl-white grotto"},
+        {"label": "Dive into the dark tunnel", "next": "end_flood_rush", "spot": "dark flooded tunnel"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} climbs into a high domed breathing chamber with trapped air above the waterline, the echo conch still humming in her satchel, bioluminescent moss on the ceiling casting soft green light, the singing voice echoing through the dome making the whole chamber ring like a bell. On the LEFT a rose crystal formation jutting from the wall hums in harmony with the singing voice, on the RIGHT a wide black whirlpool spins slowly in the center of the flooded chamber floor pulling water downward, both large, fully visible, clearly separated.",
+      "text": "Pearl can finally BREATHE in here and the echo conch makes the whole dome ring like a bell — the singing voice bounces around so much she cannot tell which direction it comes from, but the rose crystal is humming the same note and that whirlpool is pulling water somewhere DEEP. Rose crystal or whirlpool?",
+      "choices": [
+        {"label": "Touch the rose crystal", "next": "end_harmony_ring", "spot": "rose crystal formation"},
+        {"label": "Ride the whirlpool down", "next": "end_echo_trap", "spot": "black whirlpool"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} enters the deepest grotto, a vast cathedral-like chamber where every wall is made of LIVING bioluminescent coral that pulses and sings, the glow lantern blazing in her satchel, and the singing voice fills the entire space — it is not coming from a creature but from the GROTTO ITSELF, a massive living coral formation with a gentle glowing face formed in the rock. On the LEFT a warm coral alcove with orange and pink coral cushions sits near the singing face, in the MIDDLE a tall cyan crystal spire rises from the center of the grotto catching and refracting the coral light, on the RIGHT a silver waterfall feeds a moonlit pool at the base of the singing wall, all large, fully visible, clearly separated.",
+      "text": "It is NOT her cousin singing — it is the CAVE! The entire grotto is a living coral creature and it has been singing to lure sea-dragons here for warmth because it is LONELY. The glow lantern in Pearl's satchel is pulsing like a heartbeat and the grotto's huge gentle face looks so sad. Coral alcove, crystal spire, or moonlit pool?",
+      "choices": [
+        {"label": "Sit in the coral alcove", "next": "end_coral_duet", "spot": "warm coral alcove"},
+        {"label": "Climb the crystal spire", "next": "end_warm_glow", "spot": "cyan crystal spire"},
+        {"label": "Wade to the moonlit pool", "next": "end_surface_song", "spot": "silver waterfall pool"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} rests on a dry ledge above the rising water, the glow lantern pulsing in her satchel, and two enormous moray eels with bioluminescent patterns block the only two tunnels forward — a cyan-striped eel guards a high tunnel above the waterline, a magenta-striped eel guards a low tunnel half-submerged in dark water, both squirting jets of water back and forth at each other like a territorial game. On the LEFT the cyan-striped eel coils in front of the high tunnel entrance, on the RIGHT the magenta-striped eel coils in front of the low tunnel entrance, both large, fully visible, clearly separated.",
+      "text": "Two giant eels are having a WATER-SQUIRT SHOWDOWN right in front of the only two tunnels deeper — the cyan one guards the high tunnel above water and the magenta one guards the low tunnel underwater. The glow lantern makes them both pause and blink. Pick a side!",
+      "choices": [
+        {"label": "Dash past the cyan eel", "next": "end_high_ride", "spot": "cyan-striped eel"},
+        {"label": "Dive past the magenta eel", "next": "end_low_glide", "spot": "magenta-striped eel"}
+      ]
+    },
+    "end_song_found": {
+      "scene": "{HERO} swims into the pearl-white grotto and discovers the walls are ALIVE — a massive living coral creature with a gentle glowing face formed in the rock, singing its lonely song, the echo conch in Pearl's paw harmonizing with the grotto's voice, the water calming and warming around her as the grotto recognizes it has a visitor who is listening instead of running.",
+      "text": "Pearl swam into the white grotto and found the singer — the cave ITSELF, a living coral creature who had been singing for YEARS trying to lure sea-dragons because it was lonely and cold! The echo conch harmonized with its voice and for the first time the grotto heard someone sing BACK. Pearl taught it to sing above the waterline so sailors and whales could hear it too. Now the singing caves have visitors every day and the grotto is never lonely again. The End!"
+    },
+    "end_flood_rush": {
+      "scene": "{HERO} tumbles through the dark flooded tunnel completely underwater, the echo conch knocked from her paw and spinning away into blackness, Pearl rolling and tumbling in pitch-dark water with no sense of direction, the singing voice fading to nothing as the current carries her deeper into a dead-end chamber filling to the ceiling.",
+      "text": "Pearl dove into the dark tunnel and the current grabbed her IMMEDIATELY — she tumbled head over tail in pitch-black water, lost the echo conch, lost all sense of direction, and washed up in a dead-end chamber with the water rising to the ceiling! She managed to squeeze through a tiny crack and pop out on the beach coughing and sputtering. The singing caves are still singing but Pearl is NOT going back in today. Oopsie ending!",
+      "bad": true
+    },
+    "end_harmony_ring": {
+      "scene": "{HERO} touches the rose crystal formation and it blazes with light, the echo conch in her other paw singing the same note, the entire dome chamber ringing like an enormous bell that sends a shockwave of harmony through every tunnel and chamber in the cave system, the walls lighting up one by one revealing the path to the deepest grotto where a massive living coral creature with a gentle glowing face opens its eyes in wonder at the music.",
+      "text": "Pearl touched the crystal and the echo conch SANG — the whole dome rang like the world's biggest bell and the sound traveled through every tunnel lighting up the walls one by one! It reached the deepest grotto and the singing cave — a lonely living coral creature — opened its eyes because for the FIRST time someone answered its song with harmony instead of fear. Pearl followed the lit-up path and taught the grotto to sing above the waterline. Now ships follow the melody home on foggy nights. The End!"
+    },
+    "end_echo_trap": {
+      "scene": "{HERO} spins in the wide black whirlpool, the echo conch flying from her paw, Pearl spiraling downward in dizzying circles through dark water, the singing voice echoing from every direction at once getting louder and more confusing, the whirlpool depositing her in a deep rocky basin far below the grotto with no way back up.",
+      "text": "Pearl jumped into the whirlpool and it spun her around so fast she could not tell up from down — the echo conch flew away, the singing voice echoed from EVERYWHERE at once, and she ended up in a deep rocky basin with absolutely no idea which way was up. A friendly crab eventually showed her a side exit but she popped out three beaches away covered in seaweed with her ears still ringing. Oopsie ending!",
+      "bad": true
+    },
+    "end_coral_duet": {
+      "scene": "{HERO} sits in the warm coral alcove beside the singing grotto's gentle glowing face, the glow lantern casting warm light between them, Pearl singing a lullaby while the grotto hums along in deep bass notes, the entire cave system lighting up in warm pulsing colors as the duet echoes through every chamber, the tide pausing as if listening.",
+      "text": "Pearl sat down in the coral alcove and started singing — the grotto's huge gentle face lit up because nobody had ever sung WITH it before! They sang a duet that echoed through every chamber and the grotto was so happy it stopped pulling things underwater and learned to sing above the waterline. Pearl visits every full moon for their duet and the caves glow warmest on those nights. The End!"
+    },
+    "end_warm_glow": {
+      "scene": "{HERO} climbs the tall cyan crystal spire in the center of the grotto and holds the glow lantern high above her head, the living coral lantern blazing warm golden light into every corner of the vast chamber, the singing grotto's face transforming from sad to overjoyed as warmth floods through its coral body for the first time in years, bioluminescent colors cascading through the walls.",
+      "text": "Pearl climbed the spire and held the glow lantern as HIGH as she could — the living coral blazed and filled the grotto with warmth for the first time since the sea-dragons stopped coming! The grotto's sad face transformed into the biggest smile Pearl had ever seen on a cave. It did not need sea-dragons — it needed a friend with a warm heart. Pearl taught it to sing above the waterline and now the caves glow warm enough to heat the whole lagoon. The End!"
+    },
+    "end_surface_song": {
+      "scene": "{HERO} stands in the silver waterfall pool at the base of the singing wall, the glow lantern raised toward the ceiling where a crack of moonlight streams in from the surface above, the grotto watching as Pearl sings a surface melody — birdsong and wind and rain — that the grotto has never heard, the living coral face crying tears of bioluminescent blue as new harmonies bloom through its ancient walls.",
+      "text": "Pearl waded to the moonlit pool and sang every surface sound she knew — birdsong, rain, wind through grass — and the grotto started CRYING because it had never heard music from above the waves! It had been singing the same lonely undersea song for centuries. Pearl taught it surface melodies and now the singing caves harmonize birdsong with whale calls. Sailors say it is the most beautiful sound in the ocean. The End!"
+    },
+    "end_high_ride": {
+      "scene": "{HERO} dashes past the cyan-striped eel into the high tunnel above the waterline, the eel impressed and shooting a jet of water that propels Pearl forward through a winding passage of glowing blue coral, rocketing through chamber after chamber until she bursts into the deepest grotto where the massive living coral creature with a gentle glowing face stops singing in surprise at the spectacular entrance, the glow lantern in Pearl's satchel blazing.",
+      "text": "Pearl faked left and dashed right and the cyan eel was SO impressed it shot a water jet that LAUNCHED her through the high tunnel like a rocket — she burst into the deepest grotto at full speed and the singing cave stopped mid-note in total surprise! Nobody had ever arrived with that much style. Pearl caught her breath, explained she came to find the singer, and taught the lonely grotto to sing above the waterline so it would never need to lure anyone underground again. The End!"
+    },
+    "end_low_glide": {
+      "scene": "{HERO} dives past the magenta-striped eel into the low submerged tunnel, the eel shooting a gentle current that carries Pearl through glowing magenta coral passages like an underwater slide, the glow lantern in her satchel lighting the way through the dark water, until she glides smoothly into the deepest grotto from below and surfaces in front of the massive living coral creature with a gentle glowing face who blinks in amazement at the graceful underwater arrival.",
+      "text": "Pearl dove deep and the magenta eel shot a current that carried her through the low tunnel like an underwater slide — she glided through glowing passages and surfaced right in front of the singing cave's enormous gentle face! The grotto blinked its ancient eyes because nobody had ever arrived so gracefully from below. Pearl floated there catching her breath and then taught the lonely living cave to sing ABOVE the waterline. Now whales come to harmonize and the grotto is never lonely again. The End!"
+    }
+  }
+}

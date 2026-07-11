@@ -1,0 +1,149 @@
+{
+  "id": "observatory",
+  "title": "Mo and the Star Eaters",
+  "hero": "MO",
+  "style": "Warm copper and midnight navy with gold star-spatter, scientific illustration meets fairy-tale with brass detail and chalkboard textures, tarnished patina glowing under constellation light. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} arrives at the hilltop observatory on a wild windy night, the tarnished copper dome silhouetted against a sky where stars are vanishing one by one like candles being snuffed. On the LEFT a copper dome hatch glows faintly under the remaining starlight, on the RIGHT a blue star chart hangs on the stone entry wall showing crossed-out constellations, both large, fully visible, clearly separated.",
+      "text": "Stars are going out like candles — something up there is gobbling them! The old observatory might have answers, or at least a telescope big enough to see what's hungry.",
+      "choices": [
+        {"label": "Climb to the telescope dome", "next": "a", "spot": "copper dome hatch"},
+        {"label": "Search the chart room", "next": "b", "spot": "blue star chart"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} enters the observatory dome where a massive brass telescope dominates the room, aimed at a patch of sky where three stars just winked out, the copper walls humming faintly with wind. On the LEFT a brass telescope eyepiece gleams at viewing height, on the RIGHT a green copper railing wraps around the dome base near storage shelves, both large, fully visible, clearly separated.",
+      "text": "The biggest telescope EVER! It's pointed right where stars keep disappearing, and something is rumbling in the walls — is that snoring or the wind?",
+      "choices": [
+        {"label": "Look through the telescope", "next": "aa", "spot": "brass telescope"},
+        {"label": "Search around the base", "next": "ab", "spot": "green copper railing"}
+      ]
+    },
+    "b": {
+      "scene": "{HERO} finds the chart room where star maps paper every wall from floor to ceiling, some constellations crossed out in fresh ink that still glistens, a trail of black quill ink leading deeper inside. On the LEFT a yellow parchment scroll hangs from a wooden rod showing an ancient sky map, on the RIGHT a red leather armchair sits by a cold fireplace with quills scattered around it, both large, fully visible, clearly separated.",
+      "text": "Someone has been crossing out stars on the maps — the SAME ones vanishing from the real sky! A trail of fresh quill ink leads deeper inside.",
+      "choices": [
+        {"label": "Follow the ink trail", "next": "ba", "spot": "yellow parchment scroll"},
+        {"label": "Check the armchair desk", "next": "bb", "spot": "red leather armchair"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} peers into the brass telescope eyepiece and adjusts the focus wheel, the night sky filling the view with pinprick stars — and then something ENORMOUS blinks, an eye bigger than the moon staring straight back through the lens. On the LEFT an orange lens cap dangles from a brass chain near the eyepiece, on the RIGHT a silver focus wheel sits on the telescope barrel, both large, fully visible, clearly separated.",
+      "text": "AHHH! Something in the sky just BLINKED — a massive eye stared right back through the telescope! Whatever is out there, it knows Mo is watching.",
+      "scare": {
+        "spot": "telescope eyepiece",
+        "pop": "a star-moth the size of a satellite dish landing on the copper dome outside, wing-pattern showing two enormous glowing false eyes staring through the lens",
+        "reveal": "Just a star-moth! Those giant eye-spots are painted on her wings like a butterfly — she's beautiful and very friendly, just curious about the telescope.",
+        "sting": "thunder",
+        "delay": 2000
+      },
+      "choices": [
+        {"label": "Crumple a chart for ammo", "next": "m1", "spot": "orange lens cap"},
+        {"label": "Sneak past the moth", "next": "m2", "spot": "silver focus wheel"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} searches around the telescope base and finds something hidden under a dusty purple cloth — a glass jar that hums and glows faintly like a tiny galaxy is trapped inside, the legendary Star Jar. On the LEFT a purple velvet cloth drapes over the shelf where the jar was hidden, on the RIGHT a golden astrolabe sits on a brass tripod reflecting starlight across its engraved rings, both large, fully visible, clearly separated.",
+      "text": "The Star Jar! It hums and glows like a tiny trapped galaxy. Now Mo just needs to get past whatever is snoring in the walls — and figure out what's eating the stars.",
+      "choices": [
+        {"label": "Take the Star Jar upstairs", "next": "m1", "spot": "purple velvet cloth"},
+        {"label": "Examine the astrolabe", "next": "m2", "spot": "golden astrolabe"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} unrolls the oldest star chart on a wooden table beside a brass astrolabe, and the constellations on the parchment begin to SHIFT — lines connecting and disconnecting, stars rearranging into a face that mouths silent words. On the LEFT a brown wooden globe shows painted constellations spinning slowly on their own, on the RIGHT a white chalk slate leans against the wall covered in half-erased equations, both large, fully visible, clearly separated.",
+      "text": "The star chart is MOVING — the constellations rearranged into a face and it's mouthing something! The brass astrolabe starts spinning on its own too.",
+      "scare": {
+        "spot": "brass astrolabe",
+        "pop": "a tiny star-sprite swirling up from the spinning astrolabe like a snow-globe made of light, two glittering star-bright eyes blinking at its center",
+        "reveal": "Hello! I'm trying to show you a MAP! The star-sprite settles into a gentle glow and points at the sky with a tiny arm of light.",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {"label": "Grab the spinning globe", "next": "m3", "spot": "brown wooden globe"},
+        {"label": "Read the chalk equations", "next": "m4", "spot": "white chalk slate"}
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} finds the cranky porcupine astronomer slumped in a rolling chair fast asleep, quills bristling, snoring so loud the ink pot rattles, sleep-walking in place with his feet shuffling as he shoves a bookshelf aside without opening his eyes. On the LEFT a grey porcupine astronomer snores in a rolling chair with quills sticking out everywhere, on the RIGHT a turquoise ink pot sits on the desk beside scattered quills and charts, both large, fully visible, clearly separated.",
+      "text": "The porcupine astronomer fell asleep DECADES ago and he STILL rearranges furniture! His quills scratch the floor as he sleep-shuffles past, shoving bookshelves around in a dream.",
+      "choices": [
+        {"label": "Dodge past the porcupine", "next": "m3", "spot": "grey porcupine chair"},
+        {"label": "Grab a quill from the pot", "next": "m4", "spot": "turquoise ink pot"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} crumples old star charts into paper balls as the sleepwalking porcupine shuffles into the dome room, quills bristling, mumbling constellation names and heading straight for the telescope. On the LEFT a red telescope eyepiece cap sits on a brass shelf at throwing height, on the RIGHT a gold dome crank handle juts from the curved wall, both large, fully visible, clearly separated.",
+      "text": "Paper-ball skirmish! The sleep-walking porcupine shuffles straight at Mo! Stuff a paper ball in the eyepiece to block his view, or crank the dome open to distract him with sky?",
+      "choices": [
+        {"label": "Block the eyepiece", "next": "end_blocked_view", "spot": "red telescope cap"},
+        {"label": "Crank the dome open", "next": "end_open_sky", "spot": "gold dome crank"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} spots the porcupine's rolling chair and a bronze dome lever as the astronomer sleep-mumbles star names and stumbles closer with quills bristling in every direction. On the LEFT a silver chair wheel gleams on the porcupine's rolling seat, on the RIGHT a bronze lever controls the dome shutters near the wall, both large, fully visible, clearly separated.",
+      "text": "The porcupine is sleep-counting stars and heading RIGHT THIS WAY! Roll his chair across the room or yank the dome lever?",
+      "choices": [
+        {"label": "Roll the chair away", "next": "end_chair_glide", "spot": "silver chair wheel"},
+        {"label": "Pull the dome lever", "next": "end_lever_snap", "spot": "bronze dome lever"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} faces the sleepwalking porcupine in the main observatory room, armed with crumpled star charts, three targets glinting in the moonlight at perfect paper-ball range. On the LEFT a red telescope eyepiece glows warmly on the big scope, in the MIDDLE a gold dome crank handle catches starlight on the curved wall, on the RIGHT a silver rolling chair wheel spins slowly under the snoring porcupine, all large, fully visible, clearly separated.",
+      "text": "Triple-target paper-ball showdown — the porcupine is shuffling FAST! Block the eyepiece, crank the dome, or roll his chair?",
+      "choices": [
+        {"label": "Paper-ball the eyepiece", "next": "end_eyepiece_bullseye", "spot": "red telescope eyepiece"},
+        {"label": "Paper-ball the dome crank", "next": "end_dome_flood", "spot": "gold dome crank"},
+        {"label": "Paper-ball the chair wheel", "next": "end_spin_tumble", "spot": "silver chair wheel"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} notices the star-moth from earlier perched calmly on the dome rim with vast wings spread, and the violet Star Jar glimmering on a nearby shelf, while outside another star winks out of the sky. On the LEFT a white star-moth rests on the dome rim with two enormous false-eye wing-patterns glowing softly, on the RIGHT a violet glass Star Jar hums on a brass shelf, both large, fully visible, clearly separated.",
+      "text": "The star-moth watches calmly and the Star Jar hums — maybe these creatures aren't eating stars at all! Follow the moth outside or grab the jar to catch them?",
+      "choices": [
+        {"label": "Follow the star-moth", "next": "end_moth_garden", "spot": "white star-moth"},
+        {"label": "Grab the Star Jar", "next": "end_jar_fright", "spot": "violet Star Jar"}
+      ]
+    },
+    "end_blocked_view": {
+      "scene": "{HERO} stuffs a crumpled paper ball into the telescope eyepiece just as the porcupine reaches it. The astronomer peers through, sees nothing, grunts in his sleep, and shuffles away mumbling about clouds. Mo slips outside onto the observatory roof where dozens of star-moths carry tiny pinpricks of light and press them into dark patches of sky, a new constellation forming star by star — shaped exactly like Mo's village.",
+      "text": "The porcupine wanders off grumbling about clouds and Mo sneaks outside to see the truth — the star-moths are REPLANTING stars! They're building a brand-new constellation shaped like Mo's village, right down to the little fountain. The porcupine wakes, sees it, and weeps."
+    },
+    "end_open_sky": {
+      "scene": "{HERO} cranks the dome wide open and the night sky floods in like a river of stars, the porcupine astronomer freezing mid-shuffle with his snout tilted upward, still asleep. Star-moths stream through the gap trailing gold light, pressing tiny sparks into the dark sky one by one, and a new constellation takes shape overhead — Mo's village drawn in starlight, complete with the winding path up the hill.",
+      "text": "The dome opens and sky pours in! Star-moths swirl like golden confetti, planting stars into a picture of Mo's village. The porcupine wakes, adjusts his spectacles, and happy-cries so hard his quills rattle."
+    },
+    "end_chair_glide": {
+      "scene": "{HERO} gives the rolling chair a mighty shove and it glides across the dome floor with the porcupine still snoring in it, coming to rest gently by the open dome slit with a perfect view of the sky. Mo looks up and sees dozens of star-moths dancing, carrying pinpricks of light to empty patches of sky, building a new constellation star by star — Mo's home village, glowing warmly above the real one on the hill below.",
+      "text": "Wheee goes the porcupine! While he rolls, Mo watches the truth unfold — the moths carry star-seeds to dark spots and PLANT them into a new constellation shaped like Mo's own village. The porcupine wakes, sees the sky, and sobs with joy."
+    },
+    "end_lever_snap": {
+      "scene": "{HERO} grabs the bronze dome lever and pulls but it's STUCK — Mo yanks harder and the lever snaps clean off with a tremendous CLANG, the dome shutters flapping wildly, papers flying everywhere in the wind, and the porcupine waking up screaming about a meteor shower while star charts rain down like confetti.",
+      "text": "CLANG! The lever snaps and the dome goes haywire — papers everywhere, the porcupine screaming about meteors, and Mo buried in star charts! The stars will have to wait for another night. Oopsie ending!",
+      "bad": true
+    },
+    "end_eyepiece_bullseye": {
+      "scene": "{HERO} nails the eyepiece with a perfect paper-ball shot from across the room, the porcupine bumping into the blocked telescope, blinking awake, and squinting at the wadded-up chart with confusion. Mo points outside and they both watch as star-moths press tiny lights gently into the dark sky, a new constellation forming — Mo's village, sketched in starlight, perfect down to the clocktower and the bakery chimney.",
+      "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth — the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder."
+    },
+    "end_dome_flood": {
+      "scene": "{HERO} flings a crumpled star chart at the dome crank and it spins, the copper dome grinding open as wind howls in and the porcupine stops mid-sleepwalk, mesmerized by the enormous open sky filling the room. Star-moths stream through the gap in a river of gold, carrying lights and placing them into a pattern — Mo's village, sketched across the heavens in living starlight.",
+      "text": "The dome rolls open and the sky floods in! The porcupine wakes with mouth hanging open. The moths are not eating stars — they're building a constellation of Mo's home! The old astronomer reaches for his pen and weeps."
+    },
+    "end_spin_tumble": {
+      "scene": "{HERO} bounces a paper ball off the chair wheel and the rolling chair spins like a top with the porcupine in it, quills flying in every direction as he wakes up dizzy and tumbles out onto the observation balcony. They both look up and see star-moths pressing tiny lights into dark patches of sky, forming a new constellation — Mo's village, complete with the little hill, the winding path, and the observatory itself, drawn in stars.",
+      "text": "SPIN! The porcupine tumbles onto the balcony, dizzy but looking UP. The moths are planting stars into a picture of Mo's village — even the observatory is in it, tiny and perfect! The porcupine cries so hard his quills rattle."
+    },
+    "end_moth_garden": {
+      "scene": "{HERO} follows the star-moth through the dome opening and out onto the observatory roof into the wind, where dozens of moths gather carrying pinpricks of light in their delicate legs. One by one they press the lights into the dark sky like planting seeds. A constellation takes shape — Mo's village from above, the winding streets, the fountain, the hill. The porcupine appears behind Mo, fully awake for the first time in decades, tears streaming.",
+      "text": "Mo follows the moth and sees everything — they're not eating stars, they're PLANTING a new constellation shaped like Mo's village! Every street, every rooftop, drawn in starlight. The porcupine wakes at last and whispers: that is the most beautiful thing in all my years of watching the sky."
+    },
+    "end_jar_fright": {
+      "scene": "{HERO} grabs the Star Jar and holds it up, and it FLASHES so bright that every moth in the sky freezes, dropping their carried lights. The half-finished constellation crumbles into scattered random sparkles as the star-moths scatter in terror. The porcupine wakes up furious and bonks Mo on the head with a rolled-up star chart.",
+      "text": "The Star Jar scares all the moths away and the beautiful constellation falls apart into random sparkles! The porcupine is FURIOUS and Mo gets bonked with a chart. Those moths were making something beautiful and now it's gone. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

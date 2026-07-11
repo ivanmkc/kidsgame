@@ -1,0 +1,151 @@
+{
+  "id": "quarry",
+  "title": "Rex and the Moonlit Bones",
+  "hero": "REX",
+  "style": "Silver-and-charcoal pencil on midnight-blue paper, bones glowing white like x-rays, exposed rock layers in slate and indigo, full moon casting long silver shadows, rickety wooden scaffolding. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the moonlit rim of an open-air fossil quarry, silver moonlight flooding down onto glowing white bone formations in exposed rock layers, fresh claw marks scratched into the quarry wall beside a gap where a fossil used to be. On the LEFT a silver bone trail of glowing pawprints leads down a carved ramp into the quarry depths, on the RIGHT a rickety wooden scaffold tower stands at the quarry edge with ladders descending into shadow, both large, fully visible, clearly separated.",
+      "text": "Somebody has been MOVING Rex's ancestors' fossils in the middle of the night and left claw marks everywhere — and the moon is already past the top of the sky! He has to find the bone-thief before moonset or the trail goes cold. Bone trail or scaffold tower?",
+      "choices": [
+        {"label": "Follow the silver bone trail", "next": "a", "spot": "silver bone trail"},
+        {"label": "Climb the scaffold tower", "next": "b", "spot": "wooden scaffold tower"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} follows glowing silver pawprints down a carved ramp into the quarry, passing exposed rock layers striped slate and indigo, a silver fossil claw sitting on a flat rock where it was carefully placed, and a fossil ribcage jutting from the quarry wall with moonlight streaming through the bones. On the LEFT a charcoal excavation pit opens in the quarry floor lit by silver moonlight, on the RIGHT an indigo rock tunnel leads deeper into the layered cliff face, both large, fully visible, clearly separated.",
+      "text": "The pawprints led right to this silver fossil claw sitting on a flat rock — not dropped, PLACED, like someone put it there on purpose. And that ribcage in the wall looks like it's been partially uncovered by careful hands. Excavation pit or rock tunnel?",
+      "choices": [
+        {"label": "Drop into the excavation pit", "next": "aa", "spot": "charcoal excavation pit"},
+        {"label": "Enter the rock tunnel", "next": "ab", "spot": "indigo rock tunnel"}
+      ],
+      "scare": {
+        "spot": "fossil ribcage",
+        "pop": "a spectral dino silhouette with two pale glowing eyes rising slowly from behind the fossil ribcage, translucent and shimmering",
+        "reveal": "Relax cousin! Just moonlight through old bones — happens every full moon!",
+        "sting": "thunder",
+        "delay": 1900
+      }
+    },
+    "b": {
+      "scene": "{HERO} climbs down a rickety wooden scaffold tower into the quarry, each plank creaking under his weight, a charcoal feather caught on a nail halfway down fluttering in the night breeze, exposed fossil layers glowing silver on all sides. On the LEFT a slate ledge juts from the quarry wall beside a row of neatly stacked bone fragments, on the RIGHT a wooden plank bridge stretches across the quarry to the far wall, both large, fully visible, clearly separated.",
+      "text": "Halfway down the scaffolding Rex found a big charcoal FEATHER caught on a nail — whatever moved those bones has WINGS. That narrows the suspect list considerably. Slate ledge or plank bridge?",
+      "choices": [
+        {"label": "Step onto the slate ledge", "next": "ba", "spot": "slate ledge"},
+        {"label": "Cross the plank bridge", "next": "bb", "spot": "wooden plank bridge"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands in a charcoal excavation pit where layers of ancient rock are exposed in neat cross-sections, the silver fossil claw tucked under his arm, tools and brushes arranged carefully on a stone shelf, moonlight pouring in from above. On the LEFT a large grey tarp covers a mound at the pit's far end, on the RIGHT a midnight-blue fossil wall shows an enormous skeleton partially uncovered with silver bones gleaming, both large, fully visible, clearly separated.",
+      "text": "This pit has TOOLS — tiny brushes, picks, a magnifying glass — whoever is moving bones isn't smashing them, they're working like a scientist! The fossil claw hums warm against Rex's arm. Grey tarp or fossil wall?",
+      "choices": [
+        {"label": "Lift the grey tarp", "next": "m1", "spot": "large grey tarp"},
+        {"label": "Examine the fossil wall", "next": "m2", "spot": "midnight-blue fossil wall"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} walks through an indigo rock tunnel with exposed fossil layers glowing silver in the walls, the silver fossil claw under his arm, thin trip-wires stretched across the tunnel at ankle height glinting in the moonlight. On the LEFT a white bone archway opens into a wider chamber ahead, on the RIGHT a violet mineral vein in the tunnel wall pulses with faint light beside a side passage, both large, fully visible, clearly separated.",
+      "text": "Trip-wires! Whoever is down here does NOT want visitors — Rex had to high-step over three of them and his tail almost set off a fourth. The fossil claw is warm and humming louder. Bone archway or mineral vein?",
+      "choices": [
+        {"label": "Duck through the bone archway", "next": "m1", "spot": "white bone archway"},
+        {"label": "Follow the mineral vein", "next": "m2", "spot": "violet mineral vein"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands on a slate ledge jutting from the quarry wall, the charcoal feather tucked behind his ear, a row of neatly stacked bone fragments arranged by size on the ledge, a fossil slab balanced on the ledge edge like a seesaw. On the LEFT a dark amber cave opens in the quarry wall with warm orange light flickering inside, on the RIGHT a silver moonlit clearing at the quarry floor has three large objects arranged in a triangle, both large, fully visible, clearly separated.",
+      "text": "These bone fragments are sorted by SIZE — smallest to biggest, perfectly lined up. This is not a thief, this is an ORGANIZER. The feather smells like old books. Amber cave or moonlit clearing?",
+      "choices": [
+        {"label": "Peek into the amber cave", "next": "m3", "spot": "dark amber cave"},
+        {"label": "Investigate the moonlit clearing", "next": "m4", "spot": "silver moonlit clearing"}
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} crosses a creaking wooden plank bridge over the quarry pit, the charcoal feather tucked behind his ear, decoy bone-piles arranged on ledges below to confuse anyone following the trail, a fossil slab embedded in the far quarry wall. On the LEFT a cobalt alcove carved into the rock at the bridge's far end glows with cool blue light, on the RIGHT a charcoal tunnel entrance is half-hidden behind a wooden scaffold frame, both large, fully visible, clearly separated.",
+      "text": "Decoy bone-piles EVERYWHERE — the bone-mover scattered fakes to throw Rex off the trail! Good thing the feather keeps pointing toward the real path like a compass made of bird. Cobalt alcove or charcoal tunnel?",
+      "choices": [
+        {"label": "Enter the cobalt alcove", "next": "m3", "spot": "cobalt alcove"},
+        {"label": "Squeeze into the charcoal tunnel", "next": "m4", "spot": "charcoal tunnel"}
+      ],
+      "scare": {
+        "spot": "fossil slab",
+        "pop": "an ancient turtle shell lifting from the fossil slab with two enormous mossy eyes blinking open slowly underneath",
+        "reveal": "Oh my! Nobody has visited this wall in a thousand years! How exciting!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands in a hidden workshop chamber where a large cork board on the wall displays charcoal sketches of the quarry, flood-level markings, and weather charts, the silver fossil claw under his arm matching a claw-shaped gap on the board. On the LEFT a stack of rolled parchment maps sits on a stone table under moonlight from a ceiling crack, on the RIGHT a deep bone-pile pit in the floor is filled with carefully wrapped fossils packed in straw, both large, fully visible, clearly separated.",
+      "text": "Flood charts, weather maps, careful bone-wrapping — the fossil-mover isn't STEALING bones, they're PROTECTING them from something! The fossil claw fits perfectly into a gap on the chart showing where the flood hits hardest. Parchment maps or bone-pile pit?",
+      "choices": [
+        {"label": "Unroll the parchment maps", "next": "end_flood_map", "spot": "rolled parchment maps"},
+        {"label": "Jump into the bone-pile pit", "next": "end_bone_trap", "spot": "deep bone-pile pit"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands before a massive fossil wall where an archaeologist crow in brass goggles perches on a scaffold plank, her wings dusty with charcoal, the silver fossil claw in Rex's grip glowing bright as the crow's eyes widen in recognition. On the LEFT a large silver moonbeam pools on the quarry floor between Rex and the crow in a circle of light, on the RIGHT a tall fossil femur leans against the wall like a giant walking stick, both large, fully visible, clearly separated.",
+      "text": "The bone-mover is a CROW with brass goggles and the dustiest wings Rex has ever seen — she froze when she saw the fossil claw! She looks scared but not guilty. Talk in the moonbeam or grab the fossil femur?",
+      "choices": [
+        {"label": "Step into the moonbeam", "next": "end_moonlit_team", "spot": "silver moonbeam"},
+        {"label": "Pick up the fossil femur", "next": "end_femur_fumble", "spot": "tall fossil femur"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stumbles into a food-catapult defense line where the archaeologist crow has rigged three catapults to protect her dig site, the charcoal feather behind his ear, the crow squawking from a scaffold perch above. On the LEFT a brown mud-pie catapult is loaded with a dripping mud ball aimed at the entrance, in the MIDDLE a purple berry-bomb catapult holds a glistening cluster of sticky berries, on the RIGHT an orange pumpkin catapult cradles a massive round pumpkin, all large, fully visible, clearly separated.",
+      "text": "FOOD FIGHT! The crow shrieked INTRUDER and three catapults swiveled toward Rex — but she said he gets to pick which one fires! Is that sporting or suspicious? Mud-pie, berry-bomb, or pumpkin?",
+      "choices": [
+        {"label": "Launch the mud-pie", "next": "end_mud_splat", "spot": "brown mud-pie catapult"},
+        {"label": "Fling the berry-bomb", "next": "end_berry_gum", "spot": "purple berry-bomb catapult"},
+        {"label": "Roll the pumpkin", "next": "end_pumpkin_chaos", "spot": "orange pumpkin catapult"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands in a silver moonlit clearing at the quarry floor where the biggest fossil skeleton Rex has ever seen lies partially exposed in the rock — an enormous ancestor with a skull the size of a boulder, the charcoal feather behind his ear pointing toward fresh dig marks around the skeleton. On the LEFT the massive fossil skull sits half-buried with silver-glowing teeth, on the RIGHT a wooden lever system connects to ropes and pulleys rigged around the skeleton's spine, both large, fully visible, clearly separated.",
+      "text": "The BIGGEST skeleton Rex has ever seen — and someone has been trying to move it deeper underground with ropes and pulleys! The dig marks are fresh and the feather smells like the crow's workshop. Fossil skull or lever system?",
+      "choices": [
+        {"label": "Push the fossil skull", "next": "end_tail_lift", "spot": "massive fossil skull"},
+        {"label": "Pull the lever system", "next": "end_scaffold_crash", "spot": "wooden lever system"}
+      ]
+    },
+    "end_flood_map": {
+      "scene": "{HERO} unrolls the parchment maps and sees the whole quarry drawn in charcoal with flood lines marked in red — the coming storm will flood every shallow bone site, and the crow has been reburying fossils in waterproof chambers deeper underground, the silver fossil claw sitting on the map marking the deepest safe chamber, moonlight streaming onto the careful work.",
+      "text": "The maps showed EVERYTHING — a massive flood is coming and the crow has been working every moonlit night to bury fossils DEEPER where the water can't reach them! Rex's fossil claw marked the safest chamber of all. He's not chasing a thief — he found the bravest archaeologist in the whole quarry. The End!"
+    },
+    "end_bone_trap": {
+      "scene": "{HERO} jumps into the deep bone-pile pit and sinks into carefully wrapped fossils packed in straw up to his chin, the silver fossil claw tumbling from his grip, straw poofing everywhere as Rex flails his tiny arms trying to climb out of the cushioned pit.",
+      "text": "Rex belly-flopped into the bone pit and sank like a dinosaur-shaped anchor — the straw was SO deep and the wrapping was SO puffy that his tiny arms just paddled uselessly while fossils bobbed around him like the world's most archaeological ball pit. The crow found him at dawn still stuck. Oopsie ending!",
+      "bad": true
+    },
+    "end_moonlit_team": {
+      "scene": "{HERO} and the archaeologist crow stand together in the silver moonbeam as the crow explains her flood charts with wing gestures, then Rex uses his powerful tail to help drag the largest fossil to a deeper safer chamber, both of them working side by side under the full moon as the quarry glows silver and peaceful.",
+      "text": "The crow wasn't stealing — she was SAVING Rex's ancestors from a coming flood! Her wings were too small to move the biggest skeleton alone, but Rex's tail was EXACTLY strong enough. They worked all night under the moon and by dawn every bone was safe and dry in the deepest chamber. The End!"
+    },
+    "end_femur_fumble": {
+      "scene": "{HERO} grabs the tall fossil femur and it immediately tips sideways like a giant domino, knocking into the scaffold plank as the crow flaps away squawking, the plank hitting more scaffolding in a chain reaction, the silver fossil claw clattering to the ground as wooden beams collapse around Rex in a dusty heap.",
+      "text": "Rex grabbed that femur and it tipped like the world's oldest domino — CRASH went the scaffold, SQUAWK went the crow, and WHOMP went Rex under a pile of planks! The crow flew off with her flood maps and Rex spent the rest of the night untangling himself from scaffolding while his ancestors' bones stayed in the danger zone. Oopsie ending!",
+      "bad": true
+    },
+    "end_mud_splat": {
+      "scene": "{HERO} launches the mud-pie catapult and a dripping brown mud ball arcs through the air and SPLATS across the crow's brass goggles, the crow sitting stunned on her scaffold perch with mud dripping off her beak, then slowly starting to laugh as Rex holds up the charcoal feather sheepishly, moonlight turning the mud silver.",
+      "text": "SPLAT — the mud-pie hit the crow's goggles dead center and she sat there dripping for three whole seconds before she burst out LAUGHING! Between giggles she explained the flood, Rex apologized with his best sheepish face, and together they spent the rest of the night moving bones to safety. Best food fight ever. The End!"
+    },
+    "end_berry_gum": {
+      "scene": "{HERO} launches the berry-bomb catapult and a glistening purple cluster of sticky berries explodes across the crow's wings, gumming the feathers together as she tumbles off the scaffold with a startled squawk, crashing into a bone-pile below while fossils scatter across the quarry floor.",
+      "text": "The berry-bomb gummed the crow's wings shut and she tumbled off the scaffold into a bone-pile — fossils scattered EVERYWHERE and the crow couldn't fly to catch them! Now there are bones all over the quarry floor AND a flood coming AND a very sticky very grumpy crow glaring at Rex. Oopsie ending!",
+      "bad": true
+    },
+    "end_pumpkin_chaos": {
+      "scene": "{HERO} launches the pumpkin catapult and the massive orange pumpkin bounces off the quarry wall, rolls down a slope, and smashes through a scaffold frame creating a perfect ramp down to the deepest quarry level where the biggest skeleton lies, the crow staring in astonishment, pumpkin seeds raining down like confetti in the moonlight.",
+      "text": "The pumpkin bounced off the wall, rolled down the slope, and SMASHED a perfect ramp straight to the deepest level — the crow stared at Rex like he was either a genius or the luckiest dinosaur alive! They used the pumpkin ramp to slide the biggest skeleton to safety before the flood, and the seeds grew into a pumpkin patch right there in the quarry. The End!"
+    },
+    "end_tail_lift": {
+      "scene": "{HERO} braces his feet and swings his powerful tail under the massive fossil skull, lifting it with a mighty heave as the archaeologist crow appears and flaps her wings with joy, guiding Rex as he walks the enormous skull toward a deeper safer chamber, moonlight illuminating the path, the charcoal feather fluttering behind Rex's ear.",
+      "text": "Rex's tail was EXACTLY the right tool — he heaved that massive skull up and the crow appeared cheering, guiding him step by step to the deepest chamber where no flood could reach! Her wings were too small to lift it alone but Rex's tail was dinosaur-powered. They saved every last bone before the moon set. The End!"
+    },
+    "end_scaffold_crash": {
+      "scene": "{HERO} yanks the wooden lever system hard and the ropes snap as pulleys spin wildly, the entire scaffold framework collapsing onto the massive skeleton with a tremendous crash, wooden beams and rope tangling around Rex's tail as the charcoal feather drifts down onto the wreckage, dust billowing in the moonlight.",
+      "text": "Rex YANKED that lever and every rope snapped at once — CRASH went the scaffolding right onto the skeleton he was trying to save! Now there's a pile of broken planks on top of priceless ancient bones and Rex's tail is tangled in rope. The crow is going to be SO disappointed. Oopsie ending!",
+      "bad": true
+    }
+  }
+}
