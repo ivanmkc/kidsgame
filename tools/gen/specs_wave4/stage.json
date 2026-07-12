@@ -1,0 +1,243 @@
+{
+  "id": "stage",
+  "title": "Luna and the Missing Star",
+  "hero": "LUNA",
+  "style": "Velvet-and-gilt theatrical, warm amber spotlights over deep burgundy curtains, gold filigree on prop boxes, marionette strings catching light. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a dim backstage corridor of a velvet-curtained puppet theater, her shimmering horn glowing faintly, an empty star-shaped hook on the wall where a puppet should hang. On the LEFT a burgundy curtain corridor lined with sparkly costume racks stretches into warm golden light, on the RIGHT a golden prop workshop with shelves of painted wooden props gleams under a single amber lamp, both large, fully visible, clearly separated.",
+      "text": "Ten minutes to showtime and the star puppet has VANISHED — its hook is bare, the stagehands are panicking, and Luna is the only one brave enough to go looking backstage. Costume corridor or prop workshop?",
+      "choices": [
+        {
+          "label": "Search the costume corridor",
+          "next": "a",
+          "spot": "burgundy costume corridor"
+        },
+        {
+          "label": "Check the prop workshop",
+          "next": "b",
+          "spot": "golden prop workshop"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} walks through a bustling costume corridor with sparkly dresses and velvet capes hanging from brass rails, a marionette troupe waltzing in the background, a silver tinsel scarf draped over a low costume rack, and a large purple costume trunk sitting against the wall. On the LEFT a red rehearsal alcove glows behind a beaded curtain where shadow puppets dance on a lit screen, on the RIGHT a blue satin dressing room with tall gilded mirrors sparkles at the end of the hall, both large, fully visible, clearly separated.",
+      "text": "A marionette troupe is waltzing so beautifully Luna almost forgets why she came, and a shiny silver scarf on the rack basically BEGS to be borrowed — into her saddlebag it goes. Shadow puppet alcove or dressing room?",
+      "choices": [
+        {
+          "label": "Watch the shadow puppets",
+          "next": "aa",
+          "spot": "red rehearsal alcove"
+        },
+        {
+          "label": "Try the dressing room",
+          "next": "ab",
+          "spot": "blue satin dressing room"
+        }
+      ],
+      "scare": {
+        "spot": "purple costume trunk",
+        "pop": "a googly-eyed sock-puppet dragon with two big round button eyes popping out of the purple costume trunk mid-yawn",
+        "reveal": "Yawn! Just rehearsing my big entrance!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} explores a cluttered prop workshop filled with painted wooden swords and papier-mache crowns on golden shelves, a hand-puppet troupe rehearsing a sea adventure on a tiny prop stage, and a small brass hand bell sitting on a high shelf catching the light. On the LEFT an orange spotlight tower rises through a hatch in the ceiling with a spiral iron ladder, on the RIGHT a green scenery dock stretches behind tall rolling backdrops, both large, fully visible, clearly separated.",
+      "text": "A hand-puppet troupe is staging a sea battle so dramatic that a cardboard whale just capsized, and Luna finds a small brass bell on a shelf — one ring and it hums like MAGIC. Spotlight tower or scenery dock?",
+      "choices": [
+        {
+          "label": "Climb the spotlight tower",
+          "next": "ba",
+          "spot": "orange spotlight tower"
+        },
+        {
+          "label": "Explore the scenery dock",
+          "next": "bb",
+          "spot": "green scenery dock"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a warm red rehearsal alcove watching shadow puppets dance on a glowing paper screen, the silver tinsel scarf tucked in her saddlebag sparkling faintly, tall silk puppet silhouettes casting dramatic shadows on the wall. On the LEFT a jade velvet staircase descends toward the distant sound of instruments, on the RIGHT a crimson spiral ramp leads upward toward a balcony railing visible above, both large, fully visible, clearly separated.",
+      "text": "The shadow puppets performed a whole love story in thirty seconds flat and then pointed their silhouette arms in two directions — apparently the missing star went DOWN toward music or UP toward the view. Staircase down or ramp up?",
+      "choices": [
+        {
+          "label": "Take the staircase down",
+          "next": "m1",
+          "spot": "jade velvet staircase"
+        },
+        {
+          "label": "Climb the ramp up",
+          "next": "m2",
+          "spot": "crimson spiral ramp"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} peers into a blue satin dressing room with tall gilded mirrors, outrageous curly wigs on brass stands, pots of glittery greasepaint, and a puppet primping troupe adjusting their bow ties, the silver tinsel scarf tucked in her saddlebag. On the LEFT a jade curtain archway opens behind a velvet drape with the sound of distant instruments drifting up from below, on the RIGHT a golden spiral archway leads upward toward a balcony railing visible above, both large, fully visible, clearly separated.",
+      "text": "The primping puppets waved their powder puffs toward two exits and mumbled something about music downstairs and a view upstairs, which is honestly the most help Luna has gotten all day. Curtain archway or spiral arch?",
+      "choices": [
+        {
+          "label": "Duck through the curtain",
+          "next": "m1",
+          "spot": "jade curtain archway"
+        },
+        {
+          "label": "Head up the spiral arch",
+          "next": "m2",
+          "spot": "golden spiral archway"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands on a high catwalk inside the orange spotlight tower, the brass hand bell tucked in her saddlebag, surrounded by colored spotlight lenses and brass levers, with the whole theater visible far below through an open hatch. On the LEFT an amber stage wing entrance opens at the bottom of a spiral iron ladder, on the RIGHT a pink ribbon catwalk stretches toward the rigging loft high above the stage, both large, fully visible, clearly separated.",
+      "text": "From up here Luna can see the whole theater but NOT the missing star, and when she accidentally bumps a spotlight it swings across the seats like a VERY dramatic search party of one. Stage wing or rigging loft?",
+      "choices": [
+        {
+          "label": "Climb down to the stage wing",
+          "next": "m3",
+          "spot": "amber stage wing"
+        },
+        {
+          "label": "Cross to the rigging loft",
+          "next": "m4",
+          "spot": "pink ribbon catwalk"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} walks through a green scenery dock where giant painted backdrops of forests and castles lean against the walls, the brass hand bell tucked in her saddlebag, a large gold paint bucket sitting beside a wooden easel, and brushes scattered on the floor. On the LEFT an amber stage entrance opens through a gap between two tall painted backdrops, on the RIGHT a teal rope ladder leads upward toward the rigging loft above the stage, both large, fully visible, clearly separated.",
+      "text": "A half-finished castle backdrop is still wet and Luna's hoof leaves a PERFECT horseshoe stamp on the drawbridge, which honestly improves it — the painter will thank her later. Stage entrance or rope ladder?",
+      "choices": [
+        {
+          "label": "Slip through the entrance",
+          "next": "m3",
+          "spot": "amber stage entrance"
+        },
+        {
+          "label": "Climb the rope ladder",
+          "next": "m4",
+          "spot": "teal rope ladder"
+        }
+      ],
+      "scare": {
+        "spot": "gold paint bucket",
+        "pop": "a paint-splattered felt mouse puppet with two big round shiny button eyes popping up from behind the gold paint bucket trailing a ribbon of wet green paint",
+        "reveal": "Squeak! I was painting myself into the scenery!",
+        "sting": "squeak",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands in a dusty velvet orchestra pit among scattered instrument cases and tarnished music stands, the silver tinsel scarf peeking from her saddlebag, warm amber light filtering from the stage above. On the LEFT a large copper kettledrum sits on a raised velvet platform, on the RIGHT a plush rose-colored velvet armchair sits in a cozy corner with a soft cushion, both large, fully visible, clearly separated.",
+      "text": "The orchestra pit smells like rosin and old velvet, and somewhere above the audience is filing in — that rose armchair in the corner looks SUSPICIOUSLY comfortable but there is no time for sitting. Kettledrum or armchair?",
+      "choices": [
+        {
+          "label": "Bang the kettledrum",
+          "next": "end_drum_call",
+          "spot": "copper kettledrum"
+        },
+        {
+          "label": "Rest in the armchair",
+          "next": "end_velvet_nap",
+          "spot": "rose velvet armchair"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} steps onto a crimson velvet balcony high above the dark empty stage, the silver tinsel scarf peeking from her saddlebag, her horn catching a stray beam of amber light from the wings below. On the LEFT a tall garnet spotlight lamp stands bolted to the balcony railing, on the RIGHT a thick ivory curtain rope hangs within easy reach beside the railing, both large, fully visible, clearly separated.",
+      "text": "The stage below is so dark even the dust motes have given up floating, but Luna's horn is tingling like it has something to PROVE — something down there needs light. Spotlight lamp or curtain rope?",
+      "choices": [
+        {
+          "label": "Aim the spotlight lamp",
+          "next": "end_horn_star",
+          "spot": "garnet spotlight lamp"
+        },
+        {
+          "label": "Pull the curtain rope",
+          "next": "end_curtain_swing",
+          "spot": "ivory curtain rope"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands at the edge of the main stage with the brass hand bell in her hoof, the half-open curtain framing rows of waiting seats beyond, the stage lights flickering on. On the LEFT a scarlet marionette crossbar hangs from low strings with dangling puppets attached, in the MIDDLE a luminous golden center pedestal glows at center stage under a single spotlight, on the RIGHT a tall violet curtain tassel hangs beside the proscenium arch swaying gently, all large, fully visible, clearly separated.",
+      "text": "The audience is rustling, the curtain is half-open, and there is NO star puppet in sight — but Luna has a bell and a whole stage. That violet tassel is swaying like it DARES someone to grab it. Crossbar, pedestal, or tassel?",
+      "choices": [
+        {
+          "label": "Lift the marionette crossbar",
+          "next": "end_puppet_dance",
+          "spot": "scarlet marionette crossbar"
+        },
+        {
+          "label": "Step onto the pedestal",
+          "next": "end_bell_ring",
+          "spot": "golden center pedestal"
+        },
+        {
+          "label": "Swing on the curtain tassel",
+          "next": "end_tassel_tumble",
+          "spot": "violet curtain tassel"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} climbs into the rigging loft high above the stage, the brass hand bell tucked in her saddlebag, surrounded by thick ropes, pulleys, and painted canvas flats hanging from iron bars. On the LEFT a large tangerine sandbag hangs from a rope within easy reach, on the RIGHT a round teal confetti cannon is mounted on a swivel beside a brass lever, both large, fully visible, clearly separated.",
+      "text": "The rigging loft is a tangle of ropes and secrets and one of these levers DEFINITELY does something spectacular — the question is whether spectacular means the graceful kind or the upside-down kind. Sandbag rope or confetti cannon?",
+      "choices": [
+        {
+          "label": "Grab the sandbag rope",
+          "next": "end_rope_swing",
+          "spot": "tangerine sandbag"
+        },
+        {
+          "label": "Fire the confetti cannon",
+          "next": "end_confetti_finale",
+          "spot": "teal confetti cannon"
+        }
+      ]
+    },
+    "end_drum_call": {
+      "scene": "{HERO} bangs the copper kettledrum in the orchestra pit with her hoof, the silver tinsel scarf streaming from her neck like a comet tail, as the vibration travels through the floorboards and the star puppet peeks over a front-row seat in the audience above, grinning with felt arms raised in delight.",
+      "text": "Luna WHAMMED that kettledrum so hard the floorboards buzzed like a thousand bees, and from the front row a familiar sparkly face popped up — the star puppet had been sitting in the audience THIS WHOLE TIME because it wanted to watch the show for once! Luna wrapped the tinsel scarf around her horn, galloped on stage, and her horn lit up like a spotlight while the star puppet cheered from seat number one. The End!"
+    },
+    "end_velvet_nap": {
+      "scene": "{HERO} curled up in the plush rose-colored velvet armchair in the orchestra pit, eyes closed, the silver tinsel scarf draped over her like a blanket, while the stage above glows with a show happening without her.",
+      "text": "That armchair was SO unbelievably comfortable that Luna closed her eyes for just one second and woke up to thunderous applause — the show had started, finished, AND the audience had gone home, all while she napped through the most important ten minutes in puppet theater history. The star puppet is STILL missing and Luna is basically furniture now. Oopsie ending!",
+      "bad": true
+    },
+    "end_horn_star": {
+      "scene": "{HERO} aims the garnet spotlight lamp from the crimson balcony and her own horn blazes with brilliant amber light, the silver tinsel scarf streaming behind her like a banner, as the dark stage below lights up gold and the star puppet waves happily from a front-row seat in the audience.",
+      "text": "Luna aimed the lamp but her own horn stole the show — it blazed so bright the whole stage lit up gold, the tinsel scarf sparkled like a meteor shower, and there in the front row sat the star puppet clapping its little felt hands because it QUIT on purpose to finally watch a show! Luna leaped down and played the star role herself, horn-spotlight and all. The End!"
+    },
+    "end_curtain_swing": {
+      "scene": "{HERO} pulls the ivory curtain rope from the crimson balcony and the grand curtain sweeps open to reveal the lit stage below, the silver tinsel scarf catching the spotlight as it streams from her neck, the audience gasping in delight, and the star puppet visible applauding from the front row.",
+      "text": "Luna yanked the rope and the curtain WHOOSHED open like the world's fanciest reveal — and there she was, lit by her own glowing horn with the tinsel scarf shimmering, taking the most accidental and magnificent bow in theater history. The star puppet cheered from row one because it had WANTED to be in the audience all along. The End!"
+    },
+    "end_puppet_dance": {
+      "scene": "{HERO} lifts the scarlet marionette crossbar but the puppet strings tangle around her horn, the puppets hanging at weird angles and spinning in circles, Luna stumbling backward as the crossbar twists, the brass bell falling off the stage.",
+      "text": "Luna grabbed the crossbar and the puppet strings immediately tangled around her horn — the puppets spun in wobbly circles like tiny confused acrobats, Luna stumbled backward trying to untangle, the brass bell rolled off the stage with a sad CLONK, and the star puppet just hung there upside down judging the situation. Oopsie ending!",
+      "bad": true
+    },
+    "end_bell_ring": {
+      "scene": "{HERO} stands on the luminous golden center pedestal at center stage ringing the brass hand bell high above her head, its warm tone filling the theater, the audience enchanted and leaning forward, and the star puppet sitting in the front row with tears of joy on its felt face.",
+      "text": "Luna stepped into the spotlight and rang that brass bell with EVERYTHING she had — the sound was so pure and warm that every puppet in the building turned to listen, the audience held its breath, and the star puppet in the front row wiped a felt tear because it finally got to see the show from out there. The End!"
+    },
+    "end_tassel_tumble": {
+      "scene": "{HERO} swings on the violet curtain tassel beside the proscenium arch, tangled in purple fabric with the brass hand bell clanging wildly, spinning in circles wrapped in curtain while confetti from a knocked-over box rains down on the chaotic stage.",
+      "text": "Luna grabbed the tassel and it grabbed her RIGHT BACK — she spun like a sparkly purple burrito while the bell clanged in every direction, the curtain wrapped her up like a present nobody asked for, and the star puppet is STILL out there somewhere having a much better evening. Oopsie ending!",
+      "bad": true
+    },
+    "end_rope_swing": {
+      "scene": "{HERO} hangs from the tangerine sandbag rope stuck halfway between the rigging loft and the stage, swinging back and forth in tiny arcs, the sandbag having risen to the ceiling, Luna dangling with her legs kicking and the brass bell on the floor below.",
+      "text": "Luna grabbed the sandbag rope but the sandbag was heavier than she thought — it went UP and Luna went NOWHERE, dangling halfway between the loft and the stage like a sparkly pendulum! She swung back and forth kicking her hooves while the audience sat in the dark and the bell rolled around the stage making sad little ding noises. Oopsie ending!",
+      "bad": true
+    },
+    "end_confetti_finale": {
+      "scene": "{HERO} pulls the brass lever on the teal confetti cannon in the rigging loft, golden confetti exploding across the theater as she rings the brass hand bell from above, the audience looking up in wonder, and the star puppet catching confetti in its felt hands in the front row.",
+      "text": "Luna pulled the lever and BOOM — golden confetti exploded across the theater like the world's fanciest sneeze, the bell rang out from the rafters, and the star puppet caught a handful of sparkles in the front row where it had been hiding all along because sometimes watching the magic is even better than being it. The End!"
+    }
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "id": "rooftop",
+  "title": "Milo and the City of Lights",
+  "hero": "MILO",
+  "style": "Deep indigo night-city gouache, glowing amber windows and wet streets reflecting neon signs, a tiny warm lantern glow leading across chimneys and rooftops. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a chimney at the edge of a dark rooftop holding a small glowing amber lantern, the whole city skyline suddenly blacked out behind him, the harbor a sheet of black glass far below. On the LEFT a red iron fire escape zigzags up a tall brick wall toward the distant clock tower, on the RIGHT a green wooden plank bridge stretches between rooftops toward the harbor docks, both large, fully visible, clearly separated.",
+      "text": "Tonight the famous harbor lights switch on, and Milo has the best seat in the city, which is a chimney. Then every window blinks out at once, the whole city goes dark, and his one small lantern suddenly feels very, very small.",
+      "choices": [
+        {
+          "label": "Climb the fire escape",
+          "next": "a",
+          "spot": "red fire escape"
+        },
+        {
+          "label": "Cross the plank bridge",
+          "next": "b",
+          "spot": "green plank bridge"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} kneels on a chimney-crowded rooftop below the dark clock tower, a tiny gray mouse warming its paws at his little amber lantern. On the LEFT an orange attic skylight is propped open and glowing faintly, on the RIGHT a purple wooden ladder leans against the clock tower wall, both large, fully visible, clearly separated.",
+      "text": "A tiny mouse shivers by a cold chimney, so Milo shares his lantern like a one-candle campfire. The mouse presses a brass key into his paw and squeaks that the clock tower always answers first, whatever that means.",
+      "choices": [
+        {
+          "label": "Slip through the skylight",
+          "next": "aa",
+          "spot": "orange skylight"
+        },
+        {
+          "label": "Climb the purple ladder",
+          "next": "ab",
+          "spot": "purple ladder"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} stands on a warehouse rooftop by a rusty weathervane, handing a striped scarf back to an old gray ferryboat cat, wet rooftops gleaming around them. On the LEFT a yellow harbor crane towers over the dock rooftops, on the RIGHT a pink neon sign stands dark and cold above the market roofs, both large, fully visible, clearly separated.",
+      "text": "An old ferry cat's scarf is stuck on a weathervane, so Milo climbs up and fetches it, no big deal, only mild peril. The old cat winds it back on and gifts him a tin whistle, saying one good toot and the harbor answers.",
+      "choices": [
+        {
+          "label": "Climb the yellow crane",
+          "next": "ba",
+          "spot": "yellow crane"
+        },
+        {
+          "label": "Walk the noodle sign",
+          "next": "bb",
+          "spot": "pink neon sign"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a dusty attic full of chalk maps of the city pinned to every wall, a plump pigeon in a shawl pointing at a map table lit by the little lantern. On the LEFT a blue dumbwaiter cabinet sits open in the wall, on the RIGHT a copper gear hatch ringed with cogs is set into the ceiling, both large, fully visible, clearly separated.",
+      "text": "Inside lives Madame Plume, a pigeon who maps the whole city in chalk, including three noodle shops that no longer exist. She taps two secret routes into the clock tower and whispers that the dark is only the city holding its breath.",
+      "choices": [
+        {
+          "label": "Ride the blue dumbwaiter",
+          "next": "m1",
+          "spot": "blue dumbwaiter"
+        },
+        {
+          "label": "Open the gear hatch",
+          "next": "m2",
+          "spot": "copper gear hatch"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} climbs onto a windy stone ledge high on the clock tower, wet rooftops glittering far below, a gray gargoyle crouched at the corner of the ledge. On the LEFT a small red door is set into the tower wall, on the RIGHT a round white clock hatch sits behind the great dark clock face, both large, fully visible, clearly separated.",
+      "text": "The ladder ends at a ledge where the wind is auditioning for a villain role. Something stony at the corner just politely cleared its throat.",
+      "scare": {
+        "spot": "gray gargoyle",
+        "pop": "a chubby stone gargoyle with tiny wings waking up with a huge friendly grin, stretching both arms like he just finished a very long nap",
+        "reveal": "Gus the gargoyle says good evening! He has been holding that pose since Tuesday.",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Take the red door",
+          "next": "m1",
+          "spot": "red door"
+        },
+        {
+          "label": "Crawl through the hatch",
+          "next": "m2",
+          "spot": "white clock hatch"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands high in the cab of the great yellow harbor crane, the black harbor spread below like spilled ink, one pale lighthouse standing dark on its rock. On the LEFT a green cargo hook hangs from the crane arm over the lighthouse jetty, on the RIGHT a stack of brown barrels steps down toward the ferry pier, both large, fully visible, clearly separated.",
+      "text": "From the crane top Milo can see everything the dark has swallowed, which tonight is everything. Even the lighthouse is out, and lighthouses are famously the one thing that never is.",
+      "choices": [
+        {
+          "label": "Swing on the hook",
+          "next": "m3",
+          "spot": "green cargo hook"
+        },
+        {
+          "label": "Hop down the barrels",
+          "next": "m4",
+          "spot": "brown barrels"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} tiptoes along the top of a huge dark pink neon sign above the fish market roofs, wet tiles reflecting his tiny lantern glow, a black chimney pot wobbling nearby. On the LEFT a white iron gate opens onto the stone jetty toward the dark lighthouse, on the RIGHT an orange lifeboat hangs beside a big moored ferryboat, both large, fully visible, clearly separated.",
+      "text": "This sign is usually the loudest light in the city, and tonight it is just cold glass under his paws. Nearby a chimney pot sneezes, which chimney pots famously do not do.",
+      "scare": {
+        "spot": "black chimney pot",
+        "pop": "a fluffy white seagull in a tiny nightcap bursting out of the chimney pot, startled but smiling, feathers flying everywhere",
+        "reveal": "Pardon me, says the seagull, this chimney is rented through spring!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Push the white gate",
+          "next": "m3",
+          "spot": "white gate"
+        },
+        {
+          "label": "Climb into the lifeboat",
+          "next": "m4",
+          "spot": "orange lifeboat"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in the wooden belfry at the top of the clock tower, the dark city of rooftops spread out through tall arched openings, his tiny lantern glowing. On the LEFT a brown window ledge sits beneath the tallest arched opening facing the whole city, on the RIGHT a giant silver bell hangs from black beams with a thick rope, both large, fully visible, clearly separated.",
+      "text": "The mouse's brass key clicks open the belfry door like the tower was waiting for exactly him. Below sleeps the whole dark city, and Milo's lantern has never looked smaller, or braver.",
+      "choices": [
+        {
+          "label": "Set lantern on ledge",
+          "next": "end_window",
+          "spot": "brown window ledge"
+        },
+        {
+          "label": "Ring the giant bell",
+          "next": "end_bell",
+          "spot": "silver bell"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} steps out of the gearworks onto the huge dark clock face of the tower, giant cogs turning slowly behind him, the sleeping city far below. On the LEFT the long black minute hand slopes up toward the twelve, on the RIGHT a gold pendulum swings gently in the open gearworks doorway, both large, fully visible, clearly separated.",
+      "text": "The brass key opens the gear hatch, and suddenly Milo is standing on the clock face like a flea on the moon. Somewhere below, the mouse is definitely taking credit for this.",
+      "choices": [
+        {
+          "label": "Tiptoe up the hand",
+          "next": "end_twelve",
+          "spot": "black minute hand"
+        },
+        {
+          "label": "Ride the gold pendulum",
+          "next": "end_pendulum",
+          "spot": "gold pendulum"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands inside the dark lamp room at the top of the lighthouse, a giant cold glass lens towering over his tiny lantern, the black harbor beyond the windows. On the LEFT a red kite leans against the railing, in the MIDDLE a silver mirror stands propped on a wooden chest, on the RIGHT a green umbrella hangs from an iron hook, all large, fully visible, clearly separated.",
+      "text": "The keeper's chalkboard says back by dawn, do not touch the lamp, especially you, Gerald. The great lamp is stone cold, and beside it Milo's lantern looks like a firefly applying for a lighthouse job.",
+      "choices": [
+        {
+          "label": "Tie lantern to kite",
+          "next": "end_kite",
+          "spot": "red kite"
+        },
+        {
+          "label": "Aim the silver mirror",
+          "next": "end_beam",
+          "spot": "silver mirror"
+        },
+        {
+          "label": "Open the green umbrella",
+          "next": "end_umbrella",
+          "spot": "green umbrella"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands on the wooden deck of a big moored ferryboat, sleepy deckhand cats bumping into coiled ropes in the dark, the long pier stretching away behind. On the LEFT a brown wicker mast basket sits high on the mast, on the RIGHT a big brass foghorn gleams on the deck railing, both large, fully visible, clearly separated.",
+      "text": "The ferry crew is counting heads in the dark and keeps counting the same cat twice. Milo remembers the old cat's tin whistle and gives one bright toot, and every ear on deck swivels his way.",
+      "choices": [
+        {
+          "label": "Climb the mast basket",
+          "next": "end_mast",
+          "spot": "brown mast basket"
+        },
+        {
+          "label": "Honk the brass foghorn",
+          "next": "end_foghorn",
+          "spot": "brass foghorn"
+        }
+      ]
+    },
+    "end_window": {
+      "scene": "{HERO} silhouetted in the tall arched belfry window of the clock tower, his tiny lantern glowing on the wooden ledge, one amber window lighting up in the dark city below, then more and more, a spreading wave of little lights rolling across the rooftops all the way to the glittering harbor.",
+      "text": "Milo sets his lantern in the clock tower window anyway, one small light against a whole dark city. Then a window across the street glows back, a cat with a candle, then ten, then a hundred, a wave of tiny lights rolling all the way down to the water until the skyline switches itself on. Milo came to watch the famous lights, but tonight the famous lights came to watch him. The End!"
+    },
+    "end_bell": {
+      "scene": "{HERO} swinging happily on the bell rope in the belfry as the giant silver bell tips, shutters flying open across the dark rooftops below and amber lantern light blooming in window after window down to the harbor.",
+      "text": "BONG. A thousand grumpy cats fling open their shutters to complain, spot one tiny lantern glowing in the clock tower, and one by one light their own to keep it company. The harbor blooms with lamplight, and somewhere far below a tiny mouse takes a bow on Milo's behalf. The End!"
+    },
+    "end_twelve": {
+      "scene": "{HERO} perched at the very top of the huge clock face, hanging his lantern on the number twelve, the whole clock face glowing like a small amber moon while candlelit windows spark on street by street down to the shining harbor.",
+      "text": "Milo hangs his lantern at the top of the clock, and the whole face glows like a small spare moon. Street by street the city answers, candles tracing every road down to the water, and the harbor lights bloom last like they were saving their applause. The End!"
+    },
+    "end_pendulum": {
+      "bad": true,
+      "scene": "{HERO} sitting dizzy but delighted in a big wooden bin of lost mittens at the base of the clock tower gearworks, the still-glowing lantern balanced on his head like a tiny hat, the gold pendulum swinging innocently above him.",
+      "text": "The pendulum goes WHOOSH, then WHOOSH the other way, and Milo discovers that clocks are not carnival rides. He lands softly in the tower's lost mitten bin, lantern still lit on his head like a tiny hat, and vows to try again the moment the room stops spinning. Oopsie ending!"
+    },
+    "end_kite": {
+      "scene": "{HERO} on the lighthouse gallery railing as a red kite lifts his glowing lantern high above the dark harbor like a small new star, seagulls steadying the string, ships below lighting their lamps one by one and rooftop windows answering in a wave toward the far clock tower.",
+      "text": "One toot of the tin whistle and a squad of gulls holds the kite string steady while Milo's lantern climbs into the sky like a small stubborn star. Ships answer with horns and lamps, rooftops answer with candles, and far across the city the clock tower lights up last, winking like it was in on it all along. The End!"
+    },
+    "end_beam": {
+      "scene": "{HERO} in the lighthouse lamp room, his tiny lantern set before the giant glass lens with a silver mirror behind it, a huge warm golden beam striding out across the black water and sweeping the city as amber windows flicker awake along its path.",
+      "text": "The mirror and the great lens take Milo's little flame and stretch it into a golden beam that strides clear across the harbor. Window by window the city wakes and answers, and when the keeper rows home at dawn he scratches his head and decides he must have left it on. The End!"
+    },
+    "end_umbrella": {
+      "bad": true,
+      "scene": "{HERO} sitting snug in a fishing net full of astonished mackerel on a small wooden fishing boat below the dark lighthouse, holding the green umbrella turned inside out, his lantern glowing safely in a bait bucket beside a chuckling fisher cat.",
+      "text": "The wind takes one look at the open umbrella and accepts the invitation. Milo sails grandly off the lighthouse gallery and lands in a net of very surprised mackerel, lantern safe in the bait bucket, and the fisher cat rows him ashore for a do-over. Oopsie ending!"
+    },
+    "end_mast": {
+      "scene": "{HERO} tangled in a pile of fishing nets on the ferryboat deck, the wicker mast basket tilted sideways above, his lantern rolling away across the planks, deckhand cats watching with amused expressions, the dark harbor completely unchanged behind them.",
+      "text": "Milo climbed to the mast basket, but the lantern was heavier than he thought — it tipped the basket sideways and dumped him onto the deck like a furry sack of potatoes. The lantern rolled into a pile of fishing nets, and Milo spent the rest of the night untangling himself while the harbor stayed perfectly dark. Oopsie ending!",
+      "bad": true
+    },
+    "end_foghorn": {
+      "scene": "{HERO} tangled in a coil of rope on the ferry deck, dazed and spinning, the big brass foghorn still vibrating, deckhand cats mid-leap with fur standing on end, the dark harbor behind them still completely dark and unhelpful.",
+      "text": "HOOOONK — Milo hit the foghorn so hard it blasted HIM backwards across the deck into a coil of rope. Every cat on the ferry jumped three feet straight up, and the resulting tangle of startled cats, rope, and one extremely dizzy kitten took the rest of the night to sort out. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

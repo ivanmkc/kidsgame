@@ -1,0 +1,243 @@
+{
+  "id": "canvas",
+  "title": "Luna Finishes the Sky",
+  "hero": "LUNA",
+  "style": "Half-finished painting aesthetic: rich impasto oils dissolving into loose pencil sketch lines and raw white canvas, visible drips and brushstrokes, rainbow color blooming at the edges of the finished parts. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a half-painted meadow, her rainbow mane glowing against raw white canvas sky, a crumbling painted door behind her. On the LEFT a golden wooden easel leans against a half-sketched oak tree, on the RIGHT a tall blue paint jar sits on a patch of finished grass, both large, fully visible, clearly separated.",
+      "text": "Luna stepped through the strange door and gasped — half this world was gorgeous swirling paint, and the other half was just... blank. Her rainbow mane tingled like it wanted to help. Golden easel or blue jar?",
+      "choices": [
+        {
+          "label": "Pick up the easel",
+          "next": "a",
+          "spot": "golden wooden easel"
+        },
+        {
+          "label": "Open the blue jar",
+          "next": "b",
+          "spot": "tall blue paint jar"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} carries a golden easel under one leg, her rainbow mane streaming color behind her, standing on a painted hilltop where thick brushstrokes dissolve into pencil lines. On the LEFT a red wooden barn sits in a patch of finished farmland, on the RIGHT a purple stone bridge arches over a half-sketched river, both large, fully visible, clearly separated.",
+      "text": "The easel had a half-finished map clipped to it — two places still had color! Luna's mane dripped a tiny rainbow droplet onto the map and both spots glowed. Red barn or purple bridge?",
+      "choices": [
+        {
+          "label": "Head to the barn",
+          "next": "aa",
+          "spot": "red wooden barn"
+        },
+        {
+          "label": "Cross the bridge",
+          "next": "ab",
+          "spot": "purple stone bridge"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} holds a large blue paint jar in her teeth, her rainbow mane reflecting in the blue paint, standing where thick oil-paint ground crumbles into white canvas. On the LEFT a green painted hedge maze rises from the blank canvas, on the RIGHT an orange stone windmill turns slowly on a sketched hill, both large, fully visible, clearly separated.",
+      "text": "Luna pried open the jar and WHOOSH — blue paint rippled out, coloring the ground beneath her hooves! Two landmarks flickered into view ahead. Green hedge or orange windmill?",
+      "choices": [
+        {
+          "label": "Enter the maze",
+          "next": "ba",
+          "spot": "green painted hedge"
+        },
+        {
+          "label": "Climb the windmill",
+          "next": "bb",
+          "spot": "orange stone windmill"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside the red barn, golden easel propped beside her, her rainbow mane lighting up dusty shelves of dried-out paint tubes and cracked palettes. On the LEFT a silver bucket hangs from a rafter beam, on the RIGHT a copper weathervane rooster sits on a hay bale, both large, fully visible, clearly separated.",
+      "text": "The barn smelled like turpentine and old dreams — every paint tube bone-dry, every palette cracked. Luna's mane was the brightest thing in here by a country mile. Silver bucket or copper rooster?",
+      "scare": {
+        "spot": "copper weathervane rooster",
+        "pop": "a tiny paintbrush character with a sleepy face and one dried-blue bristle, peeking shyly from behind the hay bale",
+        "reveal": "Oh! Sorry — I didn't think anyone would actually come through that door!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Grab the bucket",
+          "next": "m1",
+          "spot": "silver hanging bucket"
+        },
+        {
+          "label": "Touch the rooster",
+          "next": "m2",
+          "spot": "copper weathervane rooster"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands in the middle of a purple stone bridge, golden easel balanced on the railing, her rainbow mane reflected in the sketchy pencil-line water below. On the LEFT a yellow lantern hangs from the bridge post, on the RIGHT a pink crystal formation juts from the riverbank, both large, fully visible, clearly separated.",
+      "text": "Halfway across, Luna noticed the river below was only pencil lines — not even colored in! The bridge itself was losing purple at the far end, fading to white. Yellow lantern or pink crystal?",
+      "choices": [
+        {
+          "label": "Light the lantern",
+          "next": "m1",
+          "spot": "yellow hanging lantern"
+        },
+        {
+          "label": "Touch the crystal",
+          "next": "m2",
+          "spot": "pink crystal formation"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} walks through the green hedge maze, blue paint jar tucked under one leg, her rainbow mane trailing sparks of color onto the hedge walls. On the LEFT a white marble fountain bubbles with thin watery paint, on the RIGHT a teal garden gate stands slightly ajar, both large, fully visible, clearly separated.",
+      "text": "The hedges were only green on one side — their backs were bare pencil sketch! Luna's blue jar sloshed as she walked, painting the path behind her. Marble fountain or teal gate?",
+      "scare": {
+        "spot": "white marble fountain",
+        "pop": "a cheerful painted frog with bright watercolor spots leaping from inside the fountain basin",
+        "reveal": "Ribbit! Finally someone brought color — I have been gray for WEEKS!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Visit the fountain",
+          "next": "m3",
+          "spot": "white marble fountain"
+        },
+        {
+          "label": "Go through the gate",
+          "next": "m4",
+          "spot": "teal garden gate"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands at the top of the orange windmill platform, blue paint jar beside her, her rainbow mane blowing in the wind alongside the slowly turning painted sails. On the LEFT a brown wooden chest sits near the platform edge, on the RIGHT a violet telescope points toward the white horizon, both large, fully visible, clearly separated.",
+      "text": "From up here Luna could see the whole world — painted patches floating in an ocean of white nothing! Her jar of blue paint caught the wind and hummed. Brown chest or violet telescope?",
+      "choices": [
+        {
+          "label": "Open the chest",
+          "next": "m3",
+          "spot": "brown wooden chest"
+        },
+        {
+          "label": "Look through scope",
+          "next": "m4",
+          "spot": "violet telescope"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in a half-painted clearing where thick oil paint meets raw white canvas, her rainbow mane blazing with color, a tiny exhausted paintbrush lying on the ground nearby. On the LEFT a large red canvas stretches between two painted trees, on the RIGHT a tall indigo door frame stands alone in the white emptiness, both large, fully visible, clearly separated.",
+      "text": "A tiny paintbrush lay in the clearing, bristles nearly white — it had used its very last color to paint the door Luna came through. Luna's mane blazed brighter, as if to say I brought plenty. Red canvas or indigo door?",
+      "choices": [
+        {
+          "label": "Paint the canvas",
+          "next": "end_mural",
+          "spot": "large red canvas"
+        },
+        {
+          "label": "Step through door",
+          "next": "end_splash",
+          "spot": "tall indigo door frame"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} discovers a painter's workshop carved into a cliff face, her rainbow mane illuminating three objects resting on a stone shelf. On the LEFT a crimson paintbrush with a worn wooden handle, in the MIDDLE a gold paint palette shaped like a sun, on the RIGHT a lime green bucket with a cracked rim, all large, fully visible, clearly separated.",
+      "text": "The workshop walls held half-finished masterpieces, and the littlest brush on the floor confessed it spent its last drop painting Luna's door. Three tools waited, but her mane only had enough rainbow for one. Crimson brush, gold palette, or green bucket?",
+      "choices": [
+        {
+          "label": "Grab the brush",
+          "next": "end_brushfriend",
+          "spot": "crimson worn paintbrush"
+        },
+        {
+          "label": "Take the palette",
+          "next": "end_sunset",
+          "spot": "gold sun palette"
+        },
+        {
+          "label": "Tip the bucket",
+          "next": "end_splat",
+          "spot": "lime green bucket"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} reaches the edge of the painted world where the last thick oil-paint ground crumbles into blank white nothing, her rainbow mane streaming color into the wind. On the LEFT a sturdy stone pedestal holds a large glass orb, on the RIGHT a wide wooden paintbrush the size of a broom leans against a half-drawn tree, both large, fully visible, clearly separated.",
+      "text": "The tiny paintbrush caught up, panting — it confessed it had spent its very last color painting the door Luna came through, hoping her rainbow mane held the answer. Beyond here was just white. Glass orb or giant brush?",
+      "choices": [
+        {
+          "label": "Touch the orb",
+          "next": "end_rainbow",
+          "spot": "large glass orb"
+        },
+        {
+          "label": "Swing the brush",
+          "next": "end_garden",
+          "spot": "wide wooden paintbrush"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands at a crossroads where four painted paths fade to white canvas endings, her rainbow mane casting colored light on the blank ground, a tiny exhausted paintbrush leaning against her hoof. On the LEFT a tall amber lantern post glows with a faint ember, on the RIGHT a deep magenta archway frames pure white emptiness, both large, fully visible, clearly separated.",
+      "text": "Every road just stopped. The tiny paintbrush whispered that it had painted Luna's door with its very last drop of color, betting everything on a unicorn with a rainbow mane. Amber lantern or magenta arch?",
+      "choices": [
+        {
+          "label": "Touch the lantern",
+          "next": "end_stars",
+          "spot": "tall amber lantern post"
+        },
+        {
+          "label": "Enter the arch",
+          "next": "end_home",
+          "spot": "deep magenta archway"
+        }
+      ]
+    },
+    "end_mural": {
+      "scene": "{HERO} stands before a massive finished mural that stretches across the sky between two painted oak trees, her rainbow mane softly fading to pastel after giving its color away, the tiny paintbrush riding on her back with bristles now full rainbow, the entire landscape behind them alive with thick impasto oil-paint flowers and swirling painted clouds.",
+      "text": "Luna pressed her mane to the canvas and every color poured out at once — the sky BURST into a painted sunset, the ground bloomed with wildflowers, and the little paintbrush gasped as its bristles filled with rainbow. They painted a door home together, side by side, brush and mane. The End!"
+    },
+    "end_splash": {
+      "scene": "{HERO} tumbles through the tall indigo door frame and lands in a puddle of wet blue paint on completely blank white canvas ground, her rainbow mane dripping blue, the door dissolving into faint pencil lines behind her, the landscape even more unfinished than before.",
+      "text": "Luna dove through the door and SPLOOSH — landed in the last puddle of wet paint in the whole world! Now she was blue, the door was gone, and the little paintbrush fainted. Turns out you cannot escape a painting by walking through more paintings. Oopsie ending!",
+      "bad": true
+    },
+    "end_brushfriend": {
+      "scene": "{HERO} holds the crimson paintbrush gently in her mouth while her rainbow mane wraps around it like a scarf, color flowing from mane to bristle in a warm glow, the workshop walls completing themselves into gorgeous finished oil paintings of mountains and meadows and starry skies, the tiny original paintbrush watching with joyful tears on its wooden handle.",
+      "text": "Luna picked up the old brush and her mane knew exactly what to do — rainbow color flowed down through the bristles like a river of light! Together they finished every painting on the walls, then painted a sky so beautiful it became real. The little paintbrush finally had a friend who understood color. The End!"
+    },
+    "end_sunset": {
+      "scene": "{HERO} holds the golden sun-shaped palette as it overflows with mixed colors that have turned into a muddy brown puddle dripping down her legs, her rainbow mane completely drained of color and hanging limp and grey, the little paintbrush looking horrified.",
+      "text": "The gold palette drank ALL of Luna's rainbow at once and mixed every color together into one big brown puddle — turns out if you combine EVERY color at the same time you just get mud! Luna's mane went completely grey, the paintbrush fainted, and the sunset looked like someone spilled gravy on the sky. Oopsie ending!",
+      "bad": true
+    },
+    "end_splat": {
+      "scene": "{HERO} covered head to hoof in dripping lime green paint, her rainbow mane completely green and matted, standing in a spreading green puddle that is painting everything the exact same shade of green — trees green, ground green, sky green, the tiny paintbrush green and scowling.",
+      "text": "Luna tipped the bucket and GREEN went EVERYWHERE! Her beautiful rainbow mane? Green. The sunset? Green. The little paintbrush? Very green and very annoyed. Turns out one color does NOT make a rainbow. Oopsie ending!",
+      "bad": true
+    },
+    "end_rainbow": {
+      "scene": "{HERO} presses her nose too hard against the glass orb and it rolls away across the floor, her rainbow mane shooting out in every direction like a broken sprinkler, painting random splotches on the ceiling, walls, and floor while the little paintbrush runs for cover.",
+      "text": "Luna pressed her nose to the glass orb but pushed too hard and it rolled right off the pedestal — her rainbow mane went EVERYWHERE like a sparkly sprinkler, painting the ceiling purple, the floor orange, and one very surprised pigeon completely turquoise! The orb rolled under a cabinet and Luna spent the rest of the day trying to fish it out with a broom. Oopsie ending!",
+      "bad": true
+    },
+    "end_garden": {
+      "scene": "{HERO} swings the enormous wooden paintbrush through the air in a wide arc while her rainbow mane feeds it color, a lush garden of impasto roses and sunflowers and lavender blooming into existence from raw white canvas, the tiny paintbrush planted happily among the painted flowers like a little wooden bloom itself.",
+      "text": "Luna swung the giant brush and her mane fed it every color she had — a garden EXPLODED into being, roses and sunflowers and lavender, all in thick gorgeous paint! The little paintbrush planted itself among the flowers and sprouted a tiny leaf. Luna found her door home growing between two painted oak trees. The End!"
+    },
+    "end_stars": {
+      "scene": "{HERO} touches her rainbow mane to the amber lantern as thousands of painted stars spread across the formerly white sky like scattered jewels, the tiny paintbrush reaching up to touch the nearest star, the whole landscape glowing in warm golden lamplight, oil-paint constellations forming the outline of a door among the stars.",
+      "text": "Luna breathed on the lantern and her rainbow mane lit it with every color at once! Painted stars burst across the blank sky, each one a tiny brushstroke masterpiece. The little paintbrush pointed up — the stars made a constellation shaped like a door. Luna winked, and they walked right through it together. The End!"
+    },
+    "end_home": {
+      "scene": "{HERO} steps through the magenta archway as her rainbow mane explodes with color, painting the white emptiness into a cozy cottage with a crackling fireplace and bookshelves full of paint tubes, the tiny paintbrush curled up on a painted cushion by the fire, warm golden light filling the finished room.",
+      "text": "Luna stepped through the arch and thought of home so hard her mane painted it into existence — walls, windows, a roaring fire, even a tiny cushion for her paintbrush friend. The world outside was finished too, every white patch now a swirl of gorgeous color. They were both home at last. The End!"
+    }
+  }
+}

@@ -1,0 +1,239 @@
+{
+  "id": "beacon",
+  "title": "Luna Lights the Lighthouse",
+  "hero": "LUNA",
+  "style": "Stormy watercolor seascape with thick gouache texture, deep indigo waves, warm amber lighthouse glow cutting through silver rain, cozy despite the storm. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the edge of a rain-lashed cliff, her glowing rainbow mane whipping in the wind, gazing across a churning indigo bay at a dark stone lighthouse on a rocky island, silver rain streaking the sky. On the LEFT a blue stone jetty stretches over the crashing waves, on the RIGHT a red wooden rowboat bobs beside the rocky shore, both large, fully visible, clearly separated.",
+      "text": "The puffins' fishing boats are lost in the storm and the lighthouse has gone dark! Luna shakes the rain off her mane and squares her little hooves — jetty or rowboat?",
+      "choices": [
+        {
+          "label": "Hop across the jetty",
+          "next": "a",
+          "spot": "blue stone jetty"
+        },
+        {
+          "label": "Row the red boat",
+          "next": "b",
+          "spot": "red wooden rowboat"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} balances on a slippery blue stone jetty above crashing indigo waves, her glowing rainbow mane lighting the sea spray, the dark lighthouse looming through rain ahead, a warm orange ember glowing between two rocks at her hooves. On the LEFT a green mossy boulder sits at the base of a sea cliff with a dark cave behind it, on the RIGHT a yellow wooden barrel bobs in a sheltered tidal pool, both large, fully visible, clearly separated.",
+      "text": "A warm ember glows in the rocks and Luna tucks it in her mane for safekeeping! Boulder or barrel?",
+      "choices": [
+        {
+          "label": "Squeeze past the boulder",
+          "next": "aa",
+          "spot": "green mossy boulder"
+        },
+        {
+          "label": "Hop on the barrel",
+          "next": "ab",
+          "spot": "yellow wooden barrel"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} rows a red wooden rowboat through towering indigo waves, her glowing rainbow mane reflecting in the dark water, the lighthouse barely visible through sheets of silver rain ahead. On the LEFT a silver driftwood log lies across a rocky inlet, on the RIGHT a golden wooden crate has washed up on a kelp-strewn beach, both large, fully visible, clearly separated.",
+      "text": "The little boat bumps the shore just as a sneaky wave splashes Luna's tail — two ways forward! Log or crate?",
+      "spot": "orange starfish",
+      "pop": "A cheerful plump orange starfish clinging to the rim of the rowboat, grinning with big cartoon eyes and rosy cheeks, dripping seawater, thick gouache watercolor style",
+      "reveal": "Ahoy, sailor! I am Stella — need a navigator?",
+      "sting": "boing",
+      "delay": 1700,
+      "choices": [
+        {
+          "label": "Cross the log",
+          "next": "ba",
+          "spot": "silver driftwood log"
+        },
+        {
+          "label": "Climb the crate",
+          "next": "bb",
+          "spot": "golden wooden crate"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a glowing sea cave lit by blue-green bioluminescent moss on the dripping walls, her rainbow mane casting prismatic reflections on the wet stone, tide pools shimmering at her hooves. On the LEFT a copper ship lantern hangs from a rusty hook on the cave wall, on the RIGHT a pink conch shell sits on a stone ledge above a pool, both large, fully visible, clearly separated.",
+      "text": "Oooh, the cave glows all by itself! Luna spots two treasures that might relight the lighthouse — lantern or shell?",
+      "spot": "purple sea urchin",
+      "pop": "A plump friendly purple sea urchin wearing a tiny crown made of barnacles, smiling with rosy cheeks, sitting in a tide pool, thick gouache watercolor style",
+      "reveal": "Welcome to my cave! Don't worry, my spines only tickle!",
+      "sting": "boing",
+      "delay": 1700,
+      "choices": [
+        {
+          "label": "Grab the lantern",
+          "next": "m1",
+          "spot": "copper ship lantern"
+        },
+        {
+          "label": "Take the shell",
+          "next": "m2",
+          "spot": "pink conch shell"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} rides a bobbing yellow barrel through sea-spray near the rocky base of the dark lighthouse, her glowing rainbow mane streaming behind her like a banner, waves crashing against the old stone foundation. On the LEFT a copper anchor leans against the lighthouse wall beside a low archway, on the RIGHT a pink buoy floats near a rusty iron ladder bolted to the stone, both large, fully visible, clearly separated.",
+      "text": "What a ride — the barrel bumps right against the lighthouse! Anchor or buoy?",
+      "choices": [
+        {
+          "label": "Use the anchor",
+          "next": "m1",
+          "spot": "copper anchor"
+        },
+        {
+          "label": "Grab the buoy",
+          "next": "m2",
+          "spot": "pink buoy"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} tiptoes across a silver driftwood log over a rocky inlet, Stella the orange starfish clinging proudly to her glowing rainbow mane, colorful tide pools glittering below in the storm light. On the LEFT a turquoise glass float sits wedged between two rocks, on the RIGHT a scarlet metal bucket sits upside-down on a flat stone, both large, fully visible, clearly separated.",
+      "text": "Stella points a little arm toward the lighthouse — almost there! Float or bucket?",
+      "choices": [
+        {
+          "label": "Pick up the float",
+          "next": "m3",
+          "spot": "turquoise glass float"
+        },
+        {
+          "label": "Flip the bucket",
+          "next": "m4",
+          "spot": "scarlet metal bucket"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands atop a golden wooden crate on a windswept beach, Stella the orange starfish perched on her glowing rainbow mane like a tiny crown, the dark lighthouse tower rising from the rocks above, rain streaming sideways across the scene. On the LEFT a turquoise glass bottle sits half-buried in the wet sand, on the RIGHT a scarlet tin pail sits on a flat rock beside a rain puddle, both large, fully visible, clearly separated.",
+      "text": "From up here Luna can see the lost puffin boats and one lonely little cloud — hurry! Bottle or pail?",
+      "choices": [
+        {
+          "label": "Dig out the bottle",
+          "next": "m3",
+          "spot": "turquoise glass bottle"
+        },
+        {
+          "label": "Grab the pail",
+          "next": "m4",
+          "spot": "scarlet tin pail"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in the round glass lamp room at the top of the lighthouse, her glowing rainbow mane reflecting in every rain-streaked window pane, the old brass lamp sitting dark and empty on its pedestal, the warm ember from her mane casting a tiny orange glow on the floor. On the LEFT a white wax candle sits on the curved windowsill, on the RIGHT a black iron striker sits on a dusty shelf, both large, fully visible, clearly separated.",
+      "text": "The lamp room at last — the old lamp is dark but Luna still has her lucky ember! Candle or striker?",
+      "choices": [
+        {
+          "label": "Light the candle",
+          "next": "end_candle",
+          "spot": "white wax candle"
+        },
+        {
+          "label": "Strike the iron",
+          "next": "end_sparks",
+          "spot": "black iron striker"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands in a dusty lighthouse storage room below the lamp, her glowing rainbow mane illuminating shelves of old bottles and coiled gear, the warm ember tucked behind her ear casting a tiny glow, rain drumming on the thick stone walls. On the LEFT a crimson oil drum sits on the stone floor with a brass tap, on the RIGHT a violet glass prism sits on a dusty shelf catching the mane-light, both large, fully visible, clearly separated.",
+      "text": "So many dusty treasures! Luna spots two things that could make the lighthouse shine again — oil drum or prism?",
+      "choices": [
+        {
+          "label": "Roll the oil drum",
+          "next": "end_oil",
+          "spot": "crimson oil drum"
+        },
+        {
+          "label": "Grab the prism",
+          "next": "end_prism",
+          "spot": "violet glass prism"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in an old lighthouse workshop with a worn stone workbench, Stella the orange starfish bouncing excitedly on her glowing rainbow mane, three curious objects arranged on the bench beneath a rain-streaked porthole window. On the LEFT a jade glass bottle filled with glowing fireflies sits on a folded cloth, in the MIDDLE an amber crystal orb pulses with warm light on a brass stand, on the RIGHT a teal tin whistle stands upright on a wooden block, all three large, fully visible, clearly separated.",
+      "text": "Three shiny things on the workbench and even Stella can't pick! Firefly bottle, crystal orb, or tin whistle?",
+      "choices": [
+        {
+          "label": "Open the firefly bottle",
+          "next": "end_fireflies",
+          "spot": "jade firefly bottle"
+        },
+        {
+          "label": "Hold the crystal orb",
+          "next": "end_crystal",
+          "spot": "amber crystal orb"
+        },
+        {
+          "label": "Blow the tin whistle",
+          "next": "end_whistle",
+          "spot": "teal tin whistle"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands on the rain-swept iron balcony circling the top of the lighthouse, Stella the orange starfish gripping the railing bravely, Luna's glowing rainbow mane whipping in the gale, the dark lamp room visible through a cracked window above. On the LEFT a white glass mirror leans against the iron railing, on the RIGHT a bronze fish vane lies on the balcony floor, both large, fully visible, clearly separated.",
+      "text": "Almost at the top! Luna just needs to get light out to sea somehow — mirror or fish vane?",
+      "choices": [
+        {
+          "label": "Angle the mirror",
+          "next": "end_mirror",
+          "spot": "white glass mirror"
+        },
+        {
+          "label": "Spin the fish vane",
+          "next": "end_vane",
+          "spot": "bronze fish vane"
+        }
+      ]
+    },
+    "end_candle": {
+      "scene": "{HERO} stands in the glowing lamp room at the top of the lighthouse, a white wax candle blazing on the sill where her warm ember lit it, her rainbow mane joining the flame to fill every window with brilliant warm light, a small tear-streaked thundercloud pressing its face gently against the glass outside, tiny puffin boats turning toward the glow on the dark indigo sea below.",
+      "text": "Luna's ember lights the candle and her rainbow mane turns it into a beam — even the sad little cloud stops crying and snuggles against the warm glass! The End!"
+    },
+    "end_sparks": {
+      "scene": "{HERO} slides down a wet spiral staircase inside the lighthouse on her belly, her glowing rainbow mane frizzed out in every direction with soot, a black iron striker clattering behind her, sparks and smoke pouring from the lamp room above while sprinklers spray water everywhere.",
+      "text": "Too many sparks — Luna's ember plus the striker turned the lamp room into a fireworks show and now she smells like burnt toast! Oopsie ending!",
+      "bad": true
+    },
+    "end_oil": {
+      "scene": "{HERO} stands proudly beside a blazing brass lighthouse lamp filled with crimson oil, her glowing rainbow mane adding rainbow streaks to the golden beam, a small happy thundercloud hovering above the lamp and misting it gently, warm light streaming from every window across the dark stormy sea toward tiny puffin boats sailing home.",
+      "text": "Luna's ember lights the oil and WHOOSH — her rainbow mane paints the beam with every color, the little cloud keeps it cool, and every puffin sails home singing! The End!"
+    },
+    "end_prism": {
+      "scene": "{HERO} holds the violet glass prism up to her glowing rainbow mane in the lamp room, but the beams scatter in every wrong direction, bouncing off the walls and ceiling and straight into Luna's own eyes, the cloud covering its eyes with tiny hands, while puffin boats sail in confused circles in the dark sea below.",
+      "text": "Luna held the prism up to her mane but aimed it BACKWARDS — rainbow beams bounced off every wall, hit the ceiling, and shot straight back into her eyes! Luna stumbled around the lamp room seeing stars while the puffins followed the random flashing lights in confused circles like the world's most disoriented disco. Oopsie ending!",
+      "bad": true
+    },
+    "end_fireflies": {
+      "scene": "{HERO} stands in the lamp room surrounded by hundreds of glowing golden fireflies spiraling up from a jade bottle, Stella the orange starfish conducting them with two little arms, Luna's rainbow mane sparkling among them, a small thundercloud wearing fireflies like twinkling stars hovering beside her, the combined glow streaming from the lighthouse across the dark stormy sea to guide tiny puffin boats home.",
+      "text": "Stella conducts the firefly orchestra, the little cloud wears them like jewels, and Luna's lighthouse glows brighter than any star — every puffin finds home tonight! The End!"
+    },
+    "end_crystal": {
+      "scene": "{HERO} sits on the floor of the cluttered lighthouse workshop surrounded by broken bottles and toppled shelves, Stella the orange starfish clinging to a table leg in shock, Luna's glowing rainbow mane frizzed out in every direction with dazzle-spots spinning around her head, the amber crystal orb still pulsing smugly on the overturned workbench.",
+      "text": "FLASH — the crystal had a little too much pizzazz and now Luna sees spots and Stella is hiding behind the table leg! Oopsie ending!",
+      "bad": true
+    },
+    "end_whistle": {
+      "scene": "{HERO} stands at the top of the lighthouse blowing a teal tin whistle, Stella the orange starfish dancing on the whistle rim, Luna's glowing rainbow mane blazing brighter with each musical note, a small happy thundercloud nuzzling against the lighthouse tower humming along, puffin fishing boats sailing toward the glowing musical beacon across dark indigo waves.",
+      "text": "Luna plays, Stella dances, the cloud hums bass, and every puffin boat follows the melody home — the world's first singing lighthouse! The End!"
+    },
+    "end_mirror": {
+      "scene": "{HERO} stands on the lighthouse balcony holding a white glass mirror that catches her glowing rainbow mane and bounces a brilliant beam across the dark sea, Stella the orange starfish adjusting the mirror angle with one tiny arm, a small thundercloud flashing gentle lightning that doubles the signal, puffin boats following the alternating rainbow-and-lightning beam home through the storm.",
+      "text": "Rainbow flash, lightning flash — Luna, Stella, and their cloud friend make the best lighthouse crew the puffins have ever sailed to! The End!"
+    },
+    "end_vane": {
+      "scene": "{HERO} clings to the bronze fish weather-vane at the very peak of the lighthouse roof as it spins wildly out of control, her rainbow mane whipping in circles and tangling around the pole, while Stella bounces helplessly in the dizzy wind below.",
+      "text": "Luna grabbed the weather-vane and her mane made it spin so fast that SHE started spinning too — round and round until her mane wrapped completely around the pole like rainbow spaghetti on a fork, and poor Stella got so dizzy watching that she walked into a cloud and fell asleep. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

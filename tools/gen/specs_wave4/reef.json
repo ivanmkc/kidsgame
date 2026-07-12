@@ -1,0 +1,243 @@
+{
+  "id": "reef",
+  "title": "Luna and the Stranded Seahorse",
+  "hero": "LUNA",
+  "style": "Translucent watercolor washes, dappled golden sunlight through shallow water, turquoise and coral-pink palette, stippled foam on rocks. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a sunlit rocky shore at low tide, her shimmering horn catching golden light, a tiny golden baby seahorse stranded in a crystal-clear puddle at her hooves squeaking toward the distant deep water. On the LEFT a golden sandy channel winds between sun-warmed boulders toward turquoise pools ahead, on the RIGHT a row of green mossy stepping stones crosses over bubbling rock pools, both large, fully visible, clearly separated.",
+      "text": "The tide has gone out and left behind a very small, very squeaky baby seahorse stuck in a puddle the size of a dinner plate — it needs to get back to the deep water before the sun dries everything up, which is EXACTLY the kind of quest a unicorn with a glowing horn was born for. Sandy channel or stepping stones?",
+      "choices": [
+        {
+          "label": "Wade the sandy channel",
+          "next": "a",
+          "spot": "golden sandy channel"
+        },
+        {
+          "label": "Hop the stepping stones",
+          "next": "b",
+          "spot": "green mossy stones"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} wades through a warm golden sandy channel between sun-baked boulders, the tiny golden baby seahorse perched on her mane chirping happily, a smooth pink conch shell sitting on a flat rock beside the channel, and a gray barnacle rock jutting from the sand. On the LEFT a turquoise coral arch frames a passage to deeper pools beyond, on the RIGHT a dark green kelp curtain hangs across a narrow gap between two tall boulders, both large, fully visible, clearly separated.",
+      "text": "The baby seahorse bounced on Luna's mane like a tiny rodeo champion while she spotted something GORGEOUS on a rock — a smooth pink conch shell, and into the saddlebag it went because finders keepers at low tide is basically a law. Coral arch or kelp curtain?",
+      "choices": [
+        {
+          "label": "Swim through the coral arch",
+          "next": "aa",
+          "spot": "turquoise coral arch"
+        },
+        {
+          "label": "Push through the kelp curtain",
+          "next": "ab",
+          "spot": "green kelp curtain"
+        }
+      ],
+      "scare": {
+        "spot": "gray barnacle rock",
+        "pop": "a wide-eyed hermit crab with two big round curious eyes scuttling sideways out from behind the gray barnacle rock waving its tiny claws",
+        "reveal": "Sorry, sorry — just looking for a bigger shell!",
+        "sting": "click",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} hops across flat green mossy stepping stones over bubbling turquoise rock pools, the tiny golden baby seahorse clinging to her mane and squeaking directions, a piece of turquoise sea glass glinting in a shallow pool between two stones. On the LEFT a weathered brown driftwood bridge arches over a wide tidal pool, on the RIGHT a ledge dotted with bright orange starfish stretches along the cliff base, both large, fully visible, clearly separated.",
+      "text": "Luna hopped from stone to stone like the world's most elegant game of DON'T-TOUCH-THE-WATER except with actual water, and between hops she scooped up a piece of turquoise sea glass so pretty it practically hummed in her hoof. Driftwood bridge or starfish ledge?",
+      "choices": [
+        {
+          "label": "Cross the driftwood bridge",
+          "next": "ba",
+          "spot": "brown driftwood bridge"
+        },
+        {
+          "label": "Walk the starfish ledge",
+          "next": "bb",
+          "spot": "orange starfish ledge"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} ducks under a wide turquoise coral arch into a sunlit pool where a grumpy orange crab blocks the path with outstretched claws, the smooth pink conch shell peeking from her saddlebag, the baby seahorse squeaking nervously on her mane. On the LEFT a jade tide pool stretches toward deeper water behind a low rocky shelf, on the RIGHT an amber sand flat spreads wide and shallow toward the ocean edge, both large, fully visible, clearly separated.",
+      "text": "A crab the size of a dinner plate planted itself right in the path and CLACKED like a tiny furious bouncer — the baby seahorse ducked behind Luna's ear, which was adorable but NOT helpful in the slightest. Jade pool or sand flat?",
+      "choices": [
+        {
+          "label": "Wade the jade pool",
+          "next": "m1",
+          "spot": "jade tide pool"
+        },
+        {
+          "label": "Cross the sand flat",
+          "next": "m2",
+          "spot": "amber sand flat"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} pushes through a dark green kelp curtain into a shaded rock pool where a prickly purple sea urchin sits dead center on the only path forward, the smooth pink conch shell peeking from her saddlebag, the baby seahorse peering over Luna's mane with wide eyes. On the LEFT a jade seaweed arch opens toward deeper turquoise water beyond, on the RIGHT an amber rock shelf runs along the pool edge toward the open shore, both large, fully visible, clearly separated.",
+      "text": "The kelp curtain slapped Luna in the face like a cold wet high-five, and on the other side a purple sea urchin sat in the EXACT middle of the path looking pointy enough to discourage literally anyone with hooves. Seaweed arch or rock shelf?",
+      "choices": [
+        {
+          "label": "Duck through the seaweed arch",
+          "next": "m1",
+          "spot": "jade seaweed arch"
+        },
+        {
+          "label": "Edge along the rock shelf",
+          "next": "m2",
+          "spot": "amber rock shelf"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} crosses a weathered brown driftwood bridge arching over a wide tidal pool where a curious lavender octopus watches from below with ink-dark eyes, the turquoise sea glass glinting in her saddlebag, the baby seahorse riding Luna's mane and waving a tiny fin at the octopus. On the LEFT a pink coral ledge runs along the edge of a deep pool toward the ocean, on the RIGHT a white foam channel rushes between smooth boulders toward open water, both large, fully visible, clearly separated.",
+      "text": "A lavender octopus draped three arms over the bridge railing like the world's most relaxed toll collector and wiggled a fourth toward Luna's bag — the turquoise sea glass caught the light and the octopus leaned in with ALL its attention, which is a LOT of attention from eight arms. Coral ledge or foam channel?",
+      "choices": [
+        {
+          "label": "Follow the coral ledge",
+          "next": "m3",
+          "spot": "pink coral ledge"
+        },
+        {
+          "label": "Splash down the foam channel",
+          "next": "m4",
+          "spot": "white foam channel"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} walks along a ledge dotted with bright orange starfish, the turquoise sea glass glinting in her saddlebag, the baby seahorse pointing its snout excitedly toward the sound of deep ocean waves ahead, and a pink coral boulder sitting at the base of the cliff. On the LEFT a coral shelf path continues along a deep turquoise pool toward the sea, on the RIGHT a white water gap rushes between tall rocks toward open ocean, both large, fully visible, clearly separated.",
+      "text": "The orange starfish waved their arms in slow motion like the world's laziest cheerleading squad, and the baby seahorse was practically VIBRATING because the deep ocean sounded close enough to touch. Coral shelf or water gap?",
+      "choices": [
+        {
+          "label": "Take the coral shelf",
+          "next": "m3",
+          "spot": "coral shelf path"
+        },
+        {
+          "label": "Wade the water gap",
+          "next": "m4",
+          "spot": "white water gap"
+        }
+      ],
+      "scare": {
+        "spot": "pink coral boulder",
+        "pop": "a startled green blenny fish with two big round bulging eyes peeking over the top of the pink coral boulder with its mouth in a perfect O shape",
+        "reveal": "Oh! I thought you were a very sparkly rock!",
+        "sting": "blub",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands at the edge of a deep jade pool where the water turns dark and ocean-deep, the smooth pink conch shell in her hoof, a large gray fallen boulder blocking a narrow opening in the rock face with tiny seahorse snouts poking through the cracks. On the LEFT a large copper tide bell hangs from a driftwood post within easy reach, on the RIGHT a rose coral seat curves like a cozy armchair beside a warm sunny rock, both large, fully visible, clearly separated.",
+      "text": "The baby seahorse LEAPED off Luna's mane and pressed its tiny nose against the boulder crack, and through the gap came a chorus of squeaks — the whole FAMILY was trapped behind that rock and the baby hadn't been lost at all, it had been leading Luna here THIS WHOLE TIME! That coral seat looks dangerously comfy. Tide bell or coral seat?",
+      "choices": [
+        {
+          "label": "Ring the tide bell",
+          "next": "end_bell_call",
+          "spot": "copper tide bell"
+        },
+        {
+          "label": "Rest in the coral seat",
+          "next": "end_coral_nap",
+          "spot": "rose coral seat"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} reaches a sunlit tidal channel where gentle waves lap against a large gray fallen boulder blocking a rocky hollow, the smooth pink conch shell glowing faintly in her hoof, tiny golden seahorse tails flicking through cracks in the boulder, the baby seahorse squeaking at its family through the gaps. On the LEFT a golden sand slope leads down to the base of the boulder where Luna's horn could reach the widest crack, on the RIGHT a thick amber kelp rope hangs from a rock arch directly above the boulder, both large, fully visible, clearly separated.",
+      "text": "Tiny tails through the cracks told the whole story — the baby seahorse was NEVER lost, it was on a rescue mission and Luna was the muscle! Her horn tingled like it KNEW it was exactly the right shape to lever that boulder, and the conch shell hummed in her hoof like it wanted to celebrate early. Sand slope or kelp rope?",
+      "choices": [
+        {
+          "label": "Slide down the sand slope",
+          "next": "end_horn_lever",
+          "spot": "golden sand slope"
+        },
+        {
+          "label": "Grab the kelp rope",
+          "next": "end_kelp_swing",
+          "spot": "amber kelp rope"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands on a coral-pink ledge beside a large gray fallen boulder trapping a family of tiny golden seahorses in a rocky hollow, the turquoise sea glass glinting in her hoof, the baby seahorse pressing its snout against the boulder and squeaking through the cracks to its family. On the LEFT a sturdy red coral branch lies wedged between the rocks, in the MIDDLE a thick green kelp rope dangles from the cliff face above, on the RIGHT a small blue mussel shell sits on a flat rock looking suspiciously tiny, all large, fully visible, clearly separated.",
+      "text": "The baby seahorse hadn't been lost — it had brought Luna straight to its FAMILY, all their tiny golden snouts poking through the cracks! Three things caught Luna's eye: something strong enough to pry, something long enough to pull, and something hilariously NOT big enough to do much of anything. Coral branch, kelp rope, or mussel shell?",
+      "choices": [
+        {
+          "label": "Pry with the coral branch",
+          "next": "end_coral_pry",
+          "spot": "red coral branch"
+        },
+        {
+          "label": "Pull with the kelp rope",
+          "next": "end_kelp_pull",
+          "spot": "green kelp rope"
+        },
+        {
+          "label": "Try the mussel shell",
+          "next": "end_mussel_bonk",
+          "spot": "blue mussel shell"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} arrives where a white foam channel meets a large gray fallen boulder blocking a rocky cave entrance, the turquoise sea glass in her hoof catching the spray, tiny golden seahorse faces pressing against every crack in the boulder, the baby seahorse chirping encouragement through the gaps. On the LEFT a wide orange tidal shelf juts out beside the boulder where Luna could brace her hooves, on the RIGHT a silver wave pool churns with incoming surf right behind the boulder, both large, fully visible, clearly separated.",
+      "text": "THERE they were — the whole seahorse family, stuck behind a boulder with their little faces pressed to every crack like the world's cutest jailbreak waiting to happen! The baby seahorse hadn't been lost, it had been the bravest rescue team in one-inch history. Tidal shelf or wave pool?",
+      "choices": [
+        {
+          "label": "Brace on the tidal shelf",
+          "next": "end_wave_push",
+          "spot": "orange tidal shelf"
+        },
+        {
+          "label": "Ride the wave pool",
+          "next": "end_starfish_chain",
+          "spot": "silver wave pool"
+        }
+      ]
+    },
+    "end_bell_call": {
+      "scene": "{HERO} rings the copper tide bell from the driftwood post beside the deep jade pool, the BONG echoing across the shore, the smooth pink conch shell humming in harmony in her hoof, as crabs and starfish and a lavender octopus all push against the gray fallen boulder together, the boulder rolling aside, and a stream of tiny golden seahorses pouring through the opening to swirl joyfully around the baby seahorse.",
+      "text": "Luna BONGED that bell so hard the whole shore vibrated, and every creature within earshot came RUNNING — crabs pushed, starfish pulled, even an octopus lent four arms, and the boulder ROLLED aside as the conch shell hummed a victory tune! A dozen tiny seahorses streamed out and swirled around the baby in the happiest family reunion the tide pools had ever seen. The End!"
+    },
+    "end_coral_nap": {
+      "scene": "{HERO} curled up in the rose coral seat beside the warm sunny rock at the edge of the deep jade pool, eyes closed, the smooth pink conch shell tucked under her chin, while the tide creeps in around her hooves and the baby seahorse floats beside the still-blocked boulder giving Luna a look of immense disappointment.",
+      "text": "That coral seat was SO perfectly unicorn-shaped that Luna sat down for JUST a second and immediately fell into the deepest nap of her entire life — she woke up with seaweed in her mane, water around her knees, and a baby seahorse giving her the most disappointed look a creature the size of a paper clip can produce. The seahorse family is STILL stuck behind that boulder and Luna is basically a very sparkly tide pool decoration now. Oopsie ending!",
+      "bad": true
+    },
+    "end_horn_lever": {
+      "scene": "{HERO} braces her hooves on the golden sand slope and wedges her glowing horn into the widest crack of the gray fallen boulder, the smooth pink conch shell at her feet ringing with the squeaks of the seahorse family inside, the boulder splitting and a stream of tiny golden seahorses pouring out into the sunlit tidal channel to swirl around the baby seahorse.",
+      "text": "Luna dug her hooves into the sand, aimed her horn at the biggest crack, and PUSHED — the boulder groaned, the conch shell rang out like a tiny foghorn cheering her on, and with one last shove the rock SPLIT open! A dozen seahorses streamed out spinning and squeaking, and the baby seahorse did a backflip so joyful it nearly launched into orbit. The End!"
+    },
+    "end_kelp_swing": {
+      "scene": "{HERO} swings on the thick amber kelp rope from the rock arch and slams into the gray fallen boulder in the sunlit tidal channel, the smooth pink conch shell flying from her saddlebag into the baby seahorse's tiny fins below, the boulder cracking open and tiny golden seahorses flooding out into the sparkling water.",
+      "text": "Luna grabbed that kelp rope, swung like a sparkly wrecking ball, and THWACKED the boulder with her whole unicorn self — it cracked down the middle and tiny seahorses POURED out like the world's cutest waterfall! The conch shell flew from her bag and the baby seahorse caught it, which was the most impressive catch by anyone under two inches tall in history. The End!"
+    },
+    "end_coral_pry": {
+      "scene": "{HERO} wedges the sturdy red coral branch under the gray fallen boulder on the coral-pink ledge and pushes down with her glowing horn, the turquoise sea glass flashing in her saddlebag, the boulder tipping and rolling aside as a cave full of tiny golden seahorses swim out in a joyful spiral around the baby seahorse.",
+      "text": "Luna jammed the coral branch under the boulder, leaned her horn on top, and PUSHED with everything she had — the rock tipped like a very heavy seesaw and tumbled aside, and out swirled an entire seahorse family doing a victory lap so synchronized it looked like a tiny underwater ballet! The baby seahorse nuzzled every single one and then nuzzled Luna's nose for good measure. The End!"
+    },
+    "end_kelp_pull": {
+      "scene": "{HERO} wrapped completely in thick green kelp rope on the coral-pink ledge, hooves tangled, the turquoise sea glass swinging wildly, the gray boulder unmoved, and the baby seahorse peeking out from behind the boulder watching Luna struggle.",
+      "text": "Luna lassoed that boulder like a cowgirl but forgot to brace her hooves — the kelp snapped back and wrapped around her like a sparkly green burrito! She rolled across the ledge tangled from horn to tail, the boulder didn't move one single inch, and the baby seahorse peeked out to see what all the commotion was about. Oopsie ending!",
+      "bad": true
+    },
+    "end_mussel_bonk": {
+      "scene": "{HERO} presses the small blue mussel shell against the gray fallen boulder on the coral-pink ledge, the shell popping off and flying toward her nose, the turquoise sea glass tumbling from her saddlebag onto the rocks, the baby seahorse floating beside the still-blocked boulder with its tiny fins crossed and eyebrows raised as high as seahorse eyebrows can go.",
+      "text": "Luna wedged the mussel shell into the crack, pushed with ALL her might, and the shell said NOPE — it shot off the boulder like a tiny blue cannonball and bonked her right on the nose! The sea glass tumbled out of her bag, the boulder did not even WOBBLE, the seahorse family is STILL stuck behind it, and the baby seahorse is giving Luna a look that could curdle seawater. Oopsie ending!",
+      "bad": true
+    },
+    "end_wave_push": {
+      "scene": "{HERO} braces her hooves on the wide orange tidal shelf and pushes the gray fallen boulder with her glowing horn as a big turquoise wave crashes against the boulder from behind, the turquoise sea glass flashing in her saddlebag, the combined force rolling the boulder aside as tiny golden seahorses stream out of the cave into the churning foam and the baby seahorse leaps into its family.",
+      "text": "Luna planted her hooves, timed the biggest wave, and SHOVED — the wave pushed from behind, Luna pushed from the front, and the boulder rolled aside like it had FINALLY gotten the message! Tiny seahorses came tumbling out into the surf and the baby seahorse did the most spectacular belly flop into its family's fins that Luna had ever seen. The End!"
+    },
+    "end_starfish_chain": {
+      "scene": "{HERO} stands in the silver wave pool as a wave lifts her off her hooves and deposits her on top of the gray boulder instead of moving it, the turquoise starfish stuck to Luna's leg, Luna sitting on the unmoved boulder looking baffled while water drains around her.",
+      "text": "Luna waded into the wave pool and the ocean sent a wave all right — it picked up LUNA instead of the boulder and plopped her right on TOP of it! She sat there soaking wet with a starfish stuck to her leg, the boulder completely unmoved, and the seahorses underneath wondering why the ceiling just got heavier. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "id": "loom",
+  "title": "Luna and the Tangled Thread",
+  "hero": "LUNA",
+  "style": "Rich medieval tapestry textures, warm saffron and indigo tones, golden afternoon light through stone arches, visible warp-and-weft detail. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a tall round stone tower room with a giant wooden tapestry loom stretching floor to ceiling, its colorful threads tangled in a messy knot at the center, skeins of colored yarn hanging from the rafters like a rainbow waterfall, golden afternoon light pouring through a large arched window showing a sunset sky. On the LEFT a large golden spinning wheel sits in a warm saffron-lit alcove with baskets of yarn, on the RIGHT a big copper dye vat steams gently beside racks of hanging indigo and crimson skeins in a stone alcove, both large, fully visible, clearly separated.",
+      "text": "The birthday banner is DUE at sunset and the loom looks like a rainbow sneezed — every thread is tangled, the pattern keeps shifting on its own, and Luna's best friend is about to arrive to absolutely NO decorations. Spinning wheel or dye vat?",
+      "choices": [
+        {
+          "label": "Visit the spinning wheel",
+          "next": "a",
+          "spot": "golden spinning wheel"
+        },
+        {
+          "label": "Check the dye vat",
+          "next": "b",
+          "spot": "copper dye vat"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands in a warm saffron-lit spinning alcove beside a large golden spinning wheel humming softly, skeins of golden yarn on wooden pegs, a shiny golden bobbin sitting on a low shelf catching the light, and a large wicker yarn basket sitting against the stone wall. On the LEFT a slate spiral staircase winds upward through the tower ceiling toward a belfry room, on the RIGHT a russet tapestry gallery stretches down a corridor of finished weavings glowing in amber light, both large, fully visible, clearly separated.",
+      "text": "The spinning wheel is humming a tune nobody asked for and a shiny golden bobbin on the shelf fits PERFECTLY in Luna's hoof — into the saddlebag it goes, she has a feeling about this one. Spiral staircase or tapestry gallery?",
+      "choices": [
+        {
+          "label": "Climb the spiral staircase",
+          "next": "aa",
+          "spot": "slate spiral staircase"
+        },
+        {
+          "label": "Explore the tapestry gallery",
+          "next": "ab",
+          "spot": "russet tapestry gallery"
+        }
+      ],
+      "scare": {
+        "spot": "wicker yarn basket",
+        "pop": "a fuzzy lavender moth with two big round sparkly eyes fluttering out of the wicker yarn basket trailing a strand of golden yarn",
+        "reveal": "Flutter! I was just keeping the yarn warm!",
+        "sting": "flutter",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} stands in a stone alcove beside a big copper dye vat steaming with rich indigo color, racks of dyed skeins in crimson and teal hanging on wooden drying frames, a carved wooden shuttle with a star notch sitting on a stone ledge catching the light. On the LEFT a wide tan stone windowsill stretches beside potted herbs and dried flowers in the golden afternoon light, on the RIGHT a mossy stone ramp slopes downward into a softly lit thread cellar below, both large, fully visible, clearly separated.",
+      "text": "The dye vat is bubbling like a very fashionable soup and a carved wooden shuttle with a little star notch is sitting on the ledge looking IMPORTANT — into the saddlebag, obviously. Windowsill or cellar ramp?",
+      "choices": [
+        {
+          "label": "Perch on the windowsill",
+          "next": "ba",
+          "spot": "tan stone windowsill"
+        },
+        {
+          "label": "Descend the cellar ramp",
+          "next": "bb",
+          "spot": "mossy stone ramp"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands in a round stone belfry room at the top of the tower, a large bronze bell hanging from an oak crossbeam above, the golden bobbin peeking from her saddlebag, wind ruffling her mane through open stone arches showing a golden sunset getting lower. On the LEFT a crimson stone ramp curves downward toward the sound of the loom clicking below, on the RIGHT a pine rafter walkway stretches across the open ceiling toward a balcony overlooking the loom far below, both large, fully visible, clearly separated.",
+      "text": "Up here Luna can see her friend's house on the next hill and the party lanterns are ALREADY LIT, which is extremely stressful — below she can hear the loom clicking away like it has strong opinions about deadlines. Stone ramp or rafter walkway?",
+      "choices": [
+        {
+          "label": "Take the stone ramp down",
+          "next": "m1",
+          "spot": "crimson stone ramp"
+        },
+        {
+          "label": "Cross the rafter walkway",
+          "next": "m2",
+          "spot": "pine rafter walkway"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} walks through a tapestry gallery with finished weavings hanging on both stone walls glowing in amber torchlight, the golden bobbin peeking from her saddlebag, ancient tapestries showing heroes on quests in rich warm tones, one faded tapestry showing a small unicorn that looks strangely familiar. On the LEFT an ochre curtain archway opens at the far end with the sound of the loom clicking from below, on the RIGHT a gilded wooden balcony railing is visible through a wide opening overlooking the loom room, both large, fully visible, clearly separated.",
+      "text": "These old tapestries are GORGEOUS and that faded one with a unicorn looks suspiciously familiar, but the loom downstairs is clicking louder now like furniture should not be this impatient. Curtain archway or wooden balcony?",
+      "choices": [
+        {
+          "label": "Duck through the curtain archway",
+          "next": "m1",
+          "spot": "ochre curtain archway"
+        },
+        {
+          "label": "Lean over the wooden balcony",
+          "next": "m2",
+          "spot": "gilded wooden balcony"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} perches on a wide sunlit stone windowsill in the tower, the carved wooden shuttle with its star notch peeking from her saddlebag, potted herbs and dried lavender bundles catching golden light, the valley and sunset sky visible through the arched window. On the LEFT a jade stone archway opens in the wall leading toward the loom room with colored light spilling through, on the RIGHT a teak wooden ladder leads down to a lower level where the base of the loom is visible, both large, fully visible, clearly separated.",
+      "text": "The herbs smell like a warm hug and the sunset is painting the valley PEACH, but there is zero time for scenic appreciation when a birthday banner needs finishing — colored light from the loom room is flickering through that archway like a summons. Stone archway or wooden ladder?",
+      "choices": [
+        {
+          "label": "Step through the stone archway",
+          "next": "m3",
+          "spot": "jade stone archway"
+        },
+        {
+          "label": "Climb down the wooden ladder",
+          "next": "m4",
+          "spot": "teak wooden ladder"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands in a cool stone thread cellar lined with shelves of rare colored thread on wooden spools, the carved wooden shuttle peeking from her saddlebag, a large brass dye pot sitting on the cellar floor beside a low stone bench, and soft amber light from an iron wall sconce. On the LEFT a cobalt painted archway leads through a passage toward the loom room above, on the RIGHT a chestnut wooden staircase climbs upward toward the loom room from below, both large, fully visible, clearly separated.",
+      "text": "The cellar is full of threads so rare they probably have NAMES and that round brass pot is sitting there looking suspiciously cozy, but the shuttle in Luna's saddlebag is practically vibrating toward the loom upstairs. Painted archway or wooden staircase?",
+      "choices": [
+        {
+          "label": "Go through the painted archway",
+          "next": "m3",
+          "spot": "cobalt painted archway"
+        },
+        {
+          "label": "Climb the wooden staircase",
+          "next": "m4",
+          "spot": "chestnut wooden staircase"
+        }
+      ],
+      "scare": {
+        "spot": "brass dye pot",
+        "pop": "a chubby felt mouse with two big round shiny button eyes peeking over the rim of the brass dye pot with indigo-stained paws",
+        "reveal": "Squeak! I fell in and now I am BLUE!",
+        "sting": "squeak",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands at the base of the giant tapestry loom, the golden bobbin glowing faintly in her hoof, the tangled threads above slowly weaving themselves into tiny pictures of a spinning wheel and a tower staircase — her own journey — warm amber light from the arched window. On the LEFT a large oak bobbin rack stands bolted to the loom frame with an empty spindle waiting, on the RIGHT a plush rose wool cushion sits in a cozy alcove beside the loom, both large, fully visible, clearly separated.",
+      "text": "The threads are weaving THEMSELVES into tiny pictures of Luna's journey and the golden bobbin is humming at that empty spindle like it knows exactly where it belongs — but that wool cushion is also whispering sweet nothings, and there is a banner to finish. Bobbin rack or wool cushion?",
+      "choices": [
+        {
+          "label": "Mount the bobbin rack",
+          "next": "end_golden_weave",
+          "spot": "oak bobbin rack"
+        },
+        {
+          "label": "Rest on the wool cushion",
+          "next": "end_yarn_nap",
+          "spot": "rose wool cushion"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a wooden balcony overlooking the giant loom from above, the golden bobbin in her saddlebag glowing, her horn catching a beam of sunset light that refracts across the tangled threads below making them shimmer and shift into new patterns of her adventure. On the LEFT a garnet lamp bracket is bolted to the balcony rail with a polished brass reflector, on the RIGHT an ivory pattern wheel is mounted on a pedestal at the balcony edge with carved notches around its rim, both large, fully visible, clearly separated.",
+      "text": "Luna's horn is TINGLING and every time the sunset catches it the threads rearrange into pictures of her adventure — this loom has been weaving her story the whole time, the absolute drama queen of furniture. Lamp bracket or pattern wheel?",
+      "choices": [
+        {
+          "label": "Aim the lamp bracket",
+          "next": "end_horn_tapestry",
+          "spot": "garnet lamp bracket"
+        },
+        {
+          "label": "Turn the pattern wheel",
+          "next": "end_pattern_dance",
+          "spot": "ivory pattern wheel"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands before the giant loom with the carved wooden shuttle in her hoof, three large containers of colored yarn arranged at the loom's base each glowing softly in the golden light, the border of the tapestry already woven with tiny pictures of everywhere Luna has been today. On the LEFT a large indigo stone bowl overflows with deep blue yarn, in the MIDDLE a large saffron clay pot brims with warm golden yarn, on the RIGHT a large violet wooden barrel is packed with rich purple yarn and fizzing faintly, all large, fully visible, clearly separated.",
+      "text": "The shuttle is READY and the loom needs just one more color to finish — and hold on, the border is already full of tiny woven pictures of everywhere Luna has been today, because this loom has HOBBIES. The violet barrel is fizzing suspiciously. Blue bowl, gold pot, or purple barrel?",
+      "choices": [
+        {
+          "label": "Scoop from the stone bowl",
+          "next": "end_ocean_banner",
+          "spot": "indigo stone bowl"
+        },
+        {
+          "label": "Pull from the clay pot",
+          "next": "end_sunrise_banner",
+          "spot": "saffron clay pot"
+        },
+        {
+          "label": "Grab from the wooden barrel",
+          "next": "end_violet_tangle",
+          "spot": "violet wooden barrel"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands beside the giant loom at its base level, the carved wooden shuttle with the star notch gripped in her hoof, the tapestry nearly complete with only one dark corner left unfinished, the woven border showing tiny scenes of Luna's journey in the golden sunset light streaming through the arched window. On the LEFT the main walnut loom beam stretches horizontally across the frame with a notch that matches the shuttle perfectly, on the RIGHT a large crimson yarn ball sits tangled on the floor pulsing faintly with color, both large, fully visible, clearly separated.",
+      "text": "SO close — the tapestry is almost done and the woven border shows tiny scenes of Luna's journey, which means this loom has been SPYING, but that is a conversation for after the birthday party. Loom beam or yarn ball?",
+      "choices": [
+        {
+          "label": "Weave across the loom beam",
+          "next": "end_shuttle_star",
+          "spot": "walnut loom beam"
+        },
+        {
+          "label": "Tug the crimson yarn ball",
+          "next": "end_knot_surprise",
+          "spot": "crimson yarn ball"
+        }
+      ]
+    },
+    "end_golden_weave": {
+      "scene": "{HERO} places the glowing golden bobbin onto the oak rack spindle and the loom erupts with golden thread weaving itself into a magnificent tapestry showing tiny scenes of her adventure — the spinning wheel, the tower, a galloping unicorn — her friend standing in the tower entrance with hooves clasped in delight as the last thread falls into place.",
+      "text": "Luna clicked the golden bobbin onto the rack and the loom went WHOOOOSH — golden thread shot through every gap, weaving tiny spinning wheels and towers and a little unicorn galloping through it all. Her friend trotted in right at sunset, saw the tapestry, and happy-cried because the best birthday present turned out to be the story of how hard Luna tried. The End!"
+    },
+    "end_yarn_nap": {
+      "scene": "{HERO} curled up on the plush rose wool cushion beside the loom, eyes closed with the golden bobbin still clutched in her hoof, while the loom above weaves furiously on its own and the sky through the arched window has turned to purple dusk.",
+      "text": "That wool cushion was SO impossibly soft that Luna closed her eyes for just ONE second and woke up to stars in the window — the sunset had come and gone, the party happened without her, and the loom used her golden bobbin to weave a portrait of Luna NAPPING into the birthday banner, which is accurate but deeply unhelpful. Oopsie ending!",
+      "bad": true
+    },
+    "end_horn_tapestry": {
+      "scene": "{HERO} aims her glowing horn through the garnet lamp bracket on the balcony, amplifying the light into a brilliant golden beam that floods the loom below, the golden bobbin blazing in her saddlebag as the threads dance into a radiant tapestry showing her whole adventure, her friend visible below in the tower entrance clapping with joy.",
+      "text": "Luna aimed her horn through the lamp bracket and WHOOOM — light flooded the loom like liquid gold, the golden bobbin blazed, and every thread wove itself into a shimmering tapestry of the whole adventure! Her friend walked in, looked up, and whispered that it was the most beautiful thing she had ever seen — the loom had been weaving Luna's choices all along because her story WAS the pattern. The End!"
+    },
+    "end_pattern_dance": {
+      "scene": "{HERO} turns the ivory pattern wheel too fast on the balcony pedestal, the loom below spinning wildly out of control, threads flying off the frame in colorful tangles, the golden bobbin launched across the room trailing thread behind it.",
+      "text": "Luna turned the wheel and the loom went BERSERK — the golden bobbin spun so fast it flew right off the frame, trailing thread behind it like a tiny golden comet, and the tapestry came out looking like a cat had fought a rainbow! Threads dangled everywhere, the wheel was still spinning, and Luna quietly backed away from what was technically the world's fastest and worst weaving. Oopsie ending!",
+      "bad": true
+    },
+    "end_ocean_banner": {
+      "scene": "{HERO} threads deep indigo yarn through the carved wooden shuttle and weaves it across the loom, the tapestry filling with a moonlit ocean scene of rolling waves and leaping seahorses under silver stars, the star notch on the shuttle stamping a tiny constellation in the corner, her friend entering the tower with wide sparkling eyes.",
+      "text": "Luna threaded the indigo yarn through the shuttle and the loom wove a MOONLIT OCEAN — silver waves rolled across the tapestry, seahorses leaped between the threads, and the star notch stamped a tiny constellation in the corner like a signature. Her friend ran in, gasped, and said it was her favorite scene in the whole world, which Luna already knew because that is what best friends are FOR. The End!"
+    },
+    "end_sunrise_banner": {
+      "scene": "{HERO} threads warm saffron yarn through the carved wooden shuttle and weaves it across the loom, the tapestry blazing with a golden sunrise so vivid the whole tower room glows warm, the star notch on the shuttle stamping a tiny sun in the corner, her friend entering the tower shielding her eyes with a huge grin.",
+      "text": "Luna pulled the saffron thread through the shuttle and the loom wove a SUNRISE so warm the whole tower glowed like a lantern — golden light poured from the tapestry and the star notch stamped a little sun in the corner. Her friend walked in, shielded her eyes, and laughed because who needs real sunsets when your best friend can weave you one. The End!"
+    },
+    "end_violet_tangle": {
+      "scene": "{HERO} grabs violet yarn from the wooden barrel and threads it through the carved shuttle, but the violet yarn spirals wildly out of control wrapping around Luna like a sparkly cocoon while the loom calmly finishes the banner by itself, the shuttle dangling uselessly from a strand of purple.",
+      "text": "Luna grabbed the violet yarn and it grabbed her RIGHT BACK — the thread whipped around her legs, her tail, and her snout until she was a sparkly purple burrito rolling across the floor while the loom calmly finished the birthday banner WITHOUT her, thank you very much. The banner looks great but Luna does not and her friend is going to have QUESTIONS. Oopsie ending!",
+      "bad": true
+    },
+    "end_shuttle_star": {
+      "scene": "{HERO} slides the carved wooden shuttle into the walnut loom beam notch and weaves the final pass, the star notch stamping a glittering constellation pattern across the entire tapestry as it completes into a starry map with every thread in place, her friend entering the tower pointing at the stars in amazement.",
+      "text": "Luna slotted the shuttle into the beam and ZIP — the final thread sailed across, the star notch stamping constellations into every corner until the whole tapestry was a MAP of the night sky! Her friend arrived, pointed at her own star sign in the weave, and declared this the best birthday present in the history of birthdays, which Luna thought was probably accurate. The End!"
+    },
+    "end_knot_surprise": {
+      "scene": "{HERO} stands tangled from horn to hooves in crimson yarn, the large crimson ball having unspooled in every direction across the loom room, the shuttle stuck to Luna's tail, the loom completely jammed with knotted red thread.",
+      "text": "Luna tugged the crimson ball and FWOOMP — the tangle unspooled in EVERY direction at once, wrapping around Luna's legs, her horn, the loom, and three chairs! The shuttle got stuck to her tail, the golden bobbin jammed, and Luna stood there looking like the world's sparkliest yarn sculpture while the loom made a sound like a mechanical sigh. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

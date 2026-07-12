@@ -1,0 +1,243 @@
+{
+  "id": "quarry",
+  "title": "Pip and the Echo Gem",
+  "hero": "PIP",
+  "style": "Prismatic crystal facets, amethyst and citrine tones, refracted light beams in dusty shafts, deep violet shadows, mineral sparkle. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the sunlit rim of an open crystal quarry, golden daylight streaming down onto glittering amethyst and citrine formations in the walls below, a bone-shaped collar tag jingling on his neck. On the LEFT a purple amethyst tunnel glows with warm violet light from deep faceted crystals lining its wide entrance, on the RIGHT a golden citrine passage sparkles with honeycomb-shaped citrine formations catching the sunbeams, both large, fully visible, clearly separated.",
+      "text": "Somewhere deep in this sparkly quarry hides the legendary echo gem — the ONE crystal that barks back a PERFECT bark instead of the garbled meow-quack-kazoo nonsense the regular crystals spit out. Pip's tail is already wagging at competition speed. Amethyst tunnel or citrine passage?",
+      "choices": [
+        {
+          "label": "Explore the amethyst tunnel",
+          "next": "a",
+          "spot": "purple amethyst tunnel"
+        },
+        {
+          "label": "Enter the citrine passage",
+          "next": "b",
+          "spot": "golden citrine passage"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} trots through a purple amethyst tunnel with warm violet light from faceted crystals jutting from the walls, a sparkly amethyst shard sitting on a low crystal ledge, and a round geode boulder resting against the tunnel wall. On the LEFT a blue crystal grotto glows behind dripping stalactites at the tunnel's end, on the RIGHT a tan geode bridge spans a brightly lit mineral gap, both large, fully visible, clearly separated.",
+      "text": "Pip barked HELLO and the amethyst walls fired it back as a startled MEOW, which is frankly insulting — but that sparkly amethyst shard on the ledge buzzed so hard it basically jumped into his collar all by itself. Crystal grotto or geode bridge?",
+      "choices": [
+        {
+          "label": "Enter the crystal grotto",
+          "next": "aa",
+          "spot": "blue crystal grotto"
+        },
+        {
+          "label": "Cross the geode bridge",
+          "next": "ab",
+          "spot": "tan geode bridge"
+        }
+      ],
+      "scare": {
+        "spot": "round geode boulder",
+        "pop": "a crystal salamander with two bright curious gem eyes and a glittering purple tail peeking over the round geode boulder",
+        "reveal": "Brrr! Just warming my toes on the warm rocks!",
+        "sting": "chime",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} walks through a golden citrine passage with honeycomb-shaped citrine formations glowing warmly along the ceiling like chandeliers, a golden citrine pebble sitting on a crystal shelf catching the light, warm shafts of daylight filtering from cracks above. On the LEFT a white quartz staircase descends in wide glowing steps, on the RIGHT a pink crystal chute spirals smoothly downward into sparkle, both large, fully visible, clearly separated.",
+      "text": "Pip tried a tiny test bark and the citrine walls bounced it back as a QUACK so loud three crystals rattled — not the kind of fame he was hoping for. A golden citrine pebble on the shelf hummed when he barked, so into the collar it went. Quartz staircase or crystal chute?",
+      "choices": [
+        {
+          "label": "Take the quartz staircase",
+          "next": "ba",
+          "spot": "white quartz staircase"
+        },
+        {
+          "label": "Slide down the crystal chute",
+          "next": "bb",
+          "spot": "pink crystal chute"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a blue crystal grotto with dripping stalactites overhead casting prismatic light, the sparkly amethyst shard glowing faintly in his collar, small mineral pools reflecting rainbow patterns on the grotto walls. On the LEFT a large lavender crystal cluster rises at the grotto's far wall, on the RIGHT a tall rose quartz arch leads to a bright chamber beyond, both large, fully visible, clearly separated.",
+      "text": "Every stalactite drip made a tiny PLINK that the grotto turned into a full orchestra, and the amethyst shard in Pip's collar hummed along like the world's tiniest conductor — this place is DEFINITELY hiding something sparkly. Crystal cluster or quartz arch?",
+      "choices": [
+        {
+          "label": "Approach the crystal cluster",
+          "next": "m1",
+          "spot": "lavender crystal cluster"
+        },
+        {
+          "label": "Go through the quartz arch",
+          "next": "m2",
+          "spot": "rose quartz arch"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} crosses a wide tan geode bridge made of split geode halves showing purple and blue crystal centers, the sparkly amethyst shard glowing in his collar, warm light reflecting from a brightly lit mineral gap far below. On the LEFT a jade crystal ledge juts out at the bridge's far end near a cluster of stalactites, on the RIGHT a coral crystal archway opens to a bright chamber beyond with pink light spilling through, both large, fully visible, clearly separated.",
+      "text": "Each geode half went ZING under Pip's paws like the world's most extra stepping stones, and halfway across his amethyst shard hummed a note so pretty the whole bridge hummed back. Jade ledge or coral archway?",
+      "choices": [
+        {
+          "label": "Jump to the jade ledge",
+          "next": "m1",
+          "spot": "jade crystal ledge"
+        },
+        {
+          "label": "Duck through the coral archway",
+          "next": "m2",
+          "spot": "coral crystal archway"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} descends wide white quartz steps that pulse with warm light under each paw, the golden citrine pebble glowing in his collar, crystal walls refracting rainbow beams with every step. On the LEFT a teal crystal boulder sits at the entrance to a vast bright domed cavern with tall crystals visible inside, on the RIGHT an amber geode shelf displays cracked-open geodes near a gallery entrance, both large, fully visible, clearly separated.",
+      "text": "Every step played a BONNNNG under Pip's paws like a crystal xylophone and his bark came back as a KAZOO — honestly an improvement over quacking — while the citrine pebble practically bounced on his collar. Teal boulder or amber shelf?",
+      "choices": [
+        {
+          "label": "Pass the teal boulder",
+          "next": "m3",
+          "spot": "teal crystal boulder"
+        },
+        {
+          "label": "Check the amber shelf",
+          "next": "m4",
+          "spot": "amber geode shelf"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} slides down a smooth pink crystal chute into a sparkling bright chamber, the golden citrine pebble bouncing in his collar, a round geode boulder sitting at the bottom of the chute where the slide levels off. On the LEFT a jade crystal column stands beside the entrance to a vast bright domed cavern, on the RIGHT an orange calcite shelf lines the wall near a gallery entrance, both large, fully visible, clearly separated.",
+      "text": "Pip went down that chute so fast his ears flapped like flags and his bark stretched into a WOOOOO that the crystals helpfully replayed as a tuba — not graceful but the citrine pebble somehow stayed put. Jade column or calcite shelf?",
+      "choices": [
+        {
+          "label": "Squeeze past the jade column",
+          "next": "m3",
+          "spot": "jade crystal column"
+        },
+        {
+          "label": "Explore the calcite shelf",
+          "next": "m4",
+          "spot": "orange calcite shelf"
+        }
+      ],
+      "scare": {
+        "spot": "round geode boulder",
+        "pop": "a crystal salamander with two bright curious gem eyes and a glittering blue tail sliding off the round geode boulder mid-stretch",
+        "reveal": "Wheee! The vibrations tickle my belly!",
+        "sting": "tinkle",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands before a massive lavender crystal cluster in a bright chamber lit by daylight shafts from cracks above, the sparkly amethyst shard in his collar resonating with the cluster's hum, mineral dust sparkling in golden light beams. On the LEFT a large copper singing bowl sits on a flat crystal platform catching the light, on the RIGHT a deep purple moss patch fills a cozy crystal alcove with soft warmth, both large, fully visible, clearly separated.",
+      "text": "The lavender cluster HUMMED and Pip's amethyst shard BUZZED right back like they were having a private chat he was absolutely not invited to — and that purple moss patch looks SUSPICIOUSLY comfortable for a cave with work to do. Singing bowl or moss patch?",
+      "choices": [
+        {
+          "label": "Bonk the singing bowl",
+          "next": "end_echo_chorus",
+          "spot": "copper singing bowl"
+        },
+        {
+          "label": "Flop on the moss patch",
+          "next": "end_puddle_pup",
+          "spot": "purple moss patch"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands under a grand rose quartz arch in a hall where crystal walls amplify every sound into layered echoes, the sparkly amethyst shard in his collar glowing pink from the quartz reflections, daylight filtering through crystal veins above. On the LEFT a tall emerald stalagmite rises from the center of the hall, on the RIGHT a wide amber crystal ledge juts out over a sparkling drop far below, both large, fully visible, clearly separated.",
+      "text": "Under the arch Pip's tiniest sniff echoed into a WHOOSH and his amethyst shard glowed pink and sang a note so clear it sounded like his OWN bark from last Tuesday — and that amber ledge is glinting like the world's biggest butterscotch. Emerald stalagmite or amber ledge?",
+      "choices": [
+        {
+          "label": "Touch the emerald stalagmite",
+          "next": "end_arch_song",
+          "spot": "emerald stalagmite"
+        },
+        {
+          "label": "Lick the amber ledge",
+          "next": "end_crystal_tongue",
+          "spot": "amber crystal ledge"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in a vast bright domed cavern where three tall crystals rise from the smooth stone floor, the golden citrine pebble in his collar vibrating with the harmony of all three. On the LEFT a tall purple amethyst spire glows deep violet, in the MIDDLE a golden citrine column hums warm amber light, on the RIGHT a pink rose quartz pillar pulses with soft rosy light, all large, fully visible, clearly separated.",
+      "text": "Three crystals humming BRMMM and DINNNG and CHIMMME, and the citrine pebble is basically beatboxing on Pip's collar — each crystal hums LOUDER when he steps closer like a sparkly audition lineup. Amethyst spire, citrine column, or quartz pillar?",
+      "choices": [
+        {
+          "label": "Touch the amethyst spire",
+          "next": "end_amethyst_chord",
+          "spot": "purple amethyst spire"
+        },
+        {
+          "label": "Press the citrine column",
+          "next": "end_citrine_duet",
+          "spot": "golden citrine column"
+        },
+        {
+          "label": "Lean on the quartz pillar",
+          "next": "end_quartz_harmony",
+          "spot": "pink quartz pillar"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} walks through a gallery of cracked-open geodes displayed on crystal shelves, each one whispering softly, the golden citrine pebble in his collar flickering gold in response, warm mineral light from crystal formations above. On the LEFT a large sapphire geode sits cracked wide open on a low crystal shelf, on the RIGHT a tall orange calcite tower is stacked like a cairn catching golden light, both large, fully visible, clearly separated.",
+      "text": "Every geode was whispering a tiny WOOF and Pip's ears kept swiveling like satellite dishes because those woofs sounded EXACTLY like his — is this quarry seriously a Pip jukebox? Sapphire geode or calcite tower?",
+      "choices": [
+        {
+          "label": "Bark into the sapphire geode",
+          "next": "end_geode_song",
+          "spot": "sapphire geode"
+        },
+        {
+          "label": "Howl at the calcite tower",
+          "next": "end_calcite_tower",
+          "spot": "orange calcite tower"
+        }
+      ]
+    },
+    "end_echo_chorus": {
+      "scene": "{HERO} bonks the copper singing bowl with his paw and the lavender crystal cluster blazes with light as every crystal in the bright chamber sings back a perfect bark in chorus, the sparkly amethyst shard in his collar glowing brilliant purple, daylight shafts dancing with the vibrations, mineral dust swirling into golden spirals.",
+      "text": "Pip BONKED that singing bowl and the whole cavern lit up like a concert hall — every crystal sang his bark back in PERFECT harmony, hundreds of them, years of happy barks stored in stone like the world's sparkliest jukebox! The echo gem was never one crystal. It was ALL of them, the whole quarry, singing Pip's song right back at him. The End!"
+    },
+    "end_puddle_pup": {
+      "scene": "{HERO} curled up on the deep purple moss patch in the cozy crystal alcove, eyes closed blissfully, the sparkly amethyst shard dimming in his collar, while the lavender crystal cluster hums a gentle lullaby above and the daylight shafts fade to a soft glow.",
+      "text": "That moss was SO unbelievably soft that Pip's eyes closed and his tail stopped wagging for the first time in recorded puppy history — he dreamed about barking on the meadow while the echo gem waited patiently somewhere deeper for a hero with more stamina and less interest in luxury napping. Oopsie ending!",
+      "bad": true
+    },
+    "end_arch_song": {
+      "scene": "{HERO} presses both front paws against the tall emerald stalagmite and the rose quartz arch amplifies a cascade of stored barks into a soaring melody, the sparkly amethyst shard in his collar blazing with brilliant light, the entire hall ringing with layered harmonics as daylight shafts pulse in golden waves.",
+      "text": "Pip pressed his paws to the stalagmite and the arch ROARED with sound — every bark he had ever barked on the meadow above came pouring out of the walls in layers, years and years of happy puppy! The echo gem was the whole quarry and it had been learning his song since he was a pup with ears too big for his head. The End!"
+    },
+    "end_crystal_tongue": {
+      "scene": "{HERO} licking the wide amber crystal ledge with his tongue stuck fast to the cold crystal surface, eyes wide with surprise, the sparkly amethyst shard flickering in his collar, the rose quartz arch behind him echoing his muffled yelp in increasingly silly harmonics.",
+      "text": "Pip thought that amber ledge looked DELICIOUS and licked it and his tongue stuck faster than gum on a boot — every muffled yelp bounced through the arch sounding sillier and sillier while Pip dangled there like a sparkly golden ornament. The echo gem is somewhere nearby probably taking notes on his funniest sounds yet. Oopsie ending!",
+      "bad": true
+    },
+    "end_amethyst_chord": {
+      "scene": "{HERO} touches the tall purple amethyst spire with his nose and the domed cavern erupts in a deep violet chord as every crystal vibrates in unison, the golden citrine pebble in his collar blazing bright gold, the dome overhead filling with refracted purple and gold light beams dancing across the smooth stone walls.",
+      "text": "Pip booped the amethyst spire and the dome THUNDERED with the deepest most magnificent chord any puppy has ever accidentally produced — years of stored barks humming through every crystal vein like the mountain itself was singing along! The echo gem was never one crystal. It was the whole quarry, rehearsing Pip's greatest hits this entire time. The End!"
+    },
+    "end_citrine_duet": {
+      "scene": "{HERO} covers his ears with both paws in the crystal cavern as the golden citrine column blasts an earsplitting amplified bark that echoes and multiplies off every surface, crystals vibrating wildly, the golden citrine pebble bouncing around like a pinball.",
+      "text": "Pip touched the citrine column and it barked back — but SO loud that it bounced off every crystal in the dome and came back as a THOUSAND barks at once! The noise was so enormous that Pip's ears went flat, the pebble in his collar vibrated right off, and he ran for the exit with the loudest bark-echo in geological history chasing him down the tunnel. Oopsie ending!",
+      "bad": true
+    },
+    "end_quartz_harmony": {
+      "scene": "{HERO} leans against the pink rose quartz pillar and it wobbles dangerously, Pip scrambling backward as the tall crystal tilts, the domed cavern going silent as every crystal stops humming and watches the pillar slowly lean, Pip's tail tucked between his legs.",
+      "text": "Pip leaned against the pillar a little too hard and it WOBBLED — every crystal in the cavern gasped (which for crystals sounds like a very high-pitched eeeeee) and went completely silent! Pip backed away very slowly, the pillar settled with a groan, and the cavern gave him the most disapproving silence a bunch of rocks has ever produced. Oopsie ending!",
+      "bad": true
+    },
+    "end_geode_song": {
+      "scene": "{HERO} barks into the large cracked-open sapphire geode and every geode in the gallery answers back with a different stored bark, the golden citrine pebble in his collar blazing gold, the gallery filling with a layered cascade of happy barks echoing from every crystal shelf.",
+      "text": "Pip barked into the sapphire geode and a hundred geodes barked BACK — his excited bark, his sleepy bark, his dinner bark, his suspicious-squirrel bark — all stored in crystal for YEARS like the world's most dedicated fan club! The echo gem was the whole gallery and it knew every bark Pip had ever barked. The End!"
+    },
+    "end_calcite_tower": {
+      "scene": "{HERO} tips his head back and howls at the tall orange calcite tower and every chunk rattles and hums as it plays back a different bark, the golden citrine pebble in his collar blazing with light, the whole gallery vibrating as the tower rings like a bell and crystal harmonics fill the warm air.",
+      "text": "Pip tipped his head back and HOWLED at that calcite tower and it answered with every bark it had ever caught drifting down from the meadow — puppy barks, grown-up barks, the time he barked at his own shadow, ALL of them stacked in orange stone like a crystal encyclopedia of Pip! The End!"
+    }
+  }
+}

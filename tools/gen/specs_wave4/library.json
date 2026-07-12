@@ -1,0 +1,243 @@
+{
+  "id": "library",
+  "title": "Milo and the Blank Pages",
+  "hero": "MILO",
+  "style": "Rich mahogany and warm brass, amber lamplight pools on dark wood, scattered open books with creamy pages, cozy reading-nook shadows. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in the grand lobby of a dim old library at night, warm amber lamplight pooling on polished mahogany floors, towering bookshelves on every side with open books whose pages are completely blank, a brass reading lamp glowing on a heavy oak table, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a blue-carpeted archway opens into a colorful children's wing with low painted shelves, on the RIGHT a tall mahogany corridor leads into a dim rare books gallery with green-shaded lamps, both large, fully visible, clearly separated.",
+      "text": "Every single book in the library has gone BLANK — pages, covers, even the spines are just smooth creamy nothing, and storytime is first thing tomorrow morning! Milo's whiskers twitch because blank books do NOT read themselves. Children's wing or rare books gallery?",
+      "choices": [
+        {
+          "label": "Explore the children's wing",
+          "next": "a",
+          "spot": "blue carpeted archway"
+        },
+        {
+          "label": "Search the rare books",
+          "next": "b",
+          "spot": "mahogany rare corridor"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} walks through the children's wing of the library, low colorful painted shelves on both sides with open picture books showing only blank creamy pages, a small silver magnifying glass sitting on a yellow shelf, a red velvet cushion resting on a wooden bench, warm amber lamplight from above, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a cozy reading nook built from stacked cushions and draped blankets glows with a soft orange lamp inside, on the RIGHT a small wooden puppet theater alcove with a striped awning and an empty little stage stands against the far wall, both large, fully visible, clearly separated.",
+      "text": "The picture books are ALL blank — even the ones about dragons, which is honestly a crime — and there on the shelf sits a little silver magnifying glass that practically shouts CLUE, so into the saddlebag it goes. Reading nook or puppet theater?",
+      "choices": [
+        {
+          "label": "Crawl into the reading nook",
+          "next": "aa",
+          "spot": "orange reading nook"
+        },
+        {
+          "label": "Check the puppet theater",
+          "next": "ab",
+          "spot": "striped puppet theater"
+        }
+      ],
+      "scare": {
+        "spot": "red velvet cushion",
+        "pop": "a chubby bookmark owl with two big bright round eyes fluttering up from behind the red velvet cushion with tiny paper wings rustling",
+        "reveal": "Hoo! I was just resting my pages!",
+        "sting": "flutter",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} explores the rare books gallery of the library, tall dark mahogany shelves reaching toward a vaulted ceiling, old leather-bound volumes with blank covers standing in rows, a golden bookmark sitting on a green reading stand, a brass desk lamp glowing warmly on a carved wooden desk, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a round map room with spinning globes and blank open atlases on stone pedestals is visible through an arched opening, on the RIGHT a cozy astronomy corner with a brass telescope and blank star charts under a domed glass ceiling glimmers at the end of the hall, both large, fully visible, clearly separated.",
+      "text": "The rare books are supposed to be PRICELESS and right now they are priceless blanks which is arguably worse, but that golden bookmark on the reading stand is practically humming — Milo tucks it behind his ear like a tiny antenna. Map room or astronomy corner?",
+      "choices": [
+        {
+          "label": "Enter the map room",
+          "next": "ba",
+          "spot": "round map room"
+        },
+        {
+          "label": "Visit the astronomy corner",
+          "next": "bb",
+          "spot": "brass telescope corner"
+        }
+      ],
+      "scare": {
+        "spot": "brass desk lamp",
+        "pop": "a sleepy library mouse with two big round bright eyes and a tiny ink-stained apron peeking out from behind the brass desk lamp mid-yawn",
+        "reveal": "Squeak! Just warming my whiskers on the lamp!",
+        "sting": "squeak",
+        "delay": 1700
+      }
+    },
+    "aa": {
+      "scene": "{HERO} sits inside a cozy reading nook built from stacked cushions and draped blankets, the silver magnifying glass in his paw showing faint crayon outlines on otherwise blank picture-book pages like ghostly drawings, an orange lamp casting warm glow on the cushion walls, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a jade stone staircase descends through a gap in the floorboards into warm golden light below, on the RIGHT a tall silver-framed window alcove catches moonlight streaming through old glass panes, both large, fully visible, clearly separated.",
+      "text": "Through the magnifying glass Milo can see faint crayon outlines on the blank pages — the illustrations were HERE but they WALKED OFF like they had somewhere better to be, which is frankly rude. Staircase down or moonlit window?",
+      "choices": [
+        {
+          "label": "Take the staircase down",
+          "next": "m1",
+          "spot": "jade stone staircase"
+        },
+        {
+          "label": "Go to the window",
+          "next": "m2",
+          "spot": "silver window alcove"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands in front of a small wooden puppet theater alcove with a striped awning, the stage completely empty where puppets should be, the silver magnifying glass in his paw revealing tiny painted footprints leading away from the stage across the wooden floor, warm amber light from a wall sconce, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a jade curtain archway opens to a staircase descending into warm golden light from below, on the RIGHT a silver moonlit corridor stretches toward a glowing window at the far end, both large, fully visible, clearly separated.",
+      "text": "The puppet stage is empty and through the magnifying glass Milo spots tiny PAINTED footprints leading away — the illustrations did not just leave, they marched out on their own little drawn feet! Staircase down or moonlit corridor?",
+      "choices": [
+        {
+          "label": "Follow the staircase down",
+          "next": "m1",
+          "spot": "jade curtain archway"
+        },
+        {
+          "label": "Walk the moonlit corridor",
+          "next": "m2",
+          "spot": "silver moonlit corridor"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} explores a round map room with blank globes spinning slowly on brass stands, open atlases showing empty pages on stone pedestals, the golden bookmark tucked behind his ear glowing faintly, warm amber lamplight from iron sconces on the stone walls, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a copper spiral staircase winds upward through a round opening in the ceiling toward a warm glow, on the RIGHT a rose-colored archway leads to a wide corridor with painted wooden columns, both large, fully visible, clearly separated.",
+      "text": "The globes are spinning by themselves which is either magical or a draft, and every atlas is blank as a snowfield — but the golden bookmark is VIBRATING behind Milo's ear like it knows something he does not. Spiral staircase or rose archway?",
+      "choices": [
+        {
+          "label": "Climb the spiral staircase",
+          "next": "m3",
+          "spot": "copper spiral staircase"
+        },
+        {
+          "label": "Go through the archway",
+          "next": "m4",
+          "spot": "rose-colored archway"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands in the astronomy corner under a small domed glass ceiling showing stars outside, blank star charts pinned to wooden boards, a brass celestial model with spinning rings on a pedestal, the golden bookmark tucked behind his ear glowing softly, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a copper staircase spirals upward through an opening in the wall toward warm amber light, on the RIGHT a rose-tinted corridor stretches away between tall painted wooden columns, both large, fully visible, clearly separated.",
+      "text": "The stars through the glass dome are the only things in this library that have NOT gone blank, and the celestial model is spinning as if someone just touched it two seconds ago — the golden bookmark hums behind Milo's ear. Copper staircase or rose corridor?",
+      "choices": [
+        {
+          "label": "Climb the copper staircase",
+          "next": "m3",
+          "spot": "copper staircase"
+        },
+        {
+          "label": "Walk the rose corridor",
+          "next": "m4",
+          "spot": "rose-tinted corridor"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in an underground reading vault with stone walls and warm amber lantern light, scattered blank books on old wooden tables, tiny colorful painted footprints crossing the stone floor in two directions, the silver magnifying glass in his paw showing the footprints clearly, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT an iron lantern hangs beside a low stone passage where the painted footprints lead into warm flickering light, on the RIGHT a heavy teal velvet curtain hangs across a wide alcove with faint giggling sounds coming from behind it, both large, fully visible, clearly separated.",
+      "text": "Painted footprints all over the floor like a parade of tiny drawn creatures marched through here, and through the magnifying glass Milo can see every color of crayon imaginable — plus are those GIGGLES behind that curtain? Lantern path or velvet curtain?",
+      "choices": [
+        {
+          "label": "Follow the lantern path",
+          "next": "end_lantern_party",
+          "spot": "iron lantern"
+        },
+        {
+          "label": "Peek behind the curtain",
+          "next": "end_curtain_nap",
+          "spot": "teal velvet curtain"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a moonlit upper balcony of the library overlooking the grand reading hall below, silver moonlight streaming through tall arched windows, the silver magnifying glass in his paw catching a moonbeam and refracting tiny rainbows, faint music and laughter echoing from somewhere below, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a brass telescope on a wooden tripod points down toward the reading hall far below, on the RIGHT a polished oak banister curves along the balcony toward a grand staircase descending into shadow, both large, fully visible, clearly separated.",
+      "text": "Moonlight pours through the windows and the magnifying glass turns it into tiny dancing rainbows, and somewhere down there something is LAUGHING, which is either wonderful news or terrifying news depending on what is doing the laughing. Telescope or banister?",
+      "choices": [
+        {
+          "label": "Look through the telescope",
+          "next": "end_telescope_find",
+          "spot": "brass telescope"
+        },
+        {
+          "label": "Slide down the banister",
+          "next": "end_banister_tumble",
+          "spot": "polished oak banister"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} enters a grand rotunda at the heart of the library, a domed ceiling painted with faded stars above, warm amber light from a central brass chandelier, the golden bookmark glowing behind his ear, three large colorful drawn figures standing in a row on stone pedestals — each with visible crayon textures and sketchy outlines looking strangely alive, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT a scarlet painted dragon figure stands on a stone pedestal with two big drawn eyes half-open, in the MIDDLE an emerald painted rabbit figure sits upright on a stone pedestal with drawn whiskers twitching, on the RIGHT a violet painted bear figure leans against a stone pedestal with a drawn yawn on its face, all large, fully visible, clearly separated.",
+      "text": "Three figures stand in the rotunda and NOT ONE OF THEM looks like a real statue — they have crayon textures and sketchy outlines and the dragon's drawn eyes are DEFINITELY half-open! The golden bookmark is humming so loud Milo's ear tickles. Dragon, rabbit, or bear?",
+      "choices": [
+        {
+          "label": "Approach the dragon",
+          "next": "end_dragon_friend",
+          "spot": "scarlet dragon figure"
+        },
+        {
+          "label": "Approach the rabbit",
+          "next": "end_rabbit_friend",
+          "spot": "emerald rabbit figure"
+        },
+        {
+          "label": "Approach the bear",
+          "next": "end_bear_friend",
+          "spot": "violet bear figure"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} climbs into a dusty attic archive above the library, old wooden trunks and hatboxes stacked between slanted roof beams, cobwebby brass lanterns hanging from nails, the golden bookmark behind his ear pulsing with warm light, the sound of a party with music and laughter drifting up through the floorboards, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere. On the LEFT an orange wooden trunk sits on the floor with its brass latch rattling from something inside, on the RIGHT a round blue trapdoor in the floor has warm golden light and cheerful sounds leaking through its edges, both large, fully visible, clearly separated.",
+      "text": "Music and laughter are drifting up THROUGH THE FLOOR and that orange trunk is rattling like something inside desperately wants out, and the golden bookmark behind Milo's ear is pulsing like a tiny heartbeat — this is definitely close. Orange trunk or blue trapdoor?",
+      "choices": [
+        {
+          "label": "Open the orange trunk",
+          "next": "end_trunk_surprise",
+          "spot": "orange wooden trunk"
+        },
+        {
+          "label": "Lift the blue trapdoor",
+          "next": "end_trapdoor_party",
+          "spot": "round blue trapdoor"
+        }
+      ]
+    },
+    "end_lantern_party": {
+      "scene": "{HERO} follows the iron lantern through the stone passage into a hidden candlelit reading room where dozens of small colorful drawn book illustrations — tiny painted dragons, rabbits, bears, and birds with crayon textures and sketchy outlines — are decorating a long wooden table with drawn streamers and painted party hats, a large creamy cake with drawn candles in the center, the silver magnifying glass catching candlelight and casting tiny rainbows across the celebration, a banner of drawn butterflies strung across the ceiling, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "The lantern led Milo straight into a SECRET PARTY — every single illustration from every single book had climbed out of their pages to throw a surprise birthday party for the librarian's cat! Milo held up the magnifying glass and it caught the candlelight like a tiny disco ball while every drawn dragon, rabbit, and butterfly cheered because the guest of honor's best friend had FINALLY found them, and a chair with a painted paw-print cushion was waiting just for him. The End!"
+    },
+    "end_curtain_nap": {
+      "scene": "{HERO} curled up behind the teal velvet curtain in the underground reading vault on a pile of incredibly soft blank books, the silver magnifying glass resting beside his paw, eyes closed, completely asleep while a faint glow of party light leaks under the curtain hem, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "Behind the curtain was the softest pile of blank books Milo had EVER felt and he told himself he would rest for just one second and then absolutely definitely keep searching, and then he woke up to morning sunlight and children arriving for storytime with every book still blank because the party happened WITHOUT him and his magnifying glass is now a very fancy paperweight. Oopsie ending!",
+      "bad": true
+    },
+    "end_telescope_find": {
+      "scene": "{HERO} looks through the brass telescope from the moonlit balcony and sees the entire reading hall below transformed into a colorful drawn celebration, dozens of small painted book illustrations with crayon textures dancing on the tables, drawn streamers spiraling around the bookshelves, the silver magnifying glass in his paw glowing with moonlight, the librarian's cat sitting at the head of a decorated table wearing a painted party hat, a banner of drawn butterflies hanging from the chandelier, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "Through the telescope Milo saw EVERYTHING — a hundred tiny drawn characters were throwing the most spectacular party the library had ever hosted, and right in the middle sat the librarian's cat wearing a painted party hat and wondering where Milo was! He flew down the stairs with the magnifying glass blazing moonlight and the illustrations parted like a tiny crayon parade to lead him to the best-friend seat. The End!"
+    },
+    "end_banister_tumble": {
+      "scene": "{HERO} slides down the polished oak banister from the moonlit balcony, spinning out of control, crashing into a rolling book cart at the bottom that sends a cascade of blank books flying everywhere, the silver magnifying glass tumbling from his paw, Milo buried under a mountain of blank pages with only his ears and tail poking out, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "Milo launched himself down that banister like a furry black cannonball and the landing was SPECTACULAR in all the wrong ways — he hit the book cart, the cart hit the shelf, and approximately nine thousand blank books buried him in the world's most boring avalanche while the illustrations partied on somewhere just out of earshot and his magnifying glass rolled under a cabinet. Oopsie ending!",
+      "bad": true
+    },
+    "end_dragon_friend": {
+      "scene": "{HERO} touches the scarlet painted dragon figure in the grand rotunda and the dragon blinks its two big drawn eyes and stretches its painted wings, stepping off the stone pedestal with crayon-textured scales shimmering, the golden bookmark glowing behind Milo's ear, the dragon gently nudging Milo toward a hidden passage in the rotunda wall that opens into a warm candlelit party room full of colorful drawn illustrations celebrating around a decorated table with the librarian's cat at the head, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "The dragon blinked BOTH its big drawn eyes, stretched its painted wings, and stepped right off the pedestal — it had been holding that pose for THREE HOURS waiting for someone smart enough to notice! It nudged Milo through a hidden passage and there was the party: every illustration celebrating the librarian's cat, and the golden bookmark hummed because it had been leading Milo here ALL ALONG. Guest of honor's best friend, front-row seat! The End!"
+    },
+    "end_rabbit_friend": {
+      "scene": "{HERO} chases the emerald painted rabbit through the grand rotunda as it hops in wild zigzags, the golden bookmark falling out of Milo's collar, painted books tumbling off shelves from the commotion, Milo sliding on the polished floor trying to turn.",
+      "text": "The rabbit TWITCHED its whiskers and hopped off the pedestal SO fast that Milo sprinted after it — straight into a bookshelf! Books tumbled everywhere, the golden bookmark slipped out of his collar and slid under a cabinet, and the rabbit disappeared through a gap that was rabbit-sized but definitely NOT kitten-sized. Milo sat in a pile of fallen books with a dictionary on his head. Oopsie ending!",
+      "bad": true
+    },
+    "end_bear_friend": {
+      "scene": "{HERO} touches the violet painted bear figure in the grand rotunda and the bear gives a big soft drawn yawn, opens its two round painted eyes wide, and gently scoops Milo up in its crayon-textured arms, the golden bookmark glowing behind Milo's ear, the bear carrying Milo through a hidden archway in the rotunda wall into a warm candlelit party room full of colorful drawn illustrations celebrating around a decorated table with the librarian's cat at the head, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "The bear yawned the BIGGEST drawn yawn, opened its painted eyes, and scooped Milo up like a fuzzy purple taxi — it had been pretending to be a statue since LUNCH and its arms were very tired but also very gentle! It carried Milo through a hidden archway into the secret party where every illustration was celebrating the librarian's cat, and the golden bookmark sang because a kitten who picks the sleepy bear is EXACTLY the right kind of best friend. The End!"
+    },
+    "end_trunk_surprise": {
+      "scene": "{HERO} sits on the dusty attic floor covered in painted streamers and drawn confetti, the orange wooden trunk lid having popped open and smacked Milo on the nose, the golden bookmark tangled in a streamer, confetti settling slowly around a dazed kitten.",
+      "text": "Milo popped the latch and the trunk EXPLODED with such force that the lid bonked him right on the nose — painted streamers wrapped around his ears, confetti went up his nose, and he sneezed so hard the golden bookmark flew across the room and landed in a cobweb! By the time he untangled himself the confetti trail was completely scattered and the secret party carried on without him. Oopsie ending!",
+      "bad": true
+    },
+    "end_trapdoor_party": {
+      "scene": "{HERO} lifts the round blue trapdoor in the attic floor and warm golden light and cheerful music pour upward, Milo dropping through into a magnificent hidden party room where dozens of colorful drawn book illustrations with crayon textures celebrate around a long decorated table, the librarian's cat wearing a painted party hat at the head, drawn streamers and painted butterflies filling the warm amber air, the golden bookmark behind Milo's ear blazing with light, all book covers, spines and pages are blank or show only simple pictures — no letters anywhere.",
+      "text": "Milo lifted the trapdoor and warm light poured up like liquid sunshine — he dropped through and landed right in the middle of the most spectacular secret birthday party in library history! Every illustration had climbed out of every book to celebrate the librarian's cat, and there at the head of the table sat the birthday cat pointing at the empty best-friend seat while the golden bookmark behind Milo's ear BLAZED because this was exactly where he was supposed to be all along. The End!"
+    }
+  }
+}

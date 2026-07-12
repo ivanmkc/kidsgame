@@ -1,0 +1,243 @@
+{
+  "id": "marina",
+  "title": "Mo and the Crying Tugboat",
+  "hero": "MO",
+  "style": "Silver moonlight on calm harbor water, colorful weathered boat hulls, warm dock-lamp glow on wooden planks, gentle ripple reflections. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a weathered wooden dock under silver moonlight, a small yellow tugboat sitting low in the dark water with fat drips running down its hull like tears, a single warm dock lamp casting amber glow across the planks, calm harbor water reflecting the moon. Flags and boat hulls are blank or show only simple pictures. On the LEFT a weathered blue fishing boat bobs at the dock tied with thick ropes, on the RIGHT a large red tool crate sits on the dock planks beside a coil of rope, both large, fully visible, clearly separated.",
+      "text": "The harbor master said fix the little yellow tugboat by sunrise or the morning deliveries are TOAST — but every time Mo patches one leak, SPLOSH, another one springs somewhere else, and now the tug is dripping so hard it looks like it is CRYING. Fishing boat or tool crate?",
+      "choices": [
+        {
+          "label": "Search the fishing boat",
+          "next": "a",
+          "spot": "blue fishing boat"
+        },
+        {
+          "label": "Check the tool crate",
+          "next": "b",
+          "spot": "red tool crate"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands on the deck of the weathered blue fishing boat, tangled nets and cork floats scattered around, a bright orange rope coiled on a barrel, a red buoy bobbing in the dark water beside the hull. Flags and boat hulls are blank or show only simple pictures. On the LEFT a green tackle barrel sits on the dock beside the gangway, on the RIGHT a white canvas awning stretches over a stack of folded sails near the stern, both large, fully visible, clearly separated.",
+      "text": "The fishing boat smells like salt and old adventures, and right there on a barrel sits the FINEST orange rope Mo has ever seen — springy, strong, and practically BEGGING to be useful. Into the satchel it goes. Green barrel or canvas awning?",
+      "choices": [
+        {
+          "label": "Dig through the barrel",
+          "next": "aa",
+          "spot": "green tackle barrel"
+        },
+        {
+          "label": "Search under the awning",
+          "next": "ab",
+          "spot": "white canvas awning"
+        }
+      ],
+      "scare": {
+        "spot": "red buoy",
+        "pop": "a barnacle crab with two wide startled round eyes scuttling over the top of the red buoy with claws waving",
+        "reveal": "Snip snap! I was polishing my buoy!",
+        "sting": "splash",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} kneels beside the large red tool crate on the dock, rusty hinges open, patches and brushes inside, a brass ship lantern with a warm golden flame sitting on top. Flags and boat hulls are blank or show only simple pictures. On the LEFT a pink lobster pot sits at the edge of the dock near the waterline, on the RIGHT a tall yellow crate stack rises near the dock lamp like a lookout tower, both large, fully visible, clearly separated.",
+      "text": "The tool crate is full of patches and pitch and a suspiciously sticky paintbrush, but the REAL find is a brass ship lantern sitting right on top — still lit, warm as a hug, practically purring. Mo tucks it safe. Lobster pot or crate stack?",
+      "choices": [
+        {
+          "label": "Check the lobster pot",
+          "next": "ba",
+          "spot": "pink lobster pot"
+        },
+        {
+          "label": "Climb the crate stack",
+          "next": "bb",
+          "spot": "yellow crate stack"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} peers into the open green tackle barrel on the dock, the bright orange rope slung across one shoulder, cork stoppers and wooden plugs scattered on the planks, the crying yellow tugboat visible in the water nearby with drip trails on its hull. Flags and boat hulls are blank or show only simple pictures. On the LEFT a wide stone boat ramp slopes down to the waterline beside the tugboat, on the RIGHT a teal rowing dinghy bobs at the dock with two small oars inside, both large, fully visible, clearly separated.",
+      "text": "The barrel had cork stoppers but they are ALL the wrong shape — round plugs for square leaks and square plugs for round leaks, as if the tugboat is CHOOSING to cry. That orange rope might work better. Stone ramp or rowing dinghy?",
+      "choices": [
+        {
+          "label": "Slide down the ramp",
+          "next": "m1",
+          "spot": "stone boat ramp"
+        },
+        {
+          "label": "Row the dinghy out",
+          "next": "m2",
+          "spot": "teal rowing dinghy"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} lifts a corner of the white canvas awning on the fishing boat stern, the bright orange rope slung across one shoulder, a piece of tough canvas in hand, the crying yellow tugboat bobbing in the dark water nearby with moonlit drip trails on its hull. Flags and boat hulls are blank or show only simple pictures. On the LEFT a wide stone boat ramp slopes down to the waterline beside the tugboat, on the RIGHT a teal rowing dinghy bobs at the dock with two small oars inside, both large, fully visible, clearly separated.",
+      "text": "Under the awning Mo found a piece of sail canvas tougher than a rhino's raincoat — PERFECT for patching, except Mo has a sneaking suspicion patches are NOT what this tugboat needs. Stone ramp or rowing dinghy?",
+      "choices": [
+        {
+          "label": "Slide down the ramp",
+          "next": "m1",
+          "spot": "stone boat ramp"
+        },
+        {
+          "label": "Row the dinghy out",
+          "next": "m2",
+          "spot": "teal rowing dinghy"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} crouches beside the pink lobster pot at the dock edge, the brass ship lantern hanging from one arm casting golden light, a tiny hermit crab inside the pot gesturing toward the crying yellow tugboat in the water. Flags and boat hulls are blank or show only simple pictures. On the LEFT a pile of orange anchors sits on the dock near the tugboat's bow, on the RIGHT a purple mooring bollard stands near the tugboat's stern with thick ropes coiled around it, both large, fully visible, clearly separated.",
+      "text": "A hermit crab inside the pot waved its tiny claw at the tugboat and made a sound like a sigh — apparently the whole harbor KNOWS the tug has been sad for weeks, but nobody ever asked it why. Anchor pile or mooring bollard?",
+      "choices": [
+        {
+          "label": "Head to the anchor pile",
+          "next": "m3",
+          "spot": "orange anchor pile"
+        },
+        {
+          "label": "Walk to the bollard",
+          "next": "m4",
+          "spot": "purple mooring bollard"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands on top of the tall yellow crate stack near the dock lamp, the brass ship lantern raised high, the whole moonlit harbor spread out below with the crying yellow tugboat's drip trails catching the light like silver tear streaks, a blue barrel sitting on the crate stack beside a coil of old rope. Flags and boat hulls are blank or show only simple pictures. On the LEFT a pile of orange anchors sits on the dock below near the tugboat's bow, on the RIGHT a purple mooring bollard stands near the tugboat's stern with thick ropes coiled around it, both large, fully visible, clearly separated.",
+      "text": "From up HERE Mo can see the whole harbor, and those drip trails on the tugboat make a pattern — they run DOWN the hull like TEAR STREAKS, not sideways like proper leaks. This tugboat is not leaking. This tugboat is CRYING. Anchor pile or mooring bollard?",
+      "choices": [
+        {
+          "label": "Hop down to the anchors",
+          "next": "m3",
+          "spot": "orange anchor pile"
+        },
+        {
+          "label": "Climb down to the bollard",
+          "next": "m4",
+          "spot": "purple mooring bollard"
+        }
+      ],
+      "scare": {
+        "spot": "blue barrel",
+        "pop": "a plump harbor seal pup with two big round surprised eyes popping up from inside the blue barrel with whiskers twitching",
+        "reveal": "Arf! Best napping barrel in the harbor!",
+        "sting": "splash",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands on the dock beside the yellow tugboat's hull, the bright orange rope looped over one shoulder, warm drips falling from the hull like slow tears, the moonlit water lapping gently. Flags and boat hulls are blank or show only simple pictures. On the LEFT a copper capstan stands bolted to the dock edge with a grooved drum for winding rope, on the RIGHT a red canvas hammock hangs between two dock posts swaying gently, both large, fully visible, clearly separated.",
+      "text": "Up close the drips are WARM — warm like tears, not cold like sea water — and the tugboat shudders like it is trying very hard not to sniffle. That capstan could hold one end of the rope for a towline, and that hammock is whispering sweet nothings about naptime. Capstan or hammock?",
+      "choices": [
+        {
+          "label": "Tie the rope to the capstan",
+          "next": "end_towline_ride",
+          "spot": "copper capstan"
+        },
+        {
+          "label": "Curl up in the hammock",
+          "next": "end_hammock_nap",
+          "spot": "red canvas hammock"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} sits in the teal rowing dinghy alongside the yellow tugboat, the bright orange rope coiled in the bottom of the dinghy, moonlight reflecting off the calm water, the tugboat's hull covered in warm drip trails. Flags and boat hulls are blank or show only simple pictures. On the LEFT a wooden gangplank leans against the tugboat's rail within easy reach, on the RIGHT a white canvas sail lies rolled up in the dinghy's bow, both large, fully visible, clearly separated.",
+      "text": "The dinghy bumps the tugboat's hull and the tug makes a sound like a sigh — so quiet and SO sad that Mo's heart does a little flip. That gangplank leads aboard, or Mo could rig the rope to this sail and give the tugboat something to CHASE. Gangplank or canvas sail?",
+      "choices": [
+        {
+          "label": "Climb the gangplank aboard",
+          "next": "end_garland_cruise",
+          "spot": "wooden gangplank"
+        },
+        {
+          "label": "Rig the canvas sail",
+          "next": "end_moonride",
+          "spot": "white canvas sail"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands at the bow of the yellow tugboat, the brass ship lantern in hand casting warm golden light across the wet deck, the tugboat's drip trails glistening like tear streaks in the lantern glow. Flags and boat hulls are blank or show only simple pictures. On the LEFT a tall iron mast rises from the bow deck with rigging loops for hanging things, in the MIDDLE a sturdy wooden bow rail runs across the front of the tugboat at chest height, on the RIGHT a coiled rusty anchor chain sits in a heavy pile beside the bow, all large, fully visible, clearly separated.",
+      "text": "Standing at the bow with the lantern, Mo can practically FEEL the tugboat trembling — not from leaks, from loneliness. Nobody ever hangs pretty things on its mast, nobody ever stands at its bow for the VIEW, nobody ever waves a light to say HEY LOOK AT ME. Mast, bow rail, or anchor chain?",
+      "choices": [
+        {
+          "label": "Hang the lantern on the mast",
+          "next": "end_lantern_glow",
+          "spot": "tall iron mast"
+        },
+        {
+          "label": "Set the lantern on the rail",
+          "next": "end_bow_voyage",
+          "spot": "wooden bow rail"
+        },
+        {
+          "label": "Swing the lantern on the chain",
+          "next": "end_signal_scramble",
+          "spot": "rusty anchor chain"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands at the stern of the yellow tugboat near the old wooden ship wheel, the brass ship lantern lighting up the helm area with warm gold, the tugboat making a low hum that vibrates the deck planks. Flags and boat hulls are blank or show only simple pictures. On the LEFT a brass foghorn is mounted on the rail tarnished but solid, on the RIGHT the wooden ship wheel stands with worn handles and peeling paint, both large, fully visible, clearly separated.",
+      "text": "The tugboat is HUMMING — a low rumble from deep in its engine that sounds like the saddest, tiniest song in the whole harbor. The foghorn could answer back, or Mo could just take the wheel and see where this little tug wants to GO. Foghorn or ship wheel?",
+      "choices": [
+        {
+          "label": "Blow the foghorn",
+          "next": "end_horn_duet",
+          "spot": "brass foghorn"
+        },
+        {
+          "label": "Turn the ship wheel",
+          "next": "end_star_drift",
+          "spot": "wooden ship wheel"
+        }
+      ]
+    },
+    "end_towline_ride": {
+      "scene": "{HERO} runs along the moonlit dock pulling the bright orange rope tied to the copper capstan and the yellow tugboat's bow, the tugboat surging forward through the silver water with its hull dry and gleaming, no more drip tears, moonlight sparkling on the happy wake behind it. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo tied the rope to the capstan and HEAVED — and the tugboat LURCHED forward so hard it nearly pulled Mo off the dock! But instead of straining it practically LEAPED, splashing and charging along the waterfront like a puppy on a leash, its leaks vanishing one by one because for the first time in YEARS somebody was taking it somewhere fun. Mo ran and the tugboat zoomed and the moon watched the whole ridiculous midnight joyride from above. The End!"
+    },
+    "end_hammock_nap": {
+      "scene": "{HERO} curled up in the red canvas hammock between two dock posts, the bright orange rope dangling from one paw, eyes closed, while the yellow tugboat drips sadly in the background and the first golden streaks of sunrise appear on the horizon. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "That hammock was SO cozy and the harbor sounds were SO soothing that Mo closed both eyes for JUST one second and woke up to the harbor master standing there with a clipboard and a VERY unimpressed expression. The tugboat is still crying, the delivery run left without it, and Mo is now officially the world's most comfortable failure. The rope is still dangling. The sunrise is beautiful. The tugboat is NOT fixed. Oopsie ending!",
+      "bad": true
+    },
+    "end_garland_cruise": {
+      "scene": "{HERO} stands on the deck of the yellow tugboat completely tangled in the bright orange rope, seashells and cork floats stuck in his fur, the garland wrapped around the mast and Mo and everything else in one giant orange knot.",
+      "text": "Mo strung the orange rope from bow to stern but forgot to leave room to WALK — he tripped on the garland, the seashells tangled in his fur, the rope wrapped around the mast twice and around Mo three times, and the tugboat sat perfectly still in the harbor while its decorator dangled from the rigging like a fuzzy orange ornament. Oopsie ending!",
+      "bad": true
+    },
+    "end_moonride": {
+      "scene": "{HERO} sits in the teal rowing dinghy as the yellow tugboat chases it through the moonlit harbor, the bright orange rope connecting the dinghy's small white canvas sail to the tugboat's bow, the sail full of night wind, the tugboat's hull gleaming and dry with a happy wake behind it. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo rigged the orange rope to the canvas sail and WHOOSH — the night wind caught it and the dinghy shot forward with the tugboat in tow, and the tugboat did not resist even a LITTLE because this was exactly what it wanted — to go somewhere for FUN, not for work. The leaks dried up, the wake turned silver in the moonlight, and Mo and the tugboat sailed the harbor until the stars started to yawn. The End!"
+    },
+    "end_lantern_glow": {
+      "scene": "{HERO} sits on the bow of the yellow tugboat as it putters through the moonlit harbor, the brass ship lantern hanging from the tall iron mast swinging gently and casting warm golden light across the water, the tugboat's hull dry and proud, gentle ripples in the wake. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo hung the lantern on the mast and it swung gently, casting warm gold across the water like a tiny lighthouse. The tugboat rumbled, then PURRED — the leaks stopped because it finally felt SEEN, the prettiest boat in the harbor with its own personal star. Mo sat on the bow as the tug puttered a slow victory lap, lantern swinging, drip-free and proud as a peacock with a foghorn. The End!"
+    },
+    "end_bow_voyage": {
+      "scene": "{HERO} grips the wooden bow rail of the yellow tugboat as it charges through the moonlit harbor, the brass ship lantern blazing on the rail like a headlight, silver spray splashing, the tugboat's hull gleaming and completely dry, stars reflecting in the wake. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo set the lantern on the bow rail and it blazed forward like a headlight on a midnight express — the tugboat made an excited sound like BRAAAAP and nudged away from the dock ALL BY ITSELF. Mo barely grabbed the rail in time as the little tug charged into the silver harbor, leaks gone, splashing happily because NOBODY had taken it on an adventure since before Mo was born. The End!"
+    },
+    "end_signal_scramble": {
+      "scene": "{HERO} stands at the bow of the yellow tugboat swinging the brass ship lantern wildly on the rusty anchor chain, every boat in the harbor motoring toward the tugboat with their lights on, fishing boats and sailboats and a grumpy barge all converging into a floating traffic jam, the tugboat squished between hulls and still dripping. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo grabbed the chain and swung the lantern in big wild circles like an emergency beacon and every SINGLE boat in the harbor woke up — fishing boats, sailboats, a VERY grumpy barge — they all motored straight for the tugboat thinking something was terribly wrong. The harbor turned into a floating traffic jam, the tugboat got squished between a catamaran and a kayak, and Mo is standing there with a lantern and absolutely NO explanation. The tugboat is STILL crying, now with company. Oopsie ending!",
+      "bad": true
+    },
+    "end_horn_duet": {
+      "scene": "{HERO} stands at the stern of the yellow tugboat blowing the brass foghorn under the stars, the brass ship lantern glowing on the deck, the tugboat's own smokestack puffing a happy ring of smoke, both horns sending visible sound ripples across the calm moonlit harbor, the tugboat's hull dry and vibrating with happy rumbles. Flags and boat hulls are blank or show only simple pictures.",
+      "text": "Mo blew the foghorn and it sounded TERRIBLE — like a goose arguing with a tuba — but the tugboat answered with its own horn and together they made a sound so wonderfully awful that it looped right back around to BEAUTIFUL. The leaks stopped because the tugboat was LAUGHING for the first time in years, and Mo blew again as they chugged out of the harbor, lantern swinging, making the worst and best music the moon has ever heard. The End!"
+    },
+    "end_star_drift": {
+      "scene": "{HERO} lies on the deck of the yellow tugboat fast asleep, the brass ship lantern extinguished, while the tugboat has drifted out into the open ocean far from the harbor, the marina just a tiny speck of light in the distance.",
+      "text": "Mo turned the wheel and the tugboat drifted so gently that Mo lay down on the warm deck for just a second — and fell COMPLETELY asleep! The tugboat kept drifting with nobody steering and by the time Mo woke up the marina was a tiny speck on the horizon and a confused seagull was sitting on his head. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

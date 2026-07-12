@@ -1,0 +1,236 @@
+{
+  "id": "firefly",
+  "title": "Milo and the Firefly Garden",
+  "hero": "MILO",
+  "style": "Velvety dark-garden ink-and-glow illustration, blackberry purples with chartreuse firefly sparks, oversized dewdrops and flower canopies from a bug's-eye view. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} a small black kitten clutching a glowing paper lantern, sitting on a mossy stone at the edge of an enormous dark garden, gazing at a swirl of chartreuse fireflies dancing above a clover meadow. On the LEFT a purple foxglove tunnel arching into leafy shadow, on the RIGHT a brass bell hanging from a mossy orange toadstool, both large, fully visible, clearly separated.",
+      "text": "Milo wanted one thing tonight — to dance with the fireflies at the midsummer glow-dance. But every time he padded close, his big bright lantern outshone the whole swarm and they scattered like sparks off a hammer.",
+      "choices": [
+        {
+          "label": "Sneak through the flowers",
+          "next": "a",
+          "spot": "purple foxglove tunnel"
+        },
+        {
+          "label": "Ring the toadstool bell",
+          "next": "b",
+          "spot": "brass toadstool bell"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} a small black kitten tiptoeing through a tunnel of enormous purple foxglove bells dripping with fat dewdrops, lantern held low. On the LEFT a silver luna moth tangled in a glittering cobweb between two stems, on the RIGHT a mossy stone archway leading to the dark meadow beyond, both large, fully visible, clearly separated.",
+      "text": "The foxglove tunnel smelled of honey and midnight. Halfway through, Milo spotted a luna moth caught in a cobweb, her wings shimmering like crumpled tinfoil.",
+      "choices": [
+        {
+          "label": "Free the luna moth",
+          "next": "aa",
+          "spot": "silver luna moth"
+        },
+        {
+          "label": "Tiptoe past to meadow",
+          "next": "ab",
+          "spot": "mossy stone archway"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} a small black kitten holding a bright paper lantern in a moonlit clearing ringed by giant mushrooms. On the LEFT a tiny green cricket sitting on a round lily pad at a dark pond edge, on the RIGHT a fat toad with a clover crown perched on an orange toadstool, both large, fully visible, clearly separated.",
+      "text": "The bell's clang summoned old Bramble the toad, who was wider than a dinner plate and twice as opinionated. By the pond, a tiny cricket chirped a lonely little tune that nobody was listening to.",
+      "scare": {
+        "spot": "orange toadstool",
+        "pop": "A fat friendly toad with bulging golden eyes and a tiny clover crown, cheerfully popping up from behind an orange toadstool, dark garden background, bug's-eye view, velvety ink-and-glow illustration.",
+        "reveal": "Bramble blinked one enormous golden eye. 'Too much shine for the glow-dance, kit. Less sun, more moon.'",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Carry the cricket home",
+          "next": "ba",
+          "spot": "green lily-pad cricket"
+        },
+        {
+          "label": "Ask Bramble for advice",
+          "next": "bb",
+          "spot": "fat crowned toad"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} a small black kitten with a grateful silver luna moth riding on his head, emerging from the foxglove tunnel at the edge of a dark clover meadow dotted with fireflies. On the LEFT a fat crystal dewdrop balanced on a clover leaf glowing faintly, on the RIGHT a tall swaying daisy with wide white petals, both large, fully visible, clearly separated.",
+      "text": "The moth landed on Milo's head like a living crown and whispered the firefly secret: they don't chase brightness — they chase kindness. At the meadow's edge, the whole swarm blinked like a living constellation.",
+      "choices": [
+        {
+          "label": "Dim lantern to a whisper",
+          "next": "m1",
+          "spot": "crystal clover dewdrop"
+        },
+        {
+          "label": "Hide behind the daisy",
+          "next": "m2",
+          "spot": "tall white daisy"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} a small black kitten alone at the edge of a dark clover meadow, lantern casting a harsh circle of light, fireflies hovering just out of reach above. On the LEFT a jar of golden glow-worm jam sitting on a mossy stump, on the RIGHT a big dark oak leaf lying flat on the ground, both large, fully visible, clearly separated.",
+      "text": "Milo reached the meadow without a friend or a clue. The fireflies hung just out of reach, winking as if they knew a joke he didn't.",
+      "choices": [
+        {
+          "label": "Try the glow-worm jam",
+          "next": "m1",
+          "spot": "golden glow-worm jar"
+        },
+        {
+          "label": "Cover lantern with leaf",
+          "next": "m2",
+          "spot": "dark oak leaf"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} a small black kitten with a tiny green cricket perched on his ear, walking through a mushroom ring glowing faintly violet, fireflies swirling above. On the LEFT a hollow log overgrown with soft moss, on the RIGHT a ring of pale toadstools forming a tiny stage, both large, fully visible, clearly separated.",
+      "text": "Milo carried the little cricket all the way home to the mushroom ring, and the grateful fellow refused to leave his ear. 'I know the firefly lullaby,' the cricket chirped. 'My grandmother learned it from a star.'",
+      "choices": [
+        {
+          "label": "Sing the lullaby together",
+          "next": "m3",
+          "spot": "mossy hollow log"
+        },
+        {
+          "label": "Snuff the lantern out",
+          "next": "m4",
+          "spot": "pale toadstool stage"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} a small black kitten pondering in a mushroom ring, lantern flickering, remembering Bramble's riddle about moon and sun. On the LEFT a silver stone birdbath reflecting the full moon, on the RIGHT a tall dark fern curled like a question mark, both large, fully visible, clearly separated.",
+      "text": "'Less sun, more moon.' Milo turned Bramble's riddle over in his mind like a pebble. The moon didn't chase anyone — it just glowed, and the whole world came to look.",
+      "choices": [
+        {
+          "label": "Turn lantern to lowest",
+          "next": "m3",
+          "spot": "silver stone birdbath"
+        },
+        {
+          "label": "Blow the lantern out",
+          "next": "m4",
+          "spot": "curled dark fern"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} a small black kitten at the meadow's center with lantern barely flickering, surrounded by curious fireflies drifting closer. On the LEFT a fat crystal dewdrop on a blade of grass, in the MIDDLE a velvet purple petunia with an open bell, on the RIGHT a large round BRASS WICK-KNOB dial mounted on a mossy stump, glinting, clearly connected to lantern-light by tiny etched flame marks. All three large, fully visible, clearly separated.",
+      "text": "The fireflies noticed. One brave spark drifted close, then another. Milo held his breath — they were almost near enough to touch. Now, one last offering.",
+      "choices": [
+        {
+          "label": "Offer the dewdrop gift",
+          "next": "end_stardance",
+          "spot": "crystal grass dewdrop"
+        },
+        {
+          "label": "Bow into the petunia",
+          "next": "end_waltz",
+          "spot": "purple velvet petunia"
+        },
+        {
+          "label": "Flash lantern full blast",
+          "next": "end_scatter",
+          "spot": "brass wick knob"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} a small black kitten crouched behind a tall daisy stem in total darkness, only his wide green eyes visible, fireflies circling overhead. On the LEFT a round mossy stone perfect for curling up on, on the RIGHT a low oak branch within pouncing reach, both large, fully visible, clearly separated.",
+      "text": "With his lantern covered, Milo was just a warm shadow in the grass. The fireflies swirled overhead, painting slow green spirals, unaware a kitten was hiding right below.",
+      "choices": [
+        {
+          "label": "Curl up on the stone",
+          "next": "end_crown",
+          "spot": "round mossy stone"
+        },
+        {
+          "label": "Leap from the branch",
+          "next": "end_tumble",
+          "spot": "low oak branch"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} a small black kitten sitting in the center of a violet mushroom ring, lantern turned to its lowest candle-glow, fireflies hovering at the edges listening. On the LEFT a mossy hollow log perfect for singing into, on the RIGHT a curved bark boat floating in a tiny puddle, both large, fully visible, clearly separated.",
+      "text": "Milo turned his lantern down until it was just a candle-soft flicker. The mushroom ring hummed. Every firefly in the garden turned to look — or whatever fireflies do instead of looking.",
+      "choices": [
+        {
+          "label": "Hum into the log",
+          "next": "end_chorus",
+          "spot": "mossy hollow log"
+        },
+        {
+          "label": "Set lantern in boat",
+          "next": "end_moonkitten",
+          "spot": "curved bark boat"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} a small black kitten sitting in complete darkness with no lantern, only moonlight silvering his black fur, fireflies blinking in a wide ring around him. On the LEFT a glowing green mushroom cap with a single firefly perched on it, on the RIGHT a tall white dandelion globe ready to burst, both large, fully visible, clearly separated.",
+      "text": "With the lantern out, Milo was nothing but moonlight on black fur — and that turned out to be the most beautiful glow of all. The fireflies stopped fleeing and started wondering.",
+      "choices": [
+        {
+          "label": "Touch noses with firefly",
+          "next": "end_tagfriend",
+          "spot": "glowing green mushroom"
+        },
+        {
+          "label": "Blow the dandelion seeds",
+          "next": "end_duet",
+          "spot": "white dandelion globe"
+        }
+      ]
+    },
+    "end_stardance": {
+      "scene": "{HERO} a small black kitten standing in the center of a dark clover meadow absolutely covered in fireflies, glowing like a walking constellation, fat dewdrops on the grass reflecting his light, enormous purple foxgloves framing the scene.",
+      "text": "The fireflies landed on the dewdrop, then on Milo's nose, then on his ears, his tail, every whisker. He didn't chase the glow — he became it. The most star-spangled dancer the garden had ever seen, and all he had to do was be gentle. The End!"
+    },
+    "end_waltz": {
+      "scene": "{HERO} a small black kitten gently swaying inside a giant purple petunia bell in a dark meadow, fireflies spiraling around him in slow golden-green rings like a living chandelier.",
+      "text": "Milo bowed into the petunia and began to sway, soft as a breeze. The fireflies matched his rhythm — slow, then slower, then perfectly still, then bursting into the most beautiful swirling waltz the night garden had ever held. The End!"
+    },
+    "end_scatter": {
+      "scene": "{HERO} a small black kitten sitting alone in an empty dark meadow holding a blinding lantern at full brightness, every firefly gone, only a single bewildered beetle circling the light.",
+      "text": "Milo cranked his lantern to full blast. For one glorious second he was the brightest thing in the garden — and for every second after that, he was the loneliest. Even the crickets went quiet. Oopsie ending!",
+      "bad": true
+    },
+    "end_crown": {
+      "scene": "{HERO} a small black kitten lying peacefully in a patch of soft clover with eyes half-closed in bliss, fireflies arranging themselves in a perfect glowing crown around his head, tall daisies standing guard.",
+      "text": "Milo lay so still that the fireflies forgot he was a kitten and decided he was a very furry hillock. They crowned him with a ring of living light, and Milo purred so hard the clover shook. The End!"
+    },
+    "end_tumble": {
+      "scene": "{HERO} a small black kitten tangled upside-down in a daisy bush at the meadow edge, lantern rolling away through the grass, fireflies scattered in every direction, a startled beetle fleeing.",
+      "text": "Milo launched himself off the branch like a furry cannonball. He missed the fireflies, hit the daisy, and ended up dangling upside-down with a petal on his nose. The fireflies had fled three meadows over. Oopsie ending!",
+      "bad": true
+    },
+    "end_chorus": {
+      "scene": "{HERO} a small black kitten humming softly into a mossy hollow log in a violet mushroom ring, fireflies flashing in perfect synchronized waves of green light all around, the whole garden pulsing like a heartbeat.",
+      "text": "Milo hummed the softest note he knew, and the hollow log made it warm and round. Every firefly in the garden synchronized their blinks to his hum — flash, flash, flash — a living heartbeat made of light. The End!"
+    },
+    "end_moonkitten": {
+      "scene": "{HERO} a small black kitten sitting serenely on a violet toadstool in a mushroom ring, no lantern, fur silvered by moonlight, fireflies drifting down to land on him one by one like falling stars, a tiny bark boat glowing faintly in a puddle nearby.",
+      "text": "Milo set his lantern in the little bark boat and let it float away. Without it, his black fur caught the moonlight like velvet catching dew — and the fireflies came to him, because he finally glowed just right. The End!"
+    },
+    "end_tagfriend": {
+      "scene": "{HERO} a small black kitten tangled in a glittering cobweb in the moonlit mushroom ring, wearing three violet mushroom caps stacked on his head like silly hats, a toppled toadstool behind him, fireflies blinking in what looks suspiciously like laughter.",
+      "text": "The brave firefly booped Milo's nose — TAG! — and Milo bounded after it so enthusiastically he tripped over a toadstool, rolled through the mushroom ring like a furry bowling ball, and ended up tangled in a cobweb wearing three mushroom caps as hats. The fireflies thought it was hilarious. Oopsie ending!",
+      "bad": true
+    },
+    "end_duet": {
+      "scene": "{HERO} a small black kitten mid-sneeze in the violet mushroom ring, dandelion fluff covering his face like a fluffy white beard, the empty dandelion stem in one paw, fireflies scattered in every direction with their lights flickering off, toadstools wobbling from the force of the sneeze.",
+      "text": "Milo blew the dandelion and ALL the seeds went straight up his nose. He sneezed so hard every firefly in the garden blinked off in surprise, and when they blinked back on Milo was wearing a dandelion-fluff beard and could not stop sneezing. Oopsie ending!",
+      "bad": true
+    }
+  }
+}
