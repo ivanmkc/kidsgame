@@ -1,0 +1,243 @@
+{
+  "id": "swamp",
+  "title": "Milo and the Midnight Frog",
+  "hero": "MILO",
+  "style": "Deep indigo and moss green, bioluminescent cyan water patches, firefly speck highlights, Spanish moss textures, warm twilight amber horizon. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the misty edge of a moonlit bayou, ancient cypress trees draped in silver Spanish moss rising on all sides, firefly clouds flickering gold and green above still water, and bioluminescent cyan patches glowing beneath giant lily pads. On the LEFT an amber mushroom trail winds between towering cypress trunks into a warm grove, on the RIGHT a chain of giant green lily pads stretches across the shimmering water toward a muddy island, both large, fully visible, clearly separated.",
+      "text": "It is almost midnight and somewhere in this bayou a legendary frog is about to sing his one-wish croak — but the swamp REARRANGES after dark and every critter points the wrong way on purpose because they want the wish too. Mushroom trail or lily pads?",
+      "choices": [
+        {
+          "label": "Follow the mushroom trail",
+          "next": "a",
+          "spot": "amber mushroom trail"
+        },
+        {
+          "label": "Hop the lily pads",
+          "next": "b",
+          "spot": "green lily pads"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} pads through a warm amber cypress grove with glowing mushrooms lining the mossy path, Spanish moss dangling like curtains above, a small glass firefly jar sitting on a mossy tree stump, and an olive mossy log resting near the water's edge. On the LEFT a blue paper lantern hangs from a willow branch above a narrow dark creek, on the RIGHT a warm amber cave entrance glows in a mossy hillside, both large, fully visible, clearly separated.",
+      "text": "The mushrooms pulse like tiny heartbeats and a crawdad waves a claw and says go THAT way, then go THIS way, then shrugs — helpful! Milo grabs the little firefly jar from the stump because a kitten in a swamp needs more light. Lantern or cave?",
+      "choices": [
+        {
+          "label": "Follow the lantern",
+          "next": "aa",
+          "spot": "blue paper lantern"
+        },
+        {
+          "label": "Explore the cave",
+          "next": "ab",
+          "spot": "amber cave entrance"
+        }
+      ],
+      "scare": {
+        "spot": "olive mossy log",
+        "pop": "a startled great blue heron with two wide surprised round eyes unfolding its enormous wings from behind the olive mossy log",
+        "reveal": "Goodness! I was just napping on my favorite log!",
+        "sting": "squawk",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} stands on a muddy island in the middle of the moonlit bayou, a hollow reed whistle sticking out of the mud at his feet, bioluminescent cyan water lapping at giant lily pads around him, and a grumpy catfish blowing bubbles nearby. On the LEFT a wide tan log bridge stretches across deep water toward tall cattails, on the RIGHT a row of large cyan boulders leads between rounded banks, both large, fully visible, clearly separated.",
+      "text": "Each lily pad BOUNCED like a trampoline on the way over and the catfish gurgles something about a frog but then blows a rude bubble and swims off — rude! Milo pulls the reed whistle from the mud and tucks it behind his ear. Log bridge or boulders?",
+      "choices": [
+        {
+          "label": "Cross the log bridge",
+          "next": "ba",
+          "spot": "tan log bridge"
+        },
+        {
+          "label": "Hop the boulders",
+          "next": "bb",
+          "spot": "cyan boulders"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} follows the blue lantern's glow along a narrow creek, the glass firefly jar in his paw casting warm gold across the dark water, fireflies overhead forming a swirling arrow shape that keeps flipping direction. On the LEFT gray stepping stones lead down to a quiet moonlit cove ringed by weeping willows, on the RIGHT a green vine ladder climbs up to a wooden platform high in a cypress tree, both large, fully visible, clearly separated.",
+      "text": "The fireflies keep pointing one way then CHANGING THEIR MINDS like the world's worst trail guide, but Milo's ears swivel — somewhere close, VERY close, a deep croak rumbles through the water. Stepping stones or vine ladder?",
+      "choices": [
+        {
+          "label": "Take the stepping stones",
+          "next": "m1",
+          "spot": "gray stepping stones"
+        },
+        {
+          "label": "Climb the vine ladder",
+          "next": "m2",
+          "spot": "green vine ladder"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} crouches inside a warm amber cave with glowing green moss painting the walls in light, the glass firefly jar illuminating faded cave drawings of frogs and crescent moons, and a gentle warmth rising from a crack in the rocky floor. On the LEFT a jade tunnel mouth opens in the cave wall with moonlight visible at the far end, on the RIGHT a chestnut root staircase twists up through a gap in the cave ceiling toward treetop moonlight, both large, fully visible, clearly separated.",
+      "text": "The cave walls show a frog SINGING to a crescent moon and Milo realizes this is the frog's OWN hideout — he is SO close, and the warm air feels like the bayou is holding its breath. Tunnel or root staircase?",
+      "choices": [
+        {
+          "label": "Crawl through the tunnel",
+          "next": "m1",
+          "spot": "jade tunnel mouth"
+        },
+        {
+          "label": "Climb the root staircase",
+          "next": "m2",
+          "spot": "chestnut root staircase"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} pads across a wide mossy log bridge over deep cyan-glowing water, the reed whistle tucked behind his ear, dragonflies as big as hummingbirds hovering around him, and fireflies drifting lazily above. On the LEFT a raised brown mudflat stage surrounded by tall cattails and dotted with flat sitting-stones glows under the full moon, on the RIGHT a teal grotto entrance hides behind a thin silver waterfall, both large, fully visible, clearly separated.",
+      "text": "The log bridge is so wide even a wobbly kitten cannot fall off, and the dragonflies do loop-de-loops like a tiny air show — but the croak is LOUDER now, rumbling through the water and up through Milo's paws. Mudflat stage or grotto?",
+      "choices": [
+        {
+          "label": "Visit the mudflat stage",
+          "next": "m3",
+          "spot": "brown mudflat stage"
+        },
+        {
+          "label": "Enter the grotto",
+          "next": "m4",
+          "spot": "teal grotto entrance"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} hops along a row of large cyan boulders between tall cattails, the reed whistle behind his ear, bioluminescent water pulsing in steady rhythm between the rocks, and a brown wooden bucket resting on the muddy bank. On the LEFT a silver mudflat with flat sitting-stones rises from the water surrounded by cattails, on the RIGHT a slate grotto cliff drips with water behind a silver cascade, both large, fully visible, clearly separated.",
+      "text": "The boulders pulse cyan like they are trying to TEACH Milo the beat, and his tail starts swishing in time — this bayou has a rhythm and the frog is the lead singer. Mudflat or grotto?",
+      "choices": [
+        {
+          "label": "March to the mudflat",
+          "next": "m3",
+          "spot": "silver mudflat"
+        },
+        {
+          "label": "Sneak to the grotto",
+          "next": "m4",
+          "spot": "slate grotto cliff"
+        }
+      ],
+      "scare": {
+        "spot": "brown wooden bucket",
+        "pop": "a plump crawdad with two big round shiny eyes and bright red pincer claws popping out of the brown wooden bucket waving hello",
+        "reveal": "Snap snap! Just soaking my claws!",
+        "sting": "splash",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands on the bank of a quiet moonlit cove ringed by drooping weeping willows, the glass firefly jar glowing warm gold in his paw, the still water reflecting the crescent moon, and a deep croak echoing across the surface. On the LEFT a gold paper lantern sits on the largest lily pad at the water's edge, on the RIGHT a flat tan sandstone rock juts out over the water like a cozy shelf, both large, fully visible, clearly separated.",
+      "text": "The croak is so close Milo's whiskers vibrate, and the firefly jar pulses gold like it KNOWS something — one brilliant move and the frog will come, but that sandstone rock is calling Milo's name in a VERY nap-like voice. Paper lantern or sandstone rock?",
+      "choices": [
+        {
+          "label": "Light the paper lantern",
+          "next": "end_jar_signal",
+          "spot": "gold paper lantern"
+        },
+        {
+          "label": "Rest on the sandstone rock",
+          "next": "end_warm_nap",
+          "spot": "tan sandstone rock"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a wide wooden platform built high in an ancient cypress tree, the glass firefly jar glowing in his paw, the whole moonlit bayou spread out below like a glowing map, and the deep croak rising from somewhere in the dark canopy. On the LEFT an emerald vine hangs within easy reach curling down toward the water, on the RIGHT a wide cypress branch stretches toward a second platform with a copper wind chime, both large, fully visible, clearly separated.",
+      "text": "From up here Milo can see the WHOLE bayou and it is gorgeous, but the croak is calling from below and this vine is basically a gilded invitation — the question is whether Milo trusts his landing or his balancing. Vine or wind chime?",
+      "choices": [
+        {
+          "label": "Swing on the vine",
+          "next": "end_vine_duet",
+          "spot": "emerald vine"
+        },
+        {
+          "label": "Walk to the wind chime",
+          "next": "end_chime_trail",
+          "spot": "copper wind chime"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands on a raised brown mudflat stage under the full moon, the reed whistle in his paw, flat sitting-stones arranged like an audience around the edge, and the deep croak pulsing from just beyond the cattails. On the LEFT a large russet log drum sits at the edge of the stage, in the MIDDLE a tall orange toadstool stands center stage glowing faintly, on the RIGHT a slippery ochre mud slide curves down toward the dark water, all large, fully visible, clearly separated.",
+      "text": "The stage is SET, the moon is a spotlight, and the frog is warming up just beyond those cattails — Milo needs to make some noise to bring him in, but that mud slide is giving off VERY chaotic energy. Log drum, toadstool, or mud slide?",
+      "choices": [
+        {
+          "label": "Beat the log drum",
+          "next": "end_drum_duet",
+          "spot": "russet log drum"
+        },
+        {
+          "label": "Stand on the toadstool",
+          "next": "end_whistle_call",
+          "spot": "orange toadstool"
+        },
+        {
+          "label": "Ride the mud slide",
+          "next": "end_mud_slide",
+          "spot": "ochre mud slide"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} steps into a mossy grotto behind the silver waterfall, the reed whistle behind his ear, bioluminescent moss coating every surface in soft blue-green light, and a hidden pool in the center rippling with the rhythm of the frog's croak. On the LEFT a jade mossy boulder sits beside the pool like a little stage, on the RIGHT a tall blue crystal stalagmite rises from the water glowing pale blue, both large, fully visible, clearly separated.",
+      "text": "The waterfall hums, the pool ripples, and Milo's purr starts up ALL BY ITSELF because this grotto is basically a giant reverb chamber — every sound is twice as beautiful in here. Boulder or stalagmite?",
+      "choices": [
+        {
+          "label": "Hop on the boulder",
+          "next": "end_grotto_duet",
+          "spot": "jade mossy boulder"
+        },
+        {
+          "label": "Touch the stalagmite",
+          "next": "end_crystal_song",
+          "spot": "blue crystal stalagmite"
+        }
+      ]
+    },
+    "end_jar_signal": {
+      "scene": "{HERO} holds the glass firefly jar high above the quiet moonlit cove, fireflies streaming out in a golden spiral, as a large green frog with golden eyes sits on a lily pad croaking in perfect rhythm while Milo purrs, their harmony echoing across the still water under the crescent moon.",
+      "text": "Milo raised the jar and the fireflies BURST out in a golden spiral — and there he was, the legendary frog, sitting on a lily pad with the biggest grin, croaking the most beautiful note in the entire bayou. Milo purred. The frog croaked. The harmony was so perfect the whole swamp lit up gold, because the wish was never magic — it was a duet partner, and Milo's purr was the missing note. The End!"
+    },
+    "end_warm_nap": {
+      "scene": "{HERO} curled up on the flat tan sandstone rock over the moonlit cove, eyes closed, the glass firefly jar dimming beside him, while dawn light creeps over the cypress trees and the lily pad where the frog sang sits empty.",
+      "text": "That sandstone rock was SO warm that Milo closed his eyes for one tiny second and woke up to SUNRISE — the frog had sung his midnight croak to nobody, the firefly jar was empty, and Milo is the coziest kitten in the bayou but the wish sailed right past him. Time to start over from the misty edge! Oopsie ending!",
+      "bad": true
+    },
+    "end_vine_duet": {
+      "scene": "{HERO} swings down on the emerald vine from the cypress platform, landing perfectly on a moonlit log beside a large green frog with golden eyes, the glass firefly jar swinging from his tail, as Milo purrs and the frog croaks in harmony with fireflies spiraling around them both.",
+      "text": "Milo grabbed the vine and SWOOPED down like the world's smallest furry comet, landing on a moonlit log beside the legendary frog — enormous, green, and grinning. Croak met purr and the firefly jar swung from Milo's tail like a tiny spotlight, and the whole bayou went quiet just to listen to the prettiest duet in swamp history. The End!"
+    },
+    "end_chime_trail": {
+      "scene": "{HERO} taps the copper wind chime on the high cypress platform too hard and the chime falls off its hook, crashing through branches below, the glass firefly jar wobbling on the edge of the platform, Milo lunging to catch the falling chime and missing.",
+      "text": "Milo tapped the wind chime with a LITTLE too much enthusiasm and it popped right off its hook — CRASH BANG BONK down through the cypress branches it went, scaring every frog within three miles into the deepest part of the bayou! The legendary frog heard THAT note loud and clear and swam in the opposite direction. Oopsie ending!",
+      "bad": true
+    },
+    "end_drum_duet": {
+      "scene": "{HERO} taps the russet log drum with both paws on the mudflat stage, sending ripples across the water, while a large green frog with golden eyes rides a ripple-wave onto the stage, and Milo plays the reed whistle between drum beats under the full moon.",
+      "text": "Milo WHACKED that log drum and the whole bayou THUMPED — ripples shot across the water and the frog surfed one RIGHT onto the stage like the coolest entrance in music history! Reed whistle between beats, frog croak on the downbeat, Milo's purr underneath — a three-piece bayou band under the moon. The wish was never a wish. It was an audition. The End!"
+    },
+    "end_whistle_call": {
+      "scene": "{HERO} stands on the tall orange toadstool center stage on the mudflat, blowing the reed whistle too hard with puffed-out cheeks, the note coming out as a horrible screech, the toadstool tilting from Milo's effort, fireflies scattering in every direction.",
+      "text": "Milo hopped onto the toadstool, took the deepest breath of his life, and blew the reed whistle SO hard it made the most ear-splitting SQUEEEEEAK the bayou had ever heard — the fireflies scattered, the toadstool tipped over, and Milo landed face-first in the mud while every frog in the swamp decided to be somewhere else tonight. Oopsie ending!",
+      "bad": true
+    },
+    "end_mud_slide": {
+      "scene": "{HERO} zooms down the slippery ochre mud slide off the mudflat stage, splashing into the dark bayou water with a huge muddy splash, the reed whistle full of mud, while the frog watches from a cattail perch with an amused expression.",
+      "text": "Milo hit that mud slide at FULL SPEED and learned it was a one-way trip to Splooshville — he belly-flopped into the bayou, came up sputtering with a lily pad on his head and a whistle full of mud, and the frog watched from a safe distance like this was the funniest thing since TADPOLES. That one-wish croak is STILL waiting and Milo needs a bath before trying again! Oopsie ending!",
+      "bad": true
+    },
+    "end_grotto_duet": {
+      "scene": "{HERO} sits on the jade mossy boulder beside the hidden pool in the bioluminescent grotto, playing the reed whistle softly, as a large green frog with golden eyes surfaces from the glowing pool and croaks in gentle harmony, the silver waterfall curtain shimmering behind them.",
+      "text": "Milo sat on the boulder, blew the softest whistle note, and a bubble rose from the pool — then the frog himself, enormous and green and smiling like he had been waiting for exactly this. The grotto was his HOME and Milo came to HIM. Croak, whistle, purr — the sweetest song in the quietest room. The wish was always just: find someone who shows up. The End!"
+    },
+    "end_crystal_song": {
+      "scene": "{HERO} touches the tall blue crystal stalagmite rising from the hidden pool in the grotto, the crystal humming with pale light, the reed whistle vibrating in sympathy behind his ear, as a large green frog with golden eyes climbs the stalagmite to sit at the top and croak into the resonance, bioluminescent moss pulsing to the beat.",
+      "text": "Milo's paw touched the crystal and the whole grotto HUMMED — the stalagmite rang like a tuning fork, the reed whistle buzzed behind his ear, and the frog climbed right up out of the pool to sit on top like it was his personal concert tower. Crystal met croak met purr, and even the waterfall joined in. The wish? Being the purr that completed the chord. The End!"
+    }
+  }
+}

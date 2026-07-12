@@ -1,0 +1,243 @@
+{
+  "id": "globe",
+  "title": "Mo and the Snow-Globe Hello",
+  "hero": "MO",
+  "style": "Cozy open-air miniature winter village at night, matte storybook illustration, softly falling natural snowflakes, small snow-dusted houses in warm cream and ice-blue, deep-blue starry sky, warm golden window lights. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands ankle-deep in fresh snow at the centre of a tiny frosted town of a tiny open-air winter village, wearing a long red scarf that trails behind him. On the LEFT a tall warm-brick clock tower with a brass door stands at the edge of a cobblestone square, on the RIGHT a curving ice-blue bridge arches over a frozen silver creek, both large, fully visible, clearly separated.",
+      "text": "One big WHOOOOSH and Mo is tinier than a sugar cube, standing in the sparkliest town he has ever seen. Clock tower or ice-blue bridge?",
+      "choices": [
+        {
+          "label": "Open the brass door",
+          "next": "a",
+          "spot": "brick clock tower"
+        },
+        {
+          "label": "Cross the ice-blue bridge",
+          "next": "b",
+          "spot": "ice-blue bridge"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands inside the warm-brick clock tower, his red scarf catching on a golden cog, with ticking gears turning slowly above. On the LEFT a winding striped wooden staircase spirals upward through the gears, on the RIGHT a row of tiny glowing lanterns marks a path out through a frosted archway toward ice-blue cottages, both large, fully visible, clearly separated.",
+      "text": "The clock tower smells like cinnamon and every tick echoes like a tiny drum. Candy-cane staircase or glowing lanterns?",
+      "choices": [
+        {
+          "label": "Climb the spiral staircase",
+          "next": "ab",
+          "spot": "striped wooden staircase"
+        },
+        {
+          "label": "Follow the glowing lanterns",
+          "next": "aa",
+          "spot": "glowing lanterns"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} walks across the curving ice-blue bridge, his red scarf fluttering, with snowflakes drifting lazily around him. On the LEFT a wide frozen silver pond stretches out below with a tiny brass bird frozen at its centre, on the RIGHT a row of old iron lampposts lines a lane toward the tall crystal-ice wall at the village edge, both large, fully visible, clearly separated.",
+      "text": "The bridge hums a faint lullaby under Mo's feet and the whole globe shimmers. Frozen pond or candy-cane lampposts?",
+      "scare": {
+        "spot": "ice-blue bridge railing",
+        "pop": "a tiny cheerful snowflake sprite with rosy cheeks and a top hat made of frost, tumbling out from under the bridge railing",
+        "reveal": "Hee-hee, welcome to Snowdrift Town!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Slide to the frozen pond",
+          "next": "ba",
+          "spot": "frozen silver pond"
+        },
+        {
+          "label": "Follow the lampposts",
+          "next": "bb",
+          "spot": "iron lampposts"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands among a cluster of ice-blue cottages with warm amber windows, his red scarf glowing in the candlelight, having just re-lit a dark cottage's candle on the windowsill. On the LEFT a tall silver mailbox shaped like a snowflake stands beside a cottage door, on the RIGHT a frosted purple treasure chest sits half-buried in fresh snow under an evergreen tree, both large, fully visible, clearly separated.",
+      "text": "Mo lights the last dark candle and every cottage window winks on at once like a tiny constellation. Snowflake mailbox or purple chest?",
+      "choices": [
+        {
+          "label": "Open the snowflake mailbox",
+          "next": "m1",
+          "spot": "silver snowflake mailbox"
+        },
+        {
+          "label": "Dig out the purple chest",
+          "next": "m2",
+          "spot": "purple treasure chest"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands at the top of the warm-brick clock tower, his red scarf blowing in the cold breeze, having just unjammed a golden gear that now ticks smoothly above. On the LEFT a tall silver mailbox shaped like a snowflake hangs from the tower railing, on the RIGHT a frosted purple treasure chest sits on the observation deck beside a brass telescope, both large, fully visible, clearly separated.",
+      "text": "The unjammed gear chimes a happy BONG and the whole tower sways like it wants to dance. Snowflake mailbox or purple chest?",
+      "scare": {
+        "spot": "brass telescope",
+        "pop": "a tiny giggling clock sprite made of golden gears with a cuckoo-bird hat, popping out of the telescope eyepiece",
+        "reveal": "You fixed my favourite gear, thank you!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Check the snowflake mailbox",
+          "next": "m1",
+          "spot": "silver snowflake mailbox"
+        },
+        {
+          "label": "Unlock the purple chest",
+          "next": "m2",
+          "spot": "purple treasure chest"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands on the frozen silver pond, his red scarf trailing across the ice, having just freed a tiny brass music-box bird that now perches on his shoulder chirping. On the LEFT a glowing orange warmth-stone sits in a ring of melted snow near the pond's edge, on the RIGHT a tall crystal bell hangs from a silver post at the far shore, both large, fully visible, clearly separated.",
+      "text": "The freed bird chirps a tiny thank-you and nuzzles Mo's ear with its brass beak. Warmth-stone or crystal bell?",
+      "choices": [
+        {
+          "label": "Pick up the warmth-stone",
+          "next": "m3",
+          "spot": "orange warmth-stone"
+        },
+        {
+          "label": "Ring the crystal bell",
+          "next": "m4",
+          "spot": "crystal bell"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands at the end of the lamppost lane near the tall crystal-ice wall at the village edge, his red scarf pressed flat against the icy wall, having just polished a foggy iron lamppost until it glows bright rose. On the LEFT a glowing orange warmth-stone rests on a frost-covered bench, on the RIGHT a tall crystal bell hangs from a silver hook on the ice wall, both large, fully visible, clearly separated.",
+      "text": "The polished lamppost beams so brightly that Mo can see his own house right through the glass, so close he could wave. Warmth-stone or crystal bell?",
+      "choices": [
+        {
+          "label": "Grab the warmth-stone",
+          "next": "m3",
+          "spot": "orange warmth-stone"
+        },
+        {
+          "label": "Tap the crystal bell",
+          "next": "m4",
+          "spot": "crystal bell"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} opens the silver snowflake mailbox, his red scarf catching drifting snowflakes, and finds a stack of tiny unsent letters spilling out beside two treasures. On the LEFT a cobalt-blue ink pen rests on a miniature ice writing desk, on the RIGHT a golden posthorn hangs from a hook inside the mailbox lid, both large, fully visible, clearly separated.",
+      "text": "Hundreds of unsent letters tumble out and every single one says Dear Someone, please visit us. Ink pen or golden posthorn?",
+      "choices": [
+        {
+          "label": "Write a letter back",
+          "next": "end_letter",
+          "spot": "cobalt-blue ink pen"
+        },
+        {
+          "label": "Blow the golden posthorn",
+          "next": "end_posthorn",
+          "spot": "golden posthorn"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} lifts the lid of the frosted purple treasure chest, his red scarf brushing the brass hinges, revealing two enchanted items on purple velvet inside. On the LEFT a pair of silver ice-skates with jingling bells sits neatly laced, on the RIGHT a tiny crystal key carved in the shape of a snowflake glints in the light, both large, fully visible, clearly separated.",
+      "text": "The chest pops open with a sparkly POOF and two treasures gleam up at Mo from the velvet. Ice-skates or crystal key?",
+      "choices": [
+        {
+          "label": "Lace up the ice-skates",
+          "next": "end_skates",
+          "spot": "silver ice-skates"
+        },
+        {
+          "label": "Try the crystal key",
+          "next": "end_key",
+          "spot": "crystal snowflake key"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} holds the glowing orange warmth-stone against his chest, his red scarf steaming gently, standing in a clearing where three gift pedestals have risen from the snow. On the LEFT a velvet red mitten sits on a frosted white pedestal, in the MIDDLE a tiny golden door-knocker shaped like a heart rests on a silver pedestal, on the RIGHT a sparkling silver music box sits on a crystal pedestal, all three large, fully visible, clearly separated.",
+      "text": "The warmth-stone melts a perfect circle and three gifts pop up from underneath like friendly jack-in-the-boxes. Red mitten, door-knocker, or music box?",
+      "choices": [
+        {
+          "label": "Wear the red mitten",
+          "next": "end_mitten",
+          "spot": "velvet red mitten"
+        },
+        {
+          "label": "Take the golden door-knocker",
+          "next": "end_knocker",
+          "spot": "golden door-knocker"
+        },
+        {
+          "label": "Wind the music box",
+          "next": "end_musicbox_oops",
+          "spot": "snow-globe music box"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} reaches up and taps the tall crystal bell with one finger, his red scarf swirling as the bell sends a soft silver ring across the little village. On the LEFT a shimmering ice door has appeared in the tall crystal-ice wall with a tiny welcome mat, on the RIGHT a sparkling snow-slide spirals downward into a snowy tunnel beneath the town, both large, fully visible, clearly separated.",
+      "text": "The bell's chime is so gentle the snow doesn't shake, it sighs happily instead. Ice door or snow-slide?",
+      "choices": [
+        {
+          "label": "Step through the ice door",
+          "next": "end_icedoor",
+          "spot": "shimmering ice door"
+        },
+        {
+          "label": "Swoosh down the snow-slide",
+          "next": "end_slide_oops",
+          "spot": "sparkling snow-slide"
+        }
+      ]
+    },
+    "end_letter": {
+      "scene": "{HERO} sits at the miniature ice writing desk near the silver snowflake mailbox, his red scarf draped over the chair, carefully sliding a tiny letter under each cottage door as warm amber light spills onto the fresh snow.",
+      "text": "Mo writes I will come back on every letter and the town finally learns what a real hello feels like, so the glass curves open like a door just for a friend. The End!"
+    },
+    "end_posthorn": {
+      "scene": "{HERO} stands beside the silver snowflake mailbox blowing the golden posthorn, his red scarf billowing outward, as gentle silver sound-waves ripple across the little village and the tall crystal-ice wall swings open like a garden gate.",
+      "text": "The posthorn plays a note so warm it melts every shake into a shimmer and the town learns that a hello can be a song instead of a blizzard. The End!"
+    },
+    "end_skates": {
+      "scene": "{HERO} wobbles on the silver ice-skates in the frozen courtyard, legs going in opposite directions, red scarf wrapping around a lamp post, as he spins out of control and slides into a snowbank beside the warm-brick clock tower, skates pointing straight up.",
+      "text": "Mo laced up the skates and pushed off with MAXIMUM confidence — his legs immediately went in two different directions, his scarf caught on a lamp post, and he spun like a very fuzzy top until he face-planted into the deepest snowbank in the whole globe! The town did giggle, but not in the way Mo was hoping. Oopsie ending!",
+      "bad": true
+    },
+    "end_key": {
+      "scene": "{HERO} turns the tiny crystal snowflake key in a hidden keyhole in the tall crystal-ice wall, his red scarf fluttering with excitement, as the glass swings open like a cupboard door revealing his own warm bedroom beyond.",
+      "text": "The crystal key clicks and the glass opens to a room that smells like home, and Mo leaves the key in the lock so he can always visit again. The End!"
+    },
+    "end_mitten": {
+      "scene": "{HERO} waves the velvet red mitten enthusiastically but loses grip and it flies off his hand, sailing over the rooftops of the snowy globe town, while Mo stands with one bare cold hand reaching after it and the town's curtains all close at once.",
+      "text": "Mo waved the mitten with SO much enthusiasm that it flew right off his hand — it sailed over the rooftops like a tiny red bird, every curtain in town snapped shut from the breeze, and Mo was left waving with one very cold bare hand at absolutely nobody. Oopsie ending!",
+      "bad": true
+    },
+    "end_knocker": {
+      "scene": "{HERO} presses the tiny golden door-knocker shaped like a heart against the tall crystal-ice wall, his red scarf curled around his wrist, as the glass rings with a gentle knock-knock and swings open like a real front door.",
+      "text": "Knock-knock goes the little heart and the whole globe answers who is there, and when Mo says a friend the door opens because that is exactly how it works. The End!"
+    },
+    "end_musicbox_oops": {
+      "bad": true,
+      "scene": "{HERO} cranks the sparkling silver music box way too hard in the snowy clearing, his red scarf whipping wildly, as a snow avalanche buries him up to his eyebrows and every frosted cottage rattles like a maraca.",
+      "text": "The music box plays SO loud the whole town shakes like a snow globe inside a snow globe and Mo is now a very sparkly snowdrift. Oopsie ending!"
+    },
+    "end_slide_oops": {
+      "bad": true,
+      "scene": "{HERO} rockets out of the sparkling snow-slide exit loop near the old iron lampposts, his red scarf stretched out behind him like a kite tail, tumbling face-first into a towering fresh snowbank at the bottom.",
+      "text": "The slide goes loop-de-loop-de-LOOP and spits Mo out in a glitter snowbank, and now he is eighty percent glitter and zero percent closer to home. Oopsie ending!"
+    },
+    "end_icedoor": {
+      "scene": "{HERO} steps through the shimmering ice door in the tall crystal-ice wall, his red scarf trailing behind him, into his own warm bedroom where a small glass keepsake dome sits on the shelf with a tiny door still ajar and a faint lullaby drifting out.",
+      "text": "Mo steps through and he is big again, warm again, home again, and the tiny door stays open because the town knows its friend will always come back. The End!"
+    }
+  }
+}

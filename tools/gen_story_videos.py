@@ -112,12 +112,16 @@ def gen_clip(sid: str, nid: str, idx: int, label: str, spot: str) -> str | None:
                   f"Nobody leaves frame, composition stays identical to the first frame "
                   f"throughout. Bright children's picture-book style. No text.")
     else:
-        prompt = (f"{hero_desc}. Starting from this exact scene, {hero_name} performs the action: "
-                  f"{action} — moving toward and interacting with the {spot}. The background "
-                  f"and location stay EXACTLY as in the first frame for the entire clip. "
-                  f"Gentle storybook animation, soft cheerful movement, the camera follows "
-                  f"the hero. Bright children's picture-book style, consistent with the "
-                  f"first frame. No text.")
+        prompt = (f"{hero_desc}. Starting from this exact scene, {hero_name} FULLY PERFORMS "
+                  f"this action from start to finish: {action}. The hero physically reaches "
+                  f"and engages with the {spot} — NOT just walking toward it. Show the "
+                  f"COMPLETE action: if climbing, the hero climbs up and over; if sliding, "
+                  f"the hero slides all the way down; if entering, the hero goes IN and "
+                  f"disappears through; if picking up, the hero grabs and holds it up; "
+                  f"if jumping, the hero leaps and lands. Full physical action arc from "
+                  f"approach to completion. The background and location stay EXACTLY as "
+                  f"in the first frame for the entire clip. Bright children's picture-book "
+                  f"style, consistent with the first frame. No text.")
     if sid == "globe":
         # Probe-verified: snowy-village imagery + door/key wording trips Veo's
         # third-party filter. Drawn objects are fine; the words are not.

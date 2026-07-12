@@ -1,0 +1,243 @@
+{
+  "id": "frost",
+  "title": "Luna's Snow Day",
+  "hero": "LUNA",
+  "style": "Crisp winter-morning gouache, powder-blue and white palette with soft rainbow accents in mane and sky, thick tumbling snowflakes and cozy knitted scarves. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the edge of a snow-covered meadow at dawn, wearing a rainbow-striped scarf. On the LEFT a blue frozen pond glitters with ice chunks, on the RIGHT a green pine grove stands dusted in fresh powder, both large, fully visible, clearly separated.",
+      "text": "Luna's tail swishes with excitement — the meadow snow fair is TODAY and she is going to build the tallest snow-unicorn anyone has ever seen! But the flurries are already tumbling down thick and fast, burying everything in sight.",
+      "choices": [
+        {
+          "label": "Skate to the pond",
+          "next": "a",
+          "spot": "blue frozen pond"
+        },
+        {
+          "label": "Explore the pine grove",
+          "next": "b",
+          "spot": "green pine grove"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands on the edge of a sparkling frozen pond. On the LEFT an orange duck shivers on a cracked ice floe, on the RIGHT a pile of glittering blue ice crystals catches the morning light, both large, fully visible, clearly separated.",
+      "text": "The pond is a treasure chest of building material! But a little duck is shivering on a wobbly ice floe, looking rather stuck and extremely fluffy.",
+      "choices": [
+        {
+          "label": "Rescue the shivering duck",
+          "next": "aa",
+          "spot": "orange duck"
+        },
+        {
+          "label": "Collect the glittering ice",
+          "next": "ab",
+          "spot": "blue ice crystals"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} walks through a snowy pine grove. On the LEFT a small red fox kit is tangled in thorny brambles, on the RIGHT a stack of sturdy brown pine branches leans against a tree trunk, both large, fully visible, clearly separated.",
+      "text": "The pine grove smells like a holiday candle! A tiny fox kit is tangled in brambles, yipping softly, while the most perfectly shaped building-branches lie just beyond.",
+      "scare": {
+        "spot": "brown pine trunk",
+        "pop": "A friendly round snowy owl with big golden eyes perched on a branch, dusted in snowflakes, looking curious and cheerful",
+        "reveal": "Hoo-hoo! Just the local branch inspector — carry on!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Free the tangled fox",
+          "next": "ba",
+          "spot": "red fox kit"
+        },
+        {
+          "label": "Gather the best branches",
+          "next": "bb",
+          "spot": "brown pine branches"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} gently lifts the orange duck off the ice floe onto solid snow. The grateful duck shakes its feathers and drops a golden downy feather at {HERO}'s hooves. On the LEFT a white snowball head sits atop a half-built snow sculpture, on the RIGHT a mound of fresh purple-white powder snow waits to be packed, both large, fully visible, clearly separated.",
+      "text": "The duck quacks a thank-you and gifts Luna a warm golden feather for luck. Luna sets the unicorn head on top of her half-built sculpture and — it rolls right off into a snowdrift!",
+      "choices": [
+        {
+          "label": "Chase the rolling head",
+          "next": "m1",
+          "spot": "white snowball"
+        },
+        {
+          "label": "Sculpt a brand-new head",
+          "next": "m2",
+          "spot": "purple snow mound"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} carries an armload of glittering blue ice crystals back from the pond. A half-built snow sculpture with a shimmering ice base glistens in the meadow. On the LEFT the white snowball head has slid off onto the frozen ground, on the RIGHT a tall blue ice stack rises like a slippery pillar, both large, fully visible, clearly separated.",
+      "text": "Luna's ice base is absolutely magnificent and sparkles like a disco ball! She balances the head on top, but the ice is so slippery it shoots off like a hockey puck.",
+      "choices": [
+        {
+          "label": "Slide after the runaway head",
+          "next": "m1",
+          "spot": "white rolling snowball"
+        },
+        {
+          "label": "Stack ice to trap it",
+          "next": "m2",
+          "spot": "blue ice stack"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} untangles the small red fox from the brambles. The fox nuzzles {HERO}'s nose and leads her to a bush covered in bright red winterberries. On the LEFT a white snowball head rolls away down a snowy hill, on the RIGHT a tall brown pine tree drips golden sap from its bark, both large, fully visible, clearly separated.",
+      "text": "The grateful fox shows Luna a secret winterberry bush — free decorations! Luna builds a branch-framed unicorn and places the head, but it wobbles and bounces merrily downhill.",
+      "choices": [
+        {
+          "label": "Chase the bouncing head",
+          "next": "m3",
+          "spot": "white bouncing snowball"
+        },
+        {
+          "label": "Ask pine for sticky sap",
+          "next": "m4",
+          "spot": "brown pine trunk"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} drags a bundle of sturdy brown branches through the snow. A branch-framed snow sculpture stands in the meadow but the white snowball head teeters on top. On the LEFT the head tumbles off toward a snowy slope, on the RIGHT thick white snow walls could be packed around the frame, both large, fully visible, clearly separated.",
+      "text": "Luna's branch skeleton is engineer-grade sturdy! She perches the head on top — it sits for one glorious second, then topples off with a very undignified plop.",
+      "choices": [
+        {
+          "label": "Run after the tumbling head",
+          "next": "m3",
+          "spot": "white tumbling snowball"
+        },
+        {
+          "label": "Build thick snow walls",
+          "next": "m4",
+          "spot": "white snow wall"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} dives into a deep snowdrift and discovers the snowball head has been hollowed out from inside. A white snow hare with big brown eyes peeks out of the hollow, nose twitching. On the LEFT a cozy burrow-shaped hollow inside the snowball glows warmly, on the RIGHT a stack of fresh white snow blocks sits ready for rebuilding, both large, fully visible, clearly separated.",
+      "text": "Mystery solved — a snow hare has been secretly tunneling the head into a cozy winter burrow! No wonder it kept rolling off, the inside was being remodeled.",
+      "choices": [
+        {
+          "label": "Build burrow into sculpture",
+          "next": "end_burrow_heart",
+          "spot": "white snow hare"
+        },
+        {
+          "label": "Grab the head back",
+          "next": "end_oops_collapse",
+          "spot": "cracked white snowball"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} carefully sculpts a new unicorn head from a mound of snow. A white snow hare sits nearby nibbling the edge of the old discarded head. On the LEFT a bright orange snow-carrot lies in the snow, on the RIGHT a tall wobbly snow tower rises high above {HERO}, both large, fully visible, clearly separated.",
+      "text": "Luna shapes a beautiful new head — and spots a snow hare happily munching the old one like a snow cone. So THAT is who has been sabotaging her architecture!",
+      "choices": [
+        {
+          "label": "Offer the hare a carrot",
+          "next": "end_best_friends",
+          "spot": "orange snow carrot"
+        },
+        {
+          "label": "Stack the head extra high",
+          "next": "end_oops_topple",
+          "spot": "tall snow tower"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} slides down the snowy hill after the runaway head and finds a snow hare family gathered around it at the bottom. Three decorations lie in the snow nearby. On the LEFT a bright red winterberry wreath, in the MIDDLE a shimmering silver icicle crown, on the RIGHT a golden pinecone tiara, all large, fully visible, clearly separated.",
+      "text": "The hare family has been rolling the head to their den — they want a front door! Luna has an idea: build the sculpture around their home, but first every snow-unicorn needs a crown.",
+      "choices": [
+        {
+          "label": "Pick the winterberry wreath",
+          "next": "end_berry_beauty",
+          "spot": "red winterberry wreath"
+        },
+        {
+          "label": "Pick the icicle crown",
+          "next": "end_crystal_queen",
+          "spot": "silver icicle crown"
+        },
+        {
+          "label": "Pick the pinecone tiara",
+          "next": "end_forest_royalty",
+          "spot": "golden pinecone tiara"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} dabs golden pine sap onto the snow sculpture's neck and carefully places the head on top — it holds. The sculpture squeaks from inside. On the LEFT a small round blue door shape could be carved into the base, on the RIGHT a soft pink blanket of moss peeks out from under a snowy rock, both large, fully visible, clearly separated.",
+      "text": "The sap works like magical glue — the head finally stays! Then Luna hears tiny squeaks from inside, someone has already moved in and they sound very cozy.",
+      "scare": {
+        "spot": "white snow sculpture",
+        "pop": "A tiny white snow hare baby with enormous ears pops out of the sculpture belly, wearing a snowflake on its nose, looking delighted",
+        "reveal": "Squeak! Oh — it is a tiny tenant, rent-free apparently.",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Carve a little front door",
+          "next": "end_tiny_door",
+          "spot": "blue round door"
+        },
+        {
+          "label": "Tuck in the moss blanket",
+          "next": "end_warm_heart",
+          "spot": "pink moss blanket"
+        }
+      ]
+    },
+    "end_burrow_heart": {
+      "scene": "{HERO} stands proudly beside a magnificent snow-unicorn sculpture in the meadow. The sculpture has a glowing round window in its belly revealing a cozy burrow inside where the white snow hare sleeps on the golden downy feather. A blue ribbon hangs from the horn. Snowflakes drift gently down.",
+      "text": "The judges have never seen anything like it — a snow-unicorn with a beating heart of warm fur! Luna wins the prize for Coziest Snow Sculpture, and the hare wins Best Address in the Meadow. The End!"
+    },
+    "end_oops_collapse": {
+      "scene": "{HERO} tugs at the hollowed snowball head in the snowdrift. The entire snow-unicorn sculpture behind her has collapsed into a messy pile of snow chunks. The white snow hare sits on top of the rubble looking unimpressed. Snowflakes fall on the ruins.",
+      "text": "Luna yanks the head free and the whole unicorn collapses like a snow-card-house! The hare gives her a look that clearly says 'I TOLD you that was load-bearing.' Oopsie ending!",
+      "bad": true
+    },
+    "end_best_friends": {
+      "scene": "{HERO} stands next to a snow-unicorn with a bright orange carrot nose and a small round doorway in its chest. The white snow hare sits in the doorway wearing a tiny rainbow scarf. The orange duck from the pond waddles up carrying another golden feather. Snowflakes sparkle in the air.",
+      "text": "Luna's snow-unicorn has the best nose in the fair AND a built-in hare apartment! The duck stops by with a housewarming feather, and somehow this snow sculpture has more friends than most real houses. The End!"
+    },
+    "end_oops_topple": {
+      "scene": "{HERO} stands beneath an impossibly tall snow tower that leans dangerously to one side. The top snowball head teeters and falls, landing on {HERO}'s horn like a cold hat. Snow explodes everywhere. The white snow hare watches from a safe distance, shaking its head.",
+      "text": "Taller, taller, TALL — BONK! The mega-tower wobbles and the head lands right on Luna's horn like a very cold hat. The hare slow-claps with its ears. Oopsie ending!",
+      "bad": true
+    },
+    "end_berry_beauty": {
+      "scene": "{HERO} stands beside a snow-unicorn wearing a bright red winterberry wreath as a crown. The sculpture has a cozy burrow entrance at the base where the snow hare family peeks out. Red winterberries dot the mane like rubies. The small red fox sits nearby admiring the work.",
+      "text": "The winterberry-crowned snow-unicorn is the belle of the fair! The hare family has the coziest front porch in the meadow, and the fox keeps sneaking berries from the mane for snacking purposes. The End!"
+    },
+    "end_crystal_queen": {
+      "scene": "{HERO} sits in a wide slushy puddle where the snow-unicorn used to be, the shimmering icicle crown melting on the ground beside her, rainbow light scattering everywhere, the white snow hare sitting in the slush next to her looking equally surprised. Only a carrot nose remains standing upright in the puddle.",
+      "text": "The icicle crown was magnificent for exactly four seconds — then the sun hit it, the rainbows dazzled the hare who stumbled into the sculpture, and the whole snow-unicorn melted into the world's fanciest puddle. Luna and the hare sat in the slush wearing matching surprised faces. Oopsie ending!",
+      "bad": true
+    },
+    "end_forest_royalty": {
+      "scene": "{HERO} stands exhausted beside a messy pile of snow where the snow-unicorn used to be, the golden pinecone tiara sitting crookedly on top of the rubble, the snow hare family posing regally atop the ruins as if it were a throne, a half-dug moat surrounding the whole mess.",
+      "text": "The hare family took the Royal Household thing WAY too seriously — they demanded a moat, a drawbridge, and a throne room. By the time Luna finished digging, the snow-unicorn had been completely dismantled for building materials and all that was left was a very regal pile of snow. Oopsie ending!",
+      "bad": true
+    },
+    "end_tiny_door": {
+      "scene": "{HERO} carves a small round blue door into the base of the snow-unicorn sculpture. The door has a tiny golden pinecone doorknob. Inside the snow hare baby peeks out from a cozy nest. The whole sculpture glows with warmth from within. A bark welcome mat sits at the entrance.",
+      "text": "Luna carves the most adorable front door the meadow has ever seen, complete with a pinecone doorknob. The judges award Most Livable Snow Sculpture, a category they invented on the spot just for her. The End!"
+    },
+    "end_warm_heart": {
+      "scene": "{HERO} tucks a soft pink moss blanket into the snow-unicorn's hollow belly where three snow hare babies snuggle together. The sculpture stands solid in the meadow with golden pine sap seams glowing in the winter light. The mother hare sits contentedly on the unicorn's back.",
+      "text": "Luna tucks the babies in and the snow-unicorn practically purrs! The judges wipe a tear — it is the first sculpture that has ever been warm on the inside, coziest creation in meadow history, hooves down. The End!"
+    }
+  }
+}

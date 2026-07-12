@@ -1,0 +1,243 @@
+{
+  "id": "rails",
+  "title": "Pip's Great Train Ride",
+  "hero": "PIP",
+  "style": "Vintage travel-poster storybook style, warm creams and teal carriages, rolling patchwork hills framed in round windows, puffs of white steam. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a sunlit mountain railway platform clutching a wrapped parcel tied with a red ribbon. On the LEFT a gleaming teal passenger carriage with round porthole windows, on the RIGHT a cherry-red mail wagon with its sliding door open, both large, fully visible, clearly separated.",
+      "text": "Pip hugged Granny's birthday parcel tight — the three o'clock express was the last train to Briarwood, and that homemade cake inside had zero patience for delays. All aboard!",
+      "choices": [
+        {
+          "label": "Board the teal carriage",
+          "next": "a",
+          "spot": "teal carriage"
+        },
+        {
+          "label": "Climb into mail wagon",
+          "next": "b",
+          "spot": "red mail wagon"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} sits inside a teal passenger carriage with round windows showing rolling green hills outside. On the LEFT a shiny silver whistle hanging from a brass hook on the wall, on the RIGHT a wicker picnic basket brimming with red apples on the seat, both large, fully visible, clearly separated.",
+      "text": "The carriage was empty — just Pip, the clickety-clack, and someone's forgotten lunch. A silver whistle winked from its hook, and a basket of apples practically begged for a new owner.",
+      "choices": [
+        {
+          "label": "Pocket the silver whistle",
+          "next": "aa",
+          "spot": "silver whistle"
+        },
+        {
+          "label": "Grab the apple basket",
+          "next": "ab",
+          "spot": "red apple basket"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} explores a cherry-red mail wagon stacked with brown parcels and canvas mailbags. On the LEFT a thick sky-blue woolly scarf draped over a mailbag, on the RIGHT a shiny golden music box sitting atop a wooden crate, both large, fully visible, clearly separated.",
+      "text": "The mail wagon smelled of cedar stamps and adventure. A cozy blue scarf lay abandoned on a mailbag, and a tiny golden music box glinted between the parcels like buried treasure.",
+      "scare": {
+        "spot": "brown parcel",
+        "pop": "{HERO} peeks behind a tall stack of parcels and a fluffy grey cat springs out, stretching and yawning contentedly.",
+        "reveal": "Just the mail wagon's resident nap expert — a very drowsy cat!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Wrap up in the scarf",
+          "next": "ba",
+          "spot": "blue woolly scarf"
+        },
+        {
+          "label": "Wind the music box",
+          "next": "bb",
+          "spot": "golden music box"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands at the open door of a stopped teal train carriage on a snowy mountain pass, a silver whistle glinting on a cord around neck. Fluffy white sheep sleep across the train tracks. On the LEFT a tall grey stone cairn topped with an orange flag marking a ridge path, on the RIGHT a red wooden sled propped against a snowy bank, both large, fully visible, clearly separated.",
+      "text": "Cloudtop Pass — and every inch of track was carpeted in snoozing sheep. Pip gave the whistle a toot, but the flock just flicked their ears and kept on dreaming.",
+      "choices": [
+        {
+          "label": "Head for the cairn",
+          "next": "m1",
+          "spot": "grey stone cairn"
+        },
+        {
+          "label": "Hop on the sled",
+          "next": "m2",
+          "spot": "red wooden sled"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands at the open door of a stopped teal train carriage on a snowy mountain pass, hugging a wicker basket of red apples. Fluffy white sheep sleep across the train tracks. On the LEFT a brown wooden gate leading to a daisy-filled meadow, on the RIGHT a grey stone shepherd's hut with a blue door, both large, fully visible, clearly separated.",
+      "text": "Cloudtop Pass — and a woolly traffic jam as far as Pip could see. One ewe cracked an eye open and sniffed toward the apple basket with suspicious interest.",
+      "choices": [
+        {
+          "label": "Lure sheep through gate",
+          "next": "m1",
+          "spot": "brown wooden gate"
+        },
+        {
+          "label": "Duck into stone hut",
+          "next": "m2",
+          "spot": "grey stone hut"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} wearing a sky-blue scarf stands at the open door of a stopped cherry-red mail wagon on a windy mountain pass. Fluffy white sheep huddle on the train tracks in the cold. On the LEFT a tall orange signal post with a rusty lever, on the RIGHT a mossy grey stone archway leading into a tunnel in the hillside, both large, fully visible, clearly separated.",
+      "text": "The wind howled at Highhorn Pass, and the sheep had piled onto the warm tracks like a woolly blanket convention. One shivering lamb looked up at Pip's cozy scarf with enormous hopeful eyes.",
+      "choices": [
+        {
+          "label": "Pull the signal lever",
+          "next": "m3",
+          "spot": "orange signal post"
+        },
+        {
+          "label": "Enter the stone archway",
+          "next": "m4",
+          "spot": "grey stone archway"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} holding a golden music box stands at the open door of a stopped cherry-red mail wagon on a misty mountain pass. Fluffy white sheep sit stubbornly on the train tracks. On the LEFT a red wooden footbridge arching over the tracks, on the RIGHT a yellow wooden gate opening onto a green hillside dotted with wildflowers, both large, fully visible, clearly separated.",
+      "text": "Mistmoor Pass was wall-to-wall wool. Pip wound the music box and a tiny waltz tinkled out — every sheep ear in the flock swiveled like fuzzy satellite dishes.",
+      "scare": {
+        "spot": "red footbridge",
+        "pop": "{HERO} peeks under the red footbridge and a chubby hedgehog wearing a tiny conductor's hat rolls out, waving a miniature flag.",
+        "reveal": "The world's smallest station master — reporting for duty!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Cross the red footbridge",
+          "next": "m3",
+          "spot": "red footbridge"
+        },
+        {
+          "label": "Open the yellow gate",
+          "next": "m4",
+          "spot": "yellow wooden gate"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands on a high mountain ledge overlooking a green valley with train tracks curving below, a line of fluffy white sheep trotting behind. On the LEFT a tall brown wooden signpost with a carved arrow pointing down toward a village with a clock tower, on the RIGHT a long green wooden slide built into the grassy hillside, both large, fully visible, clearly separated.",
+      "text": "From the ridge Pip could see Briarwood's clock tower in the valley below — so close! The sheep trooped behind like the world's fluffiest conga line.",
+      "choices": [
+        {
+          "label": "Follow the signpost down",
+          "next": "end_village",
+          "spot": "brown wooden signpost"
+        },
+        {
+          "label": "Ride the wooden slide",
+          "next": "end_slide",
+          "spot": "green wooden slide"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands beside a sparkling blue mountain stream with mossy stepping stones, sheep wading happily in the shallows. On the LEFT a tan rope bridge swaying gently over a gorge toward a sunlit station platform, on the RIGHT a flat brown wooden raft tied to a post on the riverbank, both large, fully visible, clearly separated.",
+      "text": "The stream led straight downhill toward Briarwood — Pip could hear the station bell! The sheep splashed about like they'd discovered the world's best swimming hole.",
+      "choices": [
+        {
+          "label": "Cross the rope bridge",
+          "next": "end_bridge",
+          "spot": "tan rope bridge"
+        },
+        {
+          "label": "Float on the raft",
+          "next": "end_raft",
+          "spot": "brown wooden raft"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} arrives at a quiet mountain rail junction where two tracks meet under tall pine trees, sheep milling about on the wooden platform. On the LEFT a cheerful yellow handcar sitting on the rails with a pump handle, on the RIGHT a cozy red caboose with its door ajar and a lantern glowing inside, both large, fully visible, clearly separated.",
+      "text": "Pinecone Junction — one stop from Briarwood! The sheep had followed Pip like he was their new shepherd, which honestly felt like a promotion.",
+      "choices": [
+        {
+          "label": "Pump the yellow handcar",
+          "next": "end_handcar",
+          "spot": "yellow handcar"
+        },
+        {
+          "label": "Hop into the caboose",
+          "next": "end_caboose",
+          "spot": "red caboose"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands at a flower-covered trackside stall near a wooden Briarwood signpost, sheep grazing on nearby grass. On the LEFT a big red helium balloon tied to a white fence post, in the MIDDLE a shiny brass telescope on a wooden tripod, on the RIGHT a bouquet of purple wildflowers in a tin bucket, all large, fully visible, clearly separated.",
+      "text": "Almost there — a trackside stall had exactly the finishing touches a birthday delivery deserved. The sheep offered no opinion, being busy eating the display grass.",
+      "choices": [
+        {
+          "label": "Grab the red balloon",
+          "next": "end_balloon",
+          "spot": "red balloon"
+        },
+        {
+          "label": "Peek through telescope",
+          "next": "end_telescope",
+          "spot": "brass telescope"
+        },
+        {
+          "label": "Pick the purple flowers",
+          "next": "end_flowers",
+          "spot": "purple wildflowers"
+        }
+      ]
+    },
+    "end_village": {
+      "scene": "{HERO} marches triumphantly into a cozy village square with a stone clock tower, carrying a wrapped parcel, trailed by a parade of fluffy white sheep wearing daisy-chain necklaces. A cottage with a green door has colorful balloons tied to its mailbox.",
+      "text": "Pip marched right up to Granny's green door with a parcel, a grin, and a dozen surprise party guests in tow. The sheep accepted their party hats with great dignity and only knocked over the cake once. The End!"
+    },
+    "end_slide": {
+      "scene": "{HERO} tumbles off the bottom of a long green wooden hillside slide into a golden hay pile, the birthday parcel burst open with pink cake splattered everywhere, sheep eagerly licking frosting off the torn wrapping paper.",
+      "text": "The slide was magnificent, the landing was spectacular, and the cake was everywhere. Pip arrived at Granny's with a ribbon, some crumbs, and a flock of extremely frosting-happy sheep. Oopsie ending!",
+      "bad": true
+    },
+    "end_bridge": {
+      "scene": "{HERO} stands proudly on a sunny Briarwood station platform beneath a painted station sign, handing a wrapped parcel to a delighted elderly golden retriever in a garden hat. White sheep crowd the platform wearing folded-newspaper conductor caps.",
+      "text": "Granny's eyes went wide — first at her birthday boy, then at the parade of sheep who had appointed themselves the official welcoming committee. Best birthday surprise in Briarwood history. The End!"
+    },
+    "end_raft": {
+      "scene": "{HERO} sits on a brown wooden raft drifting in lazy circles on a quiet pond covered in green lily pads, the birthday parcel balanced on a sheep's head like a hat, other sheep floating on logs nearby looking thoroughly confused.",
+      "text": "Turns out the stream led to Lily Pad Pond — a lovely spot with zero train stations and maximum confusion. Pip and the sheep floated in gentle circles until well past cake o'clock. Oopsie ending!",
+      "bad": true
+    },
+    "end_handcar": {
+      "scene": "{HERO} pumps a yellow handcar rolling triumphantly into a festive Briarwood station decorated with colorful bunting and paper streamers. A flock of white sheep gallops joyfully alongside the tracks, and a hand-painted birthday banner flutters from the station roof.",
+      "text": "Pip pumped that handcar like a champion and rolled into Briarwood to applause from every sparrow on the fence. The sheep arrived two minutes later, slightly out of breath but absolutely ready for cake. The End!"
+    },
+    "end_caboose": {
+      "scene": "{HERO} leaning out of a speeding red caboose window with a panicked expression as it zooms through Briarwood station without stopping, sheep faces pressed against every window in alarm, an elderly golden retriever waving frantically from the platform as birthday bunting flutters in the caboose's wake.",
+      "text": "The caboose rolled beautifully into Briarwood — and then kept rolling, right through the station and out the other side. Turns out nobody checked the brakes. Pip and fourteen sheep sailed past a bewildered Granny waving frantically from the platform. Oopsie ending!",
+      "bad": true
+    },
+    "end_balloon": {
+      "scene": "{HERO} holds a red balloon string in one paw and the wrapped birthday parcel in the other, floating gently down toward a sunny cottage garden where a delighted elderly golden retriever waves from a rocking chair. Sheep watch admiringly from below the garden fence.",
+      "text": "The balloon carried Pip just high enough to sail right over Granny's garden fence for a perfect two-point landing. The sheep below cheered — or at least bleated very loudly, which is basically the same thing. The End!"
+    },
+    "end_telescope": {
+      "scene": "{HERO} bursts through a wooden garden gate into a sunny cottage garden, parcel held high overhead, where an elderly golden retriever in a sun hat sits at a table set for tea with a birthday cake. Sheep tumble through the gate behind, one carrying a brass telescope under its leg.",
+      "text": "Through the telescope Pip spotted Granny's garden gate and a shortcut no map had ever noticed. He burst through parcel-first with a flock of uninvited but wildly enthusiastic guests tumbling after him. The End!"
+    },
+    "end_flowers": {
+      "scene": "{HERO} running in panicked circles around the flower-covered trackside stall, a single angry bee buzzing after him, purple wildflowers flying everywhere, the birthday parcel rolling away under a wooden fence, while a row of sheep watch from the grass with expressions of pure entertainment.",
+      "text": "Pip gathered the purple flowers, but a very grumpy bee was living in the bouquet and did NOT appreciate being picked up. The bee chased Pip in circles around the stall while the sheep watched like it was dinner theater, and Granny's parcel rolled under a fence. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

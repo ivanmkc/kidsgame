@@ -1,0 +1,243 @@
+{
+  "id": "canopy",
+  "title": "Mo and the Careful Jungle",
+  "hero": "MO",
+  "style": "Lush layered paper-cut collage style, emerald and lime jungle leaves in overlapping cutout layers, pink dawn light rays, punchy magenta tropical flowers, deep green shadows. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the roots of an enormous jungle tree, his little red lantern glowing beside him, gazing up through layers of emerald and lime paper-cut leaves toward a strip of pink dawn sky far above. On the LEFT a golden vine ladder spirals up a mossy trunk, on the RIGHT a row of turquoise stepping stones crosses a bubbling stream, both large, fully visible, clearly separated.",
+      "text": "Mo wanted to see the sunrise from the tippy-top of the jungle, but the canopy was SO tall even the monkeys got dizzy. Vine ladder or stepping stones?",
+      "choices": [
+        {
+          "label": "Climb the vine ladder",
+          "next": "a",
+          "spot": "golden vine ladder"
+        },
+        {
+          "label": "Hop the stepping stones",
+          "next": "b",
+          "spot": "turquoise stepping stones"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} clings to the golden vine ladder high above the jungle floor, his little red lantern swinging from his wrist, surrounded by thick emerald leaves and dangling magenta blossoms. A mossy green log juts out from the trunk nearby. On the LEFT a pink orchid platform blooms wide and flat against the bark, on the RIGHT a silver moss bridge stretches between two branches, both large, fully visible, clearly separated.",
+      "text": "The vines bounced like a trampoline made of spaghetti, and Mo's lantern swung in happy circles. Orchid platform or moss bridge?",
+      "scare": {
+        "spot": "mossy green log",
+        "pop": "A friendly bright-green tree frog with enormous orange eyes, grinning wide, sitting on a mossy log in a lush paper-cut jungle, emerald leaves behind. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "Ribbit! Just checking you can see me with that magnificent big eye!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Step onto the orchid",
+          "next": "aa",
+          "spot": "pink orchid platform"
+        },
+        {
+          "label": "Cross the moss bridge",
+          "next": "ab",
+          "spot": "silver moss bridge"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} balances on the last turquoise stepping stone in the middle of a bubbling jungle stream, his little red lantern held high, water sparkling around him. A tiny blue beetle struggles on a wet leaf near his foot. On the LEFT an orange mushroom staircase winds up a dark tree trunk, on the RIGHT a blue crystal ledge peeks out from behind a thin waterfall, both large, fully visible, clearly separated.",
+      "text": "Mo scooped up the little blue beetle and tucked it safely on his shoulder — nobody gets left behind on an adventure. Mushroom staircase or crystal ledge?",
+      "choices": [
+        {
+          "label": "Climb the mushroom stairs",
+          "next": "ba",
+          "spot": "orange mushroom staircase"
+        },
+        {
+          "label": "Peek behind the waterfall",
+          "next": "bb",
+          "spot": "blue crystal ledge"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands on a wide pink orchid platform high in the canopy, his little red lantern resting beside him, a golden feather caught in the orchid's petals glinting in the light. On the LEFT a crimson parrot perch juts out from a thick branch, on the RIGHT an emerald fern arch curls between two trunks, both large, fully visible, clearly separated.",
+      "text": "Mo plucked the golden feather from the orchid and tucked it behind his ear — finders keepers, and it matched his lantern perfectly. Parrot perch or fern arch?",
+      "choices": [
+        {
+          "label": "Hop to the parrot perch",
+          "next": "m1",
+          "spot": "crimson parrot perch"
+        },
+        {
+          "label": "Enter the fern arch",
+          "next": "m2",
+          "spot": "emerald fern arch"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} bounces gently on a silver moss bridge stretched between two giant branches, his little red lantern bobbing with each step, a golden feather tangled in the soft moss at his feet. On the LEFT a crimson parrot perch juts out from a thick branch, on the RIGHT an emerald fern arch curls between two trunks, both large, fully visible, clearly separated.",
+      "text": "The moss bridge was bouncier than a mattress store, and Mo found a golden feather he wore like a tiny crown. Parrot perch or fern arch?",
+      "choices": [
+        {
+          "label": "Hop to the parrot perch",
+          "next": "m1",
+          "spot": "crimson parrot perch"
+        },
+        {
+          "label": "Enter the fern arch",
+          "next": "m2",
+          "spot": "emerald fern arch"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} climbs a winding orange mushroom staircase spiraling up a dark tree trunk, his little red lantern illuminating the way, the tiny blue beetle riding on his shoulder. A spotted orange cap wobbles at the top step. On the LEFT a violet cocoon hammock hangs between two thick branches, on the RIGHT a copper bark ladder is carved into the trunk, both large, fully visible, clearly separated.",
+      "text": "Each mushroom step went BOING under Mo's feet, and the little beetle giggled on his shoulder like a tiny motorcycle. Cocoon hammock or bark ladder?",
+      "scare": {
+        "spot": "spotted orange cap",
+        "pop": "A friendly shimmering blue morpho butterfly with a playful grin, bursting out of a spotted orange mushroom cap in a paper-cut jungle, wings sparkling with iridescent blue. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "Wheee! I was napping in that mushroom — best alarm clock ever!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Swing into the cocoon",
+          "next": "m3",
+          "spot": "violet cocoon hammock"
+        },
+        {
+          "label": "Climb the bark ladder",
+          "next": "m4",
+          "spot": "copper bark ladder"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands on the blue crystal ledge behind a thin waterfall curtain, his little red lantern casting warm light on glistening wet stone, the tiny blue beetle perched on his shoulder shaking off droplets. On the LEFT a violet cocoon hammock hangs between branches visible through the mist, on the RIGHT a copper bark ladder rises up through a gap in the rock, both large, fully visible, clearly separated.",
+      "text": "Behind the waterfall was like standing inside a snow globe, except warm and full of sparkly beetle giggles. Cocoon hammock or bark ladder?",
+      "choices": [
+        {
+          "label": "Swing into the cocoon",
+          "next": "m3",
+          "spot": "violet cocoon hammock"
+        },
+        {
+          "label": "Climb the bark ladder",
+          "next": "m4",
+          "spot": "copper bark ladder"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} perches on a wide crimson parrot perch near the top of the canopy, his little red lantern glowing and the golden feather behind his ear ruffling in the breeze. On the LEFT a ruby seed pod sits in a nest of twigs, in the MIDDLE an amber honey jar rests on a broad leaf, on the RIGHT a pearl dewdrop shell balances on a branch tip, all three large, fully visible, clearly separated.",
+      "text": "Three gifts from the canopy, each one shimmering like it wanted to be picked — Mo's big eye could see every sparkle. Seed pod, honey jar, or dewdrop shell?",
+      "choices": [
+        {
+          "label": "Grab the seed pod",
+          "next": "end_seed_flight",
+          "spot": "ruby seed pod"
+        },
+        {
+          "label": "Open the honey jar",
+          "next": "end_sticky_trap",
+          "spot": "amber honey jar"
+        },
+        {
+          "label": "Lift the dewdrop shell",
+          "next": "end_shell_surprise",
+          "spot": "pearl dewdrop shell"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} tiptoes through a curling emerald fern arch, his little red lantern lighting up spiraling fronds, the golden feather behind his ear tickling the fern tips. On the LEFT a magenta flower crown hangs from a low branch, on the RIGHT a teal root basket sits wedged between two thick roots, both large, fully visible, clearly separated.",
+      "text": "The fern arch smelled like rain and adventure, and Mo's golden feather pointed the way like a tiny compass. Flower crown or root basket?",
+      "choices": [
+        {
+          "label": "Wear the flower crown",
+          "next": "end_crown_lift",
+          "spot": "magenta flower crown"
+        },
+        {
+          "label": "Sit in the root basket",
+          "next": "end_tangled_tumble",
+          "spot": "teal root basket"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} bounces in a soft violet cocoon hammock strung between two high branches, his little red lantern swaying, the tiny blue beetle napping contentedly on his knee. On the LEFT a scarlet berry cluster hangs from a branch above, on the RIGHT a gold tree knot bulges from the trunk, both large, fully visible, clearly separated.",
+      "text": "The cocoon hammock was so cozy the beetle started snoring, but Mo could see the sky getting pinker through the leaves. Berry cluster or tree knot?",
+      "choices": [
+        {
+          "label": "Reach for the berries",
+          "next": "end_berry_friends",
+          "spot": "scarlet berry cluster"
+        },
+        {
+          "label": "Climb the tree knot",
+          "next": "end_beetle_boost",
+          "spot": "gold tree knot"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} clings to a copper bark ladder carved into the highest trunk, his little red lantern dangling from his belt, the tiny blue beetle pointing upward excitedly from his shoulder. On the LEFT a lime leaf platform spreads wide near a gap in the canopy, on the RIGHT a white blossom branch extends out over open sky, both large, fully visible, clearly separated.",
+      "text": "Almost there — Mo could smell the sunrise, which smelled a lot like warm pancakes and adventure. Leaf platform or blossom branch?",
+      "choices": [
+        {
+          "label": "Land on the leaf",
+          "next": "end_leaf_glide",
+          "spot": "lime leaf platform"
+        },
+        {
+          "label": "Walk the blossom branch",
+          "next": "end_blossom_dawn",
+          "spot": "white blossom branch"
+        }
+      ]
+    },
+    "end_seed_flight": {
+      "scene": "{HERO} rides the ruby seed pod as it bursts open and spirals upward through the canopy like a tiny helicopter, his little red lantern blazing, the golden feather streaming behind him, pink sunrise light flooding through parting emerald leaves at the very top of the jungle.",
+      "text": "The seed pod popped open and carried Mo straight to the top, where the sunrise painted everything pink and gold — the birds chirped that anyone with an eye THAT good deserved the best seat in the jungle. The End!"
+    },
+    "end_sticky_trap": {
+      "scene": "{HERO} sits in a puddle of sticky amber honey on the crimson parrot perch, his little red lantern glued to his hand, the golden feather stuck flat to his forehead, while three amused parrots tilt their heads at him from nearby branches.",
+      "text": "The honey jar was booby-trapped by giggling parrots, and now Mo was the stickiest explorer in jungle history — he would need a VERY long bath. Oopsie ending!",
+      "bad": true
+    },
+    "end_shell_surprise": {
+      "scene": "{HERO} lifts the pearl dewdrop shell on the highest branch and finds a tiny lost egg underneath, his big eye wide with wonder, his little red lantern illuminating the shell's pearly glow, as the trees themselves bend their branches to lift him and the egg to the very top of the canopy where pink sunrise rays burst through.",
+      "text": "Mo's big eye spotted what nobody else could see — a tiny lost egg hidden under the shell — and the grateful jungle lifted him to the sunrise like a leafy elevator. The End!"
+    },
+    "end_crown_lift": {
+      "scene": "{HERO} wears the magenta flower crown on his head as the canopy flowers recognize their missing petal-crown and bloom all at once, lifting him on a rising wave of magenta and pink petals to the very top, his little red lantern shining, the golden feather tucked in the crown, sunrise light pouring over everything.",
+      "text": "The flower crown was the jungle's lost treasure, and the moment Mo wore it the whole canopy bloomed him straight to the top for the most flowery sunrise ever. The End!"
+    },
+    "end_tangled_tumble": {
+      "scene": "{HERO} sits in the teal root basket as it tips sideways and dumps him into a soft pile of emerald fern fronds below the arch, his little red lantern rolling away, the golden feather floating down to land on his nose, fern spirals curling around him like a cozy green blanket.",
+      "text": "The root basket was actually a laundry chute for leaves, and Mo tumbled all the way back down in a fuzzy green avalanche — at least it was soft. Oopsie ending!",
+      "bad": true
+    },
+    "end_berry_friends": {
+      "scene": "{HERO} holds out the scarlet berries to a family of tiny rainbow birds, but the birds swarm around Mo's head pecking at the berries in his hand, the beetle ducking into Mo's fur, Mo stumbling backward along the branch with berries falling everywhere.",
+      "text": "The berries were the birds' favorite treat all right — SO favorite that the whole family swarmed Mo's hands like tiny feathered piranhas! Berries flew everywhere, the beetle hid in Mo's fur, and Mo stumbled backward into a spider web that stuck him to the branch like a very confused Christmas ornament. Oopsie ending!",
+      "bad": true
+    },
+    "end_beetle_boost": {
+      "scene": "{HERO} climbs through the gold tree knot and discovers a hidden beetle highway inside the trunk, his little red lantern lighting the way as hundreds of tiny blue beetles — friends of his shoulder beetle — march him upward through the hollow trunk to an opening at the very top of the canopy, pink sunrise light flooding in.",
+      "text": "The little beetle Mo saved had a THOUSAND cousins living in the tree, and they all carried him up the beetle highway to the most spectacular sunrise in jungle history. The End!"
+    },
+    "end_leaf_glide": {
+      "scene": "{HERO} stands on the lime leaf platform as a gust of warm dawn wind catches it and lifts it like a green magic carpet, his little red lantern gleaming, the tiny blue beetle whooping on his shoulder, soaring above the emerald canopy into blazing pink and gold sunrise sky.",
+      "text": "The leaf caught the dawn wind and sailed Mo clean over the canopy, where the sunrise was so beautiful even the beetle cried a tiny happy tear. The End!"
+    },
+    "end_blossom_dawn": {
+      "scene": "{HERO} stands on the white blossom branch covered head to toe in golden pollen, sneezing enormous sneezes that shake the branch, while burst-open blossoms scatter petals everywhere and the beetle hides inside Mo's fur.",
+      "text": "Every blossom popped open like popcorn and Mo got a face FULL of golden pollen — ACHOO ACHOO ACHOO! Mo sneezed so hard he bounced backwards down three branches, covered in so much pollen that a family of bees started following him thinking he was the world's biggest flower. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

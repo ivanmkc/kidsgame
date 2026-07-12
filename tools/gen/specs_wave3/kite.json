@@ -1,0 +1,243 @@
+{
+  "id": "kite",
+  "title": "Pip and the Tired Wind",
+  "hero": "PIP",
+  "style": "Bright windy-day flat naive-vector style, cobalt sky crowded with patchwork kites in candy colors, swirling ribbon tails, sunlit green hills, confetti-like clouds. A small round fox cub in a striped scarf holds a little patched kite in every scene. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a sunlit green hilltop at the great kite festival, gripping the string of a droopy little patched kite whose tail drags in the grass, while dozens of candy-colored kites soar high against a cobalt sky. On the LEFT a bright orange wind-sock flaps on a tall wooden pole, on the RIGHT a cobalt blue tent sits at the foot of the hill, both large, fully visible, clearly separated.",
+      "text": "Every kite at the festival is dancing in the sky — every kite except Pip's. He tugs and tugs, but his patched kite just flops on the grass like a tired pancake. Wind-sock or tent?",
+      "choices": [
+        {
+          "label": "Chase the wind-sock",
+          "next": "a",
+          "spot": "orange wind-sock"
+        },
+        {
+          "label": "Visit the blue tent",
+          "next": "b",
+          "spot": "cobalt blue tent"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} trots uphill toward the droopy orange wind-sock, patched kite bumping along behind, and gently untangles a knot twisted in the wind-sock's fabric. On the LEFT a golden pinwheel spins lazily on a fence post, on the RIGHT a red striped flag hangs from a wooden stake, both large, fully visible, clearly separated.",
+      "text": "Pip untangles the poor knotted wind-sock — what a thoughtful little fox! Two other things flutter nearby, barely moving at all. Pinwheel or flag?",
+      "choices": [
+        {
+          "label": "Spin the golden pinwheel",
+          "next": "aa",
+          "spot": "golden pinwheel"
+        },
+        {
+          "label": "Wave the red flag",
+          "next": "ab",
+          "spot": "red striped flag"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} hops down the grassy slope toward the cobalt blue tent, patched kite trailing behind, and discovers a soft quilted scrap of fabric lying just inside the tent flap — Pip tucks it under one arm. On the LEFT a silver bell hangs from a low tree branch, on the RIGHT a green wooden crate sits beside the tent, both large, fully visible, clearly separated.",
+      "text": "Inside the tent Pip finds a soft quilted scrap — could come in handy! Now something shiny dangles on one side and something boxy waits on the other. Bell or crate?",
+      "choices": [
+        {
+          "label": "Ring the silver bell",
+          "next": "ba",
+          "spot": "silver bell"
+        },
+        {
+          "label": "Open the green crate",
+          "next": "bb",
+          "spot": "green wooden crate"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} crouches beside the golden pinwheel on its fence post, patched kite tucked under one arm, watching the blades slow to a stop in the dying breeze. On the LEFT a purple wooden birdhouse hangs from the next fence post, on the RIGHT a yellow bucket sits on a flat stone, both large, fully visible, clearly separated.",
+      "text": "The pinwheel spins once, twice, and quits. Even it can't find enough puff! Two things wait nearby. Birdhouse or bucket?",
+      "choices": [
+        {
+          "label": "Peek in the birdhouse",
+          "next": "m1",
+          "spot": "purple wooden birdhouse"
+        },
+        {
+          "label": "Grab the yellow bucket",
+          "next": "m2",
+          "spot": "yellow bucket"
+        }
+      ],
+      "scare": {
+        "spot": "purple wooden birdhouse",
+        "pop": "A tiny round bluebird with a sleepy smile and a miniature knitted nightcap, flat naive-vector style, peeking out of the birdhouse hole with one droopy eye",
+        "reveal": "Yaaawn — keep it down, even the birds are resting today!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "ab": {
+      "scene": "{HERO} stands next to the red striped flag on its wooden stake, patched kite slung over one shoulder, noticing the flag hangs perfectly limp. On the LEFT a pink paper lantern dangles from an iron hook, on the RIGHT a white feather is wedged in a fence rail, both large, fully visible, clearly separated.",
+      "text": "The flag droops like yesterday's laundry — the wind really has packed it in! Maybe one of these can help. Lantern or feather?",
+      "choices": [
+        {
+          "label": "Take the pink lantern",
+          "next": "m1",
+          "spot": "pink paper lantern"
+        },
+        {
+          "label": "Pluck the white feather",
+          "next": "m2",
+          "spot": "white feather"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} reaches up to tap the silver bell on its branch, patched kite and quilted scrap bundled together, and the bell makes one soft chime that floats across the quiet hillside. On the LEFT a turquoise wooden spool sits in the grass, on the RIGHT a coral seashell rests on a mossy log, both large, fully visible, clearly separated.",
+      "text": "Ding! The bell's tiny chime drifts out and the whole valley seems to hold its breath. Two curious things sit close by. Spool or seashell?",
+      "choices": [
+        {
+          "label": "Pick up the turquoise spool",
+          "next": "m3",
+          "spot": "turquoise wooden spool"
+        },
+        {
+          "label": "Hold the coral seashell",
+          "next": "m4",
+          "spot": "coral seashell"
+        }
+      ],
+      "scare": {
+        "spot": "coral seashell",
+        "pop": "A cheerful round ladybug with a tiny kite painted on its red shell, flat naive-vector style, popping out of the seashell and waving one tiny leg happily",
+        "reveal": "Even the bugs brought kites today — mine is painted right on my back!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "bb": {
+      "scene": "{HERO} lifts the lid of the green wooden crate beside the tent, patched kite propped against its side, quilted scrap under one arm, and sees stacks of colorful cloth patches inside. On the LEFT an amber glass jar sits on a low wooden shelf, on the RIGHT a lavender cushion rests on a wooden bench, both large, fully visible, clearly separated.",
+      "text": "The crate is stuffed with soft patches — the festival's lost-and-found for tired kites! Two more things catch Pip's eye. Jar or cushion?",
+      "choices": [
+        {
+          "label": "Peek in the amber jar",
+          "next": "m3",
+          "spot": "amber glass jar"
+        },
+        {
+          "label": "Grab the lavender cushion",
+          "next": "m4",
+          "spot": "lavender cushion"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} reaches a quiet clearing at the very top of the hill, patched kite at his side, where three objects sit in a row on a long wooden bench. On the LEFT a crimson blanket is folded neatly, in the MIDDLE a jade drum sits on a little stand, on the RIGHT a tangerine paper fan leans against the armrest, all large, fully visible, clearly separated.",
+      "text": "At the tippy-top Pip finds three forgotten things on a bench — a cozy blanket, a thunderous drum, and a paper fan. If the wind really is exhausted, one of these might do the trick. Blanket, drum, or fan?",
+      "choices": [
+        {
+          "label": "Spread the crimson blanket",
+          "next": "end_blanket_nap",
+          "spot": "crimson blanket"
+        },
+        {
+          "label": "Bang the jade drum",
+          "next": "end_drum_boom",
+          "spot": "jade drum"
+        },
+        {
+          "label": "Wave the tangerine fan",
+          "next": "end_fan_breeze",
+          "spot": "tangerine paper fan"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} wanders to a mossy ledge overlooking the valley, patched kite trailing behind, and discovers two things perched on the rocks. On the LEFT a copper weather-vane shaped like a rooster sits on a stone post, on the RIGHT a peach rocking chair sits on a flat boulder, both large, fully visible, clearly separated.",
+      "text": "Down on the ledge a weather-vane points at nothing and a rocking chair rocks all by itself — or did it just stop? The wind was definitely here. Weather-vane or rocking chair?",
+      "choices": [
+        {
+          "label": "Read the weather-vane",
+          "next": "end_weathervane",
+          "spot": "copper weather-vane"
+        },
+        {
+          "label": "Set up the rocking chair",
+          "next": "end_chair_rest",
+          "spot": "peach rocking chair"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} follows a deer trail to a grassy hollow where the air is perfectly still, patched kite and quilted scrap in hand. On the LEFT a magenta megaphone sits on a barrel, on the RIGHT a lime-green wicker basket rests beside a tree stump, both large, fully visible, clearly separated.",
+      "text": "In the hollow nothing moves — not one leaf, not one blade of grass. Pip could shout for the wind or build something cozy instead. Megaphone or basket?",
+      "choices": [
+        {
+          "label": "Shout through the megaphone",
+          "next": "end_megaphone_oops",
+          "spot": "magenta megaphone"
+        },
+        {
+          "label": "Fill the wicker basket",
+          "next": "end_basket_bed",
+          "spot": "lime-green wicker basket"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} reaches a shady spot under a wide oak tree beside a burbling brook, patched kite leaning on the trunk, quilted scrap in hand. On the LEFT a sapphire pinwheel is planted in the soft muddy bank, on the RIGHT an apricot cushion sits on a flat river stone, both large, fully visible, clearly separated.",
+      "text": "Under the old oak the brook sings a lullaby and two things wait as if someone left them on purpose. Pinwheel or cushion?",
+      "choices": [
+        {
+          "label": "Spin the sapphire pinwheel",
+          "next": "end_brook_spin",
+          "spot": "sapphire pinwheel"
+        },
+        {
+          "label": "Set out the apricot cushion",
+          "next": "end_sunset_pillow",
+          "spot": "apricot cushion"
+        }
+      ]
+    },
+    "end_blanket_nap": {
+      "scene": "{HERO} kneels in the hilltop clearing at sunset, the crimson blanket spread wide with a gentle silvery swirl of air curled up on it like a sleeping cat, while the patched kite soars impossibly high against a blazing orange and pink sky, higher than every other kite at the festival.",
+      "text": "Pip spread the blanket and whispered 'rest as long as you like.' The wind curled up, snoozed for one golden hour, then stretched awake and launched Pip's little patched kite so high it tickled the evening star. The End!"
+    },
+    "end_drum_boom": {
+      "scene": "{HERO} stands wide-eyed in the hilltop clearing beside the toppled jade drum, patched kite tangled in a massive knot of colorful kite tails overhead, while dozens of panicked kites crash into each other in a candy-colored tangle across the cobalt sky.",
+      "text": "BOOM! Pip walloped the drum so hard the whole sky flinched — every kite spun into every other kite and the festival turned into one enormous rainbow knot. Even Pip's little patched kite got snarled right in the middle. Oopsie ending!",
+      "bad": true
+    },
+    "end_fan_breeze": {
+      "scene": "{HERO} sits on the hilltop bench gently waving the tangerine paper fan, sending soft ripples through the warm evening air, while the patched kite lifts gracefully into a sky the color of ripe apricots, higher than all the other festival kites.",
+      "text": "Pip fanned so softly it felt like a lullaby made of air. The tired wind opened one eye, smiled, and carried the patched kite up into the warmest sunset the hill had ever seen. The End!"
+    },
+    "end_weathervane": {
+      "scene": "{HERO} stands on the mossy ledge at golden hour beside the copper weather-vane, which now points straight up toward the sky, while the patched kite catches a rising thermal and climbs above every other kite against a sherbet-pink sunset.",
+      "text": "The weather-vane spun lazily and pointed UP — the wind was stretching awake right here! Pip held tight and the evening breeze, remembering a certain fox who untangled a wind-sock, carried his patched kite higher than any other. The End!"
+    },
+    "end_chair_rest": {
+      "scene": "{HERO} sits in the peach rocking chair on the mossy ledge, rocking so vigorously that the chair tips backward, Pip's legs flying up in the air, the patched kite string tangled around the chair legs, the wind watching from a safe distance.",
+      "text": "Pip rocked the chair to make it extra cozy but got a little too enthusiastic — the chair tipped BACKWARDS, Pip's legs flew up, the kite string tangled around everything, and the wind took one look at the chaos and tiptoed away to nap somewhere quieter. Oopsie ending!",
+      "bad": true
+    },
+    "end_megaphone_oops": {
+      "scene": "{HERO} stands in the grassy hollow holding the magenta megaphone with ears pinned flat, while the patched kite lies crumpled on the ground and every cloud in the cobalt sky scrunches away in the opposite direction, leaving bare empty blue overhead.",
+      "text": "HEY WIND, GET BACK HERE RIGHT NOW! Pip hollered so loud that every cloud and every last wisp of breeze fled over the mountains. The sky went perfectly, uselessly, comically still. Not one kite flew for the rest of the day. Oopsie ending!",
+      "bad": true
+    },
+    "end_basket_bed": {
+      "scene": "{HERO} kneels beside the tree stump in the grassy hollow at sunset, the lime-green wicker basket lined with the quilted scrap glowing in warm light, while a gentle breeze spirals out of the basket and lifts the patched kite up into a rose-gold sky.",
+      "text": "Pip tucked the quilted scrap into the basket and set it in the softest grass. The wind nestled right in, napped until the sunset turned everything to honey, then whooshed Pip's patched kite so high the other kites looked like confetti below. The End!"
+    },
+    "end_brook_spin": {
+      "scene": "{HERO} crouches beside the brook under the wide oak at twilight, the sapphire pinwheel spinning in a cool updraft from the water with the quilted scrap spread beside it, while the patched kite spirals upward on the same playful current into a lavender and peach sky.",
+      "text": "The brook's cool breath spun the pinwheel and the tired wind couldn't resist — it tumbled in like a puppy chasing a ball, rested on Pip's quilted scrap, then launched the patched kite into a sky the color of a dream. The End!"
+    },
+    "end_sunset_pillow": {
+      "scene": "{HERO} curls up on the apricot cushion under the old oak at sunset, the quilted scrap pulled over him like a blanket, eyes closed and fast asleep, the patched kite string trailing from his hand across the grass while the tired wind sniffs the cushion and drifts away.",
+      "text": "Pip made the cushion and quilted scrap SO comfortable that he accidentally tested it himself — he curled up, pulled the scrap over his ears, and fell asleep before the wind even showed up! The wind arrived, saw the snoring lump, decided the bed was occupied, and floated off to nap somewhere else. The kite sat in the grass all night. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

@@ -1,0 +1,243 @@
+{
+  "id": "regatta",
+  "title": "Pip and the Pushy River",
+  "hero": "PIP",
+  "style": "Sun-dappled loose watercolor riverbank style, sparkling turquoise water with splashy brushwork, tiny walnut-shell and bark boats flying bright flags, willow greens, dragonfly-blue accents. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} grips his cork paddle aboard a tiny walnut-shell boat at the regatta starting line, bright pennant flags snapping above a crowd of bark boats on the sparkling turquoise river. On the LEFT a row of RED RACING BUOYS bobs in the fast current lane, on the RIGHT a GREEN WILLOW ARCHWAY droops lazily over a quieter side channel, both large, fully visible, clearly separated.",
+      "text": "Every boat in the regatta is lined up, but the river keeps shoving Pip sideways like a bossy dance partner! Racing buoys or willow archway?",
+      "choices": [
+        {
+          "label": "Paddle toward the buoys",
+          "next": "a",
+          "spot": "red racing buoys"
+        },
+        {
+          "label": "Drift under the willows",
+          "next": "b",
+          "spot": "green willow archway"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} paddles his walnut-shell boat past bobbing red buoys, cork paddle splashing hard against the stubborn current, and spots a SHINY RIVER PEBBLE glinting on a sandbar — he scoops it up. On the LEFT a GREY STONE BRIDGE arches low over the water ahead, on the RIGHT a BROWN MOSSY LOG JAM blocks half the channel, both large, fully visible, clearly separated.",
+      "text": "Pip fights the current buoy by buoy and pockets a sparkly pebble for luck, but the river shoves even harder! Stone bridge or log jam?",
+      "choices": [
+        {
+          "label": "Duck under the bridge",
+          "next": "aa",
+          "spot": "grey stone bridge"
+        },
+        {
+          "label": "Steer around the logs",
+          "next": "ab",
+          "spot": "brown mossy log jam"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} floats his walnut-shell boat beneath drooping willow branches, cork paddle trailing in the lazy current, when a BLUE DRAGONFLY lands on his bow and chirps a tiny hello. On the LEFT a GOLDEN REED ARCHWAY curves into cool shadow, on the RIGHT a broad PINK LILY PAD sits on the sunlit water at the edge of a clearing, both large, fully visible, clearly separated.",
+      "text": "The current carries Pip gently and a friendly dragonfly hitches a ride on his bow — instant crew! Reed archway or lily pad?",
+      "choices": [
+        {
+          "label": "Enter the reed archway",
+          "next": "ba",
+          "spot": "golden reed archway"
+        },
+        {
+          "label": "Paddle to the lily pad",
+          "next": "bb",
+          "spot": "pink lily pad"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} steers his walnut-shell boat under the cool grey stone bridge, cork paddle tapping the mossy arch overhead, water echoing in the shadows, pebble safe in his pocket. On the LEFT a cluster of GREEN FROG ROCKS peeks from the water where frogs are singing, on the RIGHT a row of SMOOTH WHITE STONES creates a bubbly cascade, both large, fully visible, clearly separated.",
+      "text": "A painted turtle pops from the bridge stones with a wink, and the river forks into two channels ahead. Frog rocks or white stones?",
+      "scare": {
+        "spot": "mossy arch",
+        "pop": "a friendly painted turtle poking its smiling head from behind the mossy bridge arch, sun-dappled loose watercolor, sparkling turquoise water",
+        "reveal": "Just me! I have been watching the whole race from up here!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Follow the singing frogs",
+          "next": "m1",
+          "spot": "green frog rocks"
+        },
+        {
+          "label": "Bounce over the stones",
+          "next": "m2",
+          "spot": "smooth white stones"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} navigates his walnut-shell boat around the brown mossy log jam, cork paddle pushing off crumbly bark, pebble clinking in his pocket as the current tugs him onward. On the LEFT a cluster of GREEN FROG ROCKS peeks from the water where frogs are singing, on the RIGHT a row of SMOOTH WHITE STONES creates a bubbly cascade, both large, fully visible, clearly separated.",
+      "text": "Pip squeezes past the logs with his lucky pebble clinking, and the river forks around a grassy island. Frog rocks or white stones?",
+      "choices": [
+        {
+          "label": "Follow the singing frogs",
+          "next": "m1",
+          "spot": "green frog rocks"
+        },
+        {
+          "label": "Bounce over the stones",
+          "next": "m2",
+          "spot": "smooth white stones"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} glides his walnut-shell boat through the golden reed archway, cork paddle brushing tall stalks, his blue dragonfly friend glowing like a lantern ahead in the dim tunnel. On the LEFT a trail of ORANGE ACORN CAPS floats in a line on the water downstream, on the RIGHT an OLD WOODEN DOCK juts out from the bank with a tall blue heron standing on its post, both large, fully visible, clearly separated.",
+      "text": "A crowned frog leaps from the reeds croaking about a secret shortcut, and the tunnel opens to a wide fork. Acorn caps or wooden dock?",
+      "scare": {
+        "spot": "tall reed stalks",
+        "pop": "a cheerful green frog wearing a tiny crown of white daisies leaping from the golden reeds, splashy loose watercolor, dragonfly-blue accents",
+        "reveal": "Ribbit! You found my secret shortcut — follow the current!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Follow the acorn caps",
+          "next": "m3",
+          "spot": "orange acorn caps"
+        },
+        {
+          "label": "Paddle to the dock",
+          "next": "m4",
+          "spot": "old wooden dock"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} paddles his walnut-shell boat across the sunlit water past the broad pink lily pad, cork paddle tapping big round leaves, his blue dragonfly friend darting between blossoms ahead. On the LEFT a trail of ORANGE ACORN CAPS floats in a line on the water downstream, on the RIGHT an OLD WOODEN DOCK juts out from the bank with a tall blue heron standing on its post, both large, fully visible, clearly separated.",
+      "text": "Lily pads bounce the boat like a trampoline road — boing, boing, boing — and the clearing opens wide. Acorn caps or wooden dock?",
+      "choices": [
+        {
+          "label": "Follow the acorn caps",
+          "next": "m3",
+          "spot": "orange acorn caps"
+        },
+        {
+          "label": "Paddle to the dock",
+          "next": "m4",
+          "spot": "old wooden dock"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} floats his walnut-shell boat between mossy green frog rocks where a chorus of frogs sings a wobbly tune, cork paddle resting on his knees, pebble glinting in his pocket, the current gently curling his boat sideways once more. On the LEFT a GREEN FERN CURTAIN drapes over the mouth of a calm inlet, on the RIGHT a STRIPED FINISH BANNER stretches across the straight racing lane far ahead, both large, fully visible, clearly separated.",
+      "text": "The frogs croak a warning song and the current nudges Pip sideways again — that pushy river never quits! Fern curtain or finish banner?",
+      "choices": [
+        {
+          "label": "Trust the gentle current",
+          "next": "end_safe_chorus",
+          "spot": "green fern curtain"
+        },
+        {
+          "label": "Race for the banner",
+          "next": "end_rush_falls",
+          "spot": "striped finish banner"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} bounces his walnut-shell boat through the cascade over the smooth white stones, cork paddle held high, spray flying, pebble rattling in his pocket, a low rumble echoing from somewhere downstream. On the LEFT a TALL MOSSY BOULDER sits where the river bends with mist curling at its base, on the RIGHT a BRIGHT FINISH ARCH gleams at the end of the straight racing lane, both large, fully visible, clearly separated.",
+      "text": "The rapids bounce Pip like popcorn in a pan, and a mysterious roar echoes around the bend. Mossy boulder or finish arch?",
+      "choices": [
+        {
+          "label": "Explore behind the boulder",
+          "next": "end_rainbow_cove",
+          "spot": "tall mossy boulder"
+        },
+        {
+          "label": "Sprint for the arch",
+          "next": "end_banner_tumble",
+          "spot": "bright finish arch"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} follows the floating orange acorn caps in his walnut-shell boat, cork paddle steering carefully, his blue dragonfly friend circling overhead, until the trail fans out at a three-way fork in the sparkling river. On the LEFT a RED TOADSTOOL stands on the mossy bank beside a shady creek, in the MIDDLE a BLUE KINGFISHER perches on a worn wooden post above a gentle stream, on the RIGHT a tall YELLOW SUNFLOWER towers beside a sunny brook, all three large, fully visible, clearly separated.",
+      "text": "The acorn-cap trail splits into three sparkling channels — one for each adventure! Red toadstool, blue kingfisher, or yellow sunflower?",
+      "choices": [
+        {
+          "label": "Take toadstool creek",
+          "next": "end_toadstool_haven",
+          "spot": "red toadstool"
+        },
+        {
+          "label": "Follow the kingfisher",
+          "next": "end_kingfisher_bay",
+          "spot": "blue kingfisher"
+        },
+        {
+          "label": "Sail sunflower brook",
+          "next": "end_sunflower_finish",
+          "spot": "yellow sunflower"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} paddles his walnut-shell boat up to the old wooden dock, cork paddle clunking softly against weathered planks, his blue dragonfly friend perching on the bow, while the tall blue heron on the dock post stares downstream with knowing golden eyes. On the LEFT a GREEN FERN ARCHWAY opens in the direction the heron gazes, on the RIGHT a STRIPED DOCK POST trails colorful bunting flags that flutter in the river breeze, both large, fully visible, clearly separated.",
+      "text": "The heron tilts its long neck as if to say 'I know something you do not' — very suspicious for a bird! Fern archway or dock post?",
+      "choices": [
+        {
+          "label": "Follow the heron's gaze",
+          "next": "end_heron_guide",
+          "spot": "green fern archway"
+        },
+        {
+          "label": "Stay at the cozy dock",
+          "next": "end_dock_party",
+          "spot": "striped dock post"
+        }
+      ]
+    },
+    "end_safe_chorus": {
+      "scene": "{HERO} stands tall in his walnut-shell boat in the calm turquoise inlet beyond the fern curtain, cork paddle raised high, tossing his shiny pebble into the water to send ripples signaling the other boats — one by one the fleet follows him through the safe channel as a hidden waterfall thunders harmlessly behind them, pennant flags flying in the mist.",
+      "text": "The pushy river was steering everyone away from a hidden waterfall all along! Pip trusted the current, skipped his lucky pebble to call the fleet, and every boat swept safely home together. The End!"
+    },
+    "end_rush_falls": {
+      "bad": true,
+      "scene": "{HERO} sits upside-down in his flipped walnut-shell boat at the bottom of a small waterfall, cork paddle balanced on his nose, his shiny pebble plinking into the puddle beside him, while frogs on the rocks above stare down looking very unimpressed.",
+      "text": "Pip raced straight past the frogs and tumbled over the waterfall the river had been nudging him away from — SPLOOSH! Now he is sitting in a puddle wearing his boat as a hat while the frogs clap sarcastically. Oopsie ending!"
+    },
+    "end_rainbow_cove": {
+      "scene": "{HERO} floats his walnut-shell boat through a glittering cove behind the tall mossy boulder, cork paddle catching prismatic light from the waterfall spray, his shiny pebble glowing warm in his pocket — the cove curves into a gentle channel where the other regatta boats are already gathered at the finish line, cheering.",
+      "text": "Behind the boulder the waterfall spray painted a secret rainbow across the cove, and the safe way home was hiding right here! Pip floated through the colors and the fleet cheered him across the finish line. The End!"
+    },
+    "end_banner_tumble": {
+      "bad": true,
+      "scene": "{HERO} dangles from the bright finish arch tangled head-to-toe in colorful bunting, his walnut-shell boat spinning in lazy circles below, cork paddle stuck in the ribbons, his shiny pebble rolling away downstream as if embarrassed to be seen.",
+      "text": "Pip sprinted for the finish arch but the waterfall current yanked him sideways into the bunting — THWACK! Now he is dangling like a very confused kite while his pebble rolls away pretending not to know him. Oopsie ending!"
+    },
+    "end_toadstool_haven": {
+      "scene": "{HERO} paddles his walnut-shell boat into the shady creek beside the red toadstool, cork paddle dipping quietly, his blue dragonfly friend perching on the spotted toadstool cap — the creek opens into a hidden lagoon where all the regatta boats are gathering safely, the roar of the distant waterfall muffled by mossy banks.",
+      "text": "The toadstool creek curved right around the hidden waterfall to a secret lagoon finish line! Pip's dragonfly did a victory lap around the toadstool cap while the fleet drifted in one by one. The End!"
+    },
+    "end_kingfisher_bay": {
+      "scene": "{HERO} follows the blue kingfisher from its wooden post down a gentle stream in his walnut-shell boat, cork paddle trailing, his blue dragonfly friend flying wing-to-wing with the kingfisher — the stream sweeps around a bend into a sunny bay where the finish-line banner hangs between two willows and the crowd is cheering.",
+      "text": "The kingfisher knew the safe route all along and led Pip right around the roaring waterfall! Pip waved his cork paddle as the dragonfly did loop-the-loops above the cheering finish-line crowd. The End!"
+    },
+    "end_sunflower_finish": {
+      "scene": "{HERO} sails his walnut-shell boat in lazy circles in sunflower brook, the cork paddle trailing in the water, surrounded by towering sunflowers that all face the same direction while Pip faces the wrong way, the current gently spinning the boat.",
+      "text": "Sunflower brook was sunny, safe, and also a DEAD END — the current spun Pip's boat in gentle circles among the sunflowers like the world's slowest merry-go-round while every other racer crossed the actual finish line! The dragonfly tried to point the right way but all the sunflowers were pointing THEIR way and Pip got thoroughly confused. Oopsie ending!",
+      "bad": true
+    },
+    "end_heron_guide": {
+      "scene": "{HERO} follows the tall blue heron through the green fern archway in his walnut-shell boat, but the heron has led him into a tangled fern tunnel that gets narrower and narrower, Pip's cork paddle stuck in the ferns, the dragonfly looking worried on the heron's back.",
+      "text": "The wise old heron led Pip through the ferns with GREAT confidence — straight into a tunnel that got narrower and narrower until Pip's walnut-shell boat was completely wedged between two fern stalks! The heron kept walking, the dragonfly shrugged, and Pip spent the rest of the regatta stuck in the foliage like a very small ship in a very green bottle. Oopsie ending!",
+      "bad": true
+    },
+    "end_dock_party": {
+      "scene": "{HERO} ties his walnut-shell boat to the striped dock post with bunting flags fluttering overhead, cork paddle across his lap, his blue dragonfly friend buzzing happily among the ribbons, as one by one the other regatta boats drift in — the river current has steered every single boat to this cozy safe harbor away from the waterfall.",
+      "text": "Pip's cozy dock turned out to be the real finish line — the clever river steered everyone here to dodge the waterfall! The boats drifted in, the dragonfly threw petal confetti, and they crowned Pip the coziest captain ever. The End!"
+    }
+  }
+}

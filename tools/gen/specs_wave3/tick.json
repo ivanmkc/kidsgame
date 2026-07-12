@@ -1,0 +1,243 @@
+{
+  "id": "tick",
+  "title": "Milo and the Runaway Cog",
+  "hero": "MILO",
+  "style": "Warm brass-and-moonlight ink-and-wash style, gleaming copper gears and clockwork animals, deep blue museum shadows, tiny golden lantern glow, art-deco flourishes. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in the moonlit clock tower holding his tiny golden lantern high, the great silent clock looming above with its empty cog-socket glowing faintly. On the LEFT a brass spiral staircase curls upward into blue shadows, on the RIGHT a copper archway leads into a tunnel of gleaming pipes, both large, fully visible, clearly separated.",
+      "text": "The great clock has stopped and sunrise is only hours away — if Milo doesn't find that runaway golden cog, the whole town will oversleep! His lantern catches tiny golden footprints splitting two directions. Spiral staircase or copper archway?",
+      "choices": [
+        {
+          "label": "Climb the brass staircase",
+          "next": "a",
+          "spot": "brass spiral staircase"
+        },
+        {
+          "label": "Enter the copper archway",
+          "next": "b",
+          "spot": "copper archway"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} emerges into the clock gallery holding his golden lantern, illuminating rows of sleeping clockwork animals on velvet pedestals — a tiny clockwork owl blinks one eye open and shivers, its winding key loose. On the LEFT a silver gear door stands ajar with moonlight spilling through, on the RIGHT a jade music box sits on a marble shelf, both large, fully visible, clearly separated.",
+      "text": "The gallery is full of clockwork creatures on velvet pedestals, all perfectly still — except one shivery little owl whose winding key has come loose. Milo gently tightens it, and the grateful owl hoots a quiet thank-you. Silver door or jade music box?",
+      "choices": [
+        {
+          "label": "Open the silver door",
+          "next": "aa",
+          "spot": "silver gear door"
+        },
+        {
+          "label": "Wind the jade music box",
+          "next": "ab",
+          "spot": "jade music box"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} tiptoes through the copper tunnel holding his golden lantern, warm light pooling on enormous pipes and valves, steam curling softly — a small clockwork mouse sits tangled in a loose spring, squeaking. On the LEFT a ruby valve wheel gleams on the wall, on the RIGHT a bronze periscope pokes up from the floor, both large, fully visible, clearly separated.",
+      "text": "The pipe room hums and gurgles, and a tiny clockwork mouse is tangled in a loose spring — Milo carefully frees it, and the mouse nuzzles his finger in thanks. Golden footprints split again up ahead. Ruby wheel or bronze periscope?",
+      "choices": [
+        {
+          "label": "Turn the ruby wheel",
+          "next": "ba",
+          "spot": "ruby valve wheel"
+        },
+        {
+          "label": "Look through the periscope",
+          "next": "bb",
+          "spot": "bronze periscope"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} steps through the silver gear door onto a moonlit balcony high above the clock tower floor, his golden lantern swinging, golden cog-prints glittering along the railing — the clockwork owl flutters up beside him. On the LEFT an amber bell jar sits on a stone ledge, on the RIGHT an emerald gear lever juts from the wall, both large, fully visible, clearly separated.",
+      "text": "From this moonlit balcony Milo can see the whole clockworks, and there, scurrying along a brass beam, is the golden cog! The grateful owl flutters up and points its wing toward two shortcuts. Bell jar or emerald lever?",
+      "scare": {
+        "spot": "emerald gear lever",
+        "pop": "A friendly clockwork cricket with emerald wings springs out from behind the emerald gear lever, chirping merrily and waving tiny copper antennae",
+        "reveal": "CHIRP! Hee-hee, gotcha! The cog ran right past me!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Lift the amber bell jar",
+          "next": "m1",
+          "spot": "amber bell jar"
+        },
+        {
+          "label": "Pull the emerald lever",
+          "next": "m2",
+          "spot": "emerald gear lever"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} winds the jade music box and its lid pops open, releasing a cloud of tiny clockwork butterflies that spiral around his golden lantern — the clockwork owl swoops in and joins the glittering swarm. On the LEFT a topaz gear key rests in a velvet notch on a wooden panel, on the RIGHT a sapphire clock hand leans against the stone wall, both large, fully visible, clearly separated.",
+      "text": "Clockwork butterflies spiral out of the music box like a golden compass, each wing ticking softly. The grateful owl swoops in to join the swarm, and together they point toward two paths. Topaz key or sapphire clock hand?",
+      "choices": [
+        {
+          "label": "Try the topaz gear key",
+          "next": "m1",
+          "spot": "topaz gear key"
+        },
+        {
+          "label": "Pick up the clock hand",
+          "next": "m2",
+          "spot": "sapphire clock hand"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} turns the ruby valve wheel and warm steam puffs away to reveal a hidden grotto where water drips on crystal gears, his golden lantern casting rainbow sparks — the clockwork mouse scurries ahead, squeaking excitedly. On the LEFT a coral crank handle sticks out of a stone column, on the RIGHT a pearl dial gleams on a brass panel, both large, fully visible, clearly separated.",
+      "text": "The steam clears to reveal the clock's secret water-garden, where crystal gears turn in tiny waterfalls and everything sparkles like a jewelry box. The grateful mouse scurries ahead, squeaking at two trails of golden footprints. Coral crank or pearl dial?",
+      "choices": [
+        {
+          "label": "Turn the coral crank",
+          "next": "m3",
+          "spot": "coral crank handle"
+        },
+        {
+          "label": "Spin the pearl dial",
+          "next": "m4",
+          "spot": "pearl dial"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} peers through the bronze periscope and spots the golden cog dancing on a chandelier, then follows a secret passage into a glittering gear cathedral, his golden lantern blazing — the clockwork mouse rides on his shoulder. On the LEFT an onyx gear pedal sits on the floor, on the RIGHT a garnet cog cradle hangs from a chain, both large, fully visible, clearly separated.",
+      "text": "Through the periscope Milo spots the cog doing a jig on a chandelier far above — a hidden passage opens into a glittering gear cathedral! The mouse on his shoulder chatters with excitement as two paths branch ahead. Onyx pedal or garnet cradle?",
+      "scare": {
+        "spot": "garnet cog cradle",
+        "pop": "A friendly clockwork bat with shiny copper wings drops upside-down from behind the garnet cog cradle, squeaking and grinning with tiny brass teeth",
+        "reveal": "EEE-hee! Just hanging around! Your golden friend went thataway!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Press the onyx pedal",
+          "next": "m3",
+          "spot": "onyx gear pedal"
+        },
+        {
+          "label": "Reach the garnet cradle",
+          "next": "m4",
+          "spot": "garnet cog cradle"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} corners the golden cog near the great bell mechanism, his golden lantern blazing bright, the cog trembling against the bronze bell — it looks ready to bolt again. On the LEFT a velvet cushion sits on a workbench, on the RIGHT a steel spring trap gleams on the floor, both large, fully visible, clearly separated.",
+      "text": "The golden cog shivers against the great bell, its tiny teeth chattering — it looks scared, and maybe a little sad. Being gentle might work better than being quick. Velvet cushion or steel trap?",
+      "choices": [
+        {
+          "label": "Offer the velvet cushion",
+          "next": "end_gentle_bell",
+          "spot": "velvet cushion"
+        },
+        {
+          "label": "Spring the steel trap",
+          "next": "end_trap_bell",
+          "spot": "steel spring trap"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} follows the cog into the planetarium dome where clockwork stars spin overhead, his golden lantern glowing like a tiny sun among them — the cog is spinning with the stars, giggling. On the LEFT a copper wind-up key rests on a star chart, on the RIGHT a tin whistle sits on a crescent-moon shelf, both large, fully visible, clearly separated.",
+      "text": "The cog is spinning with the clockwork stars and actually giggling — Milo has never heard a gear giggle before! It seems to have a reason for running away. Copper key or tin whistle?",
+      "choices": [
+        {
+          "label": "Wind the copper key",
+          "next": "end_stars",
+          "spot": "copper wind-up key"
+        },
+        {
+          "label": "Blow the tin whistle",
+          "next": "end_whistle",
+          "spot": "tin whistle"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} finds the golden cog splashing in a tiny waterfall between crystal gears, his golden lantern catching rainbow drops everywhere, the clockwork mouse watching from a copper pipe. On the LEFT a woolen cloth hangs from a brass hook, on the RIGHT an iron cage sits on a stone shelf, both large, fully visible, clearly separated.",
+      "text": "The cog splashes in the waterfall like a golden duckling, and the clockwork mouse tilts its head — maybe this little cog has a reason for hiding. Milo sees two ways to bring it home. Woolen cloth or iron cage?",
+      "choices": [
+        {
+          "label": "Offer the woolen cloth",
+          "next": "end_warm_cog",
+          "spot": "woolen cloth"
+        },
+        {
+          "label": "Lower the iron cage",
+          "next": "end_cage",
+          "spot": "iron cage"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} reaches the grand pendulum chamber where the golden cog sits atop the frozen pendulum, his golden lantern illuminating three gifts left by clockwork animals on stone pedestals. On the LEFT a garnet pocket watch rests on a velvet stand, in the MIDDLE a citrine gear cookie sits on a brass plate, on the RIGHT a moonstone music marble glows on a crystal dish, all three large, fully visible, clearly separated.",
+      "text": "The cog sits atop the still pendulum, hugging itself and looking homesick for something Milo can't quite name. Three gifts from the clockwork animals wait on stone pedestals. Garnet watch, citrine cookie, or moonstone marble?",
+      "choices": [
+        {
+          "label": "Give the garnet watch",
+          "next": "end_watch",
+          "spot": "garnet pocket watch"
+        },
+        {
+          "label": "Offer the citrine cookie",
+          "next": "end_cookie",
+          "spot": "citrine gear cookie"
+        },
+        {
+          "label": "Roll the moonstone marble",
+          "next": "end_marble",
+          "spot": "moonstone music marble"
+        }
+      ]
+    },
+    "end_gentle_bell": {
+      "scene": "{HERO} sits on the workbench beside the great bell with his golden lantern glowing softly, the golden cog resting on the velvet cushion, the clockwork owl perched on the bell rim — the great clock ticks again with a new secret midnight gear.",
+      "text": "Milo listened, and the cog told him everything — it ran away so the clockwork animals could keep dancing! So Milo wound in a secret midnight play-hour, and the cog clicked happily home. The morning bells rang right on time, and nobody ever knew that every night at twelve, the museum comes alive. The End!"
+    },
+    "end_trap_bell": {
+      "scene": "{HERO} stands beside the great bell holding his golden lantern, the steel spring trap snapped shut on empty air, the golden cog bouncing away through a crack in the wall, the clockwork owl hooting sadly from a rafter.",
+      "text": "SNAP! The trap clapped shut — but the cog was too quick and bounced right out through a crack! The clock stayed silent, the town overslept, and Milo learned that you can't trap something into wanting to help. Oopsie ending!",
+      "bad": true
+    },
+    "end_stars": {
+      "scene": "{HERO} sits under the planetarium dome surrounded by spinning clockwork stars, his golden lantern like a tiny sun, the golden cog nestled happily in the clock mechanism, the clockwork owl perched on a brass Saturn ring.",
+      "text": "Milo wound the copper key so gently that the planetarium played a lullaby, and the cog finally told its secret — the clockwork animals only dance when the clock stands still! So Milo added a midnight-chime pause, and the cog waltzed back into place, humming. The bells rang at dawn, and every midnight the stars dance too. The End!"
+    },
+    "end_whistle": {
+      "scene": "{HERO} stands in the planetarium dome holding his golden lantern high, every clockwork animal in the museum gathered in a joyful circle, the golden cog clicking into place, the clockwork owl conducting the celebration with outstretched wings.",
+      "text": "The tin whistle sang one clear note, and every clockwork animal in the museum came running! Together they told Milo the cog's secret, and together they helped him wind in a midnight play-hour. The cog leaped home with a happy click, the bells chimed at sunrise, and now every night is a tiny clockwork party. The End!"
+    },
+    "end_warm_cog": {
+      "scene": "{HERO} kneels in the crystal water-garden beside a tiny waterfall, his golden lantern casting rainbow light on the walls, the golden cog wrapped snugly in the woolen cloth and purring softly, the clockwork mouse nuzzling it.",
+      "text": "Wrapped in the warm cloth, the cog finally stopped shivering and told Milo why it ran — it loved the clockwork animals too much to lock them still! So Milo wound in a secret hour of freedom at midnight, and the cog purred all the way home. The bells rang at dawn, the mouse danced, and every night the waterfall sings. The End!"
+    },
+    "end_cage": {
+      "scene": "{HERO} stands in the water-garden grotto holding his golden lantern, the iron cage on the stone shelf with the golden cog locked inside refusing to spin, the clockwork mouse looking up with disappointed eyes.",
+      "text": "Milo locked the cog in the cage and carried it to the clock — but a cog that doesn't want to spin is just a lump of gold. The clock stayed silent, the mouse shook its tiny head, and Milo wished he had tried listening instead of locking. Oopsie ending!",
+      "bad": true
+    },
+    "end_watch": {
+      "scene": "{HERO} sits at the base of the grand pendulum holding his golden lantern, the golden cog cradling the garnet pocket watch with a smile, the clockwork mouse perched on the pendulum arm — the great clock ticks again with a new ruby-red midnight hand.",
+      "text": "The garnet watch popped open and showed the cog something wonderful — a tiny midnight hour painted in red! Milo promised every night at twelve the clock would pause so everyone could play, and the cog hugged the watch and clicked into place. The bells rang at dawn, and every midnight the watch glows red. The End!"
+    },
+    "end_cookie": {
+      "scene": "{HERO} sits in the pendulum chamber surrounded by crumbs, the empty gear-shaped cookie wrapper in his lap, the golden cog staring at Milo with wide betrayed eyes and empty hands, not a single crumb left.",
+      "text": "Milo held out the gear-shaped cookie for the cog but the smell was SO good that he took just one tiny nibble — and then another — and then suddenly the ENTIRE cookie was gone and the little cog was staring at him with the most betrayed expression a clockwork face has ever made. The cog ran away AGAIN, this time specifically from Milo. Oopsie ending!",
+      "bad": true
+    },
+    "end_marble": {
+      "scene": "{HERO} kneels in the pendulum chamber watching the moonstone marble roll in wider and wider circles, the golden lantern dimming, as the marble rolls right off the edge of the chamber floor and bounces down the stairs with the golden cog chasing after it in a panic.",
+      "text": "The moonstone marble hummed SO sweetly that Milo forgot to stop it rolling — it went in wider and wider circles until it rolled right off the edge and bounced down seventeen flights of stairs with the little cog chasing after it going CLINK CLINK CLINK! Milo ran after them both but by the time he caught up the cog was hiding under a grandfather clock and the marble was in a different building. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

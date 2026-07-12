@@ -1,0 +1,243 @@
+{
+  "id": "derby",
+  "title": "Pip and the Hilltop Derby",
+  "hero": "PIP",
+  "style": "Bright retro poster palette, sunlit hillside greens, bold primary-color soapbox cars, vintage race-day bunting, warm golden-hour shadows. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the hilltop starting line beside a wobbly red soapbox car with a jiggling front wheel, a grassy hillside stretching below with hay bales lining the curves of the winding dirt track, small animal spectators cheering from the grassy verge, and bunting fluttering between wooden posts. On the LEFT a red tool shed with an open front and wrenches hanging on the wall sits beside the track, on the RIGHT a green wooden ramp at the top of a gentle practice slope angles downward, both large, fully visible, clearly separated. Banners and signs are blank or show only simple pictures.",
+      "text": "The Hilltop Derby starts in five minutes and Pip's front wheel wobbles like a jelly on a trampoline — every racer on the hill is faster and that golden trophy bone is NOT going to win itself! Tool shed or practice ramp?",
+      "choices": [
+        {
+          "label": "Check the tool shed",
+          "next": "a",
+          "spot": "red tool shed"
+        },
+        {
+          "label": "Try the practice ramp",
+          "next": "b",
+          "spot": "green wooden ramp"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} inside a cozy red tool shed with wrenches hanging from hooks and a workbench cluttered with bolts and springs, a blue can of axle grease in {HERO}'s paw, the red soapbox car parked just outside with its front wheel now gleaming and smooth, a yellow hay bale sitting in the corner of the shed. On the LEFT a green forest trail disappears between tall oak trees with dappled sunlight on mossy ground, on the RIGHT a golden meadow lane stretches through wildflowers toward gentle rolling bumps, both large, fully visible, clearly separated.",
+      "text": "Pip found a blue can of axle grease and SLATHERED it on that wobbly wheel until it spun like a dream — extra grease in the glovebox for later, obviously. Forest trail or meadow lane?",
+      "choices": [
+        {
+          "label": "Take the forest trail",
+          "next": "aa",
+          "spot": "green forest trail"
+        },
+        {
+          "label": "Take the meadow lane",
+          "next": "ab",
+          "spot": "golden meadow lane"
+        }
+      ],
+      "scare": {
+        "spot": "yellow hay bale",
+        "pop": "a startled chipmunk wearing racing goggles with two wide bright eyes and a fluffy striped tail popping up from behind the yellow hay bale",
+        "reveal": "Squeak! Just checking if anyone needs a pit crew!",
+        "sting": "squeak",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} zooming down a gentle green practice slope in the red soapbox car with ears flapping in the wind, a red rubber horn now mounted on the dashboard of the car after being found wedged under the seat, other small animal racers watching from the grassy verge below. On the LEFT a gray stone tunnel entrance into the hillside looms with cool shadows inside, on the RIGHT a tan stone bridge arches over a sparkling creek with sunlight glinting off the water, both large, fully visible, clearly separated.",
+      "text": "The practice run went sideways in the BEST way because Pip found a red rubber horn under the seat and HONKED so loud a squirrel three hills over dropped its acorn — the wheel still wobbles but at least everyone knows Pip is coming! Stone tunnel or stone bridge?",
+      "choices": [
+        {
+          "label": "Dive into the tunnel",
+          "next": "ba",
+          "spot": "gray stone tunnel"
+        },
+        {
+          "label": "Cross the stone bridge",
+          "next": "bb",
+          "spot": "tan stone bridge"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} steering the red soapbox car through a shady forest trail section of the track, the blue axle grease can visible in the glovebox, tall oak trees arching overhead with dappled sunlight on mossy ground, tree roots crossing the packed-dirt track. On the LEFT a brown muddy ravine path drops steeply around a bend with puddles and tire tracks in thick brown mud, on the RIGHT an amber sandy ridge path climbs upward along a sunlit hilltop with a view of the valley, both large, fully visible, clearly separated.",
+      "text": "The greased wheel took those forest curves like a CHAMPION and Pip's tail has not stopped wagging since the first bend, but the track splits between squelchy and low or breezy and high. Muddy ravine or sandy ridge?",
+      "choices": [
+        {
+          "label": "Slide down the ravine",
+          "next": "m1",
+          "spot": "brown muddy ravine"
+        },
+        {
+          "label": "Climb the ridge",
+          "next": "m2",
+          "spot": "amber sandy ridge"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} bouncing along a sunny meadow lane section of the track in the red soapbox car, the blue axle grease can visible in the glovebox, wildflowers on both sides, bees buzzing lazily, gentle bumps in the golden grass. On the LEFT a brown muddy gully drops through thick mud with tire ruts and splashy puddles, on the RIGHT an amber sunlit ridge curves upward along a grassy hilltop toward open sky, both large, fully visible, clearly separated.",
+      "text": "Bees, buttercups, and one extremely smooth front wheel — Pip is having the time of his LIFE on the meadow lane but the track is narrowing and there is only room for one puppy. Muddy gully or sunlit ridge?",
+      "choices": [
+        {
+          "label": "Splash into the gully",
+          "next": "m1",
+          "spot": "brown muddy gully"
+        },
+        {
+          "label": "Race up the ridge",
+          "next": "m2",
+          "spot": "amber sunlit ridge"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} driving the red soapbox car through a cool dark stone tunnel carved into the hillside, the red rubber horn on the dashboard, glowing mineral streaks in the rough stone walls, an echo rippling ahead into the darkness. On the LEFT a blue waterfall curtain shimmers across the tunnel exit with rainbows in the mist and a winding track visible beyond, on the RIGHT a rusty mine-cart rail runs along a wooden platform toward a circle of bright daylight, both large, fully visible, clearly separated.",
+      "text": "Pip honked the horn inside the tunnel and the echo bounced back THREE TIMES like a tiny brass band — whoever built this shortcut had excellent taste in acoustics! Waterfall exit or mine-cart rail?",
+      "choices": [
+        {
+          "label": "Burst through the waterfall",
+          "next": "m3",
+          "spot": "blue waterfall curtain"
+        },
+        {
+          "label": "Ride the mine-cart rail",
+          "next": "m4",
+          "spot": "rusty mine-cart rail"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} driving the red soapbox car across a curved tan stone bridge over a sparkling creek, the red rubber horn on the dashboard, sunlight glinting off the shallow water below, an orange traffic cone sitting at the far end of the bridge. On the LEFT a blue waterfall cascade tumbles beside a misty track section with rainbows arcing through the spray, on the RIGHT a rusty mine-cart track runs along a wooden platform toward a bright hillside exit, both large, fully visible, clearly separated.",
+      "text": "The bridge was so pretty Pip almost forgot this was a RACE and not a scenic cruise, but something about that traffic cone at the end looks suspiciously lumpy. Waterfall track or mine-cart track?",
+      "choices": [
+        {
+          "label": "Splash past the waterfall",
+          "next": "m3",
+          "spot": "blue waterfall cascade"
+        },
+        {
+          "label": "Take the mine-cart track",
+          "next": "m4",
+          "spot": "rusty mine-cart track"
+        }
+      ],
+      "scare": {
+        "spot": "orange traffic cone",
+        "pop": "a freckled field mouse wearing a tiny checkered racing scarf with two big round surprised eyes and a long curly tail peeking out from behind the orange traffic cone",
+        "reveal": "Eep! I was directing traffic but nobody came!",
+        "sting": "chirp",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} driving the red soapbox car around a muddy ravine curve, the blue axle grease can in the glovebox, thick brown mud everywhere, a small green soapbox car stuck in a ditch with its wheels spinning helplessly and a tiny hedgehog racer sitting in it looking sad, and an orange lane barrel marking the start of a clear fast path curving toward the flat below. On the LEFT the small green soapbox car with the hedgehog racer sits deep in the muddy ditch, on the RIGHT the orange lane barrel stands at the start of a clear fast path curving away toward the distant finish area, both large, fully visible, clearly separated. Banners and signs are blank or show only simple pictures.",
+      "text": "A little hedgehog racer is stuck in the mud up to her axles and her wheels are spinning faster than her tears, but the finish line is RIGHT THERE and every second counts — that golden trophy bone waits for nobody! Pull her out or speed ahead?",
+      "choices": [
+        {
+          "label": "Pull the hedgehog out",
+          "next": "end_rescue_champ",
+          "spot": "small green car"
+        },
+        {
+          "label": "Speed to the finish",
+          "next": "end_mud_spin",
+          "spot": "orange lane barrel"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} driving the red soapbox car along a sunny hilltop ridge with the wind ruffling {HERO}'s ears, the blue axle grease can sitting large and shiny on the wide dashboard of the car, the finish area visible far below at the bottom of a steep grassy hill, and a large golden hay-bale ramp sitting at the edge of the ridge angling upward toward open sky. On the LEFT the blue axle grease can sits large and shiny on the wide dashboard of the red soapbox car, on the RIGHT the large golden hay-bale ramp angles upward toward open sky at the ridge edge, both large, fully visible, clearly separated. Banners and signs are blank or show only simple pictures.",
+      "text": "From up here Pip can see EVERYTHING — the whole track, the cheering crowd, and the finish line glittering at the bottom of one seriously steep hill, and there is still grease in that can. Slick the wheels or hit the ramp?",
+      "choices": [
+        {
+          "label": "Use the extra grease",
+          "next": "end_grease_glide",
+          "spot": "blue grease can"
+        },
+        {
+          "label": "Launch off the ramp",
+          "next": "end_ramp_launch",
+          "spot": "golden hay-bale ramp"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} behind a curtain of waterfall mist in the red soapbox car, the red rubber horn on the dashboard, rainbows sparkling in the spray, three large colorful contraptions sitting on a rocky shelf beside the track. On the LEFT a red wind-up propeller on a sturdy wooden mount sits ready to be grabbed, in the MIDDLE a blue canvas sail rigged on a tall bamboo pole stands upright, on the RIGHT a yellow coiled spring on a wide iron platform gleams in the misty light, all large, fully visible, clearly separated.",
+      "text": "Behind the waterfall is a secret pit stop and someone left THREE ridiculous contraptions on a shelf — Pip's wobbly car needs a boost and there is exactly enough time to grab ONE before the water curtain closes! Propeller, sail, or spring?",
+      "choices": [
+        {
+          "label": "Grab the red propeller",
+          "next": "end_propeller_win",
+          "spot": "red wind-up propeller"
+        },
+        {
+          "label": "Hoist the blue sail",
+          "next": "end_sail_coast",
+          "spot": "blue canvas sail"
+        },
+        {
+          "label": "Grab the yellow spring",
+          "next": "end_spring_bounce",
+          "spot": "yellow coiled spring"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} riding the red soapbox car along a rusty mine-cart rail on a wooden platform, the red rubber horn mounted large and ready on the dashboard, the track merging back onto the main hillside course with the finish area visible below, a rival blue soapbox car driven by a raccoon pulling ahead in the next lane, and a banked brown dirt curve ahead. On the LEFT the red rubber horn sits large and ready on the dashboard of the car, on the RIGHT the banked brown dirt curve angles sharply downhill toward the finish area, both large, fully visible, clearly separated. Banners and signs are blank or show only simple pictures.",
+      "text": "The mine-cart rail merges back onto the main track and a raccoon in a blue car is pulling ahead with the smuggest grin Pip has EVER seen — the finish line is SO close and that horn is SO loud! Blast the horn or take the drift?",
+      "choices": [
+        {
+          "label": "Blast the horn",
+          "next": "end_horn_rally",
+          "spot": "red rubber horn"
+        },
+        {
+          "label": "Drift the big curve",
+          "next": "end_drift_tumble",
+          "spot": "brown dirt curve"
+        }
+      ]
+    },
+    "end_rescue_champ": {
+      "scene": "{HERO} and a tiny hedgehog racer standing together at a grassy finish area, both covered in splashes of brown mud but grinning ear to ear, the crowd of small animal spectators cheering wildly, the golden trophy bone broken in half revealing chocolate inside, {HERO}'s red soapbox car and the hedgehog's green soapbox car parked side by side, the blue axle grease can tucked under {HERO}'s arm. Banners and signs are blank or show only simple pictures.",
+      "text": "Pip grabbed the hedgehog's bumper and HEAVED until the little green car popped free like a cork, and they rolled across the finish line together so the crowd voted them co-champions — and the golden trophy bone turned out to be CHOCOLATE, which is the best kind of trophy because you can share it and still lick your paws! The End!"
+    },
+    "end_mud_spin": {
+      "scene": "{HERO}'s red soapbox car spinning in circles in thick brown mud in the ravine, all four wheels spraying mud arcs everywhere, {HERO} completely coated in mud with only two surprised eyes visible, the blue axle grease can flying out of the open glovebox, other soapbox racers zooming past on the track above.",
+      "text": "Pip floored it past the stuck hedgehog and hit a mud patch so thick the car spun like a furry brown tornado — by the time the spinning stopped Pip was wearing more mud than fur and the golden trophy bone was already in someone else's paws. Oopsie ending!",
+      "bad": true
+    },
+    "end_grease_glide": {
+      "scene": "{HERO}'s red soapbox car gleaming down the steep grassy hillside at incredible speed with the freshly greased wheels shimmering silver, {HERO} crossing the finish area with ears streaming back and tongue flapping, the crowd of small animal spectators going wild on the grassy verge, the golden trophy bone on a wooden podium just beyond. Banners and signs are blank or show only simple pictures.",
+      "text": "Pip slathered on every last drop of grease and those wheels went from smooth to RIDICULOUS — the car practically flew down that hill, crossed the finish line first by a full car length, and the golden trophy bone turned out to be chocolate so Pip shared a piece with the grease can for being such a solid teammate! The End!"
+    },
+    "end_ramp_launch": {
+      "scene": "{HERO} and the red soapbox car soaring through the bright blue sky off the golden hay-bale ramp high above the hillside track, {HERO}'s ears and tongue flapping in the wind, the crowd of small animal spectators on the hillside below pointing up in amazement, the finish area directly below, the blue axle grease can clutched tight. Banners and signs are blank or show only simple pictures.",
+      "text": "Pip hit that ramp at full speed and the car LAUNCHED into the sky like a puppy-shaped rocket, sailed clean over the last three curves, and stuck the landing one tail-wag past the finish line — the crowd went so wild they forgot to check if that was technically allowed and the golden chocolate trophy bone tasted even better at altitude! The End!"
+    },
+    "end_propeller_win": {
+      "scene": "{HERO}'s red soapbox car zooming down the hillside track with the red wind-up propeller spinning on the front bumper, the red rubber horn on the dashboard, the car crossing the finish area as the propeller whirs and wildflower petals swirl in the propwash, small animal spectators cheering and throwing wildflowers. Banners and signs are blank or show only simple pictures.",
+      "text": "Pip wound that propeller until it buzzed like a giant bumblebee and the car SHOT forward so fast the finish line arrived before Pip finished honking the horn in celebration — the golden trophy bone was chocolate, the propeller was still spinning, and Pip shared both with every racer who wanted a bite or a breeze! The End!"
+    },
+    "end_sail_coast": {
+      "scene": "{HERO}'s red soapbox car sailing past the finish line and off the edge of the course, the blue canvas sail fully billowing and pulling the car across a meadow, Pip pulling on ropes trying to stop while spectators wave goodbye.",
+      "text": "The sail caught a perfect gust all right — it was SO perfect that Pip's car sailed right PAST the finish line and kept going! No brakes, no steering, just a very small puppy on a very small sailboat heading for the next county while the crowd waved goodbye and the announcer said 'and there goes number seven, last seen heading west.' Oopsie ending!",
+      "bad": true
+    },
+    "end_spring_bounce": {
+      "scene": "{HERO}'s red soapbox car bouncing wildly through the air after the yellow coiled spring launched it too high, the car flipping upside down heading toward a thick berry bush on the hillside, {HERO}'s legs and tail sticking out of the green leaves, the red rubber horn tumbling through the air beside the car, other soapbox racers zooming past on the track far below.",
+      "text": "That spring had WAY more bounce than advertised and Pip's car rocketed straight UP instead of forward, did two somersaults, and landed upside down in a bush so deep that the horn honked every time a berry fell on it — the golden trophy bone is still down at the finish line and Pip is basically a garden decoration now. Oopsie ending!",
+      "bad": true
+    },
+    "end_horn_rally": {
+      "scene": "{HERO} crossing the finish area in the red soapbox car while blasting the red rubber horn, the rival raccoon racer in the blue soapbox car swerving in surprise behind, the crowd of small animal spectators jumping with joy on the grassy verge, the golden trophy bone gleaming on a small wooden podium just ahead. Banners and signs are blank or show only simple pictures.",
+      "text": "Pip squeezed that horn and it let out a HONK so magnificently loud that the raccoon swerved, the crowd covered their ears, and three birds changed course mid-flight — Pip crossed the finish line first and the golden trophy bone turned out to be chocolate so Pip broke off the biggest piece for the raccoon because winning is sweet but sharing is sweeter! The End!"
+    },
+    "end_drift_tumble": {
+      "scene": "{HERO}'s red soapbox car spinning in dizzy circles at the bottom of the banked dirt curve, wheels pointing in four different directions, the red rubber horn stuck in a fence post, Pip sitting sideways in the driver's seat with swirly dizzy eyes.",
+      "text": "Pip yanked the steering for the PERFECT drift but yanked it a little too far — the car spun in three complete circles, bonked into a hay bale, the horn flew off and stuck in a fence post, and Pip crossed the finish line going BACKWARDS at approximately the speed of a confused turtle. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

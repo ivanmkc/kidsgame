@@ -1,0 +1,144 @@
+{
+  "id": "luna",
+  "hero": "LUNA",
+  "title": "Luna's Big Day",
+  "style": "Soft pastel kawaii cartoon with thick outlines, rounded shapes, and cheerful colors",
+  "nodes": {
+    "start": {
+      "scene": "Luna the unicorn standing in a sunny meadow beside a sparkling blue stream, surrounded by colorful wildflowers and green trees with a sunrise behind rolling hills.",
+      "text": "Luna the unicorn wakes up on a sunny morning. Where should she go today?",
+      "choices": [
+        {
+          "label": "Trot to the forest! \ud83c\udf32",
+          "next": "a",
+          "spot": "green forest trees"
+        },
+        {
+          "label": "Gallop to the beach! \ud83c\udf0a",
+          "next": "b",
+          "spot": "sparkling blue stream"
+        }
+      ]
+    },
+    "a": {
+      "scene": "Luna in a sunlit forest clearing surrounded by colorful butterflies, with a friendly squirrel waving from a thick brown tree branch, flowers dotting the ground.",
+      "text": "In the forest, a little squirrel waves hello. 'Will you play with me today?'",
+      "choices": [
+        {
+          "label": "Help find acorns \ud83c\udf30",
+          "next": "aa",
+          "spot": "green leafy bush"
+        },
+        {
+          "label": "Play hide and seek \ud83d\ude48",
+          "next": "ab",
+          "spot": "thick tree trunk"
+        }
+      ]
+    },
+    "b": {
+      "scene": "Luna trotting on a sandy beach with a red-and-white striped sailboat bobbing on the sparkling blue water, palm trees on a sandy rise to the right.",
+      "text": "At the beach, Luna finds a little sailboat. The sea sparkles!",
+      "choices": [
+        {
+          "label": "Sail away! \u26f5",
+          "next": "ba",
+          "spot": "striped sailboat"
+        },
+        {
+          "label": "Build a sandcastle \ud83c\udff0",
+          "next": "bb",
+          "spot": "golden sand beach"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "Luna and a cheerful squirrel beside a large pile of brown acorns under a big green tree in a meadow at sunset.",
+      "text": "Together they find a mountain of acorns! The squirrel is so thankful. What now?",
+      "choices": [
+        {
+          "label": "Throw an acorn party! \ud83c\udf89",
+          "next": "end_party",
+          "spot": "brown acorn pile"
+        },
+        {
+          "label": "Ride the rainbow home \ud83c\udf08",
+          "next": "end_rainbow",
+          "spot": "glowing rainbow arch"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "Luna peeking out from behind a giant red-and-white spotted mushroom in the forest, with a rabbit, squirrel, hedgehog, and blue bird gathered among smaller mushrooms and a fallen log.",
+      "text": "Luna is the best hider in the forest! All the animals want more fun.",
+      "choices": [
+        {
+          "label": "Crown the champion \ud83d\udc51",
+          "next": "end_crown",
+          "spot": "red spotted mushroom"
+        },
+        {
+          "label": "Ride the rainbow home \ud83c\udf08",
+          "next": "end_rainbow",
+          "spot": "glowing rainbow arch"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "Luna aboard a wooden sailboat at a pink sunset, a friendly blue whale spraying a sparkly water spout beside her, a small orange bonfire glowing on a distant sandy island.",
+      "text": "A friendly whale swims up and sprays a sparkly hello! Far away on the beach, a little bonfire starts to glow.",
+      "choices": [
+        {
+          "label": "Dive with the whale \ud83d\udc0b",
+          "next": "end_pearl",
+          "spot": "blue whale"
+        },
+        {
+          "label": "Dance at the bonfire \ud83d\udd25",
+          "next": "end_bonfire",
+          "spot": "orange beach bonfire"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "Luna on a beach beside a tall sandcastle decorated with colorful bunting and flags, a small orange crab, a golden crown on the sand, and a striped sailboat on the water at sunset.",
+      "text": "The sandcastle is magnificent, and a little crab wants to be its king!",
+      "choices": [
+        {
+          "label": "Crown the crab king \ud83e\udd80",
+          "next": "end_crab",
+          "spot": "tall sandcastle"
+        },
+        {
+          "label": "Dance at the bonfire \ud83d\udd25",
+          "next": "end_bonfire",
+          "spot": "beach bonfire"
+        }
+      ]
+    },
+    "end_party": {
+      "scene": "Luna wearing a daisy crown sitting on a checkered picnic blanket with forest animals sharing acorns from baskets under colorful paper lanterns at sunset.",
+      "text": "The whole forest comes to Luna's acorn party! What a wonderful day. The End!"
+    },
+    "end_rainbow": {
+      "scene": "Luna sliding joyfully down a broad rainbow arcing over a flower-dotted green meadow with bunnies and birds at sunset.",
+      "text": "What a forest adventure! Luna slides all the way home on a rainbow. Sweet dreams, Luna! The End!"
+    },
+    "end_crown": {
+      "scene": "Luna wearing a daisy crown in a sunny forest clearing surrounded by cheering rabbits, squirrels, a hedgehog, a deer, and birds.",
+      "text": "The animals weave Luna a crown of daisies \u2014 Hide-and-Seek Champion of the whole forest! The End!"
+    },
+    "end_pearl": {
+      "scene": "Luna floating inside a shimmering bubble underwater holding a glowing pearl, a friendly blue whale beside her among colorful fish and coral.",
+      "text": "The whale shows Luna a glowing pearl \u2014 a gift for her bravery! The End!"
+    },
+    "end_crab": {
+      "scene": "Luna looking up at a proud crab wearing a green cape atop a tall decorated sandcastle with bunting and shell towers on the beach.",
+      "text": "King Crab rules the grandest sandcastle on the beach. Long live the king! The End!"
+    },
+    "end_bonfire": {
+      "scene": "Luna dancing on a moonlit beach around a crackling bonfire with seagulls, crabs, and a whale spouting in the starry night sea.",
+      "text": "Luna hurries to the glowing bonfire on the twinkly beach, and everyone dances until the stars come out. The End!"
+    }
+  }
+}
