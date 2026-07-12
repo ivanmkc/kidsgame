@@ -121,8 +121,9 @@
       "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA — together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!"
     },
     "end_mesa_dance": {
-      "scene": "{HERO} stomps the ochre drumstone with both feet as a wave of golden vibration ripples across the amphitheater floor in expanding rings, the singing stone pulsing, the armadillo captain bouncing with the beat, the runaway echo breaking into a rhythm the canyon walls absorb peacefully.",
-      "text": "Rex STOMPED that drumstone and the echo turned into a BEAT — the whole canyon vibrated in rhythm, armadillos bounced on their seats, and the runaway roar broke apart into music the desert soaked up like rain. Who knew the counter-frequency was a DANCE? The End!"
+      "scene": "{HERO} stomps the ochre drumstone with both feet as a shockwave cracks the amphitheater floor in expanding fractures, the drumstone splitting in half, Rex losing his balance and tumbling off the platform into a sand dune as the armadillo captain covers her eyes with both paws and the runaway echo gets LOUDER from the vibration.",
+      "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune — the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!",
+      "bad": true
     },
     "end_low_rumble": {
       "scene": "{HERO} blows the deep red bass horn and a low powerful rumble rolls through the amphitheater shaking the tiered seats gently as every armadillo nods approvingly, the terracotta wind-chime harmonizing, the amphitheater walls absorbing the echo as the rumble settles into warm silence.",

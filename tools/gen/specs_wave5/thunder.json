@@ -218,8 +218,9 @@
       "bad": true
     },
     "end_sneak": {
-      "scene": "{HERO} crouches under the scarlet cave overhang with the glass lantern glowing, wind gremlins packed tightly around the flame creating a perfect windbreak, the Storm Hawk soaring overhead without spotting the hidden light, the beacon tower visible through a gap in the boulders ahead.",
-      "text": "The gremlins huddle so close around the lantern that it looks like a ball of fur with a glow inside — the Storm Hawk flies right past and Nova sneaks to the beacon while the big bird is busy looking confused."
+      "scene": "{HERO} crouches under the scarlet cave overhang with the glass lantern glowing, wind gremlins packed tightly around the flame, but one gremlin sneezes a tiny gust that knocks the lantern against the rock wall, a crack spreading across the glass as the flame sputters, the Storm Hawk's shadow circling closer overhead and the gremlins all staring at the sneezer with wide accusing eyes.",
+      "text": "The gremlins huddled perfectly until one little gremlin sneezed — the tiniest puff of wind knocked the lantern against the rock and CRACK went the glass! The flame sputtered and died while every other gremlin stared at the sneezer with the most judgmental faces Nova had ever seen on something that small. No flame, no beacon, and one VERY sorry gremlin. Oopsie ending!",
+      "bad": true
     },
     "end_lightning": {
       "scene": "{HERO} stands atop the amber stone tower with the glass lantern raised high, lightning striking the tower and channeling through the lantern, the glass glowing white-hot with amplified light, the Storm Hawk screeching and fleeing from the blinding flash, the distant beacon tower igniting from the reflected blaze.",
@@ -234,8 +235,9 @@
       "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud — the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards."
     },
     "end_swoop": {
-      "scene": "{HERO} sprints across the iron chain bridge in howling wind, the glass lantern flickering wildly, the Storm Hawk swooping down with talons extended, wind gremlins diving at the hawk's face to slow it, the beacon tower just steps away at the end of the bridge.",
-      "text": "Nova RUNS and the gremlins throw themselves at the Storm Hawk like tiny furry missiles — the hawk swerves, Nova reaches the beacon, and the lantern's flame leaps home just as the first ray of dawn breaks through the storm."
+      "scene": "{HERO} sprints across the iron chain bridge but a huge gust swings the bridge sideways, the glass lantern slipping from Nova's paws and bouncing off a chain link, Nova catching the bridge rail with both paws as the lantern tumbles end over end into the clouds below, the Storm Hawk diving after the falling light and the wind gremlins watching helplessly from the perch.",
+      "text": "Nova sprinted but the bridge SWUNG like a hammock in a hurricane and the lantern bounced off a chain and tumbled into the clouds — gone! The Storm Hawk dove after the falling light like the world's worst game of fetch and Nova clung to the swinging bridge with her fur standing straight up. No lantern, no beacon, and a VERY long climb back down. Oopsie ending!",
+      "bad": true
     }
   }
 }

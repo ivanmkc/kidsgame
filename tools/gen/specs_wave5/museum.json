@@ -112,8 +112,9 @@
       "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago — Milo held her wing the whole way to the pedestal."
     },
     "end_emerald_forest": {
-      "scene": "{HERO} shines through the emerald and soft green light transforms the hall into an enchanted forest of shadows, the owl guard blinking in confusion and flapping straight out an open window thinking she is outdoors. In the quiet green glow the magpie lands on Milo's shoulder and together they carry the Midnight Sapphire to its pedestal, setting it down with a soft click.",
-      "text": "Green camouflage! The owl thinks she's in a forest and flies right out the window. The magpie was never just a thief — she stole the sapphire years ago and guilt brought her back every night, but she needed a friend to help her face the empty pedestal."
+      "scene": "{HERO} shines through the emerald and soft green light fills the hall, but the emerald slips from Milo's paw and rolls across the polished marble floor with the flashlight still shining through it, sending a spinning green laser show across every wall as the owl swoops after the rolling light, Milo chasing the emerald on all fours, and the magpie flapping in circles holding the sapphire away from the chaos.",
+      "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball — the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!",
+      "bad": true
     },
     "end_quartz_disco": {
       "scene": "{HERO} fires the flashlight through the quartz cluster and rainbow light EXPLODES across every surface like the world's fanciest disco ball, the owl guard so enchanted she begins waltzing with a marble bust. The magpie swoops down and places the Midnight Sapphire on its pedestal, tears in her little eyes, the rainbow light making the gem blaze every color at once.",
@@ -129,8 +130,9 @@
       "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years — she just needed someone kind to stand beside her at the pedestal."
     },
     "end_emerald_meadow": {
-      "scene": "{HERO} beams the emerald and soft green light turns the gallery into a glowing meadow, the owl guard yawning deeply and roosting on a chandelier to sleep, thinking it must be a warm spring evening. In the peaceful green quiet the magpie carries the Midnight Sapphire to its pedestal and sets it down, her wings shaking with relief.",
-      "text": "Green glow makes the owl sleepy — goodnight, grumpy guard! The magpie finally faces what she did and the sapphire clicks into place. The whole museum seems to sigh with relief."
+      "scene": "{HERO} beams the emerald and soft green light fills the gallery, but the light makes the owl guard sneeze instead of sleep, the sneeze blowing the emerald lens off its chain and clattering across the floor, Milo tripping over a display rope and landing in a pile of museum brochures as the owl resumes her patrol looking very alert.",
+      "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it — he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!",
+      "bad": true
     },
     "end_rainbow_cathedral": {
       "scene": "{HERO} fires through the quartz and a rainbow tornado of light spirals through the entire museum, every gem and crystal and piece of glass catching the beams until the building glows like a cathedral of color. The owl is transfixed on a rafter, the magpie weeps with joy, and she places the Midnight Sapphire home at last while rainbow light dances across the pedestal.",

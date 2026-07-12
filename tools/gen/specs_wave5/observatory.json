@@ -129,12 +129,14 @@
       "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth — the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder."
     },
     "end_dome_flood": {
-      "scene": "{HERO} flings a crumpled star chart at the dome crank and it spins, the copper dome grinding open as wind howls in and the porcupine stops mid-sleepwalk, mesmerized by the enormous open sky filling the room. Star-moths stream through the gap in a river of gold, carrying lights and placing them into a pattern — Mo's village, sketched across the heavens in living starlight.",
-      "text": "The dome rolls open and the sky floods in! The porcupine wakes with mouth hanging open. The moths are not eating stars — they're building a constellation of Mo's home! The old astronomer reaches for his pen and weeps."
+      "scene": "{HERO} flings a crumpled star chart at the dome crank but it jams the gears, the dome grinding halfway open and then STUCK, rain pouring through the gap onto the telescope, the porcupine waking up screaming about water damage as star charts dissolve into soggy pulp on the floor and Mo scrambles to cover the telescope with his jacket.",
+      "text": "Mo's paper ball jammed the dome crank halfway open and rain poured in like somebody turned on a giant shower — the porcupine woke up SCREAMING about his telescope getting wet and Mo spent the next hour mopping the floor with soggy star charts while the moths did their beautiful work outside where nobody could see it! Oopsie ending!",
+      "bad": true
     },
     "end_spin_tumble": {
-      "scene": "{HERO} bounces a paper ball off the chair wheel and the rolling chair spins like a top with the porcupine in it, quills flying in every direction as he wakes up dizzy and tumbles out onto the observation balcony. They both look up and see star-moths pressing tiny lights into dark patches of sky, forming a new constellation — Mo's village, complete with the little hill, the winding path, and the observatory itself, drawn in stars.",
-      "text": "SPIN! The porcupine tumbles onto the balcony, dizzy but looking UP. The moths are planting stars into a picture of Mo's village — even the observatory is in it, tiny and perfect! The porcupine cries so hard his quills rattle."
+      "scene": "{HERO} bounces a paper ball off the chair wheel and the rolling chair rockets across the dome floor with the porcupine still in it, crashing into the telescope stand and knocking the massive brass telescope sideways with a tremendous CLANG, the porcupine tangled in the telescope tripod with quills stuck in every cushion, Mo watching with both paws over his mouth.",
+      "text": "Mo's paper ball sent the chair rolling and it crashed into the TELESCOPE — the biggest, most irreplaceable telescope in the observatory went CLANG and tipped sideways while the porcupine got tangled in the tripod like the world's prickliest pretzel! The old astronomer woke up furious and Mo spent the rest of the night helping realign a telescope he was definitely not qualified to touch. Oopsie ending!",
+      "bad": true
     },
     "end_moth_garden": {
       "scene": "{HERO} follows the star-moth through the dome opening and out onto the observatory roof into the wind, where dozens of moths gather carrying pinpricks of light in their delicate legs. One by one they press the lights into the dark sky like planting seeds. A constellation takes shape — Mo's village from above, the winding streets, the fountain, the hill. The porcupine appears behind Mo, fully awake for the first time in decades, tears streaming.",

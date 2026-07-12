@@ -204,8 +204,9 @@
       "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd — Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined."
     },
     "end_dance": {
-      "scene": "{HERO} and the Carnival King dance together on the spinning carousel, the village banner waving between them like a shared flag, painted horses circling as neon lights swirl in hot pink and electric teal against the deep purple night sky.",
-      "text": "Nova's low sweep makes the Carnival King laugh so hard he tumbles off his horse and when he lands he is just a giggling raccoon who wanted someone to play with — they dance on the carousel together and the banner waves between them like a friendship flag."
+      "scene": "{HERO} swings the teal foam sword in a low sweep but catches the carousel horse's saddle strap, the horse spinning loose and carrying Nova in dizzying circles as the Carnival King watches from his throne with the village banner still firmly draped over his shoulders, painted horses flying off the platform one by one.",
+      "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat — round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!",
+      "bad": true
     },
     "end_song": {
       "scene": "{HERO} plays the calliope organ as golden music notes swirl visibly through the air, the Carnival King waltzing with the village banner draped over one arm, phantom carnival lights pulsing in rhythm against the deep purple night sky.",
