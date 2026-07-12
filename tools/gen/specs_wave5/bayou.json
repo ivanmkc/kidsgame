@@ -136,8 +136,9 @@
       "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag — around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!"
     },
     "end_snake_spiral": {
-      "scene": "{HERO} steps behind the green snake vine and her shadow spirals gently upward through the mushroom circle, the broomstick's wild shadow spiraling alongside in a perfect double helix, the broomstick gliding down in a matching corkscrew to hover at Willow's side while the singing reed hums and violet toadstools glow.",
-      "text": "The snake shadow spiraled up and the broomstick spiraled DOWN in a perfect opposite twist — like a dance, like a spell, like two halves of the same swirl. The broomstick hovered at her side humming with pride because Willow understood: flying is not about speed, it is about the SPIRAL. The End!"
+      "scene": "{HERO} steps behind the green snake vine and her shadow spirals into a dizzy corkscrew, the broomstick's wild shadow copying the spiral and spinning faster and faster until the broomstick corkscrews into the ground like a drill, burying its bristles in the mossy earth as the singing reed makes a sad descending note and the toadstools wobble from the impact.",
+      "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!",
+      "bad": true
     },
     "end_frog_splash": {
       "scene": "{HERO} steps behind the teal frog toadstool and her shadow leaps wildly high, the broomstick's wild shadow leaping after it, both broomstick and Willow tumbling into the dark bayou water between the toadstools with an enormous teal splash, the singing reed gargling bubbles and the broomstick sputtering waterlogged sparks.",
