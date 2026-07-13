@@ -3335,6 +3335,60 @@
           "thumb": "hidden/mole_city_t_brownclock.png"
         }
       ]
+    },
+    {
+      "id": "steampunk_airship",
+      "name": "Steampunk Airship",
+      "image": "hidden/steampunk_airship.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "crate_s",
+          "label": "a green wooden crate",
+          "x": 845,
+          "y": 394,
+          "w": 171,
+          "h": 153,
+          "thumb": "hidden/steampunk_airship_t_crate_s.png"
+        },
+        {
+          "id": "telescope_s",
+          "label": "a brass telescope on a tripod",
+          "x": 607,
+          "y": 231,
+          "w": 217,
+          "h": 308,
+          "thumb": "hidden/steampunk_airship_t_telescope_s.png"
+        },
+        {
+          "id": "rope_s",
+          "label": "a coiled rope",
+          "x": 845,
+          "y": 563,
+          "w": 246,
+          "h": 100,
+          "thumb": "hidden/steampunk_airship_t_rope_s.png"
+        },
+        {
+          "id": "flag_s",
+          "label": "a red flag on a mast",
+          "x": 1077,
+          "y": 11,
+          "w": 200,
+          "h": 184,
+          "thumb": "hidden/steampunk_airship_t_flag_s.png"
+        },
+        {
+          "id": "bell_s",
+          "label": "a brass bell",
+          "x": 64,
+          "y": 38,
+          "w": 107,
+          "h": 238,
+          "thumb": "hidden/steampunk_airship_t_bell_s.png"
+        }
+      ]
     }
   ],
   "stories": [
