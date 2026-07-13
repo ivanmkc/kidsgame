@@ -3083,6 +3083,69 @@
           "thumb": "hidden/dragonfly_meadow_t_acorn_md.png"
         }
       ]
+    },
+    {
+      "id": "cloud_kingdom",
+      "name": "Cloud Kingdom",
+      "image": "hidden/cloud_kingdom.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "umbrella_c",
+          "label": "a red polka-dot umbrella",
+          "x": 1052,
+          "y": 463,
+          "w": 187,
+          "h": 179,
+          "thumb": "hidden/cloud_kingdom_t_umbrella_c.png"
+        },
+        {
+          "id": "bird_c",
+          "label": "a blue bird flying",
+          "x": 657,
+          "y": 255,
+          "w": 97,
+          "h": 90,
+          "thumb": "hidden/cloud_kingdom_t_bird_c.png"
+        },
+        {
+          "id": "balloon_c",
+          "label": "a colorful hot air balloon",
+          "x": 242,
+          "y": 157,
+          "w": 118,
+          "h": 163,
+          "thumb": "hidden/cloud_kingdom_t_balloon_c.png"
+        },
+        {
+          "id": "harp",
+          "label": "a big golden harp",
+          "x": 482,
+          "y": 356,
+          "w": 150,
+          "h": 235,
+          "thumb": "hidden/cloud_kingdom_t_harp.png"
+        },
+        {
+          "id": "cake_c",
+          "label": "a pink frosted cake on a cloud",
+          "x": 711,
+          "y": 551,
+          "w": 117,
+          "h": 93,
+          "thumb": "hidden/cloud_kingdom_t_cake_c.png"
+        },
+        {
+          "id": "flag_c",
+          "label": "a red triangular flag",
+          "x": 114,
+          "y": 157,
+          "w": 79,
+          "h": 79,
+          "thumb": "hidden/cloud_kingdom_t_flag_c.png"
+        }
+      ]
     }
   ],
   "stories": [
