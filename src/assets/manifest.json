@@ -2768,6 +2768,132 @@
           "thumb": "hidden/coral_reef_t_clownfish.png"
         }
       ]
+    },
+    {
+      "id": "spooky_graveyard",
+      "name": "Spooky Graveyard",
+      "image": "hidden/spooky_graveyard.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "raven",
+          "label": "a big glossy raven",
+          "x": 680,
+          "y": 385,
+          "w": 201,
+          "h": 224,
+          "thumb": "hidden/spooky_graveyard_t_raven.png"
+        },
+        {
+          "id": "witchhat",
+          "label": "a pointy purple witch hat",
+          "x": 491,
+          "y": 331,
+          "w": 142,
+          "h": 111,
+          "thumb": "hidden/spooky_graveyard_t_witchhat.png"
+        },
+        {
+          "id": "pumpkin_g",
+          "label": "a pumpkin sitting in the grass",
+          "x": 167,
+          "y": 497,
+          "w": 140,
+          "h": 131,
+          "thumb": "hidden/spooky_graveyard_t_pumpkin_g.png"
+        },
+        {
+          "id": "toad",
+          "label": "a warty green toad on a tombstone",
+          "x": 897,
+          "y": 420,
+          "w": 147,
+          "h": 124,
+          "thumb": "hidden/spooky_graveyard_t_toad.png"
+        },
+        {
+          "id": "ghost",
+          "label": "a friendly smiling white ghost",
+          "x": 343,
+          "y": 106,
+          "w": 183,
+          "h": 196,
+          "thumb": "hidden/spooky_graveyard_t_ghost.png"
+        },
+        {
+          "id": "owl_g",
+          "label": "a wide-eyed owl on a branch",
+          "x": 1092,
+          "y": 47,
+          "w": 110,
+          "h": 155,
+          "thumb": "hidden/spooky_graveyard_t_owl_g.png"
+        }
+      ]
+    },
+    {
+      "id": "ice_palace",
+      "name": "Ice Palace",
+      "image": "hidden/ice_palace.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "polarbear",
+          "label": "a small polar bear cub",
+          "x": 1117,
+          "y": 541,
+          "w": 106,
+          "h": 152,
+          "thumb": "hidden/ice_palace_t_polarbear.png"
+        },
+        {
+          "id": "penguin_i",
+          "label": "a penguin sliding on the floor",
+          "x": 821,
+          "y": 580,
+          "w": 119,
+          "h": 123,
+          "thumb": "hidden/ice_palace_t_penguin_i.png"
+        },
+        {
+          "id": "snowflake",
+          "label": "a giant ornate snowflake",
+          "x": 866,
+          "y": 221,
+          "w": 151,
+          "h": 186,
+          "thumb": "hidden/ice_palace_t_snowflake.png"
+        },
+        {
+          "id": "frostflower",
+          "label": "a frozen blue flower",
+          "x": 272,
+          "y": 260,
+          "w": 73,
+          "h": 72,
+          "thumb": "hidden/ice_palace_t_frostflower.png"
+        },
+        {
+          "id": "snowglobe",
+          "label": "a snow globe on a pedestal",
+          "x": 18,
+          "y": 520,
+          "w": 110,
+          "h": 130,
+          "thumb": "hidden/ice_palace_t_snowglobe.png"
+        },
+        {
+          "id": "tiara",
+          "label": "an icy crystal tiara",
+          "x": 472,
+          "y": 616,
+          "w": 160,
+          "h": 94,
+          "thumb": "hidden/ice_palace_t_tiara.png"
+        }
+      ]
     }
   ],
   "stories": [
