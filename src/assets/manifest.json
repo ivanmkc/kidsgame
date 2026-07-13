@@ -3389,6 +3389,51 @@
           "thumb": "hidden/steampunk_airship_t_bell_s.png"
         }
       ]
+    },
+    {
+      "id": "giant_kitchen",
+      "name": "Giant's Kitchen",
+      "image": "hidden/giant_kitchen.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "cupcake_g",
+          "label": "a big pink cupcake",
+          "x": 783,
+          "y": 518,
+          "w": 113,
+          "h": 120,
+          "thumb": "hidden/giant_kitchen_t_cupcake_g.png"
+        },
+        {
+          "id": "tomato_g",
+          "label": "a giant red tomato",
+          "x": 349,
+          "y": 520,
+          "w": 116,
+          "h": 119,
+          "thumb": "hidden/giant_kitchen_t_tomato_g.png"
+        },
+        {
+          "id": "eggcup_g",
+          "label": "a big blue egg cup",
+          "x": 1129,
+          "y": 522,
+          "w": 73,
+          "h": 117,
+          "thumb": "hidden/giant_kitchen_t_eggcup_g.png"
+        },
+        {
+          "id": "carrot_g",
+          "label": "a huge orange carrot",
+          "x": 656,
+          "y": 484,
+          "w": 96,
+          "h": 153,
+          "thumb": "hidden/giant_kitchen_t_carrot_g.png"
+        }
+      ]
     }
   ],
   "stories": [
