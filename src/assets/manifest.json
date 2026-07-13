@@ -3263,6 +3263,78 @@
           "thumb": "hidden/circus_backstage_t_tophat_c.png"
         }
       ]
+    },
+    {
+      "id": "mole_city",
+      "name": "Underground Mole City",
+      "image": "hidden/mole_city.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "redchair",
+          "label": "a small red armchair",
+          "x": 553,
+          "y": 342,
+          "w": 182,
+          "h": 167,
+          "thumb": "hidden/mole_city_t_redchair.png"
+        },
+        {
+          "id": "greencart",
+          "label": "a green wheelbarrow",
+          "x": 940,
+          "y": 509,
+          "w": 230,
+          "h": 168,
+          "thumb": "hidden/mole_city_t_greencart.png"
+        },
+        {
+          "id": "blueteapot",
+          "label": "a blue teapot",
+          "x": 175,
+          "y": 532,
+          "w": 173,
+          "h": 135,
+          "thumb": "hidden/mole_city_t_blueteapot.png"
+        },
+        {
+          "id": "whitemug",
+          "label": "a white mug",
+          "x": 1159,
+          "y": 324,
+          "w": 101,
+          "h": 95,
+          "thumb": "hidden/mole_city_t_whitemug.png"
+        },
+        {
+          "id": "orangebook",
+          "label": "an orange book",
+          "x": 19,
+          "y": 274,
+          "w": 132,
+          "h": 145,
+          "thumb": "hidden/mole_city_t_orangebook.png"
+        },
+        {
+          "id": "purplegem",
+          "label": "a purple gemstone",
+          "x": 369,
+          "y": 317,
+          "w": 90,
+          "h": 92,
+          "thumb": "hidden/mole_city_t_purplegem.png"
+        },
+        {
+          "id": "brownclock",
+          "label": "a brown cuckoo clock",
+          "x": 829,
+          "y": 293,
+          "w": 97,
+          "h": 129,
+          "thumb": "hidden/mole_city_t_brownclock.png"
+        }
+      ]
     }
   ],
   "stories": [
