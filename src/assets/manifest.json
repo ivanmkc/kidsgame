@@ -2894,6 +2894,195 @@
           "thumb": "hidden/ice_palace_t_tiara.png"
         }
       ]
+    },
+    {
+      "id": "monster_bedroom",
+      "name": "Monster's Bedroom",
+      "image": "hidden/monster_bedroom.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "drum_m",
+          "label": "a blue toy drum",
+          "x": 62,
+          "y": 554,
+          "w": 168,
+          "h": 135,
+          "thumb": "hidden/monster_bedroom_t_drum_m.png"
+        },
+        {
+          "id": "alarm_m",
+          "label": "a red alarm clock",
+          "x": 1090,
+          "y": 263,
+          "w": 104,
+          "h": 131,
+          "thumb": "hidden/monster_bedroom_t_alarm_m.png"
+        },
+        {
+          "id": "teddy_m",
+          "label": "a brown teddy bear",
+          "x": 1082,
+          "y": 468,
+          "w": 146,
+          "h": 181,
+          "thumb": "hidden/monster_bedroom_t_teddy_m.png"
+        },
+        {
+          "id": "slippers",
+          "label": "a pair of orange fuzzy monster slippers",
+          "x": 268,
+          "y": 571,
+          "w": 251,
+          "h": 133,
+          "thumb": "hidden/monster_bedroom_t_slippers.png"
+        },
+        {
+          "id": "lavalamp",
+          "label": "a green lava lamp",
+          "x": 1177,
+          "y": 7,
+          "w": 78,
+          "h": 213,
+          "thumb": "hidden/monster_bedroom_t_lavalamp.png"
+        },
+        {
+          "id": "ball_m",
+          "label": "a striped bouncy ball",
+          "x": 716,
+          "y": 548,
+          "w": 150,
+          "h": 149,
+          "thumb": "hidden/monster_bedroom_t_ball_m.png"
+        }
+      ]
+    },
+    {
+      "id": "treehouse_village",
+      "name": "Treehouse Village",
+      "image": "hidden/treehouse_village.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "squirrel_t",
+          "label": "a squirrel carrying a big nut",
+          "x": 692,
+          "y": 433,
+          "w": 107,
+          "h": 99,
+          "thumb": "hidden/treehouse_village_t_squirrel_t.png"
+        },
+        {
+          "id": "hammock",
+          "label": "a colorful striped hammock",
+          "x": 900,
+          "y": 521,
+          "w": 304,
+          "h": 148,
+          "thumb": "hidden/treehouse_village_t_hammock.png"
+        },
+        {
+          "id": "mailbox_t",
+          "label": "a tiny mailbox nailed to a branch",
+          "x": 179,
+          "y": 422,
+          "w": 77,
+          "h": 70,
+          "thumb": "hidden/treehouse_village_t_mailbox_t.png"
+        },
+        {
+          "id": "teapot_t",
+          "label": "a teapot hanging over a small fire",
+          "x": 459,
+          "y": 450,
+          "w": 68,
+          "h": 68,
+          "thumb": "hidden/treehouse_village_t_teapot_t.png"
+        },
+        {
+          "id": "windchime_t",
+          "label": "a set of wooden wind chimes",
+          "x": 26,
+          "y": 331,
+          "w": 96,
+          "h": 252,
+          "thumb": "hidden/treehouse_village_t_windchime_t.png"
+        },
+        {
+          "id": "flag_t",
+          "label": "a triangular pennant flag",
+          "x": 1097,
+          "y": 179,
+          "w": 95,
+          "h": 65,
+          "thumb": "hidden/treehouse_village_t_flag_t.png"
+        }
+      ]
+    },
+    {
+      "id": "dragonfly_meadow",
+      "name": "Dragonfly Meadow",
+      "image": "hidden/dragonfly_meadow.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "frog_m",
+          "label": "a bright green frog",
+          "x": 1024,
+          "y": 515,
+          "w": 207,
+          "h": 177,
+          "thumb": "hidden/dragonfly_meadow_t_frog_m.png"
+        },
+        {
+          "id": "ladybug_m",
+          "label": "a big red ladybug",
+          "x": 45,
+          "y": 525,
+          "w": 130,
+          "h": 120,
+          "thumb": "hidden/dragonfly_meadow_t_ladybug_m.png"
+        },
+        {
+          "id": "dragonfly_m",
+          "label": "a big shimmering blue dragonfly",
+          "x": 682,
+          "y": 298,
+          "w": 245,
+          "h": 190,
+          "thumb": "hidden/dragonfly_meadow_t_dragonfly_m.png"
+        },
+        {
+          "id": "snail_m",
+          "label": "a large snail with a spiral shell",
+          "x": 171,
+          "y": 210,
+          "w": 216,
+          "h": 166,
+          "thumb": "hidden/dragonfly_meadow_t_snail_m.png"
+        },
+        {
+          "id": "butterfly_m",
+          "label": "a big orange butterfly",
+          "x": 1087,
+          "y": 26,
+          "w": 150,
+          "h": 155,
+          "thumb": "hidden/dragonfly_meadow_t_butterfly_m.png"
+        },
+        {
+          "id": "acorn_md",
+          "label": "a brown acorn on the ground",
+          "x": 665,
+          "y": 585,
+          "w": 148,
+          "h": 120,
+          "thumb": "hidden/dragonfly_meadow_t_acorn_md.png"
+        }
+      ]
     }
   ],
   "stories": [
