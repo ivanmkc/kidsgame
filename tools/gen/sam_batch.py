@@ -22,7 +22,7 @@ import subprocess
 import numpy as np
 from PIL import Image
 
-VM, ZONE = "gpu-sam3-a100", "us-central1-f"
+VM, ZONE = "gpu-sam3-a100", "us-central1-a"
 
 
 # Self-contained gcloud transport: importing the pod repo's tools package
@@ -51,46 +51,53 @@ def gcloud_scp_down(vm: str, zone: str, remote: str, local: str, timeout: int = 
 _SEM = threading.Semaphore(2)
 
 _REMOTE_TMPL = '''#!/usr/bin/env python3
-import json, os, sys, time
+import json, os, time
 import numpy as np
 import torch
 from PIL import Image
 
-sys.path.insert(0, os.path.expanduser("~/sam3_repo"))
-torch.autocast("cuda", dtype=torch.float16).__enter__()
-
-from sam3 import build_sam3_image_model
-from sam3.model.sam3_image_processor import Sam3Processor
-
 RUN = "{run}"
 PROMPTS = {prompts!r}
 t0 = time.time()
-model = build_sam3_image_model(checkpoint_path=os.path.expanduser("~/sam3.1_checkpoint.pt"), load_from_HF=False)
-processor = Sam3Processor(model, confidence_threshold=0.1)
-print(f"model loaded {{time.time()-t0:.1f}}s", flush=True)
 
-img = Image.open(os.path.expanduser(f"~/kgb/{{RUN}}/scene.jpg"))
+from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
+from sam2.sam2_image_predictor import SAM2ImagePredictor
+
+gdino_proc = AutoProcessor.from_pretrained("IDEA-Research/grounding-dino-base")
+gdino_model = AutoModelForZeroShotObjectDetection.from_pretrained(
+    "IDEA-Research/grounding-dino-base").to("cuda")
+sam2 = SAM2ImagePredictor.from_pretrained("facebook/sam2-hiera-tiny")
+print(f"models loaded {{time.time()-t0:.1f}}s", flush=True)
+
+img = Image.open(os.path.expanduser(f"~/kgb/{{RUN}}/scene.jpg")).convert("RGB")
 out_dir = os.path.expanduser(f"~/kgb/{{RUN}}/out")
 os.makedirs(out_dir, exist_ok=True)
-state = processor.set_image(img)
+w, h = img.size
+
+sam2.set_image(np.array(img))
 meta = {{}}
 for pi, prompt in enumerate(PROMPTS):
-    processor.reset_all_prompts(state)
-    state = processor.set_text_prompt(state=state, prompt=prompt)
-    masks, scores = state.get("masks", []), state.get("scores", [])
-    n = len(masks) if isinstance(masks, list) else (masks.shape[0] if hasattr(masks, "shape") else 0)
+    inputs = gdino_proc(images=img, text=prompt + ".", return_tensors="pt").to("cuda")
+    with torch.no_grad():
+        outputs = gdino_model(**inputs)
+    results = gdino_proc.post_process_grounded_object_detection(
+        outputs, inputs.input_ids, threshold=0.15, text_threshold=0.15,
+        target_sizes=[(h, w)])[0]
+    boxes_xyxy = results["boxes"].cpu().numpy()
+    det_scores = results["scores"].cpu().numpy()
     entries = []
-    for mi in range(n):
-        score = float(scores[mi].cpu().item()) if isinstance(scores, torch.Tensor) else float(scores[mi])
-        m = masks[mi].cpu().numpy() if isinstance(masks, torch.Tensor) else np.array(masks[mi])
-        if m.ndim > 2:
-            m = m.squeeze()
+    for bi in range(len(boxes_xyxy)):
+        box = boxes_xyxy[bi]
+        masks_out, mask_scores, _ = sam2.predict(box=box, multimask_output=True)
+        best = int(mask_scores.argmax())
+        m = masks_out[best]
         mask = (m > 0.5).astype(np.uint8) * 255
         if mask.sum() == 0:
             continue
         Image.fromarray(mask).save(f"{{out_dir}}/p{{pi:02d}}_m{{len(entries):02d}}.png")
         ys, xs = np.where(mask > 0)
-        entries.append({{"score": round(score, 4), "area": int((mask > 0).sum()),
+        entries.append({{"score": round(float(det_scores[bi]), 4),
+                         "area": int((mask > 0).sum()),
                          "bbox": [int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())]}})
     meta[prompt] = entries
     print(f"  '{{prompt}}': {{len(entries)}} mask(s)", flush=True)
@@ -124,7 +131,7 @@ def sam_segment_batch(img: Image.Image, prompts: list[str], tag: str = "") -> di
         gcloud_scp_up(VM, ZONE, str(local / "batch.py"), f"~/kgb/{run}/batch.py")
         # Pinned venv (torch 2.12.1/torchvision 0.27.1): immune to other
         # sessions' pip --user installs, which broke the shared env once.
-        out = gcloud_ssh(VM, ZONE, f"cd ~/sam3_repo && ~/sam3_venv/bin/python ~/kgb/{run}/batch.py", timeout=900)
+        out = gcloud_ssh(VM, ZONE, f"~/sam3_venv/bin/python ~/kgb/{run}/batch.py", timeout=900)
         if "BATCH_DONE" not in out:
             raise RuntimeError(f"sam batch {tag} did not finish: ...{out[-400:]}")
         gcloud_ssh(VM, ZONE, f"cd ~/kgb/{run} && tar czf out.tgz out")
