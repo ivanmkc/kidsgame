@@ -3434,6 +3434,24 @@
           "thumb": "hidden/giant_kitchen_t_carrot_g.png"
         }
       ]
+    },
+    {
+      "id": "witch_kitchen",
+      "name": "Witch's Kitchen",
+      "image": "hidden/witch_kitchen.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "mushroom_w",
+          "label": "a red spotted mushroom",
+          "x": 528,
+          "y": 598,
+          "w": 102,
+          "h": 109,
+          "thumb": "hidden/witch_kitchen_t_mushroom_w.png"
+        }
+      ]
     }
   ],
   "stories": [

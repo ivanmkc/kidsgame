@@ -42,7 +42,7 @@ HIT_PAD = 10
 OVERLAP_PAD = 16           # hitboxes must not overlap even padded
 MASK_DILATE = 14
 HIDDEN_POOL_CAP = 8   # verify up to this many targets per scene
-HIDDEN_POOL_MIN = 3   # game draws 5-6 per play; lowered to unblock stubborn themes (raise back after)           # removal mask growth: covers soft edges + the
+HIDDEN_POOL_MIN = 5   # game draws 5-6 per play, pool must meet this           # removal mask growth: covers soft edges + the
                            # composite's 6px erosion with room to spare
 
 
