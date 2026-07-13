@@ -24730,15 +24730,18 @@
         },
         "end_eyepiece_bullseye": {
           "image": "story/observatory_end_eyepiece_bullseye.png",
-          "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth \u2014 the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder."
+          "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth \u2014 the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder.",
+          "video": "story-video/observatory_end_eyepiece_bullseye_end.mp4"
         },
         "end_dome_flood": {
           "image": "story/observatory_end_dome_flood.png",
-          "text": "Mo's paper ball jammed the dome crank halfway open and rain poured in like somebody turned on a giant shower \u2014 the porcupine woke up SCREAMING about his telescope getting wet and Mo spent the next hour mopping the floor with soggy star charts while the moths did their beautiful work outside where nobody could see it! Oopsie ending!"
+          "text": "Mo's paper ball jammed the dome crank halfway open and rain poured in like somebody turned on a giant shower \u2014 the porcupine woke up SCREAMING about his telescope getting wet and Mo spent the next hour mopping the floor with soggy star charts while the moths did their beautiful work outside where nobody could see it! Oopsie ending!",
+          "video": "story-video/observatory_end_dome_flood_end.mp4"
         },
         "end_spin_tumble": {
           "image": "story/observatory_end_spin_tumble.png",
-          "text": "Mo's paper ball sent the chair rolling and it crashed into the TELESCOPE \u2014 the biggest, most irreplaceable telescope in the observatory went CLANG and tipped sideways while the porcupine got tangled in the tripod like the world's prickliest pretzel! The old astronomer woke up furious and Mo spent the rest of the night helping realign a telescope he was definitely not qualified to touch. Oopsie ending!"
+          "text": "Mo's paper ball sent the chair rolling and it crashed into the TELESCOPE \u2014 the biggest, most irreplaceable telescope in the observatory went CLANG and tipped sideways while the porcupine got tangled in the tripod like the world's prickliest pretzel! The old astronomer woke up furious and Mo spent the rest of the night helping realign a telescope he was definitely not qualified to touch. Oopsie ending!",
+          "video": "story-video/observatory_end_spin_tumble_end.mp4"
         },
         "end_moth_garden": {
           "image": "story/observatory_end_moth_garden.png",
@@ -24914,39 +24917,48 @@
         },
         "end_ruby_dazzle": {
           "image": "story/museum_end_ruby_dazzle.png",
-          "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago \u2014 Milo held her wing the whole way to the pedestal."
+          "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago \u2014 Milo held her wing the whole way to the pedestal.",
+          "video": "story-video/museum_end_ruby_dazzle_end.mp4"
         },
         "end_emerald_forest": {
           "image": "story/museum_end_emerald_forest.png",
-          "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball \u2014 the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!"
+          "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball \u2014 the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!",
+          "video": "story-video/museum_end_emerald_forest_end.mp4"
         },
         "end_quartz_disco": {
           "image": "story/museum_end_quartz_disco.png",
-          "text": "Rainbow disco party! The owl waltzes with a statue and the magpie finally returns the sapphire she has been too ashamed to face for years. Tonight Milo gave her the courage to set it right."
+          "text": "Rainbow disco party! The owl waltzes with a statue and the magpie finally returns the sapphire she has been too ashamed to face for years. Tonight Milo gave her the courage to set it right.",
+          "video": "story-video/museum_end_quartz_disco_end.mp4"
         },
         "end_bouncy_chaos": {
           "image": "story/museum_end_bouncy_chaos.png",
-          "text": "Bouncy balls EVERYWHERE! The owl slips, the magpie flaps in circles, and Milo lands face-first in gift-shop plushies. The sapphire stays lost tonight. Oopsie ending!"
+          "text": "Bouncy balls EVERYWHERE! The owl slips, the magpie flaps in circles, and Milo lands face-first in gift-shop plushies. The sapphire stays lost tonight. Oopsie ending!",
+          "video": "story-video/museum_end_bouncy_chaos_end.mp4"
         },
         "end_ruby_sunset": {
           "image": "story/museum_end_ruby_sunset.png",
-          "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years \u2014 she just needed someone kind to stand beside her at the pedestal."
+          "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years \u2014 she just needed someone kind to stand beside her at the pedestal.",
+          "video": "story-video/museum_end_ruby_sunset_end.mp4"
         },
         "end_emerald_meadow": {
           "image": "story/museum_end_emerald_meadow.png",
-          "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it \u2014 he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!"
+          "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it \u2014 he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!",
+          "video": "story-video/museum_end_emerald_meadow_end.mp4"
         },
         "end_rainbow_cathedral": {
           "image": "story/museum_end_rainbow_cathedral.png",
-          "text": "Rainbow scatter-shot lights the whole museum like stained glass! The magpie came back every night for years, too ashamed to face the empty pedestal alone. Tonight she finally had Milo."
+          "text": "Rainbow scatter-shot lights the whole museum like stained glass! The magpie came back every night for years, too ashamed to face the empty pedestal alone. Tonight she finally had Milo.",
+          "video": "story-video/museum_end_rainbow_cathedral_end.mp4"
         },
         "end_sapphire_together": {
           "image": "story/museum_end_sapphire_together.png",
-          "text": "Milo and the magpie return the sapphire together. The owl bows \u2014 she was never trying to catch a thief, she was waiting for the magpie to forgive herself."
+          "text": "Milo and the magpie return the sapphire together. The owl bows \u2014 she was never trying to catch a thief, she was waiting for the magpie to forgive herself.",
+          "video": "story-video/museum_end_sapphire_together_end.mp4"
         },
         "end_fountain_splash": {
           "image": "story/museum_end_fountain_splash.png",
-          "text": "The sapphire sinks to the bottom of the fountain with a sad little blurp! The magpie cries, the owl is furious, and Milo is very, very wet. Oopsie ending!"
+          "text": "The sapphire sinks to the bottom of the fountain with a sad little blurp! The magpie cries, the owl is furious, and Milo is very, very wet. Oopsie ending!",
+          "video": "story-video/museum_end_fountain_splash_end.mp4"
         }
       }
     },
@@ -25114,39 +25126,48 @@
         },
         "end_spring_bloom": {
           "image": "story/lagoon_end_spring_bloom.png",
-          "text": "Pearl raced down the stairs and pressed the star-seed into the spring just as it flickered its LAST flicker \u2014 the water ERUPTED in a fountain of starlight so bright that every coral in the lagoon lit up like a birthday cake! The singing pearl chimed one perfect triumphant note and the hermit crab peeked out crying because the spring was HEALING just like it used to before it got polluted. He tore down his own fortress and became Pearl's defender on the swim home. The End!"
+          "text": "Pearl raced down the stairs and pressed the star-seed into the spring just as it flickered its LAST flicker \u2014 the water ERUPTED in a fountain of starlight so bright that every coral in the lagoon lit up like a birthday cake! The singing pearl chimed one perfect triumphant note and the hermit crab peeked out crying because the spring was HEALING just like it used to before it got polluted. He tore down his own fortress and became Pearl's defender on the swim home. The End!",
+          "video": "story-video/lagoon_end_spring_bloom_end.mp4"
         },
         "end_seed_fade": {
           "image": "story/lagoon_end_seed_fade.png",
-          "text": "Pearl leaped onto the lily pad but it started SINKING and she had to hold the star-seed up to keep it dry \u2014 by the time she scrambled to the center the seed had gone completely dark and cold like a tiny pebble. The singing pearl went silent, the lagoon dimmed, and Pearl sat on a sinking lily pad holding a regular old rock. Oopsie ending!"
+          "text": "Pearl leaped onto the lily pad but it started SINKING and she had to hold the star-seed up to keep it dry \u2014 by the time she scrambled to the center the seed had gone completely dark and cold like a tiny pebble. The singing pearl went silent, the lagoon dimmed, and Pearl sat on a sinking lily pad holding a regular old rock. Oopsie ending!",
+          "video": "story-video/lagoon_end_seed_fade_end.mp4"
         },
         "end_coral_light": {
           "image": "story/lagoon_end_coral_light.png",
-          "text": "Pearl crossed the bridge and the singing pearl told her EXACTLY when to drop \u2014 the star-seed fell in a perfect golden arc and hit the spring with a FLASH so bright the whole cavern turned into a rainbow cathedral! The starfish all pointed at the light like tiny golden arrows and even the hermit crab came out of his fortress blinking because the spring was glowing clean and healthy again. He apologized for the barricade and promised to guard the spring FOR Pearl from now on. The End!"
+          "text": "Pearl crossed the bridge and the singing pearl told her EXACTLY when to drop \u2014 the star-seed fell in a perfect golden arc and hit the spring with a FLASH so bright the whole cavern turned into a rainbow cathedral! The starfish all pointed at the light like tiny golden arrows and even the hermit crab came out of his fortress blinking because the spring was glowing clean and healthy again. He apologized for the barricade and promised to guard the spring FOR Pearl from now on. The End!",
+          "video": "story-video/lagoon_end_coral_light_end.mp4"
         },
         "end_current_pull": {
           "image": "story/lagoon_end_current_pull.png",
-          "text": "Pearl zoomed down the slide WAY too fast and splashed into a current that grabbed her like a water roller coaster with no brakes \u2014 the singing pearl bounced away into the dark and the star-seed slipped out of her paws and got carried off by the current into who-knows-where! Pearl washed up on a beach three coves over, soaking wet, star-seedless, and pearl-less. Oopsie ending!"
+          "text": "Pearl zoomed down the slide WAY too fast and splashed into a current that grabbed her like a water roller coaster with no brakes \u2014 the singing pearl bounced away into the dark and the star-seed slipped out of her paws and got carried off by the current into who-knows-where! Pearl washed up on a beach three coves over, soaking wet, star-seedless, and pearl-less. Oopsie ending!",
+          "video": "story-video/lagoon_end_current_pull_end.mp4"
         },
         "end_tiny_tickle": {
           "image": "story/lagoon_end_tiny_tickle.png",
-          "text": "Pearl fired the tiny bubbles and they tickled the crab SO MUCH he fell out of his fortress laughing \u2014 turns out he built the whole thing because the last visitor POLLUTED the spring and his family got sick, and he was just trying to protect it! Pearl showed him the star-seed and he cried happy tears because it HEALS water. He helped her plant it and the spring exploded with light. Best bubble battle ever. The End!"
+          "text": "Pearl fired the tiny bubbles and they tickled the crab SO MUCH he fell out of his fortress laughing \u2014 turns out he built the whole thing because the last visitor POLLUTED the spring and his family got sick, and he was just trying to protect it! Pearl showed him the star-seed and he cried happy tears because it HEALS water. He helped her plant it and the spring exploded with light. Best bubble battle ever. The End!",
+          "video": "story-video/lagoon_end_tiny_tickle_end.mp4"
         },
         "end_mega_lift": {
           "image": "story/lagoon_end_mega_lift.png",
-          "text": "The massive bubble was SO massive it lifted Pearl AND the fortress into the air \u2014 she clung to the bubble like a beach ball while the star-seed flickered uselessly in her satchel far above the spring! The bubble bounced off the cave ceiling, popped with a tremendous SPLAT, and Pearl landed in a pile of scattered shells while the crab facepalmed with both claws. Oopsie ending!"
+          "text": "The massive bubble was SO massive it lifted Pearl AND the fortress into the air \u2014 she clung to the bubble like a beach ball while the star-seed flickered uselessly in her satchel far above the spring! The bubble bounced off the cave ceiling, popped with a tremendous SPLAT, and Pearl landed in a pile of scattered shells while the crab facepalmed with both claws. Oopsie ending!",
+          "video": "story-video/lagoon_end_mega_lift_end.mp4"
         },
         "end_spiral_heal": {
           "image": "story/lagoon_end_spiral_heal.png",
-          "text": "The spiral stream squeezed through every crack in the fortress and carried star-seed sparkle STRAIGHT into the spring \u2014 the water erupted in spiraling ribbons of color and the crab came out in total shock because the spring was CLEAN again! He confessed he built the fortress because a visitor polluted it and his babies got sick. Pearl hugged him and said the star heals everything. He tore down his own walls and carried Pearl on his shell all the way home. The End!"
+          "text": "The spiral stream squeezed through every crack in the fortress and carried star-seed sparkle STRAIGHT into the spring \u2014 the water erupted in spiraling ribbons of color and the crab came out in total shock because the spring was CLEAN again! He confessed he built the fortress because a visitor polluted it and his babies got sick. Pearl hugged him and said the star heals everything. He tore down his own walls and carried Pearl on his shell all the way home. The End!",
+          "video": "story-video/lagoon_end_spiral_heal_end.mp4"
         },
         "end_shell_peace": {
           "image": "story/lagoon_end_shell_peace.png",
-          "text": "Pearl showed the crab the star-seed and his whole face changed \u2014 he told her a visitor polluted the spring and his babies got sick, so he built the fortress to keep EVERYONE out because he was too scared to trust anyone again. The star-seed's glow touched the wilted flowers and they sprang back to life. The crab started crying, tore down his own fortress, and walked Pearl to the spring himself. They planted the seed together and the lagoon lit up like a thousand stars. The End!"
+          "text": "Pearl showed the crab the star-seed and his whole face changed \u2014 he told her a visitor polluted the spring and his babies got sick, so he built the fortress to keep EVERYONE out because he was too scared to trust anyone again. The star-seed's glow touched the wilted flowers and they sprang back to life. The crab started crying, tore down his own fortress, and walked Pearl to the spring himself. They planted the seed together and the lagoon lit up like a thousand stars. The End!",
+          "video": "story-video/lagoon_end_shell_peace_end.mp4"
         },
         "end_crab_defender": {
           "image": "story/lagoon_end_crab_defender.png",
-          "text": "Pearl tried to step past the crab but he panicked and grabbed her satchel \u2014 the star-seed bounced out and rolled across the rocks like the world's most important marble! Pearl and the crab both dove for it at the same time, bonked heads, and watched the seed roll into a crack between two boulders where NEITHER of them could reach it. They spent the rest of the night trying to fish it out with sticks. Oopsie ending!"
+          "text": "Pearl tried to step past the crab but he panicked and grabbed her satchel \u2014 the star-seed bounced out and rolled across the rocks like the world's most important marble! Pearl and the crab both dove for it at the same time, bonked heads, and watched the seed roll into a crack between two boulders where NEITHER of them could reach it. They spent the rest of the night trying to fish it out with sticks. Oopsie ending!",
+          "video": "story-video/lagoon_end_crab_defender_end.mp4"
         }
       }
     },
@@ -25264,7 +25285,8 @@
                 "y": 452,
                 "w": 259,
                 "h": 149
-              }
+              },
+              "video": "story-video/quarry_m1_0.mp4"
             },
             {
               "label": "Flop on the moss patch",
@@ -25274,7 +25296,8 @@
                 "y": 348,
                 "w": 305,
                 "h": 203
-              }
+              },
+              "video": "story-video/quarry_m1_1.mp4"
             }
           ]
         },
@@ -25290,7 +25313,8 @@
                 "y": 25,
                 "w": 424,
                 "h": 542
-              }
+              },
+              "video": "story-video/quarry_m2_0.mp4"
             },
             {
               "label": "Lick the amber ledge",
@@ -25300,7 +25324,8 @@
                 "y": 196,
                 "w": 444,
                 "h": 524
-              }
+              },
+              "video": "story-video/quarry_m2_1.mp4"
             }
           ]
         },
@@ -25334,7 +25359,8 @@
                 "y": 263,
                 "w": 279,
                 "h": 345
-              }
+              },
+              "video": "story-video/quarry_m4_0.mp4"
             },
             {
               "label": "Howl at the calcite tower",
@@ -25344,45 +25370,55 @@
                 "y": 68,
                 "w": 373,
                 "h": 630
-              }
+              },
+              "video": "story-video/quarry_m4_1.mp4"
             }
           ]
         },
         "end_echo_chorus": {
           "image": "story/quarry_end_echo_chorus.png",
-          "text": "Pip BONKED that singing bowl and the whole cavern lit up like a concert hall \u2014 every crystal sang his bark back in PERFECT harmony, hundreds of them, years of happy barks stored in stone like the world's sparkliest jukebox! The echo gem was never one crystal. It was ALL of them, the whole quarry, singing Pip's song right back at him. The End!"
+          "text": "Pip BONKED that singing bowl and the whole cavern lit up like a concert hall \u2014 every crystal sang his bark back in PERFECT harmony, hundreds of them, years of happy barks stored in stone like the world's sparkliest jukebox! The echo gem was never one crystal. It was ALL of them, the whole quarry, singing Pip's song right back at him. The End!",
+          "video": "story-video/quarry_end_echo_chorus_end.mp4"
         },
         "end_puddle_pup": {
           "image": "story/quarry_end_puddle_pup.png",
-          "text": "That moss was SO unbelievably soft that Pip's eyes closed and his tail stopped wagging for the first time in recorded puppy history \u2014 he dreamed about barking on the meadow while the echo gem waited patiently somewhere deeper for a hero with more stamina and less interest in luxury napping. Oopsie ending!"
+          "text": "That moss was SO unbelievably soft that Pip's eyes closed and his tail stopped wagging for the first time in recorded puppy history \u2014 he dreamed about barking on the meadow while the echo gem waited patiently somewhere deeper for a hero with more stamina and less interest in luxury napping. Oopsie ending!",
+          "video": "story-video/quarry_end_puddle_pup_end.mp4"
         },
         "end_arch_song": {
           "image": "story/quarry_end_arch_song.png",
-          "text": "Pip pressed his paws to the stalagmite and the arch ROARED with sound \u2014 every bark he had ever barked on the meadow above came pouring out of the walls in layers, years and years of happy puppy! The echo gem was the whole quarry and it had been learning his song since he was a pup with ears too big for his head. The End!"
+          "text": "Pip pressed his paws to the stalagmite and the arch ROARED with sound \u2014 every bark he had ever barked on the meadow above came pouring out of the walls in layers, years and years of happy puppy! The echo gem was the whole quarry and it had been learning his song since he was a pup with ears too big for his head. The End!",
+          "video": "story-video/quarry_end_arch_song_end.mp4"
         },
         "end_crystal_tongue": {
           "image": "story/quarry_end_crystal_tongue.png",
-          "text": "Pip thought that amber ledge looked DELICIOUS and licked it and his tongue stuck faster than gum on a boot \u2014 every muffled yelp bounced through the arch sounding sillier and sillier while Pip dangled there like a sparkly golden ornament. The echo gem is somewhere nearby probably taking notes on his funniest sounds yet. Oopsie ending!"
+          "text": "Pip thought that amber ledge looked DELICIOUS and licked it and his tongue stuck faster than gum on a boot \u2014 every muffled yelp bounced through the arch sounding sillier and sillier while Pip dangled there like a sparkly golden ornament. The echo gem is somewhere nearby probably taking notes on his funniest sounds yet. Oopsie ending!",
+          "video": "story-video/quarry_end_crystal_tongue_end.mp4"
         },
         "end_amethyst_chord": {
           "image": "story/quarry_end_amethyst_chord.png",
-          "text": "Pip booped the amethyst spire and the dome THUNDERED with the deepest most magnificent chord any puppy has ever accidentally produced \u2014 years of stored barks humming through every crystal vein like the mountain itself was singing along! The echo gem was never one crystal. It was the whole quarry, rehearsing Pip's greatest hits this entire time. The End!"
+          "text": "Pip booped the amethyst spire and the dome THUNDERED with the deepest most magnificent chord any puppy has ever accidentally produced \u2014 years of stored barks humming through every crystal vein like the mountain itself was singing along! The echo gem was never one crystal. It was the whole quarry, rehearsing Pip's greatest hits this entire time. The End!",
+          "video": "story-video/quarry_end_amethyst_chord_end.mp4"
         },
         "end_citrine_duet": {
           "image": "story/quarry_end_citrine_duet.png",
-          "text": "Pip touched the citrine column and it barked back \u2014 but SO loud that it bounced off every crystal in the dome and came back as a THOUSAND barks at once! The noise was so enormous that Pip's ears went flat, the pebble in his collar vibrated right off, and he ran for the exit with the loudest bark-echo in geological history chasing him down the tunnel. Oopsie ending!"
+          "text": "Pip touched the citrine column and it barked back \u2014 but SO loud that it bounced off every crystal in the dome and came back as a THOUSAND barks at once! The noise was so enormous that Pip's ears went flat, the pebble in his collar vibrated right off, and he ran for the exit with the loudest bark-echo in geological history chasing him down the tunnel. Oopsie ending!",
+          "video": "story-video/quarry_end_citrine_duet_end.mp4"
         },
         "end_quartz_harmony": {
           "image": "story/quarry_end_quartz_harmony.png",
-          "text": "Pip leaned against the pillar a little too hard and it WOBBLED \u2014 every crystal in the cavern gasped (which for crystals sounds like a very high-pitched eeeeee) and went completely silent! Pip backed away very slowly, the pillar settled with a groan, and the cavern gave him the most disapproving silence a bunch of rocks has ever produced. Oopsie ending!"
+          "text": "Pip leaned against the pillar a little too hard and it WOBBLED \u2014 every crystal in the cavern gasped (which for crystals sounds like a very high-pitched eeeeee) and went completely silent! Pip backed away very slowly, the pillar settled with a groan, and the cavern gave him the most disapproving silence a bunch of rocks has ever produced. Oopsie ending!",
+          "video": "story-video/quarry_end_quartz_harmony_end.mp4"
         },
         "end_geode_song": {
           "image": "story/quarry_end_geode_song.png",
-          "text": "Pip barked into the sapphire geode and a hundred geodes barked BACK \u2014 his excited bark, his sleepy bark, his dinner bark, his suspicious-squirrel bark \u2014 all stored in crystal for YEARS like the world's most dedicated fan club! The echo gem was the whole gallery and it knew every bark Pip had ever barked. The End!"
+          "text": "Pip barked into the sapphire geode and a hundred geodes barked BACK \u2014 his excited bark, his sleepy bark, his dinner bark, his suspicious-squirrel bark \u2014 all stored in crystal for YEARS like the world's most dedicated fan club! The echo gem was the whole gallery and it knew every bark Pip had ever barked. The End!",
+          "video": "story-video/quarry_end_geode_song_end.mp4"
         },
         "end_calcite_tower": {
           "image": "story/quarry_end_calcite_tower.png",
-          "text": "Pip tipped his head back and HOWLED at that calcite tower and it answered with every bark it had ever caught drifting down from the meadow \u2014 puppy barks, grown-up barks, the time he barked at his own shadow, ALL of them stacked in orange stone like a crystal encyclopedia of Pip! The End!"
+          "text": "Pip tipped his head back and HOWLED at that calcite tower and it answered with every bark it had ever caught drifting down from the meadow \u2014 puppy barks, grown-up barks, the time he barked at his own shadow, ALL of them stacked in orange stone like a crystal encyclopedia of Pip! The End!",
+          "video": "story-video/quarry_end_calcite_tower_end.mp4"
         }
       }
     },
@@ -25495,7 +25531,8 @@
             "pop": "story/grotto_bb_pop.png",
             "sting": "boing",
             "reveal": "Just the cave's heartbeat monitor! All healthy!",
-            "delay": 1500
+            "delay": 1500,
+            "video": "story-video/grotto_bb_scare.mp4"
           }
         },
         "m1": {
@@ -25560,39 +25597,48 @@
         },
         "end_song_found": {
           "image": "story/grotto_end_song_found.png",
-          "text": "Pearl swam into the white grotto and found the singer \u2014 the cave ITSELF, a living coral creature who had been singing for YEARS trying to lure sea-dragons because it was lonely and cold! The echo conch harmonized with its voice and for the first time the grotto heard someone sing BACK. Pearl taught it to sing above the waterline so sailors and whales could hear it too. Now the singing caves have visitors every day and the grotto is never lonely again. The End!"
+          "text": "Pearl swam into the white grotto and found the singer \u2014 the cave ITSELF, a living coral creature who had been singing for YEARS trying to lure sea-dragons because it was lonely and cold! The echo conch harmonized with its voice and for the first time the grotto heard someone sing BACK. Pearl taught it to sing above the waterline so sailors and whales could hear it too. Now the singing caves have visitors every day and the grotto is never lonely again. The End!",
+          "video": "story-video/grotto_end_song_found_end.mp4"
         },
         "end_flood_rush": {
           "image": "story/grotto_end_flood_rush.png",
-          "text": "Pearl dove into the dark tunnel and the current grabbed her IMMEDIATELY \u2014 she tumbled head over tail in pitch-black water, lost the echo conch, lost all sense of direction, and washed up in a dead-end chamber with the water rising to the ceiling! She managed to squeeze through a tiny crack and pop out on the beach coughing and sputtering. The singing caves are still singing but Pearl is NOT going back in today. Oopsie ending!"
+          "text": "Pearl dove into the dark tunnel and the current grabbed her IMMEDIATELY \u2014 she tumbled head over tail in pitch-black water, lost the echo conch, lost all sense of direction, and washed up in a dead-end chamber with the water rising to the ceiling! She managed to squeeze through a tiny crack and pop out on the beach coughing and sputtering. The singing caves are still singing but Pearl is NOT going back in today. Oopsie ending!",
+          "video": "story-video/grotto_end_flood_rush_end.mp4"
         },
         "end_harmony_ring": {
           "image": "story/grotto_end_harmony_ring.png",
-          "text": "Pearl touched the crystal and the echo conch SANG \u2014 the whole dome rang like the world's biggest bell and the sound traveled through every tunnel lighting up the walls one by one! It reached the deepest grotto and the singing cave \u2014 a lonely living coral creature \u2014 opened its eyes because for the FIRST time someone answered its song with harmony instead of fear. Pearl followed the lit-up path and taught the grotto to sing above the waterline. Now ships follow the melody home on foggy nights. The End!"
+          "text": "Pearl touched the crystal and the echo conch SANG \u2014 the whole dome rang like the world's biggest bell and the sound traveled through every tunnel lighting up the walls one by one! It reached the deepest grotto and the singing cave \u2014 a lonely living coral creature \u2014 opened its eyes because for the FIRST time someone answered its song with harmony instead of fear. Pearl followed the lit-up path and taught the grotto to sing above the waterline. Now ships follow the melody home on foggy nights. The End!",
+          "video": "story-video/grotto_end_harmony_ring_end.mp4"
         },
         "end_echo_trap": {
           "image": "story/grotto_end_echo_trap.png",
-          "text": "Pearl jumped into the whirlpool and it spun her around so fast she could not tell up from down \u2014 the echo conch flew away, the singing voice echoed from EVERYWHERE at once, and she ended up in a deep rocky basin with absolutely no idea which way was up. A friendly crab eventually showed her a side exit but she popped out three beaches away covered in seaweed with her ears still ringing. Oopsie ending!"
+          "text": "Pearl jumped into the whirlpool and it spun her around so fast she could not tell up from down \u2014 the echo conch flew away, the singing voice echoed from EVERYWHERE at once, and she ended up in a deep rocky basin with absolutely no idea which way was up. A friendly crab eventually showed her a side exit but she popped out three beaches away covered in seaweed with her ears still ringing. Oopsie ending!",
+          "video": "story-video/grotto_end_echo_trap_end.mp4"
         },
         "end_coral_duet": {
           "image": "story/grotto_end_coral_duet.png",
-          "text": "Pearl sat down in the coral alcove and started singing \u2014 the grotto's huge gentle face lit up because nobody had ever sung WITH it before! They sang a duet that echoed through every chamber and the grotto was so happy it stopped pulling things underwater and learned to sing above the waterline. Pearl visits every full moon for their duet and the caves glow warmest on those nights. The End!"
+          "text": "Pearl sat down in the coral alcove and started singing \u2014 the grotto's huge gentle face lit up because nobody had ever sung WITH it before! They sang a duet that echoed through every chamber and the grotto was so happy it stopped pulling things underwater and learned to sing above the waterline. Pearl visits every full moon for their duet and the caves glow warmest on those nights. The End!",
+          "video": "story-video/grotto_end_coral_duet_end.mp4"
         },
         "end_warm_glow": {
           "image": "story/grotto_end_warm_glow.png",
-          "text": "Pearl climbed the spire and held the glow lantern as HIGH as she could \u2014 the living coral blazed and filled the grotto with warmth for the first time since the sea-dragons stopped coming! The grotto's sad face transformed into the biggest smile Pearl had ever seen on a cave. It did not need sea-dragons \u2014 it needed a friend with a warm heart. Pearl taught it to sing above the waterline and now the caves glow warm enough to heat the whole lagoon. The End!"
+          "text": "Pearl climbed the spire and held the glow lantern as HIGH as she could \u2014 the living coral blazed and filled the grotto with warmth for the first time since the sea-dragons stopped coming! The grotto's sad face transformed into the biggest smile Pearl had ever seen on a cave. It did not need sea-dragons \u2014 it needed a friend with a warm heart. Pearl taught it to sing above the waterline and now the caves glow warm enough to heat the whole lagoon. The End!",
+          "video": "story-video/grotto_end_warm_glow_end.mp4"
         },
         "end_surface_song": {
           "image": "story/grotto_end_surface_song.png",
-          "text": "Pearl stepped into the pool and her paw slipped on a mossy rock \u2014 SPLASH went Pearl, HISSS went the lantern, and the whole cave went DARK! She paddled around in the pitch black bumping into coral walls while the grotto tried to sing her directions but Pearl was too busy gargling water to hear them. She finally crawled out on the wrong beach, soaking wet and completely lantern-less. Oopsie ending!"
+          "text": "Pearl stepped into the pool and her paw slipped on a mossy rock \u2014 SPLASH went Pearl, HISSS went the lantern, and the whole cave went DARK! She paddled around in the pitch black bumping into coral walls while the grotto tried to sing her directions but Pearl was too busy gargling water to hear them. She finally crawled out on the wrong beach, soaking wet and completely lantern-less. Oopsie ending!",
+          "video": "story-video/grotto_end_surface_song_end.mp4"
         },
         "end_high_ride": {
           "image": "story/grotto_end_high_ride.png",
-          "text": "Pearl faked left and dashed right and the cyan eel was SO impressed it shot a water jet that LAUNCHED her through the high tunnel like a rocket \u2014 she burst into the deepest grotto at full speed and the singing cave stopped mid-note in total surprise! Nobody had ever arrived with that much style. Pearl caught her breath, explained she came to find the singer, and taught the lonely grotto to sing above the waterline so it would never need to lure anyone underground again. The End!"
+          "text": "Pearl faked left and dashed right and the cyan eel was SO impressed it shot a water jet that LAUNCHED her through the high tunnel like a rocket \u2014 she burst into the deepest grotto at full speed and the singing cave stopped mid-note in total surprise! Nobody had ever arrived with that much style. Pearl caught her breath, explained she came to find the singer, and taught the lonely grotto to sing above the waterline so it would never need to lure anyone underground again. The End!",
+          "video": "story-video/grotto_end_high_ride_end.mp4"
         },
         "end_low_glide": {
           "image": "story/grotto_end_low_glide.png",
-          "text": "Pearl dove and the magenta eel's current was WAY too strong \u2014 it flipped her upside down and sent her tumbling through the dark like laundry in a washing machine! The lantern sank into a crack, the satchel filled with sand, and she popped out in a random tide pool with kelp on her head and absolutely no idea where the singing grotto was. The eel waved goodbye from the tunnel. Oopsie ending!"
+          "text": "Pearl dove and the magenta eel's current was WAY too strong \u2014 it flipped her upside down and sent her tumbling through the dark like laundry in a washing machine! The lantern sank into a crack, the satchel filled with sand, and she popped out in a random tide pool with kelp on her head and absolutely no idea where the singing grotto was. The eel waved goodbye from the tunnel. Oopsie ending!",
+          "video": "story-video/grotto_end_low_glide_end.mp4"
         }
       }
     },
@@ -25724,7 +25770,8 @@
                 "y": 109,
                 "w": 321,
                 "h": 489
-              }
+              },
+              "video": "story-video/badlands_m2_0.mp4"
             },
             {
               "label": "Stomp the drumstone",
@@ -25734,7 +25781,8 @@
                 "y": 159,
                 "w": 314,
                 "h": 335
-              }
+              },
+              "video": "story-video/badlands_m2_1.mp4"
             }
           ]
         },
@@ -25768,7 +25816,8 @@
                 "y": 435,
                 "w": 511,
                 "h": 252
-              }
+              },
+              "video": "story-video/badlands_m4_0.mp4"
             },
             {
               "label": "Tiptoe past the spotted eggs",
@@ -25778,45 +25827,55 @@
                 "y": 429,
                 "w": 456,
                 "h": 209
-              }
+              },
+              "video": "story-video/badlands_m4_1.mp4"
             }
           ]
         },
         "end_gentle_hum": {
           "image": "story/badlands_end_gentle_hum.png",
-          "text": "Rex dipped the singing stone and the pool sang the gentlest hum \u2014 the Echo Stone LISTENED, the trapped roar melted away like butter on a hot rock, and the armadillo captain saluted from the entrance because NOT A SINGLE EGG CRACKED. Gentle beats loud every time. The End!"
+          "text": "Rex dipped the singing stone and the pool sang the gentlest hum \u2014 the Echo Stone LISTENED, the trapped roar melted away like butter on a hot rock, and the armadillo captain saluted from the entrance because NOT A SINGLE EGG CRACKED. Gentle beats loud every time. The End!",
+          "video": "story-video/badlands_end_gentle_hum_end.mp4"
         },
         "end_full_blast": {
           "image": "story/badlands_end_full_blast.png",
-          "text": "Rex's mega-roar hit the Echo Stone so hard every wall in the canyon CRACKED and the echo got TEN TIMES LOUDER \u2014 now there are a HUNDRED roars bouncing around like the world's worst concert and Rex is going to need a LOT more singing stones. Oopsie ending!"
+          "text": "Rex's mega-roar hit the Echo Stone so hard every wall in the canyon CRACKED and the echo got TEN TIMES LOUDER \u2014 now there are a HUNDRED roars bouncing around like the world's worst concert and Rex is going to need a LOT more singing stones. Oopsie ending!",
+          "video": "story-video/badlands_end_full_blast_end.mp4"
         },
         "end_canyon_chorus": {
           "image": "story/badlands_end_canyon_chorus.png",
-          "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA \u2014 together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!"
+          "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA \u2014 together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!",
+          "video": "story-video/badlands_end_canyon_chorus_end.mp4"
         },
         "end_mesa_dance": {
           "image": "story/badlands_end_mesa_dance.png",
-          "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune \u2014 the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!"
+          "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune \u2014 the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!",
+          "video": "story-video/badlands_end_mesa_dance_end.mp4"
         },
         "end_low_rumble": {
           "image": "story/badlands_end_low_rumble.png",
-          "text": "Rex blew that bass horn and a RUMBLE so deep it made his bones buzz rolled through the amphitheater \u2014 every armadillo nodded, the captain taught him the secret gentle counter-hum, and Rex walked out humming so softly not a single egg even wobbled. The End!"
+          "text": "Rex blew that bass horn and a RUMBLE so deep it made his bones buzz rolled through the amphitheater \u2014 every armadillo nodded, the captain taught him the secret gentle counter-hum, and Rex walked out humming so softly not a single egg even wobbled. The End!",
+          "video": "story-video/badlands_end_low_rumble_end.mp4"
         },
         "end_high_screech": {
           "image": "story/badlands_end_high_screech.png",
-          "text": "Rex SCREECHED so hard the pipe shot sparks and every armadillo curled into a ball and rolled offstage \u2014 stalactites cracked, the echo got SCREECHY too, and somewhere in the caves the eggs were vibrating like maracas. NOT the counter-frequency. Oopsie ending!"
+          "text": "Rex SCREECHED so hard the pipe shot sparks and every armadillo curled into a ball and rolled offstage \u2014 stalactites cracked, the echo got SCREECHY too, and somewhere in the caves the eggs were vibrating like maracas. NOT the counter-frequency. Oopsie ending!",
+          "video": "story-video/badlands_end_high_screech_end.mp4"
         },
         "end_surprise_squeak": {
           "image": "story/badlands_end_surprise_squeak.png",
-          "text": "Rex squeezed that cactus and out came the TINIEST most ridiculous squeak \u2014 armadillos laughed so hard they fell off their seats, the echo hiccupped and shrank, and the captain was laughing too hard to be grumpy anymore! The counter-frequency to a big scary roar is one very silly squeak. The End!"
+          "text": "Rex squeezed that cactus and out came the TINIEST most ridiculous squeak \u2014 armadillos laughed so hard they fell off their seats, the echo hiccupped and shrank, and the captain was laughing too hard to be grumpy anymore! The counter-frequency to a big scary roar is one very silly squeak. The End!",
+          "video": "story-video/badlands_end_surprise_squeak_end.mp4"
         },
         "end_egg_lullaby": {
           "image": "story/badlands_end_egg_lullaby.png",
-          "text": "Rex hummed the softest deepest lullaby a dinosaur ever hummed and the golden egg GLOWED \u2014 every egg in the cave stopped shaking, the armadillo captain cried actual armadillo tears, and she taught Rex the exact counter-frequency because anyone who hums THAT gently deserves to save the canyon. The End!"
+          "text": "Rex hummed the softest deepest lullaby a dinosaur ever hummed and the golden egg GLOWED \u2014 every egg in the cave stopped shaking, the armadillo captain cried actual armadillo tears, and she taught Rex the exact counter-frequency because anyone who hums THAT gently deserves to save the canyon. The End!",
+          "video": "story-video/badlands_end_egg_lullaby_end.mp4"
         },
         "end_tail_thump": {
           "image": "story/badlands_end_tail_thump.png",
-          "text": "Rex tiptoed like a champion but his tail had OTHER PLANS \u2014 THWACK went the platform and eggs rolled everywhere like the world's most stressful bowling alley! Rex spent the rest of the afternoon returning eggs to nests while armadillos supervised with VERY judgmental expressions. Oopsie ending!"
+          "text": "Rex tiptoed like a champion but his tail had OTHER PLANS \u2014 THWACK went the platform and eggs rolled everywhere like the world's most stressful bowling alley! Rex spent the rest of the afternoon returning eggs to nests while armadillos supervised with VERY judgmental expressions. Oopsie ending!",
+          "video": "story-video/badlands_end_tail_thump_end.mp4"
         }
       }
     },
@@ -25859,7 +25918,8 @@
             "pop": "story/bamboo_a_pop.png",
             "sting": "boing",
             "reveal": "Just stretching my wings in the moonlight!",
-            "delay": 1800
+            "delay": 1800,
+            "video": "story-video/bamboo_a_scare.mp4"
           }
         },
         "b": {
@@ -25888,7 +25948,8 @@
                 "y": 76,
                 "w": 295,
                 "h": 515
-              }
+              },
+              "video": "story-video/bamboo_aa_0.mp4"
             },
             {
               "label": "Cross the bamboo bridge",
@@ -25898,7 +25959,8 @@
                 "y": 402,
                 "w": 562,
                 "h": 308
-              }
+              },
+              "video": "story-video/bamboo_aa_1.mp4"
             }
           ]
         },
@@ -26006,39 +26068,48 @@
         },
         "end_lantern_arch": {
           "image": "story/bamboo_end_lantern_arch.png",
-          "text": "Luna charged through the bamboo arch and the lantern charm blazed so bright that every fake tanuki popped like a soap bubble \u2014 she dipped her horn into the Moon Pool and it ROARED back to life brighter than ever! The tanuki clapped and said THAT is how you navigate a maze \u2014 trust the light that chose you. The End!"
+          "text": "Luna charged through the bamboo arch and the lantern charm blazed so bright that every fake tanuki popped like a soap bubble \u2014 she dipped her horn into the Moon Pool and it ROARED back to life brighter than ever! The tanuki clapped and said THAT is how you navigate a maze \u2014 trust the light that chose you. The End!",
+          "video": "story-video/bamboo_end_lantern_arch_end.mp4"
         },
         "end_blossom_lost": {
           "image": "story/bamboo_end_blossom_lost.png",
-          "text": "Luna followed the pretty blossoms and they led her in a GIANT circle \u2014 round and round while the petals piled up to her knees and the Moon Pool got farther away with every step! By the time dawn arrived her horn was completely dark and she was standing in a mountain of pink petals looking very confused and very sparkle-less. Oopsie ending!"
+          "text": "Luna followed the pretty blossoms and they led her in a GIANT circle \u2014 round and round while the petals piled up to her knees and the Moon Pool got farther away with every step! By the time dawn arrived her horn was completely dark and she was standing in a mountain of pink petals looking very confused and very sparkle-less. Oopsie ending!",
+          "video": "story-video/bamboo_end_blossom_lost_end.mp4"
         },
         "end_waterfall_pool": {
           "image": "story/bamboo_end_waterfall_pool.png",
-          "text": "Luna jumped straight through the waterfall and behind it was the most beautiful hidden grotto with the Moon Pool glowing like liquid moonlight \u2014 she dipped her horn in and it blazed back BRIGHTER than a shooting star! A swirl of fireflies danced around her and the tanuki called from above that anyone brave enough to jump through a waterfall deserves the brightest horn in the forest. The End!"
+          "text": "Luna jumped straight through the waterfall and behind it was the most beautiful hidden grotto with the Moon Pool glowing like liquid moonlight \u2014 she dipped her horn in and it blazed back BRIGHTER than a shooting star! A swirl of fireflies danced around her and the tanuki called from above that anyone brave enough to jump through a waterfall deserves the brightest horn in the forest. The End!",
+          "video": "story-video/bamboo_end_waterfall_pool_end.mp4"
         },
         "end_tower_moonbath": {
           "image": "story/bamboo_end_tower_moonbath.png",
-          "text": "Luna climbed the tower but bamboo is BENDY \u2014 the whole top section flexed like a catapult and FLUNG her over the canopy! She landed upside down in a thicket with her hooves tangled in bamboo and the lantern charm somewhere in the leaves below. The tanuki peeked up and said that is NOT how towers work. Oopsie ending!"
+          "text": "Luna climbed the tower but bamboo is BENDY \u2014 the whole top section flexed like a catapult and FLUNG her over the canopy! She landed upside down in a thicket with her hooves tangled in bamboo and the lantern charm somewhere in the leaves below. The tanuki peeked up and said that is NOT how towers work. Oopsie ending!",
+          "video": "story-video/bamboo_end_tower_moonbath_end.mp4"
         },
         "end_flash_dazzle": {
           "image": "story/bamboo_end_flash_dazzle.png",
-          "text": "Luna fired the BIGGEST flash and it bounced off all three tanukis like a mirror ball \u2014 straight back into her OWN eyes! She stumbled around seeing spots, tripped over a root, and sat there blinking while every single tanuki waved cheerfully. The moonstone pebble rolled away and the tanuki said THAT is why you do not out-sparkle a trickster. Oopsie ending!"
+          "text": "Luna fired the BIGGEST flash and it bounced off all three tanukis like a mirror ball \u2014 straight back into her OWN eyes! She stumbled around seeing spots, tripped over a root, and sat there blinking while every single tanuki waved cheerfully. The moonstone pebble rolled away and the tanuki said THAT is why you do not out-sparkle a trickster. Oopsie ending!",
+          "video": "story-video/bamboo_end_flash_dazzle_end.mp4"
         },
         "end_strobe_reveal": {
           "image": "story/bamboo_end_strobe_reveal.png",
-          "text": "Luna's horn pulsed STROBE STROBE STROBE and with each flash a fake tanuki vanished until only the real one stood there looking genuinely surprised that someone figured out his trick \u2014 he bowed so deep his leaf fell off and said THAT is the cleverest horn-work he had seen in a hundred moons! The walls parted and the Moon Pool was right there waiting. The End!"
+          "text": "Luna's horn pulsed STROBE STROBE STROBE and with each flash a fake tanuki vanished until only the real one stood there looking genuinely surprised that someone figured out his trick \u2014 he bowed so deep his leaf fell off and said THAT is the cleverest horn-work he had seen in a hundred moons! The walls parted and the Moon Pool was right there waiting. The End!",
+          "video": "story-video/bamboo_end_strobe_reveal_end.mp4"
         },
         "end_steady_truth": {
           "image": "story/bamboo_end_steady_truth.png",
-          "text": "Luna held a steady blue beam and swept it across the arena like a lantern \u2014 the fake tanukis turned transparent and melted away and the real one just sat there with the most peaceful smile, saying that patience was the hardest lesson the maze could teach and Luna had passed without even trying! The walls dissolved and the Moon Pool opened wide and warm. The End!"
+          "text": "Luna held a steady blue beam and swept it across the arena like a lantern \u2014 the fake tanukis turned transparent and melted away and the real one just sat there with the most peaceful smile, saying that patience was the hardest lesson the maze could teach and Luna had passed without even trying! The walls dissolved and the Moon Pool opened wide and warm. The End!",
+          "video": "story-video/bamboo_end_steady_truth_end.mp4"
         },
         "end_song_heart": {
           "image": "story/bamboo_end_song_heart.png",
-          "text": "Luna closed her eyes and followed the song \u2014 the bamboo walls PARTED before every step like they had been waiting for someone to finally listen instead of look! The tanuki was crying actual happy tears and said he had been guarding this maze for a hundred years waiting for someone wise enough to navigate by HEART instead of sight. Luna dipped her horn in the Moon Pool and it glowed warmer than it ever had before. The End!"
+          "text": "Luna closed her eyes and followed the song \u2014 the bamboo walls PARTED before every step like they had been waiting for someone to finally listen instead of look! The tanuki was crying actual happy tears and said he had been guarding this maze for a hundred years waiting for someone wise enough to navigate by HEART instead of sight. Luna dipped her horn in the Moon Pool and it glowed warmer than it ever had before. The End!",
+          "video": "story-video/bamboo_end_song_heart_end.mp4"
         },
         "end_thicket_tangle": {
           "image": "story/bamboo_end_thicket_tangle.png",
-          "text": "Luna shoved into the thicket and the bamboo grabbed on like it had opinions about shortcuts \u2014 every step got more tangled and the lanterns' song got quieter until she was stuck up to her ears in purple bamboo with her horn completely dark and dawn happening without her. The tanuki sighed from somewhere above and said THAT is what happens when you stop listening. Oopsie ending!"
+          "text": "Luna shoved into the thicket and the bamboo grabbed on like it had opinions about shortcuts \u2014 every step got more tangled and the lanterns' song got quieter until she was stuck up to her ears in purple bamboo with her horn completely dark and dawn happening without her. The tanuki sighed from somewhere above and said THAT is what happens when you stop listening. Oopsie ending!",
+          "video": "story-video/bamboo_end_thicket_tangle_end.mp4"
         }
       }
     },
@@ -26081,7 +26152,8 @@
             "pop": "story/junkyard_a_pop.png",
             "sting": "thunder",
             "reveal": "Whoa! Just testing my battle outfit!",
-            "delay": 1700
+            "delay": 1700,
+            "video": "story-video/junkyard_a_scare.mp4"
           }
         },
         "b": {
@@ -26096,7 +26168,8 @@
                 "y": 547,
                 "w": 334,
                 "h": 141
-              }
+              },
+              "video": "story-video/junkyard_b_0.mp4"
             },
             {
               "label": "Hop into the bathtub",
@@ -26106,7 +26179,8 @@
                 "y": 160,
                 "w": 255,
                 "h": 413
-              }
+              },
+              "video": "story-video/junkyard_b_1.mp4"
             }
           ]
         },
@@ -26122,7 +26196,8 @@
                 "y": 198,
                 "w": 406,
                 "h": 282
-              }
+              },
+              "video": "story-video/junkyard_aa_0.mp4"
             },
             {
               "label": "Peek into the school bus",
@@ -26132,7 +26207,8 @@
                 "y": 222,
                 "w": 401,
                 "h": 345
-              }
+              },
+              "video": "story-video/junkyard_aa_1.mp4"
             }
           ]
         },
@@ -26204,7 +26280,8 @@
                 "y": 205,
                 "w": 319,
                 "h": 436
-              }
+              },
+              "video": "story-video/junkyard_m2_0.mp4"
             },
             {
               "label": "Slide the drainpipe",
@@ -26214,7 +26291,8 @@
                 "y": 63,
                 "w": 509,
                 "h": 537
-              }
+              },
+              "video": "story-video/junkyard_m2_1.mp4"
             }
           ]
         },
@@ -26252,39 +26330,48 @@
         },
         "end_crane_rescue": {
           "image": "story/junkyard_end_crane_rescue.png",
-          "text": "Pip swung over on the crane hook like a tiny action hero and landed right next to the music box \u2014 the magnet clicked onto the jammed gear and it popped free with a PING! The most beautiful lullaby started playing and the tom-cat appeared with actual tears because he had been trying to fix that melody for MONTHS. Turns out the tough old cat was sheltering a whole family of stray kittens and the music box was their bedtime song. The End!"
+          "text": "Pip swung over on the crane hook like a tiny action hero and landed right next to the music box \u2014 the magnet clicked onto the jammed gear and it popped free with a PING! The most beautiful lullaby started playing and the tom-cat appeared with actual tears because he had been trying to fix that melody for MONTHS. Turns out the tough old cat was sheltering a whole family of stray kittens and the music box was their bedtime song. The End!",
+          "video": "story-video/junkyard_end_crane_rescue_end.mp4"
         },
         "end_hubcap_avalanche": {
           "image": "story/junkyard_end_hubcap_avalanche.png",
-          "text": "Pip toppled the hubcap tower and it crashed down like the world's loudest cymbal solo \u2014 CLANG BANG CRASH \u2014 burying him in a pile of spinning hubcaps while the magnet stuck to ALL of them at once and turned him into a metal hedgehog! The wall did not budge, the howling stopped in confusion, and the tom-cat just stared down with his arms crossed. Oopsie ending!"
+          "text": "Pip toppled the hubcap tower and it crashed down like the world's loudest cymbal solo \u2014 CLANG BANG CRASH \u2014 burying him in a pile of spinning hubcaps while the magnet stuck to ALL of them at once and turned him into a metal hedgehog! The wall did not budge, the howling stopped in confusion, and the tom-cat just stared down with his arms crossed. Oopsie ending!",
+          "video": "story-video/junkyard_end_hubcap_avalanche_end.mp4"
         },
         "end_ladder_discovery": {
           "image": "story/junkyard_end_ladder_discovery.png",
-          "text": "Pip climbed down carefully and found the music box right where the magnet pointed \u2014 it was NOT a puppy at all but a wind-up dog with a jammed gear and Pip's small paw was EXACTLY the right size to reach inside and turn it! The sweetest lullaby filled the hollow and the tom-cat appeared behind him looking ten years younger. He had been trying to fix it for months because the melody was the only thing that calmed his scared stray kittens. The End!"
+          "text": "Pip climbed down carefully and found the music box right where the magnet pointed \u2014 it was NOT a puppy at all but a wind-up dog with a jammed gear and Pip's small paw was EXACTLY the right size to reach inside and turn it! The sweetest lullaby filled the hollow and the tom-cat appeared behind him looking ten years younger. He had been trying to fix it for months because the melody was the only thing that calmed his scared stray kittens. The End!",
+          "video": "story-video/junkyard_end_ladder_discovery_end.mp4"
         },
         "end_pipe_tumble": {
           "image": "story/junkyard_end_pipe_tumble.png",
-          "text": "Pip shot down that pipe like a cannonball and LAUNCHED into a mountain of soggy cardboard boxes \u2014 completely soaked, covered in packing peanuts, and somehow FURTHER from the howling than when he started! The magnet flew away and stuck to a pipe on the other side of the yard and the mysterious howl will have to wait for a less dramatic rescue attempt. Oopsie ending!"
+          "text": "Pip shot down that pipe like a cannonball and LAUNCHED into a mountain of soggy cardboard boxes \u2014 completely soaked, covered in packing peanuts, and somehow FURTHER from the howling than when he started! The magnet flew away and stuck to a pipe on the other side of the yard and the mysterious howl will have to wait for a less dramatic rescue attempt. Oopsie ending!",
+          "video": "story-video/junkyard_end_pipe_tumble_end.mp4"
         },
         "end_lob_splat": {
           "image": "story/junkyard_end_lob_splat.png",
-          "text": "Pip lobbed the mud ball in a PERFECT arc and it splattered right on the tom-cat's tin can armor from above \u2014 SPLORCH! The old cat looked down at the mud, looked at Pip, and burst out laughing so hard he nearly fell over. Nobody had ever out-lobbed him before! He stepped aside and showed Pip his secret \u2014 a shelter full of kittens and a broken music box he could not fix. Pip's small paws reached the jammed gear and the sweetest lullaby filled the scrapyard while the brass bell chimed along. The End!"
+          "text": "Pip lobbed the mud ball in a PERFECT arc and it splattered right on the tom-cat's tin can armor from above \u2014 SPLORCH! The old cat looked down at the mud, looked at Pip, and burst out laughing so hard he nearly fell over. Nobody had ever out-lobbed him before! He stepped aside and showed Pip his secret \u2014 a shelter full of kittens and a broken music box he could not fix. Pip's small paws reached the jammed gear and the sweetest lullaby filled the scrapyard while the brass bell chimed along. The End!",
+          "video": "story-video/junkyard_end_lob_splat_end.mp4"
         },
         "end_roll_clang": {
           "image": "story/junkyard_end_roll_clang.png",
-          "text": "Pip rolled the mud ball SO fast it hit a rock and bounced right back into his own FACE \u2014 SPLAT! He stumbled backward blinded by mud, got his satchel hooked on a fridge handle, and dangled there like a very muddy Christmas ornament while the tom-cat just stared at him. The brass bell clanged helpfully but Pip could not see, could not move, and smelled like wet dirt. Oopsie ending!"
+          "text": "Pip rolled the mud ball SO fast it hit a rock and bounced right back into his own FACE \u2014 SPLAT! He stumbled backward blinded by mud, got his satchel hooked on a fridge handle, and dangled there like a very muddy Christmas ornament while the tom-cat just stared at him. The brass bell clanged helpfully but Pip could not see, could not move, and smelled like wet dirt. Oopsie ending!",
+          "video": "story-video/junkyard_end_roll_clang_end.mp4"
         },
         "end_sneak_kittens": {
           "image": "story/junkyard_end_sneak_kittens.png",
-          "text": "Pip snuck around the side and tumbled right into the SECRET \u2014 a cozy shelter full of the cutest kittens he had ever seen all blinking up at him! The howling was just a broken music box shaped like a dog and the tom-cat appeared behind him looking SHOCKED that someone found his hiding spot. Pip reached his small paw into the music box, turned the jammed gear, and the brass bell and lullaby harmonized so sweetly that every kitten purred and the old tom-cat whispered thank you. The End!"
+          "text": "Pip snuck around the side and tumbled right into the SECRET \u2014 a cozy shelter full of the cutest kittens he had ever seen all blinking up at him! The howling was just a broken music box shaped like a dog and the tom-cat appeared behind him looking SHOCKED that someone found his hiding spot. Pip reached his small paw into the music box, turned the jammed gear, and the brass bell and lullaby harmonized so sweetly that every kitten purred and the old tom-cat whispered thank you. The End!",
+          "video": "story-video/junkyard_end_sneak_kittens_end.mp4"
         },
         "end_kitten_lullaby": {
           "image": "story/junkyard_end_kitten_lullaby.png",
-          "text": "Pip shook the brass bell softly and every kitten stopped squirming and curled up like the chime was their favorite sound \u2014 then he reached over and fixed the music box gear and the bell and the lullaby played together in the most beautiful harmony! The tom-cat sat down beside Pip and said he had been guarding these kittens alone for months and nobody had ever been kind enough to come help. Sometimes the bravest rescue is a gentle one. The End!"
+          "text": "Pip shook the brass bell softly and every kitten stopped squirming and curled up like the chime was their favorite sound \u2014 then he reached over and fixed the music box gear and the bell and the lullaby played together in the most beautiful harmony! The tom-cat sat down beside Pip and said he had been guarding these kittens alone for months and nobody had ever been kind enough to come help. Sometimes the bravest rescue is a gentle one. The End!",
+          "video": "story-video/junkyard_end_kitten_lullaby_end.mp4"
         },
         "end_gear_fix": {
           "image": "story/junkyard_end_gear_fix.png",
-          "text": "Pip reached inside the music box and the gear SPRANG loose with a BOING \u2014 a tiny coil bonked him on the nose and the box honked ONE horrible note before going totally dead! Every kitten woke up crying and the tom-cat rushed in looking like someone had just broken his most precious thing, which is exactly what happened. Pip held the broken spring and whispered sorry about forty times. Oopsie ending!"
+          "text": "Pip reached inside the music box and the gear SPRANG loose with a BOING \u2014 a tiny coil bonked him on the nose and the box honked ONE horrible note before going totally dead! Every kitten woke up crying and the tom-cat rushed in looking like someone had just broken his most precious thing, which is exactly what happened. Pip held the broken spring and whispered sorry about forty times. Oopsie ending!",
+          "video": "story-video/junkyard_end_gear_fix_end.mp4"
         }
       }
     }
