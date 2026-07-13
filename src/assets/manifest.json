@@ -3146,6 +3146,123 @@
           "thumb": "hidden/cloud_kingdom_t_flag_c.png"
         }
       ]
+    },
+    {
+      "id": "crystal_cavern",
+      "name": "Crystal Cavern",
+      "image": "hidden/crystal_cavern.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "minecart",
+          "label": "a rusty mine cart on tracks",
+          "x": 867,
+          "y": 361,
+          "w": 150,
+          "h": 108,
+          "thumb": "hidden/crystal_cavern_t_minecart.png"
+        },
+        {
+          "id": "glowworm",
+          "label": "a glowing blue worm on the ceiling",
+          "x": 316,
+          "y": 13,
+          "w": 131,
+          "h": 69,
+          "thumb": "hidden/crystal_cavern_t_glowworm.png"
+        },
+        {
+          "id": "fossilfish",
+          "label": "a fossil of a fish in the rock",
+          "x": 1127,
+          "y": 282,
+          "w": 135,
+          "h": 103,
+          "thumb": "hidden/crystal_cavern_t_fossilfish.png"
+        },
+        {
+          "id": "caveshroom",
+          "label": "a cluster of glowing mushrooms",
+          "x": 282,
+          "y": 440,
+          "w": 152,
+          "h": 141,
+          "thumb": "hidden/crystal_cavern_t_caveshroom.png"
+        },
+        {
+          "id": "cavebat",
+          "label": "a tiny bat hanging upside down",
+          "x": 237,
+          "y": 119,
+          "w": 51,
+          "h": 88,
+          "thumb": "hidden/crystal_cavern_t_cavebat.png"
+        },
+        {
+          "id": "emerald",
+          "label": "a glowing green emerald",
+          "x": 901,
+          "y": 503,
+          "w": 101,
+          "h": 106,
+          "thumb": "hidden/crystal_cavern_t_emerald.png"
+        }
+      ]
+    },
+    {
+      "id": "circus_backstage",
+      "name": "Circus Backstage",
+      "image": "hidden/circus_backstage.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "stool_c",
+          "label": "a tall red stool",
+          "x": 855,
+          "y": 462,
+          "w": 142,
+          "h": 240,
+          "thumb": "hidden/circus_backstage_t_stool_c.png"
+        },
+        {
+          "id": "drum_c",
+          "label": "a big red bass drum",
+          "x": 365,
+          "y": 470,
+          "w": 227,
+          "h": 218,
+          "thumb": "hidden/circus_backstage_t_drum_c.png"
+        },
+        {
+          "id": "trumpet_c",
+          "label": "a golden trumpet",
+          "x": 339,
+          "y": 252,
+          "w": 196,
+          "h": 104,
+          "thumb": "hidden/circus_backstage_t_trumpet_c.png"
+        },
+        {
+          "id": "cape_c",
+          "label": "a sparkly purple cape on a hanger",
+          "x": 1086,
+          "y": 421,
+          "w": 192,
+          "h": 177,
+          "thumb": "hidden/circus_backstage_t_cape_c.png"
+        },
+        {
+          "id": "tophat_c",
+          "label": "a tall black magician top hat",
+          "x": 1136,
+          "y": 241,
+          "w": 139,
+          "h": 130,
+          "thumb": "hidden/circus_backstage_t_tophat_c.png"
+        }
+      ]
     }
   ],
   "stories": [
