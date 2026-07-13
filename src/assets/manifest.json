@@ -23382,7 +23382,8 @@
             "pop": "story/manor_a_pop.png",
             "sting": "thunder",
             "reveal": "Squawk! I just wanted to stretch my legs! That frame is SO cramped!",
-            "delay": 1800
+            "delay": 1800,
+            "video": "story-video/manor_a_scare.mp4"
           }
         },
         "b": {
@@ -23411,7 +23412,8 @@
                 "y": 1,
                 "w": 287,
                 "h": 667
-              }
+              },
+              "video": "story-video/manor_aa_0.mp4"
             },
             {
               "label": "Enter the conservatory",
@@ -23421,7 +23423,8 @@
                 "y": 0,
                 "w": 253,
                 "h": 605
-              }
+              },
+              "video": "story-video/manor_aa_1.mp4"
             }
           ]
         },
@@ -23437,7 +23440,8 @@
                 "y": 42,
                 "w": 359,
                 "h": 545
-              }
+              },
+              "video": "story-video/manor_ab_0.mp4"
             },
             {
               "label": "Cut through the conservatory",
@@ -23447,7 +23451,8 @@
                 "y": 25,
                 "w": 406,
                 "h": 580
-              }
+              },
+              "video": "story-video/manor_ab_1.mp4"
             }
           ]
         },
@@ -23463,7 +23468,8 @@
                 "y": 8,
                 "w": 179,
                 "h": 250
-              }
+              },
+              "video": "story-video/manor_ba_0.mp4"
             },
             {
               "label": "Climb the tower",
@@ -23473,7 +23479,8 @@
                 "y": 209,
                 "w": 337,
                 "h": 510
-              }
+              },
+              "video": "story-video/manor_ba_1.mp4"
             }
           ]
         },
@@ -23489,7 +23496,8 @@
                 "y": 3,
                 "w": 203,
                 "h": 273
-              }
+              },
+              "video": "story-video/manor_bb_0.mp4"
             },
             {
               "label": "Pop through the trapdoor",
@@ -23499,7 +23507,8 @@
                 "y": 101,
                 "w": 136,
                 "h": 122
-              }
+              },
+              "video": "story-video/manor_bb_1.mp4"
             }
           ]
         },
@@ -23515,7 +23524,8 @@
                 "y": 305,
                 "w": 78,
                 "h": 92
-              }
+              },
+              "video": "story-video/manor_m1_0.mp4"
             },
             {
               "label": "Load the green potion",
@@ -23525,7 +23535,8 @@
                 "y": 265,
                 "w": 74,
                 "h": 132
-              }
+              },
+              "video": "story-video/manor_m1_1.mp4"
             }
           ]
         },
@@ -23541,7 +23552,8 @@
                 "y": 291,
                 "w": 94,
                 "h": 122
-              }
+              },
+              "video": "story-video/manor_m2_0.mp4"
             },
             {
               "label": "Load the pink potion",
@@ -23551,7 +23563,8 @@
                 "y": 349,
                 "w": 87,
                 "h": 119
-              }
+              },
+              "video": "story-video/manor_m2_1.mp4"
             }
           ]
         },
@@ -23585,7 +23598,8 @@
                 "y": 108,
                 "w": 221,
                 "h": 375
-              }
+              },
+              "video": "story-video/manor_m4_0.mp4"
             },
             {
               "label": "Grab the purple potion",
@@ -23595,45 +23609,55 @@
                 "y": 243,
                 "w": 189,
                 "h": 253
-              }
+              },
+              "video": "story-video/manor_m4_1.mp4"
             }
           ]
         },
         "end_sticky_save": {
           "image": "story/manor_end_sticky_save.png",
-          "text": "The pink goo CAUGHT the falling floorboards like the world's stickiest safety net \u2014 turns out the floor was rotten over a BOTTOMLESS library pit and the badger was trying to stop Willow from falling through! He pulled off his top hat, bowed, and said he was grandma's old apprentice, guarding Pumpkin and the manor's terrible secret. Pumpkin purred from behind the bookshelf and Willow scooped her up on perfectly sticky-safe floors. The End!"
+          "text": "The pink goo CAUGHT the falling floorboards like the world's stickiest safety net \u2014 turns out the floor was rotten over a BOTTOMLESS library pit and the badger was trying to stop Willow from falling through! He pulled off his top hat, bowed, and said he was grandma's old apprentice, guarding Pumpkin and the manor's terrible secret. Pumpkin purred from behind the bookshelf and Willow scooped her up on perfectly sticky-safe floors. The End!",
+          "video": "story-video/manor_end_sticky_save_end.mp4"
         },
         "end_bounce_out": {
           "image": "story/manor_end_bounce_out.png",
-          "text": "The bouncy potion turned the ENTIRE library into a trampoline park and Willow bounced off a bookshelf, off the ceiling, and straight OUT THE WINDOW into the garden hedge \u2014 she looked up to see Pumpkin sitting calmly on the windowsill and the badger shaking his head like this was the silliest witch he had ever seen. Back to the entrance! Oopsie ending!"
+          "text": "The bouncy potion turned the ENTIRE library into a trampoline park and Willow bounced off a bookshelf, off the ceiling, and straight OUT THE WINDOW into the garden hedge \u2014 she looked up to see Pumpkin sitting calmly on the windowsill and the badger shaking his head like this was the silliest witch he had ever seen. Back to the entrance! Oopsie ending!",
+          "video": "story-video/manor_end_bounce_out_end.mp4"
         },
         "end_smoky_sneak": {
           "image": "story/manor_end_smoky_sneak.png",
-          "text": "The purple smoke revealed EVERYTHING \u2014 glowing red lines showed every rotten board and every trap, and the badger took off his monocle and said FINALLY someone who checks before stomping around! He was grandma's old apprentice guarding the manor from a bottomless pit under the conservatory. Pumpkin was purring in the one safe corner, and Willow carried her home on the marked-safe path. The End!"
+          "text": "The purple smoke revealed EVERYTHING \u2014 glowing red lines showed every rotten board and every trap, and the badger took off his monocle and said FINALLY someone who checks before stomping around! He was grandma's old apprentice guarding the manor from a bottomless pit under the conservatory. Pumpkin was purring in the one safe corner, and Willow carried her home on the marked-safe path. The End!",
+          "video": "story-video/manor_end_smoky_sneak_end.mp4"
         },
         "end_pink_hug": {
           "image": "story/manor_end_pink_hug.png",
-          "text": "The pink potion sealed the ENTIRE doorway shut like the world's stickiest wall and Willow's hat got glued to the frame \u2014 she dangled there by her cape while the badger sighed and said THAT is the third door this month! Pumpkin meowed from somewhere deeper in the manor, completely unreachable behind a wall of pink goo. Oopsie ending!"
+          "text": "The pink potion sealed the ENTIRE doorway shut like the world's stickiest wall and Willow's hat got glued to the frame \u2014 she dangled there by her cape while the badger sighed and said THAT is the third door this month! Pumpkin meowed from somewhere deeper in the manor, completely unreachable behind a wall of pink goo. Oopsie ending!",
+          "video": "story-video/manor_end_pink_hug_end.mp4"
         },
         "end_green_truce": {
           "image": "story/manor_end_green_truce.png",
-          "text": "The bouncy potion turned the floor into a MEGA trampoline and Willow bounced so high she hit the CEILING \u2014 then the floor \u2014 then the ceiling AGAIN \u2014 and the badger just watched her ricochet around the ballroom like a very surprised pinball! By the time she stopped bouncing she was so dizzy she could not tell which way was up and Pumpkin was still on the chandelier looking deeply unimpressed. Oopsie ending!"
+          "text": "The bouncy potion turned the floor into a MEGA trampoline and Willow bounced so high she hit the CEILING \u2014 then the floor \u2014 then the ceiling AGAIN \u2014 and the badger just watched her ricochet around the ballroom like a very surprised pinball! By the time she stopped bouncing she was so dizzy she could not tell which way was up and Pumpkin was still on the chandelier looking deeply unimpressed. Oopsie ending!",
+          "video": "story-video/manor_end_green_truce_end.mp4"
         },
         "end_pink_stuck": {
           "image": "story/manor_end_pink_stuck.png",
-          "text": "The pink potion hit the CHANDELIER and it swung down and scooped up Willow, the badger, AND Pumpkin in one giant sticky sparkly glob \u2014 now all three of them are dangling from the ceiling like the world's worst ornament. The badger sighs and says THIS is why he set up the traps. Somebody will find them eventually! Oopsie ending!"
+          "text": "The pink potion hit the CHANDELIER and it swung down and scooped up Willow, the badger, AND Pumpkin in one giant sticky sparkly glob \u2014 now all three of them are dangling from the ceiling like the world's worst ornament. The badger sighs and says THIS is why he set up the traps. Somebody will find them eventually! Oopsie ending!",
+          "video": "story-video/manor_end_pink_stuck_end.mp4"
         },
         "end_purple_truth": {
           "image": "story/manor_end_purple_truth.png",
-          "text": "The smoke revealed a BOTTOMLESS CRACK running across the entire dance floor and the badger was standing on the only safe strip \u2014 he was not blocking Willow, he was blocking the PIT! He was grandma's old apprentice guarding every lost visitor from the manor's rotten secret. Willow followed the safe strip, grabbed Pumpkin from behind the curtains, and they all walked out together. The End!"
+          "text": "The smoke revealed a BOTTOMLESS CRACK running across the entire dance floor and the badger was standing on the only safe strip \u2014 he was not blocking Willow, he was blocking the PIT! He was grandma's old apprentice guarding every lost visitor from the manor's rotten secret. Willow followed the safe strip, grabbed Pumpkin from behind the curtains, and they all walked out together. The End!",
+          "video": "story-video/manor_end_purple_truth_end.mp4"
         },
         "end_bouncy_bridge": {
           "image": "story/manor_end_bouncy_bridge.png",
-          "text": "The bouncy potion turned the rotten landing into a TRAMPOLINE BRIDGE and Willow bounced right over the dangerous boards \u2014 the badger jumped aside and there was Pumpkin, curled in a cozy basket the badger had MADE for her! He was grandma's old apprentice and the rotten floor hid a bottomless drop, so he kept the cat safe and warm. Best babysitter badger ever. The End!"
+          "text": "The bouncy potion turned the rotten landing into a TRAMPOLINE BRIDGE and Willow bounced right over the dangerous boards \u2014 the badger jumped aside and there was Pumpkin, curled in a cozy basket the badger had MADE for her! He was grandma's old apprentice and the rotten floor hid a bottomless drop, so he kept the cat safe and warm. Best babysitter badger ever. The End!",
+          "video": "story-video/manor_end_bouncy_bridge_end.mp4"
         },
         "end_purple_reveal": {
           "image": "story/manor_end_purple_reveal.png",
-          "text": "The smoke cleared and Willow saw it \u2014 every board glowed red with cracks except the ONE the badger was standing on, and right beside him Pumpkin was sleeping with the yarn as a pillow. He was grandma's old apprentice and the entire landing was a trap EXCEPT his spot. He had been standing guard for three days, feeding the cat treats and waiting for someone smart enough to look before stepping. The End!"
+          "text": "The smoke cleared and Willow saw it \u2014 every board glowed red with cracks except the ONE the badger was standing on, and right beside him Pumpkin was sleeping with the yarn as a pillow. He was grandma's old apprentice and the entire landing was a trap EXCEPT his spot. He had been standing guard for three days, feeding the cat treats and waiting for someone smart enough to look before stepping. The End!",
+          "video": "story-video/manor_end_purple_reveal_end.mp4"
         }
       }
     },
@@ -23653,7 +23677,8 @@
                 "y": 151,
                 "w": 321,
                 "h": 449
-              }
+              },
+              "video": "story-video/carnival_start_0.mp4"
             },
             {
               "label": "Check the candy cart",
@@ -23663,7 +23688,8 @@
                 "y": 143,
                 "w": 374,
                 "h": 521
-              }
+              },
+              "video": "story-video/carnival_start_1.mp4"
             }
           ]
         },
@@ -23688,7 +23714,8 @@
             "pop": "story/carnival_a_pop.png",
             "sting": "boing",
             "reveal": "Ta-daaa! Just practicing my big entrance!",
-            "delay": 1800
+            "delay": 1800,
+            "video": "story-video/carnival_a_scare.mp4"
           }
         },
         "b": {
@@ -23745,7 +23772,8 @@
                 "y": 215,
                 "w": 189,
                 "h": 256
-              }
+              },
+              "video": "story-video/carnival_ba_0.mp4"
             },
             {
               "label": "Play ring-toss",
@@ -23755,7 +23783,8 @@
                 "y": 54,
                 "w": 316,
                 "h": 466
-              }
+              },
+              "video": "story-video/carnival_ba_1.mp4"
             }
           ]
         },
@@ -23780,7 +23809,8 @@
             "pop": "story/carnival_bb_pop.png",
             "sting": "thunder",
             "reveal": "Whoops, just your reflection stretching its legs!",
-            "delay": 1900
+            "delay": 1900,
+            "video": "story-video/carnival_bb_scare.mp4"
           }
         },
         "m1": {
@@ -23795,7 +23825,8 @@
                 "y": 44,
                 "w": 348,
                 "h": 245
-              }
+              },
+              "video": "story-video/carnival_m1_0.mp4"
             },
             {
               "label": "Sweep the low strike",
@@ -23805,7 +23836,8 @@
                 "y": 413,
                 "w": 358,
                 "h": 286
-              }
+              },
+              "video": "story-video/carnival_m1_1.mp4"
             }
           ]
         },
@@ -23853,7 +23885,8 @@
                 "y": 436,
                 "w": 191,
                 "h": 186
-              }
+              },
+              "video": "story-video/carnival_m4_0.mp4"
             },
             {
               "label": "Pull the curtain",
@@ -23863,45 +23896,55 @@
                 "y": 150,
                 "w": 190,
                 "h": 340
-              }
+              },
+              "video": "story-video/carnival_m4_1.mp4"
             }
           ]
         },
         "end_crown": {
           "image": "story/carnival_end_crown.png",
-          "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd \u2014 Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined."
+          "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd \u2014 Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined.",
+          "video": "story-video/carnival_end_crown_end.mp4"
         },
         "end_dance": {
           "image": "story/carnival_end_dance.png",
-          "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat \u2014 round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!"
+          "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat \u2014 round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!",
+          "video": "story-video/carnival_end_dance_end.mp4"
         },
         "end_song": {
           "image": "story/carnival_end_song.png",
-          "text": "The bellows pump a golden melody and the Carnival King cannot help but dance \u2014 he waltzes over with the banner and asks if Nova's village has a stage, because this raccoon has been performing for empty seats and a real audience sounds like heaven."
+          "text": "The bellows pump a golden melody and the Carnival King cannot help but dance \u2014 he waltzes over with the banner and asks if Nova's village has a stage, because this raccoon has been performing for empty seats and a real audience sounds like heaven.",
+          "video": "story-video/carnival_end_song_end.mp4"
         },
         "end_fog": {
           "image": "story/carnival_end_fog.png",
-          "text": "Nova mashes the wrong valves and the calliope screams like a cat in a bathtub \u2014 the whole carnival sinks into fog three hours early and the banner vanishes with the Carnival King. Oopsie ending!"
+          "text": "Nova mashes the wrong valves and the calliope screams like a cat in a bathtub \u2014 the whole carnival sinks into fog three hours early and the banner vanishes with the Carnival King. Oopsie ending!",
+          "video": "story-video/carnival_end_fog_end.mp4"
         },
         "end_rings": {
           "image": "story/carnival_end_rings.png",
-          "text": "Every ring lands PERFECTLY and the prize tower dings so loud the Carnival King comes running \u2014 he hands over the banner and begs Nova to teach him that throw at the village festival."
+          "text": "Every ring lands PERFECTLY and the prize tower dings so loud the Carnival King comes running \u2014 he hands over the banner and begs Nova to teach him that throw at the village festival.",
+          "video": "story-video/carnival_end_rings_end.mp4"
         },
         "end_hammer": {
           "image": "story/carnival_end_hammer.png",
-          "text": "DING \u2014 the bell rings loud enough to wake up every sleeping scarecrow in three counties and the startled Carnival King drops the banner right into Nova's paws, then asks if she has ever considered a career in carnival strongfox."
+          "text": "DING \u2014 the bell rings loud enough to wake up every sleeping scarecrow in three counties and the startled Carnival King drops the banner right into Nova's paws, then asks if she has ever considered a career in carnival strongfox.",
+          "video": "story-video/carnival_end_hammer_end.mp4"
         },
         "end_chicken": {
           "image": "story/carnival_end_chicken.png",
-          "text": "Nova's dart pops a balloon but the prize that drops out is a rubber chicken the size of a loaf of bread \u2014 the Carnival King waves goodbye with the banner still firmly on his shoulders. Oopsie ending!"
+          "text": "Nova's dart pops a balloon but the prize that drops out is a rubber chicken the size of a loaf of bread \u2014 the Carnival King waves goodbye with the banner still firmly on his shoulders. Oopsie ending!",
+          "video": "story-video/carnival_end_chicken_end.mp4"
         },
         "end_show": {
           "image": "story/carnival_end_show.png",
-          "text": "Nova steps into the spotlight and takes a bow so magnificent that the Carnival King leaps up clapping \u2014 he has been performing to empty seats for so long that seeing a REAL showfox makes him hand over the banner and ask to join the village festival troupe."
+          "text": "Nova steps into the spotlight and takes a bow so magnificent that the Carnival King leaps up clapping \u2014 he has been performing to empty seats for so long that seeing a REAL showfox makes him hand over the banner and ask to join the village festival troupe.",
+          "video": "story-video/carnival_end_show_end.mp4"
         },
         "end_trap": {
           "image": "story/carnival_end_trap.png",
-          "text": "Behind the curtain is nothing but a banana peel and the Carnival King's giggling \u2014 Nova slips, does an accidental somersault, and by the time the stars stop spinning the carnival has packed itself up. Oopsie ending!"
+          "text": "Behind the curtain is nothing but a banana peel and the Carnival King's giggling \u2014 Nova slips, does an accidental somersault, and by the time the stars stop spinning the carnival has packed itself up. Oopsie ending!",
+          "video": "story-video/carnival_end_trap_end.mp4"
         }
       }
     },
@@ -23921,7 +23964,8 @@
                 "y": 305,
                 "w": 545,
                 "h": 304
-              }
+              },
+              "video": "story-video/thunder_start_0.mp4"
             },
             {
               "label": "Enter the wind tunnel",
@@ -23931,7 +23975,8 @@
                 "y": 162,
                 "w": 199,
                 "h": 247
-              }
+              },
+              "video": "story-video/thunder_start_1.mp4"
             }
           ]
         },
@@ -23975,7 +24020,8 @@
                 "y": 0,
                 "w": 315,
                 "h": 378
-              }
+              },
+              "video": "story-video/thunder_aa_0.mp4"
             },
             {
               "label": "Push up the trail",
@@ -23985,7 +24031,8 @@
                 "y": 233,
                 "w": 350,
                 "h": 422
-              }
+              },
+              "video": "story-video/thunder_aa_1.mp4"
             }
           ]
         },
@@ -24001,7 +24048,8 @@
                 "y": 0,
                 "w": 392,
                 "h": 539
-              }
+              },
+              "video": "story-video/thunder_ab_0.mp4"
             },
             {
               "label": "Climb out to the trail",
@@ -24011,7 +24059,8 @@
                 "y": 233,
                 "w": 356,
                 "h": 423
-              }
+              },
+              "video": "story-video/thunder_ab_1.mp4"
             }
           ]
         },
@@ -24041,7 +24090,8 @@
                 "y": 288,
                 "w": 496,
                 "h": 432
-              }
+              },
+              "video": "story-video/thunder_bb_0.mp4"
             },
             {
               "label": "Climb to the hawk perch",
@@ -24051,7 +24101,8 @@
                 "y": 232,
                 "w": 347,
                 "h": 424
-              }
+              },
+              "video": "story-video/thunder_bb_1.mp4"
             }
           ],
           "scare": {
@@ -24062,7 +24113,8 @@
             "pop": "story/thunder_bb_pop.png",
             "sting": "thunder",
             "reveal": "Grumble! Just napping through the storm, carry on little fox!",
-            "delay": 1900
+            "delay": 1900,
+            "video": "story-video/thunder_bb_scare.mp4"
           }
         },
         "m1": {
@@ -24077,7 +24129,8 @@
                 "y": 348,
                 "w": 413,
                 "h": 299
-              }
+              },
+              "video": "story-video/thunder_m1_0.mp4"
             },
             {
               "label": "Stack the rock pile",
@@ -24087,7 +24140,8 @@
                 "y": 132,
                 "w": 270,
                 "h": 495
-              }
+              },
+              "video": "story-video/thunder_m1_1.mp4"
             }
           ]
         },
@@ -24117,7 +24171,8 @@
                 "y": 0,
                 "w": 515,
                 "h": 450
-              }
+              },
+              "video": "story-video/thunder_m3_0.mp4"
             },
             {
               "label": "Climb the stone tower",
@@ -24127,7 +24182,8 @@
                 "y": 108,
                 "w": 166,
                 "h": 284
-              }
+              },
+              "video": "story-video/thunder_m3_1.mp4"
             },
             {
               "label": "Sneak through the passage",
@@ -24137,7 +24193,8 @@
                 "y": 409,
                 "w": 443,
                 "h": 311
-              }
+              },
+              "video": "story-video/thunder_m3_2.mp4"
             }
           ]
         },
@@ -24153,7 +24210,8 @@
                 "y": 307,
                 "w": 295,
                 "h": 413
-              }
+              },
+              "video": "story-video/thunder_m4_0.mp4"
             },
             {
               "label": "Sprint the chain bridge",
@@ -24163,45 +24221,55 @@
                 "y": 349,
                 "w": 334,
                 "h": 371
-              }
+              },
+              "video": "story-video/thunder_m4_1.mp4"
             }
           ]
         },
         "end_guardian": {
           "image": "story/thunder_end_guardian.png",
-          "text": "The moss blocks the wind perfectly and the gremlins settle around the lantern like fuzzy little bodyguards \u2014 they WERE protecting it all along, and together they wait out the hawk and carry the flame safely to the beacon at dawn."
+          "text": "The moss blocks the wind perfectly and the gremlins settle around the lantern like fuzzy little bodyguards \u2014 they WERE protecting it all along, and together they wait out the hawk and carry the flame safely to the beacon at dawn.",
+          "video": "story-video/thunder_end_guardian_end.mp4"
         },
         "end_crack": {
           "image": "story/thunder_end_crack.png",
-          "text": "The rocks stack solid but the THUD shakes the whole cave and the lantern tips off its stone and cracks \u2014 the flame sputters out and even the wind gremlins look heartbroken. Oopsie ending!"
+          "text": "The rocks stack solid but the THUD shakes the whole cave and the lantern tips off its stone and cracks \u2014 the flame sputters out and even the wind gremlins look heartbroken. Oopsie ending!",
+          "video": "story-video/thunder_end_crack_end.mp4"
         },
         "end_redirect": {
           "image": "story/thunder_end_redirect.png",
-          "text": "Nova points the weather vane skyward and lightning follows the arrow AWAY from the lantern \u2014 the flash scares the Storm Hawk into next week and the beacon flame catches, sending golden light pouring across the valley."
+          "text": "Nova points the weather vane skyward and lightning follows the arrow AWAY from the lantern \u2014 the flash scares the Storm Hawk into next week and the beacon flame catches, sending golden light pouring across the valley.",
+          "video": "story-video/thunder_end_redirect_end.mp4"
         },
         "end_blown": {
           "image": "story/thunder_end_blown.png",
-          "text": "The horn blast echoes across three mountains and sounds AMAZING but it also blows out the lantern like a birthday candle \u2014 the Storm Hawk does a victory loop and Nova is standing in the dark holding a very loud empty horn. Oopsie ending!"
+          "text": "The horn blast echoes across three mountains and sounds AMAZING but it also blows out the lantern like a birthday candle \u2014 the Storm Hawk does a victory loop and Nova is standing in the dark holding a very loud empty horn. Oopsie ending!",
+          "video": "story-video/thunder_end_blown_end.mp4"
         },
         "end_sneak": {
           "image": "story/thunder_end_sneak.png",
-          "text": "The gremlins huddled perfectly until one little gremlin sneezed \u2014 the tiniest puff of wind knocked the lantern against the rock and CRACK went the glass! The flame sputtered and died while every other gremlin stared at the sneezer with the most judgmental faces Nova had ever seen on something that small. No flame, no beacon, and one VERY sorry gremlin. Oopsie ending!"
+          "text": "The gremlins huddled perfectly until one little gremlin sneezed \u2014 the tiniest puff of wind knocked the lantern against the rock and CRACK went the glass! The flame sputtered and died while every other gremlin stared at the sneezer with the most judgmental faces Nova had ever seen on something that small. No flame, no beacon, and one VERY sorry gremlin. Oopsie ending!",
+          "video": "story-video/thunder_end_sneak_end.mp4"
         },
         "end_lightning": {
           "image": "story/thunder_end_lightning.png",
-          "text": "Lightning hits the tower and instead of breaking the lantern the bolt channels THROUGH it \u2014 the glass blazes so bright the Storm Hawk squawks and flaps away, and the beacon across the peak catches the light and roars to life."
+          "text": "Lightning hits the tower and instead of breaking the lantern the bolt channels THROUGH it \u2014 the glass blazes so bright the Storm Hawk squawks and flaps away, and the beacon across the peak catches the light and roars to life.",
+          "video": "story-video/thunder_end_lightning_end.mp4"
         },
         "end_decoy": {
           "image": "story/thunder_end_decoy.png",
-          "text": "The gremlins scatter ahead carrying tiny sparks and the Storm Hawk chases every wrong glow like a cat after laser dots \u2014 meanwhile Nova tiptoes through the passage with the real lantern and lights the beacon while the hawk is busy playing tag."
+          "text": "The gremlins scatter ahead carrying tiny sparks and the Storm Hawk chases every wrong glow like a cat after laser dots \u2014 meanwhile Nova tiptoes through the passage with the real lantern and lights the beacon while the hawk is busy playing tag.",
+          "video": "story-video/thunder_end_decoy_end.mp4"
         },
         "end_dazzle": {
           "image": "story/thunder_end_dazzle.png",
-          "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud \u2014 the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards."
+          "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud \u2014 the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards.",
+          "video": "story-video/thunder_end_dazzle_end.mp4"
         },
         "end_swoop": {
           "image": "story/thunder_end_swoop.png",
-          "text": "Nova sprinted but the bridge SWUNG like a hammock in a hurricane and the lantern bounced off a chain and tumbled into the clouds \u2014 gone! The Storm Hawk dove after the falling light like the world's worst game of fetch and Nova clung to the swinging bridge with her fur standing straight up. No lantern, no beacon, and a VERY long climb back down. Oopsie ending!"
+          "text": "Nova sprinted but the bridge SWUNG like a hammock in a hurricane and the lantern bounced off a chain and tumbled into the clouds \u2014 gone! The Storm Hawk dove after the falling light like the world's worst game of fetch and Nova clung to the swinging bridge with her fur standing straight up. No lantern, no beacon, and a VERY long climb back down. Oopsie ending!",
+          "video": "story-video/thunder_end_swoop_end.mp4"
         }
       }
     },
@@ -24291,7 +24359,8 @@
                 "y": 232,
                 "w": 405,
                 "h": 218
-              }
+              },
+              "video": "story-video/bayou_ba_0.mp4"
             },
             {
               "label": "Approach the waterfall",
@@ -24301,7 +24370,8 @@
                 "y": 48,
                 "w": 241,
                 "h": 435
-              }
+              },
+              "video": "story-video/bayou_ba_1.mp4"
             }
           ]
         },
@@ -24317,7 +24387,8 @@
                 "y": 380,
                 "w": 306,
                 "h": 207
-              }
+              },
+              "video": "story-video/bayou_bb_0.mp4"
             },
             {
               "label": "Climb toward the waterfall",
@@ -24327,7 +24398,8 @@
                 "y": 294,
                 "w": 155,
                 "h": 389
-              }
+              },
+              "video": "story-video/bayou_bb_1.mp4"
             }
           ]
         },
@@ -24343,7 +24415,8 @@
                 "y": 0,
                 "w": 378,
                 "h": 362
-              }
+              },
+              "video": "story-video/bayou_m1_0.mp4"
             },
             {
               "label": "Step behind the snake root",
@@ -24353,7 +24426,8 @@
                 "y": 422,
                 "w": 283,
                 "h": 298
-              }
+              },
+              "video": "story-video/bayou_m1_1.mp4"
             }
           ]
         },
@@ -24401,7 +24475,8 @@
                 "y": 202,
                 "w": 271,
                 "h": 373
-              }
+              },
+              "video": "story-video/bayou_m4_0.mp4"
             },
             {
               "label": "Step behind the boulder",
@@ -24411,45 +24486,55 @@
                 "y": 388,
                 "w": 277,
                 "h": 210
-              }
+              },
+              "video": "story-video/bayou_m4_1.mp4"
             }
           ]
         },
         "end_cat_grace": {
           "image": "story/bayou_end_cat_grace.png",
-          "text": "Willow's cat shadow stretched long and SLOW and the broomstick's wild shadow copied it perfectly \u2014 stretch, arch, purr-wiggle. The broomstick drifted down like a leaf and nuzzled her hand because the cat shadow proved she would never yank the handle or take a corner too fast again. The broomstick was never a phantom \u2014 it was a broom that wanted a rider who understood GRACE. Witch exam: passed with flying colors. The End!"
+          "text": "Willow's cat shadow stretched long and SLOW and the broomstick's wild shadow copied it perfectly \u2014 stretch, arch, purr-wiggle. The broomstick drifted down like a leaf and nuzzled her hand because the cat shadow proved she would never yank the handle or take a corner too fast again. The broomstick was never a phantom \u2014 it was a broom that wanted a rider who understood GRACE. Witch exam: passed with flying colors. The End!",
+          "video": "story-video/bayou_end_cat_grace_end.mp4"
         },
         "end_snake_flee": {
           "image": "story/bayou_end_snake_flee.png",
-          "text": "The snake shadow HISSED and the broomstick decided nope nope NOPE \u2014 it rocketed into the fog so fast it left a violet comet trail, and by the time Willow stopped coughing on the sparks the sun was coming up. Turns out a scared broomstick does NOT like snakes. Witch exam: postponed! Oopsie ending!"
+          "text": "The snake shadow HISSED and the broomstick decided nope nope NOPE \u2014 it rocketed into the fog so fast it left a violet comet trail, and by the time Willow stopped coughing on the sparks the sun was coming up. Turns out a scared broomstick does NOT like snakes. Witch exam: postponed! Oopsie ending!",
+          "video": "story-video/bayou_end_snake_flee_end.mp4"
         },
         "end_frog_bounce": {
           "image": "story/bayou_end_frog_bounce.png",
-          "text": "The frog shadow went boing-boing-boing and the broomstick's shadow went boing-boing-boing right back \u2014 before Willow knew it the broomstick was BOUNCING beside her like a happy puppy! It bonked her hat with its bristles and she laughed so hard the whole grotto glowed. The broomstick just wanted a rider who could be SILLY. The End!"
+          "text": "The frog shadow went boing-boing-boing and the broomstick's shadow went boing-boing-boing right back \u2014 before Willow knew it the broomstick was BOUNCING beside her like a happy puppy! It bonked her hat with its bristles and she laughed so hard the whole grotto glowed. The broomstick just wanted a rider who could be SILLY. The End!",
+          "video": "story-video/bayou_end_frog_bounce_end.mp4"
         },
         "end_gentle_land": {
           "image": "story/bayou_end_gentle_land.png",
-          "text": "The cat shadow curled up and tucked its paws, and the broomstick's wild shadow did EXACTLY the same thing \u2014 the broomstick floated down into Willow's lap like it had been waiting for permission to rest. The runaway was not being naughty \u2014 it was terrified of a crash-prone rider, and the gentle cat shadow proved those days were over. The End!"
+          "text": "The cat shadow curled up and tucked its paws, and the broomstick's wild shadow did EXACTLY the same thing \u2014 the broomstick floated down into Willow's lap like it had been waiting for permission to rest. The runaway was not being naughty \u2014 it was terrified of a crash-prone rider, and the gentle cat shadow proved those days were over. The End!",
+          "video": "story-video/bayou_end_gentle_land_end.mp4"
         },
         "end_cat_dance": {
           "image": "story/bayou_end_cat_dance.png",
-          "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag \u2014 around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!"
+          "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag \u2014 around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!",
+          "video": "story-video/bayou_end_cat_dance_end.mp4"
         },
         "end_snake_spiral": {
           "image": "story/bayou_end_snake_spiral.png",
-          "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!"
+          "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!",
+          "video": "story-video/bayou_end_snake_spiral_end.mp4"
         },
         "end_frog_splash": {
           "image": "story/bayou_end_frog_splash.png",
-          "text": "The frog shadow leaped SO enthusiastically that the broomstick copied it right into the WATER \u2014 Willow went in after it and now they are both soaking, the bristles are full of duckweed, and the singing reed is making gargle noises. The mushroom circle is just watching like this is the funniest thing since tadpoles. Oopsie ending!"
+          "text": "The frog shadow leaped SO enthusiastically that the broomstick copied it right into the WATER \u2014 Willow went in after it and now they are both soaking, the bristles are full of duckweed, and the singing reed is making gargle noises. The mushroom circle is just watching like this is the funniest thing since tadpoles. Oopsie ending!",
+          "video": "story-video/bayou_end_frog_splash_end.mp4"
         },
         "end_waterfall_calm": {
           "image": "story/bayou_end_waterfall_calm.png",
-          "text": "The snake shadow swayed like a lullaby and the broomstick's wild shadow swayed right along until the shaking stopped \u2014 the broomstick leaned against Willow's shoulder with a tired little hum. The singing reed joined in and the waterfall sang harmony, and by the time they flew home the broomstick trusted her completely. Gentlest flight of the whole semester. The End!"
+          "text": "The snake shadow swayed like a lullaby and the broomstick's wild shadow swayed right along until the shaking stopped \u2014 the broomstick leaned against Willow's shoulder with a tired little hum. The singing reed joined in and the waterfall sang harmony, and by the time they flew home the broomstick trusted her completely. Gentlest flight of the whole semester. The End!",
+          "video": "story-video/bayou_end_waterfall_calm_end.mp4"
         },
         "end_dawn_race": {
           "image": "story/bayou_end_dawn_race.png",
-          "text": "The frog shadow bounced and the broomstick bounced and then it bounced RIGHT THROUGH THE WATERFALL and wedged itself between two rocks like a very sparkly cork \u2014 by the time Willow pried it loose the sun was up and the exam was over. The broomstick looked extremely sorry but sorry does not un-miss a sunrise deadline. Oopsie ending!"
+          "text": "The frog shadow bounced and the broomstick bounced and then it bounced RIGHT THROUGH THE WATERFALL and wedged itself between two rocks like a very sparkly cork \u2014 by the time Willow pried it loose the sun was up and the exam was over. The broomstick looked extremely sorry but sorry does not un-miss a sunrise deadline. Oopsie ending!",
+          "video": "story-video/bayou_end_dawn_race_end.mp4"
         }
       }
     },
