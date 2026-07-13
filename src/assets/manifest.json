@@ -2705,6 +2705,69 @@
           "thumb": "hidden/sky_market_t_kite_s.png"
         }
       ]
+    },
+    {
+      "id": "coral_reef",
+      "name": "Coral Reef",
+      "image": "hidden/coral_reef.png",
+      "w": 1280,
+      "h": 720,
+      "targets": [
+        {
+          "id": "jellyfish",
+          "label": "a translucent purple jellyfish",
+          "x": 664,
+          "y": 168,
+          "w": 136,
+          "h": 192,
+          "thumb": "hidden/coral_reef_t_jellyfish.png"
+        },
+        {
+          "id": "seashell",
+          "label": "a big striped spiral shell",
+          "x": 694,
+          "y": 539,
+          "w": 195,
+          "h": 149,
+          "thumb": "hidden/coral_reef_t_seashell.png"
+        },
+        {
+          "id": "angelfish",
+          "label": "a yellow and blue angelfish",
+          "x": 402,
+          "y": 255,
+          "w": 164,
+          "h": 126,
+          "thumb": "hidden/coral_reef_t_angelfish.png"
+        },
+        {
+          "id": "octopus_r",
+          "label": "a small red octopus",
+          "x": 166,
+          "y": 455,
+          "w": 177,
+          "h": 153,
+          "thumb": "hidden/coral_reef_t_octopus_r.png"
+        },
+        {
+          "id": "morayeel",
+          "label": "a friendly green moray eel peeking out",
+          "x": 962,
+          "y": 429,
+          "w": 196,
+          "h": 117,
+          "thumb": "hidden/coral_reef_t_morayeel.png"
+        },
+        {
+          "id": "clownfish",
+          "label": "an orange clownfish in an anemone",
+          "x": 790,
+          "y": 396,
+          "w": 138,
+          "h": 91,
+          "thumb": "hidden/coral_reef_t_clownfish.png"
+        }
+      ]
     }
   ],
   "stories": [
@@ -23281,6 +23344,300 @@
       }
     },
     {
+      "id": "manor",
+      "title": "Willow and the Shifting Manor",
+      "nodes": {
+        "start": {
+          "image": "story/manor_start.png",
+          "text": "Grandma's cat Pumpkin has been crying inside this creepy manor for THREE days and the rooms rearrange themselves when you look away \u2014 Willow heard a meow from upstairs and spotted a corridor sneaking along the side. Grand staircase or brick corridor?",
+          "choices": [
+            {
+              "label": "Climb the grand staircase",
+              "next": "a"
+            },
+            {
+              "label": "Sneak through the corridor",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/manor_a.png",
+          "text": "Willow grabs the silver bell from the newel post and it FREEZES the room for one second \u2014 useful in a house that will not stop rearranging! One of the paintings is EMPTY with tiny footprints walking away from it, which is NOT how paintings work \u2014 parlor or music room?",
+          "choices": [
+            {
+              "label": "Peek into the parlor",
+              "next": "aa"
+            },
+            {
+              "label": "Tiptoe to the music room",
+              "next": "ab"
+            }
+          ],
+          "scare": {
+            "x": 414,
+            "y": 82,
+            "w": 249,
+            "h": 374,
+            "pop": "story/manor_a_pop.png",
+            "sting": "thunder",
+            "reveal": "Squawk! I just wanted to stretch my legs! That frame is SO cramped!",
+            "delay": 1800
+          }
+        },
+        "b": {
+          "image": "story/manor_b.png",
+          "text": "Willow spots a ball of purple yarn on the floor \u2014 that is Pumpkin's favorite toy, so the cat came THIS way \u2014 and she scoops it up to follow the trail. Spiral staircase or pantry?",
+          "choices": [
+            {
+              "label": "Climb the spiral stairs",
+              "next": "ba"
+            },
+            {
+              "label": "Search the pantry",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/manor_aa.png",
+          "text": "Willow sees a BADGER in a top hat peeking at her from behind the curtain, which is never a good sign \u2014 Pumpkin's meow echoes from deeper inside. Library or conservatory?",
+          "choices": [
+            {
+              "label": "Head for the library",
+              "next": "m1",
+              "hot": {
+                "x": 75,
+                "y": 1,
+                "w": 287,
+                "h": 667
+              }
+            },
+            {
+              "label": "Enter the conservatory",
+              "next": "m2",
+              "hot": {
+                "x": 480,
+                "y": 0,
+                "w": 253,
+                "h": 605
+              }
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/manor_ab.png",
+          "text": "The piano is playing ALL BY ITSELF and Willow can see a badger in a monocle watching her in the mirror \u2014 she rings the bell and the piano freezes mid-chord but the badger vanishes! Library or conservatory?",
+          "choices": [
+            {
+              "label": "Chase him to the library",
+              "next": "m1",
+              "hot": {
+                "x": 48,
+                "y": 42,
+                "w": 359,
+                "h": 545
+              }
+            },
+            {
+              "label": "Cut through the conservatory",
+              "next": "m2",
+              "hot": {
+                "x": 854,
+                "y": 25,
+                "w": 406,
+                "h": 580
+              }
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/manor_ba.png",
+          "text": "The staircase just TWISTED while Willow was ON IT and rearranged three steps behind her \u2014 she grabs the railing and holds tight because this manor has absolutely no manners. Ballroom or tower?",
+          "choices": [
+            {
+              "label": "Enter the ballroom",
+              "next": "m3",
+              "hot": {
+                "x": 83,
+                "y": 8,
+                "w": 179,
+                "h": 250
+              }
+            },
+            {
+              "label": "Climb the tower",
+              "next": "m4",
+              "hot": {
+                "x": 943,
+                "y": 209,
+                "w": 337,
+                "h": 510
+              }
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/manor_bb.png",
+          "text": "Pumpkin's paw prints are in the dust heading DEEPER and the yarn ball tugs gently in that direction like it remembers the way \u2014 Willow spots a hidden passage and a trapdoor above. Ballroom or tower?",
+          "choices": [
+            {
+              "label": "Slip into the ballroom",
+              "next": "m3",
+              "hot": {
+                "x": 119,
+                "y": 3,
+                "w": 203,
+                "h": 273
+              }
+            },
+            {
+              "label": "Pop through the trapdoor",
+              "next": "m4",
+              "hot": {
+                "x": 763,
+                "y": 101,
+                "w": 136,
+                "h": 122
+              }
+            }
+          ]
+        },
+        "m1": {
+          "image": "story/manor_m1.png",
+          "text": "The badger aims his catapult and yells HALT but Willow has her OWN catapult and the floor is making very concerning creaking noises \u2014 pink sticky potion or green bouncy potion?",
+          "choices": [
+            {
+              "label": "Load the pink potion",
+              "next": "end_sticky_save",
+              "hot": {
+                "x": 708,
+                "y": 305,
+                "w": 78,
+                "h": 92
+              }
+            },
+            {
+              "label": "Load the green potion",
+              "next": "end_bounce_out",
+              "hot": {
+                "x": 981,
+                "y": 265,
+                "w": 74,
+                "h": 132
+              }
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/manor_m2.png",
+          "text": "The badger launches a vine-net from behind the planter and Willow dodges \u2014 she has one shot before he reloads! Purple smoky potion or pink sticky potion?",
+          "choices": [
+            {
+              "label": "Load the purple potion",
+              "next": "end_smoky_sneak",
+              "hot": {
+                "x": 724,
+                "y": 291,
+                "w": 94,
+                "h": 122
+              }
+            },
+            {
+              "label": "Load the pink potion",
+              "next": "end_pink_hug",
+              "hot": {
+                "x": 1054,
+                "y": 349,
+                "w": 87,
+                "h": 119
+              }
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/manor_m3.png",
+          "text": "The badger fires a chandelier-rattle spell and the whole room shakes \u2014 Willow has THREE potions and one chance before the floor shifts again! Green bouncy, pink sticky, or purple smoky?",
+          "choices": [
+            {
+              "label": "Load the green potion",
+              "next": "end_green_truce"
+            },
+            {
+              "label": "Load the pink potion",
+              "next": "end_pink_stuck"
+            },
+            {
+              "label": "Load the purple potion",
+              "next": "end_purple_truth"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/manor_m4.png",
+          "text": "Pumpkin is RIGHT BEHIND the badger and he will NOT move from that landing \u2014 he looks worried, not mean, but Willow needs to get past! Green bouncy or purple smoky?",
+          "choices": [
+            {
+              "label": "Grab the green potion",
+              "next": "end_bouncy_bridge",
+              "hot": {
+                "x": 23,
+                "y": 108,
+                "w": 221,
+                "h": 375
+              }
+            },
+            {
+              "label": "Grab the purple potion",
+              "next": "end_purple_reveal",
+              "hot": {
+                "x": 1065,
+                "y": 243,
+                "w": 189,
+                "h": 253
+              }
+            }
+          ]
+        },
+        "end_sticky_save": {
+          "image": "story/manor_end_sticky_save.png",
+          "text": "The pink goo CAUGHT the falling floorboards like the world's stickiest safety net \u2014 turns out the floor was rotten over a BOTTOMLESS library pit and the badger was trying to stop Willow from falling through! He pulled off his top hat, bowed, and said he was grandma's old apprentice, guarding Pumpkin and the manor's terrible secret. Pumpkin purred from behind the bookshelf and Willow scooped her up on perfectly sticky-safe floors. The End!"
+        },
+        "end_bounce_out": {
+          "image": "story/manor_end_bounce_out.png",
+          "text": "The bouncy potion turned the ENTIRE library into a trampoline park and Willow bounced off a bookshelf, off the ceiling, and straight OUT THE WINDOW into the garden hedge \u2014 she looked up to see Pumpkin sitting calmly on the windowsill and the badger shaking his head like this was the silliest witch he had ever seen. Back to the entrance! Oopsie ending!"
+        },
+        "end_smoky_sneak": {
+          "image": "story/manor_end_smoky_sneak.png",
+          "text": "The purple smoke revealed EVERYTHING \u2014 glowing red lines showed every rotten board and every trap, and the badger took off his monocle and said FINALLY someone who checks before stomping around! He was grandma's old apprentice guarding the manor from a bottomless pit under the conservatory. Pumpkin was purring in the one safe corner, and Willow carried her home on the marked-safe path. The End!"
+        },
+        "end_pink_hug": {
+          "image": "story/manor_end_pink_hug.png",
+          "text": "The pink potion sealed the ENTIRE doorway shut like the world's stickiest wall and Willow's hat got glued to the frame \u2014 she dangled there by her cape while the badger sighed and said THAT is the third door this month! Pumpkin meowed from somewhere deeper in the manor, completely unreachable behind a wall of pink goo. Oopsie ending!"
+        },
+        "end_green_truce": {
+          "image": "story/manor_end_green_truce.png",
+          "text": "The bouncy potion turned the floor into a MEGA trampoline and Willow bounced so high she hit the CEILING \u2014 then the floor \u2014 then the ceiling AGAIN \u2014 and the badger just watched her ricochet around the ballroom like a very surprised pinball! By the time she stopped bouncing she was so dizzy she could not tell which way was up and Pumpkin was still on the chandelier looking deeply unimpressed. Oopsie ending!"
+        },
+        "end_pink_stuck": {
+          "image": "story/manor_end_pink_stuck.png",
+          "text": "The pink potion hit the CHANDELIER and it swung down and scooped up Willow, the badger, AND Pumpkin in one giant sticky sparkly glob \u2014 now all three of them are dangling from the ceiling like the world's worst ornament. The badger sighs and says THIS is why he set up the traps. Somebody will find them eventually! Oopsie ending!"
+        },
+        "end_purple_truth": {
+          "image": "story/manor_end_purple_truth.png",
+          "text": "The smoke revealed a BOTTOMLESS CRACK running across the entire dance floor and the badger was standing on the only safe strip \u2014 he was not blocking Willow, he was blocking the PIT! He was grandma's old apprentice guarding every lost visitor from the manor's rotten secret. Willow followed the safe strip, grabbed Pumpkin from behind the curtains, and they all walked out together. The End!"
+        },
+        "end_bouncy_bridge": {
+          "image": "story/manor_end_bouncy_bridge.png",
+          "text": "The bouncy potion turned the rotten landing into a TRAMPOLINE BRIDGE and Willow bounced right over the dangerous boards \u2014 the badger jumped aside and there was Pumpkin, curled in a cozy basket the badger had MADE for her! He was grandma's old apprentice and the rotten floor hid a bottomless drop, so he kept the cat safe and warm. Best babysitter badger ever. The End!"
+        },
+        "end_purple_reveal": {
+          "image": "story/manor_end_purple_reveal.png",
+          "text": "The smoke cleared and Willow saw it \u2014 every board glowed red with cracks except the ONE the badger was standing on, and right beside him Pumpkin was sleeping with the yarn as a pillow. He was grandma's old apprentice and the entire landing was a trap EXCEPT his spot. He had been standing guard for three days, feeding the cat treats and waiting for someone smart enough to look before stepping. The End!"
+        }
+      }
+    },
+    {
       "id": "carnival",
       "title": "Nova and the Midnight Carnival",
       "nodes": {
@@ -23292,12 +23649,11 @@
               "label": "Sneak to the ticket booth",
               "next": "a",
               "hot": {
-                "x": 5,
-                "y": 152,
-                "w": 317,
-                "h": 447
-              },
-              "video": "story-video/carnival_start_0.mp4"
+                "x": 3,
+                "y": 151,
+                "w": 321,
+                "h": 449
+              }
             },
             {
               "label": "Check the candy cart",
@@ -23306,9 +23662,8 @@
                 "x": 906,
                 "y": 143,
                 "w": 374,
-                "h": 520
-              },
-              "video": "story-video/carnival_start_1.mp4"
+                "h": 521
+              }
             }
           ]
         },
@@ -23318,37 +23673,22 @@
           "choices": [
             {
               "label": "Hop in the teacup ride",
-              "next": "aa",
-              "hot": {
-                "x": 68,
-                "y": 384,
-                "w": 224,
-                "h": 142
-              },
-              "video": "story-video/carnival_a_0.mp4"
+              "next": "aa"
             },
             {
               "label": "Walk through the archway",
-              "next": "ab",
-              "hot": {
-                "x": 966,
-                "y": 172,
-                "w": 314,
-                "h": 395
-              },
-              "video": "story-video/carnival_a_1.mp4"
+              "next": "ab"
             }
           ],
           "scare": {
-            "x": 346,
-            "y": 11,
-            "w": 447,
-            "h": 688,
+            "x": 764,
+            "y": 231,
+            "w": 244,
+            "h": 355,
             "pop": "story/carnival_a_pop.png",
             "sting": "boing",
             "reveal": "Ta-daaa! Just practicing my big entrance!",
-            "delay": 1800,
-            "video": "story-video/carnival_a_scare.mp4"
+            "delay": 1800
           }
         },
         "b": {
@@ -23357,25 +23697,11 @@
           "choices": [
             {
               "label": "Race the bumper cars",
-              "next": "ba",
-              "hot": {
-                "x": 0,
-                "y": 436,
-                "w": 141,
-                "h": 106
-              },
-              "video": "story-video/carnival_b_0.mp4"
+              "next": "ba"
             },
             {
               "label": "Visit the fortune-teller",
-              "next": "bb",
-              "hot": {
-                "x": 456,
-                "y": 142,
-                "w": 412,
-                "h": 538
-              },
-              "video": "story-video/carnival_b_1.mp4"
+              "next": "bb"
             }
           ]
         },
@@ -23399,25 +23725,11 @@
           "choices": [
             {
               "label": "Challenge at the carousel",
-              "next": "m1",
-              "hot": {
-                "x": 0,
-                "y": 2,
-                "w": 441,
-                "h": 601
-              },
-              "video": "story-video/carnival_ab_0.mp4"
+              "next": "m1"
             },
             {
               "label": "Play the calliope",
-              "next": "m2",
-              "hot": {
-                "x": 923,
-                "y": 84,
-                "w": 357,
-                "h": 571
-              },
-              "video": "story-video/carnival_ab_1.mp4"
+              "next": "m2"
             }
           ]
         },
@@ -23427,11 +23739,23 @@
           "choices": [
             {
               "label": "Try the prize tower",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 414,
+                "y": 215,
+                "w": 189,
+                "h": 256
+              }
             },
             {
               "label": "Play ring-toss",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 964,
+                "y": 54,
+                "w": 316,
+                "h": 466
+              }
             }
           ]
         },
@@ -23447,7 +23771,17 @@
               "label": "Play ring-toss",
               "next": "m4"
             }
-          ]
+          ],
+          "scare": {
+            "x": 494,
+            "y": 227,
+            "w": 107,
+            "h": 229,
+            "pop": "story/carnival_bb_pop.png",
+            "sting": "thunder",
+            "reveal": "Whoops, just your reflection stretching its legs!",
+            "delay": 1900
+          }
         },
         "m1": {
           "image": "story/carnival_m1.png",
@@ -23457,12 +23791,11 @@
               "label": "Swing the high chop",
               "next": "end_crown",
               "hot": {
-                "x": 86,
+                "x": 65,
                 "y": 44,
-                "w": 326,
-                "h": 244
-              },
-              "video": "story-video/carnival_m1_0.mp4"
+                "w": 348,
+                "h": 245
+              }
             },
             {
               "label": "Sweep the low strike",
@@ -23470,10 +23803,9 @@
               "hot": {
                 "x": 803,
                 "y": 413,
-                "w": 350,
-                "h": 285
-              },
-              "video": "story-video/carnival_m1_1.mp4"
+                "w": 358,
+                "h": 286
+              }
             }
           ]
         },
@@ -23517,293 +23849,359 @@
               "label": "Step onto the spotlight",
               "next": "end_show",
               "hot": {
-                "x": 607,
-                "y": 437,
-                "w": 190,
-                "h": 184
-              },
-              "video": "story-video/carnival_m4_0.mp4"
+                "x": 606,
+                "y": 436,
+                "w": 191,
+                "h": 186
+              }
             },
             {
               "label": "Pull the curtain",
               "next": "end_trap",
               "hot": {
-                "x": 902,
-                "y": 165,
-                "w": 170,
-                "h": 323
-              },
-              "video": "story-video/carnival_m4_1.mp4"
+                "x": 900,
+                "y": 150,
+                "w": 190,
+                "h": 340
+              }
             }
           ]
         },
         "end_crown": {
           "image": "story/carnival_end_crown.png",
-          "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd \u2014 Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined.",
-          "video": "story-video/carnival_end_crown_end.mp4"
+          "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd \u2014 Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined."
         },
         "end_dance": {
           "image": "story/carnival_end_dance.png",
-          "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat \u2014 round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!",
-          "video": "story-video/carnival_end_dance_end.mp4"
+          "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat \u2014 round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!"
         },
         "end_song": {
           "image": "story/carnival_end_song.png",
-          "text": "The bellows pump a golden melody and the Carnival King cannot help but dance \u2014 he waltzes over with the banner and asks if Nova's village has a stage, because this raccoon has been performing for empty seats and a real audience sounds like heaven.",
-          "video": "story-video/carnival_end_song_end.mp4"
+          "text": "The bellows pump a golden melody and the Carnival King cannot help but dance \u2014 he waltzes over with the banner and asks if Nova's village has a stage, because this raccoon has been performing for empty seats and a real audience sounds like heaven."
         },
         "end_fog": {
           "image": "story/carnival_end_fog.png",
-          "text": "Nova mashes the wrong valves and the calliope screams like a cat in a bathtub \u2014 the whole carnival sinks into fog three hours early and the banner vanishes with the Carnival King. Oopsie ending!",
-          "video": "story-video/carnival_end_fog_end.mp4"
+          "text": "Nova mashes the wrong valves and the calliope screams like a cat in a bathtub \u2014 the whole carnival sinks into fog three hours early and the banner vanishes with the Carnival King. Oopsie ending!"
         },
         "end_rings": {
           "image": "story/carnival_end_rings.png",
-          "text": "Every ring lands PERFECTLY and the prize tower dings so loud the Carnival King comes running \u2014 he hands over the banner and begs Nova to teach him that throw at the village festival.",
-          "video": "story-video/carnival_end_rings_end.mp4"
+          "text": "Every ring lands PERFECTLY and the prize tower dings so loud the Carnival King comes running \u2014 he hands over the banner and begs Nova to teach him that throw at the village festival."
         },
         "end_hammer": {
           "image": "story/carnival_end_hammer.png",
-          "text": "DING \u2014 the bell rings loud enough to wake up every sleeping scarecrow in three counties and the startled Carnival King drops the banner right into Nova's paws, then asks if she has ever considered a career in carnival strongfox.",
-          "video": "story-video/carnival_end_hammer_end.mp4"
+          "text": "DING \u2014 the bell rings loud enough to wake up every sleeping scarecrow in three counties and the startled Carnival King drops the banner right into Nova's paws, then asks if she has ever considered a career in carnival strongfox."
         },
         "end_chicken": {
           "image": "story/carnival_end_chicken.png",
-          "text": "Nova's dart pops a balloon but the prize that drops out is a rubber chicken the size of a loaf of bread \u2014 the Carnival King waves goodbye with the banner still firmly on his shoulders. Oopsie ending!",
-          "video": "story-video/carnival_end_chicken_end.mp4"
+          "text": "Nova's dart pops a balloon but the prize that drops out is a rubber chicken the size of a loaf of bread \u2014 the Carnival King waves goodbye with the banner still firmly on his shoulders. Oopsie ending!"
         },
         "end_show": {
           "image": "story/carnival_end_show.png",
-          "text": "Nova steps into the spotlight and takes a bow so magnificent that the Carnival King leaps up clapping \u2014 he has been performing to empty seats for so long that seeing a REAL showfox makes him hand over the banner and ask to join the village festival troupe.",
-          "video": "story-video/carnival_end_show_end.mp4"
+          "text": "Nova steps into the spotlight and takes a bow so magnificent that the Carnival King leaps up clapping \u2014 he has been performing to empty seats for so long that seeing a REAL showfox makes him hand over the banner and ask to join the village festival troupe."
         },
         "end_trap": {
           "image": "story/carnival_end_trap.png",
-          "text": "Behind the curtain is nothing but a banana peel and the Carnival King's giggling \u2014 Nova slips, does an accidental somersault, and by the time the stars stop spinning the carnival has packed itself up. Oopsie ending!",
-          "video": "story-video/carnival_end_trap_end.mp4"
+          "text": "Behind the curtain is nothing but a banana peel and the Carnival King's giggling \u2014 Nova slips, does an accidental somersault, and by the time the stars stop spinning the carnival has packed itself up. Oopsie ending!"
         }
       }
     },
     {
-      "id": "manor",
-      "title": "Willow and the Shifting Manor",
+      "id": "thunder",
+      "title": "Nova and the Storm Peak",
       "nodes": {
         "start": {
-          "image": "story/manor_start.png",
-          "text": "Grandma's cat Pumpkin has been crying inside this creepy manor for THREE days and the rooms rearrange themselves when you look away \u2014 Willow heard a meow from upstairs and spotted a corridor sneaking along the side. Grand staircase or brick corridor?",
+          "image": "story/thunder_start.png",
+          "text": "The village beacon went dark and the ONLY way to relight it is to carry this very fragile, very breakable glass lantern across the stormiest mountain in the kingdom \u2014 Nova holds it tight and picks a path. Stone bridge or wind tunnel?",
           "choices": [
             {
-              "label": "Climb the grand staircase",
-              "next": "a"
+              "label": "Cross the stone bridge",
+              "next": "a",
+              "hot": {
+                "x": 0,
+                "y": 305,
+                "w": 545,
+                "h": 304
+              }
             },
             {
-              "label": "Sneak through the corridor",
-              "next": "b"
+              "label": "Enter the wind tunnel",
+              "next": "b",
+              "hot": {
+                "x": 1045,
+                "y": 162,
+                "w": 199,
+                "h": 247
+              }
             }
           ]
         },
         "a": {
-          "image": "story/manor_a.png",
-          "text": "Willow grabs the silver bell from the newel post and it FREEZES the room for one second \u2014 useful in a house that will not stop rearranging! One of the paintings is EMPTY with tiny footprints walking away from it, which is NOT how paintings work \u2014 parlor or music room?",
+          "image": "story/thunder_a.png",
+          "text": "Lightning flashes and the bridge SHAKES but Nova spots a wool blanket caught on a post \u2014 she wraps it around the lantern for protection because glass plus lightning storm equals bad math. Mossy ledge or crystal cave?",
           "choices": [
             {
-              "label": "Peek into the parlor",
+              "label": "Climb to the mossy ledge",
               "next": "aa"
             },
             {
-              "label": "Tiptoe to the music room",
+              "label": "Duck into the crystal cave",
               "next": "ab"
             }
           ]
         },
         "b": {
-          "image": "story/manor_b.png",
-          "text": "Willow spots a ball of purple yarn on the floor \u2014 that is Pumpkin's favorite toy, so the cat came THIS way \u2014 and she scoops it up to follow the trail. Spiral staircase or pantry?",
+          "image": "story/thunder_b.png",
+          "text": "Wind gremlins dive-bomb the lantern but Nova snatches a feather cloak off the wall and shields the flame \u2014 the gremlins chitter angrily but the cloak blocks every gust like a tiny windbreaker for fire. Crumbling arch or thunder ridge?",
           "choices": [
             {
-              "label": "Climb the spiral stairs",
+              "label": "Cross the crumbling arch",
               "next": "ba"
             },
             {
-              "label": "Search the pantry",
+              "label": "Trek the thunder ridge",
               "next": "bb"
             }
           ]
         },
         "aa": {
-          "image": "story/manor_aa.png",
-          "text": "Willow sees a BADGER in a top hat peeking at her from behind the curtain, which is never a good sign \u2014 Pumpkin's meow echoes from deeper inside. Library or conservatory?",
+          "image": "story/thunder_aa.png",
+          "text": "From the ledge Nova can see the dark beacon at the very top AND a sheltered cave where she could catch her breath \u2014 the wind gremlins are circling above like tiny angry helicopters. Mountain cave or summit trail?",
           "choices": [
             {
-              "label": "Head for the library",
-              "next": "m1"
+              "label": "Shelter in the cave",
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 315,
+                "h": 378
+              }
             },
             {
-              "label": "Enter the conservatory",
-              "next": "m2"
+              "label": "Push up the trail",
+              "next": "m2",
+              "hot": {
+                "x": 752,
+                "y": 233,
+                "w": 350,
+                "h": 422
+              }
             }
           ]
         },
         "ab": {
-          "image": "story/manor_ab.png",
-          "text": "The piano is playing ALL BY ITSELF and Willow can see a badger in a monocle watching her in the mirror \u2014 she rings the bell and the piano freezes mid-chord but the badger vanishes! Library or conservatory?",
+          "image": "story/thunder_ab.png",
+          "text": "The crystals catch the lantern light and scatter it like a hundred tiny stars \u2014 very pretty but the Storm Hawk's shadow just crossed the cave entrance, so moving is better than admiring geology. Mountain cave or summit trail?",
           "choices": [
             {
-              "label": "Chase him to the library",
-              "next": "m1"
+              "label": "Go deeper into the cave",
+              "next": "m1",
+              "hot": {
+                "x": 25,
+                "y": 0,
+                "w": 392,
+                "h": 539
+              }
             },
             {
-              "label": "Cut through the conservatory",
-              "next": "m2"
+              "label": "Climb out to the trail",
+              "next": "m2",
+              "hot": {
+                "x": 744,
+                "y": 233,
+                "w": 356,
+                "h": 423
+              }
             }
           ]
         },
         "ba": {
-          "image": "story/manor_ba.png",
-          "text": "The staircase just TWISTED while Willow was ON IT and rearranged three steps behind her \u2014 she grabs the railing and holds tight because this manor has absolutely no manners. Ballroom or tower?",
+          "image": "story/thunder_ba.png",
+          "text": "The wind gremlins keep pointing at the Storm Hawk circling above and then at Nova's lantern \u2014 they seem worried FOR her, which is confusing because five minutes ago they were dive-bombing her face. Boulder field or hawk perch?",
           "choices": [
             {
-              "label": "Enter the ballroom",
+              "label": "Cross the boulder field",
               "next": "m3"
             },
             {
-              "label": "Climb the tower",
+              "label": "Climb to the hawk perch",
               "next": "m4"
             }
           ]
         },
         "bb": {
-          "image": "story/manor_bb.png",
-          "text": "Pumpkin's paw prints are in the dust heading DEEPER and the yarn ball tugs gently in that direction like it remembers the way \u2014 Willow spots a hidden passage and a trapdoor above. Ballroom or tower?",
+          "image": "story/thunder_bb.png",
+          "text": "Lightning strikes a rod and the whole ridge glows blue for a second \u2014 and is that boulder in the path BREATHING? Boulder field or hawk perch?",
           "choices": [
             {
-              "label": "Slip into the ballroom",
-              "next": "m3"
+              "label": "Cross the boulder field",
+              "next": "m3",
+              "hot": {
+                "x": 0,
+                "y": 288,
+                "w": 496,
+                "h": 432
+              }
             },
             {
-              "label": "Pop through the trapdoor",
-              "next": "m4"
+              "label": "Climb to the hawk perch",
+              "next": "m4",
+              "hot": {
+                "x": 755,
+                "y": 232,
+                "w": 347,
+                "h": 424
+              }
             }
-          ]
+          ],
+          "scare": {
+            "x": 509,
+            "y": 236,
+            "w": 278,
+            "h": 280,
+            "pop": "story/thunder_bb_pop.png",
+            "sting": "thunder",
+            "reveal": "Grumble! Just napping through the storm, carry on little fox!",
+            "delay": 1900
+          }
         },
         "m1": {
-          "image": "story/manor_m1.png",
-          "text": "The badger aims his catapult and yells HALT but Willow has her OWN catapult and the floor is making very concerning creaking noises \u2014 pink sticky potion or green bouncy potion?",
+          "image": "story/thunder_m1.png",
+          "text": "Wind gremlins pour through the gaps and the lantern flame dances wildly \u2014 Nova needs to block one gap FAST with whatever is handy, and this is basically a pillow fort but with rocks and moss. Moss bundle or rock pile?",
           "choices": [
             {
-              "label": "Load the pink potion",
-              "next": "end_sticky_save"
+              "label": "Stuff the moss bundle",
+              "next": "end_guardian",
+              "hot": {
+                "x": 47,
+                "y": 348,
+                "w": 413,
+                "h": 299
+              }
             },
             {
-              "label": "Load the green potion",
-              "next": "end_bounce_out"
+              "label": "Stack the rock pile",
+              "next": "end_crack",
+              "hot": {
+                "x": 1010,
+                "y": 132,
+                "w": 270,
+                "h": 495
+              }
             }
           ]
         },
         "m2": {
-          "image": "story/manor_m2.png",
-          "text": "The badger launches a vine-net from behind the planter and Willow dodges \u2014 she has one shot before he reloads! Purple smoky potion or pink sticky potion?",
+          "image": "story/thunder_m2.png",
+          "text": "The beacon is SO close but the Storm Hawk keeps circling and the wind is trying to shove Nova off the mountain \u2014 she needs a plan and the trail offers two interesting objects. Weather vane or signal horn?",
           "choices": [
             {
-              "label": "Load the purple potion",
-              "next": "end_smoky_sneak"
+              "label": "Grab the weather vane",
+              "next": "end_redirect"
             },
             {
-              "label": "Load the pink potion",
-              "next": "end_pink_hug"
+              "label": "Blow the signal horn",
+              "next": "end_blown"
             }
           ]
         },
         "m3": {
-          "image": "story/manor_m3.png",
-          "text": "The badger fires a chandelier-rattle spell and the whole room shakes \u2014 Willow has THREE potions and one chance before the floor shifts again! Green bouncy, pink sticky, or purple smoky?",
+          "image": "story/thunder_m3.png",
+          "text": "The wind gremlins are forming a tiny living shield around the lantern and NOW Nova gets it \u2014 they are not attacking, they are PROTECTING the light from the Storm Hawk that eats light. Cave, tower, or passage?",
           "choices": [
             {
-              "label": "Load the green potion",
-              "next": "end_green_truce"
+              "label": "Hide under the overhang",
+              "next": "end_sneak",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 515,
+                "h": 450
+              }
             },
             {
-              "label": "Load the pink potion",
-              "next": "end_pink_stuck"
+              "label": "Climb the stone tower",
+              "next": "end_lightning",
+              "hot": {
+                "x": 794,
+                "y": 108,
+                "w": 166,
+                "h": 284
+              }
             },
             {
-              "label": "Load the purple potion",
-              "next": "end_purple_truth"
+              "label": "Sneak through the passage",
+              "next": "end_decoy",
+              "hot": {
+                "x": 837,
+                "y": 409,
+                "w": 443,
+                "h": 311
+              }
             }
           ]
         },
         "m4": {
-          "image": "story/manor_m4.png",
-          "text": "Pumpkin is RIGHT BEHIND the badger and he will NOT move from that landing \u2014 he looks worried, not mean, but Willow needs to get past! Green bouncy or purple smoky?",
+          "image": "story/thunder_m4.png",
+          "text": "The Storm Hawk is RIGHT THERE staring at the lantern with hungry golden eyes and the wind gremlins are chittering battle plans behind Nova \u2014 time to make a move before that beak gets any closer. Crystal outcrop or chain bridge?",
           "choices": [
             {
-              "label": "Grab the green potion",
-              "next": "end_bouncy_bridge",
+              "label": "Use the crystal outcrop",
+              "next": "end_dazzle",
               "hot": {
-                "x": 25,
-                "y": 131,
-                "w": 218,
-                "h": 351
-              },
-              "video": "story-video/manor_m4_0.mp4"
+                "x": 0,
+                "y": 307,
+                "w": 295,
+                "h": 413
+              }
             },
             {
-              "label": "Grab the purple potion",
-              "next": "end_purple_reveal",
+              "label": "Sprint the chain bridge",
+              "next": "end_swoop",
               "hot": {
-                "x": 1066,
-                "y": 244,
-                "w": 187,
-                "h": 251
-              },
-              "video": "story-video/manor_m4_1.mp4"
+                "x": 745,
+                "y": 349,
+                "w": 334,
+                "h": 371
+              }
             }
           ]
         },
-        "end_sticky_save": {
-          "image": "story/manor_end_sticky_save.png",
-          "text": "The pink goo CAUGHT the falling floorboards like the world's stickiest safety net \u2014 turns out the floor was rotten over a BOTTOMLESS library pit and the badger was trying to stop Willow from falling through! He pulled off his top hat, bowed, and said he was grandma's old apprentice, guarding Pumpkin and the manor's terrible secret. Pumpkin purred from behind the bookshelf and Willow scooped her up on perfectly sticky-safe floors. The End!",
-          "video": "story-video/manor_end_sticky_save_end.mp4"
+        "end_guardian": {
+          "image": "story/thunder_end_guardian.png",
+          "text": "The moss blocks the wind perfectly and the gremlins settle around the lantern like fuzzy little bodyguards \u2014 they WERE protecting it all along, and together they wait out the hawk and carry the flame safely to the beacon at dawn."
         },
-        "end_bounce_out": {
-          "image": "story/manor_end_bounce_out.png",
-          "text": "The bouncy potion turned the ENTIRE library into a trampoline park and Willow bounced off a bookshelf, off the ceiling, and straight OUT THE WINDOW into the garden hedge \u2014 she looked up to see Pumpkin sitting calmly on the windowsill and the badger shaking his head like this was the silliest witch he had ever seen. Back to the entrance! Oopsie ending!",
-          "video": "story-video/manor_end_bounce_out_end.mp4"
+        "end_crack": {
+          "image": "story/thunder_end_crack.png",
+          "text": "The rocks stack solid but the THUD shakes the whole cave and the lantern tips off its stone and cracks \u2014 the flame sputters out and even the wind gremlins look heartbroken. Oopsie ending!"
         },
-        "end_smoky_sneak": {
-          "image": "story/manor_end_smoky_sneak.png",
-          "text": "The purple smoke revealed EVERYTHING \u2014 glowing red lines showed every rotten board and every trap, and the badger took off his monocle and said FINALLY someone who checks before stomping around! He was grandma's old apprentice guarding the manor from a bottomless pit under the conservatory. Pumpkin was purring in the one safe corner, and Willow carried her home on the marked-safe path. The End!",
-          "video": "story-video/manor_end_smoky_sneak_end.mp4"
+        "end_redirect": {
+          "image": "story/thunder_end_redirect.png",
+          "text": "Nova points the weather vane skyward and lightning follows the arrow AWAY from the lantern \u2014 the flash scares the Storm Hawk into next week and the beacon flame catches, sending golden light pouring across the valley."
         },
-        "end_pink_hug": {
-          "image": "story/manor_end_pink_hug.png",
-          "text": "The pink potion sealed the ENTIRE doorway shut like the world's stickiest wall and Willow's hat got glued to the frame \u2014 she dangled there by her cape while the badger sighed and said THAT is the third door this month! Pumpkin meowed from somewhere deeper in the manor, completely unreachable behind a wall of pink goo. Oopsie ending!",
-          "video": "story-video/manor_end_pink_hug_end.mp4"
+        "end_blown": {
+          "image": "story/thunder_end_blown.png",
+          "text": "The horn blast echoes across three mountains and sounds AMAZING but it also blows out the lantern like a birthday candle \u2014 the Storm Hawk does a victory loop and Nova is standing in the dark holding a very loud empty horn. Oopsie ending!"
         },
-        "end_green_truce": {
-          "image": "story/manor_end_green_truce.png",
-          "text": "The bouncy potion turned the floor into a MEGA trampoline and Willow bounced so high she hit the CEILING \u2014 then the floor \u2014 then the ceiling AGAIN \u2014 and the badger just watched her ricochet around the ballroom like a very surprised pinball! By the time she stopped bouncing she was so dizzy she could not tell which way was up and Pumpkin was still on the chandelier looking deeply unimpressed. Oopsie ending!",
-          "video": "story-video/manor_end_green_truce_end.mp4"
+        "end_sneak": {
+          "image": "story/thunder_end_sneak.png",
+          "text": "The gremlins huddled perfectly until one little gremlin sneezed \u2014 the tiniest puff of wind knocked the lantern against the rock and CRACK went the glass! The flame sputtered and died while every other gremlin stared at the sneezer with the most judgmental faces Nova had ever seen on something that small. No flame, no beacon, and one VERY sorry gremlin. Oopsie ending!"
         },
-        "end_pink_stuck": {
-          "image": "story/manor_end_pink_stuck.png",
-          "text": "The pink potion hit the CHANDELIER and it swung down and scooped up Willow, the badger, AND Pumpkin in one giant sticky sparkly glob \u2014 now all three of them are dangling from the ceiling like the world's worst ornament. The badger sighs and says THIS is why he set up the traps. Somebody will find them eventually! Oopsie ending!",
-          "video": "story-video/manor_end_pink_stuck_end.mp4"
+        "end_lightning": {
+          "image": "story/thunder_end_lightning.png",
+          "text": "Lightning hits the tower and instead of breaking the lantern the bolt channels THROUGH it \u2014 the glass blazes so bright the Storm Hawk squawks and flaps away, and the beacon across the peak catches the light and roars to life."
         },
-        "end_purple_truth": {
-          "image": "story/manor_end_purple_truth.png",
-          "text": "The smoke revealed a BOTTOMLESS CRACK running across the entire dance floor and the badger was standing on the only safe strip \u2014 he was not blocking Willow, he was blocking the PIT! He was grandma's old apprentice guarding every lost visitor from the manor's rotten secret. Willow followed the safe strip, grabbed Pumpkin from behind the curtains, and they all walked out together. The End!",
-          "video": "story-video/manor_end_purple_truth_end.mp4"
+        "end_decoy": {
+          "image": "story/thunder_end_decoy.png",
+          "text": "The gremlins scatter ahead carrying tiny sparks and the Storm Hawk chases every wrong glow like a cat after laser dots \u2014 meanwhile Nova tiptoes through the passage with the real lantern and lights the beacon while the hawk is busy playing tag."
         },
-        "end_bouncy_bridge": {
-          "image": "story/manor_end_bouncy_bridge.png",
-          "text": "The bouncy potion turned the rotten landing into a TRAMPOLINE BRIDGE and Willow bounced right over the dangerous boards \u2014 the badger jumped aside and there was Pumpkin, curled in a cozy basket the badger had MADE for her! He was grandma's old apprentice and the rotten floor hid a bottomless drop, so he kept the cat safe and warm. Best babysitter badger ever. The End!",
-          "video": "story-video/manor_end_bouncy_bridge_end.mp4"
+        "end_dazzle": {
+          "image": "story/thunder_end_dazzle.png",
+          "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud \u2014 the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards."
         },
-        "end_purple_reveal": {
-          "image": "story/manor_end_purple_reveal.png",
-          "text": "The smoke cleared and Willow saw it \u2014 every board glowed red with cracks except the ONE the badger was standing on, and right beside him Pumpkin was sleeping with the yarn as a pillow. He was grandma's old apprentice and the entire landing was a trap EXCEPT his spot. He had been standing guard for three days, feeding the cat treats and waiting for someone smart enough to look before stepping. The End!",
-          "video": "story-video/manor_end_purple_reveal_end.mp4"
+        "end_swoop": {
+          "image": "story/thunder_end_swoop.png",
+          "text": "Nova sprinted but the bridge SWUNG like a hammock in a hurricane and the lantern bounced off a chain and tumbled into the clouds \u2014 gone! The Storm Hawk dove after the falling light like the world's worst game of fetch and Nova clung to the swinging bridge with her fur standing straight up. No lantern, no beacon, and a VERY long climb back down. Oopsie ending!"
         }
       }
     },
@@ -23887,11 +24285,23 @@
           "choices": [
             {
               "label": "Enter the mushroom circle",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 90,
+                "y": 232,
+                "w": 405,
+                "h": 218
+              }
             },
             {
               "label": "Approach the waterfall",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 958,
+                "y": 48,
+                "w": 241,
+                "h": 435
+              }
             }
           ]
         },
@@ -23901,11 +24311,23 @@
           "choices": [
             {
               "label": "Head for the mushroom circle",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 87,
+                "y": 380,
+                "w": 306,
+                "h": 207
+              }
             },
             {
               "label": "Climb toward the waterfall",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 895,
+                "y": 294,
+                "w": 155,
+                "h": 389
+              }
             }
           ]
         },
@@ -23915,11 +24337,23 @@
           "choices": [
             {
               "label": "Step behind the cat rock",
-              "next": "end_cat_grace"
+              "next": "end_cat_grace",
+              "hot": {
+                "x": 74,
+                "y": 0,
+                "w": 378,
+                "h": 362
+              }
             },
             {
               "label": "Step behind the snake root",
-              "next": "end_snake_flee"
+              "next": "end_snake_flee",
+              "hot": {
+                "x": 936,
+                "y": 422,
+                "w": 283,
+                "h": 298
+              }
             }
           ]
         },
@@ -23961,476 +24395,273 @@
           "choices": [
             {
               "label": "Step behind the driftwood",
-              "next": "end_waterfall_calm"
+              "next": "end_waterfall_calm",
+              "hot": {
+                "x": 53,
+                "y": 202,
+                "w": 271,
+                "h": 373
+              }
             },
             {
               "label": "Step behind the boulder",
-              "next": "end_dawn_race"
+              "next": "end_dawn_race",
+              "hot": {
+                "x": 942,
+                "y": 388,
+                "w": 277,
+                "h": 210
+              }
             }
           ]
         },
         "end_cat_grace": {
           "image": "story/bayou_end_cat_grace.png",
-          "text": "Willow's cat shadow stretched long and SLOW and the broomstick's wild shadow copied it perfectly \u2014 stretch, arch, purr-wiggle. The broomstick drifted down like a leaf and nuzzled her hand because the cat shadow proved she would never yank the handle or take a corner too fast again. The broomstick was never a phantom \u2014 it was a broom that wanted a rider who understood GRACE. Witch exam: passed with flying colors. The End!",
-          "video": "story-video/bayou_end_cat_grace_end.mp4"
+          "text": "Willow's cat shadow stretched long and SLOW and the broomstick's wild shadow copied it perfectly \u2014 stretch, arch, purr-wiggle. The broomstick drifted down like a leaf and nuzzled her hand because the cat shadow proved she would never yank the handle or take a corner too fast again. The broomstick was never a phantom \u2014 it was a broom that wanted a rider who understood GRACE. Witch exam: passed with flying colors. The End!"
         },
         "end_snake_flee": {
           "image": "story/bayou_end_snake_flee.png",
-          "text": "The snake shadow HISSED and the broomstick decided nope nope NOPE \u2014 it rocketed into the fog so fast it left a violet comet trail, and by the time Willow stopped coughing on the sparks the sun was coming up. Turns out a scared broomstick does NOT like snakes. Witch exam: postponed! Oopsie ending!",
-          "video": "story-video/bayou_end_snake_flee_end.mp4"
+          "text": "The snake shadow HISSED and the broomstick decided nope nope NOPE \u2014 it rocketed into the fog so fast it left a violet comet trail, and by the time Willow stopped coughing on the sparks the sun was coming up. Turns out a scared broomstick does NOT like snakes. Witch exam: postponed! Oopsie ending!"
         },
         "end_frog_bounce": {
           "image": "story/bayou_end_frog_bounce.png",
-          "text": "The frog shadow went boing-boing-boing and the broomstick's shadow went boing-boing-boing right back \u2014 before Willow knew it the broomstick was BOUNCING beside her like a happy puppy! It bonked her hat with its bristles and she laughed so hard the whole grotto glowed. The broomstick just wanted a rider who could be SILLY. The End!",
-          "video": "story-video/bayou_end_frog_bounce_end.mp4"
+          "text": "The frog shadow went boing-boing-boing and the broomstick's shadow went boing-boing-boing right back \u2014 before Willow knew it the broomstick was BOUNCING beside her like a happy puppy! It bonked her hat with its bristles and she laughed so hard the whole grotto glowed. The broomstick just wanted a rider who could be SILLY. The End!"
         },
         "end_gentle_land": {
           "image": "story/bayou_end_gentle_land.png",
-          "text": "The cat shadow curled up and tucked its paws, and the broomstick's wild shadow did EXACTLY the same thing \u2014 the broomstick floated down into Willow's lap like it had been waiting for permission to rest. The runaway was not being naughty \u2014 it was terrified of a crash-prone rider, and the gentle cat shadow proved those days were over. The End!",
-          "video": "story-video/bayou_end_gentle_land_end.mp4"
+          "text": "The cat shadow curled up and tucked its paws, and the broomstick's wild shadow did EXACTLY the same thing \u2014 the broomstick floated down into Willow's lap like it had been waiting for permission to rest. The runaway was not being naughty \u2014 it was terrified of a crash-prone rider, and the gentle cat shadow proved those days were over. The End!"
         },
         "end_cat_dance": {
           "image": "story/bayou_end_cat_dance.png",
-          "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag \u2014 around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!",
-          "video": "story-video/bayou_end_cat_dance_end.mp4"
+          "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag \u2014 around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!"
         },
         "end_snake_spiral": {
           "image": "story/bayou_end_snake_spiral.png",
-          "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!",
-          "video": "story-video/bayou_end_snake_spiral_end.mp4"
+          "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!"
         },
         "end_frog_splash": {
           "image": "story/bayou_end_frog_splash.png",
-          "text": "The frog shadow leaped SO enthusiastically that the broomstick copied it right into the WATER \u2014 Willow went in after it and now they are both soaking, the bristles are full of duckweed, and the singing reed is making gargle noises. The mushroom circle is just watching like this is the funniest thing since tadpoles. Oopsie ending!",
-          "video": "story-video/bayou_end_frog_splash_end.mp4"
+          "text": "The frog shadow leaped SO enthusiastically that the broomstick copied it right into the WATER \u2014 Willow went in after it and now they are both soaking, the bristles are full of duckweed, and the singing reed is making gargle noises. The mushroom circle is just watching like this is the funniest thing since tadpoles. Oopsie ending!"
         },
         "end_waterfall_calm": {
           "image": "story/bayou_end_waterfall_calm.png",
-          "text": "The snake shadow swayed like a lullaby and the broomstick's wild shadow swayed right along until the shaking stopped \u2014 the broomstick leaned against Willow's shoulder with a tired little hum. The singing reed joined in and the waterfall sang harmony, and by the time they flew home the broomstick trusted her completely. Gentlest flight of the whole semester. The End!",
-          "video": "story-video/bayou_end_waterfall_calm_end.mp4"
+          "text": "The snake shadow swayed like a lullaby and the broomstick's wild shadow swayed right along until the shaking stopped \u2014 the broomstick leaned against Willow's shoulder with a tired little hum. The singing reed joined in and the waterfall sang harmony, and by the time they flew home the broomstick trusted her completely. Gentlest flight of the whole semester. The End!"
         },
         "end_dawn_race": {
           "image": "story/bayou_end_dawn_race.png",
-          "text": "The frog shadow bounced and the broomstick bounced and then it bounced RIGHT THROUGH THE WATERFALL and wedged itself between two rocks like a very sparkly cork \u2014 by the time Willow pried it loose the sun was up and the exam was over. The broomstick looked extremely sorry but sorry does not un-miss a sunrise deadline. Oopsie ending!",
-          "video": "story-video/bayou_end_dawn_race_end.mp4"
+          "text": "The frog shadow bounced and the broomstick bounced and then it bounced RIGHT THROUGH THE WATERFALL and wedged itself between two rocks like a very sparkly cork \u2014 by the time Willow pried it loose the sun was up and the exam was over. The broomstick looked extremely sorry but sorry does not un-miss a sunrise deadline. Oopsie ending!"
         }
       }
     },
     {
-      "id": "badlands",
-      "title": "Rex and the Runaway Echo",
+      "id": "observatory",
+      "title": "Mo and the Star Eaters",
       "nodes": {
         "start": {
-          "image": "story/badlands_start.png",
-          "text": "Rex opened his mouth to yawn and out came the BIGGEST accidental roar that ever roared \u2014 now it's bouncing off every canyon wall and getting LOUDER. He has to reach the Echo Stone and roar the counter-frequency before the whole desert shakes apart! Slot canyon or mesa arch?",
+          "image": "story/observatory_start.png",
+          "text": "Stars are going out like candles \u2014 something up there is gobbling them! The old observatory might have answers, or at least a telescope big enough to see what's hungry.",
           "choices": [
             {
-              "label": "Squeeze through the slot canyon",
+              "label": "Climb to the telescope dome",
               "next": "a"
             },
             {
-              "label": "March under the mesa arch",
+              "label": "Search the chart room",
               "next": "b"
             }
           ]
         },
         "a": {
-          "image": "story/badlands_a.png",
-          "text": "The slot canyon squeezed Rex's roar into a SQUEAL like a dinosaur stepping on a squeaky toy \u2014 embarrassing! But that turquoise singing stone on the ledge hummed back so sweetly Rex tucked it under his arm. Blue grotto or sandstone bridge?",
+          "image": "story/observatory_a.png",
+          "text": "The biggest telescope EVER! It's pointed right where stars keep disappearing, and something is rumbling in the walls \u2014 is that snoring or the wind?",
           "choices": [
             {
-              "label": "Explore the blue grotto",
+              "label": "Look through the telescope",
               "next": "aa"
             },
             {
-              "label": "Cross the sandstone bridge",
+              "label": "Search around the base",
               "next": "ab"
             }
           ]
         },
         "b": {
-          "image": "story/badlands_b.png",
-          "text": "Under the mesa arch Rex's echo bounced so hard pebbles rained down like confetti at a VERY loud party \u2014 but that terracotta wind-chime jingled the OPPOSITE sound and canceled the echo for one beautiful second. Rex grabbed it. Sienna staircase or red slot canyon?",
+          "image": "story/observatory_b.png",
+          "text": "Someone has been crossing out stars on the maps \u2014 the SAME ones vanishing from the real sky! A trail of fresh quill ink leads deeper inside.",
           "choices": [
             {
-              "label": "Climb down the sienna staircase",
+              "label": "Follow the ink trail",
               "next": "ba"
             },
             {
-              "label": "Duck into the red slot canyon",
+              "label": "Check the armchair desk",
               "next": "bb"
             }
           ]
         },
         "aa": {
-          "image": "story/badlands_aa.png",
-          "text": "The grotto turned Rex's breathing into a SYMPHONY and the singing stone hummed along like it knew every note \u2014 somewhere close the Echo Stone must be listening. Echo bell or crystal alcove?",
+          "image": "story/observatory_aa.png",
+          "text": "AHHH! Something in the sky just BLINKED \u2014 a massive eye stared right back through the telescope! Whatever is out there, it knows Mo is watching.",
           "choices": [
             {
-              "label": "Ring the echo bell",
+              "label": "Crumple a chart for ammo",
               "next": "m1"
             },
             {
-              "label": "Step into the crystal alcove",
+              "label": "Sneak past the moth",
               "next": "m2"
             }
           ]
         },
         "ab": {
-          "image": "story/badlands_ab.png",
-          "text": "The bridge WOBBLED with every echo-bounce and Rex's singing stone vibrated so hard it nearly wiggled free \u2014 whatever is making all this noise is CLOSE and probably enormous. Turquoise boulder or mesa ledge?",
+          "image": "story/observatory_ab.png",
+          "text": "The Star Jar! It hums and glows like a tiny trapped galaxy. Now Mo just needs to get past whatever is snoring in the walls \u2014 and figure out what's eating the stars.",
           "choices": [
             {
-              "label": "Climb past the turquoise boulder",
+              "label": "Take the Star Jar upstairs",
               "next": "m1"
             },
             {
-              "label": "Scout from the mesa ledge",
+              "label": "Examine the astrolabe",
               "next": "m2"
             }
           ]
         },
         "ba": {
-          "image": "story/badlands_ba.png",
-          "text": "Each step BONGED under Rex's feet and the wind-chime jingled the cancel-note just in time \u2014 but the ground at the bottom keeps rumbling and that armadillo barricade looks VERY intentional. Armadillo barricade or rust cave?",
+          "image": "story/observatory_ba.png",
+          "text": "The star chart is MOVING \u2014 the constellations rearranged into a face and it's mouthing something! The brass astrolabe starts spinning on its own too.",
           "choices": [
             {
-              "label": "Approach the armadillo barricade",
+              "label": "Grab the spinning globe",
               "next": "m3"
             },
             {
-              "label": "Peek into the rust cave",
+              "label": "Read the chalk equations",
               "next": "m4"
             }
           ]
         },
         "bb": {
-          "image": "story/badlands_bb.png",
-          "text": "This slot canyon was so tight Rex's echo squeezed into a WHISPER for once \u2014 the wind-chime barely had to cancel anything! But ahead the canyon opens into something BIG and echoey. Tan boulder or sienna tunnel?",
+          "image": "story/observatory_bb.png",
+          "text": "The porcupine astronomer fell asleep DECADES ago and he STILL rearranges furniture! His quills scratch the floor as he sleep-shuffles past, shoving bookshelves around in a dream.",
           "choices": [
             {
-              "label": "Pass the tan boulder",
+              "label": "Dodge past the porcupine",
               "next": "m3"
             },
             {
-              "label": "Enter the sienna tunnel",
+              "label": "Grab a quill from the pot",
               "next": "m4"
             }
           ]
         },
         "m1": {
-          "image": "story/badlands_m1.png",
-          "text": "There it is \u2014 the golden Echo Stone! It's practically SHAKING with Rex's trapped roar. One big counter-roar should shut it down \u2014 but the singing stone keeps humming toward that gentle crystal pool like it knows something Rex doesn't. Roar at the Echo Stone or dip the singing stone in the pool?",
+          "image": "story/observatory_m1.png",
+          "text": "Paper-ball skirmish! The sleep-walking porcupine shuffles straight at Mo! Stuff a paper ball in the eyepiece to block his view, or crank the dome open to distract him with sky?",
           "choices": [
             {
-              "label": "Roar at full blast",
-              "next": "end_full_blast"
+              "label": "Block the eyepiece",
+              "next": "end_blocked_view"
             },
             {
-              "label": "Dip the stone in the pool",
-              "next": "end_gentle_hum"
+              "label": "Crank the dome open",
+              "next": "end_open_sky"
             }
           ]
         },
         "m2": {
-          "image": "story/badlands_m2.png",
-          "text": "The armadillo captain tapped her helmet and pointed at the amphitheater \u2014 THIS is where Rex proves he can cancel his echo without scrambling every egg in the canyon. Canyon horn or drumstone?",
+          "image": "story/observatory_m2.png",
+          "text": "The porcupine is sleep-counting stars and heading RIGHT THIS WAY! Roll his chair across the room or yank the dome lever?",
           "choices": [
             {
-              "label": "Blow the canyon horn",
-              "next": "end_canyon_chorus"
+              "label": "Roll the chair away",
+              "next": "end_chair_glide"
             },
             {
-              "label": "Stomp the drumstone",
-              "next": "end_mesa_dance"
+              "label": "Pull the dome lever",
+              "next": "end_lever_snap"
             }
           ]
         },
         "m3": {
-          "image": "story/badlands_m3.png",
-          "text": "The armadillo captain rolled onto the stage and declared ROAR CONTEST! Rex can blow the deep bass horn, screech into the screech pipe, or squeeze that suspicious little cactus. Bass horn, screech pipe, or squeaky cactus?",
+          "image": "story/observatory_m3.png",
+          "text": "Triple-target paper-ball showdown \u2014 the porcupine is shuffling FAST! Block the eyepiece, crank the dome, or roll his chair?",
           "choices": [
             {
-              "label": "Blow the bass horn",
-              "next": "end_low_rumble"
+              "label": "Paper-ball the eyepiece",
+              "next": "end_eyepiece_bullseye"
             },
             {
-              "label": "Screech into the pipe",
-              "next": "end_high_screech"
+              "label": "Paper-ball the dome crank",
+              "next": "end_dome_flood"
             },
             {
-              "label": "Squeeze the squeaky cactus",
-              "next": "end_surprise_squeak"
+              "label": "Paper-ball the chair wheel",
+              "next": "end_spin_tumble"
             }
           ]
         },
         "m4": {
-          "image": "story/badlands_m4.png",
-          "text": "Rex's jaw DROPPED \u2014 armadillo EGGS everywhere, and they're shaking with every echo-bounce! No WONDER the armadillos are so grumpy about noise. The wind-chime is keeping things calm but Rex needs to be super careful. Big golden egg or spotted eggs?",
+          "image": "story/observatory_m4.png",
+          "text": "The star-moth watches calmly and the Star Jar hums \u2014 maybe these creatures aren't eating stars at all! Follow the moth outside or grab the jar to catch them?",
           "choices": [
             {
-              "label": "Hum to the golden egg",
-              "next": "end_egg_lullaby"
+              "label": "Follow the star-moth",
+              "next": "end_moth_garden",
+              "hot": {
+                "x": 56,
+                "y": 208,
+                "w": 313,
+                "h": 285
+              }
             },
             {
-              "label": "Tiptoe past the spotted eggs",
-              "next": "end_tail_thump"
+              "label": "Grab the Star Jar",
+              "next": "end_jar_fright",
+              "hot": {
+                "x": 1147,
+                "y": 95,
+                "w": 126,
+                "h": 192
+              }
             }
           ]
         },
-        "end_gentle_hum": {
-          "image": "story/badlands_end_gentle_hum.png",
-          "text": "Rex dipped the singing stone and the pool sang the gentlest hum \u2014 the Echo Stone LISTENED, the trapped roar melted away like butter on a hot rock, and the armadillo captain saluted from the entrance because NOT A SINGLE EGG CRACKED. Gentle beats loud every time. The End!",
-          "video": "story-video/badlands_end_gentle_hum_end.mp4"
+        "end_blocked_view": {
+          "image": "story/observatory_end_blocked_view.png",
+          "text": "The porcupine wanders off grumbling about clouds and Mo sneaks outside to see the truth \u2014 the star-moths are REPLANTING stars! They're building a brand-new constellation shaped like Mo's village, right down to the little fountain. The porcupine wakes, sees it, and weeps."
         },
-        "end_full_blast": {
-          "image": "story/badlands_end_full_blast.png",
-          "text": "Rex's mega-roar hit the Echo Stone so hard every wall in the canyon CRACKED and the echo got TEN TIMES LOUDER \u2014 now there are a HUNDRED roars bouncing around like the world's worst concert and Rex is going to need a LOT more singing stones. Oopsie ending!",
-          "video": "story-video/badlands_end_full_blast_end.mp4"
+        "end_open_sky": {
+          "image": "story/observatory_end_open_sky.png",
+          "text": "The dome opens and sky pours in! Star-moths swirl like golden confetti, planting stars into a picture of Mo's village. The porcupine wakes, adjusts his spectacles, and happy-cries so hard his quills rattle."
         },
-        "end_canyon_chorus": {
-          "image": "story/badlands_end_canyon_chorus.png",
-          "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA \u2014 together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!",
-          "video": "story-video/badlands_end_canyon_chorus_end.mp4"
+        "end_chair_glide": {
+          "image": "story/observatory_end_chair_glide.png",
+          "text": "Wheee goes the porcupine! While he rolls, Mo watches the truth unfold \u2014 the moths carry star-seeds to dark spots and PLANT them into a new constellation shaped like Mo's own village. The porcupine wakes, sees the sky, and sobs with joy."
         },
-        "end_mesa_dance": {
-          "image": "story/badlands_end_mesa_dance.png",
-          "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune \u2014 the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!",
-          "video": "story-video/badlands_end_mesa_dance_end.mp4"
+        "end_lever_snap": {
+          "image": "story/observatory_end_lever_snap.png",
+          "text": "CLANG! The lever snaps and the dome goes haywire \u2014 papers everywhere, the porcupine screaming about meteors, and Mo buried in star charts! The stars will have to wait for another night. Oopsie ending!"
         },
-        "end_low_rumble": {
-          "image": "story/badlands_end_low_rumble.png",
-          "text": "Rex blew that bass horn and a RUMBLE so deep it made his bones buzz rolled through the amphitheater \u2014 every armadillo nodded, the captain taught him the secret gentle counter-hum, and Rex walked out humming so softly not a single egg even wobbled. The End!",
-          "video": "story-video/badlands_end_low_rumble_end.mp4"
+        "end_eyepiece_bullseye": {
+          "image": "story/observatory_end_eyepiece_bullseye.png",
+          "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth \u2014 the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder."
         },
-        "end_high_screech": {
-          "image": "story/badlands_end_high_screech.png",
-          "text": "Rex SCREECHED so hard the pipe shot sparks and every armadillo curled into a ball and rolled offstage \u2014 stalactites cracked, the echo got SCREECHY too, and somewhere in the caves the eggs were vibrating like maracas. NOT the counter-frequency. Oopsie ending!",
-          "video": "story-video/badlands_end_high_screech_end.mp4"
+        "end_dome_flood": {
+          "image": "story/observatory_end_dome_flood.png",
+          "text": "Mo's paper ball jammed the dome crank halfway open and rain poured in like somebody turned on a giant shower \u2014 the porcupine woke up SCREAMING about his telescope getting wet and Mo spent the next hour mopping the floor with soggy star charts while the moths did their beautiful work outside where nobody could see it! Oopsie ending!"
         },
-        "end_surprise_squeak": {
-          "image": "story/badlands_end_surprise_squeak.png",
-          "text": "Rex squeezed that cactus and out came the TINIEST most ridiculous squeak \u2014 armadillos laughed so hard they fell off their seats, the echo hiccupped and shrank, and the captain was laughing too hard to be grumpy anymore! The counter-frequency to a big scary roar is one very silly squeak. The End!",
-          "video": "story-video/badlands_end_surprise_squeak_end.mp4"
+        "end_spin_tumble": {
+          "image": "story/observatory_end_spin_tumble.png",
+          "text": "Mo's paper ball sent the chair rolling and it crashed into the TELESCOPE \u2014 the biggest, most irreplaceable telescope in the observatory went CLANG and tipped sideways while the porcupine got tangled in the tripod like the world's prickliest pretzel! The old astronomer woke up furious and Mo spent the rest of the night helping realign a telescope he was definitely not qualified to touch. Oopsie ending!"
         },
-        "end_egg_lullaby": {
-          "image": "story/badlands_end_egg_lullaby.png",
-          "text": "Rex hummed the softest deepest lullaby a dinosaur ever hummed and the golden egg GLOWED \u2014 every egg in the cave stopped shaking, the armadillo captain cried actual armadillo tears, and she taught Rex the exact counter-frequency because anyone who hums THAT gently deserves to save the canyon. The End!",
-          "video": "story-video/badlands_end_egg_lullaby_end.mp4"
+        "end_moth_garden": {
+          "image": "story/observatory_end_moth_garden.png",
+          "text": "Mo follows the moth and sees everything \u2014 they're not eating stars, they're PLANTING a new constellation shaped like Mo's village! Every street, every rooftop, drawn in starlight. The porcupine wakes at last and whispers: that is the most beautiful thing in all my years of watching the sky."
         },
-        "end_tail_thump": {
-          "image": "story/badlands_end_tail_thump.png",
-          "text": "Rex tiptoed like a champion but his tail had OTHER PLANS \u2014 THWACK went the platform and eggs rolled everywhere like the world's most stressful bowling alley! Rex spent the rest of the afternoon returning eggs to nests while armadillos supervised with VERY judgmental expressions. Oopsie ending!",
-          "video": "story-video/badlands_end_tail_thump_end.mp4"
-        }
-      }
-    },
-    {
-      "id": "thunder",
-      "title": "Nova and the Storm Peak",
-      "nodes": {
-        "start": {
-          "image": "story/thunder_start.png",
-          "text": "The village beacon went dark and the ONLY way to relight it is to carry this very fragile, very breakable glass lantern across the stormiest mountain in the kingdom \u2014 Nova holds it tight and picks a path. Stone bridge or wind tunnel?",
-          "choices": [
-            {
-              "label": "Cross the stone bridge",
-              "next": "a"
-            },
-            {
-              "label": "Enter the wind tunnel",
-              "next": "b"
-            }
-          ]
-        },
-        "a": {
-          "image": "story/thunder_a.png",
-          "text": "Lightning flashes and the bridge SHAKES but Nova spots a wool blanket caught on a post \u2014 she wraps it around the lantern for protection because glass plus lightning storm equals bad math. Mossy ledge or crystal cave?",
-          "choices": [
-            {
-              "label": "Climb to the mossy ledge",
-              "next": "aa"
-            },
-            {
-              "label": "Duck into the crystal cave",
-              "next": "ab"
-            }
-          ]
-        },
-        "b": {
-          "image": "story/thunder_b.png",
-          "text": "Wind gremlins dive-bomb the lantern but Nova snatches a feather cloak off the wall and shields the flame \u2014 the gremlins chitter angrily but the cloak blocks every gust like a tiny windbreaker for fire. Crumbling arch or thunder ridge?",
-          "choices": [
-            {
-              "label": "Cross the crumbling arch",
-              "next": "ba"
-            },
-            {
-              "label": "Trek the thunder ridge",
-              "next": "bb"
-            }
-          ]
-        },
-        "aa": {
-          "image": "story/thunder_aa.png",
-          "text": "From the ledge Nova can see the dark beacon at the very top AND a sheltered cave where she could catch her breath \u2014 the wind gremlins are circling above like tiny angry helicopters. Mountain cave or summit trail?",
-          "choices": [
-            {
-              "label": "Shelter in the cave",
-              "next": "m1"
-            },
-            {
-              "label": "Push up the trail",
-              "next": "m2"
-            }
-          ]
-        },
-        "ab": {
-          "image": "story/thunder_ab.png",
-          "text": "The crystals catch the lantern light and scatter it like a hundred tiny stars \u2014 very pretty but the Storm Hawk's shadow just crossed the cave entrance, so moving is better than admiring geology. Mountain cave or summit trail?",
-          "choices": [
-            {
-              "label": "Go deeper into the cave",
-              "next": "m1"
-            },
-            {
-              "label": "Climb out to the trail",
-              "next": "m2"
-            }
-          ]
-        },
-        "ba": {
-          "image": "story/thunder_ba.png",
-          "text": "The wind gremlins keep pointing at the Storm Hawk circling above and then at Nova's lantern \u2014 they seem worried FOR her, which is confusing because five minutes ago they were dive-bombing her face. Boulder field or hawk perch?",
-          "choices": [
-            {
-              "label": "Cross the boulder field",
-              "next": "m3"
-            },
-            {
-              "label": "Climb to the hawk perch",
-              "next": "m4"
-            }
-          ]
-        },
-        "bb": {
-          "image": "story/thunder_bb.png",
-          "text": "Lightning strikes a rod and the whole ridge glows blue for a second \u2014 and is that boulder in the path BREATHING? Boulder field or hawk perch?",
-          "choices": [
-            {
-              "label": "Cross the boulder field",
-              "next": "m3"
-            },
-            {
-              "label": "Climb to the hawk perch",
-              "next": "m4"
-            }
-          ]
-        },
-        "m1": {
-          "image": "story/thunder_m1.png",
-          "text": "Wind gremlins pour through the gaps and the lantern flame dances wildly \u2014 Nova needs to block one gap FAST with whatever is handy, and this is basically a pillow fort but with rocks and moss. Moss bundle or rock pile?",
-          "choices": [
-            {
-              "label": "Stuff the moss bundle",
-              "next": "end_guardian"
-            },
-            {
-              "label": "Stack the rock pile",
-              "next": "end_crack"
-            }
-          ]
-        },
-        "m2": {
-          "image": "story/thunder_m2.png",
-          "text": "The beacon is SO close but the Storm Hawk keeps circling and the wind is trying to shove Nova off the mountain \u2014 she needs a plan and the trail offers two interesting objects. Weather vane or signal horn?",
-          "choices": [
-            {
-              "label": "Grab the weather vane",
-              "next": "end_redirect"
-            },
-            {
-              "label": "Blow the signal horn",
-              "next": "end_blown"
-            }
-          ]
-        },
-        "m3": {
-          "image": "story/thunder_m3.png",
-          "text": "The wind gremlins are forming a tiny living shield around the lantern and NOW Nova gets it \u2014 they are not attacking, they are PROTECTING the light from the Storm Hawk that eats light. Cave, tower, or passage?",
-          "choices": [
-            {
-              "label": "Hide under the overhang",
-              "next": "end_sneak"
-            },
-            {
-              "label": "Climb the stone tower",
-              "next": "end_lightning"
-            },
-            {
-              "label": "Sneak through the passage",
-              "next": "end_decoy"
-            }
-          ]
-        },
-        "m4": {
-          "image": "story/thunder_m4.png",
-          "text": "The Storm Hawk is RIGHT THERE staring at the lantern with hungry golden eyes and the wind gremlins are chittering battle plans behind Nova \u2014 time to make a move before that beak gets any closer. Crystal outcrop or chain bridge?",
-          "choices": [
-            {
-              "label": "Use the crystal outcrop",
-              "next": "end_dazzle"
-            },
-            {
-              "label": "Sprint the chain bridge",
-              "next": "end_swoop"
-            }
-          ]
-        },
-        "end_guardian": {
-          "image": "story/thunder_end_guardian.png",
-          "text": "The moss blocks the wind perfectly and the gremlins settle around the lantern like fuzzy little bodyguards \u2014 they WERE protecting it all along, and together they wait out the hawk and carry the flame safely to the beacon at dawn.",
-          "video": "story-video/thunder_end_guardian_end.mp4"
-        },
-        "end_crack": {
-          "image": "story/thunder_end_crack.png",
-          "text": "The rocks stack solid but the THUD shakes the whole cave and the lantern tips off its stone and cracks \u2014 the flame sputters out and even the wind gremlins look heartbroken. Oopsie ending!",
-          "video": "story-video/thunder_end_crack_end.mp4"
-        },
-        "end_redirect": {
-          "image": "story/thunder_end_redirect.png",
-          "text": "Nova points the weather vane skyward and lightning follows the arrow AWAY from the lantern \u2014 the flash scares the Storm Hawk into next week and the beacon flame catches, sending golden light pouring across the valley.",
-          "video": "story-video/thunder_end_redirect_end.mp4"
-        },
-        "end_blown": {
-          "image": "story/thunder_end_blown.png",
-          "text": "The horn blast echoes across three mountains and sounds AMAZING but it also blows out the lantern like a birthday candle \u2014 the Storm Hawk does a victory loop and Nova is standing in the dark holding a very loud empty horn. Oopsie ending!",
-          "video": "story-video/thunder_end_blown_end.mp4"
-        },
-        "end_sneak": {
-          "image": "story/thunder_end_sneak.png",
-          "text": "The gremlins huddled perfectly until one little gremlin sneezed \u2014 the tiniest puff of wind knocked the lantern against the rock and CRACK went the glass! The flame sputtered and died while every other gremlin stared at the sneezer with the most judgmental faces Nova had ever seen on something that small. No flame, no beacon, and one VERY sorry gremlin. Oopsie ending!",
-          "video": "story-video/thunder_end_sneak_end.mp4"
-        },
-        "end_lightning": {
-          "image": "story/thunder_end_lightning.png",
-          "text": "Lightning hits the tower and instead of breaking the lantern the bolt channels THROUGH it \u2014 the glass blazes so bright the Storm Hawk squawks and flaps away, and the beacon across the peak catches the light and roars to life.",
-          "video": "story-video/thunder_end_lightning_end.mp4"
-        },
-        "end_decoy": {
-          "image": "story/thunder_end_decoy.png",
-          "text": "The gremlins scatter ahead carrying tiny sparks and the Storm Hawk chases every wrong glow like a cat after laser dots \u2014 meanwhile Nova tiptoes through the passage with the real lantern and lights the beacon while the hawk is busy playing tag.",
-          "video": "story-video/thunder_end_decoy_end.mp4"
-        },
-        "end_dazzle": {
-          "image": "story/thunder_end_dazzle.png",
-          "text": "The lantern light hits the crystals and EXPLODES into a rainbow so bright the Storm Hawk bonks into a cloud \u2014 the gremlins cheer and Nova marches to the beacon with a parade of tiny furry bodyguards.",
-          "video": "story-video/thunder_end_dazzle_end.mp4"
-        },
-        "end_swoop": {
-          "image": "story/thunder_end_swoop.png",
-          "text": "Nova sprinted but the bridge SWUNG like a hammock in a hurricane and the lantern bounced off a chain and tumbled into the clouds \u2014 gone! The Storm Hawk dove after the falling light like the world's worst game of fetch and Nova clung to the swinging bridge with her fur standing straight up. No lantern, no beacon, and a VERY long climb back down. Oopsie ending!",
-          "video": "story-video/thunder_end_swoop_end.mp4"
+        "end_jar_fright": {
+          "image": "story/observatory_end_jar_fright.png",
+          "text": "The Star Jar scares all the moths away and the beautiful constellation falls apart into random sparkles! The porcupine is FURIOUS and Mo gets bonked with a chart. Those moths were making something beautiful and now it's gone. Oopsie ending!"
         }
       }
     },
@@ -24444,25 +24675,11 @@
           "choices": [
             {
               "label": "Explore the Dinosaur Hall",
-              "next": "a",
-              "hot": {
-                "x": 36,
-                "y": 135,
-                "w": 290,
-                "h": 334
-              },
-              "video": "story-video/museum_start_0.mp4"
+              "next": "a"
             },
             {
               "label": "Check the Gem Gallery",
-              "next": "b",
-              "hot": {
-                "x": 1043,
-                "y": 194,
-                "w": 204,
-                "h": 318
-              },
-              "video": "story-video/museum_start_1.mp4"
+              "next": "b"
             }
           ]
         },
@@ -24612,466 +24829,39 @@
         },
         "end_ruby_dazzle": {
           "image": "story/museum_end_ruby_dazzle.png",
-          "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago \u2014 Milo held her wing the whole way to the pedestal.",
-          "video": "story-video/museum_end_ruby_dazzle_end.mp4"
+          "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago \u2014 Milo held her wing the whole way to the pedestal."
         },
         "end_emerald_forest": {
           "image": "story/museum_end_emerald_forest.png",
-          "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball \u2014 the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!",
-          "video": "story-video/museum_end_emerald_forest_end.mp4"
+          "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball \u2014 the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!"
         },
         "end_quartz_disco": {
           "image": "story/museum_end_quartz_disco.png",
-          "text": "Rainbow disco party! The owl waltzes with a statue and the magpie finally returns the sapphire she has been too ashamed to face for years. Tonight Milo gave her the courage to set it right.",
-          "video": "story-video/museum_end_quartz_disco_end.mp4"
+          "text": "Rainbow disco party! The owl waltzes with a statue and the magpie finally returns the sapphire she has been too ashamed to face for years. Tonight Milo gave her the courage to set it right."
         },
         "end_bouncy_chaos": {
           "image": "story/museum_end_bouncy_chaos.png",
-          "text": "Bouncy balls EVERYWHERE! The owl slips, the magpie flaps in circles, and Milo lands face-first in gift-shop plushies. The sapphire stays lost tonight. Oopsie ending!",
-          "video": "story-video/museum_end_bouncy_chaos_end.mp4"
+          "text": "Bouncy balls EVERYWHERE! The owl slips, the magpie flaps in circles, and Milo lands face-first in gift-shop plushies. The sapphire stays lost tonight. Oopsie ending!"
         },
         "end_ruby_sunset": {
           "image": "story/museum_end_ruby_sunset.png",
-          "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years \u2014 she just needed someone kind to stand beside her at the pedestal.",
-          "video": "story-video/museum_end_ruby_sunset_end.mp4"
+          "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years \u2014 she just needed someone kind to stand beside her at the pedestal."
         },
         "end_emerald_meadow": {
           "image": "story/museum_end_emerald_meadow.png",
-          "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it \u2014 he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!",
-          "video": "story-video/museum_end_emerald_meadow_end.mp4"
+          "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it \u2014 he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!"
         },
         "end_rainbow_cathedral": {
           "image": "story/museum_end_rainbow_cathedral.png",
-          "text": "Rainbow scatter-shot lights the whole museum like stained glass! The magpie came back every night for years, too ashamed to face the empty pedestal alone. Tonight she finally had Milo.",
-          "video": "story-video/museum_end_rainbow_cathedral_end.mp4"
+          "text": "Rainbow scatter-shot lights the whole museum like stained glass! The magpie came back every night for years, too ashamed to face the empty pedestal alone. Tonight she finally had Milo."
         },
         "end_sapphire_together": {
           "image": "story/museum_end_sapphire_together.png",
-          "text": "Milo and the magpie return the sapphire together. The owl bows \u2014 she was never trying to catch a thief, she was waiting for the magpie to forgive herself.",
-          "video": "story-video/museum_end_sapphire_together_end.mp4"
+          "text": "Milo and the magpie return the sapphire together. The owl bows \u2014 she was never trying to catch a thief, she was waiting for the magpie to forgive herself."
         },
         "end_fountain_splash": {
           "image": "story/museum_end_fountain_splash.png",
-          "text": "The sapphire sinks to the bottom of the fountain with a sad little blurp! The magpie cries, the owl is furious, and Milo is very, very wet. Oopsie ending!",
-          "video": "story-video/museum_end_fountain_splash_end.mp4"
-        }
-      }
-    },
-    {
-      "id": "quarry",
-      "title": "Pip and the Echo Gem",
-      "nodes": {
-        "start": {
-          "image": "story/quarry_start.png",
-          "text": "Somewhere deep in this sparkly quarry hides the legendary echo gem \u2014 the ONE crystal that barks back a PERFECT bark instead of the garbled meow-quack-kazoo nonsense the regular crystals spit out. Pip's tail is already wagging at competition speed. Amethyst tunnel or citrine passage?",
-          "choices": [
-            {
-              "label": "Explore the amethyst tunnel",
-              "next": "a"
-            },
-            {
-              "label": "Enter the citrine passage",
-              "next": "b"
-            }
-          ]
-        },
-        "a": {
-          "image": "story/quarry_a.png",
-          "text": "Pip barked HELLO and the amethyst walls fired it back as a startled MEOW, which is frankly insulting \u2014 but that sparkly amethyst shard on the ledge buzzed so hard it basically jumped into his collar all by itself. Crystal grotto or geode bridge?",
-          "choices": [
-            {
-              "label": "Enter the crystal grotto",
-              "next": "aa"
-            },
-            {
-              "label": "Cross the geode bridge",
-              "next": "ab"
-            }
-          ]
-        },
-        "b": {
-          "image": "story/quarry_b.png",
-          "text": "Pip tried a tiny test bark and the citrine walls bounced it back as a QUACK so loud three crystals rattled \u2014 not the kind of fame he was hoping for. A golden citrine pebble on the shelf hummed when he barked, so into the collar it went. Quartz staircase or crystal chute?",
-          "choices": [
-            {
-              "label": "Take the quartz staircase",
-              "next": "ba"
-            },
-            {
-              "label": "Slide down the crystal chute",
-              "next": "bb"
-            }
-          ]
-        },
-        "aa": {
-          "image": "story/quarry_aa.png",
-          "text": "Every stalactite drip made a tiny PLINK that the grotto turned into a full orchestra, and the amethyst shard in Pip's collar hummed along like the world's tiniest conductor \u2014 this place is DEFINITELY hiding something sparkly. Crystal cluster or quartz arch?",
-          "choices": [
-            {
-              "label": "Approach the crystal cluster",
-              "next": "m1"
-            },
-            {
-              "label": "Go through the quartz arch",
-              "next": "m2"
-            }
-          ]
-        },
-        "ab": {
-          "image": "story/quarry_ab.png",
-          "text": "Each geode half went ZING under Pip's paws like the world's most extra stepping stones, and halfway across his amethyst shard hummed a note so pretty the whole bridge hummed back. Jade ledge or coral archway?",
-          "choices": [
-            {
-              "label": "Jump to the jade ledge",
-              "next": "m1"
-            },
-            {
-              "label": "Duck through the coral archway",
-              "next": "m2"
-            }
-          ]
-        },
-        "ba": {
-          "image": "story/quarry_ba.png",
-          "text": "Every step played a BONNNNG under Pip's paws like a crystal xylophone and his bark came back as a KAZOO \u2014 honestly an improvement over quacking \u2014 while the citrine pebble practically bounced on his collar. Teal boulder or amber shelf?",
-          "choices": [
-            {
-              "label": "Pass the teal boulder",
-              "next": "m3"
-            },
-            {
-              "label": "Check the amber shelf",
-              "next": "m4"
-            }
-          ]
-        },
-        "bb": {
-          "image": "story/quarry_bb.png",
-          "text": "Pip went down that chute so fast his ears flapped like flags and his bark stretched into a WOOOOO that the crystals helpfully replayed as a tuba \u2014 not graceful but the citrine pebble somehow stayed put. Jade column or calcite shelf?",
-          "choices": [
-            {
-              "label": "Squeeze past the jade column",
-              "next": "m3"
-            },
-            {
-              "label": "Explore the calcite shelf",
-              "next": "m4"
-            }
-          ]
-        },
-        "m1": {
-          "image": "story/quarry_m1.png",
-          "text": "The lavender cluster HUMMED and Pip's amethyst shard BUZZED right back like they were having a private chat he was absolutely not invited to \u2014 and that purple moss patch looks SUSPICIOUSLY comfortable for a cave with work to do. Singing bowl or moss patch?",
-          "choices": [
-            {
-              "label": "Bonk the singing bowl",
-              "next": "end_echo_chorus"
-            },
-            {
-              "label": "Flop on the moss patch",
-              "next": "end_puddle_pup"
-            }
-          ]
-        },
-        "m2": {
-          "image": "story/quarry_m2.png",
-          "text": "Under the arch Pip's tiniest sniff echoed into a WHOOSH and his amethyst shard glowed pink and sang a note so clear it sounded like his OWN bark from last Tuesday \u2014 and that amber ledge is glinting like the world's biggest butterscotch. Emerald stalagmite or amber ledge?",
-          "choices": [
-            {
-              "label": "Touch the emerald stalagmite",
-              "next": "end_arch_song"
-            },
-            {
-              "label": "Lick the amber ledge",
-              "next": "end_crystal_tongue"
-            }
-          ]
-        },
-        "m3": {
-          "image": "story/quarry_m3.png",
-          "text": "Three crystals humming BRMMM and DINNNG and CHIMMME, and the citrine pebble is basically beatboxing on Pip's collar \u2014 each crystal hums LOUDER when he steps closer like a sparkly audition lineup. Amethyst spire, citrine column, or quartz pillar?",
-          "choices": [
-            {
-              "label": "Touch the amethyst spire",
-              "next": "end_amethyst_chord"
-            },
-            {
-              "label": "Press the citrine column",
-              "next": "end_citrine_duet"
-            },
-            {
-              "label": "Lean on the quartz pillar",
-              "next": "end_quartz_harmony"
-            }
-          ]
-        },
-        "m4": {
-          "image": "story/quarry_m4.png",
-          "text": "Every geode was whispering a tiny WOOF and Pip's ears kept swiveling like satellite dishes because those woofs sounded EXACTLY like his \u2014 is this quarry seriously a Pip jukebox? Sapphire geode or calcite tower?",
-          "choices": [
-            {
-              "label": "Bark into the sapphire geode",
-              "next": "end_geode_song"
-            },
-            {
-              "label": "Howl at the calcite tower",
-              "next": "end_calcite_tower"
-            }
-          ]
-        },
-        "end_echo_chorus": {
-          "image": "story/quarry_end_echo_chorus.png",
-          "text": "Pip BONKED that singing bowl and the whole cavern lit up like a concert hall \u2014 every crystal sang his bark back in PERFECT harmony, hundreds of them, years of happy barks stored in stone like the world's sparkliest jukebox! The echo gem was never one crystal. It was ALL of them, the whole quarry, singing Pip's song right back at him. The End!",
-          "video": "story-video/quarry_end_echo_chorus_end.mp4"
-        },
-        "end_puddle_pup": {
-          "image": "story/quarry_end_puddle_pup.png",
-          "text": "That moss was SO unbelievably soft that Pip's eyes closed and his tail stopped wagging for the first time in recorded puppy history \u2014 he dreamed about barking on the meadow while the echo gem waited patiently somewhere deeper for a hero with more stamina and less interest in luxury napping. Oopsie ending!",
-          "video": "story-video/quarry_end_puddle_pup_end.mp4"
-        },
-        "end_arch_song": {
-          "image": "story/quarry_end_arch_song.png",
-          "text": "Pip pressed his paws to the stalagmite and the arch ROARED with sound \u2014 every bark he had ever barked on the meadow above came pouring out of the walls in layers, years and years of happy puppy! The echo gem was the whole quarry and it had been learning his song since he was a pup with ears too big for his head. The End!",
-          "video": "story-video/quarry_end_arch_song_end.mp4"
-        },
-        "end_crystal_tongue": {
-          "image": "story/quarry_end_crystal_tongue.png",
-          "text": "Pip thought that amber ledge looked DELICIOUS and licked it and his tongue stuck faster than gum on a boot \u2014 every muffled yelp bounced through the arch sounding sillier and sillier while Pip dangled there like a sparkly golden ornament. The echo gem is somewhere nearby probably taking notes on his funniest sounds yet. Oopsie ending!",
-          "video": "story-video/quarry_end_crystal_tongue_end.mp4"
-        },
-        "end_amethyst_chord": {
-          "image": "story/quarry_end_amethyst_chord.png",
-          "text": "Pip booped the amethyst spire and the dome THUNDERED with the deepest most magnificent chord any puppy has ever accidentally produced \u2014 years of stored barks humming through every crystal vein like the mountain itself was singing along! The echo gem was never one crystal. It was the whole quarry, rehearsing Pip's greatest hits this entire time. The End!",
-          "video": "story-video/quarry_end_amethyst_chord_end.mp4"
-        },
-        "end_citrine_duet": {
-          "image": "story/quarry_end_citrine_duet.png",
-          "text": "Pip touched the citrine column and it barked back \u2014 but SO loud that it bounced off every crystal in the dome and came back as a THOUSAND barks at once! The noise was so enormous that Pip's ears went flat, the pebble in his collar vibrated right off, and he ran for the exit with the loudest bark-echo in geological history chasing him down the tunnel. Oopsie ending!",
-          "video": "story-video/quarry_end_citrine_duet_end.mp4"
-        },
-        "end_quartz_harmony": {
-          "image": "story/quarry_end_quartz_harmony.png",
-          "text": "Pip leaned against the pillar a little too hard and it WOBBLED \u2014 every crystal in the cavern gasped (which for crystals sounds like a very high-pitched eeeeee) and went completely silent! Pip backed away very slowly, the pillar settled with a groan, and the cavern gave him the most disapproving silence a bunch of rocks has ever produced. Oopsie ending!",
-          "video": "story-video/quarry_end_quartz_harmony_end.mp4"
-        },
-        "end_geode_song": {
-          "image": "story/quarry_end_geode_song.png",
-          "text": "Pip barked into the sapphire geode and a hundred geodes barked BACK \u2014 his excited bark, his sleepy bark, his dinner bark, his suspicious-squirrel bark \u2014 all stored in crystal for YEARS like the world's most dedicated fan club! The echo gem was the whole gallery and it knew every bark Pip had ever barked. The End!",
-          "video": "story-video/quarry_end_geode_song_end.mp4"
-        },
-        "end_calcite_tower": {
-          "image": "story/quarry_end_calcite_tower.png",
-          "text": "Pip tipped his head back and HOWLED at that calcite tower and it answered with every bark it had ever caught drifting down from the meadow \u2014 puppy barks, grown-up barks, the time he barked at his own shadow, ALL of them stacked in orange stone like a crystal encyclopedia of Pip! The End!",
-          "video": "story-video/quarry_end_calcite_tower_end.mp4"
-        }
-      }
-    },
-    {
-      "id": "grotto",
-      "title": "Pearl and the Singing Caves",
-      "nodes": {
-        "start": {
-          "image": "story/grotto_start.png",
-          "text": "Something deep in the caves is SINGING and it sounds exactly like Pearl's lost cousin who vanished into these caves last full moon \u2014 the tide is rising and the caves flood chamber by chamber, so standing here debating is NOT an option. Crystal tunnel or coral passage?",
-          "choices": [
-            {
-              "label": "Enter the crystal tunnel",
-              "next": "a"
-            },
-            {
-              "label": "Follow the coral passage",
-              "next": "b"
-            }
-          ]
-        },
-        "a": {
-          "image": "story/grotto_a.png",
-          "text": "The singing is LOUDER in here and Pearl finds a conch shell stuck between two crystals that hums the same melody \u2014 she holds it to her ear and it whispers directions, which is creepy but helpful. The water is at her ankles and rising FAST. Stalactite chamber or phosphor pool?",
-          "choices": [
-            {
-              "label": "Splash into the chamber",
-              "next": "aa"
-            },
-            {
-              "label": "Wade to the phosphor pool",
-              "next": "ab"
-            }
-          ]
-        },
-        "b": {
-          "image": "story/grotto_b.png",
-          "text": "The coral walls are SO bright they make Pearl's fur look pink and sitting on a ledge is a tiny lantern made of LIVING coral that pulses warm light in time with the singing \u2014 definitely going in the satchel, definitely not asking questions about alive lanterns. Current channel or coral arch?",
-          "choices": [
-            {
-              "label": "Follow the current channel",
-              "next": "ba"
-            },
-            {
-              "label": "Duck under the coral arch",
-              "next": "bb"
-            }
-          ]
-        },
-        "aa": {
-          "image": "story/grotto_aa.png",
-          "text": "The stalactites are VIBRATING with the singing and the echo conch is practically screaming directions \u2014 the water is at Pearl's knees now and two paths go deeper, one echoing with song and one leading to trapped air pockets above. Echo hall or air shaft?",
-          "choices": [
-            {
-              "label": "Follow the echo hall",
-              "next": "m1"
-            },
-            {
-              "label": "Climb the air shaft",
-              "next": "m2"
-            }
-          ]
-        },
-        "ab": {
-          "image": "story/grotto_ab.png",
-          "text": "The phosphor pool is beautiful but something underneath keeps tugging at the water \u2014 the echo conch hums a warning note and Pearl decides NOT to put her paws in the glowy green mystery liquid. The water is rising and the singing is getting CLOSER. Song corridor or breathing chamber?",
-          "choices": [
-            {
-              "label": "Run down the song corridor",
-              "next": "m1"
-            },
-            {
-              "label": "Swim to the breathing chamber",
-              "next": "m2"
-            }
-          ]
-        },
-        "ba": {
-          "image": "story/grotto_ba.png",
-          "text": "The current is STRONG and Pearl has to grab the walls to keep from being swept \u2014 the glow lantern blazes brighter the deeper she goes, and the singing is coming from a massive dark chamber ahead that feels like it is BREATHING. Grotto entrance or sand bank?",
-          "choices": [
-            {
-              "label": "Enter the grotto",
-              "next": "m3"
-            },
-            {
-              "label": "Rest on the sand bank",
-              "next": "m4"
-            }
-          ]
-        },
-        "bb": {
-          "image": "story/grotto_bb.png",
-          "text": "The walls are PULSING like a heartbeat and Pearl can feel it in her chest \u2014 the glow lantern pulses in the same rhythm and the singing is so loud now it fills the water like it is coming from the ROCKS themselves. Cavern mouth or tidal ledge?",
-          "choices": [
-            {
-              "label": "Swim to the cavern mouth",
-              "next": "m3"
-            },
-            {
-              "label": "Climb the tidal ledge",
-              "next": "m4"
-            }
-          ]
-        },
-        "m1": {
-          "image": "story/grotto_m1.png",
-          "text": "The echo conch and the singing voice are hitting the EXACT same note and the water is vibrating \u2014 Pearl can see a glowing white grotto where the voice might be, but the water is at her CHEST and one of these passages leads deeper underwater. White grotto or dark tunnel?",
-          "choices": [
-            {
-              "label": "Swim to the white grotto",
-              "next": "end_song_found"
-            },
-            {
-              "label": "Dive into the dark tunnel",
-              "next": "end_flood_rush"
-            }
-          ]
-        },
-        "m2": {
-          "image": "story/grotto_m2.png",
-          "text": "Pearl can finally BREATHE in here and the echo conch makes the whole dome ring like a bell \u2014 the singing voice bounces around so much she cannot tell which direction it comes from, but the rose crystal is humming the same note and that whirlpool is pulling water somewhere DEEP. Rose crystal or whirlpool?",
-          "choices": [
-            {
-              "label": "Touch the rose crystal",
-              "next": "end_harmony_ring"
-            },
-            {
-              "label": "Ride the whirlpool down",
-              "next": "end_echo_trap"
-            }
-          ]
-        },
-        "m3": {
-          "image": "story/grotto_m3.png",
-          "text": "It is NOT her cousin singing \u2014 it is the CAVE! The entire grotto is a living coral creature and it has been singing to lure sea-dragons here for warmth because it is LONELY. The glow lantern in Pearl's satchel is pulsing like a heartbeat and the grotto's huge gentle face looks so sad. Coral alcove, crystal spire, or moonlit pool?",
-          "choices": [
-            {
-              "label": "Sit in the coral alcove",
-              "next": "end_coral_duet"
-            },
-            {
-              "label": "Climb the crystal spire",
-              "next": "end_warm_glow"
-            },
-            {
-              "label": "Wade to the moonlit pool",
-              "next": "end_surface_song"
-            }
-          ]
-        },
-        "m4": {
-          "image": "story/grotto_m4.png",
-          "text": "Two giant eels are having a WATER-SQUIRT SHOWDOWN right in front of the only two tunnels deeper \u2014 the cyan one guards the high tunnel above water and the magenta one guards the low tunnel underwater. The glow lantern makes them both pause and blink. Pick a side!",
-          "choices": [
-            {
-              "label": "Dash past the cyan eel",
-              "next": "end_high_ride"
-            },
-            {
-              "label": "Dive past the magenta eel",
-              "next": "end_low_glide"
-            }
-          ]
-        },
-        "end_song_found": {
-          "image": "story/grotto_end_song_found.png",
-          "text": "Pearl swam into the white grotto and found the singer \u2014 the cave ITSELF, a living coral creature who had been singing for YEARS trying to lure sea-dragons because it was lonely and cold! The echo conch harmonized with its voice and for the first time the grotto heard someone sing BACK. Pearl taught it to sing above the waterline so sailors and whales could hear it too. Now the singing caves have visitors every day and the grotto is never lonely again. The End!",
-          "video": "story-video/grotto_end_song_found_end.mp4"
-        },
-        "end_flood_rush": {
-          "image": "story/grotto_end_flood_rush.png",
-          "text": "Pearl dove into the dark tunnel and the current grabbed her IMMEDIATELY \u2014 she tumbled head over tail in pitch-black water, lost the echo conch, lost all sense of direction, and washed up in a dead-end chamber with the water rising to the ceiling! She managed to squeeze through a tiny crack and pop out on the beach coughing and sputtering. The singing caves are still singing but Pearl is NOT going back in today. Oopsie ending!",
-          "video": "story-video/grotto_end_flood_rush_end.mp4"
-        },
-        "end_harmony_ring": {
-          "image": "story/grotto_end_harmony_ring.png",
-          "text": "Pearl touched the crystal and the echo conch SANG \u2014 the whole dome rang like the world's biggest bell and the sound traveled through every tunnel lighting up the walls one by one! It reached the deepest grotto and the singing cave \u2014 a lonely living coral creature \u2014 opened its eyes because for the FIRST time someone answered its song with harmony instead of fear. Pearl followed the lit-up path and taught the grotto to sing above the waterline. Now ships follow the melody home on foggy nights. The End!",
-          "video": "story-video/grotto_end_harmony_ring_end.mp4"
-        },
-        "end_echo_trap": {
-          "image": "story/grotto_end_echo_trap.png",
-          "text": "Pearl jumped into the whirlpool and it spun her around so fast she could not tell up from down \u2014 the echo conch flew away, the singing voice echoed from EVERYWHERE at once, and she ended up in a deep rocky basin with absolutely no idea which way was up. A friendly crab eventually showed her a side exit but she popped out three beaches away covered in seaweed with her ears still ringing. Oopsie ending!",
-          "video": "story-video/grotto_end_echo_trap_end.mp4"
-        },
-        "end_coral_duet": {
-          "image": "story/grotto_end_coral_duet.png",
-          "text": "Pearl sat down in the coral alcove and started singing \u2014 the grotto's huge gentle face lit up because nobody had ever sung WITH it before! They sang a duet that echoed through every chamber and the grotto was so happy it stopped pulling things underwater and learned to sing above the waterline. Pearl visits every full moon for their duet and the caves glow warmest on those nights. The End!",
-          "video": "story-video/grotto_end_coral_duet_end.mp4"
-        },
-        "end_warm_glow": {
-          "image": "story/grotto_end_warm_glow.png",
-          "text": "Pearl climbed the spire and held the glow lantern as HIGH as she could \u2014 the living coral blazed and filled the grotto with warmth for the first time since the sea-dragons stopped coming! The grotto's sad face transformed into the biggest smile Pearl had ever seen on a cave. It did not need sea-dragons \u2014 it needed a friend with a warm heart. Pearl taught it to sing above the waterline and now the caves glow warm enough to heat the whole lagoon. The End!",
-          "video": "story-video/grotto_end_warm_glow_end.mp4"
-        },
-        "end_surface_song": {
-          "image": "story/grotto_end_surface_song.png",
-          "text": "Pearl stepped into the pool and her paw slipped on a mossy rock \u2014 SPLASH went Pearl, HISSS went the lantern, and the whole cave went DARK! She paddled around in the pitch black bumping into coral walls while the grotto tried to sing her directions but Pearl was too busy gargling water to hear them. She finally crawled out on the wrong beach, soaking wet and completely lantern-less. Oopsie ending!",
-          "video": "story-video/grotto_end_surface_song_end.mp4"
-        },
-        "end_high_ride": {
-          "image": "story/grotto_end_high_ride.png",
-          "text": "Pearl faked left and dashed right and the cyan eel was SO impressed it shot a water jet that LAUNCHED her through the high tunnel like a rocket \u2014 she burst into the deepest grotto at full speed and the singing cave stopped mid-note in total surprise! Nobody had ever arrived with that much style. Pearl caught her breath, explained she came to find the singer, and taught the lonely grotto to sing above the waterline so it would never need to lure anyone underground again. The End!",
-          "video": "story-video/grotto_end_high_ride_end.mp4"
-        },
-        "end_low_glide": {
-          "image": "story/grotto_end_low_glide.png",
-          "text": "Pearl dove and the magenta eel's current was WAY too strong \u2014 it flipped her upside down and sent her tumbling through the dark like laundry in a washing machine! The lantern sank into a crack, the satchel filled with sand, and she popped out in a random tide pool with kelp on her head and absolutely no idea where the singing grotto was. The eel waved goodbye from the tunnel. Oopsie ending!",
-          "video": "story-video/grotto_end_low_glide_end.mp4"
+          "text": "The sapphire sinks to the bottom of the fountain with a sad little blurp! The magpie cries, the owl is furious, and Milo is very, very wet. Oopsie ending!"
         }
       }
     },
@@ -25239,251 +25029,709 @@
         },
         "end_spring_bloom": {
           "image": "story/lagoon_end_spring_bloom.png",
-          "text": "Pearl raced down the stairs and pressed the star-seed into the spring just as it flickered its LAST flicker \u2014 the water ERUPTED in a fountain of starlight so bright that every coral in the lagoon lit up like a birthday cake! The singing pearl chimed one perfect triumphant note and the hermit crab peeked out crying because the spring was HEALING just like it used to before it got polluted. He tore down his own fortress and became Pearl's defender on the swim home. The End!",
-          "video": "story-video/lagoon_end_spring_bloom_end.mp4"
+          "text": "Pearl raced down the stairs and pressed the star-seed into the spring just as it flickered its LAST flicker \u2014 the water ERUPTED in a fountain of starlight so bright that every coral in the lagoon lit up like a birthday cake! The singing pearl chimed one perfect triumphant note and the hermit crab peeked out crying because the spring was HEALING just like it used to before it got polluted. He tore down his own fortress and became Pearl's defender on the swim home. The End!"
         },
         "end_seed_fade": {
           "image": "story/lagoon_end_seed_fade.png",
-          "text": "Pearl leaped onto the lily pad but it started SINKING and she had to hold the star-seed up to keep it dry \u2014 by the time she scrambled to the center the seed had gone completely dark and cold like a tiny pebble. The singing pearl went silent, the lagoon dimmed, and Pearl sat on a sinking lily pad holding a regular old rock. Oopsie ending!",
-          "video": "story-video/lagoon_end_seed_fade_end.mp4"
+          "text": "Pearl leaped onto the lily pad but it started SINKING and she had to hold the star-seed up to keep it dry \u2014 by the time she scrambled to the center the seed had gone completely dark and cold like a tiny pebble. The singing pearl went silent, the lagoon dimmed, and Pearl sat on a sinking lily pad holding a regular old rock. Oopsie ending!"
         },
         "end_coral_light": {
           "image": "story/lagoon_end_coral_light.png",
-          "text": "Pearl crossed the bridge and the singing pearl told her EXACTLY when to drop \u2014 the star-seed fell in a perfect golden arc and hit the spring with a FLASH so bright the whole cavern turned into a rainbow cathedral! The starfish all pointed at the light like tiny golden arrows and even the hermit crab came out of his fortress blinking because the spring was glowing clean and healthy again. He apologized for the barricade and promised to guard the spring FOR Pearl from now on. The End!",
-          "video": "story-video/lagoon_end_coral_light_end.mp4"
+          "text": "Pearl crossed the bridge and the singing pearl told her EXACTLY when to drop \u2014 the star-seed fell in a perfect golden arc and hit the spring with a FLASH so bright the whole cavern turned into a rainbow cathedral! The starfish all pointed at the light like tiny golden arrows and even the hermit crab came out of his fortress blinking because the spring was glowing clean and healthy again. He apologized for the barricade and promised to guard the spring FOR Pearl from now on. The End!"
         },
         "end_current_pull": {
           "image": "story/lagoon_end_current_pull.png",
-          "text": "Pearl zoomed down the slide WAY too fast and splashed into a current that grabbed her like a water roller coaster with no brakes \u2014 the singing pearl bounced away into the dark and the star-seed slipped out of her paws and got carried off by the current into who-knows-where! Pearl washed up on a beach three coves over, soaking wet, star-seedless, and pearl-less. Oopsie ending!",
-          "video": "story-video/lagoon_end_current_pull_end.mp4"
+          "text": "Pearl zoomed down the slide WAY too fast and splashed into a current that grabbed her like a water roller coaster with no brakes \u2014 the singing pearl bounced away into the dark and the star-seed slipped out of her paws and got carried off by the current into who-knows-where! Pearl washed up on a beach three coves over, soaking wet, star-seedless, and pearl-less. Oopsie ending!"
         },
         "end_tiny_tickle": {
           "image": "story/lagoon_end_tiny_tickle.png",
-          "text": "Pearl fired the tiny bubbles and they tickled the crab SO MUCH he fell out of his fortress laughing \u2014 turns out he built the whole thing because the last visitor POLLUTED the spring and his family got sick, and he was just trying to protect it! Pearl showed him the star-seed and he cried happy tears because it HEALS water. He helped her plant it and the spring exploded with light. Best bubble battle ever. The End!",
-          "video": "story-video/lagoon_end_tiny_tickle_end.mp4"
+          "text": "Pearl fired the tiny bubbles and they tickled the crab SO MUCH he fell out of his fortress laughing \u2014 turns out he built the whole thing because the last visitor POLLUTED the spring and his family got sick, and he was just trying to protect it! Pearl showed him the star-seed and he cried happy tears because it HEALS water. He helped her plant it and the spring exploded with light. Best bubble battle ever. The End!"
         },
         "end_mega_lift": {
           "image": "story/lagoon_end_mega_lift.png",
-          "text": "The massive bubble was SO massive it lifted Pearl AND the fortress into the air \u2014 she clung to the bubble like a beach ball while the star-seed flickered uselessly in her satchel far above the spring! The bubble bounced off the cave ceiling, popped with a tremendous SPLAT, and Pearl landed in a pile of scattered shells while the crab facepalmed with both claws. Oopsie ending!",
-          "video": "story-video/lagoon_end_mega_lift_end.mp4"
+          "text": "The massive bubble was SO massive it lifted Pearl AND the fortress into the air \u2014 she clung to the bubble like a beach ball while the star-seed flickered uselessly in her satchel far above the spring! The bubble bounced off the cave ceiling, popped with a tremendous SPLAT, and Pearl landed in a pile of scattered shells while the crab facepalmed with both claws. Oopsie ending!"
         },
         "end_spiral_heal": {
           "image": "story/lagoon_end_spiral_heal.png",
-          "text": "The spiral stream squeezed through every crack in the fortress and carried star-seed sparkle STRAIGHT into the spring \u2014 the water erupted in spiraling ribbons of color and the crab came out in total shock because the spring was CLEAN again! He confessed he built the fortress because a visitor polluted it and his babies got sick. Pearl hugged him and said the star heals everything. He tore down his own walls and carried Pearl on his shell all the way home. The End!",
-          "video": "story-video/lagoon_end_spiral_heal_end.mp4"
+          "text": "The spiral stream squeezed through every crack in the fortress and carried star-seed sparkle STRAIGHT into the spring \u2014 the water erupted in spiraling ribbons of color and the crab came out in total shock because the spring was CLEAN again! He confessed he built the fortress because a visitor polluted it and his babies got sick. Pearl hugged him and said the star heals everything. He tore down his own walls and carried Pearl on his shell all the way home. The End!"
         },
         "end_shell_peace": {
           "image": "story/lagoon_end_shell_peace.png",
-          "text": "Pearl showed the crab the star-seed and his whole face changed \u2014 he told her a visitor polluted the spring and his babies got sick, so he built the fortress to keep EVERYONE out because he was too scared to trust anyone again. The star-seed's glow touched the wilted flowers and they sprang back to life. The crab started crying, tore down his own fortress, and walked Pearl to the spring himself. They planted the seed together and the lagoon lit up like a thousand stars. The End!",
-          "video": "story-video/lagoon_end_shell_peace_end.mp4"
+          "text": "Pearl showed the crab the star-seed and his whole face changed \u2014 he told her a visitor polluted the spring and his babies got sick, so he built the fortress to keep EVERYONE out because he was too scared to trust anyone again. The star-seed's glow touched the wilted flowers and they sprang back to life. The crab started crying, tore down his own fortress, and walked Pearl to the spring himself. They planted the seed together and the lagoon lit up like a thousand stars. The End!"
         },
         "end_crab_defender": {
           "image": "story/lagoon_end_crab_defender.png",
-          "text": "Pearl tried to step past the crab but he panicked and grabbed her satchel \u2014 the star-seed bounced out and rolled across the rocks like the world's most important marble! Pearl and the crab both dove for it at the same time, bonked heads, and watched the seed roll into a crack between two boulders where NEITHER of them could reach it. They spent the rest of the night trying to fish it out with sticks. Oopsie ending!",
-          "video": "story-video/lagoon_end_crab_defender_end.mp4"
+          "text": "Pearl tried to step past the crab but he panicked and grabbed her satchel \u2014 the star-seed bounced out and rolled across the rocks like the world's most important marble! Pearl and the crab both dove for it at the same time, bonked heads, and watched the seed roll into a crack between two boulders where NEITHER of them could reach it. They spent the rest of the night trying to fish it out with sticks. Oopsie ending!"
         }
       }
     },
     {
-      "id": "observatory",
-      "title": "Mo and the Star Eaters",
+      "id": "quarry",
+      "title": "Pip and the Echo Gem",
       "nodes": {
         "start": {
-          "image": "story/observatory_start.png",
-          "text": "Stars are going out like candles \u2014 something up there is gobbling them! The old observatory might have answers, or at least a telescope big enough to see what's hungry.",
+          "image": "story/quarry_start.png",
+          "text": "Somewhere deep in this sparkly quarry hides the legendary echo gem \u2014 the ONE crystal that barks back a PERFECT bark instead of the garbled meow-quack-kazoo nonsense the regular crystals spit out. Pip's tail is already wagging at competition speed. Amethyst tunnel or citrine passage?",
           "choices": [
             {
-              "label": "Climb to the telescope dome",
+              "label": "Explore the amethyst tunnel",
               "next": "a"
             },
             {
-              "label": "Search the chart room",
+              "label": "Enter the citrine passage",
               "next": "b"
             }
           ]
         },
         "a": {
-          "image": "story/observatory_a.png",
-          "text": "The biggest telescope EVER! It's pointed right where stars keep disappearing, and something is rumbling in the walls \u2014 is that snoring or the wind?",
+          "image": "story/quarry_a.png",
+          "text": "Pip barked HELLO and the amethyst walls fired it back as a startled MEOW, which is frankly insulting \u2014 but that sparkly amethyst shard on the ledge buzzed so hard it basically jumped into his collar all by itself. Crystal grotto or geode bridge?",
           "choices": [
             {
-              "label": "Look through the telescope",
+              "label": "Enter the crystal grotto",
               "next": "aa"
             },
             {
-              "label": "Search around the base",
+              "label": "Cross the geode bridge",
               "next": "ab"
             }
           ]
         },
         "b": {
-          "image": "story/observatory_b.png",
-          "text": "Someone has been crossing out stars on the maps \u2014 the SAME ones vanishing from the real sky! A trail of fresh quill ink leads deeper inside.",
+          "image": "story/quarry_b.png",
+          "text": "Pip tried a tiny test bark and the citrine walls bounced it back as a QUACK so loud three crystals rattled \u2014 not the kind of fame he was hoping for. A golden citrine pebble on the shelf hummed when he barked, so into the collar it went. Quartz staircase or crystal chute?",
           "choices": [
             {
-              "label": "Follow the ink trail",
+              "label": "Take the quartz staircase",
               "next": "ba"
             },
             {
-              "label": "Check the armchair desk",
+              "label": "Slide down the crystal chute",
               "next": "bb"
             }
           ]
         },
         "aa": {
-          "image": "story/observatory_aa.png",
-          "text": "AHHH! Something in the sky just BLINKED \u2014 a massive eye stared right back through the telescope! Whatever is out there, it knows Mo is watching.",
+          "image": "story/quarry_aa.png",
+          "text": "Every stalactite drip made a tiny PLINK that the grotto turned into a full orchestra, and the amethyst shard in Pip's collar hummed along like the world's tiniest conductor \u2014 this place is DEFINITELY hiding something sparkly. Crystal cluster or quartz arch?",
           "choices": [
             {
-              "label": "Crumple a chart for ammo",
+              "label": "Approach the crystal cluster",
               "next": "m1"
             },
             {
-              "label": "Sneak past the moth",
+              "label": "Go through the quartz arch",
               "next": "m2"
             }
           ]
         },
         "ab": {
-          "image": "story/observatory_ab.png",
-          "text": "The Star Jar! It hums and glows like a tiny trapped galaxy. Now Mo just needs to get past whatever is snoring in the walls \u2014 and figure out what's eating the stars.",
+          "image": "story/quarry_ab.png",
+          "text": "Each geode half went ZING under Pip's paws like the world's most extra stepping stones, and halfway across his amethyst shard hummed a note so pretty the whole bridge hummed back. Jade ledge or coral archway?",
           "choices": [
             {
-              "label": "Take the Star Jar upstairs",
+              "label": "Jump to the jade ledge",
               "next": "m1"
             },
             {
-              "label": "Examine the astrolabe",
+              "label": "Duck through the coral archway",
               "next": "m2"
             }
           ]
         },
         "ba": {
-          "image": "story/observatory_ba.png",
-          "text": "The star chart is MOVING \u2014 the constellations rearranged into a face and it's mouthing something! The brass astrolabe starts spinning on its own too.",
+          "image": "story/quarry_ba.png",
+          "text": "Every step played a BONNNNG under Pip's paws like a crystal xylophone and his bark came back as a KAZOO \u2014 honestly an improvement over quacking \u2014 while the citrine pebble practically bounced on his collar. Teal boulder or amber shelf?",
           "choices": [
             {
-              "label": "Grab the spinning globe",
+              "label": "Pass the teal boulder",
               "next": "m3"
             },
             {
-              "label": "Read the chalk equations",
+              "label": "Check the amber shelf",
               "next": "m4"
             }
           ]
         },
         "bb": {
-          "image": "story/observatory_bb.png",
-          "text": "The porcupine astronomer fell asleep DECADES ago and he STILL rearranges furniture! His quills scratch the floor as he sleep-shuffles past, shoving bookshelves around in a dream.",
+          "image": "story/quarry_bb.png",
+          "text": "Pip went down that chute so fast his ears flapped like flags and his bark stretched into a WOOOOO that the crystals helpfully replayed as a tuba \u2014 not graceful but the citrine pebble somehow stayed put. Jade column or calcite shelf?",
           "choices": [
             {
-              "label": "Dodge past the porcupine",
+              "label": "Squeeze past the jade column",
               "next": "m3"
             },
             {
-              "label": "Grab a quill from the pot",
+              "label": "Explore the calcite shelf",
               "next": "m4"
             }
           ]
         },
         "m1": {
-          "image": "story/observatory_m1.png",
-          "text": "Paper-ball skirmish! The sleep-walking porcupine shuffles straight at Mo! Stuff a paper ball in the eyepiece to block his view, or crank the dome open to distract him with sky?",
+          "image": "story/quarry_m1.png",
+          "text": "The lavender cluster HUMMED and Pip's amethyst shard BUZZED right back like they were having a private chat he was absolutely not invited to \u2014 and that purple moss patch looks SUSPICIOUSLY comfortable for a cave with work to do. Singing bowl or moss patch?",
           "choices": [
             {
-              "label": "Block the eyepiece",
-              "next": "end_blocked_view"
+              "label": "Bonk the singing bowl",
+              "next": "end_echo_chorus",
+              "hot": {
+                "x": 88,
+                "y": 452,
+                "w": 259,
+                "h": 149
+              }
             },
             {
-              "label": "Crank the dome open",
-              "next": "end_open_sky"
+              "label": "Flop on the moss patch",
+              "next": "end_puddle_pup",
+              "hot": {
+                "x": 939,
+                "y": 348,
+                "w": 305,
+                "h": 203
+              }
             }
           ]
         },
         "m2": {
-          "image": "story/observatory_m2.png",
-          "text": "The porcupine is sleep-counting stars and heading RIGHT THIS WAY! Roll his chair across the room or yank the dome lever?",
+          "image": "story/quarry_m2.png",
+          "text": "Under the arch Pip's tiniest sniff echoed into a WHOOSH and his amethyst shard glowed pink and sang a note so clear it sounded like his OWN bark from last Tuesday \u2014 and that amber ledge is glinting like the world's biggest butterscotch. Emerald stalagmite or amber ledge?",
           "choices": [
             {
-              "label": "Roll the chair away",
-              "next": "end_chair_glide"
+              "label": "Touch the emerald stalagmite",
+              "next": "end_arch_song",
+              "hot": {
+                "x": 265,
+                "y": 25,
+                "w": 424,
+                "h": 542
+              }
             },
             {
-              "label": "Pull the dome lever",
-              "next": "end_lever_snap"
+              "label": "Lick the amber ledge",
+              "next": "end_crystal_tongue",
+              "hot": {
+                "x": 836,
+                "y": 196,
+                "w": 444,
+                "h": 524
+              }
             }
           ]
         },
         "m3": {
-          "image": "story/observatory_m3.png",
-          "text": "Triple-target paper-ball showdown \u2014 the porcupine is shuffling FAST! Block the eyepiece, crank the dome, or roll his chair?",
+          "image": "story/quarry_m3.png",
+          "text": "Three crystals humming BRMMM and DINNNG and CHIMMME, and the citrine pebble is basically beatboxing on Pip's collar \u2014 each crystal hums LOUDER when he steps closer like a sparkly audition lineup. Amethyst spire, citrine column, or quartz pillar?",
           "choices": [
             {
-              "label": "Paper-ball the eyepiece",
-              "next": "end_eyepiece_bullseye"
+              "label": "Touch the amethyst spire",
+              "next": "end_amethyst_chord"
             },
             {
-              "label": "Paper-ball the dome crank",
-              "next": "end_dome_flood"
+              "label": "Press the citrine column",
+              "next": "end_citrine_duet"
             },
             {
-              "label": "Paper-ball the chair wheel",
-              "next": "end_spin_tumble"
+              "label": "Lean on the quartz pillar",
+              "next": "end_quartz_harmony"
             }
           ]
         },
         "m4": {
-          "image": "story/observatory_m4.png",
-          "text": "The star-moth watches calmly and the Star Jar hums \u2014 maybe these creatures aren't eating stars at all! Follow the moth outside or grab the jar to catch them?",
+          "image": "story/quarry_m4.png",
+          "text": "Every geode was whispering a tiny WOOF and Pip's ears kept swiveling like satellite dishes because those woofs sounded EXACTLY like his \u2014 is this quarry seriously a Pip jukebox? Sapphire geode or calcite tower?",
           "choices": [
             {
-              "label": "Follow the star-moth",
-              "next": "end_moth_garden"
+              "label": "Bark into the sapphire geode",
+              "next": "end_geode_song",
+              "hot": {
+                "x": 359,
+                "y": 263,
+                "w": 279,
+                "h": 345
+              }
             },
             {
-              "label": "Grab the Star Jar",
-              "next": "end_jar_fright"
+              "label": "Howl at the calcite tower",
+              "next": "end_calcite_tower",
+              "hot": {
+                "x": 907,
+                "y": 68,
+                "w": 373,
+                "h": 630
+              }
             }
           ]
         },
-        "end_blocked_view": {
-          "image": "story/observatory_end_blocked_view.png",
-          "text": "The porcupine wanders off grumbling about clouds and Mo sneaks outside to see the truth \u2014 the star-moths are REPLANTING stars! They're building a brand-new constellation shaped like Mo's village, right down to the little fountain. The porcupine wakes, sees it, and weeps."
+        "end_echo_chorus": {
+          "image": "story/quarry_end_echo_chorus.png",
+          "text": "Pip BONKED that singing bowl and the whole cavern lit up like a concert hall \u2014 every crystal sang his bark back in PERFECT harmony, hundreds of them, years of happy barks stored in stone like the world's sparkliest jukebox! The echo gem was never one crystal. It was ALL of them, the whole quarry, singing Pip's song right back at him. The End!"
         },
-        "end_open_sky": {
-          "image": "story/observatory_end_open_sky.png",
-          "text": "The dome opens and sky pours in! Star-moths swirl like golden confetti, planting stars into a picture of Mo's village. The porcupine wakes, adjusts his spectacles, and happy-cries so hard his quills rattle."
+        "end_puddle_pup": {
+          "image": "story/quarry_end_puddle_pup.png",
+          "text": "That moss was SO unbelievably soft that Pip's eyes closed and his tail stopped wagging for the first time in recorded puppy history \u2014 he dreamed about barking on the meadow while the echo gem waited patiently somewhere deeper for a hero with more stamina and less interest in luxury napping. Oopsie ending!"
         },
-        "end_chair_glide": {
-          "image": "story/observatory_end_chair_glide.png",
-          "text": "Wheee goes the porcupine! While he rolls, Mo watches the truth unfold \u2014 the moths carry star-seeds to dark spots and PLANT them into a new constellation shaped like Mo's own village. The porcupine wakes, sees the sky, and sobs with joy."
+        "end_arch_song": {
+          "image": "story/quarry_end_arch_song.png",
+          "text": "Pip pressed his paws to the stalagmite and the arch ROARED with sound \u2014 every bark he had ever barked on the meadow above came pouring out of the walls in layers, years and years of happy puppy! The echo gem was the whole quarry and it had been learning his song since he was a pup with ears too big for his head. The End!"
         },
-        "end_lever_snap": {
-          "image": "story/observatory_end_lever_snap.png",
-          "text": "CLANG! The lever snaps and the dome goes haywire \u2014 papers everywhere, the porcupine screaming about meteors, and Mo buried in star charts! The stars will have to wait for another night. Oopsie ending!"
+        "end_crystal_tongue": {
+          "image": "story/quarry_end_crystal_tongue.png",
+          "text": "Pip thought that amber ledge looked DELICIOUS and licked it and his tongue stuck faster than gum on a boot \u2014 every muffled yelp bounced through the arch sounding sillier and sillier while Pip dangled there like a sparkly golden ornament. The echo gem is somewhere nearby probably taking notes on his funniest sounds yet. Oopsie ending!"
         },
-        "end_eyepiece_bullseye": {
-          "image": "story/observatory_end_eyepiece_bullseye.png",
-          "text": "Bullseye! While the porcupine fiddles with the blocked eyepiece, Mo sees the truth \u2014 the star-moths are planting a constellation of Mo's village! The porcupine gasps, pulls out a fresh chart, and draws it through tears of wonder.",
-          "video": "story-video/observatory_end_eyepiece_bullseye_end.mp4"
+        "end_amethyst_chord": {
+          "image": "story/quarry_end_amethyst_chord.png",
+          "text": "Pip booped the amethyst spire and the dome THUNDERED with the deepest most magnificent chord any puppy has ever accidentally produced \u2014 years of stored barks humming through every crystal vein like the mountain itself was singing along! The echo gem was never one crystal. It was the whole quarry, rehearsing Pip's greatest hits this entire time. The End!"
         },
-        "end_dome_flood": {
-          "image": "story/observatory_end_dome_flood.png",
-          "text": "Mo's paper ball jammed the dome crank halfway open and rain poured in like somebody turned on a giant shower \u2014 the porcupine woke up SCREAMING about his telescope getting wet and Mo spent the next hour mopping the floor with soggy star charts while the moths did their beautiful work outside where nobody could see it! Oopsie ending!",
-          "video": "story-video/observatory_end_dome_flood_end.mp4"
+        "end_citrine_duet": {
+          "image": "story/quarry_end_citrine_duet.png",
+          "text": "Pip touched the citrine column and it barked back \u2014 but SO loud that it bounced off every crystal in the dome and came back as a THOUSAND barks at once! The noise was so enormous that Pip's ears went flat, the pebble in his collar vibrated right off, and he ran for the exit with the loudest bark-echo in geological history chasing him down the tunnel. Oopsie ending!"
         },
-        "end_spin_tumble": {
-          "image": "story/observatory_end_spin_tumble.png",
-          "text": "Mo's paper ball sent the chair rolling and it crashed into the TELESCOPE \u2014 the biggest, most irreplaceable telescope in the observatory went CLANG and tipped sideways while the porcupine got tangled in the tripod like the world's prickliest pretzel! The old astronomer woke up furious and Mo spent the rest of the night helping realign a telescope he was definitely not qualified to touch. Oopsie ending!",
-          "video": "story-video/observatory_end_spin_tumble_end.mp4"
+        "end_quartz_harmony": {
+          "image": "story/quarry_end_quartz_harmony.png",
+          "text": "Pip leaned against the pillar a little too hard and it WOBBLED \u2014 every crystal in the cavern gasped (which for crystals sounds like a very high-pitched eeeeee) and went completely silent! Pip backed away very slowly, the pillar settled with a groan, and the cavern gave him the most disapproving silence a bunch of rocks has ever produced. Oopsie ending!"
         },
-        "end_moth_garden": {
-          "image": "story/observatory_end_moth_garden.png",
-          "text": "Mo follows the moth and sees everything \u2014 they're not eating stars, they're PLANTING a new constellation shaped like Mo's village! Every street, every rooftop, drawn in starlight. The porcupine wakes at last and whispers: that is the most beautiful thing in all my years of watching the sky."
+        "end_geode_song": {
+          "image": "story/quarry_end_geode_song.png",
+          "text": "Pip barked into the sapphire geode and a hundred geodes barked BACK \u2014 his excited bark, his sleepy bark, his dinner bark, his suspicious-squirrel bark \u2014 all stored in crystal for YEARS like the world's most dedicated fan club! The echo gem was the whole gallery and it knew every bark Pip had ever barked. The End!"
         },
-        "end_jar_fright": {
-          "image": "story/observatory_end_jar_fright.png",
-          "text": "The Star Jar scares all the moths away and the beautiful constellation falls apart into random sparkles! The porcupine is FURIOUS and Mo gets bonked with a chart. Those moths were making something beautiful and now it's gone. Oopsie ending!"
+        "end_calcite_tower": {
+          "image": "story/quarry_end_calcite_tower.png",
+          "text": "Pip tipped his head back and HOWLED at that calcite tower and it answered with every bark it had ever caught drifting down from the meadow \u2014 puppy barks, grown-up barks, the time he barked at his own shadow, ALL of them stacked in orange stone like a crystal encyclopedia of Pip! The End!"
+        }
+      }
+    },
+    {
+      "id": "grotto",
+      "title": "Pearl and the Singing Caves",
+      "nodes": {
+        "start": {
+          "image": "story/grotto_start.png",
+          "text": "Something deep in the caves is SINGING and it sounds exactly like Pearl's lost cousin who vanished into these caves last full moon \u2014 the tide is rising and the caves flood chamber by chamber, so standing here debating is NOT an option. Crystal tunnel or coral passage?",
+          "choices": [
+            {
+              "label": "Enter the crystal tunnel",
+              "next": "a"
+            },
+            {
+              "label": "Follow the coral passage",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/grotto_a.png",
+          "text": "The singing is LOUDER in here and Pearl finds a conch shell stuck between two crystals that hums the same melody \u2014 she holds it to her ear and it whispers directions, which is creepy but helpful. The water is at her ankles and rising FAST. Stalactite chamber or phosphor pool?",
+          "choices": [
+            {
+              "label": "Splash into the chamber",
+              "next": "aa"
+            },
+            {
+              "label": "Wade to the phosphor pool",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/grotto_b.png",
+          "text": "The coral walls are SO bright they make Pearl's fur look pink and sitting on a ledge is a tiny lantern made of LIVING coral that pulses warm light in time with the singing \u2014 definitely going in the satchel, definitely not asking questions about alive lanterns. Current channel or coral arch?",
+          "choices": [
+            {
+              "label": "Follow the current channel",
+              "next": "ba"
+            },
+            {
+              "label": "Duck under the coral arch",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/grotto_aa.png",
+          "text": "The stalactites are VIBRATING with the singing and the echo conch is practically screaming directions \u2014 the water is at Pearl's knees now and two paths go deeper, one echoing with song and one leading to trapped air pockets above. Echo hall or air shaft?",
+          "choices": [
+            {
+              "label": "Follow the echo hall",
+              "next": "m1"
+            },
+            {
+              "label": "Climb the air shaft",
+              "next": "m2"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/grotto_ab.png",
+          "text": "The phosphor pool is beautiful but something underneath keeps tugging at the water \u2014 the echo conch hums a warning note and Pearl decides NOT to put her paws in the glowy green mystery liquid. The water is rising and the singing is getting CLOSER. Song corridor or breathing chamber?",
+          "choices": [
+            {
+              "label": "Run down the song corridor",
+              "next": "m1"
+            },
+            {
+              "label": "Swim to the breathing chamber",
+              "next": "m2"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/grotto_ba.png",
+          "text": "The current is STRONG and Pearl has to grab the walls to keep from being swept \u2014 the glow lantern blazes brighter the deeper she goes, and the singing is coming from a massive dark chamber ahead that feels like it is BREATHING. Grotto entrance or sand bank?",
+          "choices": [
+            {
+              "label": "Enter the grotto",
+              "next": "m3"
+            },
+            {
+              "label": "Rest on the sand bank",
+              "next": "m4"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/grotto_bb.png",
+          "text": "The walls are PULSING like a heartbeat and Pearl can feel it in her chest \u2014 the glow lantern pulses in the same rhythm and the singing is so loud now it fills the water like it is coming from the ROCKS themselves. Cavern mouth or tidal ledge?",
+          "choices": [
+            {
+              "label": "Swim to the cavern mouth",
+              "next": "m3"
+            },
+            {
+              "label": "Climb the tidal ledge",
+              "next": "m4"
+            }
+          ],
+          "scare": {
+            "x": 0,
+            "y": 0,
+            "w": 1280,
+            "h": 720,
+            "pop": "story/grotto_bb_pop.png",
+            "sting": "boing",
+            "reveal": "Just the cave's heartbeat monitor! All healthy!",
+            "delay": 1500
+          }
+        },
+        "m1": {
+          "image": "story/grotto_m1.png",
+          "text": "The echo conch and the singing voice are hitting the EXACT same note and the water is vibrating \u2014 Pearl can see a glowing white grotto where the voice might be, but the water is at her CHEST and one of these passages leads deeper underwater. White grotto or dark tunnel?",
+          "choices": [
+            {
+              "label": "Swim to the white grotto",
+              "next": "end_song_found"
+            },
+            {
+              "label": "Dive into the dark tunnel",
+              "next": "end_flood_rush"
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/grotto_m2.png",
+          "text": "Pearl can finally BREATHE in here and the echo conch makes the whole dome ring like a bell \u2014 the singing voice bounces around so much she cannot tell which direction it comes from, but the rose crystal is humming the same note and that whirlpool is pulling water somewhere DEEP. Rose crystal or whirlpool?",
+          "choices": [
+            {
+              "label": "Touch the rose crystal",
+              "next": "end_harmony_ring"
+            },
+            {
+              "label": "Ride the whirlpool down",
+              "next": "end_echo_trap"
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/grotto_m3.png",
+          "text": "It is NOT her cousin singing \u2014 it is the CAVE! The entire grotto is a living coral creature and it has been singing to lure sea-dragons here for warmth because it is LONELY. The glow lantern in Pearl's satchel is pulsing like a heartbeat and the grotto's huge gentle face looks so sad. Coral alcove, crystal spire, or moonlit pool?",
+          "choices": [
+            {
+              "label": "Sit in the coral alcove",
+              "next": "end_coral_duet"
+            },
+            {
+              "label": "Climb the crystal spire",
+              "next": "end_warm_glow"
+            },
+            {
+              "label": "Wade to the moonlit pool",
+              "next": "end_surface_song"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/grotto_m4.png",
+          "text": "Two giant eels are having a WATER-SQUIRT SHOWDOWN right in front of the only two tunnels deeper \u2014 the cyan one guards the high tunnel above water and the magenta one guards the low tunnel underwater. The glow lantern makes them both pause and blink. Pick a side!",
+          "choices": [
+            {
+              "label": "Dash past the cyan eel",
+              "next": "end_high_ride"
+            },
+            {
+              "label": "Dive past the magenta eel",
+              "next": "end_low_glide"
+            }
+          ]
+        },
+        "end_song_found": {
+          "image": "story/grotto_end_song_found.png",
+          "text": "Pearl swam into the white grotto and found the singer \u2014 the cave ITSELF, a living coral creature who had been singing for YEARS trying to lure sea-dragons because it was lonely and cold! The echo conch harmonized with its voice and for the first time the grotto heard someone sing BACK. Pearl taught it to sing above the waterline so sailors and whales could hear it too. Now the singing caves have visitors every day and the grotto is never lonely again. The End!"
+        },
+        "end_flood_rush": {
+          "image": "story/grotto_end_flood_rush.png",
+          "text": "Pearl dove into the dark tunnel and the current grabbed her IMMEDIATELY \u2014 she tumbled head over tail in pitch-black water, lost the echo conch, lost all sense of direction, and washed up in a dead-end chamber with the water rising to the ceiling! She managed to squeeze through a tiny crack and pop out on the beach coughing and sputtering. The singing caves are still singing but Pearl is NOT going back in today. Oopsie ending!"
+        },
+        "end_harmony_ring": {
+          "image": "story/grotto_end_harmony_ring.png",
+          "text": "Pearl touched the crystal and the echo conch SANG \u2014 the whole dome rang like the world's biggest bell and the sound traveled through every tunnel lighting up the walls one by one! It reached the deepest grotto and the singing cave \u2014 a lonely living coral creature \u2014 opened its eyes because for the FIRST time someone answered its song with harmony instead of fear. Pearl followed the lit-up path and taught the grotto to sing above the waterline. Now ships follow the melody home on foggy nights. The End!"
+        },
+        "end_echo_trap": {
+          "image": "story/grotto_end_echo_trap.png",
+          "text": "Pearl jumped into the whirlpool and it spun her around so fast she could not tell up from down \u2014 the echo conch flew away, the singing voice echoed from EVERYWHERE at once, and she ended up in a deep rocky basin with absolutely no idea which way was up. A friendly crab eventually showed her a side exit but she popped out three beaches away covered in seaweed with her ears still ringing. Oopsie ending!"
+        },
+        "end_coral_duet": {
+          "image": "story/grotto_end_coral_duet.png",
+          "text": "Pearl sat down in the coral alcove and started singing \u2014 the grotto's huge gentle face lit up because nobody had ever sung WITH it before! They sang a duet that echoed through every chamber and the grotto was so happy it stopped pulling things underwater and learned to sing above the waterline. Pearl visits every full moon for their duet and the caves glow warmest on those nights. The End!"
+        },
+        "end_warm_glow": {
+          "image": "story/grotto_end_warm_glow.png",
+          "text": "Pearl climbed the spire and held the glow lantern as HIGH as she could \u2014 the living coral blazed and filled the grotto with warmth for the first time since the sea-dragons stopped coming! The grotto's sad face transformed into the biggest smile Pearl had ever seen on a cave. It did not need sea-dragons \u2014 it needed a friend with a warm heart. Pearl taught it to sing above the waterline and now the caves glow warm enough to heat the whole lagoon. The End!"
+        },
+        "end_surface_song": {
+          "image": "story/grotto_end_surface_song.png",
+          "text": "Pearl stepped into the pool and her paw slipped on a mossy rock \u2014 SPLASH went Pearl, HISSS went the lantern, and the whole cave went DARK! She paddled around in the pitch black bumping into coral walls while the grotto tried to sing her directions but Pearl was too busy gargling water to hear them. She finally crawled out on the wrong beach, soaking wet and completely lantern-less. Oopsie ending!"
+        },
+        "end_high_ride": {
+          "image": "story/grotto_end_high_ride.png",
+          "text": "Pearl faked left and dashed right and the cyan eel was SO impressed it shot a water jet that LAUNCHED her through the high tunnel like a rocket \u2014 she burst into the deepest grotto at full speed and the singing cave stopped mid-note in total surprise! Nobody had ever arrived with that much style. Pearl caught her breath, explained she came to find the singer, and taught the lonely grotto to sing above the waterline so it would never need to lure anyone underground again. The End!"
+        },
+        "end_low_glide": {
+          "image": "story/grotto_end_low_glide.png",
+          "text": "Pearl dove and the magenta eel's current was WAY too strong \u2014 it flipped her upside down and sent her tumbling through the dark like laundry in a washing machine! The lantern sank into a crack, the satchel filled with sand, and she popped out in a random tide pool with kelp on her head and absolutely no idea where the singing grotto was. The eel waved goodbye from the tunnel. Oopsie ending!"
+        }
+      }
+    },
+    {
+      "id": "badlands",
+      "title": "Rex and the Runaway Echo",
+      "nodes": {
+        "start": {
+          "image": "story/badlands_start.png",
+          "text": "Rex opened his mouth to yawn and out came the BIGGEST accidental roar that ever roared \u2014 now it's bouncing off every canyon wall and getting LOUDER. He has to reach the Echo Stone and roar the counter-frequency before the whole desert shakes apart! Slot canyon or mesa arch?",
+          "choices": [
+            {
+              "label": "Squeeze through the slot canyon",
+              "next": "a"
+            },
+            {
+              "label": "March under the mesa arch",
+              "next": "b"
+            }
+          ]
+        },
+        "a": {
+          "image": "story/badlands_a.png",
+          "text": "The slot canyon squeezed Rex's roar into a SQUEAL like a dinosaur stepping on a squeaky toy \u2014 embarrassing! But that turquoise singing stone on the ledge hummed back so sweetly Rex tucked it under his arm. Blue grotto or sandstone bridge?",
+          "choices": [
+            {
+              "label": "Explore the blue grotto",
+              "next": "aa"
+            },
+            {
+              "label": "Cross the sandstone bridge",
+              "next": "ab"
+            }
+          ]
+        },
+        "b": {
+          "image": "story/badlands_b.png",
+          "text": "Under the mesa arch Rex's echo bounced so hard pebbles rained down like confetti at a VERY loud party \u2014 but that terracotta wind-chime jingled the OPPOSITE sound and canceled the echo for one beautiful second. Rex grabbed it. Sienna staircase or red slot canyon?",
+          "choices": [
+            {
+              "label": "Climb down the sienna staircase",
+              "next": "ba"
+            },
+            {
+              "label": "Duck into the red slot canyon",
+              "next": "bb"
+            }
+          ]
+        },
+        "aa": {
+          "image": "story/badlands_aa.png",
+          "text": "The grotto turned Rex's breathing into a SYMPHONY and the singing stone hummed along like it knew every note \u2014 somewhere close the Echo Stone must be listening. Echo bell or crystal alcove?",
+          "choices": [
+            {
+              "label": "Ring the echo bell",
+              "next": "m1"
+            },
+            {
+              "label": "Step into the crystal alcove",
+              "next": "m2"
+            }
+          ]
+        },
+        "ab": {
+          "image": "story/badlands_ab.png",
+          "text": "The bridge WOBBLED with every echo-bounce and Rex's singing stone vibrated so hard it nearly wiggled free \u2014 whatever is making all this noise is CLOSE and probably enormous. Turquoise boulder or mesa ledge?",
+          "choices": [
+            {
+              "label": "Climb past the turquoise boulder",
+              "next": "m1"
+            },
+            {
+              "label": "Scout from the mesa ledge",
+              "next": "m2"
+            }
+          ]
+        },
+        "ba": {
+          "image": "story/badlands_ba.png",
+          "text": "Each step BONGED under Rex's feet and the wind-chime jingled the cancel-note just in time \u2014 but the ground at the bottom keeps rumbling and that armadillo barricade looks VERY intentional. Armadillo barricade or rust cave?",
+          "choices": [
+            {
+              "label": "Approach the armadillo barricade",
+              "next": "m3"
+            },
+            {
+              "label": "Peek into the rust cave",
+              "next": "m4"
+            }
+          ]
+        },
+        "bb": {
+          "image": "story/badlands_bb.png",
+          "text": "This slot canyon was so tight Rex's echo squeezed into a WHISPER for once \u2014 the wind-chime barely had to cancel anything! But ahead the canyon opens into something BIG and echoey. Tan boulder or sienna tunnel?",
+          "choices": [
+            {
+              "label": "Pass the tan boulder",
+              "next": "m3"
+            },
+            {
+              "label": "Enter the sienna tunnel",
+              "next": "m4"
+            }
+          ]
+        },
+        "m1": {
+          "image": "story/badlands_m1.png",
+          "text": "There it is \u2014 the golden Echo Stone! It's practically SHAKING with Rex's trapped roar. One big counter-roar should shut it down \u2014 but the singing stone keeps humming toward that gentle crystal pool like it knows something Rex doesn't. Roar at the Echo Stone or dip the singing stone in the pool?",
+          "choices": [
+            {
+              "label": "Roar at full blast",
+              "next": "end_full_blast"
+            },
+            {
+              "label": "Dip the stone in the pool",
+              "next": "end_gentle_hum"
+            }
+          ]
+        },
+        "m2": {
+          "image": "story/badlands_m2.png",
+          "text": "The armadillo captain tapped her helmet and pointed at the amphitheater \u2014 THIS is where Rex proves he can cancel his echo without scrambling every egg in the canyon. Canyon horn or drumstone?",
+          "choices": [
+            {
+              "label": "Blow the canyon horn",
+              "next": "end_canyon_chorus",
+              "hot": {
+                "x": 211,
+                "y": 109,
+                "w": 321,
+                "h": 489
+              }
+            },
+            {
+              "label": "Stomp the drumstone",
+              "next": "end_mesa_dance",
+              "hot": {
+                "x": 790,
+                "y": 159,
+                "w": 314,
+                "h": 335
+              }
+            }
+          ]
+        },
+        "m3": {
+          "image": "story/badlands_m3.png",
+          "text": "The armadillo captain rolled onto the stage and declared ROAR CONTEST! Rex can blow the deep bass horn, screech into the screech pipe, or squeeze that suspicious little cactus. Bass horn, screech pipe, or squeaky cactus?",
+          "choices": [
+            {
+              "label": "Blow the bass horn",
+              "next": "end_low_rumble"
+            },
+            {
+              "label": "Screech into the pipe",
+              "next": "end_high_screech"
+            },
+            {
+              "label": "Squeeze the squeaky cactus",
+              "next": "end_surprise_squeak"
+            }
+          ]
+        },
+        "m4": {
+          "image": "story/badlands_m4.png",
+          "text": "Rex's jaw DROPPED \u2014 armadillo EGGS everywhere, and they're shaking with every echo-bounce! No WONDER the armadillos are so grumpy about noise. The wind-chime is keeping things calm but Rex needs to be super careful. Big golden egg or spotted eggs?",
+          "choices": [
+            {
+              "label": "Hum to the golden egg",
+              "next": "end_egg_lullaby",
+              "hot": {
+                "x": 0,
+                "y": 435,
+                "w": 511,
+                "h": 252
+              }
+            },
+            {
+              "label": "Tiptoe past the spotted eggs",
+              "next": "end_tail_thump",
+              "hot": {
+                "x": 824,
+                "y": 429,
+                "w": 456,
+                "h": 209
+              }
+            }
+          ]
+        },
+        "end_gentle_hum": {
+          "image": "story/badlands_end_gentle_hum.png",
+          "text": "Rex dipped the singing stone and the pool sang the gentlest hum \u2014 the Echo Stone LISTENED, the trapped roar melted away like butter on a hot rock, and the armadillo captain saluted from the entrance because NOT A SINGLE EGG CRACKED. Gentle beats loud every time. The End!"
+        },
+        "end_full_blast": {
+          "image": "story/badlands_end_full_blast.png",
+          "text": "Rex's mega-roar hit the Echo Stone so hard every wall in the canyon CRACKED and the echo got TEN TIMES LOUDER \u2014 now there are a HUNDRED roars bouncing around like the world's worst concert and Rex is going to need a LOT more singing stones. Oopsie ending!"
+        },
+        "end_canyon_chorus": {
+          "image": "story/badlands_end_canyon_chorus.png",
+          "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA \u2014 together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!"
+        },
+        "end_mesa_dance": {
+          "image": "story/badlands_end_mesa_dance.png",
+          "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune \u2014 the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!"
+        },
+        "end_low_rumble": {
+          "image": "story/badlands_end_low_rumble.png",
+          "text": "Rex blew that bass horn and a RUMBLE so deep it made his bones buzz rolled through the amphitheater \u2014 every armadillo nodded, the captain taught him the secret gentle counter-hum, and Rex walked out humming so softly not a single egg even wobbled. The End!"
+        },
+        "end_high_screech": {
+          "image": "story/badlands_end_high_screech.png",
+          "text": "Rex SCREECHED so hard the pipe shot sparks and every armadillo curled into a ball and rolled offstage \u2014 stalactites cracked, the echo got SCREECHY too, and somewhere in the caves the eggs were vibrating like maracas. NOT the counter-frequency. Oopsie ending!"
+        },
+        "end_surprise_squeak": {
+          "image": "story/badlands_end_surprise_squeak.png",
+          "text": "Rex squeezed that cactus and out came the TINIEST most ridiculous squeak \u2014 armadillos laughed so hard they fell off their seats, the echo hiccupped and shrank, and the captain was laughing too hard to be grumpy anymore! The counter-frequency to a big scary roar is one very silly squeak. The End!"
+        },
+        "end_egg_lullaby": {
+          "image": "story/badlands_end_egg_lullaby.png",
+          "text": "Rex hummed the softest deepest lullaby a dinosaur ever hummed and the golden egg GLOWED \u2014 every egg in the cave stopped shaking, the armadillo captain cried actual armadillo tears, and she taught Rex the exact counter-frequency because anyone who hums THAT gently deserves to save the canyon. The End!"
+        },
+        "end_tail_thump": {
+          "image": "story/badlands_end_tail_thump.png",
+          "text": "Rex tiptoed like a champion but his tail had OTHER PLANS \u2014 THWACK went the platform and eggs rolled everywhere like the world's most stressful bowling alley! Rex spent the rest of the afternoon returning eggs to nests while armadillos supervised with VERY judgmental expressions. Oopsie ending!"
         }
       }
     },
@@ -25517,7 +25765,17 @@
               "label": "Cross the stepping-stones",
               "next": "ab"
             }
-          ]
+          ],
+          "scare": {
+            "x": 0,
+            "y": 5,
+            "w": 1280,
+            "h": 709,
+            "pop": "story/bamboo_a_pop.png",
+            "sting": "boing",
+            "reveal": "Just stretching my wings in the moonlight!",
+            "delay": 1800
+          }
         },
         "b": {
           "image": "story/bamboo_b.png",
@@ -25539,11 +25797,23 @@
           "choices": [
             {
               "label": "Push past the paper screen",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 65,
+                "y": 76,
+                "w": 295,
+                "h": 515
+              }
             },
             {
               "label": "Cross the bamboo bridge",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 718,
+                "y": 402,
+                "w": 562,
+                "h": 308
+              }
             }
           ]
         },
@@ -25651,48 +25921,39 @@
         },
         "end_lantern_arch": {
           "image": "story/bamboo_end_lantern_arch.png",
-          "text": "Luna charged through the bamboo arch and the lantern charm blazed so bright that every fake tanuki popped like a soap bubble \u2014 she dipped her horn into the Moon Pool and it ROARED back to life brighter than ever! The tanuki clapped and said THAT is how you navigate a maze \u2014 trust the light that chose you. The End!",
-          "video": "story-video/bamboo_end_lantern_arch_end.mp4"
+          "text": "Luna charged through the bamboo arch and the lantern charm blazed so bright that every fake tanuki popped like a soap bubble \u2014 she dipped her horn into the Moon Pool and it ROARED back to life brighter than ever! The tanuki clapped and said THAT is how you navigate a maze \u2014 trust the light that chose you. The End!"
         },
         "end_blossom_lost": {
           "image": "story/bamboo_end_blossom_lost.png",
-          "text": "Luna followed the pretty blossoms and they led her in a GIANT circle \u2014 round and round while the petals piled up to her knees and the Moon Pool got farther away with every step! By the time dawn arrived her horn was completely dark and she was standing in a mountain of pink petals looking very confused and very sparkle-less. Oopsie ending!",
-          "video": "story-video/bamboo_end_blossom_lost_end.mp4"
+          "text": "Luna followed the pretty blossoms and they led her in a GIANT circle \u2014 round and round while the petals piled up to her knees and the Moon Pool got farther away with every step! By the time dawn arrived her horn was completely dark and she was standing in a mountain of pink petals looking very confused and very sparkle-less. Oopsie ending!"
         },
         "end_waterfall_pool": {
           "image": "story/bamboo_end_waterfall_pool.png",
-          "text": "Luna jumped straight through the waterfall and behind it was the most beautiful hidden grotto with the Moon Pool glowing like liquid moonlight \u2014 she dipped her horn in and it blazed back BRIGHTER than a shooting star! A swirl of fireflies danced around her and the tanuki called from above that anyone brave enough to jump through a waterfall deserves the brightest horn in the forest. The End!",
-          "video": "story-video/bamboo_end_waterfall_pool_end.mp4"
+          "text": "Luna jumped straight through the waterfall and behind it was the most beautiful hidden grotto with the Moon Pool glowing like liquid moonlight \u2014 she dipped her horn in and it blazed back BRIGHTER than a shooting star! A swirl of fireflies danced around her and the tanuki called from above that anyone brave enough to jump through a waterfall deserves the brightest horn in the forest. The End!"
         },
         "end_tower_moonbath": {
           "image": "story/bamboo_end_tower_moonbath.png",
-          "text": "Luna climbed the tower but bamboo is BENDY \u2014 the whole top section flexed like a catapult and FLUNG her over the canopy! She landed upside down in a thicket with her hooves tangled in bamboo and the lantern charm somewhere in the leaves below. The tanuki peeked up and said that is NOT how towers work. Oopsie ending!",
-          "video": "story-video/bamboo_end_tower_moonbath_end.mp4"
+          "text": "Luna climbed the tower but bamboo is BENDY \u2014 the whole top section flexed like a catapult and FLUNG her over the canopy! She landed upside down in a thicket with her hooves tangled in bamboo and the lantern charm somewhere in the leaves below. The tanuki peeked up and said that is NOT how towers work. Oopsie ending!"
         },
         "end_flash_dazzle": {
           "image": "story/bamboo_end_flash_dazzle.png",
-          "text": "Luna fired the BIGGEST flash and it bounced off all three tanukis like a mirror ball \u2014 straight back into her OWN eyes! She stumbled around seeing spots, tripped over a root, and sat there blinking while every single tanuki waved cheerfully. The moonstone pebble rolled away and the tanuki said THAT is why you do not out-sparkle a trickster. Oopsie ending!",
-          "video": "story-video/bamboo_end_flash_dazzle_end.mp4"
+          "text": "Luna fired the BIGGEST flash and it bounced off all three tanukis like a mirror ball \u2014 straight back into her OWN eyes! She stumbled around seeing spots, tripped over a root, and sat there blinking while every single tanuki waved cheerfully. The moonstone pebble rolled away and the tanuki said THAT is why you do not out-sparkle a trickster. Oopsie ending!"
         },
         "end_strobe_reveal": {
           "image": "story/bamboo_end_strobe_reveal.png",
-          "text": "Luna's horn pulsed STROBE STROBE STROBE and with each flash a fake tanuki vanished until only the real one stood there looking genuinely surprised that someone figured out his trick \u2014 he bowed so deep his leaf fell off and said THAT is the cleverest horn-work he had seen in a hundred moons! The walls parted and the Moon Pool was right there waiting. The End!",
-          "video": "story-video/bamboo_end_strobe_reveal_end.mp4"
+          "text": "Luna's horn pulsed STROBE STROBE STROBE and with each flash a fake tanuki vanished until only the real one stood there looking genuinely surprised that someone figured out his trick \u2014 he bowed so deep his leaf fell off and said THAT is the cleverest horn-work he had seen in a hundred moons! The walls parted and the Moon Pool was right there waiting. The End!"
         },
         "end_steady_truth": {
           "image": "story/bamboo_end_steady_truth.png",
-          "text": "Luna held a steady blue beam and swept it across the arena like a lantern \u2014 the fake tanukis turned transparent and melted away and the real one just sat there with the most peaceful smile, saying that patience was the hardest lesson the maze could teach and Luna had passed without even trying! The walls dissolved and the Moon Pool opened wide and warm. The End!",
-          "video": "story-video/bamboo_end_steady_truth_end.mp4"
+          "text": "Luna held a steady blue beam and swept it across the arena like a lantern \u2014 the fake tanukis turned transparent and melted away and the real one just sat there with the most peaceful smile, saying that patience was the hardest lesson the maze could teach and Luna had passed without even trying! The walls dissolved and the Moon Pool opened wide and warm. The End!"
         },
         "end_song_heart": {
           "image": "story/bamboo_end_song_heart.png",
-          "text": "Luna closed her eyes and followed the song \u2014 the bamboo walls PARTED before every step like they had been waiting for someone to finally listen instead of look! The tanuki was crying actual happy tears and said he had been guarding this maze for a hundred years waiting for someone wise enough to navigate by HEART instead of sight. Luna dipped her horn in the Moon Pool and it glowed warmer than it ever had before. The End!",
-          "video": "story-video/bamboo_end_song_heart_end.mp4"
+          "text": "Luna closed her eyes and followed the song \u2014 the bamboo walls PARTED before every step like they had been waiting for someone to finally listen instead of look! The tanuki was crying actual happy tears and said he had been guarding this maze for a hundred years waiting for someone wise enough to navigate by HEART instead of sight. Luna dipped her horn in the Moon Pool and it glowed warmer than it ever had before. The End!"
         },
         "end_thicket_tangle": {
           "image": "story/bamboo_end_thicket_tangle.png",
-          "text": "Luna shoved into the thicket and the bamboo grabbed on like it had opinions about shortcuts \u2014 every step got more tangled and the lanterns' song got quieter until she was stuck up to her ears in purple bamboo with her horn completely dark and dawn happening without her. The tanuki sighed from somewhere above and said THAT is what happens when you stop listening. Oopsie ending!",
-          "video": "story-video/bamboo_end_thicket_tangle_end.mp4"
+          "text": "Luna shoved into the thicket and the bamboo grabbed on like it had opinions about shortcuts \u2014 every step got more tangled and the lanterns' song got quieter until she was stuck up to her ears in purple bamboo with her horn completely dark and dawn happening without her. The tanuki sighed from somewhere above and said THAT is what happens when you stop listening. Oopsie ending!"
         }
       }
     },
@@ -25726,7 +25987,17 @@
               "label": "Climb the tire mountain",
               "next": "ab"
             }
-          ]
+          ],
+          "scare": {
+            "x": 828,
+            "y": 160,
+            "w": 416,
+            "h": 461,
+            "pop": "story/junkyard_a_pop.png",
+            "sting": "thunder",
+            "reveal": "Whoa! Just testing my battle outfit!",
+            "delay": 1700
+          }
         },
         "b": {
           "image": "story/junkyard_b.png",
@@ -25734,11 +26005,23 @@
           "choices": [
             {
               "label": "Walk the tin roof path",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 338,
+                "y": 547,
+                "w": 334,
+                "h": 141
+              }
             },
             {
               "label": "Hop into the bathtub",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 813,
+                "y": 160,
+                "w": 255,
+                "h": 413
+              }
             }
           ]
         },
@@ -25748,11 +26031,23 @@
           "choices": [
             {
               "label": "Check the truck cab",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 33,
+                "y": 198,
+                "w": 406,
+                "h": 282
+              }
             },
             {
               "label": "Peek into the school bus",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 851,
+                "y": 222,
+                "w": 401,
+                "h": 345
+              }
             }
           ]
         },
@@ -25818,11 +26113,23 @@
           "choices": [
             {
               "label": "Climb down the fire escape",
-              "next": "end_ladder_discovery"
+              "next": "end_ladder_discovery",
+              "hot": {
+                "x": 225,
+                "y": 205,
+                "w": 319,
+                "h": 436
+              }
             },
             {
               "label": "Slide the drainpipe",
-              "next": "end_pipe_tumble"
+              "next": "end_pipe_tumble",
+              "hot": {
+                "x": 727,
+                "y": 63,
+                "w": 509,
+                "h": 537
+              }
             }
           ]
         },
@@ -25860,48 +26167,39 @@
         },
         "end_crane_rescue": {
           "image": "story/junkyard_end_crane_rescue.png",
-          "text": "Pip swung over on the crane hook like a tiny action hero and landed right next to the music box \u2014 the magnet clicked onto the jammed gear and it popped free with a PING! The most beautiful lullaby started playing and the tom-cat appeared with actual tears because he had been trying to fix that melody for MONTHS. Turns out the tough old cat was sheltering a whole family of stray kittens and the music box was their bedtime song. The End!",
-          "video": "story-video/junkyard_end_crane_rescue_end.mp4"
+          "text": "Pip swung over on the crane hook like a tiny action hero and landed right next to the music box \u2014 the magnet clicked onto the jammed gear and it popped free with a PING! The most beautiful lullaby started playing and the tom-cat appeared with actual tears because he had been trying to fix that melody for MONTHS. Turns out the tough old cat was sheltering a whole family of stray kittens and the music box was their bedtime song. The End!"
         },
         "end_hubcap_avalanche": {
           "image": "story/junkyard_end_hubcap_avalanche.png",
-          "text": "Pip toppled the hubcap tower and it crashed down like the world's loudest cymbal solo \u2014 CLANG BANG CRASH \u2014 burying him in a pile of spinning hubcaps while the magnet stuck to ALL of them at once and turned him into a metal hedgehog! The wall did not budge, the howling stopped in confusion, and the tom-cat just stared down with his arms crossed. Oopsie ending!",
-          "video": "story-video/junkyard_end_hubcap_avalanche_end.mp4"
+          "text": "Pip toppled the hubcap tower and it crashed down like the world's loudest cymbal solo \u2014 CLANG BANG CRASH \u2014 burying him in a pile of spinning hubcaps while the magnet stuck to ALL of them at once and turned him into a metal hedgehog! The wall did not budge, the howling stopped in confusion, and the tom-cat just stared down with his arms crossed. Oopsie ending!"
         },
         "end_ladder_discovery": {
           "image": "story/junkyard_end_ladder_discovery.png",
-          "text": "Pip climbed down carefully and found the music box right where the magnet pointed \u2014 it was NOT a puppy at all but a wind-up dog with a jammed gear and Pip's small paw was EXACTLY the right size to reach inside and turn it! The sweetest lullaby filled the hollow and the tom-cat appeared behind him looking ten years younger. He had been trying to fix it for months because the melody was the only thing that calmed his scared stray kittens. The End!",
-          "video": "story-video/junkyard_end_ladder_discovery_end.mp4"
+          "text": "Pip climbed down carefully and found the music box right where the magnet pointed \u2014 it was NOT a puppy at all but a wind-up dog with a jammed gear and Pip's small paw was EXACTLY the right size to reach inside and turn it! The sweetest lullaby filled the hollow and the tom-cat appeared behind him looking ten years younger. He had been trying to fix it for months because the melody was the only thing that calmed his scared stray kittens. The End!"
         },
         "end_pipe_tumble": {
           "image": "story/junkyard_end_pipe_tumble.png",
-          "text": "Pip shot down that pipe like a cannonball and LAUNCHED into a mountain of soggy cardboard boxes \u2014 completely soaked, covered in packing peanuts, and somehow FURTHER from the howling than when he started! The magnet flew away and stuck to a pipe on the other side of the yard and the mysterious howl will have to wait for a less dramatic rescue attempt. Oopsie ending!",
-          "video": "story-video/junkyard_end_pipe_tumble_end.mp4"
+          "text": "Pip shot down that pipe like a cannonball and LAUNCHED into a mountain of soggy cardboard boxes \u2014 completely soaked, covered in packing peanuts, and somehow FURTHER from the howling than when he started! The magnet flew away and stuck to a pipe on the other side of the yard and the mysterious howl will have to wait for a less dramatic rescue attempt. Oopsie ending!"
         },
         "end_lob_splat": {
           "image": "story/junkyard_end_lob_splat.png",
-          "text": "Pip lobbed the mud ball in a PERFECT arc and it splattered right on the tom-cat's tin can armor from above \u2014 SPLORCH! The old cat looked down at the mud, looked at Pip, and burst out laughing so hard he nearly fell over. Nobody had ever out-lobbed him before! He stepped aside and showed Pip his secret \u2014 a shelter full of kittens and a broken music box he could not fix. Pip's small paws reached the jammed gear and the sweetest lullaby filled the scrapyard while the brass bell chimed along. The End!",
-          "video": "story-video/junkyard_end_lob_splat_end.mp4"
+          "text": "Pip lobbed the mud ball in a PERFECT arc and it splattered right on the tom-cat's tin can armor from above \u2014 SPLORCH! The old cat looked down at the mud, looked at Pip, and burst out laughing so hard he nearly fell over. Nobody had ever out-lobbed him before! He stepped aside and showed Pip his secret \u2014 a shelter full of kittens and a broken music box he could not fix. Pip's small paws reached the jammed gear and the sweetest lullaby filled the scrapyard while the brass bell chimed along. The End!"
         },
         "end_roll_clang": {
           "image": "story/junkyard_end_roll_clang.png",
-          "text": "Pip rolled the mud ball SO fast it hit a rock and bounced right back into his own FACE \u2014 SPLAT! He stumbled backward blinded by mud, got his satchel hooked on a fridge handle, and dangled there like a very muddy Christmas ornament while the tom-cat just stared at him. The brass bell clanged helpfully but Pip could not see, could not move, and smelled like wet dirt. Oopsie ending!",
-          "video": "story-video/junkyard_end_roll_clang_end.mp4"
+          "text": "Pip rolled the mud ball SO fast it hit a rock and bounced right back into his own FACE \u2014 SPLAT! He stumbled backward blinded by mud, got his satchel hooked on a fridge handle, and dangled there like a very muddy Christmas ornament while the tom-cat just stared at him. The brass bell clanged helpfully but Pip could not see, could not move, and smelled like wet dirt. Oopsie ending!"
         },
         "end_sneak_kittens": {
           "image": "story/junkyard_end_sneak_kittens.png",
-          "text": "Pip snuck around the side and tumbled right into the SECRET \u2014 a cozy shelter full of the cutest kittens he had ever seen all blinking up at him! The howling was just a broken music box shaped like a dog and the tom-cat appeared behind him looking SHOCKED that someone found his hiding spot. Pip reached his small paw into the music box, turned the jammed gear, and the brass bell and lullaby harmonized so sweetly that every kitten purred and the old tom-cat whispered thank you. The End!",
-          "video": "story-video/junkyard_end_sneak_kittens_end.mp4"
+          "text": "Pip snuck around the side and tumbled right into the SECRET \u2014 a cozy shelter full of the cutest kittens he had ever seen all blinking up at him! The howling was just a broken music box shaped like a dog and the tom-cat appeared behind him looking SHOCKED that someone found his hiding spot. Pip reached his small paw into the music box, turned the jammed gear, and the brass bell and lullaby harmonized so sweetly that every kitten purred and the old tom-cat whispered thank you. The End!"
         },
         "end_kitten_lullaby": {
           "image": "story/junkyard_end_kitten_lullaby.png",
-          "text": "Pip shook the brass bell softly and every kitten stopped squirming and curled up like the chime was their favorite sound \u2014 then he reached over and fixed the music box gear and the bell and the lullaby played together in the most beautiful harmony! The tom-cat sat down beside Pip and said he had been guarding these kittens alone for months and nobody had ever been kind enough to come help. Sometimes the bravest rescue is a gentle one. The End!",
-          "video": "story-video/junkyard_end_kitten_lullaby_end.mp4"
+          "text": "Pip shook the brass bell softly and every kitten stopped squirming and curled up like the chime was their favorite sound \u2014 then he reached over and fixed the music box gear and the bell and the lullaby played together in the most beautiful harmony! The tom-cat sat down beside Pip and said he had been guarding these kittens alone for months and nobody had ever been kind enough to come help. Sometimes the bravest rescue is a gentle one. The End!"
         },
         "end_gear_fix": {
           "image": "story/junkyard_end_gear_fix.png",
-          "text": "Pip reached inside the music box and the gear SPRANG loose with a BOING \u2014 a tiny coil bonked him on the nose and the box honked ONE horrible note before going totally dead! Every kitten woke up crying and the tom-cat rushed in looking like someone had just broken his most precious thing, which is exactly what happened. Pip held the broken spring and whispered sorry about forty times. Oopsie ending!",
-          "video": "story-video/junkyard_end_gear_fix_end.mp4"
+          "text": "Pip reached inside the music box and the gear SPRANG loose with a BOING \u2014 a tiny coil bonked him on the nose and the box honked ONE horrible note before going totally dead! Every kitten woke up crying and the tom-cat rushed in looking like someone had just broken his most precious thing, which is exactly what happened. Pip held the broken spring and whispered sorry about forty times. Oopsie ending!"
         }
       }
     }
