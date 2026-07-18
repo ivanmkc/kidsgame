@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameShell } from '../../components/GameShell';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
 import { say } from '../../sound';
+import { MUSICBOX_IMAGES } from '../../assets/images';
 import { colors, fonts, shadows } from '../../theme';
 import { SCENES, sceneById } from './scenes';
 import { JourneyScene } from './JourneyScene';
@@ -28,7 +29,6 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
     if (scene) say(t(lang, 'musicbox.intro'));
   }, [scene?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Character picker: big tappable characters, no text (toddler-friendly).
   if (!scene) {
     return (
       <GameShell
@@ -38,32 +38,29 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
         lang={lang}
       >
         <View style={styles.pickerWrap}>
-          {SCENES.map((s) => (
-            <Pressable
-              key={s.id}
-              onPress={() => onPickScene(s.id)}
-              testID={`scene-pick-${s.id}`}
-              accessibilityRole="button"
-              accessibilityLabel={t(lang, `song.${s.songId}` as UIKey)}
-              style={({ pressed }) => [styles.charCard, pressed && styles.charPressed]}
-            >
-              <Text style={styles.charEmoji}>
-                {s.id === 'twinkle' ? '🐰' : '🐶'}
-              </Text>
-              <Text style={styles.charVehicle}>
-                {s.id === 'twinkle' ? '🎈' : '⛵'}
-              </Text>
-              <Text style={styles.charLabel}>
-                {t(lang, `song.${s.songId}` as UIKey)}
-              </Text>
-            </Pressable>
-          ))}
+          {SCENES.map((s) => {
+            const pickerSrc = MUSICBOX_IMAGES[`${s.id}/picker`];
+            return (
+              <Pressable
+                key={s.id}
+                onPress={() => onPickScene(s.id)}
+                testID={`scene-pick-${s.id}`}
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, `song.${s.songId}` as UIKey)}
+                style={({ pressed }) => [styles.charCard, pressed && styles.charPressed]}
+              >
+                <Image source={pickerSrc} style={styles.charPortrait} resizeMode="contain" />
+                <Text style={styles.charLabel}>
+                  {t(lang, `song.${s.songId}` as UIKey)}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </GameShell>
     );
   }
 
-  // Journey: the scrolling play surface. GameShell provides the back chip.
   return (
     <GameShell
       title={t(lang, `song.${scene.songId}` as UIKey)}
@@ -88,32 +85,28 @@ const styles = StyleSheet.create({
   },
   charCard: {
     width: 200,
-    height: 240,
+    height: 260,
     borderRadius: 28,
     backgroundColor: colors.paper,
     borderWidth: 3,
     borderColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 8,
     ...shadows.lifted,
   },
   charPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.95 }],
   },
-  charEmoji: {
-    fontSize: 72,
-  },
-  charVehicle: {
-    fontSize: 40,
-    marginTop: -8,
+  charPortrait: {
+    width: 140,
+    height: 160,
   },
   charLabel: {
     fontFamily: fonts.displayMed,
     fontSize: 15,
     color: colors.inkSoft,
     textAlign: 'center',
-    marginTop: 4,
   },
 });

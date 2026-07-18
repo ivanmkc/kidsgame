@@ -62,11 +62,11 @@ export function JourneyScene({ scene }: Props) {
 
     const zone = spawnZone(yFrac);
     const pool = scene.objects[zone];
-    const emoji = pool[nextId.current % pool.length];
+    const spriteKey = pool[nextId.current % pool.length];
     const id = nextId.current++;
     setSpawns((prev) => [
       ...prev.slice(-(MAX_SPAWNS - 1)),
-      { id, x, y, emoji, big, zone },
+      { id, x, y, spriteKey, sceneId: scene.id, big, zone },
     ]);
   }, [state, scene, scrollX, vehicleBounce]);
 
@@ -130,5 +130,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderRadius: 20,
     margin: 8,
+    backgroundColor: '#1B1440',
   },
 });

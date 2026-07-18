@@ -1,5 +1,6 @@
 import React from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Image, StyleSheet } from 'react-native';
+import { MUSICBOX_IMAGES } from '../../assets/images';
 import { SceneDef } from './scenes';
 
 interface Props {
@@ -8,19 +9,10 @@ interface Props {
   scale: Animated.AnimatedInterpolation<number>;
 }
 
-// Placeholder: emoji character in a balloon basket. Replaced by a generated
-// chroma sprite once the asset pipeline runs.
-const VEHICLE_EMOJI: Record<string, string> = {
-  twinkle: '🎈',
-};
-
-const CHARACTER_EMOJI: Record<string, string> = {
-  twinkle: '🐰',
-};
+const VEHICLE_SIZE = 160;
 
 export function VehicleSprite({ scene, translateY, scale }: Props) {
-  const vehicleEmoji = VEHICLE_EMOJI[scene.id] ?? '🎈';
-  const charEmoji = CHARACTER_EMOJI[scene.id] ?? '🐰';
+  const src = MUSICBOX_IMAGES[`${scene.id}/vehicle`];
   const topPct = `${scene.vehicleY * 100}%`;
 
   return (
@@ -34,10 +26,11 @@ export function VehicleSprite({ scene, translateY, scale }: Props) {
       ]}
       pointerEvents="none"
     >
-      <Text style={styles.balloon}>{vehicleEmoji}</Text>
-      <View style={styles.basket}>
-        <Text style={styles.character}>{charEmoji}</Text>
-      </View>
+      <Image
+        source={src}
+        style={styles.sprite}
+        resizeMode="contain"
+      />
     </Animated.View>
   );
 }
@@ -45,21 +38,12 @@ export function VehicleSprite({ scene, translateY, scale }: Props) {
 const styles = StyleSheet.create({
   vehicle: {
     position: 'absolute',
-    left: '18%' as unknown as number,
+    left: '12%' as unknown as number,
     zIndex: 5,
     alignItems: 'center',
   },
-  balloon: {
-    fontSize: 72,
-  },
-  basket: {
-    marginTop: -12,
-    backgroundColor: '#8B4513',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  character: {
-    fontSize: 36,
+  sprite: {
+    width: VEHICLE_SIZE,
+    height: VEHICLE_SIZE,
   },
 });

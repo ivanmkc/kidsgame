@@ -102,5 +102,21 @@ for (const f of fs.readdirSync(path.join(root, 'assets/game/ui')).sort()) {
 }
 lines.push('} as const;', '');
 
+// Music Box scene assets (panoramic strips, vehicle/picker sprites, object sprites)
+const mbDir = path.join(root, 'assets/game/musicbox');
+if (fs.existsSync(mbDir)) {
+  lines.push('export const MUSICBOX_IMAGES: Record<string, number> = {');
+  for (const scene of fs.readdirSync(mbDir).sort()) {
+    const sd = path.join(mbDir, scene);
+    if (!fs.statSync(sd).isDirectory()) continue;
+    for (const f of fs.readdirSync(sd).sort()) {
+      if (!f.endsWith('.png')) continue;
+      const key = `${scene}/${f.replace('.png', '')}`;
+      lines.push(`  '${key}': require('../../assets/game/musicbox/${scene}/${f}'),`);
+    }
+  }
+  lines.push('};', '');
+}
+
 fs.writeFileSync(path.join(root, 'src/assets/images.ts'), lines.join('\n'));
 console.log('wrote src/assets/images.ts');

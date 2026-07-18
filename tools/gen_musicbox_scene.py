@@ -39,51 +39,64 @@ STYLE = (
     "no UI elements, no harsh shadows"
 )
 
+LUNA = ("Luna, a small white unicorn foal with a curly rainbow mane and tail, "
+        "big friendly eyes and a tiny golden horn")
+
 SCENES: dict[str, dict] = {
     "twinkle": {
         "bg_prompt": (
             f"A seamlessly tileable horizontal panoramic night sky strip, "
-            f"deep indigo to purple gradient with scattered twinkling stars, "
-            f"a crescent moon, wisps of cloud, {STYLE}"
+            f"deep indigo to dark purple gradient with many scattered twinkling "
+            f"yellow and white stars of varying sizes, small wisps of semi-"
+            f"transparent cloud, {STYLE}"
         ),
         "mid_prompt": (
-            f"A seamlessly tileable horizontal panoramic mountain range strip, "
-            f"rolling purple-blue hills and peaks, some with snow caps, "
-            f"silhouetted against a twilight sky, {STYLE}"
+            f"A seamlessly tileable horizontal panoramic mountain range strip "
+            f"with transparent sky above, rolling purple-blue hills and jagged "
+            f"peaks with snow-capped tops, silhouetted against twilight, "
+            f"the bottom edge fades to dark green-blue, {STYLE}"
         ),
         "fg_prompt": (
-            f"A seamlessly tileable horizontal panoramic meadow strip, "
-            f"lush green rolling hills with wildflowers, soft grass, "
-            f"gentle undulations, {STYLE}"
+            f"A seamlessly tileable horizontal panoramic meadow strip with "
+            f"transparent sky above, lush green rolling hills covered in soft "
+            f"grass and scattered small wildflowers in pink and yellow, gentle "
+            f"undulating terrain, the top edge is a soft grassy horizon, {STYLE}"
         ),
         "vehicle_prompt": (
-            f"A cute cheerful bunny character wearing a red scarf, riding in "
-            f"the basket of a colorful hot-air balloon with stripes of red, "
-            f"yellow, and blue, the bunny is waving, full body view, "
-            f"on a solid magenta (#FF00FF) background, {STYLE}"
+            f"{LUNA} happily riding in the wicker basket of a large colorful "
+            f"hot-air balloon, the balloon envelope has wide stripes of cherry "
+            f"red, sunny yellow, and sky blue, Luna is peeping over the basket "
+            f"edge and waving one hoof, ropes connect basket to balloon, the "
+            f"full balloon and basket visible, on a solid magenta (#FF00FF) "
+            f"background, {STYLE}"
+        ),
+        "picker_prompt": (
+            f"Portrait of {LUNA} smiling, head and upper body, looking directly "
+            f"at the viewer, a small hot-air balloon floats behind her, on a "
+            f"solid magenta (#FF00FF) background, {STYLE}"
         ),
         "objects": {
             "sky": [
-                ("star", "a bright twinkling golden star with sparkle rays"),
-                ("comet", "a small shooting star with a glowing tail"),
-                ("moon_crescent", "a small crescent moon glowing softly"),
-                ("cloud_wispy", "a small wispy white cloud"),
-                ("rocket", "a tiny colorful toy rocket with a flame trail"),
-                ("sparkle", "a cluster of three small sparkles"),
+                ("star", "a single bright twinkling golden five-pointed star with small sparkle rays radiating outward"),
+                ("comet", "a single small shooting star with a bright white head and a glowing blue-white tail trailing behind"),
+                ("moon_crescent", "a single small golden crescent moon with a gentle warm glow"),
+                ("cloud_wispy", "a single small wispy semi-transparent white cloud"),
+                ("rocket", "a single tiny colorful toy rocket ship with red nose cone, blue body, and an orange flame trail"),
+                ("sparkle", "a single cluster of three small golden sparkles close together"),
             ],
             "mid": [
-                ("rainbow", "a small curved rainbow arc"),
-                ("bird", "a small cute bird in flight"),
-                ("cloud_puffy", "a small puffy white cloud"),
-                ("eagle", "a small friendly eagle soaring"),
+                ("rainbow", "a single small curved rainbow arc with all seven visible colors"),
+                ("bird", "a single small cute bluebird in flight with wings spread"),
+                ("cloud_puffy", "a single small round puffy white cloud"),
+                ("owl", "a single small cute round owl with big yellow eyes perched"),
             ],
             "ground": [
-                ("flower_pink", "a small pink wildflower"),
-                ("flower_yellow", "a small yellow sunflower"),
-                ("tree_round", "a small round green tree"),
-                ("mushroom", "a small red-and-white mushroom"),
-                ("mountain_goat", "a tiny cute mountain goat"),
-                ("tulip", "a small red tulip"),
+                ("flower_pink", "a single small pink five-petal wildflower with a green stem"),
+                ("flower_yellow", "a single small yellow sunflower with brown center and green stem"),
+                ("tree_round", "a single small round bushy green tree with a brown trunk"),
+                ("mushroom", "a single small red mushroom with white spots and a short white stem"),
+                ("mountain_goat", "a single tiny cute white mountain goat standing"),
+                ("tulip", "a single small red tulip flower with green stem and leaf"),
             ],
         },
     },
@@ -118,10 +131,10 @@ def _gen_strip(prompt: str, name: str, out_dir: Path, max_retries: int = 4) -> P
             continue
 
         ok = ask_yes_no(
-            img,
             f"Is this a high-quality panoramic landscape strip? "
             f"Requirements: {prompt.split(',')[0]}, no text, no UI, "
-            f"painterly children's book style."
+            f"painterly children's book style.",
+            [img],
         )
         if ok:
             img.save(path)
@@ -157,10 +170,10 @@ def _gen_sprite(prompt: str, name: str, out_dir: Path, size: int = 256,
             continue
 
         ok = ask_yes_no(
-            sprite,
             f"Is this a clean sprite of: {prompt.split(',')[0]}? "
             f"Should be a single object, transparent background, "
-            f"painterly children's book style, no text."
+            f"painterly children's book style, no text.",
+            [sprite],
         )
         if ok:
             sprite.save(path)
@@ -195,11 +208,16 @@ def gen_scene(scene_id: str) -> None:
     print("\nVehicle sprite:")
     _gen_sprite(spec["vehicle_prompt"], "vehicle", scene_dir, size=300)
 
-    # 3. Object sprites
+    # 3. Picker portrait
+    if "picker_prompt" in spec:
+        print("\nPicker portrait:")
+        _gen_sprite(spec["picker_prompt"], "picker", scene_dir, size=256)
+
+    # 4. Object sprites
     for zone, items in spec["objects"].items():
         print(f"\nObject sprites ({zone}):")
         for name, prompt in items:
-            _gen_sprite(prompt, f"obj_{zone}_{name}", scene_dir, size=80)
+            _gen_sprite(prompt, f"obj_{zone}_{name}", scene_dir, size=128)
 
     # 4. Update manifest
     manifest_path = MANIFEST

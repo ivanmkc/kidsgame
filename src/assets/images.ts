@@ -1679,3 +1679,27 @@ export const UI_IMAGES = {
   logo: require('../../assets/game/ui/logo.png'),
   menu_bg: require('../../assets/game/ui/menu_bg.jpg'),
 } as const;
+
+export const MUSICBOX_IMAGES: Record<string, number> = {
+  'twinkle/bg': require('../../assets/game/musicbox/twinkle/bg.png'),
+  'twinkle/fg': require('../../assets/game/musicbox/twinkle/fg.png'),
+  'twinkle/mid': require('../../assets/game/musicbox/twinkle/mid.png'),
+  'twinkle/obj_ground_flower_pink': require('../../assets/game/musicbox/twinkle/obj_ground_flower_pink.png'),
+  'twinkle/obj_ground_flower_yellow': require('../../assets/game/musicbox/twinkle/obj_ground_flower_yellow.png'),
+  'twinkle/obj_ground_mountain_goat': require('../../assets/game/musicbox/twinkle/obj_ground_mountain_goat.png'),
+  'twinkle/obj_ground_mushroom': require('../../assets/game/musicbox/twinkle/obj_ground_mushroom.png'),
+  'twinkle/obj_ground_tree_round': require('../../assets/game/musicbox/twinkle/obj_ground_tree_round.png'),
+  'twinkle/obj_ground_tulip': require('../../assets/game/musicbox/twinkle/obj_ground_tulip.png'),
+  'twinkle/obj_mid_bird': require('../../assets/game/musicbox/twinkle/obj_mid_bird.png'),
+  'twinkle/obj_mid_cloud_puffy': require('../../assets/game/musicbox/twinkle/obj_mid_cloud_puffy.png'),
+  'twinkle/obj_mid_owl': require('../../assets/game/musicbox/twinkle/obj_mid_owl.png'),
+  'twinkle/obj_mid_rainbow': require('../../assets/game/musicbox/twinkle/obj_mid_rainbow.png'),
+  'twinkle/obj_sky_cloud_wispy': require('../../assets/game/musicbox/twinkle/obj_sky_cloud_wispy.png'),
+  'twinkle/obj_sky_comet': require('../../assets/game/musicbox/twinkle/obj_sky_comet.png'),
+  'twinkle/obj_sky_moon_crescent': require('../../assets/game/musicbox/twinkle/obj_sky_moon_crescent.png'),
+  'twinkle/obj_sky_rocket': require('../../assets/game/musicbox/twinkle/obj_sky_rocket.png'),
+  'twinkle/obj_sky_sparkle': require('../../assets/game/musicbox/twinkle/obj_sky_sparkle.png'),
+  'twinkle/obj_sky_star': require('../../assets/game/musicbox/twinkle/obj_sky_star.png'),
+  'twinkle/picker': require('../../assets/game/musicbox/twinkle/picker.png'),
+  'twinkle/vehicle': require('../../assets/game/musicbox/twinkle/vehicle.png'),
+};
