@@ -12,6 +12,7 @@ import { speechLines as compare } from '../compare/logic';
 import { speechLines as sums } from '../sums/logic';
 import { speechLines as spell } from '../spell/logic';
 import { speechLines as bingo } from '../bingo/logic';
+import { speechLines as musicbox } from '../musicbox/logic';
 import { speechLines as winlines } from '../winlines';
 
 describe('speech line dump', () => {
@@ -21,7 +22,7 @@ describe('speech line dump', () => {
     const all = [...new Set([
       ...numberLines, ...HAN_NUMERALS,
       ...letters(), ...numbers(), ...sounds(), ...rhyme(),
-      ...count(), ...compare(), ...sums(), ...spell(), ...bingo(), ...winlines(),
+      ...count(), ...compare(), ...sums(), ...spell(), ...bingo(), ...musicbox(), ...winlines(),
     ])].sort();
     expect(all.length).toBeGreaterThan(100);
     if (process.env.KGB_DUMP === '1') {
