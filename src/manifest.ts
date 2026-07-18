@@ -105,10 +105,6 @@ export interface EscapeItem {
   emoji: string;   // tray icon — big and readable for age 3
 }
 
-export interface EscapeAfter extends Box {
-  patch: string;       // changed-state crop composited over the base
-}
-
 export interface EscapeHotspot {
   id: string;
   box: Box;
@@ -117,7 +113,7 @@ export interface EscapeHotspot {
   gives?: string;      // item id granted on successful tap
   needs?: string;      // item id that must be SELECTED in the tray
   pop?: string;        // transparent sprite that springs out (reveal beat)
-  after?: EscapeAfter; // visual state after use (e.g. open chest) — composited + crossfaded
+  afterScene?: string; // full-scene image after this hotspot is used (crossfaded)
   sayFound?: string;   // spoken on success
   saySearch?: string;  // spoken on plain search with nothing there (flavor)
   sayLocked?: string;  // spoken when tapped without the needed item

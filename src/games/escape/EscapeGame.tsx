@@ -8,7 +8,7 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
-import { EscapeAfter, EscapeRoom, manifest } from '../../manifest';
+import { EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 import { EscapeState, applyTap, nextHint, selectItem, startState } from './logic';
 
@@ -65,6 +65,35 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const displayWidth = Math.min(width - 24, 980);
   const scale = displayWidth / 1280;
   const displayHeight = 720 * scale;
+
+  // Full-scene state chain: find the latest afterScene for used hotspots.
+  // Hotspots with afterScene form a linear chain in spec order; the current
+  // scene = the afterScene of the last used state-changing hotspot.
+  const sceneChain = useMemo(() => {
+    if (!room) return [];
+    return room.hotspots.filter((h) => h.afterScene).map((h) => h.id);
+  }, [room]);
+
+  const currentSceneKey = useMemo(() => {
+    if (!room) return '';
+    for (let i = sceneChain.length - 1; i >= 0; i--) {
+      if (state.used.includes(sceneChain[i])) {
+        const h = room.hotspots.find((x) => x.id === sceneChain[i]);
+        if (h?.afterScene) return h.afterScene;
+      }
+    }
+    return room.image;
+  }, [room, sceneChain, state.used]);
+
+  const prevSceneKey = useRef(currentSceneKey);
+  const crossfade = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (currentSceneKey !== prevSceneKey.current) {
+      crossfade.setValue(0);
+      Animated.timing(crossfade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+      prevSceneKey.current = currentSceneKey;
+    }
+  }, [currentSceneKey, crossfade]);
 
   const heldItems = useMemo(
     () => (room ? state.inventory.map((id) => room.items.find((i) => i.id === id)!).filter(Boolean) : []),
@@ -134,14 +163,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}>
-          <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
-          {room.hotspots.map((h) => {
-            const used = state.used.includes(h.id);
-            if (used && h.after) {
-              return <AfterPatch key={`after-${h.id}`} after={h.after} scale={scale} />;
-            }
-            return null;
-          })}
+          <Image source={SCENE_THUMBS[currentSceneKey] ?? SCENE_IMAGES[currentSceneKey]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+          {currentSceneKey !== room.image && (
+            <Animated.Image
+              source={SCENE_IMAGES[currentSceneKey]}
+              style={{ position: 'absolute', width: displayWidth, height: displayHeight, opacity: crossfade }}
+              resizeMode="cover"
+            />
+          )}
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
             const actionable = !used && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
@@ -193,33 +222,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         lang={lang}
       />
     </GameShell>
-  );
-}
-
-function AfterPatch({ after, scale }: { after: EscapeAfter; scale: number }) {
-  const fade = useRef(new Animated.Value(0)).current;
-  const grow = useRef(new Animated.Value(0.92)).current;
-  const src = SCENE_IMAGES[after.patch];
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }),
-      Animated.spring(grow, { toValue: 1, friction: 5, useNativeDriver: true }),
-    ]).start();
-  }, [fade, grow]);
-  if (!src) return null;
-  return (
-    <View pointerEvents="none" style={{ position: 'absolute', left: after.x * scale, top: after.y * scale, width: after.w * scale, height: after.h * scale }}>
-      <Animated.Image
-        source={src}
-        style={{
-          width: '100%' as unknown as number,
-          height: '100%' as unknown as number,
-          opacity: fade,
-          transform: [{ scale: grow }],
-        }}
-        resizeMode="stretch"
-      />
-    </View>
   );
 }
 

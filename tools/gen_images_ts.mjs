@@ -54,7 +54,7 @@ for (const r of manifest.escape ?? []) {
   sceneFiles.add(r.image);
   for (const h of r.hotspots) {
     if (h.pop) sceneFiles.add(h.pop);
-    if (h.after?.patch) sceneFiles.add(h.after.patch);
+    if (h.afterScene) sceneFiles.add(h.afterScene);
   }
 }
 for (const f of [...sceneFiles].sort()) {
