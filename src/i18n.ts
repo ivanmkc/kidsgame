@@ -66,6 +66,12 @@ export type UIKey =
   | 'card.bingo.title'    | 'card.bingo.blurb'
   | 'card.carmode.title'  | 'card.carmode.blurb'
   | 'card.escape.title'   | 'card.escape.blurb'
+  | 'card.highlow.title'  | 'card.highlow.blurb'
+  | 'card.bells.title'    | 'card.bells.blurb'
+  | 'card.echobeat.title' | 'card.echobeat.blurb'
+  | 'card.steadybeat.title' | 'card.steadybeat.blurb'
+  | 'card.fastslow.title' | 'card.fastslow.blurb'
+  | 'card.samediff.title' | 'card.samediff.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -137,6 +143,22 @@ export type UIKey =
   | 'shell.escape.subPlay'
   | 'picker.escape'
   | 'escape.trayEmpty'
+  // ── Music game shells ──────────────────────────────────────────
+  | 'menu.music'
+  | 'shell.highlow.title'   | 'shell.highlow.sub'
+  | 'shell.bells.title'     | 'shell.bells.sub'
+  | 'shell.echobeat.title'  | 'shell.echobeat.sub'
+  | 'shell.steadybeat.title' | 'shell.steadybeat.sub'
+  | 'shell.fastslow.title'  | 'shell.fastslow.sub'
+  | 'shell.samediff.title'  | 'shell.samediff.sub'
+  | 'music.listen'
+  | 'music.yourTurn'
+  | 'music.high'
+  | 'music.low'
+  | 'music.fast'
+  | 'music.slow'
+  | 'music.same'
+  | 'music.different'
   // ── WinOverlay: labels + per-game messages ─────────────────────
   | 'overlay.next'
   | 'overlay.nextRound'
@@ -171,6 +193,12 @@ export type UIKey =
   | 'win.sums'
   | 'win.bingo'
   | 'win.musicbox'
+  | 'win.highlow'
+  | 'win.bells'
+  | 'win.echobeat'
+  | 'win.steadybeat'
+  | 'win.fastslow'
+  | 'win.samediff'
   // ── Music box ──────────────────────────────────────────────────
   | 'musicbox.intro'
   | 'musicbox.introFree'
@@ -302,6 +330,18 @@ const EN: Table = {
   'card.carmode.blurb': 'Audio games for the car — no looking needed!',
   'card.escape.title': 'Little Escapes',
   'card.escape.blurb': 'Find, unlock, and save the day!',
+  'card.highlow.title': 'High or Low',
+  'card.highlow.blurb': 'Which note is higher?',
+  'card.bells.title': 'Melody Bells',
+  'card.bells.blurb': 'Repeat the tune on the bells!',
+  'card.echobeat.title': 'Echo Beat',
+  'card.echobeat.blurb': 'Listen to the beat, tap it back!',
+  'card.steadybeat.title': 'Steady Beat',
+  'card.steadybeat.blurb': 'Keep the beat going — tap along!',
+  'card.fastslow.title': 'Fast or Slow',
+  'card.fastslow.blurb': 'Was that music fast or slow?',
+  'card.samediff.title': 'Same or Different',
+  'card.samediff.blurb': 'Do the two tunes sound the same?',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',
@@ -374,6 +414,28 @@ const EN: Table = {
   'picker.escape': 'Which room today?',
   'escape.trayEmpty': 'Things you find go here…',
 
+  'menu.music': 'Music Games 🎵',
+  'shell.highlow.title': 'High or Low',
+  'shell.highlow.sub': 'Which note sounds higher?',
+  'shell.bells.title': 'Melody Bells',
+  'shell.bells.sub': 'Listen, then play the tune back!',
+  'shell.echobeat.title': 'Echo Beat',
+  'shell.echobeat.sub': 'Tap the rhythm you hear!',
+  'shell.steadybeat.title': 'Steady Beat',
+  'shell.steadybeat.sub': 'Tap along with the beat!',
+  'shell.fastslow.title': 'Fast or Slow',
+  'shell.fastslow.sub': 'Is the music fast or slow?',
+  'shell.samediff.title': 'Same or Different',
+  'shell.samediff.sub': 'Do the two melodies match?',
+  'music.listen': 'Listen...',
+  'music.yourTurn': 'Your turn!',
+  'music.high': 'High',
+  'music.low': 'Low',
+  'music.fast': 'Fast',
+  'music.slow': 'Slow',
+  'music.same': 'Same',
+  'music.different': 'Different',
+
   'overlay.next': 'Next Level ▶️',
   'overlay.nextRound': 'Next Round ▶️',
   'overlay.playAgain': 'Play Again ▶️',
@@ -407,6 +469,12 @@ const EN: Table = {
   'win.sums': 'Sum superstar! You added them all!',
   'win.bingo': 'BINGO! You got a line!',
   'win.musicbox': 'Beautiful music! You played the whole song!',
+  'win.highlow': 'Great ears! You heard every note!',
+  'win.bells': 'Bell master! You played them all back!',
+  'win.echobeat': 'Rhythm star! Perfect echo!',
+  'win.steadybeat': 'Steady as a drum! Great beat!',
+  'win.fastslow': 'Speed detective! You got them all!',
+  'win.samediff': 'Sharp ears! You heard every difference!',
   'musicbox.intro': 'Tap, tap, tap anywhere to play the song!',
   'musicbox.introFree': 'Magic keys! Every tap makes a pretty note!',
   'musicbox.freeplay': 'Magic Keys',
@@ -535,6 +603,18 @@ const JA: Table = {
   'card.carmode.blurb': 'みみだけで あそぶ おとゲーム！',
   'card.escape.title': 'ちいさな だっしゅつ',
   'card.escape.blurb': 'さがして あけて たすけよう！',
+  'card.highlow.title': 'たかい ひくい',
+  'card.highlow.blurb': 'どっちの おとが たかい？',
+  'card.bells.title': 'メロディベル',
+  'card.bells.blurb': 'きいた メロディを まねして ならそう！',
+  'card.echobeat.title': 'エコービート',
+  'card.echobeat.blurb': 'リズムを きいて おなじように タップ！',
+  'card.steadybeat.title': 'ビートキーパー',
+  'card.steadybeat.blurb': 'ビートに あわせて タップしよう！',
+  'card.fastslow.title': 'はやい おそい',
+  'card.fastslow.blurb': 'おんがくは はやかった？ おそかった？',
+  'card.samediff.title': 'おなじ ちがう',
+  'card.samediff.blurb': 'ふたつの メロディは おなじ？',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',
@@ -607,6 +687,28 @@ const JA: Table = {
   'picker.escape': 'きょうは どのおへや？',
   'escape.trayEmpty': 'みつけたものが ここにはいるよ…',
 
+  'menu.music': 'おんがくあそび 🎵',
+  'shell.highlow.title': 'たかい ひくい',
+  'shell.highlow.sub': 'どっちの おとが たかい？',
+  'shell.bells.title': 'メロディベル',
+  'shell.bells.sub': 'きいて、おなじように ならそう！',
+  'shell.echobeat.title': 'エコービート',
+  'shell.echobeat.sub': 'きこえた リズムを タップ！',
+  'shell.steadybeat.title': 'ビートキーパー',
+  'shell.steadybeat.sub': 'ビートに あわせて タップ！',
+  'shell.fastslow.title': 'はやい おそい',
+  'shell.fastslow.sub': 'おんがくは はやい？ おそい？',
+  'shell.samediff.title': 'おなじ ちがう',
+  'shell.samediff.sub': 'ふたつの メロディは おなじ？',
+  'music.listen': 'きいてね…',
+  'music.yourTurn': 'きみの ばん！',
+  'music.high': 'たかい',
+  'music.low': 'ひくい',
+  'music.fast': 'はやい',
+  'music.slow': 'おそい',
+  'music.same': 'おなじ',
+  'music.different': 'ちがう',
+
   'overlay.next': 'つぎのレベル ▶️',
   'overlay.nextRound': 'つぎのラウンド ▶️',
   'overlay.playAgain': 'もういちど ▶️',
@@ -640,6 +742,12 @@ const JA: Table = {
   'win.sums': 'たしざん スーパースター！ ぜんぶ せいかい！',
   'win.bingo': 'ビンゴ！ いちれつ そろったね！',
   'win.musicbox': 'すてきな おんがく！ さいごまで ひけたね！',
+  'win.highlow': 'みみがいいね！ ぜんぶ ききとれた！',
+  'win.bells': 'ベルマスター！ ぜんぶ ひけたね！',
+  'win.echobeat': 'リズムスター！ かんぺきな エコー！',
+  'win.steadybeat': 'ビートばっちり！ すごいリズム！',
+  'win.fastslow': 'はやさたんてい！ ぜんぶ あたり！',
+  'win.samediff': 'みみがするどい！ ぜんぶ ききとれた！',
   'musicbox.intro': 'とん とん とん！ どこでも タップして うたを ひこう！',
   'musicbox.introFree': 'まほうの けんばん！ タップすると きれいなおとが なるよ！',
   'musicbox.freeplay': 'まほうの けんばん',
@@ -767,6 +875,18 @@ const CMN: Table = {
   'card.carmode.blurb': '不用看屏幕的声音游戏！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '找一找，打开它，救出小伙伴！',
+  'card.highlow.title': '高低音',
+  'card.highlow.blurb': '哪个音更高？',
+  'card.bells.title': '旋律铃铛',
+  'card.bells.blurb': '听旋律，按顺序敲响铃铛！',
+  'card.echobeat.title': '回声节拍',
+  'card.echobeat.blurb': '听节拍，拍回来！',
+  'card.steadybeat.title': '稳定节拍',
+  'card.steadybeat.blurb': '跟着节拍一起拍！',
+  'card.fastslow.title': '快与慢',
+  'card.fastslow.blurb': '这段音乐是快还是慢？',
+  'card.samediff.title': '相同不同',
+  'card.samediff.blurb': '两段旋律听起来一样吗？',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',
@@ -839,6 +959,28 @@ const CMN: Table = {
   'picker.escape': '今天玩哪个房间？',
   'escape.trayEmpty': '找到的东西会放在这里…',
 
+  'menu.music': '音乐游戏 🎵',
+  'shell.highlow.title': '高低音',
+  'shell.highlow.sub': '哪个音更高？',
+  'shell.bells.title': '旋律铃铛',
+  'shell.bells.sub': '听完旋律，按顺序敲响！',
+  'shell.echobeat.title': '回声节拍',
+  'shell.echobeat.sub': '拍出你听到的节拍！',
+  'shell.steadybeat.title': '稳定节拍',
+  'shell.steadybeat.sub': '跟着节拍一起拍！',
+  'shell.fastslow.title': '快与慢',
+  'shell.fastslow.sub': '音乐是快还是慢？',
+  'shell.samediff.title': '相同不同',
+  'shell.samediff.sub': '两段旋律一样吗？',
+  'music.listen': '听一听…',
+  'music.yourTurn': '轮到你了！',
+  'music.high': '高',
+  'music.low': '低',
+  'music.fast': '快',
+  'music.slow': '慢',
+  'music.same': '一样',
+  'music.different': '不同',
+
   'overlay.next': '下一关 ▶️',
   'overlay.nextRound': '下一轮 ▶️',
   'overlay.playAgain': '再玩一次 ▶️',
@@ -872,6 +1014,12 @@ const CMN: Table = {
   'win.sums': '加法小超人！全都算对了！',
   'win.bingo': '宾果！你连成一排了！',
   'win.musicbox': '好美的音乐！你弹完了整首歌！',
+  'win.highlow': '好耳朵！每个音都听出来了！',
+  'win.bells': '铃铛大师！全都弹对了！',
+  'win.echobeat': '节拍之星！完美回声！',
+  'win.steadybeat': '节拍稳如鼓！好厉害！',
+  'win.fastslow': '速度侦探！全都答对了！',
+  'win.samediff': '耳朵好尖！每个差别都听到了！',
   'musicbox.intro': '点、点、点！点哪里都能弹歌哦！',
   'musicbox.introFree': '魔法琴键！每点一下都有好听的音！',
   'musicbox.freeplay': '魔法琴键',
@@ -999,6 +1147,18 @@ const YUE: Table = {
   'card.carmode.blurb': '唔使睇屏幕嘅聲音遊戲！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
+  'card.highlow.title': '高低音',
+  'card.highlow.blurb': '邊個音高啲？',
+  'card.bells.title': '旋律鈴鐺',
+  'card.bells.blurb': '聽旋律，跟住順序撳鈴鐺！',
+  'card.echobeat.title': '回聲節拍',
+  'card.echobeat.blurb': '聽節拍，撳返出嚟！',
+  'card.steadybeat.title': '穩定節拍',
+  'card.steadybeat.blurb': '跟住節拍一齊撳！',
+  'card.fastslow.title': '快定慢',
+  'card.fastslow.blurb': '呢段音樂係快定慢？',
+  'card.samediff.title': '一樣定唔同',
+  'card.samediff.blurb': '兩段旋律聽落一樣？',
 
   'picker.surprise': '🎲 隨機嚟一個！',
   'picker.diff': '想喺邊玩？',
@@ -1071,6 +1231,28 @@ const YUE: Table = {
   'picker.escape': '今日玩邊間房？',
   'escape.trayEmpty': '搵到嘅嘢會放喺呢度…',
 
+  'menu.music': '音樂遊戲 🎵',
+  'shell.highlow.title': '高低音',
+  'shell.highlow.sub': '邊個音高啲？',
+  'shell.bells.title': '旋律鈴鐺',
+  'shell.bells.sub': '聽完旋律，跟住撳返！',
+  'shell.echobeat.title': '回聲節拍',
+  'shell.echobeat.sub': '撳出你聽到嘅節拍！',
+  'shell.steadybeat.title': '穩定節拍',
+  'shell.steadybeat.sub': '跟住節拍一齊撳！',
+  'shell.fastslow.title': '快定慢',
+  'shell.fastslow.sub': '音樂係快定慢？',
+  'shell.samediff.title': '一樣定唔同',
+  'shell.samediff.sub': '兩段旋律係咪一樣？',
+  'music.listen': '聽下…',
+  'music.yourTurn': '到你喇！',
+  'music.high': '高',
+  'music.low': '低',
+  'music.fast': '快',
+  'music.slow': '慢',
+  'music.same': '一樣',
+  'music.different': '唔同',
+
   'overlay.next': '下一關 ▶️',
   'overlay.nextRound': '下一輪 ▶️',
   'overlay.playAgain': '再玩一次 ▶️',
@@ -1104,6 +1286,12 @@ const YUE: Table = {
   'win.sums': '加法小超人！全部計啱！',
   'win.bingo': 'BINGO！你連成一行喇！',
   'win.musicbox': '好靚嘅音樂！你彈晒成首歌喇！',
+  'win.highlow': '好耳仔！每個音都聽到！',
+  'win.bells': '鈴鐺大師！全部撳返晒！',
+  'win.echobeat': '節拍之星！完美回聲！',
+  'win.steadybeat': '節拍穩如鼓！好勁！',
+  'win.fastslow': '速度偵探！全部答啱！',
+  'win.samediff': '耳仔好尖！每個差別都聽到！',
   'musicbox.intro': '撳、撳、撳！撳邊度都彈到歌㗎！',
   'musicbox.introFree': '魔法琴鍵！每撳一下都有好聽嘅音！',
   'musicbox.freeplay': '魔法琴鍵',
