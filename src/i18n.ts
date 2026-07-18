@@ -63,6 +63,7 @@ export type UIKey =
   | 'card.compare.title'  | 'card.compare.blurb'
   | 'card.sums.title'     | 'card.sums.blurb'
   | 'card.musicbox.title' | 'card.musicbox.blurb'
+  | 'card.escape.title'   | 'card.escape.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -124,6 +125,11 @@ export type UIKey =
   | 'shell.musicbox.title'
   | 'shell.musicbox.subPicker'
   | 'shell.musicbox.subPlay'
+  | 'shell.escape.title'
+  | 'shell.escape.subPicker'
+  | 'shell.escape.subPlay'
+  | 'picker.escape'
+  | 'escape.trayEmpty'
   // ── WinOverlay: labels + per-game messages ─────────────────────
   | 'overlay.next'
   | 'overlay.nextRound'
@@ -282,6 +288,8 @@ const EN: Table = {
   'card.sums.blurb': 'One more hops in — how many now?',
   'card.musicbox.title': 'Music Box',
   'card.musicbox.blurb': 'Tap along and play a song!',
+  'card.escape.title': 'Little Escapes',
+  'card.escape.blurb': 'Find, unlock, and save the day!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',
@@ -343,6 +351,11 @@ const EN: Table = {
   'shell.musicbox.title': 'Music Box',
   'shell.musicbox.subPicker': 'Pick a song to play!',
   'shell.musicbox.subPlay': 'Tap anywhere to play the next note!',
+  'shell.escape.title': 'Little Escapes',
+  'shell.escape.subPicker': 'Pick a room to explore!',
+  'shell.escape.subPlay': 'Search the picture — find things and use them!',
+  'picker.escape': 'Which room today?',
+  'escape.trayEmpty': 'Things you find go here…',
 
   'overlay.next': 'Next Level ▶️',
   'overlay.nextRound': 'Next Round ▶️',
@@ -498,6 +511,8 @@ const JA: Table = {
   'card.sums.blurb': 'もういっぴき ふえたら いくつ？',
   'card.musicbox.title': 'オルゴール',
   'card.musicbox.blurb': 'タップして うたを ひこう！',
+  'card.escape.title': 'ちいさな だっしゅつ',
+  'card.escape.blurb': 'さがして あけて たすけよう！',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',
@@ -559,6 +574,11 @@ const JA: Table = {
   'shell.musicbox.title': 'オルゴール',
   'shell.musicbox.subPicker': 'うたを えらんでね！',
   'shell.musicbox.subPlay': 'どこでも タップして つぎのおとを ならそう！',
+  'shell.escape.title': 'ちいさな だっしゅつ',
+  'shell.escape.subPicker': 'おへやを えらんでね！',
+  'shell.escape.subPlay': 'えを さがして みつけたものを つかおう！',
+  'picker.escape': 'きょうは どのおへや？',
+  'escape.trayEmpty': 'みつけたものが ここにはいるよ…',
 
   'overlay.next': 'つぎのレベル ▶️',
   'overlay.nextRound': 'つぎのラウンド ▶️',
@@ -713,6 +733,8 @@ const CMN: Table = {
   'card.sums.blurb': '又来一只 — 现在几只？',
   'card.musicbox.title': '音乐盒',
   'card.musicbox.blurb': '点一点，弹一首歌！',
+  'card.escape.title': '小小密室',
+  'card.escape.blurb': '找一找，打开它，救出小伙伴！',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',
@@ -774,6 +796,11 @@ const CMN: Table = {
   'shell.musicbox.title': '音乐盒',
   'shell.musicbox.subPicker': '选一首歌吧！',
   'shell.musicbox.subPlay': '点哪里都可以，弹出下一个音！',
+  'shell.escape.title': '小小密室',
+  'shell.escape.subPicker': '选一个房间吧！',
+  'shell.escape.subPlay': '找找图里的东西，用它们解开谜题！',
+  'picker.escape': '今天玩哪个房间？',
+  'escape.trayEmpty': '找到的东西会放在这里…',
 
   'overlay.next': '下一关 ▶️',
   'overlay.nextRound': '下一轮 ▶️',
@@ -928,6 +955,8 @@ const YUE: Table = {
   'card.sums.blurb': '又嚟多隻 — 而家有幾多？',
   'card.musicbox.title': '音樂盒',
   'card.musicbox.blurb': '撳一撳，彈一首歌！',
+  'card.escape.title': '小小密室',
+  'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
 
   'picker.surprise': '🎲 隨機嚟一個！',
   'picker.diff': '想喺邊玩？',
@@ -989,6 +1018,11 @@ const YUE: Table = {
   'shell.musicbox.title': '音樂盒',
   'shell.musicbox.subPicker': '揀一首歌啦！',
   'shell.musicbox.subPlay': '撳邊度都得，彈出下一個音！',
+  'shell.escape.title': '小小密室',
+  'shell.escape.subPicker': '揀一間房啦！',
+  'shell.escape.subPlay': '喺圖入面搵嘢，用佢哋解謎！',
+  'picker.escape': '今日玩邊間房？',
+  'escape.trayEmpty': '搵到嘅嘢會放喺呢度…',
 
   'overlay.next': '下一關 ▶️',
   'overlay.nextRound': '下一輪 ▶️',

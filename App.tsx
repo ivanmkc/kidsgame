@@ -40,6 +40,7 @@ import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { StickerGame } from './src/games/sticker/StickerGame';
 import { StoryGame } from './src/games/story/StoryGame';
 import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
+import { EscapeGame } from './src/games/escape/EscapeGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
@@ -126,7 +127,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'musicbox'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'musicbox', 'escape'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
@@ -205,6 +206,15 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'escape' && (
+        <EscapeGame
+          onHome={goHome}
+          sceneId={param}
+          onPickScene={(id) => navigate(`escape/${id}`)}
+          onBackToPicker={() => navigate('escape')}
+          lang={lang}
+        />
+      )}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} lang={lang} />}
@@ -233,7 +243,7 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'musicbox';
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'musicbox' | 'escape';
 interface CardDef { route: string; color: string; key: CardKey; preview: string }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
@@ -259,6 +269,7 @@ const GAME_CARDS: CardDef[] = [
   { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
   { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
   { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
+  { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape' },
 ];
 
 function Menu({
@@ -297,6 +308,7 @@ function Menu({
     if (key === 'icons20') return <OddOnePreview />;
     if (key === 'rules') return <RulesPreview lang={lang} />;
     if (key === 'musicbox') return <MusicBoxPreview />;
+    if (key === 'escape') return <EscapePreview />;
 
     const scene =
       key === 'diff'
@@ -571,6 +583,19 @@ function MusicBoxPreview() {
       <Text style={{ fontSize: 26 }}>🎶</Text>
       <Text style={{ fontSize: 40 }}>🐻</Text>
       <Text style={{ fontSize: 30 }}>♪</Text>
+    </View>
+  );
+}
+
+// Little Escapes preview: the tap-select-tap loop in three beats
+function EscapePreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(79,176,109,0.10)' }]}>
+      <Text style={{ fontSize: 34 }}>🔍</Text>
+      <Text style={{ fontSize: 30 }}>🗝️</Text>
+      <Text style={{ fontSize: 26, color: colors.inkSoft }}>➜</Text>
+      <Text style={{ fontSize: 34 }}>🔒</Text>
+      <Text style={{ fontSize: 34 }}>🐶</Text>
     </View>
   );
 }
