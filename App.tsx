@@ -248,7 +248,7 @@ type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
   | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'carmode';
-interface CardDef { route: string; color: string; key: CardKey; preview: string }
+interface CardDef { route: string; color: string; key: CardKey; preview: string; beta?: boolean }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
   { route: 'sounds', color: '#5DA9E8', key: 'sounds', preview: 'icons8' },
@@ -273,8 +273,10 @@ const GAME_CARDS: CardDef[] = [
   { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
   { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
   { route: 'bingo', color: '#D66FA8', key: 'bingo', preview: 'bingo' },
-  { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
-  { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape' },
+  // musicbox hidden pending redesign — v1 missed the Sago Mini interaction
+  // model (route stays live for dev via #/musicbox deep link).
+  // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
+  { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape', beta: true },
   { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
 ];
 
@@ -315,7 +317,12 @@ function Menu({
     if (key === 'rules') return <RulesPreview lang={lang} />;
     if (key === 'bingo') return <BingoPreview />;
     if (key === 'musicbox') return <MusicBoxPreview />;
-    if (key === 'escape') return <EscapePreview />;
+    if (key === 'escape') {
+      // Real room art beats the emoji strip; fall back if rooms are absent.
+      const room = manifest.escape?.[0];
+      const src = room ? (SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]) : null;
+      return src ? <Image source={src} style={styles.preview} /> : <EscapePreview />;
+    }
     if (key === 'carmode') return <CarModePreview />;
 
     const scene =
@@ -666,7 +673,7 @@ function OddOnePreview() {
 }
 
 function GameCard({
-  color, title, blurb, preview, onPress, testID, width,
+  color, title, blurb, preview, onPress, testID, width, beta,
 }: {
   color: string;
   title: string;
@@ -675,6 +682,7 @@ function GameCard({
   onPress: () => void;
   testID: string;
   width: number;
+  beta?: boolean;
 }) {
   return (
     <Pressable
@@ -688,6 +696,11 @@ function GameCard({
       <View style={styles.previewWrap} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden>
         {preview}
       </View>
+      {beta ? (
+        <View style={styles.betaBadge} testID={`${testID}-beta`}>
+          <Text style={styles.betaBadgeText}>BETA</Text>
+        </View>
+      ) : null}
       <View style={styles.cardBody}>
         <Text style={[styles.gameTitle, { color }]}>{title}</Text>
         <Text style={styles.gameBlurb}>{blurb}</Text>
@@ -934,4 +947,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   playBadgeText: { color: '#fff', fontFamily: fonts.display, fontSize: 15, letterSpacing: 1 },
+  betaBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(60,45,70,0.85)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  betaBadgeText: { color: colors.gold, fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.5 },
 });
