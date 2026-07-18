@@ -50,6 +50,10 @@ for (const st of manifest.stories ?? []) {
     for (const c of n.choices ?? []) if (c.icon) sceneFiles.add(c.icon);
   }
 }
+for (const r of manifest.escape ?? []) {
+  sceneFiles.add(r.image);
+  for (const h of r.hotspots) if (h.pop) sceneFiles.add(h.pop);
+}
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);
 }
@@ -58,6 +62,7 @@ lines.push('export const SCENE_THUMBS: Record<string, number> = {');
 const thumbable = new Set();
 for (const d of manifest.diff) thumbable.add(d.image ?? d.imageA);
 for (const h of manifest.hidden) thumbable.add(h.image);
+for (const r of manifest.escape ?? []) thumbable.add(r.image);
 for (const f of [...thumbable].sort()) {
   const t = f.replace(/\.(png|jpg)$/, '_thumb.jpg');
   if (exists(t)) lines.push(`  '${f}': require('../../assets/game/${t}'),`);
@@ -66,6 +71,20 @@ lines.push('};', '', 'export const DRESSUP_ICONS: Record<string, number> = {');
 for (const name of manifest.dressup ?? []) {
   if (exists(`dressup/${name}.png`)) {
     lines.push(`  ${name}: require('../../assets/game/dressup/${name}.png'),`);
+  }
+}
+lines.push('};', '', 'export const CHARACTER_ICONS: Record<string, number> = {');
+for (const name of manifest.characters ?? []) {
+  if (exists(`characters/${name}.png`)) {
+    lines.push(`  ${name}: require('../../assets/game/characters/${name}.png'),`);
+  }
+}
+lines.push('};', '', 'export const ANIMAL_ICONS: Record<string, number> = {');
+for (const [animal, poses] of Object.entries(manifest.animalPoses ?? {})) {
+  for (const pose of poses) {
+    if (exists(`animals/${animal}_${pose}.png`)) {
+      lines.push(`  ${animal}_${pose}: require('../../assets/game/animals/${animal}_${pose}.png'),`);
+    }
   }
 }
 lines.push('};', '', 'export const RHYME_SPRITES: Record<string, number> = {');
