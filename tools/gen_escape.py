@@ -1,4 +1,4 @@
-"""Generate Little Escapes rooms: solvability lint, scene, SAM hotspots, pops.
+"""Generate Little Escapes rooms: solvability lint, scene, SAM hotspots, pops, after-patches.
 
 Per room (specs in gen/escape_specs.py):
 1. LINT (fail closed): every `needs` has exactly one giver, every item is
@@ -8,7 +8,10 @@ Per room (specs in gen/escape_specs.py):
    Escape hotspots are MANDATORY: any miss fails the room (unlike stories
    there is no tile-button fallback — the picture IS the game).
 4. Pop sprites on magenta -> chroma-keyed RGBA (found-item reveal beat).
-5. Manifest `escape` section written atomically (fresh read-modify-write —
+5. After-patches: NBP edit_local generates the visual after-state for each
+   state-changing hotspot (lock/win with an "after" prompt in the spec).
+   The crop at the hotspot box is saved as a PNG overlay the app crossfades.
+6. Manifest `escape` section written atomically (fresh read-modify-write —
    other generators own other sections concurrently).
 
 Usage: python3 tools/gen_escape.py [room_id ...]   (resumes from files)
@@ -21,10 +24,12 @@ import json
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).parent))
 from gen.chroma import key_out_magenta  # noqa: E402
 from gen.judge import ask_yes_no  # noqa: E402
-from gen.nbp import _call, generate  # noqa: E402
+from gen.nbp import _call, edit_local, generate  # noqa: E402
 from gen.escape_specs import ESCAPE_ROOMS, ESCAPE_STYLE  # noqa: E402
 from gen_stories import _locate_scare  # noqa: E402
 from google.genai import types  # noqa: E402
@@ -129,6 +134,43 @@ def _gen_pop(room_id: str, hid: str, prompt: str) -> str | None:
     return None
 
 
+def _gen_after(scene: Image.Image, room_id: str, hid: str, box: tuple[int, int, int, int], prompt: str) -> dict | None:
+    """Generate an after-state patch for a hotspot using NBP edit_local.
+
+    Returns a manifest-shaped dict {x, y, w, h, patch} or None on failure.
+    """
+    fname = f"{room_id}_{hid}_after.png"
+    if (OUT / fname).exists():
+        return {"x": box[0], "y": box[1], "w": box[2], "h": box[3],
+                "patch": f"escape/{fname}"}
+    for attempt in range(3):
+        try:
+            out, inside_ch, drift = edit_local(scene, box, prompt, ctx=80)
+        except Exception as e:
+            print(f"  {room_id}/{hid}: after-patch attempt {attempt + 1} error: {str(e)[:120]}")
+            continue
+        if drift > 0.12:
+            print(f"  {room_id}/{hid}: after-patch drift {drift:.2f}, retry {attempt + 1}")
+            continue
+        if inside_ch < 0.05:
+            print(f"  {room_id}/{hid}: after-patch no change ({inside_ch:.2f}), retry {attempt + 1}")
+            continue
+        x, y, w, h = box
+        patch = out.crop((x, y, x + w, y + h))
+        if ask_yes_no(
+            f"Two images: the first is the ORIGINAL scene crop, the second is the edited version. "
+            f"Does the second image show a believable '{prompt}' that matches the art style of the first? "
+            f"The background around the object must look natural and seamless.",
+            [scene.crop((x, y, x + w, y + h)), patch],
+        ):
+            patch.save(OUT / fname)
+            print(f"  {room_id}/{hid}: after-patch saved (ch={inside_ch:.2f} drift={drift:.2f})")
+            return {"x": x, "y": y, "w": w, "h": h, "patch": f"escape/{fname}"}
+        print(f"  {room_id}/{hid}: after-patch judge rejected, retry {attempt + 1}")
+    print(f"  {room_id}/{hid}: after-patch FAILED after 3 attempts")
+    return None
+
+
 def gen_room(spec: dict) -> dict | None:
     rid = spec["id"]
     errs = lint_room(spec)
@@ -179,6 +221,10 @@ def gen_room(spec: dict) -> dict | None:
             pop = _gen_pop(rid, h["id"], h["pop"])
             if pop:
                 entry["pop"] = pop
+        if h.get("after"):
+            after = _gen_after(scene, rid, h["id"], (x, y, w, hgt), h["after"])
+            if after:
+                entry["after"] = after
         hotspots.append(entry)
 
     print(f"  room {rid} OK ({len(hotspots)} hotspots)")

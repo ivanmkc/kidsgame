@@ -52,7 +52,10 @@ for (const st of manifest.stories ?? []) {
 }
 for (const r of manifest.escape ?? []) {
   sceneFiles.add(r.image);
-  for (const h of r.hotspots) if (h.pop) sceneFiles.add(h.pop);
+  for (const h of r.hotspots) {
+    if (h.pop) sceneFiles.add(h.pop);
+    if (h.after?.patch) sceneFiles.add(h.after.patch);
+  }
 }
 for (const f of [...sceneFiles].sort()) {
   lines.push(`  '${f}': require('../../assets/game/${f}'),`);

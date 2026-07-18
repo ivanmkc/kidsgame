@@ -28164,7 +28164,14 @@
           "gives": "bone",
           "needs": "key",
           "sayFound": "The chest popped open \u2014 a yummy bone!",
-          "sayLocked": "The toy chest is locked tight. What could open it?"
+          "sayLocked": "The toy chest is locked tight. What could open it?",
+          "after": {
+            "x": 328,
+            "y": 155,
+            "w": 276,
+            "h": 250,
+            "patch": "escape/toyroom_chest_after.png"
+          }
         },
         {
           "id": "pen",
@@ -28177,7 +28184,14 @@
           "kind": "win",
           "needs": "bone",
           "sayFound": "The puppy wiggles out \u2014 you saved him!",
-          "sayLocked": "The puppy is hungry. What does a puppy love best?"
+          "sayLocked": "The puppy is hungry. What does a puppy love best?",
+          "after": {
+            "x": 1104,
+            "y": 336,
+            "w": 167,
+            "h": 256,
+            "patch": "escape/toyroom_pen_after.png"
+          }
         }
       ]
     },
@@ -28236,7 +28250,14 @@
           "gives": "pancake",
           "needs": "egg",
           "sayFound": "Sizzle sizzle \u2014 a golden pancake!",
-          "sayLocked": "The stove is ready, but what could we cook?"
+          "sayLocked": "The stove is ready, but what could we cook?",
+          "after": {
+            "x": 790,
+            "y": 233,
+            "w": 241,
+            "h": 300,
+            "patch": "escape/dragoncave_stove_after.png"
+          }
         },
         {
           "id": "dragon",
@@ -28249,7 +28270,14 @@
           "kind": "win",
           "needs": "pancake",
           "sayFound": "The dragon gobbles it up and puffs a happy little smoke ring!",
-          "sayLocked": "The baby dragon's tummy is rumbling\u2026"
+          "sayLocked": "The baby dragon's tummy is rumbling\u2026",
+          "after": {
+            "x": 1047,
+            "y": 322,
+            "w": 178,
+            "h": 200,
+            "patch": "escape/dragoncave_dragon_after.png"
+          }
         }
       ]
     },
@@ -28313,7 +28341,14 @@
           "gives": "battery",
           "needs": "wrench",
           "sayFound": "The panel opened \u2014 a super battery!",
-          "sayLocked": "The rocket panel is stuck. We need a tool!"
+          "sayLocked": "The rocket panel is stuck. We need a tool!",
+          "after": {
+            "x": 499,
+            "y": 141,
+            "w": 282,
+            "h": 466,
+            "patch": "escape/rocketpad_rocket_after.png"
+          }
         },
         {
           "id": "crate",
@@ -28327,7 +28362,14 @@
           "gives": "star",
           "needs": "battery",
           "sayFound": "Power on! A glowing star popped out!",
-          "sayLocked": "The power slot is empty\u2026"
+          "sayLocked": "The power slot is empty\u2026",
+          "after": {
+            "x": 897,
+            "y": 249,
+            "w": 112,
+            "h": 225,
+            "patch": "escape/rocketpad_crate_after.png"
+          }
         },
         {
           "id": "button",
@@ -28340,7 +28382,14 @@
           "kind": "win",
           "needs": "star",
           "sayFound": "Three, two, one \u2014 BLAST OFF!",
-          "sayLocked": "The launch button needs star power!"
+          "sayLocked": "The launch button needs star power!",
+          "after": {
+            "x": 1077,
+            "y": 380,
+            "w": 173,
+            "h": 340,
+            "patch": "escape/rocketpad_button_after.png"
+          }
         }
       ]
     },
@@ -28399,7 +28448,14 @@
           "gives": "shell",
           "needs": "fish",
           "sayFound": "The pelican trades you a shiny shell!",
-          "sayLocked": "The pelican wants a snack first\u2026"
+          "sayLocked": "The pelican wants a snack first\u2026",
+          "after": {
+            "x": 733,
+            "y": 258,
+            "w": 189,
+            "h": 196,
+            "patch": "escape/piratecove_pelican_after.png"
+          }
         },
         {
           "id": "chest",
@@ -28412,7 +28468,14 @@
           "kind": "win",
           "needs": "shell",
           "sayFound": "The chest bursts open \u2014 treasure for everyone!",
-          "sayLocked": "The treasure chest has a shell-shaped slot!"
+          "sayLocked": "The treasure chest has a shell-shaped slot!",
+          "after": {
+            "x": 990,
+            "y": 371,
+            "w": 267,
+            "h": 222,
+            "patch": "escape/piratecove_chest_after.png"
+          }
         }
       ]
     }
