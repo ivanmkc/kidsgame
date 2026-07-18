@@ -28396,6 +28396,14 @@
             "yue": {
               "sayFound": "\u5572\u8349\u5ea6\u6709\u96bb\u86cb\u4ed4\u6536\u57cb\u5497\u5440\uff01"
             }
+          },
+          "revealScene": "escape/dragoncave_haystack_reveal.png",
+          "takenScene": "escape/dragoncave_haystack_taken.png",
+          "itemBox": {
+            "x": 118,
+            "y": 386,
+            "w": 153,
+            "h": 169
           }
         },
         {
@@ -28433,7 +28441,6 @@
           "needs": "egg",
           "sayFound": "Sizzle sizzle \u2014 a golden pancake!",
           "sayLocked": "The stove is ready, but what could we cook?",
-          "afterScene": "escape/dragoncave_s1.png",
           "t": {
             "ja": {
               "sayFound": "\u3058\u3085\u3046\u3058\u3085\u3046\uff01 \u304d\u3093\u3044\u308d\u306e \u30d1\u30f3\u30b1\u30fc\u30ad\uff01",
@@ -28448,7 +28455,15 @@
               "sayLocked": "\u500b\u7210\u6e96\u5099\u597d\u5566\uff0c\u4f46\u4fc2\u716e\u5572\u4e5c\u5622\u597d\u5462\uff1f"
             }
           },
-          "animVideo": "escape-video/dragoncave_stove.mp4"
+          "animVideo": "escape-video/dragoncave_stove.mp4",
+          "revealScene": "escape/dragoncave_stove_reveal.png",
+          "takenScene": "escape/dragoncave_stove_taken.png",
+          "itemBox": {
+            "x": 841,
+            "y": 270,
+            "w": 143,
+            "h": 64
+          }
         },
         {
           "id": "dragon",
@@ -28462,7 +28477,7 @@
           "needs": "pancake",
           "sayFound": "The dragon gobbles it up and puffs a happy little smoke ring!",
           "sayLocked": "The baby dragon's tummy is rumbling\u2026",
-          "afterScene": "escape/dragoncave_s2.png",
+          "afterScene": "escape/dragoncave_dragon_after.png",
           "t": {
             "ja": {
               "sayFound": "\u30c9\u30e9\u30b4\u30f3 \u3082\u3050\u3082\u3050 \u305f\u3079\u3066\u3001\u3046\u308c\u3057\u305d\u3046\u306b \u3051\u3080\u308a\u306e \u308f\u3063\u304b\u3092 \u3077\u304b\u30fc\uff01",
@@ -28551,6 +28566,14 @@
             "yue": {
               "sayFound": "\u4e00\u689d\u626d\u5413\u626d\u5413\u5605\u9b5a\u4ed4\uff01"
             }
+          },
+          "revealScene": "escape/piratecove_net_reveal.png",
+          "takenScene": "escape/piratecove_net_taken.png",
+          "itemBox": {
+            "x": 0,
+            "y": 269,
+            "w": 330,
+            "h": 362
           }
         },
         {
@@ -28588,7 +28611,6 @@
           "needs": "fish",
           "sayFound": "The pelican trades you a shiny shell!",
           "sayLocked": "The pelican wants a snack first\u2026",
-          "afterScene": "escape/piratecove_s1.png",
           "t": {
             "ja": {
               "sayFound": "\u30da\u30ea\u30ab\u30f3 \u304c \u3074\u304b\u3074\u304b \u306e \u304b\u3044 \u3092 \u304f\u308c\u305f\u3088\uff01",
@@ -28603,7 +28625,15 @@
               "sayLocked": "\u5858\u9d5d\u60f3\u98df\u5572\u5622\u5148\u5440\u2026"
             }
           },
-          "animVideo": "escape-video/piratecove_pelican.mp4"
+          "animVideo": "escape-video/piratecove_pelican.mp4",
+          "revealScene": "escape/piratecove_pelican_reveal.png",
+          "takenScene": "escape/piratecove_pelican_taken.png",
+          "itemBox": {
+            "x": 666,
+            "y": 410,
+            "w": 197,
+            "h": 112
+          }
         },
         {
           "id": "chest",
@@ -28617,7 +28647,7 @@
           "needs": "shell",
           "sayFound": "The chest bursts open \u2014 treasure for everyone!",
           "sayLocked": "The treasure chest has a shell-shaped slot!",
-          "afterScene": "escape/piratecove_s2.png",
+          "afterScene": "escape/piratecove_chest_after.png",
           "t": {
             "ja": {
               "sayFound": "\u305f\u304b\u3089\u3070\u3053 \u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u307f\u3093\u306a \u306e \u304a\u305f\u304b\u3089 \u3060\uff01",
@@ -28706,6 +28736,14 @@
             "yue": {
               "sayFound": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
             }
+          },
+          "revealScene": "escape/rocketpad_toolbox_reveal.png",
+          "takenScene": "escape/rocketpad_toolbox_taken.png",
+          "itemBox": {
+            "x": 3,
+            "y": 329,
+            "w": 293,
+            "h": 245
           }
         },
         {
@@ -28730,6 +28768,14 @@
             "yue": {
               "sayFound": "\u500b\u7bb1\u5165\u9762\u6709\u7c92\u8d85\u7d1a\u96fb\u82af\uff01"
             }
+          },
+          "revealScene": "escape/rocketpad_crate_reveal.png",
+          "takenScene": "escape/rocketpad_crate_taken.png",
+          "itemBox": {
+            "x": 1046,
+            "y": 247,
+            "w": 234,
+            "h": 168
           }
         },
         {
@@ -28766,7 +28812,7 @@
           "needs": "wrench",
           "sayFound": "The wrench pops the panel open \u2014 there is an empty battery slot inside!",
           "sayLocked": "The rocket panel is stuck. We need a tool to open it!",
-          "afterScene": "escape/rocketpad_s1.png",
+          "afterScene": "escape/rocketpad_panel_after.png",
           "animVideo": "escape-video/rocketpad_panel.mp4",
           "t": {
             "ja": {
@@ -28795,7 +28841,7 @@
           "needs": "battery",
           "sayFound": "The battery clicks in \u2014 three, two, one \u2014 BLAST OFF!",
           "sayLocked": "The battery slot is empty. We need something to power the rocket!",
-          "afterScene": "escape/rocketpad_s2.png",
+          "afterScene": "escape/rocketpad_slot_after.png",
           "animVideo": "escape-video/rocketpad_slot.mp4",
           "t": {
             "ja": {
