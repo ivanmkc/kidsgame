@@ -35,7 +35,7 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { top: 0, zIndex: 0, width: STRIP_W * 2,
+          { top: 0, height: TALL, width: STRIP_W * 2,
             transform: [{ translateX: bgTranslate }] },
         ]}
       >
@@ -43,28 +43,30 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
         <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
       </Animated.View>
 
-      {/* Midground mountains: bottom portion */}
+      {/* Midground mountains: stretches up above the meadow so peaks show */}
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, zIndex: 1, width: STRIP_W * 2,
+          { bottom: 0, height: 650, width: STRIP_W * 2,
+            backgroundColor: 'transparent',
             transform: [{ translateX: midTranslate }] },
         ]}
       >
-        <Image source={midSrc} style={{ width: STRIP_W, height: 420 }} resizeMode="cover" />
-        <Image source={midSrc} style={{ width: STRIP_W, height: 420 }} resizeMode="cover" />
+        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
+        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
       </Animated.View>
 
       {/* Foreground meadow: bottom portion */}
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, zIndex: 2, width: STRIP_W * 2,
+          { bottom: 0, height: 380, width: STRIP_W * 2,
+            backgroundColor: 'transparent',
             transform: [{ translateX: fgTranslate }] },
         ]}
       >
-        <Image source={fgSrc} style={{ width: STRIP_W, height: 380 }} resizeMode="cover" />
-        <Image source={fgSrc} style={{ width: STRIP_W, height: 380 }} resizeMode="cover" />
+        <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
+        <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
       </Animated.View>
     </View>
   );
@@ -79,5 +81,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     flexDirection: 'row',
+  },
+  midImg: {
+    width: STRIP_W,
+    height: 650,
+    backgroundColor: 'transparent',
+  },
+  fgImg: {
+    width: STRIP_W,
+    height: 380,
+    backgroundColor: 'transparent',
   },
 });
