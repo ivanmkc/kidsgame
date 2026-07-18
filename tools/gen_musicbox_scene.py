@@ -48,6 +48,7 @@ MILO = ("Milo, a small black kitten with huge amber eyes, a white chest patch, "
 
 SCENES: dict[str, dict] = {
     "twinkle": {
+        "vehicleY": 0.28,
         "bg_prompt": (
             f"A seamlessly tileable horizontal panoramic night sky strip, "
             f"deep indigo to dark purple gradient with many scattered twinkling "
@@ -107,6 +108,7 @@ SCENES: dict[str, dict] = {
         },
     },
     "row": {
+        "vehicleY": 0.48,
         "bg_prompt": (
             f"A seamlessly tileable horizontal panoramic bright sunny sky strip, "
             f"cheerful blue sky with fluffy white cumulus clouds and warm golden "
@@ -161,6 +163,7 @@ SCENES: dict[str, dict] = {
         },
     },
     "jingle": {
+        "vehicleY": 0.42,
         "bg_prompt": (
             f"A seamlessly tileable horizontal panoramic winter sky strip, "
             f"pale grey-blue sky with soft clouds and gently falling snowflakes, "
@@ -343,27 +346,40 @@ def _gen_sprite(prompt: str, name: str, out_dir: Path, size: int = 256,
 
 
 def _composite_scene(scene_dir: Path, spec: dict) -> Image.Image:
-    """Build a full composite of bg + mid + fg + vehicle + 3 sample spawns."""
+    """Build a full composite of bg + mid + fg + vehicle + 3 sample spawns.
+
+    Uses the actual game stage proportions (1024x668) so layers overlap
+    realistically: bg fills the stage top-aligned, mid is bottom-aligned
+    at 650px, fg is bottom-aligned at 380px.
+    """
+    STAGE_W, STAGE_H = 1024, 668
+    BG_H, MID_H, FG_H = 900, 650, 380
+
     bg = Image.open(scene_dir / "bg.png").convert("RGBA")
-    w, h = bg.size
-
-    def _load_layer(name: str) -> Image.Image:
-        img = Image.open(scene_dir / f"{name}.png").convert("RGBA")
-        if img.size != (w, h):
-            img = img.resize((w, h), Image.Resampling.LANCZOS)
-        return img
-
-    mid = _load_layer("mid")
-    fg = _load_layer("fg")
+    mid = Image.open(scene_dir / "mid.png").convert("RGBA")
+    fg = Image.open(scene_dir / "fg.png").convert("RGBA")
     vehicle = Image.open(scene_dir / "vehicle.png").convert("RGBA")
 
-    comp = Image.new("RGBA", (w, h))
-    comp.paste(bg, (0, 0))
-    comp = Image.alpha_composite(comp, mid)
-    vx = w // 4
-    vy = int(h * 0.3) - vehicle.height // 2
+    comp = Image.new("RGBA", (STAGE_W, STAGE_H))
+
+    bg_scaled = bg.resize((STAGE_W, BG_H), Image.Resampling.LANCZOS)
+    comp.paste(bg_scaled, (0, 0))
+
+    mid_scaled = mid.resize((STAGE_W, MID_H), Image.Resampling.LANCZOS)
+    mid_layer = Image.new("RGBA", (STAGE_W, STAGE_H), (0, 0, 0, 0))
+    mid_layer.paste(mid_scaled, (0, STAGE_H - MID_H))
+    comp = Image.alpha_composite(comp, mid_layer)
+
+    vehicle_y = spec.get("vehicleY", 0.35)
+    vx = STAGE_W // 5
+    vy = int(STAGE_H * vehicle_y) - vehicle.height // 2
     comp.paste(vehicle, (vx, max(0, vy)), vehicle)
-    comp = Image.alpha_composite(comp, fg)
+
+    fg_scaled = fg.resize((STAGE_W, FG_H), Image.Resampling.LANCZOS)
+    fg_layer = Image.new("RGBA", (STAGE_W, STAGE_H), (0, 0, 0, 0))
+    fg_layer.paste(fg_scaled, (0, STAGE_H - FG_H))
+    comp = Image.alpha_composite(comp, fg_layer)
+
     zones = list(spec["objects"].items())
     spawn_y = {"sky": 0.15, "mid": 0.45, "ground": 0.75}
     for zi, (zone, items) in enumerate(zones):
@@ -372,8 +388,8 @@ def _composite_scene(scene_dir: Path, spec: dict) -> Image.Image:
             p = scene_dir / f"obj_{zone}_{name}.png"
             if p.exists():
                 sprite = Image.open(p).convert("RGBA")
-                sx = w // 2 + zi * 100
-                sy = int(h * spawn_y.get(zone, 0.5)) - sprite.height // 2
+                sx = STAGE_W // 2 + zi * 80
+                sy = int(STAGE_H * spawn_y.get(zone, 0.5)) - sprite.height // 2
                 comp.paste(sprite, (sx, max(0, sy)), sprite)
     return comp.convert("RGB")
 
