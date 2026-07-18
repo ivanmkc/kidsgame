@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, StyleSheet, View, GestureResponderEvent } from 'react-native';
 import { playNote, primeMusic } from '../../music';
-import { BoxState, advance, beatsForTap, harmonyOffsets, noteForTap, octaveOffset, spawnZone, startState } from './logic';
+import { BoxState, advance, beatsForTap, harmonyOffsets, noteForTap, octaveOffset, pickSpawnSprite, spawnZone, startState } from './logic';
 import { SceneDef } from './scenes';
 import { songById } from './logic';
 import { ScrollingWorld } from './ScrollingWorld';
@@ -19,6 +19,8 @@ export function JourneyScene({ scene }: Props) {
   const song = songById(scene.songId);
   const [state, setState] = useState<BoxState>(() => startState(song));
   const [spawns, setSpawns] = useState<SpawnEntry[]>([]);
+  const spawnsRef = useRef(spawns);
+  spawnsRef.current = spawns;
   const nextId = useRef(1);
   const scrollX = useRef(new Animated.Value(0)).current;
   const scrollTotal = useRef(0);
@@ -76,7 +78,8 @@ export function JourneyScene({ scene }: Props) {
 
     const zone = spawnZone(yFrac);
     const pool = scene.objects[zone];
-    const spriteKey = pool[nextId.current % pool.length];
+    const activeKeys = spawnsRef.current.map((s) => s.spriteKey);
+    const spriteKey = pickSpawnSprite(pool, nextId.current, activeKeys);
     const id = nextId.current++;
     const scrollAtSpawn = scrollTotal.current;
     setSpawns((prev) => [
