@@ -49,6 +49,17 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
 
+  // Lang switch: rebuild the word list and current round from the new pool.
+  const langMounted = useRef(false);
+  useEffect(() => {
+    if (!langMounted.current) { langMounted.current = true; return; }
+    gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
+    setWordIdx(0);
+    setPlacedIds([]);
+    setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
+    setGameKey((k) => k + 1);
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const wordCount = gameWordsRef.current.length;
   const won = wordCount > 0 && wordIdx >= wordCount;
   useWinLine(won, t(lang, 'win.spell', { n: wordCount }));

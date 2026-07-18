@@ -44,8 +44,8 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated category still gets read aloud (kids play entirely by ear).
   useEffect(() => {
-    if (!won) say(CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?');
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!won) say(CATEGORY_TEXT[round.baseCategory]?.not[lang] ?? 'Which one does not belong?');
+  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (idx: number) => {
     if (won) return;
@@ -99,7 +99,7 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.question, shadows.soft]} testID={`oddone-question-${round.baseCategory}`}>
-          <Text style={styles.questionText}>{CATEGORY_TEXT[round.baseCategory]?.not ?? 'Which one does not belong?'}</Text>
+          <Text style={styles.questionText}>{CATEGORY_TEXT[round.baseCategory]?.not[lang] ?? 'Which one does not belong?'}</Text>
         </View>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
           {round.items.map((icon, i) => (

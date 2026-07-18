@@ -50,6 +50,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = playable && roundIdx >= roundsToWin;
   useWinLine(won, t(lang, 'win.rhyme'));
+  useEffect(() => { setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null); }, [gameLang]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && playable, timerKey);
   const { width, height } = useWindowDimensions();
 
@@ -115,7 +116,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         {!playable ? (
           <View style={[styles.banner, shadows.soft]} testID="rhyme-empty">
-            <Text style={styles.bannerText}>More rhymes coming soon! 🎶</Text>
+            <Text style={styles.bannerText}>{t(lang, 'rhyme.comingSoon')}</Text>
           </View>
         ) : (
           <>
