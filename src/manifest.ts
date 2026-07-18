@@ -102,6 +102,7 @@ export interface Story {
 export interface EscapeItem {
   id: string;
   label: string;   // spoken when found ("A shiny key!")
+  t?: Record<string, string>; // ja/cmn/yue label — falls back to label
   emoji: string;   // tray icon — big and readable for age 3
 }
 
@@ -114,9 +115,11 @@ export interface EscapeHotspot {
   needs?: string;      // item id that must be SELECTED in the tray
   pop?: string;        // transparent sprite that springs out (reveal beat)
   afterScene?: string; // full-scene image after this hotspot is used (crossfaded)
+  animVideo?: string;  // Veo transition clip played on unlock (fallback: crossfade)
   sayFound?: string;   // spoken on success
   saySearch?: string;  // spoken on plain search with nothing there (flavor)
   sayLocked?: string;  // spoken when tapped without the needed item
+  t?: Record<string, Record<string, string>>; // ja/cmn/yue per field
 }
 
 export interface EscapeRoom {
@@ -127,6 +130,7 @@ export interface EscapeRoom {
   image: string;
   intro: string;    // spoken once on entry — the mission
   winText: string;  // spoken on completion
+  t?: Record<string, Record<string, string>>; // ja/cmn/yue per field (intro, winText)
   items: EscapeItem[];
   hotspots: EscapeHotspot[];
 }

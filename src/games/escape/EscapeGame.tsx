@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
@@ -8,7 +8,7 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
-import { EscapeRoom, manifest } from '../../manifest';
+import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 import { EscapeState, applyTap, nextHint, selectItem, startState } from './logic';
 
@@ -27,12 +27,27 @@ interface Props {
 
 const HINT_MS = 12000;
 
+function roomText(room: EscapeRoom, field: 'intro' | 'winText', lang: Lang): string {
+  return room.t?.[lang]?.[field] ?? room[field];
+}
+
+function hotText(h: EscapeHotspot, field: 'sayFound' | 'saySearch' | 'sayLocked', lang: Lang): string | undefined {
+  const base = h[field];
+  if (!base) return undefined;
+  return h.t?.[lang]?.[field] ?? base;
+}
+
+function itemLabel(item: { label: string; t?: Record<string, string> }, lang: Lang): string {
+  return item.t?.[lang] ?? item.label;
+}
+
 export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang }: Props) {
   const rooms = manifest.escape ?? [];
   const room = rooms.find((r) => r.id === sceneId);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
+  const [clip, setClip] = useState<string | null>(null);
   const lastAction = useRef(Date.now());
   const { width } = useWindowDimensions();
 
@@ -40,12 +55,13 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   useEffect(() => {
     setState(startState());
     setPops([]);
+    setClip(null);
     setHintSpot(null);
     lastAction.current = Date.now();
   }, [sceneId]);
 
   useEffect(() => {
-    if (room) say(room.intro);
+    if (room) say(roomText(room, 'intro', lang));
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Idle hint: after 12s without progress, glow the next actionable spot
@@ -117,30 +133,35 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const onSpot = (hotspotId: string) => {
     lastAction.current = Date.now();
     setHintSpot(null);
+    const h = room.hotspots.find((x) => x.id === hotspotId);
     const { state: next, effect } = applyTap(room, state, hotspotId);
     setState(next);
+    const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
+      h ? hotText(h, field, lang) : undefined;
     switch (effect.kind) {
       case 'found':
         sfx.good();
         if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
-        if (effect.say) say(effect.say);
+        { const s = locSay('sayFound'); if (s) say(s); }
         break;
       case 'unlocked':
         sfx.good();
+        if (h?.animVideo) setClip(h.animVideo);
         if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
-        if (effect.say) say(effect.say);
+        { const s = locSay('sayFound'); if (s) say(s); }
         break;
       case 'win':
+        if (h?.animVideo) setClip(h.animVideo);
         if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
-        sayThen([effect.say ?? '', room.winText], () => { /* WinOverlay reads state.done */ });
+        sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
         break;
       case 'locked':
         sfx.boing(0.4);
-        if (effect.say) say(effect.say);
+        { const s = locSay('sayLocked'); if (s) say(s); }
         break;
       case 'flavor':
         sfx.tap();
-        if (effect.say) say(effect.say);
+        { const s = locSay('saySearch'); if (s) say(s); }
         break;
       default:
         break;
@@ -172,6 +193,19 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               resizeMode="cover"
             />
           )}
+          {clip && Platform.OS === 'web' ? (
+            <View style={StyleSheet.absoluteFill} pointerEvents="none" testID="escape-clip">
+              {React.createElement('video', {
+                src: clip,
+                autoPlay: true,
+                muted: true,
+                playsInline: true,
+                onEnded: () => setClip(null),
+                onError: () => setClip(null),
+                style: { width: '100%', height: '100%', objectFit: 'cover' },
+              })}
+            </View>
+          ) : null}
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
             const actionable = !used && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
@@ -204,7 +238,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               testID={`escape-item-${i.id}`}
               onPress={() => onTray(i.id)}
               accessibilityRole="button"
-              accessibilityLabel={i.label}
+              accessibilityLabel={itemLabel(i, lang)}
               style={[styles.trayItem, state.selected === i.id && styles.trayItemOn]}
             >
               <Text style={styles.trayEmoji}>{i.emoji}</Text>
@@ -214,7 +248,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       </ScrollView>
       <WinOverlay
         visible={state.done}
-        message={room.winText}
+        message={roomText(room, 'winText', lang)}
         onNext={() => {
           const idx = rooms.findIndex((r) => r.id === room.id);
           onPickScene(rooms[(idx + 1) % rooms.length].id);
