@@ -24073,7 +24073,13 @@
           "choices": [
             {
               "label": "Climb the grand staircase",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 5,
+                "y": 491,
+                "w": 388,
+                "h": 229
+              }
             },
             {
               "label": "Sneak through the corridor",
@@ -24584,7 +24590,13 @@
           "choices": [
             {
               "label": "Try the prize tower",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 21,
+                "y": 13,
+                "w": 228,
+                "h": 639
+              }
             },
             {
               "label": "Play ring-toss",
@@ -24804,7 +24816,13 @@
           "choices": [
             {
               "label": "Cross the crumbling arch",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 285,
+                "h": 720
+              }
             },
             {
               "label": "Trek the thunder ridge",
@@ -25101,11 +25119,23 @@
           "choices": [
             {
               "label": "Chase the spark trail",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 43,
+                "y": 13,
+                "w": 634,
+                "h": 249
+              }
             },
             {
               "label": "Hop the mushroom caps",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 659,
+                "y": 592,
+                "w": 336,
+                "h": 128
+              }
             }
           ]
         },
@@ -25157,7 +25187,13 @@
           "choices": [
             {
               "label": "Step into the clearing",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 349,
+                "h": 474
+              }
             },
             {
               "label": "Crawl through the tunnel",
@@ -25171,7 +25207,13 @@
           "choices": [
             {
               "label": "Run to the clearing",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 138,
+                "y": 152,
+                "w": 406,
+                "h": 156
+              }
             },
             {
               "label": "Duck into the tunnel",
@@ -25591,7 +25633,13 @@
           "choices": [
             {
               "label": "Paper-ball the eyepiece",
-              "next": "end_eyepiece_bullseye"
+              "next": "end_eyepiece_bullseye",
+              "hot": {
+                "x": 215,
+                "y": 4,
+                "w": 211,
+                "h": 127
+              }
             },
             {
               "label": "Paper-ball the dome crank",
@@ -26050,7 +26098,13 @@
           "choices": [
             {
               "label": "Swim into the kelp garden",
-              "next": "aa"
+              "next": "aa",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 327,
+                "h": 720
+              }
             },
             {
               "label": "Climb the anemone cluster",
@@ -26064,7 +26118,13 @@
           "choices": [
             {
               "label": "Hop across the tide pools",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 0,
+                "y": 4,
+                "w": 488,
+                "h": 528
+              }
             },
             {
               "label": "Scramble up the urchin ridge",
@@ -26134,7 +26194,13 @@
           "choices": [
             {
               "label": "Approach the shell fortress",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 0,
+                "y": 128,
+                "w": 379,
+                "h": 544
+              }
             },
             {
               "label": "Sneak through the spring tunnel",
@@ -26148,7 +26214,13 @@
           "choices": [
             {
               "label": "Face the shell barricade",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 269,
+                "y": 26,
+                "w": 417,
+                "h": 434
+              }
             },
             {
               "label": "Slip into the spring passage",
@@ -26190,7 +26262,13 @@
           "choices": [
             {
               "label": "Cross the rope bridge",
-              "next": "end_coral_light"
+              "next": "end_coral_light",
+              "hot": {
+                "x": 102,
+                "y": 34,
+                "w": 484,
+                "h": 536
+              }
             },
             {
               "label": "Zoom down the coral slide",
@@ -26246,7 +26324,13 @@
             },
             {
               "label": "Wade to the spring pool",
-              "next": "end_crab_defender"
+              "next": "end_crab_defender",
+              "hot": {
+                "x": 626,
+                "y": 572,
+                "w": 274,
+                "h": 148
+              }
             }
           ]
         },
@@ -26339,7 +26423,13 @@
             },
             {
               "label": "Cross the geode bridge",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 162,
+                "y": 98,
+                "w": 500,
+                "h": 324
+              }
             }
           ]
         },
@@ -26349,7 +26439,13 @@
           "choices": [
             {
               "label": "Take the quartz staircase",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 578,
+                "y": 66,
+                "w": 332,
+                "h": 547
+              }
             },
             {
               "label": "Slide down the crystal chute",
@@ -26586,7 +26682,13 @@
           "choices": [
             {
               "label": "Enter the crystal tunnel",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 29,
+                "y": 28,
+                "w": 388,
+                "h": 622
+              }
             },
             {
               "label": "Follow the coral passage",
@@ -26614,7 +26716,13 @@
           "choices": [
             {
               "label": "Follow the current channel",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 0,
+                "y": 378,
+                "w": 444,
+                "h": 342
+              }
             },
             {
               "label": "Duck under the coral arch",
@@ -26642,7 +26750,13 @@
           "choices": [
             {
               "label": "Run down the song corridor",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 18,
+                "y": 123,
+                "w": 539,
+                "h": 214
+              }
             },
             {
               "label": "Swim to the breathing chamber",
@@ -26684,7 +26798,13 @@
           "choices": [
             {
               "label": "Swim to the cavern mouth",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 108,
+                "y": 6,
+                "w": 524,
+                "h": 246
+              }
             },
             {
               "label": "Climb the tidal ledge",
@@ -26709,7 +26829,13 @@
           "choices": [
             {
               "label": "Swim to the white grotto",
-              "next": "end_song_found"
+              "next": "end_song_found",
+              "hot": {
+                "x": 42,
+                "y": 73,
+                "w": 288,
+                "h": 571
+              }
             },
             {
               "label": "Dive into the dark tunnel",
@@ -26737,7 +26863,13 @@
           "choices": [
             {
               "label": "Sit in the coral alcove",
-              "next": "end_coral_duet"
+              "next": "end_coral_duet",
+              "hot": {
+                "x": 269,
+                "y": 173,
+                "w": 389,
+                "h": 291
+              }
             },
             {
               "label": "Climb the crystal spire",
@@ -26755,11 +26887,23 @@
           "choices": [
             {
               "label": "Dash past the cyan eel",
-              "next": "end_high_ride"
+              "next": "end_high_ride",
+              "hot": {
+                "x": 227,
+                "y": 0,
+                "w": 505,
+                "h": 487
+              }
             },
             {
               "label": "Dive past the magenta eel",
-              "next": "end_low_glide"
+              "next": "end_low_glide",
+              "hot": {
+                "x": 440,
+                "y": 555,
+                "w": 508,
+                "h": 165
+              }
             }
           ]
         },
@@ -26820,7 +26964,13 @@
           "choices": [
             {
               "label": "Squeeze through the slot canyon",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 0,
+                "y": 130,
+                "w": 630,
+                "h": 192
+              }
             },
             {
               "label": "March under the mesa arch",
@@ -26848,7 +26998,13 @@
           "choices": [
             {
               "label": "Climb down the sienna staircase",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 114,
+                "y": 568,
+                "w": 258,
+                "h": 152
+              }
             },
             {
               "label": "Duck into the red slot canyon",
@@ -26862,7 +27018,13 @@
           "choices": [
             {
               "label": "Ring the echo bell",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 77,
+                "w": 734,
+                "h": 236
+              }
             },
             {
               "label": "Step into the crystal alcove",
@@ -26876,7 +27038,13 @@
           "choices": [
             {
               "label": "Climb past the turquoise boulder",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 267,
+                "w": 142,
+                "h": 242
+              }
             },
             {
               "label": "Scout from the mesa ledge",
@@ -26890,7 +27058,13 @@
           "choices": [
             {
               "label": "Approach the armadillo barricade",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 18,
+                "y": 373,
+                "w": 271,
+                "h": 347
+              }
             },
             {
               "label": "Peek into the rust cave",
@@ -27124,7 +27298,13 @@
             },
             {
               "label": "Cross the stepping-stones",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 520,
+                "y": 576,
+                "w": 418,
+                "h": 144
+              }
             }
           ],
           "scare": {
@@ -27145,7 +27325,13 @@
           "choices": [
             {
               "label": "Through the firefly archway",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 116,
+                "y": 2,
+                "w": 616,
+                "h": 406
+              }
             },
             {
               "label": "Into the stone garden",
@@ -27313,7 +27499,13 @@
           "choices": [
             {
               "label": "Flash-blind burst",
-              "next": "end_flash_dazzle"
+              "next": "end_flash_dazzle",
+              "hot": {
+                "x": 262,
+                "y": 157,
+                "w": 361,
+                "h": 276
+              }
             },
             {
               "label": "Strobe-pulse reveal",
@@ -27505,7 +27697,13 @@
           "choices": [
             {
               "label": "Step along the bumper ledge",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 140,
+                "y": 17,
+                "w": 552,
+                "h": 300
+              }
             },
             {
               "label": "Slide down the tarp",
@@ -27635,7 +27833,13 @@
             },
             {
               "label": "Fast ground-roll",
-              "next": "end_roll_clang"
+              "next": "end_roll_clang",
+              "hot": {
+                "x": 408,
+                "y": 478,
+                "w": 396,
+                "h": 149
+              }
             },
             {
               "label": "Sneak around the side",
