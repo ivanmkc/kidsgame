@@ -114,6 +114,31 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1.15, 1, 0.92, 1.15],
   });
 
+  const earPulse = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (phase === 'listen') {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      earPulse.stopAnimation();
+      earPulse.setValue(1);
+    }
+    return () => earPulse.stopAnimation();
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const resultStars = [];
+  if (phase === 'result') {
+    for (let i = 0; i < round.beatsPerRound; i++) {
+      resultStars.push(
+        <Text key={i} style={styles.resultStar}>{i < hits ? '⭐' : '☆'}</Text>
+      );
+    }
+  }
+
   return (
     <GameShell
       title={t(lang, 'shell.steadybeat.title' as never)}
@@ -123,18 +148,32 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       right={<ScoreChip label={`💓 ${score}/${total}`} testID="steadybeat-score" />}
     >
       <View style={styles.board}>
-        <View style={[styles.statusCard, shadows.soft]}>
-          <Text style={styles.statusText}>
-            {phase === 'listen' ? `👂 ${t(lang, 'music.listen' as never)}` :
-             phase === 'result' ? `${hits}/${round.beatsPerRound} ⭐` :
-             `${round.bpm} BPM`}
-          </Text>
-        </View>
+        {phase === 'listen' ? (
+          <View style={[styles.statusCard, shadows.soft]}>
+            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
+            <Text style={styles.statusText}>{t(lang, 'music.listen' as never)}</Text>
+          </View>
+        ) : phase === 'result' ? (
+          <View style={[styles.statusCard, shadows.soft]}>
+            <View style={styles.resultRow}>{resultStars}</View>
+          </View>
+        ) : (
+          <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard]}>
+            <Text style={styles.statusEmoji}>👆</Text>
+            <Text style={styles.statusText}>{t(lang, 'music.yourTurn' as never)}</Text>
+          </View>
+        )}
         <Pressable
           onPress={onTap}
           testID="steadybeat-circle"
           disabled={phase !== 'tap'}
-          style={({ pressed }) => [styles.circle, shadows.lifted, pressed && styles.circlePressed]}
+          style={({ pressed }) => [
+            styles.circle,
+            shadows.lifted,
+            phase === 'listen' && styles.circleDimmed,
+            phase === 'tap' && shadows.glowGold,
+            pressed && styles.circlePressed,
+          ]}
         >
           <Animated.View
             style={[
@@ -168,8 +207,15 @@ const styles = StyleSheet.create({
     borderColor: colors.gold,
     paddingVertical: 10,
     paddingHorizontal: 22,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
+  yourTurnCard: { borderColor: colors.green, backgroundColor: '#E8F5E9' },
+  statusEmoji: { fontSize: 30 },
   statusText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
+  resultRow: { flexDirection: 'row', gap: 4 },
+  resultStar: { fontSize: 22 },
   circle: {
     width: 180,
     height: 180,
@@ -181,6 +227,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   circlePressed: { transform: [{ scale: 0.92 }] },
+  circleDimmed: { opacity: 0.45 },
   pulse: { alignItems: 'center', justifyContent: 'center' },
   circleEmoji: { fontSize: 56 },
 });
