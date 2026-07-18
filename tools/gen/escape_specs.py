@@ -7,6 +7,12 @@ exactly ONCE, one win spot, tray never holds more than 3, plus one free
 compose every hotspot object LEFT→RIGHT, large and clearly separated
 (SAM needs discrete solid objects — no region phrases).
 
+CAUSAL AUTHORING RULE: every `needs` relation must name a causal verb a
+4-year-old can say aloud — "key OPENS chest", "battery POWERS rocket",
+"wrench OPENS panel", "fish FEEDS pelican", "egg COOKS on stove". No
+abstract enablement ("star powers button"). The semantic chain gate in
+gen_escape.py enforces this at generation time.
+
 NOTE: `anim` prompts go through Veo, so door/key wording must be
 sanitized in the generator (globe-style: key→charm, padlock→latch).
 The `after` prompts are NBP-only (no Veo filter issue).
@@ -98,40 +104,35 @@ ESCAPE_ROOMS = [
                   "apart in a single row across the scene: on the far LEFT EDGE a big red "
                   "toolbox sitting open on the floor, in the LEFT-CENTER a big round yellow "
                   "poster of the moon hanging high on the wall, in the CENTER a tall silver "
-                  "rocket standing alone, in the RIGHT-CENTER a big green battery sitting on "
-                  "a wooden crate, on the far RIGHT EDGE a big round blue button on a tall "
-                  "white stand. Each object is a separate standalone item with wide empty "
-                  "space on all sides, evenly spaced across the full width."),
+                  "rocket with a closed metal side panel, in the RIGHT-CENTER a big brown "
+                  "wooden supply crate with a green lid sitting on the floor, on the far RIGHT "
+                  "EDGE nothing — just empty hangar wall. Each object is a separate standalone "
+                  "item with wide empty space on all sides, evenly spaced across the full width."),
         "intro": "The bunny's rocket will not start! Find what it needs and help her blast off to the moon.",
         "winText": "Whoosh! The bunny zooms to the moon — thanks to you!",
         "items": [
-            {"id": "wrench", "label": "A trusty wrench!", "emoji": "🔧"},
-            {"id": "battery", "label": "A super battery!", "emoji": "🔋"},
-            {"id": "star", "label": "A glowing star!", "emoji": "⭐"},
+            {"id": "wrench", "label": "A trusty wrench!", "emoji": "\U0001f527"},
+            {"id": "battery", "label": "A super battery!", "emoji": "\U0001f50b"},
         ],
         "hotspots": [
             {"id": "toolbox", "spot": "red toolbox", "kind": "search", "gives": "wrench",
              "pop": "a big red wrench with a smiling face",
              "sayFound": "A trusty wrench!"},
+            {"id": "crate", "spot": "brown supply crate", "kind": "search", "gives": "battery",
+             "pop": "a chunky green battery with a lightning bolt",
+             "sayFound": "A super battery was inside the crate!"},
             {"id": "poster", "spot": "yellow moon poster", "kind": "search",
              "saySearch": "That is where the bunny wants to go!"},
-            {"id": "rocket", "spot": "silver rocket", "kind": "lock", "needs": "wrench", "gives": "battery",
-             "pop": "a chunky green battery with a lightning bolt",
-             "sayLocked": "The rocket panel is stuck. We need a tool!",
-             "sayFound": "The panel opened — a super battery!",
-             "after": "the silver rocket has an open side panel revealing colorful wires and circuits inside",
-             "anim": "the rocket's side panel pops open with a click, revealing colorful wires sparking inside"},
-            {"id": "crate", "spot": "green battery", "kind": "lock", "needs": "battery", "gives": "star",
-             "pop": "a glowing golden star with a happy face",
-             "sayLocked": "The power slot is empty…",
-             "sayFound": "Power on! A glowing star popped out!",
-             "after": "the green battery is now glowing brightly with a visible lightning bolt, sitting on the wooden crate",
-             "anim": "the battery slots into the crate with a satisfying click and lights up with a bright lightning glow"},
-            {"id": "button", "spot": "blue button", "kind": "win", "needs": "star",
-             "sayLocked": "The launch button needs star power!",
-             "sayFound": "Three, two, one — BLAST OFF!",
-             "after": "the big round blue button is pressed down and glowing bright with star power energy",
-             "anim": "the button presses down with a flash and the whole scene lights up with star power energy"},
+            {"id": "panel", "spot": "rocket side panel", "kind": "lock", "needs": "wrench",
+             "sayLocked": "The rocket panel is stuck. We need a tool to open it!",
+             "sayFound": "The wrench pops the panel open — there is an empty battery slot inside!",
+             "after": "the silver rocket has an open side panel revealing an empty battery slot with two metal contacts inside",
+             "anim": "the rocket's side panel pops open with a click, revealing an empty battery slot with two metal contacts inside"},
+            {"id": "slot", "spot": "battery slot", "kind": "win", "needs": "battery",
+             "sayLocked": "The battery slot is empty. We need something to power the rocket!",
+             "sayFound": "The battery clicks in — three, two, one — BLAST OFF!",
+             "after": "the silver rocket blasting off with bright orange flames shooting from the bottom, the battery glowing inside the open panel, the whole hangar lit up with the launch",
+             "anim": "the battery snaps into the slot with a click, the rocket rumbles, and it blasts off with bright orange flames shooting from the bottom"},
         ],
     },
     {
@@ -245,22 +246,18 @@ ESCAPE_TRANSLATIONS = {
         "items": {
             "wrench": {"ja": "じょうぶな レンチ！", "cmn": "可靠的扳手！", "yue": "一把好用嘅士巴拿！"},
             "battery": {"ja": "すごい でんち！", "cmn": "一个超级电池！", "yue": "一粒超級電芯！"},
-            "star": {"ja": "ぴかぴか ほし！", "cmn": "一个闪亮的星星！", "yue": "一粒閃閃嘅星星！"},
         },
         "hotspots": {
             "toolbox": {"sayFound": {"ja": "じょうぶな レンチ！", "cmn": "可靠的扳手！", "yue": "一把好用嘅士巴拿！"}},
+            "crate": {"sayFound": {"ja": "はこの なかに すごい でんちが あった！", "cmn": "箱子里有一个超级电池！", "yue": "個箱入面有粒超級電芯！"}},
             "poster": {"saySearch": {"ja": "うさぎさん ここに いきたいんだね！", "cmn": "兔子就想去那里！", "yue": "兔仔就係想去嗰度呀！"}},
-            "rocket": {
-                "sayFound": {"ja": "パネル あいた！ すごい でんち！", "cmn": "面板打开了 — 一个超级电池！", "yue": "塊板開咗啦 — 一粒超級電芯！"},
-                "sayLocked": {"ja": "ロケットの パネル あかない。 どうぐが いるね！", "cmn": "火箭面板卡住了。 我们需要工具！", "yue": "火箭塊板卡住咗。 我哋要搵工具！"},
+            "panel": {
+                "sayFound": {"ja": "レンチで パネルが パカッと あいた！ でんちの スロットが からっぽだ！", "cmn": "扳手把面板撬开了！里面有个空的电池槽！", "yue": "士巴拿撬開咗塊板！入面有個空嘅電池位！"},
+                "sayLocked": {"ja": "ロケットの パネル あかない。 どうぐが いるね！", "cmn": "火箭面板卡住了。 我们需要工具来打开它！", "yue": "火箭塊板卡住咗。 我哋要搵工具嚟開佢！"},
             },
-            "crate": {
-                "sayFound": {"ja": "スイッチ オン！ ぴかぴか ほしが でてきた！", "cmn": "开机！ 一个闪亮的星星弹出来了！", "yue": "開機！ 一粒閃閃嘅星星彈咗出嚟！"},
-                "sayLocked": {"ja": "でんげん スロット からっぽ…", "cmn": "电源槽是空的…", "yue": "電源位空咗…"},
-            },
-            "button": {
-                "sayFound": {"ja": "さん、に、いち — はっしゃ！", "cmn": "三，二，一 — 发射！", "yue": "三，二，一 — 發射！"},
-                "sayLocked": {"ja": "はっしゃ ボタンに ほしの ちからが いるよ！", "cmn": "发射按钮需要星星能量！", "yue": "發射掣要星星能量！"},
+            "slot": {
+                "sayFound": {"ja": "でんちが カチッ！ さん、に、いち — はっしゃ！", "cmn": "电池咔嗒一声装好了！三，二，一 — 发射！", "yue": "電池咔噠一聲入咗位！三，二，一 — 發射！"},
+                "sayLocked": {"ja": "でんちの スロット からっぽだ。 ロケットに なにか いるね！", "cmn": "电池槽是空的。火箭需要动力！", "yue": "電池位空咗。火箭需要啲嘢嚟發動！"},
             },
         },
     },

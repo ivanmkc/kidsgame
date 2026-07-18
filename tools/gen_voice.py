@@ -252,6 +252,24 @@ def collect_lang_lines() -> list[tuple[str, str]]:
             for lang, txt in ((n.get("scare") or {}).get("t") or {}).items():
                 if spoken_form(txt):
                     jobs.add((lang, spoken_form(txt)))
+    # Escape room translations: room-level intro/winText + hotspot says + item labels
+    for room in m.get("escape", []):
+        for lang, fields in (room.get("t") or {}).items():
+            for txt in fields.values():
+                if spoken_form(txt):
+                    jobs.add((lang, spoken_form(txt)))
+        for lang, txt in (room.get("nameT") or {}).items():
+            if spoken_form(txt):
+                jobs.add((lang, spoken_form(txt)))
+        for h in room.get("hotspots", []):
+            for lang, fields in (h.get("t") or {}).items():
+                for txt in fields.values():
+                    if spoken_form(txt):
+                        jobs.add((lang, spoken_form(txt)))
+        for item in room.get("items", []):
+            for lang, txt in (item.get("t") or {}).items():
+                if spoken_form(txt):
+                    jobs.add((lang, spoken_form(txt)))
     for lang, leads in STORY_LEADS.items():
         for t in leads:
             jobs.add((lang, t))
