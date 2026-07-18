@@ -39,7 +39,7 @@ def key_strip_magenta(img: Image.Image) -> Image.Image:
     alpha = np.where(bg, 0, 255).astype(np.uint8)
 
     from PIL import ImageFilter
-    a_img = Image.fromarray(alpha, "L").filter(ImageFilter.MinFilter(3))
+    a_img = Image.fromarray(alpha, "L").filter(ImageFilter.MinFilter(5))
     alpha = np.asarray(a_img)
 
     rgba = np.dstack([rgb.astype(np.uint8), alpha])
