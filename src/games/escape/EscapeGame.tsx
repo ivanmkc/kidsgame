@@ -154,7 +154,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'collected': {
         sfx.good();
-        if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
+        if (effect.pop && !h?.revealScene) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
           const box = h.itemBox ?? h.box;
@@ -174,7 +174,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'win':
         if (h?.animVideo) setClip(h.animVideo);
-        if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
+        if (effect.pop && !h?.revealScene && !h?.takenScene && !h?.afterScene) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
         break;
       case 'locked':
