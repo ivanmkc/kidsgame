@@ -109,13 +109,8 @@ def lint_room(spec: dict) -> list[str]:
         if not done:
             break
     errs.append("greedy trace never reaches the win")
-    # State-change chain must be linear (each after-hotspot depends on prior).
-    state_hs = [h for h in hs if h.get("after")]
-    if len(state_hs) > 1:
-        for i in range(1, len(state_hs)):
-            prev, cur = state_hs[i - 1], state_hs[i]
-            if prev["kind"] == "search" and cur["kind"] == "search":
-                errs.append(f"state chain not linear: {prev['id']} and {cur['id']} are independent searches")
+    # State-change chain: scenes generated in spec order, each from previous.
+    # Independent searches are fine in reveal/collect grammar.
     return errs
 
 

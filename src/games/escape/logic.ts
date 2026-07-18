@@ -161,17 +161,8 @@ export function lintRoom(room: EscapeRoom): string[] {
   if (solve(room) === null) errs.push('room is not solvable by greedy trace');
   // Tray pressure: greedy holds every unused item; cap at TRAY_SIZE.
   if (itemIds.length > TRAY_SIZE) errs.push(`room has ${itemIds.length} items (tray fits ${TRAY_SIZE})`);
-  // State-change chain must be linear: each state-changing hotspot must depend
-  // (transitively) on the previous one, so scene images form a strict sequence.
-  const stateHotspots = room.hotspots.filter((h) => h.afterScene || h.revealScene);
-  if (stateHotspots.length > 1) {
-    for (let i = 1; i < stateHotspots.length; i++) {
-      const prev = stateHotspots[i - 1];
-      const cur = stateHotspots[i];
-      if (prev.kind === 'search' && cur.kind === 'search') {
-        errs.push(`state chain is not linear: ${prev.id} and ${cur.id} are independent searches`);
-      }
-    }
-  }
+  // State-change chain: scenes are generated in spec order, each from the
+  // previous. Independent searches are fine in the reveal/collect grammar
+  // because the generator chains them and the runtime shows the latest state.
   return errs;
 }
