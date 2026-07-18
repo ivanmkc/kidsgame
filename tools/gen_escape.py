@@ -26,13 +26,33 @@ from gen.chroma import key_out_magenta  # noqa: E402
 from gen.judge import ask_yes_no  # noqa: E402
 from gen.nbp import _call, generate  # noqa: E402
 from gen.escape_specs import ESCAPE_ROOMS, ESCAPE_STYLE  # noqa: E402
-from gen_stories import _locate_scare, _spots_distinct  # noqa: E402
+from gen_stories import _locate_scare  # noqa: E402
 from google.genai import types  # noqa: E402
 from PIL import Image  # noqa: E402
 
 ROOT = Path(__file__).parent.parent
 OUT = ROOT / "assets" / "game" / "escape"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
+
+
+def _escape_spots_ok(boxes: list[tuple[int, int, int, int]]) -> bool:
+    """Escape-specific distinctness: stories' 240px center rule can't fit
+    4-5 spots in one scene and isn't needed — escape taps are deliberate.
+    Require: no box hogs the frame, and every pair of boxes keeps a
+    finger-width gap (28 scene-px ≈ a chubby finger at display scale) so
+    one tap can never land on two spots."""
+    for (x, y, w, h) in boxes:
+        if w * h > 0.35 * 1280 * 720:
+            return False
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            ax, ay, aw, ah = boxes[i]
+            bx, by, bw, bh = boxes[j]
+            gap = 28
+            if not (ax + aw + gap <= bx or bx + bw + gap <= ax or
+                    ay + ah + gap <= by or by + bh + gap <= ay):
+                return False
+    return True
 
 
 def lint_room(spec: dict) -> list[str]:
@@ -139,7 +159,7 @@ def gen_room(spec: dict) -> dict | None:
             if box is None:
                 break
             boxes[h["id"]] = box
-        if len(boxes) == len(spec["hotspots"]) and _spots_distinct(list(boxes.values())):
+        if len(boxes) == len(spec["hotspots"]) and _escape_spots_ok(list(boxes.values())):
             break
         print(f"  {rid}: {len(boxes)}/{len(spec['hotspots'])} spots located — re-render {attempt + 1}")
         scene_path.unlink(missing_ok=True)
