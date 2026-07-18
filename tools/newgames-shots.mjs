@@ -11,6 +11,8 @@ const shots = [
   ['musicbox-twinkle', 'http://localhost:8787/kidsgame/#/musicbox/twinkle', 'musicbox-stage'],
   ['bingo', 'http://localhost:8787/kidsgame/#/bingo', null],
   ['escape-picker', 'http://localhost:8787/kidsgame/#/escape', null],
+  ['escape-toyroom', 'http://localhost:8787/kidsgame/#/escape/toyroom', 'escape-tray'],
+  ['escape-rocketpad', 'http://localhost:8787/kidsgame/#/escape/rocketpad', 'escape-tray'],
 ];
 for (const [name, url, waitFor] of shots) {
   await page.goto(url, { waitUntil: 'networkidle' });
