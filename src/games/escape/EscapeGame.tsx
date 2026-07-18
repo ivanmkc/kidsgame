@@ -137,7 +137,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
-            const actionable = !used && (h.kind === 'search' || !h.needs || state.selected === h.needs);
+            const actionable = !used && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
             return (
               <Pressable
                 key={h.id}

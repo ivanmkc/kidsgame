@@ -45,8 +45,11 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
     return { state, effect: { kind: 'found', item: h.gives, say: h.sayFound, pop: h.pop } };
   }
 
-  // lock / win: an item requirement gates the tap.
-  if (h.needs && s.selected !== h.needs) {
+  // lock / win: an item requirement gates the tap. Forgiveness rule:
+  // HOLDING the right item is enough (needs are unique and the tray is
+  // tiny, so this is never ambiguous) — selecting first is taught but a
+  // 3-year-old can't wedge by skipping it.
+  if (h.needs && !s.inventory.includes(h.needs)) {
     return { state: s, effect: { kind: 'locked', say: h.sayLocked } };
   }
   const inventory = h.needs ? s.inventory.filter((i) => i !== h.needs) : s.inventory.slice();
@@ -63,7 +66,8 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
 }
 
 /** What the idle-hint should point at: the next hotspot that advances the
- *  chain, plus the tray item to pick up first when a lock is next. */
+ *  chain. `selectItem` glows the matching tray item too — purely visual
+ *  teaching now that holding the item is enough to use it. */
 export function nextHint(room: EscapeRoom, s: EscapeState): { hotspotId: string; selectItem?: string } | null {
   if (s.done) return null;
   for (const h of room.hotspots) {
