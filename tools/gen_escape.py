@@ -119,6 +119,55 @@ def lint_room(spec: dict) -> list[str]:
     return errs
 
 
+def _semantic_chain_gate(spec: dict) -> list[str]:
+    """Gemini judge per chain step: does this step follow everyday cause-and-
+    effect a preschooler knows? Fail closed on NO.
+
+    Example passing steps: "key OPENS chest", "battery POWERS rocket",
+    "egg COOKS on stove". Example failing: "star powers button" (abstract).
+    """
+    errs: list[str] = []
+    hs = spec["hotspots"]
+    item_labels = {i["id"]: i["label"] for i in spec["items"]}
+    for h in hs:
+        if not h.get("needs"):
+            continue
+        need_label = item_labels.get(h["needs"], h["needs"])
+        spot_label = h.get("spot", h["id"])
+        gives_label = item_labels.get(h.get("gives", ""), "") if h.get("gives") else ""
+        hint = h.get("sayLocked", "")
+        result = h.get("sayFound", "")
+        description = (
+            f"A child has '{need_label}'. They bring it to '{spot_label}'."
+            + (f" The clue was: '{hint}'" if hint else "")
+            + (f" Result: '{result}'" if result else "")
+            + (f" This produces '{gives_label}'." if gives_label else "")
+        )
+        ok = ask_yes_no(
+            f"Does this puzzle step follow everyday cause-and-effect that a "
+            f"preschooler (age 3-6) already knows from real life?\n\n"
+            f"REAL cause-and-effect examples (answer YES for these patterns):\n"
+            f"- Keys open locks\n"
+            f"- Batteries power machines\n"
+            f"- Tools (wrench, screwdriver) open stuck panels/bolts\n"
+            f"- Food feeds hungry animals\n"
+            f"- Eggs cook into pancakes on a stove\n"
+            f"- Shaped pieces fit into matching shaped slots\n"
+            f"- Fish feeds a pelican\n\n"
+            f"ABSTRACT/MAGICAL (answer NO):\n"
+            f"- A star powers a button (what does that even mean?)\n"
+            f"- A crystal activates a portal\n\n"
+            f"Step: {description}",
+            [],
+        )
+        if not ok:
+            errs.append(f"semantic gate: '{h['needs']}' → '{h['id']}' failed cause-and-effect check")
+            print(f"  SEMANTIC GATE FAIL: {h['needs']} → {h['id']} ({description})")
+        else:
+            print(f"  semantic gate OK: {h['needs']} → {h['id']}")
+    return errs
+
+
 def _gen_pop(room_id: str, hid: str, prompt: str) -> str | None:
     fname = f"{room_id}_{hid}_pop.png"
     if (OUT / fname).exists():
@@ -222,6 +271,11 @@ def gen_room(spec: dict) -> dict | None:
         print(f"{rid}: LINT FAILED — {'; '.join(errs)}")
         return None
 
+    sem_errs = _semantic_chain_gate(spec)
+    if sem_errs:
+        print(f"{rid}: SEMANTIC GATE FAILED — {'; '.join(sem_errs)}")
+        return None
+
     OUT.mkdir(parents=True, exist_ok=True)
     scene_path = OUT / f"{rid}.png"
     for attempt in range(4):
@@ -239,14 +293,28 @@ def gen_room(spec: dict) -> dict | None:
             img.save(scene_path)
 
         # Hotspots are mandatory — locate every spot or re-render the scene.
+        # Some hotspots share a box with another (e.g. a battery slot inside
+        # an opened panel) — skip SAM for those and copy later.
         scene = Image.open(scene_path)
         boxes = {}
+        share_map = {}
         for h in spec["hotspots"]:
+            if h.get("shareBox"):
+                share_map[h["id"]] = h["shareBox"]
+                continue
             box = _locate_scare(scene, h["spot"], f"{rid}/{h['id']}")
             if box is None:
                 break
             boxes[h["id"]] = box
-        if len(boxes) == len(spec["hotspots"]) and _escape_spots_ok(list(boxes.values())):
+        for hid, src_id in share_map.items():
+            if src_id in boxes:
+                boxes[hid] = boxes[src_id]
+        # Overlap check: exclude pairs that share a box (they're never both
+        # interactive at the same time — one is used before the other appears).
+        shared_pairs = {(hid, src_id) for hid, src_id in share_map.items()}
+        unique_boxes = [boxes[h["id"]] for h in spec["hotspots"]
+                        if h["id"] in boxes and h["id"] not in share_map]
+        if len(boxes) == len(spec["hotspots"]) and _escape_spots_ok(unique_boxes):
             break
         print(f"  {rid}: {len(boxes)}/{len(spec['hotspots'])} spots located — re-render {attempt + 1}")
         scene_path.unlink(missing_ok=True)

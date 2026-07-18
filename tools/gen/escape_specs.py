@@ -100,14 +100,14 @@ ESCAPE_ROOMS = [
         "id": "rocketpad",
         "name": "Bunny Blast-Off",
         "level": "medium",
-        "scene": ("A wide bright rocket hangar viewed from the front, five objects placed far "
+        "scene": ("A wide bright rocket hangar viewed from the front, four objects placed far "
                   "apart in a single row across the scene: on the far LEFT EDGE a big red "
                   "toolbox sitting open on the floor, in the LEFT-CENTER a big round yellow "
                   "poster of the moon hanging high on the wall, in the CENTER a tall silver "
-                  "rocket with a closed metal side panel, in the RIGHT-CENTER a big brown "
-                  "wooden supply crate with a green lid sitting on the floor, on the far RIGHT "
-                  "EDGE nothing — just empty hangar wall. Each object is a separate standalone "
-                  "item with wide empty space on all sides, evenly spaced across the full width."),
+                  "rocket with a visible closed metal side panel, on the far RIGHT EDGE a big "
+                  "brown wooden supply crate with a green lid sitting on the floor. Each object "
+                  "is a separate standalone item with wide empty space on all sides, evenly "
+                  "spaced across the full width."),
         "intro": "The bunny's rocket will not start! Find what it needs and help her blast off to the moon.",
         "winText": "Whoosh! The bunny zooms to the moon — thanks to you!",
         "items": [
@@ -128,10 +128,10 @@ ESCAPE_ROOMS = [
              "sayFound": "The wrench pops the panel open — there is an empty battery slot inside!",
              "after": "the silver rocket has an open side panel revealing an empty battery slot with two metal contacts inside",
              "anim": "the rocket's side panel pops open with a click, revealing an empty battery slot with two metal contacts inside"},
-            {"id": "slot", "spot": "battery slot", "kind": "win", "needs": "battery",
+            {"id": "slot", "spot": "battery slot", "kind": "win", "needs": "battery", "shareBox": "panel",
              "sayLocked": "The battery slot is empty. We need something to power the rocket!",
              "sayFound": "The battery clicks in — three, two, one — BLAST OFF!",
-             "after": "the silver rocket blasting off with bright orange flames shooting from the bottom, the battery glowing inside the open panel, the whole hangar lit up with the launch",
+             "after": "the green battery glowing brightly inside the open side panel of the silver rocket, with warm orange light spilling from the engine nozzle at the bottom as it powers up",
              "anim": "the battery snaps into the slot with a click, the rocket rumbles, and it blasts off with bright orange flames shooting from the bottom"},
         ],
     },

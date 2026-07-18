@@ -189,9 +189,9 @@ export const SCENE_IMAGES: Record<string, number> = {
   'escape/piratecove_s1.png': require('../../assets/game/escape/piratecove_s1.png'),
   'escape/piratecove_s2.png': require('../../assets/game/escape/piratecove_s2.png'),
   'escape/rocketpad.png': require('../../assets/game/escape/rocketpad.png'),
+  'escape/rocketpad_crate_pop.png': require('../../assets/game/escape/rocketpad_crate_pop.png'),
   'escape/rocketpad_s1.png': require('../../assets/game/escape/rocketpad_s1.png'),
   'escape/rocketpad_s2.png': require('../../assets/game/escape/rocketpad_s2.png'),
-  'escape/rocketpad_s3.png': require('../../assets/game/escape/rocketpad_s3.png'),
   'escape/toyroom.png': require('../../assets/game/escape/toyroom.png'),
   'escape/toyroom_s1.png': require('../../assets/game/escape/toyroom_s1.png'),
   'escape/toyroom_s2.png': require('../../assets/game/escape/toyroom_s2.png'),
@@ -1682,11 +1682,9 @@ export const UI_IMAGES = {
 
 export const MUSICBOX_IMAGES: Record<string, number> = {
   'jingle/bg': require('../../assets/game/musicbox/jingle/bg.png'),
-  'jingle/fg': require('../../assets/game/musicbox/jingle/fg.png'),
   'jingle/mid': require('../../assets/game/musicbox/jingle/mid.png'),
   'jingle/obj_ground_candy_cane': require('../../assets/game/musicbox/jingle/obj_ground_candy_cane.png'),
   'jingle/obj_ground_gift_blue': require('../../assets/game/musicbox/jingle/obj_ground_gift_blue.png'),
-  'jingle/obj_ground_gift_red': require('../../assets/game/musicbox/jingle/obj_ground_gift_red.png'),
   'jingle/obj_ground_holly': require('../../assets/game/musicbox/jingle/obj_ground_holly.png'),
   'jingle/obj_ground_mitten': require('../../assets/game/musicbox/jingle/obj_ground_mitten.png'),
   'jingle/obj_ground_snow_bunny': require('../../assets/game/musicbox/jingle/obj_ground_snow_bunny.png'),
