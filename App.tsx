@@ -28,6 +28,7 @@ import { CompareGame } from './src/games/compare/CompareGame';
 import { SumsGame } from './src/games/sums/SumsGame';
 import { SpellGame } from './src/games/spell/SpellGame';
 import { FeedbackChip } from './src/components/Feedback';
+import { LangContext } from './src/components/GameShell';
 import { FilterCycleChip } from './src/components/ScenePicker';
 import { TwinkleField } from './src/components/Sparkles';
 import { DiffGame } from './src/games/diff/DiffGame';
@@ -38,6 +39,7 @@ import { ShadowGame } from './src/games/shadow/ShadowGame';
 import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { StickerGame } from './src/games/sticker/StickerGame';
 import { StoryGame } from './src/games/story/StoryGame';
+import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
@@ -47,6 +49,9 @@ import { useTwoPlayer } from './src/multiplayer';
 import { isMuted, say, setMuted, sfx, setSpeechLang, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
 import { colors, fonts, shadows } from './src/theme';
+import { useLockdown, effectiveLang, visibleCards } from './src/lockdown';
+import { AdultGate } from './src/components/AdultGate';
+import { LockdownSettings } from './src/components/LockdownSettings';
 
 // Stale-cache self-heal: hashed JS is cached as immutable, so an old
 // cached index.html pins an outdated bundle forever (invisible-diff bug
@@ -65,6 +70,15 @@ if (typeof document !== 'undefined' && typeof fetch !== 'undefined') {
       }
     })
     .catch(() => { /* offline: fine */ });
+}
+
+// Asset cache: hashed bundles + scene art + voice clips are immutable, so
+// a service worker caches them for instant returns (gh-pages only sends
+// max-age=600). index.html/version.json bypass it — self-heal stays live.
+if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* http dev: fine */ });
+  });
 }
 
 // Kids drag fingers across the screen constantly — kill text/image
@@ -93,6 +107,17 @@ export default function App() {
     const l = nextLang(lang);
     setLang(l); saveLang(l); setSpeechLang(l); sfx.tap(); track('lang', { mode: l });
   };
+  const lockdown = useLockdown();
+  useEffect(() => {
+    const eff = effectiveLang(lang, lockdown.state.hiddenLangs);
+    if (eff !== lang) { setLang(eff); saveLang(eff); setSpeechLang(eff); }
+  }, [lockdown.state.hiddenLangs, lang]);
+  const cycleLangLocked = () => {
+    let l = nextLang(lang);
+    let tries = LANGS.length;
+    while (lockdown.state.hiddenLangs.includes(l) && tries-- > 0) l = nextLang(l);
+    setLang(l); saveLang(l); setSpeechLang(l); sfx.tap(); track('lang', { mode: l });
+  };
   const [twoPlayer, setTwoPlayer] = useTwoPlayer();
   const difficulty = difficultyOf(filter);
   const [route, navigate] = useRoute();
@@ -101,9 +126,10 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'musicbox'];
   // A stale/mistyped hash must never strand a kid on a blank page.
-  const screen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
+  const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
+  const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
   const param = parts.param;
   const goHome = () => navigate('menu');
   const pickFilter = (f: DifficultyFilter) => { setFilter(f); saveFilter(f); sfx.tap(); };
@@ -114,6 +140,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar style="dark" />
+      <LangContext.Provider value={{ lang, onCycle: cycleLangLocked }}>
       {screen === 'letters' && <LettersGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'numbers' && <NumbersGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'sounds' && <SoundsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
@@ -123,7 +150,7 @@ export default function App() {
       {screen === 'compare' && <CompareGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'sums' && <SumsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'menu' && (
-        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} lang={lang} onCycleLang={cycleLang} />
+        <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} lang={lang} onCycleLang={cycleLangLocked} lockdown={lockdown} />
       )}
       {screen === 'spotit' && <SpotItGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'diff' && (
@@ -169,6 +196,15 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'musicbox' && (
+        <MusicBoxGame
+          onHome={goHome}
+          sceneId={param}
+          onPickScene={(id) => navigate(`musicbox/${id}`)}
+          onBackToPicker={() => navigate('musicbox')}
+          lang={lang}
+        />
+      )}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} lang={lang} />}
@@ -185,6 +221,7 @@ export default function App() {
           lang={lang}
         />
       )}
+      </LangContext.Provider>
     </SafeAreaView>
   );
 }
@@ -196,7 +233,7 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story';
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'musicbox';
 interface CardDef { route: string; color: string; key: CardKey; preview: string }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
@@ -221,10 +258,11 @@ const GAME_CARDS: CardDef[] = [
   { route: 'rules', color: '#3E9BB8', key: 'rules', preview: 'rules' },
   { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
   { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
+  { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
 ];
 
 function Menu({
-  filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer, lang, onCycleLang,
+  filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer, lang, onCycleLang, lockdown,
 }: {
   lang: Lang;
   onCycleLang: () => void;
@@ -233,8 +271,14 @@ function Menu({
   onNavigate: (r: string) => void;
   twoPlayer: boolean;
   onToggleTwoPlayer: (on: boolean) => void;
+  lockdown: ReturnType<typeof useLockdown>;
 }) {
   const [muted, setMutedState] = React.useState(isMuted());
+  const [showGate, setShowGate] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const visGames = visibleCards(GAME_CARDS, lockdown.state.hiddenGames);
+  const visWords = visibleCards(WORD_CARDS, lockdown.state.hiddenGames);
+  const visNumbers = visibleCards(NUMBER_CARDS, lockdown.state.hiddenGames);
   const toggleMute = () => {
     const m = !muted;
     setMuted(m);
@@ -252,6 +296,7 @@ function Menu({
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
     if (key === 'rules') return <RulesPreview lang={lang} />;
+    if (key === 'musicbox') return <MusicBoxPreview />;
 
     const scene =
       key === 'diff'
@@ -278,11 +323,12 @@ function Menu({
               <View style={styles.diffRow}>
                 <FilterCycleChip filter={filter} onCycle={() => onPickFilter(nextFilter(filter))} verbose lang={lang} />
                 <Pressable
-                  onPress={onCycleLang}
+                  onPress={lockdown.allowedLangs.length > 1 ? onCycleLang : undefined}
                   testID="lang-cycle"
                   accessibilityRole="button"
                   accessibilityLabel={t(lang, 'a11y.langCycle', { name: LANGS.find((l) => l.id === lang)?.label ?? '' })}
-                  style={[styles.diffChip, styles.soundChip]}
+                  style={[styles.diffChip, styles.soundChip, lockdown.allowedLangs.length <= 1 && { opacity: 0.5 }]}
+                  disabled={lockdown.allowedLangs.length <= 1}
                 >
                   <Text style={styles.diffText}>{LANGS.find((l) => l.id === lang)?.emoji} {LANGS.find((l) => l.id === lang)?.label}</Text>
                 </Pressable>
@@ -315,8 +361,9 @@ function Menu({
             </View>
           </View>
         </Reveal>
+        {visGames.length > 0 && (
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
-          {GAME_CARDS.map((g, i) => (
+          {visGames.map((g, i) => (
             <Reveal key={g.route} delay={120 + i * 80}>
               <GameCard
                 color={g.color}
@@ -330,22 +377,27 @@ function Menu({
             </Reveal>
           ))}
         </View>
+        )}
+        {visWords.length > 0 && (<>
         <Reveal delay={200}><Text style={styles.sectionHead}>{t(lang, 'menu.word')}</Text></Reveal>
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
-          {WORD_CARDS.map((g, i) => (
+          {visWords.map((g, i) => (
             <Reveal key={g.route} delay={160 + i * 80}>
               <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
         </View>
+        </>)}
+        {visNumbers.length > 0 && (<>
         <Reveal delay={220}><Text style={styles.sectionHead}>{t(lang, 'menu.number')}</Text></Reveal>
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
-          {NUMBER_CARDS.map((g, i) => (
+          {visNumbers.map((g, i) => (
             <Reveal key={g.route} delay={180 + i * 80}>
               <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
         </View>
+        </>)}
         <Reveal delay={240}>
           <View style={styles.grownups}>
             <Text style={styles.grownupsHead}>{t(lang, 'menu.grownups')}</Text>
@@ -353,10 +405,36 @@ function Menu({
               <InstallChip lang={lang} />
               <ShareChip lang={lang} />
               <FeedbackChip lang={lang} />
+              <Pressable
+                onPress={() => setShowGate(true)}
+                testID="parental-controls"
+                accessibilityRole="button"
+                accessibilityLabel="Parental Controls"
+                style={({ pressed }) => [styles.grownupsBtn, pressed && { opacity: 0.8 }]}
+              >
+                <Text style={styles.grownupsBtnText}>
+                  Parental Controls{lockdown.isActive ? ' (active)' : ''}
+                </Text>
+              </Pressable>
             </View>
           </View>
         </Reveal>
       </ScrollView>
+      {showGate && (
+        <AdultGate
+          onPass={() => { setShowGate(false); setShowSettings(true); }}
+          onCancel={() => setShowGate(false)}
+        />
+      )}
+      {showSettings && (
+        <LockdownSettings
+          hiddenGames={lockdown.state.hiddenGames}
+          hiddenLangs={lockdown.state.hiddenLangs}
+          onToggleGame={lockdown.toggleGame}
+          onToggleLang={lockdown.toggleLang}
+          onDone={() => setShowSettings(false)}
+        />
+      )}
     </AppBackground>
   );
 }
@@ -480,6 +558,19 @@ function RulesPreview({ lang }: { lang: Lang }) {
           </View>
         ))}
       </View>
+    </View>
+  );
+}
+
+// Music Box preview: bouncing buddies and floating notes on a pastel sky
+function MusicBoxPreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: '#E3EEFB' }]}>
+      <Text style={{ fontSize: 30 }}>🎵</Text>
+      <Text style={{ fontSize: 40 }}>🐰</Text>
+      <Text style={{ fontSize: 26 }}>🎶</Text>
+      <Text style={{ fontSize: 40 }}>🐻</Text>
+      <Text style={{ fontSize: 30 }}>♪</Text>
     </View>
   );
 }
