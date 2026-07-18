@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Lang } from '../lang';
 import { t } from '../i18n';
 import { sfx } from '../sound';
@@ -10,21 +10,20 @@ import { Confetti } from './Confetti';
 interface Props {
   visible: boolean;
   message: string;
-  /** Kind runner-up line under the message (duel modes). */
   sub?: string;
-  /** Extra content between message and buttons — star rows / player chips. */
   stats?: React.ReactNode;
-  /** Advance to fresh content — next scene or a new random round set. */
   onNext: () => void;
   onHome: () => void;
   nextLabel?: string;
-  /** Selects the localized default button labels (Next Level / All Games). */
   lang?: Lang;
 }
 
 export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextLabel, lang = 'en' }: Props) {
-  const scale = useRef(new Animated.Value(0.3)).current;
-  const stars = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
+  const { width, height } = useWindowDimensions();
+  const landscape = width > height;
+
+  const slideY = useRef(new Animated.Value(300)).current;
+  const starAnims = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
   // Tap shield: a kid hammering the final answer would otherwise punch
   // through the freshly-mounted overlay onto its buttons (and beyond, into
   // the menu). Buttons arm only after the entrance settles.
@@ -34,80 +33,98 @@ export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextL
     if (visible) {
       sfx.win();
       setArmed(false);
-      const t = setTimeout(() => setArmed(true), 600);
-      scale.setValue(0.3);
-      stars.forEach((s) => s.setValue(0));
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
+      const timer = setTimeout(() => setArmed(true), 600);
+      slideY.setValue(300);
+      starAnims.forEach((s) => s.setValue(0));
+      Animated.spring(slideY, { toValue: 0, useNativeDriver: true, friction: 7 }).start();
       Animated.stagger(
         160,
-        stars.map((s) => Animated.spring(s, { toValue: 1, useNativeDriver: true, friction: 3 }))
+        starAnims.map((s) => Animated.spring(s, { toValue: 1, useNativeDriver: true, friction: 3 }))
       ).start();
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!visible) return null;
 
+  const starSize = landscape ? 28 : 34;
+  const bigStarSize = landscape ? 36 : 44;
+  const msgSize = landscape ? 18 : 22;
+  const btnWidth = landscape ? 170 : 200;
+  const btnFont = landscape ? 16 : 18;
+  const btnPad = landscape ? 10 : 12;
+
   return (
-    <Pressable style={styles.backdrop} testID="win-overlay" onPress={() => {}}>
+    <View style={styles.wrapper} pointerEvents="box-none" testID="win-overlay">
       <Confetti />
-      <Animated.View style={[styles.card, shadows.lifted, { transform: [{ scale }] }]}>
-        <View style={styles.starRow}>
-          {stars.map((s, i) => (
-            <Animated.Text
-              key={i}
-              style={[
-                styles.star,
-                i === 1 && styles.starBig,
-                {
-                  opacity: s,
-                  transform: [
-                    { scale: s.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0, 1.35, 1] }) },
-                    { rotate: s.interpolate({ inputRange: [0, 1], outputRange: [i === 1 ? '-40deg' : '40deg', '0deg'] }) },
-                  ],
-                },
-              ]}
-            >
-              ⭐
-            </Animated.Text>
-          ))}
+      <Animated.View
+        style={[styles.banner, shadows.lifted, { transform: [{ translateY: slideY }] }]}
+        accessibilityLiveRegion="polite"
+        accessibilityRole="alert"
+      >
+        <View style={landscape ? styles.rowLandscape : styles.colPortrait}>
+          <View style={styles.celebRow}>
+            <View style={styles.starRow}>
+              {starAnims.map((s, i) => (
+                <Animated.Text
+                  key={i}
+                  style={{
+                    fontSize: i === 1 ? bigStarSize : starSize,
+                    opacity: s,
+                    transform: [
+                      { scale: s.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0, 1.35, 1] }) },
+                      { rotate: s.interpolate({ inputRange: [0, 1], outputRange: [i === 1 ? '-40deg' : '40deg', '0deg'] }) },
+                    ],
+                  }}
+                >
+                  ⭐
+                </Animated.Text>
+              ))}
+            </View>
+            <View style={styles.textCol}>
+              <Text style={[styles.message, { fontSize: msgSize }]} numberOfLines={2}>{message}</Text>
+              {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
+            </View>
+          </View>
+          {stats ? <View style={styles.statsWrap}>{stats}</View> : null}
+          <View style={styles.btnRow}>
+            <ChunkyButton label={nextLabel ?? t(lang, 'overlay.next')} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={btnWidth} fontSize={btnFont} paddingVertical={btnPad} />
+            <ChunkyButton label={t(lang, 'overlay.allGames')} color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={btnWidth} fontSize={btnFont} paddingVertical={btnPad} />
+          </View>
         </View>
-        <Text style={styles.message}>{message}</Text>
-        {sub ? <Text style={styles.sub}>{sub}</Text> : null}
-        {stats ?? null}
-        <ChunkyButton label={nextLabel ?? t(lang, 'overlay.next')} color={colors.green} darkColor={darken(colors.green)} onPress={() => armed && onNext()} testID="play-again" minWidth={224} />
-        <ChunkyButton label={t(lang, 'overlay.allGames')} color={colors.purple} darkColor={darken(colors.purple)} onPress={() => armed && onHome()} testID="win-home" minWidth={224} />
       </Animated.View>
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
+  wrapper: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(67,48,75,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
     zIndex: 10,
+    justifyContent: 'flex-end',
   },
-  card: {
+  banner: {
     backgroundColor: colors.paper,
-    borderRadius: 32,
-    paddingVertical: 28,
-    paddingHorizontal: 34,
-    alignItems: 'center',
-    gap: 12,
-    minWidth: 280,
-    borderWidth: 4,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 3,
+    borderBottomWidth: 0,
     borderColor: colors.gold,
+    paddingTop: 16,
+    paddingBottom: 20,
+    paddingHorizontal: 20,
   },
-  starRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 62 },
-  star: { fontSize: 38 },
-  starBig: { fontSize: 54, marginBottom: 2 },
-  message: { fontSize: 25, fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
-  sub: { fontSize: 16, fontFamily: fonts.bodyReg, color: colors.inkSoft, textAlign: 'center', marginTop: -6 },
+  colPortrait: { alignItems: 'center', gap: 10 },
+  rowLandscape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 16 },
+  celebRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  starRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
+  textCol: { flexShrink: 1 },
+  message: { fontFamily: fonts.display, color: colors.ink, textAlign: 'center' },
+  sub: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, textAlign: 'center' },
+  statsWrap: { flexDirection: 'row', justifyContent: 'center' },
+  btnRow: { flexDirection: 'row', gap: 12, justifyContent: 'center' },
 });
