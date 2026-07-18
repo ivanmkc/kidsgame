@@ -41,6 +41,10 @@ STYLE = (
 
 LUNA = ("Luna, a small white unicorn foal with a curly rainbow mane and tail, "
         "big friendly eyes and a tiny golden horn")
+PIP = ("Pip, a chubby golden puppy with floppy ears, a red collar with a bone "
+       "tag, and a happy open-mouth smile")
+MILO = ("Milo, a small black kitten with huge amber eyes, a white chest patch, "
+        "carrying a tiny glowing lantern")
 
 SCENES: dict[str, dict] = {
     "twinkle": {
@@ -97,6 +101,110 @@ SCENES: dict[str, dict] = {
                 ("mushroom", "a single small red mushroom with white spots and a short white stem"),
                 ("mountain_goat", "a single tiny cute white mountain goat standing"),
                 ("tulip", "a single small red tulip flower with green stem and leaf"),
+            ],
+        },
+    },
+    "row": {
+        "bg_prompt": (
+            f"A seamlessly tileable horizontal panoramic bright sunny sky strip, "
+            f"cheerful blue sky with fluffy white cumulus clouds and warm golden "
+            f"sunlight, a few seagulls in the distance, {STYLE}"
+        ),
+        "mid_prompt": (
+            f"A seamlessly tileable horizontal panoramic ocean strip with "
+            f"transparent sky above, sparkling turquoise-blue sea water with "
+            f"gentle rolling waves and white foam crests, small tropical islands "
+            f"with palm trees in the far distance, {STYLE}"
+        ),
+        "fg_prompt": (
+            f"A seamlessly tileable horizontal panoramic ocean surface strip "
+            f"with transparent sky above, close-up deep blue-green waves with "
+            f"white foam and spray, seaweed and small bubbles at the bottom, "
+            f"coral reef shapes peeking above the water line, {STYLE}"
+        ),
+        "vehicle_prompt": (
+            f"{PIP} happily sitting in a small red wooden rowboat with two "
+            f"little oars, Pip is peeking over the side with tongue out, the "
+            f"boat bobs on gentle waves, full boat and character visible, on a "
+            f"solid magenta (#FF00FF) background, {STYLE}"
+        ),
+        "picker_prompt": (
+            f"Portrait of {PIP} smiling, head and upper body, wearing a small "
+            f"sailor hat, looking directly at the viewer, a tiny anchor in the "
+            f"background, on a solid magenta (#FF00FF) background, {STYLE}"
+        ),
+        "objects": {
+            "sky": [
+                ("seagull", "a single small cute white seagull in flight with wings spread"),
+                ("cloud_fluffy", "a single small round fluffy white cloud"),
+                ("sun_rays", "a single small cheerful golden sun with short rays radiating outward"),
+                ("pelican", "a single small cute brown pelican carrying a fish in its beak"),
+            ],
+            "mid": [
+                ("dolphin", "a single small cute grey dolphin leaping out of water with a splash"),
+                ("fish_orange", "a single small bright orange clownfish swimming"),
+                ("jellyfish", "a single small pink jellyfish with trailing tentacles"),
+                ("sea_turtle", "a single small cute green sea turtle swimming"),
+            ],
+            "ground": [
+                ("starfish", "a single small orange five-armed starfish"),
+                ("shell_pink", "a single small pink conch seashell"),
+                ("crab", "a single small cute red crab with big claws"),
+                ("seahorse", "a single small cute yellow seahorse"),
+                ("coral", "a single small piece of bright orange fan coral"),
+                ("anchor", "a single small rustic brown anchor with a rope"),
+            ],
+        },
+    },
+    "jingle": {
+        "bg_prompt": (
+            f"A seamlessly tileable horizontal panoramic winter sky strip, "
+            f"pale grey-blue sky with soft clouds and gently falling snowflakes, "
+            f"hints of aurora borealis green and purple at the top, {STYLE}"
+        ),
+        "mid_prompt": (
+            f"A seamlessly tileable horizontal panoramic snowy pine forest strip "
+            f"with transparent sky above, snow-covered evergreen pine trees of "
+            f"varying sizes in the distance, soft blue-white snow drifts, "
+            f"gentle rolling snowy hills, {STYLE}"
+        ),
+        "fg_prompt": (
+            f"A seamlessly tileable horizontal panoramic snowy ground strip "
+            f"with transparent sky above, close-up fresh white snow with gentle "
+            f"hills and sled tracks, scattered pine needles and small frozen "
+            f"puddles, sparkly frost texture, {STYLE}"
+        ),
+        "vehicle_prompt": (
+            f"{MILO} bundled up in a red scarf sitting on a wooden sled with "
+            f"curved runners, the sled is sliding down a snowy slope, Milo's "
+            f"scarf flutters behind, full sled and character visible, on a "
+            f"solid magenta (#FF00FF) background, {STYLE}"
+        ),
+        "picker_prompt": (
+            f"Portrait of {MILO} wearing a red scarf, head and upper body, "
+            f"looking directly at the viewer, snowflakes in the air around him, "
+            f"on a solid magenta (#FF00FF) background, {STYLE}"
+        ),
+        "objects": {
+            "sky": [
+                ("snowflake", "a single small delicate white snowflake crystal"),
+                ("snowflake_big", "a single large intricate white snowflake with six-fold symmetry"),
+                ("cardinal", "a single small cute bright red cardinal bird perched"),
+                ("cloud_snowy", "a single small grey cloud with tiny snowflakes falling from it"),
+            ],
+            "mid": [
+                ("pine_tree", "a single small snow-covered evergreen pine tree"),
+                ("snowman", "a single small cute snowman with a top hat, carrot nose, and stick arms"),
+                ("deer", "a single small cute brown deer with small antlers standing"),
+                ("cabin", "a single small cozy log cabin with a smoking chimney and warm window glow"),
+            ],
+            "ground": [
+                ("gift_red", "a single small wrapped gift box with red paper and a gold ribbon bow"),
+                ("gift_blue", "a single small wrapped gift box with blue paper and a silver ribbon"),
+                ("holly", "a single small sprig of green holly with three red berries"),
+                ("candy_cane", "a single small red and white striped candy cane"),
+                ("snow_bunny", "a single small cute white bunny sitting in the snow"),
+                ("mitten", "a single small red knitted mitten with white snowflake pattern"),
             ],
         },
     },

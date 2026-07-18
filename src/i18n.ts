@@ -209,6 +209,7 @@ export type UIKey =
   | 'song.london'
   | 'song.spider'
   | 'song.macdonald'
+  | 'song.jingle'
   // ── Displayed in-game hints ────────────────────────────────────
   | 'diff.pictureA'
   | 'diff.pictureB'
@@ -484,6 +485,7 @@ const EN: Table = {
   'song.london': 'London Bridge',
   'song.spider': 'Itsy Bitsy Spider',
   'song.macdonald': 'Old MacDonald',
+  'song.jingle': 'Jingle Bells',
 
   'diff.pictureA': 'Picture A',
   'diff.pictureB': 'Picture B',
@@ -757,6 +759,7 @@ const JA: Table = {
   'song.london': 'ロンドンばし',
   'song.spider': 'ちいさな クモさん',
   'song.macdonald': 'ゆかいな まきば',
+  'song.jingle': 'ジングルベル',
 
   'diff.pictureA': 'えA',
   'diff.pictureB': 'えB',
@@ -1029,6 +1032,7 @@ const CMN: Table = {
   'song.london': '伦敦桥',
   'song.spider': '小蜘蛛',
   'song.macdonald': '王老先生有块地',
+  'song.jingle': '铃儿响叮当',
 
   'diff.pictureA': '图A',
   'diff.pictureB': '图B',
@@ -1301,6 +1305,7 @@ const YUE: Table = {
   'song.london': '倫敦橋',
   'song.spider': '小蜘蛛',
   'song.macdonald': '王老先生有塊地',
+  'song.jingle': '鈴兒響叮噹',
 
   'diff.pictureA': '圖A',
   'diff.pictureB': '圖B',

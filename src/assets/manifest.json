@@ -24124,7 +24124,12 @@
             "sting": "thunder",
             "reveal": "Squawk! I just wanted to stretch my legs! That frame is SO cramped!",
             "delay": 1800,
-            "video": "story-video/manor_a_scare.mp4"
+            "video": "story-video/manor_a_scare.mp4",
+            "t": {
+              "ja": "\u30ae\u30e3\u30fc\uff01 \u3042\u3057 \u3092 \u306e\u3070\u3057\u305f\u304b\u3063\u305f \u3060\u3051\uff01 \u3053\u306e \u3048\u3076\u3061 \u305b\u307e\u3059\u304e\u308b\uff01",
+              "cmn": "\u560e\uff01 \u6211\u53ea\u662f\u60f3\u4f38\u4f38\u817f\uff01 \u8fd9\u4e2a\u753b\u6846\u592a\u6324\u5566\uff01",
+              "yue": "\u5471\uff01 \u6211\u53ea\u4fc2\u60f3\u4f38\u5413\u8173\u556b\uff01 \u500b\u756b\u6846\u597d\u903c\u5440\uff01"
+            }
           }
         },
         "b": {
@@ -24484,7 +24489,12 @@
             "sting": "boing",
             "reveal": "Ta-daaa! Just practicing my big entrance!",
             "delay": 1800,
-            "video": "story-video/carnival_a_scare.mp4"
+            "video": "story-video/carnival_a_scare.mp4",
+            "t": {
+              "ja": "\u30b8\u30e3\u30fc\u30f3\uff01 \u304a\u304a\u304d\u306a \u3068\u3046\u3058\u3087\u3046 \u306e \u308c\u3093\u3057\u3085\u3046 \u3061\u3085\u3046\uff01",
+              "cmn": "\u5654\u5654\u5654\uff01 \u53ea\u662f\u5728\u7ec3\u4e60\u6211\u7684\u534e\u4e3d\u767b\u573a\uff01",
+              "yue": "\u767b\u767b\u767b\uff01 \u7df4\u7dca\u6211\u500b\u83ef\u9e97\u767b\u5834\u548b\uff01"
+            }
           }
         },
         "b": {
@@ -24614,7 +24624,12 @@
             "sting": "thunder",
             "reveal": "Whoops, just your reflection stretching its legs!",
             "delay": 1900,
-            "video": "story-video/carnival_bb_scare.mp4"
+            "video": "story-video/carnival_bb_scare.mp4",
+            "t": {
+              "ja": "\u3042\u308c\u308c\u3001 \u304d\u307f \u306e \u304b\u3052 \u304c \u3042\u3057 \u3092 \u306e\u3070\u3057\u3066\u308b \u3060\u3051\uff01",
+              "cmn": "\u54ce\u5440\uff0c \u53ea\u662f\u4f60\u7684\u5012\u5f71\u5728\u4f38\u61d2\u8170\u5462\uff01",
+              "yue": "\u54ce\u5440\uff0c \u53ea\u4fc2\u4f60\u500b\u5012\u5f71\u4f38\u5413\u8173\u556b\uff01"
+            }
           }
         },
         "m1": {
@@ -24939,7 +24954,12 @@
             "sting": "thunder",
             "reveal": "Grumble! Just napping through the storm, carry on little fox!",
             "delay": 1900,
-            "video": "story-video/thunder_bb_scare.mp4"
+            "video": "story-video/thunder_bb_scare.mp4",
+            "t": {
+              "ja": "\u3080\u30fc\uff01 \u3042\u3089\u3057 \u306e \u306a\u304b \u3067 \u304a\u3072\u308b\u306d \u3061\u3085\u3046\uff01 \u3053\u304e\u3064\u306d\u3055\u3093\u3001\u3064\u3065\u3051\u3066\uff01",
+              "cmn": "\u54fc\uff01 \u53ea\u662f\u5728\u66b4\u98ce\u96e8\u91cc\u7761\u89c9\u5462\uff01 \u5c0f\u72d0\u72f8\uff0c\u7ee7\u7eed\u73a9\u5427\uff01",
+              "yue": "\u54fc\uff01 \u55ba\u66b4\u98a8\u96e8\u5165\u9762\u7793\u7dca\u89ba\u548b\uff01 \u5c0f\u72d0\u72f8\uff0c\u7e7c\u7e8c\u73a9\u5566\uff01"
+            }
           }
         },
         "m1": {
@@ -25166,7 +25186,12 @@
             "sting": "boing",
             "reveal": "Ribbit! We were just watching the sparks go by!",
             "delay": 1800,
-            "video": "story-video/bayou_a_scare.mp4"
+            "video": "story-video/bayou_a_scare.mp4",
+            "t": {
+              "ja": "\u30b2\u30ed\u30b2\u30ed\uff01 \u3072\u3070\u306a \u304c \u3068\u3093\u3067\u3044\u304f \u306e \u3092 \u307f\u3066\u305f \u3060\u3051\uff01",
+              "cmn": "\u5471\uff01 \u6211\u4eec\u53ea\u662f\u5728\u770b\u706b\u82b1\u98de\u8fc7\u5462\uff01",
+              "yue": "\u5471\uff01 \u6211\u54cb\u53ea\u4fc2\u7747\u7dca\u5572\u706b\u82b1\u98db\u904e\u556b\uff01"
+            }
           }
         },
         "b": {
@@ -25573,7 +25598,12 @@
             "pop": "story/observatory_ba_pop.png",
             "sting": "boing",
             "reveal": "Hello! I'm trying to show you a MAP! The star-sprite settles into a gentle glow and points at the sky with a tiny arm of light.",
-            "delay": 1700
+            "delay": 1700,
+            "t": {
+              "ja": "\u3053\u3093\u306b\u3061\u306f\uff01 \u3061\u305a \u3092 \u307f\u305b\u3088\u3046 \u3068 \u3057\u3066\u308b \u306e\uff01 \u307b\u3057 \u306e \u3088\u3046\u305b\u3044 \u304c \u3084\u3055\u3057\u304f \u3072\u304b\u308a\u3060\u3057\u3066\u3001\u3061\u3044\u3055\u306a \u3072\u304b\u308a \u306e \u3046\u3067 \u3067 \u305d\u3089 \u3092 \u3055\u3057\u3066\u308b \u3088\u3002",
+              "cmn": "\u4f60\u597d\uff01 \u6211\u60f3\u7ed9\u4f60\u770b\u4e00\u5f20\u5730\u56fe\uff01 \u661f\u661f\u5c0f\u7cbe\u7075\u53d1\u51fa\u67d4\u548c\u7684\u5149\uff0c\u7528\u5c0f\u5c0f\u7684\u5149\u81c2\u6307\u5411\u5929\u7a7a\u3002",
+              "yue": "\u4f60\u597d\u5440\uff01 \u6211\u60f3\u4ffe\u5f35\u5730\u5716\u4f60\u7747\u5440\uff01 \u661f\u661f\u5c0f\u7cbe\u9748\u767c\u51fa\u67d4\u548c\u5605\u5149\uff0c\u7528\u4f62\u96bb\u5c0f\u5149\u81c2\u6307\u4f4f\u500b\u5929\u5440\u3002"
+            }
           }
         },
         "bb": {
@@ -25954,7 +25984,12 @@
             "sting": "boing",
             "reveal": "Just a grumpy museum gecko who naps in the skeleton! She's been living there for years and does NOT appreciate visitors.",
             "delay": 1600,
-            "video": "story-video/museum_bb_scare.mp4"
+            "video": "story-video/museum_bb_scare.mp4",
+            "t": {
+              "ja": "\u307b\u306d \u306e \u306a\u304b \u3067 \u304a\u3072\u308b\u306d \u3059\u308b \u304d\u3052\u3093 \u306e \u308f\u308b\u3044 \u306f\u304f\u3076\u3064\u304b\u3093 \u306e \u30e4\u30e2\u30ea\uff01 \u306a\u3093\u306d\u3093 \u3082 \u305d\u3053 \u306b \u3059\u3093\u3067\u3066\u3001\u304a\u304d\u3083\u304f\u3055\u3093 \u306f \u3060\u3044\u304d\u3089\u3044 \u306a \u306e\uff01",
+              "cmn": "\u53ea\u662f\u53ea\u813e\u6c14\u4e0d\u597d\u7684\u535a\u7269\u9986\u58c1\u864e\uff0c\u5b83\u5728\u9aa8\u5934\u91cc\u7761\u89c9\u5462\uff01 \u5b83\u5728\u90a3\u91cc\u4f4f\u4e86\u597d\u591a\u5e74\uff0c\u4e0d\u559c\u6b22\u6709\u8bbf\u5ba2\uff01",
+              "yue": "\u53ea\u4fc2\u96bb\u813e\u6c23\u5514\u597d\u5605\u535a\u7269\u9928\u58c1\u864e\uff0c\u4f62\u55ba\u9aa8\u982d\u5165\u9762\u7793\u7dca\u89ba\u548b\uff01 \u4f62\u55ba\u5ea6\u4f4f\u5497\u597d\u591a\u5e74\u5587\uff0c\u5514\u937e\u610f\u6709\u8a2a\u5ba2\u35ce\uff01"
+            }
           }
         },
         "m1": {
@@ -26488,7 +26523,12 @@
             "sting": "thunder",
             "reveal": "Relax cousin! Just moonlight through old bones \u2014 happens every full moon!",
             "delay": 1900,
-            "video": "story-video/quarry_a_scare.mp4"
+            "video": "story-video/quarry_a_scare.mp4",
+            "t": {
+              "ja": "\u3044\u3068\u3053\u3001\u30ea\u30e9\u30c3\u30af\u30b9\u3057\u3066\uff01 \u3075\u308b\u3044 \u307b\u306d \u3092 \u3068\u304a\u308b \u3064\u304d\u3042\u304b\u308a \u3060\u3088\uff01 \u307e\u3093\u3052\u3064 \u306e \u305f\u3073 \u306b \u304a\u3053\u308b \u3053\u3068 \u306a \u306e\uff01",
+              "cmn": "\u653e\u677e\u70b9\uff0c\u4eb2\u7231\u7684\uff01 \u53ea\u662f\u6708\u5149\u7a7f\u8fc7\u65e7\u9aa8\u5934\uff01 \u6bcf\u4e2a\u6ee1\u6708\u90fd\u4f1a\u53d1\u751f\u54e6\uff01",
+              "yue": "\u653e\u9b06\u5572\u5566\uff0c\u8868\u54e5\uff01 \u53ea\u4fc2\u6708\u5149\u7a7f\u904e\u5572\u820a\u9aa8\u982d\u556b\uff01 \u6bcf\u500b\u6eff\u6708\u90fd\u6703\u767c\u751f\u35ce\uff01"
+            }
           }
         },
         "b": {
@@ -26590,7 +26630,12 @@
             "sting": "boing",
             "reveal": "Oh my! Nobody has visited this wall in a thousand years! How exciting!",
             "delay": 1800,
-            "video": "story-video/quarry_bb_scare.mp4"
+            "video": "story-video/quarry_bb_scare.mp4",
+            "t": {
+              "ja": "\u3042\u3089\u307e\uff01 \u3053\u306e \u304b\u3079\u3001\u305b\u3093\u306d\u3093 \u3082 \u3060\u308c\u3082 \u304d\u3066\u306a\u3044 \u3088\uff01 \u308f\u304f\u308f\u304f \u3059\u308b \u306d\uff01",
+              "cmn": "\u54ce\u5440\uff01 \u8fd9\u9762\u5899\u4e00\u5343\u5e74\u90fd\u6ca1\u4eba\u6765\u8fc7\u5566\uff01 \u592a\u8ba9\u4eba\u5174\u594b\u5566\uff01",
+              "yue": "\u54ce\u5440\uff01 \u5462\u5e45\u7246\u4e00\u5343\u5e74\u90fd\u5187\u4eba\u569f\u904e\u35ce\uff01 \u597d\u523a\u6fc0\u5440\uff01"
+            }
           }
         },
         "m1": {
@@ -26845,7 +26890,12 @@
             "sting": "thunder",
             "reveal": "Been saving this for someone! Take it!",
             "delay": 1700,
-            "video": "story-video/grotto_ab_scare.mp4"
+            "video": "story-video/grotto_ab_scare.mp4",
+            "t": {
+              "ja": "\u3060\u308c\u304b \u306e \u305f\u3081 \u306b \u3068\u3063\u3066\u304a\u3044\u305f \u306e\uff01 \u3069\u3046\u305e\uff01",
+              "cmn": "\u6211\u4e00\u76f4\u4e3a\u67d0\u4eba\u7559\u7740\u8fd9\u4e2a\u5462\uff01 \u62ff\u7740\u5427\uff01",
+              "yue": "\u6211\u4e00\u76f4\u90fd\u5e6b\u4eba\u7559\u8d77\u5462\u500b\u35ce\uff01 \u651e\u53bb\u5566\uff01"
+            }
           }
         },
         "ba": {
@@ -26905,7 +26955,12 @@
             "sting": "boing",
             "reveal": "Just the cave's heartbeat monitor! All healthy!",
             "delay": 1500,
-            "video": "story-video/grotto_bb_scare.mp4"
+            "video": "story-video/grotto_bb_scare.mp4",
+            "t": {
+              "ja": "\u3069\u3046\u304f\u3064 \u306e \u3057\u3093\u3071\u304f\u3051\u3044 \u3060 \u3088\uff01 \u305c\u3093\u3076 \u3051\u3093\u3053\u3046\uff01",
+              "cmn": "\u53ea\u662f\u6d1e\u7a74\u7684\u5fc3\u8df3\u76d1\u6d4b\u5668\uff01 \u4e00\u5207\u90fd\u5065\u5eb7\uff01",
+              "yue": "\u53ea\u4fc2\u500b\u5c71\u7abf\u5605\u5fc3\u8df3\u76e3\u6e2c\u5668\u556b\uff01 \u5168\u90e8\u90fd\u597d\u5065\u5eb7\u5440\uff01"
+            }
           }
         },
         "m1": {
@@ -27411,7 +27466,12 @@
             "sting": "boing",
             "reveal": "Just stretching my wings in the moonlight!",
             "delay": 1800,
-            "video": "story-video/bamboo_a_scare.mp4"
+            "video": "story-video/bamboo_a_scare.mp4",
+            "t": {
+              "ja": "\u3064\u304d\u3042\u304b\u308a \u306e \u306a\u304b \u3067 \u306f\u306d \u3092 \u306e\u3070\u3057\u3066\u308b \u3060\u3051\uff01",
+              "cmn": "\u53ea\u662f\u5728\u6708\u5149\u4e0b\u4f38\u5c55\u7fc5\u8180\u5462\uff01",
+              "yue": "\u53ea\u4fc2\u55ba\u6708\u5149\u4e0b\u4f38\u5413\u7ffc\u556b\uff01"
+            }
           }
         },
         "b": {
@@ -27729,7 +27789,12 @@
             "sting": "thunder",
             "reveal": "Whoa! Just testing my battle outfit!",
             "delay": 1700,
-            "video": "story-video/junkyard_a_scare.mp4"
+            "video": "story-video/junkyard_a_scare.mp4",
+            "t": {
+              "ja": "\u308f\u3042\uff01 \u305f\u305f\u304b\u3044 \u306e \u3075\u304f \u3092 \u305f\u3081\u3057\u3066\u308b \u3060\u3051\uff01",
+              "cmn": "\u54c7\uff01 \u53ea\u662f\u5728\u6d4b\u8bd5\u6211\u7684\u6218\u6597\u670d\uff01",
+              "yue": "\u5629\uff01 \u53ea\u4fc2\u8a66\u7dca\u6211\u5957\u6230\u9b25\u886b\u556b\uff01"
+            }
           }
         },
         "b": {
@@ -28120,12 +28185,22 @@
         {
           "id": "key",
           "label": "A shiny key!",
-          "emoji": "\ud83d\udddd\ufe0f"
+          "emoji": "\ud83d\udddd\ufe0f",
+          "t": {
+            "ja": "\u3074\u304b\u3074\u304b\u306e \u304b\u304e\uff01",
+            "cmn": "\u4e00\u628a\u95ea\u4eae\u7684\u94a5\u5319\uff01",
+            "yue": "\u4e00\u628a\u9583\u9583\u5605\u9396\u5319\uff01"
+          }
         },
         {
           "id": "bone",
           "label": "A yummy bone!",
-          "emoji": "\ud83e\uddb4"
+          "emoji": "\ud83e\uddb4",
+          "t": {
+            "ja": "\u304a\u3044\u3057\u3044 \u307b\u306d\uff01",
+            "cmn": "\u4e00\u5757\u7f8e\u5473\u7684\u9aa8\u5934\uff01",
+            "yue": "\u4e00\u689d\u597d\u5473\u5605\u9aa8\u982d\uff01"
+          }
         }
       ],
       "hotspots": [
@@ -28139,7 +28214,18 @@
           },
           "kind": "search",
           "gives": "key",
-          "sayFound": "A shiny key was hiding under the pillow!"
+          "sayFound": "A shiny key was hiding under the pillow!",
+          "t": {
+            "ja": {
+              "sayFound": "\u3074\u304b\u3074\u304b\u306e \u304b\u304e\u304c \u307e\u304f\u3089\u306e \u3057\u305f\u306b \u304b\u304f\u308c\u3066\u305f\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u4e00\u628a\u95ea\u4eae\u7684\u94a5\u5319\u85cf\u5728\u6795\u5934\u4e0b\u9762\uff01"
+            },
+            "yue": {
+              "sayFound": "\u4e00\u628a\u9583\u9583\u5605\u9396\u5319\u6536\u57cb\u5497\u55ba\u6795\u982d\u5e95\u5440\uff01"
+            }
+          }
         },
         {
           "id": "teddy",
@@ -28150,7 +28236,18 @@
             "h": 244
           },
           "kind": "search",
-          "saySearch": "The teddy bear giggles. Nothing under here!"
+          "saySearch": "The teddy bear giggles. Nothing under here!",
+          "t": {
+            "ja": {
+              "saySearch": "\u304f\u307e\u3055\u3093\u3001\u304f\u3059\u304f\u3059 \u308f\u3089\u3046\u3088\u3002\u3053\u3053\u306b\u306f \u306a\u306b\u3082 \u306a\u3044\u3088\uff01"
+            },
+            "cmn": {
+              "saySearch": "\u5c0f\u718a\u54af\u54af\u5730\u7b11\u3002\u8fd9\u91cc\u4ec0\u4e48\u90fd\u6ca1\u6709\uff01"
+            },
+            "yue": {
+              "saySearch": "\u5564\u5564\u718a\u54af\u54af\u5481\u7b11\u3002\u5462\u5ea6\u4e5c\u90fd\u5187\u5440\uff01"
+            }
+          }
         },
         {
           "id": "chest",
@@ -28165,7 +28262,21 @@
           "needs": "key",
           "sayFound": "The chest popped open \u2014 a yummy bone!",
           "sayLocked": "The toy chest is locked tight. What could open it?",
-          "afterScene": "escape/toyroom_s1.png"
+          "afterScene": "escape/toyroom_s1.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u305f\u304b\u3089\u3070\u3053\u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u304a\u3044\u3057\u3044 \u307b\u306d\uff01",
+              "sayLocked": "\u304a\u3082\u3061\u3083\u3070\u3053\u304c \u304b\u305f\u304f \u3057\u307e\u3063\u3066\u308b\u3088\u3002 \u306a\u306b\u3067 \u3042\u304f\u304b\u306a\uff1f"
+            },
+            "cmn": {
+              "sayFound": "\u7bb1\u5b50\u6253\u5f00\u4e86\uff01\u4e00\u5757\u7f8e\u5473\u7684\u9aa8\u5934\uff01",
+              "sayLocked": "\u73a9\u5177\u7bb1\u9501\u5f97\u7d27\u7d27\u7684\u3002\u4ec0\u4e48\u80fd\u6253\u5f00\u5b83\u5462\uff1f"
+            },
+            "yue": {
+              "sayFound": "\u500b\u7bb1\u6253\u958b\u5497\u5566\uff01\u4e00\u689d\u597d\u5473\u5605\u9aa8\u982d\uff01",
+              "sayLocked": "\u73a9\u5177\u7bb1\u9396\u5230\u5be6\u4e00\u5be6\u5440\u3002\u7528\u54a9\u53ef\u4ee5\u6253\u958b\u4f62\u5462\uff1f"
+            }
+          }
         },
         {
           "id": "pen",
@@ -28179,9 +28290,42 @@
           "needs": "bone",
           "sayFound": "The puppy wiggles out \u2014 you saved him!",
           "sayLocked": "The puppy is hungry. What does a puppy love best?",
-          "afterScene": "escape/toyroom_s2.png"
+          "afterScene": "escape/toyroom_s2.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u308f\u3093\u3061\u3083\u3093\u3001\u3059\u308b\u3059\u308b\u3063\u3068 \u3067\u3066\u304d\u305f\uff01 \u305f\u3059\u3051\u3066\u3042\u3052\u305f\u306d\uff01",
+              "sayLocked": "\u308f\u3093\u3061\u3083\u3093 \u304a\u306a\u304b\u3059\u3044\u305f\u307f\u305f\u3044\u3002 \u306a\u306b\u304c \u3044\u3061\u3070\u3093 \u3059\u304d\u304b\u306a\uff1f"
+            },
+            "cmn": {
+              "sayFound": "\u5c0f\u72d7\u626d\u52a8\u7740\u51fa\u6765\u4e86\uff01\u4f60\u6551\u4e86\u4ed6\uff01",
+              "sayLocked": "\u5c0f\u72d7\u809a\u5b50\u997f\u4e86\u3002\u5c0f\u72d7\u6700\u559c\u6b22\u4ec0\u4e48\u5462\uff1f"
+            },
+            "yue": {
+              "sayFound": "\u72d7\u72d7\u6350\u5497\u51fa\u569f\u5566\uff01\u4f60\u6551\u5497\u4f62\u5566\uff01",
+              "sayLocked": "\u72d7\u72d7\u809a\u9913\u5566\u3002\u72d7\u72d7\u6700\u937e\u610f\u98df\u54a9\u35ce\uff1f"
+            }
+          }
         }
-      ]
+      ],
+      "nameT": {
+        "ja": "\u306d\u3080\u305f\u3044 \u308f\u3093\u3061\u3083\u3093",
+        "cmn": "\u778c\u7761\u72d7",
+        "yue": "\u773c\u7793\u72d7\u72d7"
+      },
+      "t": {
+        "ja": {
+          "intro": "\u305f\u3044\u3078\u3093\uff01 \u308f\u3093\u3061\u3083\u3093\u3001\u304a\u3082\u3061\u3083\u306e \u3055\u304f\u306e \u306a\u304b\u3060\u3002 \u30c9\u30a2\u304c \u3042\u304b\u306a\u3044\u3088\u3002 \u304a\u3082\u3061\u3083\u3079\u3084\u3092 \u307f\u3066\u3001\u305f\u3059\u3051\u3066\u3042\u3052\u3066\u306d\uff01",
+          "winText": "\u3084\u3063\u305f\u30fc\uff01 \u308f\u3093\u3061\u3083\u3093 \u3058\u3086\u3046\u306b \u306a\u3063\u305f\uff01 \u3068\u3063\u3066\u3082 \u3046\u308c\u3057\u305d\u3046\uff01"
+        },
+        "cmn": {
+          "intro": "\u7cdf\u7cd5\uff01\u5c0f\u72d7\u88ab\u56f0\u4f4f\u5566\u3002\u95e8\u6253\u4e0d\u5f00\u3002\u5feb\u5728\u73a9\u5177\u623f\u91cc\u627e\u627e\uff0c\u5e2e\u4ed6\u51fa\u6765\u5427\uff01",
+          "winText": "\u592a\u68d2\u4e86\uff01\u5c0f\u72d7\u81ea\u7531\u5566\uff0c\u5b83\u597d\u5f00\u5fc3\u5440\uff01"
+        },
+        "yue": {
+          "intro": "\u5514\u597d\u5566\uff01\u72d7\u72d7\u4ffe\u56f0\u4f4f\u5497\u3002\u9053\u9580\u90c1\u90fd\u5514\u90c1\u3002\u5feb\u5572\u55ba\u73a9\u5177\u623f\u6435\u5413\uff0c\u5e6b\u4f62\u51fa\u569f\u5566\uff01",
+          "winText": "\u592a\u597d\u5566\uff01\u72d7\u72d7\u81ea\u7531\u5566\uff0c\u597d\u958b\u5fc3\u5440\uff01"
+        }
+      }
     },
     {
       "id": "dragoncave",
@@ -28194,12 +28338,22 @@
         {
           "id": "egg",
           "label": "A big egg!",
-          "emoji": "\ud83e\udd5a"
+          "emoji": "\ud83e\udd5a",
+          "t": {
+            "ja": "\u304a\u304a\u304d\u306a \u305f\u307e\u3054\uff01",
+            "cmn": "\u4e00\u4e2a\u5927\u9e21\u86cb\uff01",
+            "yue": "\u4e00\u96bb\u5927\u86cb\uff01"
+          }
         },
         {
           "id": "pancake",
           "label": "A golden pancake!",
-          "emoji": "\ud83e\udd5e"
+          "emoji": "\ud83e\udd5e",
+          "t": {
+            "ja": "\u304d\u3093\u3044\u308d\u306e \u30d1\u30f3\u30b1\u30fc\u30ad\uff01",
+            "cmn": "\u4e00\u4e2a\u91d1\u8272\u7684\u714e\u997c\uff01",
+            "yue": "\u4e00\u500b\u91d1\u9ec3\u8272\u5605\u73ed\u621f\uff01"
+          }
         }
       ],
       "hotspots": [
@@ -28213,7 +28367,18 @@
           },
           "kind": "search",
           "gives": "egg",
-          "sayFound": "An egg was hiding in the hay!"
+          "sayFound": "An egg was hiding in the hay!",
+          "t": {
+            "ja": {
+              "sayFound": "\u308f\u3089\u306e \u306a\u304b\u306b \u305f\u307e\u3054\u304c \u304b\u304f\u308c\u3066\u305f\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u7a3b\u8349\u91cc\u85cf\u7740\u4e00\u4e2a\u86cb\uff01"
+            },
+            "yue": {
+              "sayFound": "\u5572\u8349\u5ea6\u6709\u96bb\u86cb\u4ed4\u6536\u57cb\u5497\u5440\uff01"
+            }
+          }
         },
         {
           "id": "crystal",
@@ -28224,7 +28389,18 @@
             "h": 135
           },
           "kind": "search",
-          "saySearch": "The crystal ball shows a yummy breakfast!"
+          "saySearch": "The crystal ball shows a yummy breakfast!",
+          "t": {
+            "ja": {
+              "saySearch": "\u3059\u3044\u3057\u3087\u3046\u3060\u307e\u306b \u304a\u3044\u3057\u3044 \u3042\u3055\u3054\u306f\u3093\u304c \u3046\u3064\u3063\u3066\u308b\uff01"
+            },
+            "cmn": {
+              "saySearch": "\u6c34\u6676\u7403\u91cc\u6709\u7f8e\u5473\u65e9\u9910\uff01"
+            },
+            "yue": {
+              "saySearch": "\u6c34\u6676\u7403\u4ed4\u898b\u5230\u597d\u5473\u5605\u65e9\u9910\u5440\uff01"
+            }
+          }
         },
         {
           "id": "stove",
@@ -28239,7 +28415,21 @@
           "needs": "egg",
           "sayFound": "Sizzle sizzle \u2014 a golden pancake!",
           "sayLocked": "The stove is ready, but what could we cook?",
-          "afterScene": "escape/dragoncave_s1.png"
+          "afterScene": "escape/dragoncave_s1.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u3058\u3085\u3046\u3058\u3085\u3046\uff01 \u304d\u3093\u3044\u308d\u306e \u30d1\u30f3\u30b1\u30fc\u30ad\uff01",
+              "sayLocked": "\u30b3\u30f3\u30ed\u306f \u3058\u3085\u3093\u3073OK\uff01 \u3067\u3082 \u306a\u306b\u3092 \u3064\u304f\u308d\u3046\u304b\u306a\uff1f"
+            },
+            "cmn": {
+              "sayFound": "\u6ecb\u6ecb\u6ecb\uff01\u4e00\u4e2a\u91d1\u8272\u7684\u714e\u997c\uff01",
+              "sayLocked": "\u7089\u5b50\u51c6\u5907\u597d\u4e86\uff0c\u53ef\u662f\u6211\u4eec\u80fd\u716e\u4ec0\u4e48\u5462\uff1f"
+            },
+            "yue": {
+              "sayFound": "\u5431\u5431\u55b3\u55b3\uff01\u4e00\u500b\u91d1\u9ec3\u8272\u5605\u73ed\u621f\uff01",
+              "sayLocked": "\u500b\u7210\u6e96\u5099\u597d\u5566\uff0c\u4f46\u4fc2\u716e\u5572\u4e5c\u5622\u597d\u5462\uff1f"
+            }
+          }
         },
         {
           "id": "dragon",
@@ -28253,9 +28443,42 @@
           "needs": "pancake",
           "sayFound": "The dragon gobbles it up and puffs a happy little smoke ring!",
           "sayLocked": "The baby dragon's tummy is rumbling\u2026",
-          "afterScene": "escape/dragoncave_s2.png"
+          "afterScene": "escape/dragoncave_s2.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u30c9\u30e9\u30b4\u30f3 \u3082\u3050\u3082\u3050 \u305f\u3079\u3066\u3001\u3046\u308c\u3057\u305d\u3046\u306b \u3051\u3080\u308a\u306e \u308f\u3063\u304b\u3092 \u3077\u304b\u30fc\uff01",
+              "sayLocked": "\u3042\u304b\u3061\u3083\u3093 \u30c9\u30e9\u30b4\u30f3 \u304a\u306a\u304b\u304c \u3050\u30fc\u3050\u30fc \u3044\u3063\u3066\u308b\u2026"
+            },
+            "cmn": {
+              "sayFound": "\u5c0f\u98de\u9f99\u5927\u53e3\u5403\u6389\uff0c\u5f00\u5fc3\u5730\u5410\u51fa\u4e00\u4e2a\u5c0f\u70df\u5708\uff01",
+              "sayLocked": "\u5c0f\u98de\u9f99\u7684\u809a\u5b50\u5495\u5495\u53eb\u4e86\u2026"
+            },
+            "yue": {
+              "sayFound": "\u9f8d\u4ed4\u98df\u6652\u5566\uff0c\u4ef2\u958b\u5fc3\u5481\u5674\u5497\u500b\u7159\u5708\u4ed4\u6dfb\uff01",
+              "sayLocked": "\u5c0f\u98db\u9f8d\u500b\u809a\u4ed4\u5495\u5495\u8072\u5440\u2026"
+            }
+          }
         }
-      ]
+      ],
+      "nameT": {
+        "ja": "\u30c9\u30e9\u30b4\u30f3 \u306e \u3042\u3055\u3054\u306f\u3093",
+        "cmn": "\u9f99\u7684\u65e9\u9910",
+        "yue": "\u9f8d\u4ed4\u5605\u65e9\u9910"
+      },
+      "t": {
+        "ja": {
+          "intro": "\u3042\u304b\u3061\u3083\u3093 \u30c9\u30e9\u30b4\u30f3 \u304a\u306a\u304b\u304c \u3059\u3044\u3066\u3066 \u3068\u3079\u306a\u3044\u3088\uff01 \u304a\u3044\u3057\u3044\u3082\u306e \u307f\u3064\u3051\u3066 \u3042\u3055\u3054\u306f\u3093 \u3064\u304f\u3063\u3066\u3042\u3052\u3088\u3046\u3002",
+          "winText": "\u3082\u3050\u3082\u3050\uff01 \u3042\u304b\u3061\u3083\u3093 \u30c9\u30e9\u30b4\u30f3 \u304a\u306a\u304b\u3044\u3063\u3071\u3044\uff01 \u307e\u305f \u3073\u3085\u30fc\u3093\u3063\u3066 \u3068\u3093\u3067\u308b\u3088\uff01"
+        },
+        "cmn": {
+          "intro": "\u5c0f\u98de\u9f99\u592a\u997f\u4e86\uff0c\u98de\u4e0d\u52a8\u5566\uff01\u5feb\u627e\u4e9b\u597d\u5403\u7684\uff0c\u7ed9\u4ed6\u505a\u65e9\u9910\u5427\u3002",
+          "winText": "\u55ef\uff01\u5c0f\u98de\u9f99\u5403\u9971\u4e86\uff0c\u53c8\u53ef\u4ee5\u98de\u5566\uff01"
+        },
+        "yue": {
+          "intro": "\u5c0f\u98db\u9f8d\u592a\u809a\u9913\u5566\uff0c\u98db\u5514\u5230\u5440\uff01\u5feb\u5572\u6435\u5572\u597d\u5622\u98df\uff0c\u716e\u65e9\u9910\u4ffe\u4f62\u5566\u3002",
+          "winText": "\u5629\uff01\u5c0f\u98db\u9f8d\u98df\u98fd\u98fd\u5566\uff0c\u53c8\u53ef\u4ee5\u98db\u569f\u98db\u53bb\u5566\uff01"
+        }
+      }
     },
     {
       "id": "rocketpad",
@@ -28268,17 +28491,32 @@
         {
           "id": "wrench",
           "label": "A trusty wrench!",
-          "emoji": "\ud83d\udd27"
+          "emoji": "\ud83d\udd27",
+          "t": {
+            "ja": "\u3058\u3087\u3046\u3076\u306a \u30ec\u30f3\u30c1\uff01",
+            "cmn": "\u53ef\u9760\u7684\u6273\u624b\uff01",
+            "yue": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
+          }
         },
         {
           "id": "battery",
           "label": "A super battery!",
-          "emoji": "\ud83d\udd0b"
+          "emoji": "\ud83d\udd0b",
+          "t": {
+            "ja": "\u3059\u3054\u3044 \u3067\u3093\u3061\uff01",
+            "cmn": "\u4e00\u4e2a\u8d85\u7ea7\u7535\u6c60\uff01",
+            "yue": "\u4e00\u7c92\u8d85\u7d1a\u96fb\u82af\uff01"
+          }
         },
         {
           "id": "star",
           "label": "A glowing star!",
-          "emoji": "\u2b50"
+          "emoji": "\u2b50",
+          "t": {
+            "ja": "\u3074\u304b\u3074\u304b \u307b\u3057\uff01",
+            "cmn": "\u4e00\u4e2a\u95ea\u4eae\u7684\u661f\u661f\uff01",
+            "yue": "\u4e00\u7c92\u9583\u9583\u5605\u661f\u661f\uff01"
+          }
         }
       ],
       "hotspots": [
@@ -28292,7 +28530,18 @@
           },
           "kind": "search",
           "gives": "wrench",
-          "sayFound": "A trusty wrench!"
+          "sayFound": "A trusty wrench!",
+          "t": {
+            "ja": {
+              "sayFound": "\u3058\u3087\u3046\u3076\u306a \u30ec\u30f3\u30c1\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u53ef\u9760\u7684\u6273\u624b\uff01"
+            },
+            "yue": {
+              "sayFound": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
+            }
+          }
         },
         {
           "id": "poster",
@@ -28303,7 +28552,18 @@
             "h": 171
           },
           "kind": "search",
-          "saySearch": "That is where the bunny wants to go!"
+          "saySearch": "That is where the bunny wants to go!",
+          "t": {
+            "ja": {
+              "saySearch": "\u3046\u3055\u304e\u3055\u3093 \u3053\u3053\u306b \u3044\u304d\u305f\u3044\u3093\u3060\u306d\uff01"
+            },
+            "cmn": {
+              "saySearch": "\u5154\u5b50\u5c31\u60f3\u53bb\u90a3\u91cc\uff01"
+            },
+            "yue": {
+              "saySearch": "\u5154\u4ed4\u5c31\u4fc2\u60f3\u53bb\u55f0\u5ea6\u5440\uff01"
+            }
+          }
         },
         {
           "id": "rocket",
@@ -28318,7 +28578,21 @@
           "needs": "wrench",
           "sayFound": "The panel opened \u2014 a super battery!",
           "sayLocked": "The rocket panel is stuck. We need a tool!",
-          "afterScene": "escape/rocketpad_s1.png"
+          "afterScene": "escape/rocketpad_s1.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u30d1\u30cd\u30eb \u3042\u3044\u305f\uff01 \u3059\u3054\u3044 \u3067\u3093\u3061\uff01",
+              "sayLocked": "\u30ed\u30b1\u30c3\u30c8\u306e \u30d1\u30cd\u30eb \u3042\u304b\u306a\u3044\u3002 \u3069\u3046\u3050\u304c \u3044\u308b\u306d\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u9762\u677f\u6253\u5f00\u4e86 \u2014 \u4e00\u4e2a\u8d85\u7ea7\u7535\u6c60\uff01",
+              "sayLocked": "\u706b\u7bad\u9762\u677f\u5361\u4f4f\u4e86\u3002 \u6211\u4eec\u9700\u8981\u5de5\u5177\uff01"
+            },
+            "yue": {
+              "sayFound": "\u584a\u677f\u958b\u5497\u5566 \u2014 \u4e00\u7c92\u8d85\u7d1a\u96fb\u82af\uff01",
+              "sayLocked": "\u706b\u7bad\u584a\u677f\u5361\u4f4f\u5497\u3002 \u6211\u54cb\u8981\u6435\u5de5\u5177\uff01"
+            }
+          }
         },
         {
           "id": "crate",
@@ -28333,7 +28607,21 @@
           "needs": "battery",
           "sayFound": "Power on! A glowing star popped out!",
           "sayLocked": "The power slot is empty\u2026",
-          "afterScene": "escape/rocketpad_s2.png"
+          "afterScene": "escape/rocketpad_s2.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u30b9\u30a4\u30c3\u30c1 \u30aa\u30f3\uff01 \u3074\u304b\u3074\u304b \u307b\u3057\u304c \u3067\u3066\u304d\u305f\uff01",
+              "sayLocked": "\u3067\u3093\u3052\u3093 \u30b9\u30ed\u30c3\u30c8 \u304b\u3089\u3063\u307d\u2026"
+            },
+            "cmn": {
+              "sayFound": "\u5f00\u673a\uff01 \u4e00\u4e2a\u95ea\u4eae\u7684\u661f\u661f\u5f39\u51fa\u6765\u4e86\uff01",
+              "sayLocked": "\u7535\u6e90\u69fd\u662f\u7a7a\u7684\u2026"
+            },
+            "yue": {
+              "sayFound": "\u958b\u6a5f\uff01 \u4e00\u7c92\u9583\u9583\u5605\u661f\u661f\u5f48\u5497\u51fa\u569f\uff01",
+              "sayLocked": "\u96fb\u6e90\u4f4d\u7a7a\u5497\u2026"
+            }
+          }
         },
         {
           "id": "button",
@@ -28347,9 +28635,42 @@
           "needs": "star",
           "sayFound": "Three, two, one \u2014 BLAST OFF!",
           "sayLocked": "The launch button needs star power!",
-          "afterScene": "escape/rocketpad_s3.png"
+          "afterScene": "escape/rocketpad_s3.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u3055\u3093\u3001\u306b\u3001\u3044\u3061 \u2014 \u306f\u3063\u3057\u3083\uff01",
+              "sayLocked": "\u306f\u3063\u3057\u3083 \u30dc\u30bf\u30f3\u306b \u307b\u3057\u306e \u3061\u304b\u3089\u304c \u3044\u308b\u3088\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u53d1\u5c04\uff01",
+              "sayLocked": "\u53d1\u5c04\u6309\u94ae\u9700\u8981\u661f\u661f\u80fd\u91cf\uff01"
+            },
+            "yue": {
+              "sayFound": "\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u767c\u5c04\uff01",
+              "sayLocked": "\u767c\u5c04\u63a3\u8981\u661f\u661f\u80fd\u91cf\uff01"
+            }
+          }
         }
-      ]
+      ],
+      "nameT": {
+        "ja": "\u3046\u3055\u304e\u3055\u3093 \u30ed\u30b1\u30c3\u30c8\uff01",
+        "cmn": "\u5154\u5b50\u706b\u7bad\uff01",
+        "yue": "\u5154\u4ed4\u706b\u7bad\uff01"
+      },
+      "t": {
+        "ja": {
+          "intro": "\u3046\u3055\u304e\u3055\u3093\u306e \u30ed\u30b1\u30c3\u30c8 \u3046\u3054\u304b\u306a\u3044\uff01 \u306a\u306b\u304b \u307f\u3064\u3051\u3066 \u304a\u3064\u304d\u3055\u307e\u3078 \u3057\u3085\u3063\u3071\u3064\uff01",
+          "winText": "\u30d2\u30e5\u30fc\u30f3\uff01 \u3046\u3055\u304e\u3055\u3093 \u304a\u3064\u304d\u3055\u307e\u3078 \u30d3\u30e5\u30fc\u30f3\uff01 \u3042\u308a\u304c\u3068\u3046\uff01"
+        },
+        "cmn": {
+          "intro": "\u5154\u5b50\u706b\u7bad\u5f00\u4e0d\u4e86\uff01 \u627e\u4e1c\u897f\uff0c\u5e2e\u5b83\u98de\u6708\u4eae\uff01",
+          "winText": "\u55d6\uff01 \u5154\u5b50\u98de\u5230\u6708\u4eae\u5566 \u2014 \u8c22\u8c22\u4f60\uff01"
+        },
+        "yue": {
+          "intro": "\u5154\u4ed4\u5605\u706b\u7bad\u958b\u5514\u5230\u5440\uff01 \u6435\u5413\u4f62\u9700\u8981\u5572\u4e5c\uff0c\u5e6b\u4f62\u98db\u4e0a\u6708\u7403\u5566\uff01",
+          "winText": "\u5629\uff01 \u5154\u4ed4\u98db\u5497\u4e0a\u6708\u7403\u5566 \u2014 \u591a\u8b1d\u4f60\u5440\uff01"
+        }
+      }
     },
     {
       "id": "piratecove",
@@ -28362,12 +28683,22 @@
         {
           "id": "fish",
           "label": "A wiggly fish!",
-          "emoji": "\ud83d\udc1f"
+          "emoji": "\ud83d\udc1f",
+          "t": {
+            "ja": "\u304f\u306d\u304f\u306d \u304a\u3055\u304b\u306a\uff01",
+            "cmn": "\u4e00\u6761\u626d\u6765\u626d\u53bb\u7684\u9c7c\uff01",
+            "yue": "\u4e00\u689d\u626d\u5413\u626d\u5413\u5605\u9b5a\u4ed4\uff01"
+          }
         },
         {
           "id": "shell",
           "label": "A shiny shell!",
-          "emoji": "\ud83d\udc1a"
+          "emoji": "\ud83d\udc1a",
+          "t": {
+            "ja": "\u3074\u304b\u3074\u304b \u306e \u304b\u3044\uff01",
+            "cmn": "\u4e00\u4e2a\u95ea\u4eae\u7684\u8d1d\u58f3\uff01",
+            "yue": "\u4e00\u500b\u9583\u9583\u5605\u8c9d\u6bbc\uff01"
+          }
         }
       ],
       "hotspots": [
@@ -28381,7 +28712,18 @@
           },
           "kind": "search",
           "gives": "fish",
-          "sayFound": "A wiggly fish!"
+          "sayFound": "A wiggly fish!",
+          "t": {
+            "ja": {
+              "sayFound": "\u304f\u306d\u304f\u306d \u304a\u3055\u304b\u306a\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u4e00\u6761\u626d\u6765\u626d\u53bb\u7684\u9c7c\uff01"
+            },
+            "yue": {
+              "sayFound": "\u4e00\u689d\u626d\u5413\u626d\u5413\u5605\u9b5a\u4ed4\uff01"
+            }
+          }
         },
         {
           "id": "umbrella",
@@ -28392,7 +28734,18 @@
             "h": 306
           },
           "kind": "search",
-          "saySearch": "Just a shady spot. Nothing hidden here!"
+          "saySearch": "Just a shady spot. Nothing hidden here!",
+          "t": {
+            "ja": {
+              "saySearch": "\u305f\u3060 \u306e \u3072\u304b\u3052 \u3060\u306d\u3002 \u3053\u3053 \u306b\u306f \u306a\u306b\u3082 \u306a\u3044\u3088\uff01"
+            },
+            "cmn": {
+              "saySearch": "\u53ea\u662f\u4e00\u4e2a\u9634\u51c9\u7684\u5730\u65b9\u3002 \u8fd9\u91cc\u4ec0\u4e48\u4e5f\u6ca1\u85cf\uff01"
+            },
+            "yue": {
+              "saySearch": "\u53ea\u4fc2\u4e00\u500b\u9670\u6dbc\u5605\u5730\u65b9\u3002 \u5462\u5ea6\u5187\u5622\u6536\u57cb\u35ce\uff01"
+            }
+          }
         },
         {
           "id": "pelican",
@@ -28407,7 +28760,21 @@
           "needs": "fish",
           "sayFound": "The pelican trades you a shiny shell!",
           "sayLocked": "The pelican wants a snack first\u2026",
-          "afterScene": "escape/piratecove_s1.png"
+          "afterScene": "escape/piratecove_s1.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u30da\u30ea\u30ab\u30f3 \u304c \u3074\u304b\u3074\u304b \u306e \u304b\u3044 \u3092 \u304f\u308c\u305f\u3088\uff01",
+              "sayLocked": "\u30da\u30ea\u30ab\u30f3 \u3055\u3093\u3001\u307e\u305a \u304a\u3084\u3064 \u304c \u307b\u3057\u3044\u3063\u3066\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u9e48\u9e55\u8ddf\u4f60\u4ea4\u6362\u4e86\u4e00\u4e2a\u95ea\u4eae\u7684\u8d1d\u58f3\uff01",
+              "sayLocked": "\u5c0f\u9e48\u9e55\u60f3\u5148\u5403\u70b9\u5fc3\u5462\u2026"
+            },
+            "yue": {
+              "sayFound": "\u5858\u9d5d\u540c\u4f60\u4ea4\u63db\u5497\u500b\u9583\u9583\u5605\u8c9d\u6bbc\u5440\uff01",
+              "sayLocked": "\u5858\u9d5d\u60f3\u98df\u5572\u5622\u5148\u5440\u2026"
+            }
+          }
         },
         {
           "id": "chest",
@@ -28421,9 +28788,42 @@
           "needs": "shell",
           "sayFound": "The chest bursts open \u2014 treasure for everyone!",
           "sayLocked": "The treasure chest has a shell-shaped slot!",
-          "afterScene": "escape/piratecove_s2.png"
+          "afterScene": "escape/piratecove_s2.png",
+          "t": {
+            "ja": {
+              "sayFound": "\u305f\u304b\u3089\u3070\u3053 \u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u307f\u3093\u306a \u306e \u304a\u305f\u304b\u3089 \u3060\uff01",
+              "sayLocked": "\u305f\u304b\u3089\u3070\u3053 \u306b\u306f \u304b\u3044 \u306e \u304b\u305f\u3061 \u306e \u3042\u306a \u304c \u3042\u308b\u3088\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u5b9d\u7bb1\u7830\u5730\u4e00\u58f0\u6253\u5f00\u4e86\uff01 \u5927\u5bb6\u90fd\u6709\u5b9d\u85cf\u4e86\uff01",
+              "sayLocked": "\u5b9d\u7bb1\u4e0a\u6709\u4e00\u4e2a\u8d1d\u58f3\u5f62\u72b6\u7684\u69fd\uff01"
+            },
+            "yue": {
+              "sayFound": "\u500b\u5bf6\u7bb1\u7830\u4e00\u8072\u958b\u5497\u5566\uff01 \u5927\u5bb6\u90fd\u6709\u5bf6\u85cf\u5566\uff01",
+              "sayLocked": "\u500b\u5bf6\u7bb1\u6709\u500b\u8c9d\u6bbc\u5f62\u72c0\u5605\u7abf\u5440\uff01"
+            }
+          }
         }
-      ]
+      ],
+      "nameT": {
+        "ja": "\u30da\u30ea\u30ab\u30f3 \u306e \u3053\u3046\u304b\u3093",
+        "cmn": "\u9e48\u9e55\u7684\u4ea4\u6613",
+        "yue": "\u5858\u9d5d\u5605\u4ea4\u6613"
+      },
+      "t": {
+        "ja": {
+          "intro": "\u305f\u304b\u3089\u3070\u3053 \u304c \u304d\u305f \u3051\u3069 \u3042\u304b\u306a\u3044\uff01 \u307e\u308f\u308a \u3092 \u3055\u304c\u3057\u3066 \u307f\u3066\uff01",
+          "winText": "\u304a\u305f\u304b\u3089\uff01 \u3061\u3063\u3061\u3083\u306a \u304b\u3044\u305e\u304f\u3055\u3093\u3001\u304b\u3057\u3053\u3044\u306d\uff01"
+        },
+        "cmn": {
+          "intro": "\u4e00\u4e2a\u5b9d\u7bb1\u51b2\u4e0a\u5cb8\u4e86\uff0c\u53ef\u662f\u6253\u4e0d\u5f00\uff01 \u5feb\u5728\u6d77\u6e7e\u9644\u8fd1\u627e\u627e\u770b\uff01",
+          "winText": "\u5b9d\u85cf\uff01 \u4f60\u771f\u662f\u6700\u806a\u660e\u7684\u5c0f\u6d77\u76d7\uff01"
+        },
+        "yue": {
+          "intro": "\u6709\u500b\u5bf6\u7bb1\u6c96\u5497\u4e0a\u5cb8\uff0c\u4f46\u4fc2\u958b\u5514\u5230\uff01 \u5feb\u5572\u55ba\u6d77\u7063\u9644\u8fd1\u6435\u5413\u5566\uff01",
+          "winText": "\u5bf6\u85cf\u5440\uff01 \u4f60\u4fc2\u6700\u53fb\u5605\u5c0f\u6d77\u76dc\u5440\uff01"
+        }
+      }
     }
   ],
   "musicbox": {
@@ -28456,6 +28856,66 @@
           "mushroom",
           "mountain_goat",
           "tulip"
+        ]
+      }
+    },
+    "row": {
+      "strips": [
+        "bg",
+        "mid",
+        "fg"
+      ],
+      "vehicle": "vehicle",
+      "objects": {
+        "sky": [
+          "seagull",
+          "cloud_fluffy",
+          "sun_rays",
+          "pelican"
+        ],
+        "mid": [
+          "dolphin",
+          "fish_orange",
+          "jellyfish",
+          "sea_turtle"
+        ],
+        "ground": [
+          "starfish",
+          "shell_pink",
+          "crab",
+          "seahorse",
+          "coral",
+          "anchor"
+        ]
+      }
+    },
+    "jingle": {
+      "strips": [
+        "bg",
+        "mid",
+        "fg"
+      ],
+      "vehicle": "vehicle",
+      "objects": {
+        "sky": [
+          "snowflake",
+          "snowflake_big",
+          "cardinal",
+          "cloud_snowy"
+        ],
+        "mid": [
+          "pine_tree",
+          "snowman",
+          "deer",
+          "cabin"
+        ],
+        "ground": [
+          "gift_red",
+          "gift_blue",
+          "holly",
+          "candy_cane",
+          "snow_bunny",
+          "mitten"
         ]
       }
     }
