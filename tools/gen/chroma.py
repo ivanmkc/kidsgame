@@ -47,17 +47,33 @@ def key_strip_magenta(img: Image.Image) -> Image.Image:
     return _despill_edges(sprite, bg_color)
 
 
+def edges_compatible(strip: Image.Image, col_w: int = 16) -> float:
+    """Return the mean per-pixel RGB diff between the first and last *col_w*
+    columns of a strip.  Low values (<20) mean the strip is already near-
+    seamless and only needs a narrow crossfade smoother."""
+    arr = np.asarray(strip).astype(np.float32)
+    left = arr[:, :col_w, :3].mean(axis=1)
+    right = arr[:, -col_w:, :3].mean(axis=1)
+    return float(np.abs(left - right).mean())
+
+
 def crossfade_loop(strip: Image.Image, final_w: int = 1280,
                    fade_w: int = 128) -> Image.Image:
     """Crossfade the last *fade_w* columns over the first to make a seamless
-    1280-wide loop from a wider (1408) source strip."""
+    1280-wide loop from a wider (1408) source strip.
+
+    If the strip edges are already compatible (low diff), use a narrow fade
+    (32px) to avoid ghosting dissimilar content into the join zone."""
     arr = np.asarray(strip).astype(np.float32)
-    start = arr[:, :fade_w]
-    end = arr[:, final_w:final_w + fade_w]
-    t = np.linspace(0, 1, fade_w).reshape(1, -1, 1)
+    # Adaptively narrow the fade if edges are already similar
+    edge_diff = edges_compatible(strip, col_w=16)
+    effective_fade = min(fade_w, 32) if edge_diff < 25 else fade_w
+    start = arr[:, :effective_fade]
+    end = arr[:, final_w:final_w + effective_fade]
+    t = np.linspace(0, 1, effective_fade).reshape(1, -1, 1)
     blended = end * (1 - t) + start * t
     result = np.copy(arr[:, :final_w])
-    result[:, :fade_w] = blended
+    result[:, :effective_fade] = blended
     return Image.fromarray(result.clip(0, 255).astype(np.uint8), strip.mode)
 
 
@@ -102,20 +118,43 @@ def key_out_magenta(img: Image.Image, out_size: int = 256) -> tuple[Image.Image,
 
 
 def _despill_edges(sprite: Image.Image, bg_color: np.ndarray) -> Image.Image:
-    """Kill residual key spill: anti-aliased object/backdrop boundary pixels
-    survive the absolute-distance key as darker magenta blends. Any pixel that
-    is magenta-HUED (R and B both well above G — legit pinks have G close to
-    B) and sits within 2px of transparency is spill, whatever its brightness."""
+    """Kill residual key spill on edge pixels in two passes:
+
+    Pass 1 (shift): Magenta-hued pixels near the transparency boundary that
+    still have meaningful content behind them get their RGB shifted toward
+    their nearest non-spill opaque neighbor. This preserves the content
+    (snow contours, grass edges) while removing the magenta tint.
+
+    Pass 2 (zero): Strongly-spilled pixels (very close to the bg color) are
+    fully zeroed — they're pure backdrop, not content.
+    """
     from PIL import ImageFilter
+    from scipy.ndimage import uniform_filter
+
     arr = np.asarray(sprite, np.int16).copy()
     r, g, b, a = arr[..., 0], arr[..., 1], arr[..., 2], arr[..., 3]
     hue = (np.minimum(r, b) > g + 50) & (np.minimum(r, b) > 60)
     near_bg = np.abs(arr[..., :3] - bg_color).sum(-1) < 160
     trans = Image.fromarray(((a < 128) * 255).astype(np.uint8), "L").filter(ImageFilter.MaxFilter(11))
     edge = np.asarray(trans) > 0
-    spill = (a > 0) & edge & (hue | near_bg)
-    arr[spill, 3] = 0
-    # zero RGB under transparency: alpha-naive viewers (and any straight
-    # convert('RGB')) would otherwise resurrect the keyed-out backdrop
+
+    # Pass 1: shift magenta-hued edge pixels toward neighbor color
+    mild_spill = (a > 0) & edge & hue & ~near_bg
+    if mild_spill.any():
+        # Build a neighbor-averaged color from non-spill opaque pixels
+        good = (a > 128) & ~hue & ~near_bg
+        rgb_f = arr[..., :3].astype(np.float32)
+        for c in range(3):
+            ch = rgb_f[..., c].copy()
+            ch[~good] = 0
+            blurred = uniform_filter(ch, size=7)
+            weight = uniform_filter(good.astype(np.float32), size=7)
+            safe = weight > 0.1
+            neighbor_color = np.where(safe, blurred / np.maximum(weight, 1e-3), ch)
+            arr[..., c] = np.where(mild_spill, neighbor_color.clip(0, 255), arr[..., c])
+
+    # Pass 2: zero strongly-spilled pixels (pure backdrop)
+    strong_spill = (a > 0) & edge & near_bg
+    arr[strong_spill, 3] = 0
     arr[arr[..., 3] == 0, :3] = 0
     return Image.fromarray(arr.astype(np.uint8), "RGBA")
