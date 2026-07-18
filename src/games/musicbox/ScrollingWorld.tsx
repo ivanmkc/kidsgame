@@ -1,33 +1,29 @@
 import React from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Image, StyleSheet, View } from 'react-native';
+import { MUSICBOX_IMAGES } from '../../assets/images';
 import { SceneDef } from './scenes';
 
-// Three parallax layers at different scroll rates. Each layer is a wide
-// gradient strip rendered as a CSS linear-gradient (no image assets needed
-// for the MVP placeholder — generated panoramic PNGs replace these later).
+// Three parallax layers at different scroll rates. Each layer is a
+// pre-generated panoramic PNG strip (1280x400) that tiles horizontally.
+// Two copies side by side give seamless scrolling.
+//
+// The bg (sky) is fully opaque and fills the entire stage. The mid
+// (mountains) and fg (meadow) strips have transparent tops that let the
+// sky show through. All three layers are tall enough that resizeMode
+// "cover" makes them fill their containers edge to edge.
 
 interface Props {
   scrollX: Animated.Value;
   scene: SceneDef;
 }
 
-const LAYER_WIDTH = 3000;
-
-const PALETTES: Record<string, { bg: string[]; mid: string[]; fg: string[] }> = {
-  twinkle: {
-    bg: ['#1B1464', '#2E2080', '#4A3CA0', '#6B5CC0', '#8B7CDF', '#7060C8', '#4A3CA0', '#2E2080'],
-    mid: ['#3B5998', '#4A7AB5', '#5B9BD5', '#6BB8E0', '#5B9BD5', '#4A7AB5'],
-    fg: ['#4CAF50', '#66BB6A', '#81C784', '#A5D6A7', '#81C784', '#66BB6A'],
-  },
-};
-
-function gradientStyle(colors: string[]): object {
-  const stops = colors.map((c, i) => `${c} ${(i / (colors.length - 1)) * 100}%`).join(', ');
-  return { backgroundImage: `linear-gradient(to right, ${stops})` };
-}
+const STRIP_W = 1280;
+const TALL = 900;
 
 export function ScrollingWorld({ scrollX, scene }: Props) {
-  const palette = PALETTES[scene.id] ?? PALETTES.twinkle;
+  const bgSrc = MUSICBOX_IMAGES[`${scene.id}/bg`];
+  const midSrc = MUSICBOX_IMAGES[`${scene.id}/mid`];
+  const fgSrc = MUSICBOX_IMAGES[`${scene.id}/fg`];
 
   const bgTranslate = Animated.multiply(scrollX, -0.2);
   const midTranslate = Animated.multiply(scrollX, -0.5);
@@ -35,30 +31,41 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
 
   return (
     <View style={styles.container} pointerEvents="none">
+      {/* Background sky: fills entire stage */}
       <Animated.View
         style={[
-          styles.layer,
-          styles.bgLayer,
-          gradientStyle(palette.bg) as object,
-          { width: LAYER_WIDTH * 2, transform: [{ translateX: bgTranslate }] },
+          styles.row,
+          { top: 0, zIndex: 0, width: STRIP_W * 2,
+            transform: [{ translateX: bgTranslate }] },
         ]}
-      />
+      >
+        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
+        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
+      </Animated.View>
+
+      {/* Midground mountains: bottom portion */}
       <Animated.View
         style={[
-          styles.layer,
-          styles.midLayer,
-          gradientStyle(palette.mid) as object,
-          { width: LAYER_WIDTH * 2, transform: [{ translateX: midTranslate }] },
+          styles.row,
+          { bottom: 0, zIndex: 1, width: STRIP_W * 2,
+            transform: [{ translateX: midTranslate }] },
         ]}
-      />
+      >
+        <Image source={midSrc} style={{ width: STRIP_W, height: 420 }} resizeMode="cover" />
+        <Image source={midSrc} style={{ width: STRIP_W, height: 420 }} resizeMode="cover" />
+      </Animated.View>
+
+      {/* Foreground meadow: bottom portion */}
       <Animated.View
         style={[
-          styles.layer,
-          styles.fgLayer,
-          gradientStyle(palette.fg) as object,
-          { width: LAYER_WIDTH * 2, transform: [{ translateX: fgTranslate }] },
+          styles.row,
+          { bottom: 0, zIndex: 2, width: STRIP_W * 2,
+            transform: [{ translateX: fgTranslate }] },
         ]}
-      />
+      >
+        <Image source={fgSrc} style={{ width: STRIP_W, height: 380 }} resizeMode="cover" />
+        <Image source={fgSrc} style={{ width: STRIP_W, height: 380 }} resizeMode="cover" />
+      </Animated.View>
     </View>
   );
 }
@@ -66,31 +73,11 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
 const styles = StyleSheet.create({
   container: {
     ...(StyleSheet.absoluteFill as object),
+    overflow: 'hidden',
   },
-  layer: {
+  row: {
     position: 'absolute',
     left: 0,
-    height: '100%' as unknown as number,
-  },
-  bgLayer: {
-    top: 0,
-    height: '100%' as unknown as number,
-    zIndex: 0,
-  },
-  midLayer: {
-    top: '30%' as unknown as number,
-    height: '45%' as unknown as number,
-    zIndex: 1,
-    borderTopLeftRadius: 80,
-    borderTopRightRadius: 120,
-    opacity: 0.85,
-  },
-  fgLayer: {
-    bottom: 0,
-    top: undefined as unknown as number,
-    height: '35%' as unknown as number,
-    zIndex: 2,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 60,
+    flexDirection: 'row',
   },
 });
