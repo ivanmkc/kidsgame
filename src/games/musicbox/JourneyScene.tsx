@@ -13,7 +13,7 @@ interface Props {
 }
 
 const SCROLL_PER_TAP = 48;
-const MAX_SPAWNS = 18;
+const MAX_SPAWNS = 20;
 
 export function JourneyScene({ scene }: Props) {
   const song = songById(scene.songId);
@@ -23,33 +23,47 @@ export function JourneyScene({ scene }: Props) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const scrollTotal = useRef(0);
   const vehicleBounce = useRef(new Animated.Value(0)).current;
+  const vehicleIdle = useRef(new Animated.Value(0)).current;
   const stageSize = useRef({ w: 1, h: 1 });
   const holdDown = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     setState(startState(song));
     setSpawns([]);
     scrollX.setValue(0);
     scrollTotal.current = 0;
+
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(vehicleIdle, { toValue: 1, duration: 2400, useNativeDriver: true }),
+        Animated.timing(vehicleIdle, { toValue: 0, duration: 2400, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
   }, [scene.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doTap = useCallback((x: number, y: number, fingerCount: number) => {
     primeMusic();
     const yFrac = y / Math.max(1, stageSize.current.h);
     const offset = octaveOffset(yFrac);
-    const midi = noteForTap(state);
+    const s = stateRef.current;
+    const midi = noteForTap(s);
     const offsets = harmonyOffsets(fingerCount);
     for (const h of offsets) {
       playNote(midi + offset + h, fingerCount > 1 ? 0.7 : 1);
     }
-    const big = beatsForTap(state) > 1;
-    setState(advance(state));
+    const big = beatsForTap(s) > 1;
+    setState(advance(s));
 
     const scrollAmount = holdDown.current ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;
     scrollTotal.current += scrollAmount;
-    Animated.timing(scrollX, {
+    Animated.spring(scrollX, {
       toValue: scrollTotal.current,
-      duration: 180,
+      friction: 14,
+      tension: 50,
       useNativeDriver: true,
     }).start();
 
@@ -64,11 +78,19 @@ export function JourneyScene({ scene }: Props) {
     const pool = scene.objects[zone];
     const spriteKey = pool[nextId.current % pool.length];
     const id = nextId.current++;
+    const scrollAtSpawn = scrollTotal.current;
     setSpawns((prev) => [
       ...prev.slice(-(MAX_SPAWNS - 1)),
-      { id, x, y, spriteKey, sceneId: scene.id, big, zone },
+      { id, x, y, scrollAtSpawn, spriteKey, sceneId: scene.id, big, zone },
     ]);
-  }, [state, scene, scrollX, vehicleBounce]);
+  }, [scene, scrollX, vehicleBounce]);
+
+  const onTapSpawn = useCallback((entry: SpawnEntry) => {
+    primeMusic();
+    const s = stateRef.current;
+    const midi = noteForTap(s);
+    playNote(midi, 0.5);
+  }, []);
 
   const onTouchStart = useCallback((e: GestureResponderEvent) => {
     const touch = e.nativeEvent;
@@ -82,16 +104,28 @@ export function JourneyScene({ scene }: Props) {
   const onPressOut = useCallback(() => { holdDown.current = false; }, []);
 
   const vehicleTranslateY = useMemo(() =>
-    vehicleBounce.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [0, -18, 0],
-    }), [vehicleBounce]);
+    Animated.add(
+      vehicleBounce.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, -18, 0],
+      }),
+      vehicleIdle.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, -6, 0],
+      }),
+    ), [vehicleBounce, vehicleIdle]);
 
   const vehicleScale = useMemo(() =>
     vehicleBounce.interpolate({
       inputRange: [0, 0.5, 1],
       outputRange: [1, 1.08, 1],
     }), [vehicleBounce]);
+
+  const vehicleRotate = useMemo(() =>
+    vehicleIdle.interpolate({
+      inputRange: [0, 0.25, 0.5, 0.75, 1],
+      outputRange: ['-2deg', '0deg', '2deg', '0deg', '-2deg'],
+    }), [vehicleIdle]);
 
   return (
     <View
@@ -115,10 +149,11 @@ export function JourneyScene({ scene }: Props) {
         scene={scene}
         translateY={vehicleTranslateY}
         scale={vehicleScale}
+        rotate={vehicleRotate}
       />
 
       {spawns.map((s) => (
-        <SpawnedObject key={s.id} entry={s} />
+        <SpawnedObject key={s.id} entry={s} scrollX={scrollX} onTapSpawn={onTapSpawn} />
       ))}
     </View>
   );
@@ -128,8 +163,8 @@ const styles = StyleSheet.create({
   stage: {
     flex: 1,
     overflow: 'hidden',
-    borderRadius: 20,
-    margin: 8,
+    borderRadius: 12,
+    margin: 4,
     backgroundColor: '#1B1440',
   },
 });
