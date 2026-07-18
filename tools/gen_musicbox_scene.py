@@ -24,7 +24,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from gen.chroma import crossfade_loop, key_out_magenta, key_strip_magenta  # noqa: E402
+from gen.chroma import crossfade_loop, edges_compatible, key_out_magenta, key_strip_magenta  # noqa: E402
 from gen.judge import ask_yes_no, strict_min  # noqa: E402
 from gen.nbp import generate  # noqa: E402
 from PIL import Image  # noqa: E402
@@ -272,20 +272,28 @@ def _gen_strip(prompt: str, name: str, out_dir: Path, max_retries: int = 8,
 
     for attempt in range(max_retries):
         print(f"  gen {name} (attempt {attempt + 1})...")
-        full_prompt = f"{prompt}. The image must tile seamlessly when repeated horizontally — the left edge must match the right edge exactly in color and content."
+        full_prompt = (
+            f"{prompt}. The image must tile seamlessly when repeated "
+            f"horizontally — the left edge must match the right edge exactly "
+            f"in color and content. IMPORTANT: no large distinct objects or "
+            f"features within 150 pixels of either the left or right edge; "
+            f"edges should be simple gradients or repeating textures that "
+            f"connect smoothly."
+        )
         img = generate(full_prompt, size=(gen_w, 400))
 
         if magenta_key:
-            # Verify NBP actually rendered a magenta sky region before keying.
-            # The top rows must be close to #FF00FF; if the model ignored the
-            # magenta instruction the key_strip_magenta call would produce a
-            # fully opaque strip (broken transparency).
             top_rgb = np.array(img)[:5, :, :].mean(axis=(0, 1))
             is_magenta = top_rgb[0] > 180 and top_rgb[2] > 180 and top_rgb[1] < 100
             if not is_magenta:
                 print(f"    top rows not magenta (R={top_rgb[0]:.0f} G={top_rgb[1]:.0f} B={top_rgb[2]:.0f}) — retrying")
                 continue
             img = key_strip_magenta(img)
+            # Check edge compatibility before crossfading
+            edge_diff = edges_compatible(img, col_w=16)
+            if edge_diff > 40:
+                print(f"    edge diff {edge_diff:.1f} > 40 — strip edges too dissimilar, retrying")
+                continue
             img = crossfade_loop(img, final_w=1280, fade_w=128)
 
         if not _verify_tileable(img):
