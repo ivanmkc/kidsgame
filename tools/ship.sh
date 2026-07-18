@@ -6,9 +6,7 @@ set -euo pipefail
 
 # A running generator mutates the manifest mid-build (merge-on-save) —
 # shipping during generation raced once and let failing tests through.
-# Story content rules (hotspot nav on every decision node, no bracket text
-# in narration) — built-manifest verification, hard gate.
-python3 tools/gen/story_lint.py --manifest || { echo "REFUSING TO SHIP: story manifest verify failed."; exit 1; }
+python3 tools/verify_story_audio.py || { echo "REFUSING TO SHIP: story audio coverage/duration failed."; exit 1; }
 
 if pgrep -f "generate_assets.py" > /dev/null; then
   echo "REFUSING TO SHIP: generation loop is running (manifest would race)."
@@ -32,9 +30,23 @@ m['hidden'] = [h for h in m['hidden'] if h['id'] in ledger and has_files(h)]
 for coll in ('diff', 'hidden'):
     for e in m[coll]:
         e.pop('flagged', None)  # nothing unverified ships, so no badges
+# Stories: hotspot nav is mandatory for post-retrofit books. Books still
+# missing 'hot' on any decision choice are held back from the deploy (same
+# philosophy as the ledger filter) instead of blocking the whole ship.
+LEGACY_TILE_OK = {'luna', 'pip', 'whisper', 'scareschool'}
+def fully_wired(st):
+    return all('hot' in c for n in st['nodes'].values() for c in n.get('choices', []))
+held = [s['id'] for s in m.get('stories', []) if s['id'] not in LEGACY_TILE_OK and not fully_wired(s)]
+m['stories'] = [s for s in m.get('stories', []) if s['id'] in LEGACY_TILE_OK or fully_wired(s)]
+if held:
+    print(f"ship manifest: holding back {len(held)} un-wired stories: {' '.join(sorted(held))}")
 json.dump(m, open('src/assets/manifest.json', 'w'), indent=2)
-print(f"ship manifest: {before} -> {len(m['diff'])} diff + {len(m['hidden'])} hidden (ledger-verified only)")
+print(f"ship manifest: {before} -> {len(m['diff'])} diff + {len(m['hidden'])} hidden (ledger-verified only), {len(m['stories'])} stories")
 PYEOF
+
+# Story content rules (hotspot nav on every decision node, no bracket text
+# in narration) verified on the SHIP manifest — hard gate.
+python3 tools/gen/story_lint.py --manifest || { echo "REFUSING TO SHIP: story manifest verify failed."; exit 1; }
 
 python3 tools/check_pool_pixels.py   # invisible-difference gate (hard fail)
 python3 tools/tighten_hitboxes.py > /dev/null

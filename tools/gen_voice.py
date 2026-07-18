@@ -161,6 +161,11 @@ TTS_OVERRIDES = {
     "Hide behind hay bale": "Hide behind the hay bale!",
     "Spy from hay bale": "Spy from behind the hay bale!",
     "Shout through the megaphone": "Give a big shout through the megaphone!",
+    "Play the calliope": "Play a tune on the calliope organ!",
+    "Scout from the mesa ledge": "Scout around from the mesa ledge!",
+    "Roar at full blast": "Give the biggest, loudest roar you can!",
+    "Strobe-pulse reveal": "Do the strobe pulse reveal!",
+    "Steady-beam illuminate": "Shine the steady beam to light it up!",
 }
 
 
