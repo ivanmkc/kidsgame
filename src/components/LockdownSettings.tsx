@@ -37,6 +37,7 @@ const GAME_SECTION: { title: string; games: GameEntry[] } [] = [
       { id: 'rules', label: 'Rule Time!' },
       { id: 'sticker', label: 'Sticker Party' },
       { id: 'story', label: 'Story Path' },
+      { id: 'carmode', label: 'Car Mode' },
     ],
   },
   {

@@ -64,6 +64,7 @@ export type UIKey =
   | 'card.sums.title'     | 'card.sums.blurb'
   | 'card.musicbox.title' | 'card.musicbox.blurb'
   | 'card.bingo.title'    | 'card.bingo.blurb'
+  | 'card.carmode.title'  | 'card.carmode.blurb'
   | 'card.escape.title'   | 'card.escape.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
@@ -129,6 +130,8 @@ export type UIKey =
   | 'shell.bingo.title'
   | 'shell.bingo.sub'
   | 'shell.bingo.subPhonics'
+  | 'shell.carmode.title'
+  | 'shell.carmode.sub'
   | 'shell.escape.title'
   | 'shell.escape.subPicker'
   | 'shell.escape.subPlay'
@@ -295,6 +298,8 @@ const EN: Table = {
   'card.musicbox.blurb': 'Tap along and play a song!',
   'card.bingo.title': 'Picture Bingo',
   'card.bingo.blurb': 'Listen for the call and find it on your board!',
+  'card.carmode.title': 'Car Mode',
+  'card.carmode.blurb': 'Audio games for the car — no looking needed!',
   'card.escape.title': 'Little Escapes',
   'card.escape.blurb': 'Find, unlock, and save the day!',
 
@@ -361,6 +366,8 @@ const EN: Table = {
   'shell.bingo.title': 'Picture Bingo',
   'shell.bingo.sub': 'Listen to the call and tap the picture!',
   'shell.bingo.subPhonics': 'Which picture starts with that sound?',
+  'shell.carmode.title': 'Car Mode',
+  'shell.carmode.sub': 'Listen, answer, and tap!',
   'shell.escape.title': 'Little Escapes',
   'shell.escape.subPicker': 'Pick a room to explore!',
   'shell.escape.subPlay': 'Search the picture — find things and use them!',
@@ -524,6 +531,8 @@ const JA: Table = {
   'card.musicbox.blurb': 'タップして うたを ひこう！',
   'card.bingo.title': 'えビンゴ',
   'card.bingo.blurb': 'よばれた えを みつけよう！',
+  'card.carmode.title': 'くるまモード',
+  'card.carmode.blurb': 'みみだけで あそぶ おとゲーム！',
   'card.escape.title': 'ちいさな だっしゅつ',
   'card.escape.blurb': 'さがして あけて たすけよう！',
 
@@ -590,6 +599,8 @@ const JA: Table = {
   'shell.bingo.title': 'えビンゴ',
   'shell.bingo.sub': 'よばれた えを タップして みつけよう！',
   'shell.bingo.subPhonics': 'そのおとで はじまる えは どれ？',
+  'shell.carmode.title': 'くるまモード',
+  'shell.carmode.sub': 'きいて こたえて タップ！',
   'shell.escape.title': 'ちいさな だっしゅつ',
   'shell.escape.subPicker': 'おへやを えらんでね！',
   'shell.escape.subPlay': 'えを さがして みつけたものを つかおう！',
@@ -752,6 +763,8 @@ const CMN: Table = {
   'card.musicbox.blurb': '点一点，弹一首歌！',
   'card.bingo.title': '图片宾果',
   'card.bingo.blurb': '听提示，找出板上的图片！',
+  'card.carmode.title': '车载模式',
+  'card.carmode.blurb': '不用看屏幕的声音游戏！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '找一找，打开它，救出小伙伴！',
 
@@ -818,6 +831,8 @@ const CMN: Table = {
   'shell.bingo.title': '图片宾果',
   'shell.bingo.sub': '听提示，点对应的图片！',
   'shell.bingo.subPhonics': '哪张图是这个音开头的？',
+  'shell.carmode.title': '车载模式',
+  'shell.carmode.sub': '听，回答，点一点！',
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '选一个房间吧！',
   'shell.escape.subPlay': '找找图里的东西，用它们解开谜题！',
@@ -980,6 +995,8 @@ const YUE: Table = {
   'card.musicbox.blurb': '撳一撳，彈一首歌！',
   'card.bingo.title': '圖片BINGO',
   'card.bingo.blurb': '聽提示，搵出板上嘅圖！',
+  'card.carmode.title': '車載模式',
+  'card.carmode.blurb': '唔使睇屏幕嘅聲音遊戲！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
 
@@ -1046,6 +1063,8 @@ const YUE: Table = {
   'shell.bingo.title': '圖片BINGO',
   'shell.bingo.sub': '聽提示，撳對應嘅圖！',
   'shell.bingo.subPhonics': '邊張圖係呢個音起頭？',
+  'shell.carmode.title': '車載模式',
+  'shell.carmode.sub': '聽，答，撳一撳！',
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '揀一間房啦！',
   'shell.escape.subPlay': '喺圖入面搵嘢，用佢哋解謎！',
