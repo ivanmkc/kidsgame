@@ -26,11 +26,7 @@ describe('escape logic', () => {
     s = r.state;
     expect(s.inventory).toEqual(['key']);
 
-    // Lock without selecting the key: gentle refusal, state unchanged.
-    r = applyTap(ROOM, s, 'chest');
-    expect(r.effect.kind).toBe('locked');
-    expect(r.state.used).not.toContain('chest');
-
+    // Forgiveness rule: holding the key is enough — no selection required.
     s = selectItem(s, 'key');
     r = applyTap(ROOM, s, 'chest');
     expect(r.effect).toMatchObject({ kind: 'unlocked', item: 'bone' });
@@ -38,10 +34,17 @@ describe('escape logic', () => {
     expect(s.inventory).toEqual(['bone']); // key consumed, bone gained
     expect(s.selected).toBeNull();
 
-    s = selectItem(s, 'bone');
+    // Win via forgiveness: bone held but NOT selected still frees the puppy.
     r = applyTap(ROOM, s, 'cage');
     expect(r.effect.kind).toBe('win');
     expect(r.state.done).toBe(true);
+  });
+
+  it('locks refuse only when the needed item is not held at all', () => {
+    const s = startState();
+    const r = applyTap(ROOM, s, 'chest');
+    expect(r.effect.kind).toBe('locked');
+    expect(r.state.used).not.toContain('chest');
   });
 
   it('empty search spots are harmless flavor and stay tappable', () => {
