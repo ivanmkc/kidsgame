@@ -27804,5 +27804,314 @@
       "sit",
       "jump"
     ]
-  }
+  },
+  "escape": [
+    {
+      "id": "toyroom",
+      "name": "The Sleepy Puppy",
+      "level": "easy",
+      "image": "escape/toyroom.png",
+      "intro": "Oh no! The puppy is stuck in the toy pen and the gate will not budge. Look around the toy room and help him out!",
+      "winText": "Hooray! The puppy is free and SO happy!",
+      "items": [
+        {
+          "id": "key",
+          "label": "A shiny key!",
+          "emoji": "\ud83d\udddd\ufe0f"
+        },
+        {
+          "id": "bone",
+          "label": "A yummy bone!",
+          "emoji": "\ud83e\uddb4"
+        }
+      ],
+      "hotspots": [
+        {
+          "id": "pillow",
+          "box": {
+            "x": 0,
+            "y": 217,
+            "w": 249,
+            "h": 346
+          },
+          "kind": "search",
+          "gives": "key",
+          "sayFound": "A shiny key was hiding under the pillow!"
+        },
+        {
+          "id": "teddy",
+          "box": {
+            "x": 796,
+            "y": 119,
+            "w": 190,
+            "h": 244
+          },
+          "kind": "search",
+          "saySearch": "The teddy bear giggles. Nothing under here!"
+        },
+        {
+          "id": "chest",
+          "box": {
+            "x": 328,
+            "y": 155,
+            "w": 276,
+            "h": 250
+          },
+          "kind": "lock",
+          "gives": "bone",
+          "needs": "key",
+          "sayFound": "The chest popped open \u2014 a yummy bone!",
+          "sayLocked": "The toy chest is locked tight. What could open it?"
+        },
+        {
+          "id": "pen",
+          "box": {
+            "x": 1104,
+            "y": 336,
+            "w": 167,
+            "h": 256
+          },
+          "kind": "win",
+          "needs": "bone",
+          "sayFound": "The puppy wiggles out \u2014 you saved him!",
+          "sayLocked": "The puppy is hungry. What does a puppy love best?"
+        }
+      ]
+    },
+    {
+      "id": "dragoncave",
+      "name": "Dragon's Breakfast",
+      "level": "easy",
+      "image": "escape/dragoncave.png",
+      "intro": "The baby dragon is too hungry to fly! Find something yummy and cook him breakfast.",
+      "winText": "Yum! The baby dragon is full and zooming again!",
+      "items": [
+        {
+          "id": "egg",
+          "label": "A big egg!",
+          "emoji": "\ud83e\udd5a"
+        },
+        {
+          "id": "pancake",
+          "label": "A golden pancake!",
+          "emoji": "\ud83e\udd5e"
+        }
+      ],
+      "hotspots": [
+        {
+          "id": "haystack",
+          "box": {
+            "x": 0,
+            "y": 272,
+            "w": 292,
+            "h": 340
+          },
+          "kind": "search",
+          "gives": "egg",
+          "sayFound": "An egg was hiding in the hay!"
+        },
+        {
+          "id": "crystal",
+          "box": {
+            "x": 308,
+            "y": 272,
+            "w": 141,
+            "h": 135
+          },
+          "kind": "search",
+          "saySearch": "The crystal ball shows a yummy breakfast!"
+        },
+        {
+          "id": "stove",
+          "box": {
+            "x": 790,
+            "y": 233,
+            "w": 241,
+            "h": 300
+          },
+          "kind": "lock",
+          "gives": "pancake",
+          "needs": "egg",
+          "sayFound": "Sizzle sizzle \u2014 a golden pancake!",
+          "sayLocked": "The stove is ready, but what could we cook?"
+        },
+        {
+          "id": "dragon",
+          "box": {
+            "x": 1047,
+            "y": 322,
+            "w": 178,
+            "h": 200
+          },
+          "kind": "win",
+          "needs": "pancake",
+          "sayFound": "The dragon gobbles it up and puffs a happy little smoke ring!",
+          "sayLocked": "The baby dragon's tummy is rumbling\u2026"
+        }
+      ]
+    },
+    {
+      "id": "rocketpad",
+      "name": "Bunny Blast-Off",
+      "level": "medium",
+      "image": "escape/rocketpad.png",
+      "intro": "The bunny's rocket will not start! Find what it needs and help her blast off to the moon.",
+      "winText": "Whoosh! The bunny zooms to the moon \u2014 thanks to you!",
+      "items": [
+        {
+          "id": "wrench",
+          "label": "A trusty wrench!",
+          "emoji": "\ud83d\udd27"
+        },
+        {
+          "id": "battery",
+          "label": "A super battery!",
+          "emoji": "\ud83d\udd0b"
+        },
+        {
+          "id": "star",
+          "label": "A glowing star!",
+          "emoji": "\u2b50"
+        }
+      ],
+      "hotspots": [
+        {
+          "id": "toolbox",
+          "box": {
+            "x": 9,
+            "y": 391,
+            "w": 392,
+            "h": 295
+          },
+          "kind": "search",
+          "gives": "wrench",
+          "sayFound": "A trusty wrench!"
+        },
+        {
+          "id": "poster",
+          "box": {
+            "x": 264,
+            "y": 194,
+            "w": 171,
+            "h": 171
+          },
+          "kind": "search",
+          "saySearch": "That is where the bunny wants to go!"
+        },
+        {
+          "id": "rocket",
+          "box": {
+            "x": 499,
+            "y": 141,
+            "w": 282,
+            "h": 466
+          },
+          "kind": "lock",
+          "gives": "battery",
+          "needs": "wrench",
+          "sayFound": "The panel opened \u2014 a super battery!",
+          "sayLocked": "The rocket panel is stuck. We need a tool!"
+        },
+        {
+          "id": "crate",
+          "box": {
+            "x": 897,
+            "y": 249,
+            "w": 112,
+            "h": 225
+          },
+          "kind": "lock",
+          "gives": "star",
+          "needs": "battery",
+          "sayFound": "Power on! A glowing star popped out!",
+          "sayLocked": "The power slot is empty\u2026"
+        },
+        {
+          "id": "button",
+          "box": {
+            "x": 1077,
+            "y": 380,
+            "w": 173,
+            "h": 340
+          },
+          "kind": "win",
+          "needs": "star",
+          "sayFound": "Three, two, one \u2014 BLAST OFF!",
+          "sayLocked": "The launch button needs star power!"
+        }
+      ]
+    },
+    {
+      "id": "piratecove",
+      "name": "The Pelican Trade",
+      "level": "medium",
+      "image": "escape/piratecove.png",
+      "intro": "A treasure chest washed up on the beach, but it will not open! Look around the cove for a way in.",
+      "winText": "Treasure! You are the cleverest little pirate!",
+      "items": [
+        {
+          "id": "fish",
+          "label": "A wiggly fish!",
+          "emoji": "\ud83d\udc1f"
+        },
+        {
+          "id": "shell",
+          "label": "A shiny shell!",
+          "emoji": "\ud83d\udc1a"
+        }
+      ],
+      "hotspots": [
+        {
+          "id": "net",
+          "box": {
+            "x": 50,
+            "y": 340,
+            "w": 201,
+            "h": 251
+          },
+          "kind": "search",
+          "gives": "fish",
+          "sayFound": "A wiggly fish!"
+        },
+        {
+          "id": "umbrella",
+          "box": {
+            "x": 277,
+            "y": 205,
+            "w": 321,
+            "h": 306
+          },
+          "kind": "search",
+          "saySearch": "Just a shady spot. Nothing hidden here!"
+        },
+        {
+          "id": "pelican",
+          "box": {
+            "x": 733,
+            "y": 258,
+            "w": 189,
+            "h": 196
+          },
+          "kind": "lock",
+          "gives": "shell",
+          "needs": "fish",
+          "sayFound": "The pelican trades you a shiny shell!",
+          "sayLocked": "The pelican wants a snack first\u2026"
+        },
+        {
+          "id": "chest",
+          "box": {
+            "x": 990,
+            "y": 371,
+            "w": 267,
+            "h": 222
+          },
+          "kind": "win",
+          "needs": "shell",
+          "sayFound": "The chest bursts open \u2014 treasure for everyone!",
+          "sayLocked": "The treasure chest has a shell-shaped slot!"
+        }
+      ]
+    }
+  ]
 }
