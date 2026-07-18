@@ -15,6 +15,8 @@ export const SPOKEN_WIN_KEYS = [
   'win.letters', 'win.lettersKana', 'win.numbers',
   'win.sounds', 'win.soundsWords', 'win.rhyme',
   'win.count', 'win.compare', 'win.sums', 'win.bingo', 'win.musicbox',
+  'win.highlow', 'win.bells', 'win.echobeat', 'win.steadybeat',
+  'win.fastslow', 'win.samediff',
 ] as const satisfies readonly UIKey[];
 
 /** Speak `line` exactly once when `won` flips true. */

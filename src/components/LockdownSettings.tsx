@@ -58,6 +58,17 @@ const GAME_SECTION: { title: string; games: GameEntry[] } [] = [
       { id: 'sums', label: 'Little Sums' },
     ],
   },
+  {
+    title: 'Music Games',
+    games: [
+      { id: 'highlow', label: 'High or Low' },
+      { id: 'bells', label: 'Melody Bells' },
+      { id: 'echobeat', label: 'Echo Beat' },
+      { id: 'steadybeat', label: 'Steady Beat' },
+      { id: 'fastslow', label: 'Fast or Slow' },
+      { id: 'samediff', label: 'Same or Different' },
+    ],
+  },
 ];
 
 export function LockdownSettings({

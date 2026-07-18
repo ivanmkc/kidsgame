@@ -14,6 +14,12 @@ import { speechLines as spell } from '../spell/logic';
 import { speechLines as bingo } from '../bingo/logic';
 import { speechLines as musicbox } from '../musicbox/logic';
 import { speechLines as carmode } from '../carmode/logic';
+import { speechLines as highlow } from '../highlow/logic';
+import { speechLines as bells } from '../bells/logic';
+import { speechLines as echobeat } from '../echobeat/logic';
+import { speechLines as steadybeat } from '../steadybeat/logic';
+import { speechLines as fastslow } from '../fastslow/logic';
+import { speechLines as samediff } from '../samediff/logic';
 import { speechLines as winlines } from '../winlines';
 
 describe('speech line dump', () => {
@@ -23,7 +29,9 @@ describe('speech line dump', () => {
     const all = [...new Set([
       ...numberLines, ...HAN_NUMERALS,
       ...letters(), ...numbers(), ...sounds(), ...rhyme(),
-      ...count(), ...compare(), ...sums(), ...spell(), ...bingo(), ...musicbox(), ...carmode(), ...winlines(),
+      ...count(), ...compare(), ...sums(), ...spell(), ...bingo(), ...musicbox(), ...carmode(),
+      ...highlow(), ...bells(), ...echobeat(), ...steadybeat(), ...fastslow(), ...samediff(),
+      ...winlines(),
     ])].sort();
     expect(all.length).toBeGreaterThan(100);
     if (process.env.KGB_DUMP === '1') {

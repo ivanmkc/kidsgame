@@ -43,6 +43,12 @@ import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
 import { BingoGame } from './src/games/bingo/BingoGame';
 import { CarModeGame } from './src/games/carmode/CarModeGame';
 import { EscapeGame } from './src/games/escape/EscapeGame';
+import { HighLowGame } from './src/games/highlow/HighLowGame';
+import { BellsGame } from './src/games/bells/BellsGame';
+import { EchoBeatGame } from './src/games/echobeat/EchoBeatGame';
+import { SteadyBeatGame } from './src/games/steadybeat/SteadyBeatGame';
+import { FastSlowGame } from './src/games/fastslow/FastSlowGame';
+import { SameDiffGame } from './src/games/samediff/SameDiffGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
 import { DiffScene, baseImage, manifest } from './src/manifest';
@@ -129,7 +135,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
@@ -223,6 +229,12 @@ export default function App() {
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'rules' && <RulesGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'highlow' && <HighLowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'bells' && <BellsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'echobeat' && <EchoBeatGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'steadybeat' && <SteadyBeatGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'fastslow' && <FastSlowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'samediff' && <SameDiffGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'puzzle' && (
         <PuzzleGame
           onHome={goHome}
@@ -247,7 +259,8 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'carmode';
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'carmode'
+  | 'highlow' | 'bells' | 'echobeat' | 'steadybeat' | 'fastslow' | 'samediff';
 interface CardDef { route: string; color: string; key: CardKey; preview: string; beta?: boolean }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
@@ -281,6 +294,14 @@ const GAME_CARDS: CardDef[] = [
   // round engine is being reused by the music training games).
   // { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
 ];
+const MUSIC_CARDS: CardDef[] = [
+  { route: 'highlow', color: '#5DA9E8', key: 'highlow', preview: 'music' },
+  { route: 'bells', color: '#FFC24B', key: 'bells', preview: 'music' },
+  { route: 'echobeat', color: '#E8874F', key: 'echobeat', preview: 'music' },
+  { route: 'steadybeat', color: '#9B7EDE', key: 'steadybeat', preview: 'music' },
+  { route: 'fastslow', color: '#2FB8AC', key: 'fastslow', preview: 'music' },
+  { route: 'samediff', color: '#E8564F', key: 'samediff', preview: 'music' },
+];
 
 function Menu({
   filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer, lang, onCycleLang, lockdown,
@@ -300,6 +321,7 @@ function Menu({
   const visGames = visibleCards(GAME_CARDS, lockdown.state.hiddenGames);
   const visWords = visibleCards(WORD_CARDS, lockdown.state.hiddenGames);
   const visNumbers = visibleCards(NUMBER_CARDS, lockdown.state.hiddenGames);
+  const visMusic = visibleCards(MUSIC_CARDS, lockdown.state.hiddenGames);
   const toggleMute = () => {
     const m = !muted;
     setMuted(m);
@@ -326,6 +348,7 @@ function Menu({
       return src ? <Image source={src} style={styles.preview} /> : <EscapePreview />;
     }
     if (key === 'carmode') return <CarModePreview />;
+    if (key === 'music') return <MusicPreview />;
 
     const scene =
       key === 'diff'
@@ -422,6 +445,16 @@ function Menu({
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {visNumbers.map((g, i) => (
             <Reveal key={g.route} delay={180 + i * 80}>
+              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+            </Reveal>
+          ))}
+        </View>
+        </>)}
+        {visMusic.length > 0 && (<>
+        <Reveal delay={230}><Text style={styles.sectionHead}>{t(lang, 'menu.music' as const)}</Text></Reveal>
+        <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
+          {visMusic.map((g, i) => (
+            <Reveal key={g.route} delay={190 + i * 80}>
               <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
             </Reveal>
           ))}
@@ -649,6 +682,19 @@ function CarModePreview() {
       <Text style={{ fontSize: 26 }}>🎵</Text>
       <Text style={{ fontSize: 34 }}>🤔</Text>
       <Text style={{ fontSize: 30 }}>👆</Text>
+    </View>
+  );
+}
+
+// Music Games preview: notes and instruments
+function MusicPreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(93,169,232,0.10)' }]}>
+      <Text style={{ fontSize: 30 }}>🎵</Text>
+      <Text style={{ fontSize: 34 }}>🔔</Text>
+      <Text style={{ fontSize: 30 }}>🥁</Text>
+      <Text style={{ fontSize: 34 }}>💓</Text>
+      <Text style={{ fontSize: 30 }}>🎶</Text>
     </View>
   );
 }
