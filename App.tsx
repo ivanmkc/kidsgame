@@ -41,6 +41,7 @@ import { StickerGame } from './src/games/sticker/StickerGame';
 import { StoryGame } from './src/games/story/StoryGame';
 import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
 import { BingoGame } from './src/games/bingo/BingoGame';
+import { CarModeGame } from './src/games/carmode/CarModeGame';
 import { EscapeGame } from './src/games/escape/EscapeGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
@@ -128,7 +129,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
@@ -216,6 +217,7 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'carmode' && <CarModeGame onHome={goHome} lang={lang} />}
       {screen === 'bingo' && <BingoGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
@@ -245,7 +247,7 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape';
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'carmode';
 interface CardDef { route: string; color: string; key: CardKey; preview: string }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
@@ -273,6 +275,7 @@ const GAME_CARDS: CardDef[] = [
   { route: 'bingo', color: '#D66FA8', key: 'bingo', preview: 'bingo' },
   { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
   { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape' },
+  { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
 ];
 
 function Menu({
@@ -313,6 +316,7 @@ function Menu({
     if (key === 'bingo') return <BingoPreview />;
     if (key === 'musicbox') return <MusicBoxPreview />;
     if (key === 'escape') return <EscapePreview />;
+    if (key === 'carmode') return <CarModePreview />;
 
     const scene =
       key === 'diff'
@@ -623,6 +627,19 @@ function EscapePreview() {
       <Text style={{ fontSize: 26, color: colors.inkSoft }}>➜</Text>
       <Text style={{ fontSize: 34 }}>🔒</Text>
       <Text style={{ fontSize: 34 }}>🐶</Text>
+    </View>
+  );
+}
+
+// Car Mode preview: audio waves and headphones, eyes-free vibe
+function CarModePreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(232,162,79,0.12)' }]}>
+      <Text style={{ fontSize: 30 }}>🚗</Text>
+      <Text style={{ fontSize: 34 }}>👂</Text>
+      <Text style={{ fontSize: 26 }}>🎵</Text>
+      <Text style={{ fontSize: 34 }}>🤔</Text>
+      <Text style={{ fontSize: 30 }}>👆</Text>
     </View>
   );
 }
