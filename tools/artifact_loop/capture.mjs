@@ -150,18 +150,59 @@ async function doInteraction(page, interact) {
       await page.waitForTimeout(step.wait || 900);
     }
     await page.waitForTimeout(600);
-  } else if (interact.kind === 'open-lockdown') {
-    // Long-press the gear icon in the menu to open lockdown settings
-    // The gear is typically in the top corner — try tapping the settings trigger
+  } else if (interact.kind === 'story-choice') {
+    // Click a story choice button to navigate to a mid-node
+    for (const choice of interact.choices) {
+      try {
+        const btn = page.getByTestId(`story-choice-${choice}`);
+        await btn.waitFor({ timeout: 4000 });
+        await btn.click();
+        await page.waitForTimeout(1500);
+      } catch {
+        console.log(`  story choice ${choice} not found, skipping`);
+      }
+    }
+    await page.waitForTimeout(800);
+  } else if (interact.kind === 'story-scare') {
+    // Navigate to a node then tap the scare spot
+    for (const choice of (interact.choices || [])) {
+      try {
+        const btn = page.getByTestId(`story-choice-${choice}`);
+        await btn.waitFor({ timeout: 4000 });
+        await btn.click();
+        await page.waitForTimeout(1500);
+      } catch {
+        console.log(`  story choice ${choice} not found, skipping`);
+      }
+    }
+    await page.waitForTimeout(500);
     try {
-      const gear = page.locator('[accessibilityLabel="Settings"]').first();
+      const scare = page.getByTestId('story-scare');
+      await scare.waitFor({ timeout: 3000 });
+      await scare.click();
+      await page.waitForTimeout(2000);
+    } catch {
+      console.log('  scare spot not found');
+    }
+  } else if (interact.kind === 'open-lockdown') {
+    try {
+      const gear = page.getByTestId('parental-controls');
       await gear.waitFor({ timeout: 3000 });
-      await gear.click({ delay: 2000 }); // long press
+      await gear.click();
       await page.waitForTimeout(1500);
     } catch {
-      // fallback: try top-right corner long-press
+      console.log('  parental-controls button not found, trying fallback');
       await page.mouse.click(vp.width - 40, 40, { delay: 2000 });
       await page.waitForTimeout(1500);
+    }
+  } else if (interact.kind === 'open-adult-gate') {
+    try {
+      const gear = page.getByTestId('parental-controls');
+      await gear.waitFor({ timeout: 3000 });
+      await gear.click();
+      await page.waitForTimeout(1500);
+    } catch {
+      console.log('  parental-controls not found');
     }
   }
 }

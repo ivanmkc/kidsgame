@@ -1,5 +1,8 @@
 {
-  "viewport": { "width": 1024, "height": 768 },
+  "viewport": {
+    "width": 1024,
+    "height": 768
+  },
   "surfaces": [
     {
       "id": "menu-top",
@@ -25,7 +28,6 @@
       "waitFor": null,
       "scrollTo": "section-music"
     },
-
     {
       "id": "musicbox-picker",
       "route": "#/musicbox",
@@ -43,7 +45,11 @@
       "route": "#/musicbox/twinkle",
       "waitFor": "musicbox-stage",
       "scrollTo": null,
-      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+      "interact": {
+        "kind": "tap-stage",
+        "testId": "musicbox-stage",
+        "count": 12
+      }
     },
     {
       "id": "musicbox-row-start",
@@ -56,7 +62,11 @@
       "route": "#/musicbox/row",
       "waitFor": "musicbox-stage",
       "scrollTo": null,
-      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+      "interact": {
+        "kind": "tap-stage",
+        "testId": "musicbox-stage",
+        "count": 12
+      }
     },
     {
       "id": "musicbox-jingle-start",
@@ -69,9 +79,12 @@
       "route": "#/musicbox/jingle",
       "waitFor": "musicbox-stage",
       "scrollTo": null,
-      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+      "interact": {
+        "kind": "tap-stage",
+        "testId": "musicbox-stage",
+        "count": 12
+      }
     },
-
     {
       "id": "escape-picker",
       "route": "#/escape",
@@ -92,8 +105,14 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-pillow", "wait": 900 },
-          { "tap": "escape-spot-chest", "wait": 900 }
+          {
+            "tap": "escape-spot-pillow",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-chest",
+            "wait": 900
+          }
         ]
       }
     },
@@ -105,9 +124,18 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-pillow", "wait": 900 },
-          { "tap": "escape-spot-chest", "wait": 900 },
-          { "tap": "escape-spot-pen", "wait": 900 }
+          {
+            "tap": "escape-spot-pillow",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-chest",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-pen",
+            "wait": 900
+          }
         ]
       }
     },
@@ -125,8 +153,14 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-haystack", "wait": 900 },
-          { "tap": "escape-spot-stove", "wait": 900 }
+          {
+            "tap": "escape-spot-haystack",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-stove",
+            "wait": 900
+          }
         ]
       }
     },
@@ -138,9 +172,18 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-haystack", "wait": 900 },
-          { "tap": "escape-spot-stove", "wait": 900 },
-          { "tap": "escape-spot-dragon", "wait": 900 }
+          {
+            "tap": "escape-spot-haystack",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-stove",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-dragon",
+            "wait": 900
+          }
         ]
       }
     },
@@ -158,9 +201,18 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-toolbox", "wait": 900 },
-          { "tap": "escape-spot-rocket", "wait": 900 },
-          { "tap": "escape-spot-crate", "wait": 900 }
+          {
+            "tap": "escape-spot-toolbox",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-rocket",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-crate",
+            "wait": 900
+          }
         ]
       }
     },
@@ -172,10 +224,22 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-toolbox", "wait": 900 },
-          { "tap": "escape-spot-rocket", "wait": 900 },
-          { "tap": "escape-spot-crate", "wait": 900 },
-          { "tap": "escape-spot-button", "wait": 900 }
+          {
+            "tap": "escape-spot-toolbox",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-rocket",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-crate",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-button",
+            "wait": 900
+          }
         ]
       }
     },
@@ -193,8 +257,14 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-net", "wait": 900 },
-          { "tap": "escape-spot-pelican", "wait": 900 }
+          {
+            "tap": "escape-spot-net",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-pelican",
+            "wait": 900
+          }
         ]
       }
     },
@@ -206,13 +276,21 @@
       "interact": {
         "kind": "escape-chain",
         "steps": [
-          { "tap": "escape-spot-net", "wait": 900 },
-          { "tap": "escape-spot-pelican", "wait": 900 },
-          { "tap": "escape-spot-chest", "wait": 900 }
+          {
+            "tap": "escape-spot-net",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-pelican",
+            "wait": 900
+          },
+          {
+            "tap": "escape-spot-chest",
+            "wait": 900
+          }
         ]
       }
     },
-
     {
       "id": "bingo-board",
       "route": "#/bingo",
@@ -284,7 +362,186 @@
       "route": "#/menu",
       "waitFor": null,
       "scrollTo": null,
-      "interact": { "kind": "open-lockdown" }
+      "interact": {
+        "kind": "open-lockdown"
+      }
+    },
+    {
+      "id": "hidden-haunted_house",
+      "route": "#/hidden/haunted_house",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-yokai_festival",
+      "route": "#/hidden/yokai_festival",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-robot_factory",
+      "route": "#/hidden/robot_factory",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-wizard_library",
+      "route": "#/hidden/wizard_library",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-sky_market",
+      "route": "#/hidden/sky_market",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-coral_reef",
+      "route": "#/hidden/coral_reef",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-spooky_graveyard",
+      "route": "#/hidden/spooky_graveyard",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-ice_palace",
+      "route": "#/hidden/ice_palace",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-monster_bedroom",
+      "route": "#/hidden/monster_bedroom",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-treehouse_village",
+      "route": "#/hidden/treehouse_village",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-dragonfly_meadow",
+      "route": "#/hidden/dragonfly_meadow",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-cloud_kingdom",
+      "route": "#/hidden/cloud_kingdom",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-crystal_cavern",
+      "route": "#/hidden/crystal_cavern",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-circus_backstage",
+      "route": "#/hidden/circus_backstage",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-mole_city",
+      "route": "#/hidden/mole_city",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-steampunk_airship",
+      "route": "#/hidden/steampunk_airship",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-giant_kitchen",
+      "route": "#/hidden/giant_kitchen",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-witch_kitchen",
+      "route": "#/hidden/witch_kitchen",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "story-aurora-node-a",
+      "route": "#/story/aurora",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "story-choice",
+        "choices": [
+          "a"
+        ]
+      }
+    },
+    {
+      "id": "story-aurora-scare",
+      "route": "#/story/aurora",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "story-scare",
+        "choices": [
+          "a"
+        ]
+      }
+    },
+    {
+      "id": "story-dune-node-a",
+      "route": "#/story/dune",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "story-choice",
+        "choices": [
+          "a"
+        ]
+      }
+    },
+    {
+      "id": "story-globe-node-b",
+      "route": "#/story/globe",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "story-choice",
+        "choices": [
+          "b"
+        ]
+      }
+    },
+    {
+      "id": "story-globe-scare",
+      "route": "#/story/globe",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "story-scare",
+        "choices": [
+          "b"
+        ]
+      }
+    },
+    {
+      "id": "adult-gate",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": {
+        "kind": "open-adult-gate"
+      }
     }
   ]
 }
