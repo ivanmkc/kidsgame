@@ -223,22 +223,23 @@ function PopSprite({ path }: { path: string }) {
   const src = SCENE_IMAGES[path];
   if (!src) return null;
   return (
-    <Animated.Image
-      source={src}
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: '-15%',
-        top: '-30%',
-        width: '130%',
-        height: '130%',
-        transform: [
-          { translateY: spring.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) },
-          { scale: spring.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.2, 1.12, 1] }) },
-        ],
-      }}
-      resizeMode="contain"
-    />
+    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+      <Animated.Image
+        source={src}
+        style={{
+          position: 'absolute',
+          left: '-15%',
+          top: '-30%',
+          width: '130%',
+          height: '130%',
+          transform: [
+            { translateY: spring.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) },
+            { scale: spring.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.2, 1.12, 1] }) },
+          ],
+        }}
+        resizeMode="contain"
+      />
+    </View>
   );
 }
 
