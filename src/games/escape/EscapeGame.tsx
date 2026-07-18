@@ -102,7 +102,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
 
   if (!sceneId || !room) {
     return (
-      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang}>
+      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill />}>
         <ScenePicker
           title={t(lang, 'picker.escape')}
           options={rooms.map((r) => ({ id: r.id, name: r.nameT?.[lang] ?? r.name, image: r.image, level: r.level }))}
@@ -160,6 +160,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
+      right={<BetaPill />}
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}>
@@ -279,7 +280,24 @@ function PopSprite({ path }: { path: string }) {
   );
 }
 
+// Small BETA pill in the header — parents should know this game is new.
+function BetaPill() {
+  return (
+    <View style={styles.betaPill} testID="escape-beta">
+      <Text style={styles.betaPillText}>BETA</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  betaPill: {
+    backgroundColor: 'rgba(60,45,70,0.85)',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    height: 44,
+    justifyContent: 'center',
+  },
+  betaPillText: { color: colors.gold, fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.5 },
   wrap: { alignItems: 'center', paddingBottom: 20, gap: 12 },
   frame: {
     borderRadius: 22,
