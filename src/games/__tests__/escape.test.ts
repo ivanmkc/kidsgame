@@ -19,19 +19,37 @@ const ROOM: EscapeRoom = {
 };
 
 describe('escape logic', () => {
-  it('plays the full chain: search → take → unlock → win', () => {
+  it('plays the full chain: search → reveal → collect → unlock → reveal → collect → win', () => {
     let s = startState();
+
+    // Tap pillow → reveals key (not yet in inventory)
     let r = applyTap(ROOM, s, 'pillow');
-    expect(r.effect).toMatchObject({ kind: 'found', item: 'key' });
+    expect(r.effect).toMatchObject({ kind: 'revealed', item: 'key' });
+    s = r.state;
+    expect(s.revealed).toContain('pillow');
+    expect(s.inventory).toEqual([]);
+
+    // Tap pillow again (or itemBox) → collects key into inventory
+    r = applyTap(ROOM, s, 'pillow');
+    expect(r.effect).toMatchObject({ kind: 'collected', item: 'key' });
     s = r.state;
     expect(s.inventory).toEqual(['key']);
+    expect(s.used).toContain('pillow');
+    expect(s.revealed).not.toContain('pillow');
 
     // Forgiveness rule: holding the key is enough — no selection required.
     s = selectItem(s, 'key');
     r = applyTap(ROOM, s, 'chest');
-    expect(r.effect).toMatchObject({ kind: 'unlocked', item: 'bone' });
+    expect(r.effect).toMatchObject({ kind: 'revealed', item: 'bone' });
     s = r.state;
-    expect(s.inventory).toEqual(['bone']); // key consumed, bone gained
+    expect(s.revealed).toContain('chest');
+    expect(s.inventory).toEqual([]); // key consumed, bone not yet collected
+
+    // Collect bone from revealed chest
+    r = applyTap(ROOM, s, 'chest');
+    expect(r.effect).toMatchObject({ kind: 'collected', item: 'bone' });
+    s = r.state;
+    expect(s.inventory).toEqual(['bone']);
     expect(s.selected).toBeNull();
 
     // Win via forgiveness: bone held but NOT selected still frees the puppy.
@@ -54,31 +72,48 @@ describe('escape logic', () => {
     expect(r.state.used).toHaveLength(0);
   });
 
-  it('used hotspots go dead', () => {
+  it('revealed hotspots stay tappable for collection', () => {
     let s = startState();
-    s = applyTap(ROOM, s, 'pillow').state;
+    const r = applyTap(ROOM, s, 'pillow');
+    expect(r.effect.kind).toBe('revealed');
+    s = r.state;
+    expect(s.revealed).toContain('pillow');
+    expect(applyTap(ROOM, s, 'pillow').effect.kind).toBe('collected');
+  });
+
+  it('fully used hotspots go dead', () => {
+    let s = startState();
+    s = applyTap(ROOM, s, 'pillow').state; // reveal
+    s = applyTap(ROOM, s, 'pillow').state; // collect
     expect(applyTap(ROOM, s, 'pillow').effect.kind).toBe('nothing');
   });
 
   it('selection toggles and rejects unheld items', () => {
     let s = startState();
     expect(selectItem(s, 'key')).toBe(s); // not held yet
-    s = applyTap(ROOM, s, 'pillow').state;
+    s = applyTap(ROOM, s, 'pillow').state; // reveal
+    s = applyTap(ROOM, s, 'pillow').state; // collect
     s = selectItem(s, 'key');
     expect(s.selected).toBe('key');
     expect(selectItem(s, 'key').selected).toBeNull();
   });
 
-  it('nextHint walks the chain in order', () => {
+  it('nextHint walks the chain in order, prioritizing revealed items', () => {
     let s = startState();
     expect(nextHint(ROOM, s)).toMatchObject({ hotspotId: 'pillow' });
+
+    // Reveal key — hint should point at the revealed item for collection
+    s = applyTap(ROOM, s, 'pillow').state;
+    expect(nextHint(ROOM, s)).toMatchObject({ hotspotId: 'pillow' });
+
+    // Collect key — hint should advance to the chest
     s = applyTap(ROOM, s, 'pillow').state;
     expect(nextHint(ROOM, s)).toMatchObject({ hotspotId: 'chest', selectItem: 'key' });
   });
 
-  it('fixture room passes lint and solves in 3 taps', () => {
+  it('fixture room passes lint and solves in 5 taps (reveal+collect each)', () => {
     expect(lintRoom(ROOM)).toEqual([]);
-    expect(solve(ROOM)).toBe(3);
+    expect(solve(ROOM)).toBe(5); // pillow reveal, pillow collect, chest reveal, chest collect, cage win
   });
 
   it('lint catches dead ends', () => {

@@ -83,24 +83,26 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const scale = displayWidth / 1280;
   const displayHeight = 720 * scale;
 
-  // Full-scene state chain: find the latest afterScene for used hotspots.
-  // Hotspots with afterScene form a linear chain in spec order; the current
-  // scene = the afterScene of the last used state-changing hotspot.
+  // Full-scene state chain: find the latest scene for used/revealed hotspots.
+  // Hotspots with state-change scenes form a linear chain in spec order;
+  // the current scene = the scene matching the last changed hotspot's phase
+  // (revealed → revealScene, used → takenScene/afterScene).
   const sceneChain = useMemo(() => {
     if (!room) return [];
-    return room.hotspots.filter((h) => h.afterScene).map((h) => h.id);
+    return room.hotspots.filter((h) => h.afterScene || h.revealScene).map((h) => h.id);
   }, [room]);
 
   const currentSceneKey = useMemo(() => {
     if (!room) return '';
     for (let i = sceneChain.length - 1; i >= 0; i--) {
-      if (state.used.includes(sceneChain[i])) {
-        const h = room.hotspots.find((x) => x.id === sceneChain[i]);
-        if (h?.afterScene) return h.afterScene;
-      }
+      const hid = sceneChain[i];
+      const h = room.hotspots.find((x) => x.id === hid);
+      if (!h) continue;
+      if (state.used.includes(hid)) return h.takenScene ?? h.afterScene ?? room.image;
+      if (state.revealed.includes(hid)) return h.revealScene ?? h.afterScene ?? room.image;
     }
     return room.image;
-  }, [room, sceneChain, state.used]);
+  }, [room, sceneChain, state.used, state.revealed]);
 
   const prevSceneKey = useRef(currentSceneKey);
   const crossfade = useRef(new Animated.Value(1)).current;
@@ -140,7 +142,11 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
       h ? hotText(h, field, lang) : undefined;
     switch (effect.kind) {
-      case 'found':
+      case 'revealed':
+        sfx.good();
+        if (h?.animVideo) setClip(h.animVideo);
+        break;
+      case 'collected':
         sfx.good();
         if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         { const s = locSay('sayFound'); if (s) say(s); }
@@ -148,7 +154,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       case 'unlocked':
         sfx.good();
         if (h?.animVideo) setClip(h.animVideo);
-        if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         { const s = locSay('sayFound'); if (s) say(s); }
         break;
       case 'win':
@@ -209,7 +214,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           ) : null}
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
-            const actionable = !used && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
+            const revealed = state.revealed.includes(h.id);
+            const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
             return (
               <Pressable
                 key={h.id}
@@ -223,7 +229,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
                   height: (h.box.h + 16) * scale,
                 }}
               >
-                {!used && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
+                {revealed && <PulseRing strong />}
+                {!used && !revealed && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
                 {used && pops.find((p) => p.id === h.id) ? <PopSprite path={pops.find((p) => p.id === h.id)!.pop} /> : null}
                 {used ? <SparkleBurst trigger="found" /> : null}
               </Pressable>

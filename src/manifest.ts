@@ -111,14 +111,17 @@ export interface EscapeHotspot {
   box: Box;
   /** search: reveals/gives on tap. lock: needs an item. win: final goal (may need an item). */
   kind: 'search' | 'lock' | 'win';
-  gives?: string;      // item id granted on successful tap
-  needs?: string;      // item id that must be SELECTED in the tray
-  pop?: string;        // transparent sprite that springs out (reveal beat)
-  afterScene?: string; // full-scene image after this hotspot is used (crossfaded)
-  animVideo?: string;  // Veo transition clip played on unlock (fallback: crossfade)
-  sayFound?: string;   // spoken on success
-  saySearch?: string;  // spoken on plain search with nothing there (flavor)
-  sayLocked?: string;  // spoken when tapped without the needed item
+  gives?: string;        // item id granted on successful tap
+  needs?: string;        // item id that must be SELECTED in the tray
+  pop?: string;          // transparent sprite that springs out (collect beat)
+  afterScene?: string;   // full-scene image after this hotspot is fully consumed (win hotspots, no-gives locks)
+  revealScene?: string;  // full-scene image with container open AND item visible (gives-hotspots)
+  takenScene?: string;   // full-scene image with container open but item GONE (gives-hotspots)
+  itemBox?: Box;         // tap target for the revealed item within the scene
+  animVideo?: string;    // Veo transition clip played on unlock/reveal (fallback: crossfade)
+  sayFound?: string;     // spoken on collection (item flies to tray)
+  saySearch?: string;    // spoken on plain search with nothing there (flavor)
+  sayLocked?: string;    // spoken when tapped without the needed item
   t?: Record<string, Record<string, string>>; // ja/cmn/yue per field
 }
 
