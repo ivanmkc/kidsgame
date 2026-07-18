@@ -28225,7 +28225,16 @@
             "yue": {
               "sayFound": "\u4e00\u628a\u9583\u9583\u5605\u9396\u5319\u6536\u57cb\u5497\u55ba\u6795\u982d\u5e95\u5440\uff01"
             }
-          }
+          },
+          "revealScene": "escape/toyroom_pillow_reveal.png",
+          "takenScene": "escape/toyroom_pillow_taken.png",
+          "itemBox": {
+            "x": 268,
+            "y": 410,
+            "w": 141,
+            "h": 148
+          },
+          "animVideo": "escape-video/toyroom_pillow.mp4"
         },
         {
           "id": "teddy",
@@ -28262,7 +28271,6 @@
           "needs": "key",
           "sayFound": "The chest popped open \u2014 a yummy bone!",
           "sayLocked": "The toy chest is locked tight. What could open it?",
-          "afterScene": "escape/toyroom_s1.png",
           "t": {
             "ja": {
               "sayFound": "\u305f\u304b\u3089\u3070\u3053\u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u304a\u3044\u3057\u3044 \u307b\u306d\uff01",
@@ -28277,7 +28285,15 @@
               "sayLocked": "\u73a9\u5177\u7bb1\u9396\u5230\u5be6\u4e00\u5be6\u5440\u3002\u7528\u54a9\u53ef\u4ee5\u6253\u958b\u4f62\u5462\uff1f"
             }
           },
-          "animVideo": "escape-video/toyroom_chest.mp4"
+          "animVideo": "escape-video/toyroom_chest.mp4",
+          "revealScene": "escape/toyroom_chest_reveal.png",
+          "takenScene": "escape/toyroom_chest_taken.png",
+          "itemBox": {
+            "x": 377,
+            "y": 160,
+            "w": 199,
+            "h": 121
+          }
         },
         {
           "id": "pen",
@@ -28681,10 +28697,14 @@
           "gives": "wrench",
           "sayFound": "A trusty wrench!",
           "t": {
-            "sayFound": {
-              "ja": "\u3058\u3087\u3046\u3076\u306a \u30ec\u30f3\u30c1\uff01",
-              "cmn": "\u53ef\u9760\u7684\u6273\u624b\uff01",
-              "yue": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
+            "ja": {
+              "sayFound": "\u3058\u3087\u3046\u3076\u306a \u30ec\u30f3\u30c1\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u53ef\u9760\u7684\u6273\u624b\uff01"
+            },
+            "yue": {
+              "sayFound": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
             }
           }
         },
@@ -28701,10 +28721,14 @@
           "sayFound": "A super battery was inside the crate!",
           "pop": "escape/rocketpad_crate_pop.png",
           "t": {
-            "sayFound": {
-              "ja": "\u306f\u3053\u306e \u306a\u304b\u306b \u3059\u3054\u3044 \u3067\u3093\u3061\u304c \u3042\u3063\u305f\uff01",
-              "cmn": "\u7bb1\u5b50\u91cc\u6709\u4e00\u4e2a\u8d85\u7ea7\u7535\u6c60\uff01",
-              "yue": "\u500b\u7bb1\u5165\u9762\u6709\u7c92\u8d85\u7d1a\u96fb\u82af\uff01"
+            "ja": {
+              "sayFound": "\u306f\u3053\u306e \u306a\u304b\u306b \u3059\u3054\u3044 \u3067\u3093\u3061\u304c \u3042\u3063\u305f\uff01"
+            },
+            "cmn": {
+              "sayFound": "\u7bb1\u5b50\u91cc\u6709\u4e00\u4e2a\u8d85\u7ea7\u7535\u6c60\uff01"
+            },
+            "yue": {
+              "sayFound": "\u500b\u7bb1\u5165\u9762\u6709\u7c92\u8d85\u7d1a\u96fb\u82af\uff01"
             }
           }
         },
@@ -28719,10 +28743,14 @@
           "kind": "search",
           "saySearch": "That is where the bunny wants to go!",
           "t": {
-            "saySearch": {
-              "ja": "\u3046\u3055\u304e\u3055\u3093 \u3053\u3053\u306b \u3044\u304d\u305f\u3044\u3093\u3060\u306d\uff01",
-              "cmn": "\u5154\u5b50\u5c31\u60f3\u53bb\u90a3\u91cc\uff01",
-              "yue": "\u5154\u4ed4\u5c31\u4fc2\u60f3\u53bb\u55f0\u5ea6\u5440\uff01"
+            "ja": {
+              "saySearch": "\u3046\u3055\u304e\u3055\u3093 \u3053\u3053\u306b \u3044\u304d\u305f\u3044\u3093\u3060\u306d\uff01"
+            },
+            "cmn": {
+              "saySearch": "\u5154\u5b50\u5c31\u60f3\u53bb\u90a3\u91cc\uff01"
+            },
+            "yue": {
+              "saySearch": "\u5154\u4ed4\u5c31\u4fc2\u60f3\u53bb\u55f0\u5ea6\u5440\uff01"
             }
           }
         },
@@ -28741,15 +28769,17 @@
           "afterScene": "escape/rocketpad_s1.png",
           "animVideo": "escape-video/rocketpad_panel.mp4",
           "t": {
-            "sayFound": {
-              "ja": "\u30ec\u30f3\u30c1\u3067 \u30d1\u30cd\u30eb\u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u3067\u3093\u3061\u306e \u30b9\u30ed\u30c3\u30c8\u304c \u304b\u3089\u3063\u307d\u3060\uff01",
-              "cmn": "\u6273\u624b\u628a\u9762\u677f\u64ac\u5f00\u4e86\uff01\u91cc\u9762\u6709\u4e2a\u7a7a\u7684\u7535\u6c60\u69fd\uff01",
-              "yue": "\u58eb\u5df4\u62ff\u64ac\u958b\u5497\u584a\u677f\uff01\u5165\u9762\u6709\u500b\u7a7a\u5605\u96fb\u6c60\u4f4d\uff01"
+            "ja": {
+              "sayFound": "\u30ec\u30f3\u30c1\u3067 \u30d1\u30cd\u30eb\u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u3067\u3093\u3061\u306e \u30b9\u30ed\u30c3\u30c8\u304c \u304b\u3089\u3063\u307d\u3060\uff01",
+              "sayLocked": "\u30ed\u30b1\u30c3\u30c8\u306e \u30d1\u30cd\u30eb \u3042\u304b\u306a\u3044\u3002 \u3069\u3046\u3050\u304c \u3044\u308b\u306d\uff01"
             },
-            "sayLocked": {
-              "ja": "\u30ed\u30b1\u30c3\u30c8\u306e \u30d1\u30cd\u30eb \u3042\u304b\u306a\u3044\u3002 \u3069\u3046\u3050\u304c \u3044\u308b\u306d\uff01",
-              "cmn": "\u706b\u7bad\u9762\u677f\u5361\u4f4f\u4e86\u3002 \u6211\u4eec\u9700\u8981\u5de5\u5177\u6765\u6253\u5f00\u5b83\uff01",
-              "yue": "\u706b\u7bad\u584a\u677f\u5361\u4f4f\u5497\u3002 \u6211\u54cb\u8981\u6435\u5de5\u5177\u569f\u958b\u4f62\uff01"
+            "cmn": {
+              "sayFound": "\u6273\u624b\u628a\u9762\u677f\u64ac\u5f00\u4e86\uff01\u91cc\u9762\u6709\u4e2a\u7a7a\u7684\u7535\u6c60\u69fd\uff01",
+              "sayLocked": "\u706b\u7bad\u9762\u677f\u5361\u4f4f\u4e86\u3002 \u6211\u4eec\u9700\u8981\u5de5\u5177\u6765\u6253\u5f00\u5b83\uff01"
+            },
+            "yue": {
+              "sayFound": "\u58eb\u5df4\u62ff\u64ac\u958b\u5497\u584a\u677f\uff01\u5165\u9762\u6709\u500b\u7a7a\u5605\u96fb\u6c60\u4f4d\uff01",
+              "sayLocked": "\u706b\u7bad\u584a\u677f\u5361\u4f4f\u5497\u3002 \u6211\u54cb\u8981\u6435\u5de5\u5177\u569f\u958b\u4f62\uff01"
             }
           }
         },
@@ -28768,15 +28798,17 @@
           "afterScene": "escape/rocketpad_s2.png",
           "animVideo": "escape-video/rocketpad_slot.mp4",
           "t": {
-            "sayFound": {
-              "ja": "\u3067\u3093\u3061\u304c \u30ab\u30c1\u30c3\uff01 \u3055\u3093\u3001\u306b\u3001\u3044\u3061 \u2014 \u306f\u3063\u3057\u3083\uff01",
-              "cmn": "\u7535\u6c60\u5494\u55d2\u4e00\u58f0\u88c5\u597d\u4e86\uff01\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u53d1\u5c04\uff01",
-              "yue": "\u96fb\u6c60\u5494\u5660\u4e00\u8072\u5165\u5497\u4f4d\uff01\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u767c\u5c04\uff01"
+            "ja": {
+              "sayFound": "\u3067\u3093\u3061\u304c \u30ab\u30c1\u30c3\uff01 \u3055\u3093\u3001\u306b\u3001\u3044\u3061 \u2014 \u306f\u3063\u3057\u3083\uff01",
+              "sayLocked": "\u3067\u3093\u3061\u306e \u30b9\u30ed\u30c3\u30c8 \u304b\u3089\u3063\u307d\u3060\u3002 \u30ed\u30b1\u30c3\u30c8\u306b \u306a\u306b\u304b \u3044\u308b\u306d\uff01"
             },
-            "sayLocked": {
-              "ja": "\u3067\u3093\u3061\u306e \u30b9\u30ed\u30c3\u30c8 \u304b\u3089\u3063\u307d\u3060\u3002 \u30ed\u30b1\u30c3\u30c8\u306b \u306a\u306b\u304b \u3044\u308b\u306d\uff01",
-              "cmn": "\u7535\u6c60\u69fd\u662f\u7a7a\u7684\u3002\u706b\u7bad\u9700\u8981\u52a8\u529b\uff01",
-              "yue": "\u96fb\u6c60\u4f4d\u7a7a\u5497\u3002\u706b\u7bad\u9700\u8981\u5572\u5622\u569f\u767c\u52d5\uff01"
+            "cmn": {
+              "sayFound": "\u7535\u6c60\u5494\u55d2\u4e00\u58f0\u88c5\u597d\u4e86\uff01\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u53d1\u5c04\uff01",
+              "sayLocked": "\u7535\u6c60\u69fd\u662f\u7a7a\u7684\u3002\u706b\u7bad\u9700\u8981\u52a8\u529b\uff01"
+            },
+            "yue": {
+              "sayFound": "\u96fb\u6c60\u5494\u5660\u4e00\u8072\u5165\u5497\u4f4d\uff01\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u767c\u5c04\uff01",
+              "sayLocked": "\u96fb\u6c60\u4f4d\u7a7a\u5497\u3002\u706b\u7bad\u9700\u8981\u5572\u5622\u569f\u767c\u52d5\uff01"
             }
           }
         }
