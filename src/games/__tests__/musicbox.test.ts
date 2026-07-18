@@ -7,6 +7,7 @@ import {
   octaveOffset,
   harmonyOffsets,
   spawnZone,
+  pickSpawnSprite,
   songById,
   speechLines,
 } from '../musicbox/logic';
@@ -105,6 +106,29 @@ describe('musicbox v2 logic', () => {
       expect(sc.objects.mid.length).toBeGreaterThan(0);
       expect(sc.objects.ground.length).toBeGreaterThan(0);
     }
+  });
+
+  it('pickSpawnSprite skips unique sprites already on screen', () => {
+    const pool = ['obj_sky_sun_rays', 'obj_sky_seagull', 'obj_sky_cloud_fluffy', 'obj_sky_pelican'];
+
+    // With no actives, sun spawns normally at tapIndex 0
+    expect(pickSpawnSprite(pool, 0, [])).toBe('obj_sky_sun_rays');
+
+    // With sun already active, it skips to seagull
+    expect(pickSpawnSprite(pool, 0, ['obj_sky_sun_rays'])).toBe('obj_sky_seagull');
+
+    // Non-unique sprites can duplicate freely
+    expect(pickSpawnSprite(pool, 1, ['obj_sky_seagull'])).toBe('obj_sky_seagull');
+  });
+
+  it('pickSpawnSprite dedup covers moon and rocket across scenes', () => {
+    const twinkleSky = ['obj_sky_star', 'obj_sky_comet', 'obj_sky_moon_crescent', 'obj_sky_cloud_wispy', 'obj_sky_rocket', 'obj_sky_sparkle'];
+
+    // Moon at index 2 is unique; if already active, picks next non-unique
+    expect(pickSpawnSprite(twinkleSky, 2, ['obj_sky_moon_crescent'])).toBe('obj_sky_cloud_wispy');
+
+    // Rocket at index 4 is unique; if already active, picks next non-unique
+    expect(pickSpawnSprite(twinkleSky, 4, ['obj_sky_rocket'])).toBe('obj_sky_sparkle');
   });
 
   it('speechLines covers at least 4 langs, no duplicates', () => {

@@ -59,6 +59,29 @@ export function spawnZone(yFrac: number): SpawnZone {
   return 'mid';
 }
 
+const UNIQUE_SPRITES = new Set([
+  'obj_sky_sun_rays',
+  'obj_sky_moon_crescent',
+  'obj_sky_rocket',
+  'obj_mid_rainbow',
+]);
+
+/** Pick a spawn sprite, skipping unique sprites already on screen. */
+export function pickSpawnSprite(
+  pool: string[],
+  tapIndex: number,
+  activeKeys: string[],
+): string {
+  const active = new Set(activeKeys);
+  const first = pool[tapIndex % pool.length];
+  if (!UNIQUE_SPRITES.has(first) || !active.has(first)) return first;
+  for (let i = 1; i < pool.length; i++) {
+    const candidate = pool[(tapIndex + i) % pool.length];
+    if (!UNIQUE_SPRITES.has(candidate) || !active.has(candidate)) return candidate;
+  }
+  return first;
+}
+
 export function songById(id: string | undefined): Song | null {
   return SONGS.find((x) => x.id === id) ?? null;
 }
