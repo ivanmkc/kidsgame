@@ -63,6 +63,7 @@ export type UIKey =
   | 'card.compare.title'  | 'card.compare.blurb'
   | 'card.sums.title'     | 'card.sums.blurb'
   | 'card.musicbox.title' | 'card.musicbox.blurb'
+  | 'card.bingo.title'    | 'card.bingo.blurb'
   | 'card.escape.title'   | 'card.escape.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
@@ -125,6 +126,9 @@ export type UIKey =
   | 'shell.musicbox.title'
   | 'shell.musicbox.subPicker'
   | 'shell.musicbox.subPlay'
+  | 'shell.bingo.title'
+  | 'shell.bingo.sub'
+  | 'shell.bingo.subPhonics'
   | 'shell.escape.title'
   | 'shell.escape.subPicker'
   | 'shell.escape.subPlay'
@@ -162,6 +166,7 @@ export type UIKey =
   | 'win.count'
   | 'win.compare'
   | 'win.sums'
+  | 'win.bingo'
   | 'win.musicbox'
   // ── Music box ──────────────────────────────────────────────────
   | 'musicbox.intro'
@@ -288,6 +293,8 @@ const EN: Table = {
   'card.sums.blurb': 'One more hops in — how many now?',
   'card.musicbox.title': 'Music Box',
   'card.musicbox.blurb': 'Tap along and play a song!',
+  'card.bingo.title': 'Picture Bingo',
+  'card.bingo.blurb': 'Listen for the call and find it on your board!',
   'card.escape.title': 'Little Escapes',
   'card.escape.blurb': 'Find, unlock, and save the day!',
 
@@ -351,6 +358,9 @@ const EN: Table = {
   'shell.musicbox.title': 'Music Box',
   'shell.musicbox.subPicker': 'Pick a song to play!',
   'shell.musicbox.subPlay': 'Tap anywhere to play the next note!',
+  'shell.bingo.title': 'Picture Bingo',
+  'shell.bingo.sub': 'Listen to the call and tap the picture!',
+  'shell.bingo.subPhonics': 'Which picture starts with that sound?',
   'shell.escape.title': 'Little Escapes',
   'shell.escape.subPicker': 'Pick a room to explore!',
   'shell.escape.subPlay': 'Search the picture — find things and use them!',
@@ -388,6 +398,7 @@ const EN: Table = {
   'win.count': 'Amazing counter! You got them all!',
   'win.compare': 'Sharp eyes! You compared like a champ!',
   'win.sums': 'Sum superstar! You added them all!',
+  'win.bingo': 'BINGO! You got a line!',
   'win.musicbox': 'Beautiful music! You played the whole song!',
   'musicbox.intro': 'Tap, tap, tap anywhere to play the song!',
   'musicbox.introFree': 'Magic keys! Every tap makes a pretty note!',
@@ -511,6 +522,8 @@ const JA: Table = {
   'card.sums.blurb': 'もういっぴき ふえたら いくつ？',
   'card.musicbox.title': 'オルゴール',
   'card.musicbox.blurb': 'タップして うたを ひこう！',
+  'card.bingo.title': 'えビンゴ',
+  'card.bingo.blurb': 'よばれた えを みつけよう！',
   'card.escape.title': 'ちいさな だっしゅつ',
   'card.escape.blurb': 'さがして あけて たすけよう！',
 
@@ -574,6 +587,9 @@ const JA: Table = {
   'shell.musicbox.title': 'オルゴール',
   'shell.musicbox.subPicker': 'うたを えらんでね！',
   'shell.musicbox.subPlay': 'どこでも タップして つぎのおとを ならそう！',
+  'shell.bingo.title': 'えビンゴ',
+  'shell.bingo.sub': 'よばれた えを タップして みつけよう！',
+  'shell.bingo.subPhonics': 'そのおとで はじまる えは どれ？',
   'shell.escape.title': 'ちいさな だっしゅつ',
   'shell.escape.subPicker': 'おへやを えらんでね！',
   'shell.escape.subPlay': 'えを さがして みつけたものを つかおう！',
@@ -611,6 +627,7 @@ const JA: Table = {
   'win.count': 'かぞえかた ばつぐん！ ぜんぶ できたね！',
   'win.compare': 'めがするどい！ よくくらべたね！',
   'win.sums': 'たしざん スーパースター！ ぜんぶ せいかい！',
+  'win.bingo': 'ビンゴ！ いちれつ そろったね！',
   'win.musicbox': 'すてきな おんがく！ さいごまで ひけたね！',
   'musicbox.intro': 'とん とん とん！ どこでも タップして うたを ひこう！',
   'musicbox.introFree': 'まほうの けんばん！ タップすると きれいなおとが なるよ！',
@@ -733,6 +750,8 @@ const CMN: Table = {
   'card.sums.blurb': '又来一只 — 现在几只？',
   'card.musicbox.title': '音乐盒',
   'card.musicbox.blurb': '点一点，弹一首歌！',
+  'card.bingo.title': '图片宾果',
+  'card.bingo.blurb': '听提示，找出板上的图片！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '找一找，打开它，救出小伙伴！',
 
@@ -796,6 +815,9 @@ const CMN: Table = {
   'shell.musicbox.title': '音乐盒',
   'shell.musicbox.subPicker': '选一首歌吧！',
   'shell.musicbox.subPlay': '点哪里都可以，弹出下一个音！',
+  'shell.bingo.title': '图片宾果',
+  'shell.bingo.sub': '听提示，点对应的图片！',
+  'shell.bingo.subPhonics': '哪张图是这个音开头的？',
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '选一个房间吧！',
   'shell.escape.subPlay': '找找图里的东西，用它们解开谜题！',
@@ -833,6 +855,7 @@ const CMN: Table = {
   'win.count': '数数高手！全都数对了！',
   'win.compare': '眼力真尖！比得像冠军！',
   'win.sums': '加法小超人！全都算对了！',
+  'win.bingo': '宾果！你连成一排了！',
   'win.musicbox': '好美的音乐！你弹完了整首歌！',
   'musicbox.intro': '点、点、点！点哪里都能弹歌哦！',
   'musicbox.introFree': '魔法琴键！每点一下都有好听的音！',
@@ -955,6 +978,8 @@ const YUE: Table = {
   'card.sums.blurb': '又嚟多隻 — 而家有幾多？',
   'card.musicbox.title': '音樂盒',
   'card.musicbox.blurb': '撳一撳，彈一首歌！',
+  'card.bingo.title': '圖片BINGO',
+  'card.bingo.blurb': '聽提示，搵出板上嘅圖！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
 
@@ -1018,6 +1043,9 @@ const YUE: Table = {
   'shell.musicbox.title': '音樂盒',
   'shell.musicbox.subPicker': '揀一首歌啦！',
   'shell.musicbox.subPlay': '撳邊度都得，彈出下一個音！',
+  'shell.bingo.title': '圖片BINGO',
+  'shell.bingo.sub': '聽提示，撳對應嘅圖！',
+  'shell.bingo.subPhonics': '邊張圖係呢個音起頭？',
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '揀一間房啦！',
   'shell.escape.subPlay': '喺圖入面搵嘢，用佢哋解謎！',
@@ -1055,6 +1083,7 @@ const YUE: Table = {
   'win.count': '數數高手！全部數啱！',
   'win.compare': '眼力好尖！比得好叻！',
   'win.sums': '加法小超人！全部計啱！',
+  'win.bingo': 'BINGO！你連成一行喇！',
   'win.musicbox': '好靚嘅音樂！你彈晒成首歌喇！',
   'musicbox.intro': '撳、撳、撳！撳邊度都彈到歌㗎！',
   'musicbox.introFree': '魔法琴鍵！每撳一下都有好聽嘅音！',

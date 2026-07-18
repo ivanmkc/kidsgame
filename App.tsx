@@ -40,6 +40,7 @@ import { PuzzleGame } from './src/games/puzzle/PuzzleGame';
 import { StickerGame } from './src/games/sticker/StickerGame';
 import { StoryGame } from './src/games/story/StoryGame';
 import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
+import { BingoGame } from './src/games/bingo/BingoGame';
 import { EscapeGame } from './src/games/escape/EscapeGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
@@ -127,7 +128,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'musicbox', 'escape'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
@@ -215,6 +216,7 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'bingo' && <BingoGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'oddone' && <OddOneGame onHome={goHome} difficulty={difficulty} lang={lang} />}
@@ -243,7 +245,7 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'musicbox' | 'escape';
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape';
 interface CardDef { route: string; color: string; key: CardKey; preview: string }
 const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
@@ -268,6 +270,7 @@ const GAME_CARDS: CardDef[] = [
   { route: 'rules', color: '#3E9BB8', key: 'rules', preview: 'rules' },
   { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
   { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
+  { route: 'bingo', color: '#D66FA8', key: 'bingo', preview: 'bingo' },
   { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
   { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape' },
 ];
@@ -307,6 +310,7 @@ function Menu({
     if (key === 'icons13') return <ShadowPreview />;
     if (key === 'icons20') return <OddOnePreview />;
     if (key === 'rules') return <RulesPreview lang={lang} />;
+    if (key === 'bingo') return <BingoPreview />;
     if (key === 'musicbox') return <MusicBoxPreview />;
     if (key === 'escape') return <EscapePreview />;
 
@@ -570,6 +574,29 @@ function RulesPreview({ lang }: { lang: Lang }) {
           </View>
         ))}
       </View>
+    </View>
+  );
+}
+
+function BingoPreview() {
+  const icons = manifest.spotit.icons;
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(214,111,168,0.10)' }]}>
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
+        <View
+          key={idx}
+          style={[
+            styles.previewTile,
+            { width: 32, height: 32, borderRadius: 8, borderWidth: 2 },
+            [0, 4, 8].includes(idx)
+              ? { borderColor: colors.gold, backgroundColor: 'rgba(232,162,79,0.18)' }
+              : { borderColor: colors.blush },
+          ]}
+        >
+          <Image source={SPOTIT_ICONS[icons[idx % icons.length]]} style={{ width: '76%', height: '76%' }} resizeMode="contain" />
+          {[0, 4, 8].includes(idx) && <Text style={{ position: 'absolute', top: -4, right: -4, fontSize: 10 }}>⭐</Text>}
+        </View>
+      ))}
     </View>
   );
 }
