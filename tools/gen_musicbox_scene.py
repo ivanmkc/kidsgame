@@ -408,32 +408,51 @@ def _composite_scene(scene_dir: Path, spec: dict) -> Image.Image:
 
 def _composite_judge_gate(scene_dir: Path, spec: dict,
                           max_retries: int = 3) -> bool:
-    """Dual-judge strict-min on the composited scene.
+    """Dual-judge strict-min on VIEWPORT-WIDTH CROPS of the composited scene.
 
-    Returns True if the scene passes; False means the caller must delete
-    failing pieces and regenerate.
+    Instead of judging the full flat composite (which contains tonal gradients
+    invisible under parallax), we judge 2-3 random viewport-width (~1024px)
+    crops — what the kid actually sees. The artifact question stays strict
+    (rectangles/ghosts/fringe = fail); the coherence question applies per-crop.
     """
+    import random
+    VIEWPORT_W = 1024
+
     for attempt in range(max_retries):
         comp = _composite_scene(scene_dir, spec)
-        comp_path = scene_dir / "_composite_check.png"
-        comp.save(comp_path)
-        ok = strict_min(
-            "Look at this composited game scene carefully. Are there ANY "
-            "rectangular seams, cut edges, banding artifacts, ghost or "
-            "semi-transparent characters, white fringe, or opaque background "
-            "patches around sprites? Answer YES if the image is CLEAN (no "
-            "such artifacts), NO if any artifacts are present.",
-            "Is this one coherent hand-illustrated children's book scene? "
-            "All elements should look like they belong in the same painting, "
-            "with consistent style and lighting. Answer YES or NO.",
-            [comp],
-        )
-        if ok:
-            print(f"  composite judge: PASS (attempt {attempt + 1})")
-            comp_path.unlink(missing_ok=True)
+        comp_w = comp.width
+
+        n_crops = min(3, max(1, comp_w // VIEWPORT_W))
+        max_offset = max(0, comp_w - VIEWPORT_W)
+        offsets = sorted(random.sample(range(max_offset + 1), min(n_crops, max_offset + 1))) if max_offset > 0 else [0]
+
+        all_pass = True
+        for ci, x0 in enumerate(offsets):
+            crop = comp.crop((x0, 0, x0 + VIEWPORT_W, comp.height))
+            crop_path = scene_dir / f"_crop_check_{ci}.png"
+            crop.save(crop_path)
+
+            ok = strict_min(
+                "Look at this game scene viewport carefully. Are there ANY "
+                "rectangular seams, cut edges, banding artifacts, ghost or "
+                "semi-transparent characters, white fringe, or opaque background "
+                "patches around sprites? Answer YES if the image is CLEAN (no "
+                "such artifacts), NO if any artifacts are present.",
+                "Is this one coherent hand-illustrated children's book scene? "
+                "All elements should look like they belong in the same painting, "
+                "with consistent style and lighting. Answer YES or NO.",
+                [crop],
+            )
+            crop_path.unlink(missing_ok=True)
+            if not ok:
+                all_pass = False
+                print(f"  composite judge: crop {ci} FAIL (x={x0})")
+                break
+
+        if all_pass:
+            print(f"  composite judge: PASS (attempt {attempt + 1}, {len(offsets)} crops)")
             return True
         print(f"  composite judge: FAIL (attempt {attempt + 1})")
-    comp_path.unlink(missing_ok=True)
     return False
 
 
