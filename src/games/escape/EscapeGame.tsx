@@ -8,7 +8,7 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
-import { EscapeRoom, manifest } from '../../manifest';
+import { EscapeAfter, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 import { EscapeState, applyTap, nextHint, selectItem, startState } from './logic';
 
@@ -137,6 +137,13 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
+            if (used && h.after) {
+              return <AfterPatch key={`after-${h.id}`} after={h.after} scale={scale} />;
+            }
+            return null;
+          })}
+          {room.hotspots.map((h) => {
+            const used = state.used.includes(h.id);
             const actionable = !used && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
             return (
               <Pressable
@@ -186,6 +193,33 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         lang={lang}
       />
     </GameShell>
+  );
+}
+
+function AfterPatch({ after, scale }: { after: EscapeAfter; scale: number }) {
+  const fade = useRef(new Animated.Value(0)).current;
+  const grow = useRef(new Animated.Value(0.92)).current;
+  const src = SCENE_IMAGES[after.patch];
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fade, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.spring(grow, { toValue: 1, friction: 5, useNativeDriver: true }),
+    ]).start();
+  }, [fade, grow]);
+  if (!src) return null;
+  return (
+    <View pointerEvents="none" style={{ position: 'absolute', left: after.x * scale, top: after.y * scale, width: after.w * scale, height: after.h * scale }}>
+      <Animated.Image
+        source={src}
+        style={{
+          width: '100%' as unknown as number,
+          height: '100%' as unknown as number,
+          opacity: fade,
+          transform: [{ scale: grow }],
+        }}
+        resizeMode="stretch"
+      />
+    </View>
   );
 }
 
