@@ -1682,9 +1682,11 @@ export const UI_IMAGES = {
 
 export const MUSICBOX_IMAGES: Record<string, number> = {
   'jingle/bg': require('../../assets/game/musicbox/jingle/bg.png'),
+  'jingle/fg': require('../../assets/game/musicbox/jingle/fg.png'),
   'jingle/mid': require('../../assets/game/musicbox/jingle/mid.png'),
   'jingle/obj_ground_candy_cane': require('../../assets/game/musicbox/jingle/obj_ground_candy_cane.png'),
   'jingle/obj_ground_gift_blue': require('../../assets/game/musicbox/jingle/obj_ground_gift_blue.png'),
+  'jingle/obj_ground_gift_red': require('../../assets/game/musicbox/jingle/obj_ground_gift_red.png'),
   'jingle/obj_ground_holly': require('../../assets/game/musicbox/jingle/obj_ground_holly.png'),
   'jingle/obj_ground_mitten': require('../../assets/game/musicbox/jingle/obj_ground_mitten.png'),
   'jingle/obj_ground_snow_bunny': require('../../assets/game/musicbox/jingle/obj_ground_snow_bunny.png'),
