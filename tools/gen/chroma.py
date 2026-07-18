@@ -20,6 +20,47 @@ def resize_rgba(canvas: np.ndarray, out_size: int) -> Image.Image:
     return Image.fromarray(np.concatenate([rgb, a2], axis=-1).astype(np.uint8), "RGBA")
 
 
+def key_strip_magenta(img: Image.Image) -> Image.Image:
+    """Remove the magenta backdrop from a panoramic strip, returning RGBA.
+
+    Unlike key_out_magenta this preserves the original dimensions — no
+    trim, pad, or resize — so the strip stays tileable.
+
+    Strips have content at the bottom and magenta sky at the top, so the
+    bg color is sampled from the top rows only (the full-border median
+    used by key_out_magenta gets polluted by bottom-edge content).
+    """
+    rgb = np.asarray(img.convert("RGB"), np.int16)
+    top_rows = np.concatenate([rgb[0, :], rgb[1, :], rgb[2, :],
+                               rgb[3, :], rgb[4, :]])
+    bg_color = np.median(top_rows, axis=0)
+    dist = np.abs(rgb - bg_color).sum(-1)
+    bg = dist < 120
+    alpha = np.where(bg, 0, 255).astype(np.uint8)
+
+    from PIL import ImageFilter
+    a_img = Image.fromarray(alpha, "L").filter(ImageFilter.MinFilter(3))
+    alpha = np.asarray(a_img)
+
+    rgba = np.dstack([rgb.astype(np.uint8), alpha])
+    sprite = Image.fromarray(rgba, "RGBA")
+    return _despill_edges(sprite, bg_color)
+
+
+def crossfade_loop(strip: Image.Image, final_w: int = 1280,
+                   fade_w: int = 128) -> Image.Image:
+    """Crossfade the last *fade_w* columns over the first to make a seamless
+    1280-wide loop from a wider (1408) source strip."""
+    arr = np.asarray(strip).astype(np.float32)
+    start = arr[:, :fade_w]
+    end = arr[:, final_w:final_w + fade_w]
+    t = np.linspace(0, 1, fade_w).reshape(1, -1, 1)
+    blended = end * (1 - t) + start * t
+    result = np.copy(arr[:, :final_w])
+    result[:, :fade_w] = blended
+    return Image.fromarray(result.clip(0, 255).astype(np.uint8), strip.mode)
+
+
 def key_out_magenta(img: Image.Image, out_size: int = 256) -> tuple[Image.Image, float]:
     """Remove the magenta backdrop, trim to content, pad square, resize.
 
