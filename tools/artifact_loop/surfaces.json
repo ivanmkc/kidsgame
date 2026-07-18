@@ -292,6 +292,30 @@
       }
     },
     {
+      "id": "spotit-game",
+      "route": "#/spotit",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "memory-game",
+      "route": "#/memory",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "shadow-game",
+      "route": "#/shadow",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "oddone-game",
+      "route": "#/oddone",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
       "id": "bingo-board",
       "route": "#/bingo",
       "waitFor": null,
