@@ -28479,5 +28479,39 @@
         }
       ]
     }
-  ]
+  ],
+  "musicbox": {
+    "twinkle": {
+      "strips": [
+        "bg",
+        "mid",
+        "fg"
+      ],
+      "vehicle": "vehicle",
+      "objects": {
+        "sky": [
+          "star",
+          "comet",
+          "moon_crescent",
+          "cloud_wispy",
+          "rocket",
+          "sparkle"
+        ],
+        "mid": [
+          "rainbow",
+          "bird",
+          "cloud_puffy",
+          "owl"
+        ],
+        "ground": [
+          "flower_pink",
+          "flower_yellow",
+          "tree_round",
+          "mushroom",
+          "mountain_goat",
+          "tulip"
+        ]
+      }
+    }
+  }
 }
