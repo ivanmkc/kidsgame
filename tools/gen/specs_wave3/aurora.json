@@ -1,0 +1,243 @@
+{
+  "id": "aurora",
+  "title": "Luna and the Sleeping Lights",
+  "hero": "LUNA",
+  "style": "Luminous airbrush night scene, teal and magenta aurora ribbons over pale blue ice floes, glowing whale spouts, star-dusted polar sky, soft snow sparkle. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the edge of a vast frozen shore, her shimmering drum slung across her back, under a dark polar sky with no aurora in sight. On the LEFT a glowing blue ice cave mouth opens in a glacier wall, on the RIGHT an amber-lit harbor with snow-covered boats sits along the shoreline, both large, fully visible, clearly separated.",
+      "text": "Luna dragged her drum to the very top of the world for the famous aurora show, but the sky is just sitting there being aggressively dark. Ice cave or harbor?",
+      "choices": [
+        {
+          "label": "Explore the ice cave",
+          "next": "a",
+          "spot": "blue ice cave"
+        },
+        {
+          "label": "Check the harbor",
+          "next": "b",
+          "spot": "amber-lit harbor"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} walks through a shimmering ice cave with her drum on her back, blue crystal walls humming faintly, a rounded blue ice boulder sitting beside the path, and a tiny glowing starfish clinging to the wall. On the LEFT a turquoise crystal grotto sparkles with hanging icicle chandeliers, on the RIGHT a silver frozen waterfall gleams at the end of a passage, both large, fully visible, clearly separated.",
+      "text": "The cave walls hum like someone left the fridge door open on purpose, and a wee glowing starfish blinks hello so Luna scoops it gently into her pocket. Crystal grotto or frozen waterfall?",
+      "choices": [
+        {
+          "label": "Enter the crystal grotto",
+          "next": "aa",
+          "spot": "turquoise crystal grotto"
+        },
+        {
+          "label": "Approach the waterfall",
+          "next": "ab",
+          "spot": "silver frozen waterfall"
+        }
+      ],
+      "scare": {
+        "spot": "blue ice boulder",
+        "pop": "a chubby baby seal with sparkly whiskers and a wide grin popping up from behind a rounded blue ice boulder in a glowing cave",
+        "reveal": "Arf! Just checking if you brought fish!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} explores a frosted harbor with her drum on her back, old wooden boats dusted in snow and a crinkled whale-song chart pinned to a mast fluttering in the breeze. On the LEFT a tall coral-pink lighthouse rises from the dock, on the RIGHT rolling lavender snow dunes stretch toward the horizon, both large, fully visible, clearly separated.",
+      "text": "A crinkled chart on a mast shows musical notes shaped like whale tails, so Luna rolls it up and stuffs it in her belt like a pirate of science. Lighthouse or snow dunes?",
+      "choices": [
+        {
+          "label": "Climb the lighthouse",
+          "next": "ba",
+          "spot": "coral-pink lighthouse"
+        },
+        {
+          "label": "Cross the snow dunes",
+          "next": "bb",
+          "spot": "lavender snow dunes"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} enters a dazzling crystal grotto with her drum on her back, the tiny starfish glowing in her pocket, surrounded by humming turquoise crystals that pulse with deep vibrations. On the LEFT a thick jade ice door seals a passage sloping downward, on the RIGHT a golden ice window in the cave ceiling lets starlight pour through, both large, fully visible, clearly separated.",
+      "text": "The crystals hum deep enough to rattle teeth, and the pocket starfish buzzes along like a tiny backup singer — something enormous is sleeping below this ice. Jade door or ice window?",
+      "choices": [
+        {
+          "label": "Open the jade door",
+          "next": "m1",
+          "spot": "jade ice door"
+        },
+        {
+          "label": "Climb to the window",
+          "next": "m2",
+          "spot": "golden ice window"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} faces a massive silver frozen waterfall with her drum on her back, the tiny starfish glowing in her pocket, ice crystals suspended mid-cascade like frozen music notes. On the LEFT a broad amber ice shelf juts from behind the frozen curtain, on the RIGHT a silver ice staircase spirals upward alongside the falls, both large, fully visible, clearly separated.",
+      "text": "The waterfall froze mid-pour and every drip is a tiny crystal note — this glacier is basically a symphony someone hit pause on. Ice shelf or staircase?",
+      "choices": [
+        {
+          "label": "Step onto the shelf",
+          "next": "m1",
+          "spot": "amber ice shelf"
+        },
+        {
+          "label": "Climb the staircase",
+          "next": "m2",
+          "spot": "silver ice staircase"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands at the top of the coral-pink lighthouse with her drum on her back, the whale-song chart tucked in her belt, wind whipping through the open gallery and the vast frozen bay stretching below. On the LEFT a rusty copper telescope sits bolted to the railing, on the RIGHT a large silver bell hangs from a frost-covered chain, both large, fully visible, clearly separated.",
+      "text": "From up here the whole frozen bay looks like it is holding its breath, and Luna spots slow dark shapes drifting just under the ice. Telescope or bell?",
+      "choices": [
+        {
+          "label": "Peer through the telescope",
+          "next": "m3",
+          "spot": "copper telescope"
+        },
+        {
+          "label": "Ring the silver bell",
+          "next": "m4",
+          "spot": "silver bell"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} trudges across rolling lavender snow dunes with her drum on her back, the whale-song chart tucked in her belt, a large lavender snow mound sitting beside the trail, and tiny fox tracks crisscrossing the snow. On the LEFT a violet fox den peeks from beneath a wide ice shelf, on the RIGHT a teal ice arch frames a view of the frozen channel beyond, both large, fully visible, clearly separated.",
+      "text": "Fox prints zigzag everywhere like a tiny choreographer mapped out the dunes, and when wind hits a ridge it hums the same whale-tail tune from the chart. Fox den or ice arch?",
+      "choices": [
+        {
+          "label": "Peek into the fox den",
+          "next": "m3",
+          "spot": "violet fox den"
+        },
+        {
+          "label": "Walk through the ice arch",
+          "next": "m4",
+          "spot": "teal ice arch"
+        }
+      ],
+      "scare": {
+        "spot": "lavender snow mound",
+        "pop": "a fluffy white arctic fox kit with enormous curious eyes peeking over a lavender snow mound under the stars",
+        "reveal": "Yip! Race you to the shore!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} balances on thick translucent ice above a dark ocean with her drum on her back, the tiny starfish in her pocket casting a green glow through the ice, massive whale shadows drifting far below. On the LEFT a large crimson boulder sits on the ice like a throne, on the RIGHT a smooth pearly ice drum formation rises from the frozen surface, both large, fully visible, clearly separated.",
+      "text": "Giant whale shadows glide under the ice like slow-motion parade floats, and the pocket starfish is glowing so hard it could power a lighthouse. Boulder or ice drum?",
+      "choices": [
+        {
+          "label": "Sit and wait quietly",
+          "next": "end_quiet_wait",
+          "spot": "crimson boulder"
+        },
+        {
+          "label": "Tap a gentle rhythm",
+          "next": "end_drum_wake",
+          "spot": "pearly ice drum"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} emerges into a sheltered cove where the cave ceiling has cracked open to the sky, her drum on her back, the tiny starfish in her pocket pulsing softly, moonlight streaming down onto the frozen surface. On the LEFT a large amber shell sits half-buried in the ice, on the RIGHT a flat mint-green ice floe bobs gently in a gap of open water, both large, fully visible, clearly separated.",
+      "text": "Moonlight pours in like a spotlight nobody ordered, and the pocket starfish is vibrating so fast it might actually be a phone. Amber shell or ice floe?",
+      "choices": [
+        {
+          "label": "Hold the shell and listen",
+          "next": "end_shell_song",
+          "spot": "amber shell"
+        },
+        {
+          "label": "Ride the floating floe",
+          "next": "end_floe_drift",
+          "spot": "mint-green ice floe"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} steps onto a wide frozen bay with her drum on her back, the whale-song chart in her hand, dark whale shapes visible beneath the ice and the sky waiting overhead. On the LEFT a scarlet driftwood log lies across the ice, in the MIDDLE a luminous jade stone glows faintly at the center of the bay, on the RIGHT a tall cobalt ice pillar rises from the frozen surface, all large, fully visible, clearly separated.",
+      "text": "The whole bay trembles like it is holding in a sneeze, and the whale chart practically points at the ice saying tap here please. Driftwood log, jade stone, or ice pillar?",
+      "choices": [
+        {
+          "label": "Drum on the log",
+          "next": "end_log_rhythm",
+          "spot": "scarlet driftwood log"
+        },
+        {
+          "label": "Touch the jade stone",
+          "next": "end_stone_glow",
+          "spot": "luminous jade stone"
+        },
+        {
+          "label": "Tap the ice pillar",
+          "next": "end_pillar_crack",
+          "spot": "cobalt ice pillar"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} arrives at the edge of a quiet bay with her drum on her back, the whale-song chart in her hand, the frozen surface perfectly still and a strange warmth rising from below. On the LEFT a large tangerine starfish is frozen into the surface ice, on the RIGHT a round white snow mound sits on the ice puffing tiny wisps of mist, both large, fully visible, clearly separated.",
+      "text": "Something warm breathes under this bay and that snow mound just puffed a tiny cloud, while the whale chart shows a big smiley note right at this spot. Starfish or snow mound?",
+      "choices": [
+        {
+          "label": "Free the frozen starfish",
+          "next": "end_starfish_guide",
+          "spot": "tangerine starfish"
+        },
+        {
+          "label": "Investigate the snow mound",
+          "next": "end_mound_whale",
+          "spot": "white snow mound"
+        }
+      ]
+    },
+    "end_quiet_wait": {
+      "scene": "{HERO} sits slumped on the crimson boulder on the thick ice with her drum unused beside her, yawning at the dark sky while whale shadows slowly drift away below.",
+      "text": "Luna sat so still on the boulder that a seagull started building a nest in her hair — meanwhile the whales decided she was furniture and swam to a completely different ocean. Oopsie ending!",
+      "bad": true
+    },
+    "end_drum_wake": {
+      "scene": "{HERO} kneels beside the pearly ice drum tapping her shimmering drum in a gentle rhythm, the starfish blazing green in her pocket, as enormous whales surface through cracks in the ice and their glowing spouts paint brilliant teal and magenta aurora ribbons across the polar sky.",
+      "text": "Luna tapped a lullaby in reverse and the whales rose like enormous singing submarines, their shimmering spouts painting the sky in ribbons of teal and magenta — the aurora was never broken, just napping! The End!"
+    },
+    "end_shell_song": {
+      "scene": "{HERO} holds the large amber shell to her ear with one hand and taps her drum with the other in the moonlit cove, the starfish blazing in her pocket, as whales surface through the opening and their luminous spouts swirl aurora colors across the night sky.",
+      "text": "The shell echoed a whale heartbeat back through the ice, and Luna drummed along until the whole pod surfaced singing, spouting the aurora across the sky like the world's biggest night-light. The End!"
+    },
+    "end_floe_drift": {
+      "scene": "{HERO} sits cross-legged on the mint-green ice floe drifting in slow circles through the dark cove, her drum on her back, staring up at the still-dark sky with a baffled expression.",
+      "text": "The ice floe spun Luna in lazy circles like the world's coldest merry-go-round, and by the time she got dizzy enough to stop the whales had moved three fjords over. Oopsie ending!",
+      "bad": true
+    },
+    "end_log_rhythm": {
+      "scene": "{HERO} sits astride the scarlet driftwood log drumming a thundering rhythm, the whale-song chart pinned under her knee, as whales burst through the bay ice and their radiant spouts explode into teal and magenta aurora streamers across the sky.",
+      "text": "Luna drummed on the driftwood so hard it woke up whales three fjords away — they burst through the ice like living fireworks and painted the sky in aurora so bright the stars filed a noise complaint. The End!"
+    },
+    "end_stone_glow": {
+      "scene": "{HERO} sits on the cracked ice beside the luminous jade stone, her drum upside down on the stone and vibrating wildly, the whale-song chart blown away in the wind, cracks spreading across the frozen bay as startled whale shadows dive deep below.",
+      "text": "Luna set her drum on the jade stone and gave it one ENORMOUS whack — the stone amplified it into a BOOM so loud that every whale in the ocean dove to the absolute bottom, the ice cracked in seventeen directions, and Luna spent the rest of the night balanced on a very tiny ice cube. Oopsie ending!",
+      "bad": true
+    },
+    "end_pillar_crack": {
+      "scene": "{HERO} whacks her drum hard against the tall cobalt ice pillar on the wide frozen bay, cracks spreading wildly in every direction as the ice splits apart beneath her feet, the whale-song chart blown away by a gust, whales diving deep below the crumbling ice.",
+      "text": "Luna tapped the pillar but got a LITTLE carried away and gave it one massive WHACK — the ice cracked all right, in about fifty directions at once, and the whales took that as a signal to dive for cover! Luna spent the rest of the night hopping between shrinking ice chunks like a very cold, very sparkly game of musical chairs. Oopsie ending!",
+      "bad": true
+    },
+    "end_starfish_guide": {
+      "scene": "{HERO} holds the freed tangerine starfish high above her head at the edge of the quiet bay, her drum tucked under her arm and the whale-song chart in her belt, as the starfish blazes with warm light and whales surface following its glow, their luminous spouts cascading aurora colors across the sky.",
+      "text": "The starfish turned into a tiny lighthouse and every whale in the bay followed its glow — up they came singing, spouting an aurora so vivid Luna forgot what dark even looked like. The End!"
+    },
+    "end_mound_whale": {
+      "scene": "{HERO} kneels beside the white snow mound that reveals itself as a baby whale's nose poking through the ice, her drum in her lap and the whale-song chart beside her, as the baby calls its pod and enormous whales surface across the bay, their glowing spouts erupting into a dazzling aurora.",
+      "text": "The snow mound sneezed because it was a baby whale's nose — its delighted squeal brought the whole pod rocketing up, and their spouts painted an aurora so spectacular even the moon stood up and clapped. The End!"
+    }
+  }
+}

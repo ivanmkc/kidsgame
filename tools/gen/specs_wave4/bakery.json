@@ -1,0 +1,243 @@
+{
+  "id": "bakery",
+  "title": "Pip and the Sunrise Loaf",
+  "hero": "PIP",
+  "style": "Cozy golden oven glow, flour-dusted warm surfaces, brick and copper tones, steam wisps catching firelight, pre-dawn blue through windows. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in the entrance of a cozy brick-oven village bakery in the dark pre-dawn hours, flour dusting every warm surface, a glowing orange brick oven in the back casting amber light, copper bowls on shelves, and a pictographic recipe chart on the wall showing only a simple sun shape. Signs and labels are blank or show only simple pictures. On the LEFT an amber flour pantry with tall wooden shelves lined with plump grain sacks stretches along the wall in warm light, on the RIGHT a copper mixing station with gleaming bowls and whisks sits under hanging ladles, both large, fully visible, clearly separated.",
+      "text": "It is WAY past Pip's bedtime but the legendary sunrise loaf will not bake itself — the recipe on the wall is just a picture of a sun, which is not exactly step-by-step instructions. The oven is already humming, dawn is sneaking closer, and somebody's tail is wagging. Flour pantry or mixing station?",
+      "choices": [
+        {
+          "label": "Search the flour pantry",
+          "next": "a",
+          "spot": "amber flour pantry"
+        },
+        {
+          "label": "Try the mixing station",
+          "next": "b",
+          "spot": "copper mixing station"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} explores a tall amber flour pantry lined with plump grain sacks on wooden shelves, a golden whisk with a warm shimmer tucked behind a large burlap flour sack on the bottom shelf, warm oven glow filtering through from the bakery behind. Signs and labels are blank or show only simple pictures. On the LEFT a slate stone mill with a heavy round grinding wheel sits in the corner beside a wooden bucket, on the RIGHT a cinnamon spice shelf lined with jars and cinnamon sticks stands against the far wall, both large, fully visible, clearly separated.",
+      "text": "Every sack smells like a different dream and behind the biggest one Pip finds a golden whisk that HUMS when he picks it up — into the satchel it goes, no time to ask questions about magical kitchen tools. Stone mill or spice shelf?",
+      "choices": [
+        {
+          "label": "Try the stone mill",
+          "next": "aa",
+          "spot": "slate stone mill"
+        },
+        {
+          "label": "Check the spice shelf",
+          "next": "ab",
+          "spot": "cinnamon spice shelf"
+        }
+      ],
+      "scare": {
+        "spot": "burlap flour sack",
+        "pop": "a round dough blob with two big surprised yeasty eyes and a puffy flour-dusted body rising slowly out of the burlap flour sack",
+        "reveal": "Yawn! Just proofing in the quiet spot!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} stands at a wide copper mixing station with gleaming copper bowls arranged by size from tiny to enormous, hanging brass ladles catching the oven glow, and a small copper measuring cup with a sun stamped on the bottom sitting among the bowls. Signs and labels are blank or show only simple pictures. On the LEFT a honey-colored proofing nook with warm rounded shelves holding puffy dough balls glows near the oven wall, on the RIGHT the big orange brick oven with its iron grate and glowing embers fills the back wall, both large, fully visible, clearly separated.",
+      "text": "The biggest bowl could fit Pip inside it TWICE and among the copper jumble he finds a tiny measuring cup with a sun on the bottom that chimes when he taps it — definitely enchanted, definitely going in the satchel. Proofing nook or brick oven?",
+      "choices": [
+        {
+          "label": "Check the proofing nook",
+          "next": "ba",
+          "spot": "honey proofing nook"
+        },
+        {
+          "label": "Peek at the brick oven",
+          "next": "bb",
+          "spot": "orange brick oven"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands beside a slate stone mill in the corner of the flour pantry, the golden whisk tucked in his satchel glowing faintly, the heavy round grinding wheel turning as golden grain pours into a wooden bucket below, fine golden flour rising in soft clouds. On the LEFT a cream kneading table dusted with flour stretches under a hanging lamp in the warm bakery, on the RIGHT a tall indigo arched window shows the dark pre-dawn sky with the faintest blush at the horizon, both large, fully visible, clearly separated.",
+      "text": "The stone mill grinds the grain into flour so golden it practically GLOWS and the whisk in Pip's satchel buzzes like it cannot wait to stir — the sky outside is just barely starting to lighten and dawn waits for nobody. Kneading table or tall window?",
+      "choices": [
+        {
+          "label": "Head to the kneading table",
+          "next": "m1",
+          "spot": "cream kneading table"
+        },
+        {
+          "label": "Climb to the tall window",
+          "next": "m2",
+          "spot": "indigo arched window"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} browses a tall cinnamon spice shelf lined with jars of cinnamon sticks and vanilla pods, the golden whisk tucked in his satchel, warm amber oven glow catching the glass jars, and a big cinnamon stick leaning against the shelf. Signs and labels are blank or show only simple pictures. On the LEFT a walnut flour counter dusted with golden flour stretches under a warm lamp, on the RIGHT a violet round window shows the dark pre-dawn sky with a thin pink line at the horizon, both large, fully visible, clearly separated.",
+      "text": "Pip grabs the biggest cinnamon stick because anything that smells THIS good belongs in a sunrise loaf — the golden whisk practically vibrates with approval, which is unusual behavior for a kitchen tool but Pip is rolling with it. Flour counter or round window?",
+      "choices": [
+        {
+          "label": "Head to the flour counter",
+          "next": "m1",
+          "spot": "walnut flour counter"
+        },
+        {
+          "label": "Cross to the round window",
+          "next": "m2",
+          "spot": "violet round window"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} peers into a warm honey-colored proofing nook with rounded shelves near the oven wall, puffy dough balls rising in neat rows, the copper measuring cup tucked in his satchel, steam curling gently from the warmest shelf where one dough ball is perfectly round and ready. On the LEFT a wide granite rolling counter with a marble rolling pin sits under a rack of baking trays, on the RIGHT a tall pewter cooling rack stands beside the oven with wire shelves catching the heat, both large, fully visible, clearly separated.",
+      "text": "Every dough ball is rising like a tiny cloud and the copper cup CHIMES near the roundest one — Pip pokes it and it bounces right back, which means the yeast is happy and also that dough has more personality than expected. Rolling counter or cooling rack?",
+      "choices": [
+        {
+          "label": "Go to the rolling counter",
+          "next": "m3",
+          "spot": "granite rolling counter"
+        },
+        {
+          "label": "Check the cooling rack",
+          "next": "m4",
+          "spot": "pewter cooling rack"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} crouches near the big orange brick oven peering at its glowing embers through the iron grate, the copper measuring cup tucked in his satchel, a large copper mixing bowl sitting on the brick hearth beside the oven, and waves of warmth rippling the air above the coals. On the LEFT a wide marble rolling slab with a wooden rolling pin sits under a rack of baking trays, on the RIGHT a tall bronze cooling shelf stands near the oven with wire racks catching the warmth, both large, fully visible, clearly separated.",
+      "text": "The oven is SO warm that Pip's ears go floppy which honestly feels amazing but this is NOT nap time — the copper cup clicks against the old bellows slot like it was built to fit, which is either destiny or extremely good engineering. Rolling slab or cooling shelf?",
+      "choices": [
+        {
+          "label": "Go to the rolling slab",
+          "next": "m3",
+          "spot": "marble rolling slab"
+        },
+        {
+          "label": "Check the cooling shelf",
+          "next": "m4",
+          "spot": "bronze cooling shelf"
+        }
+      ],
+      "scare": {
+        "spot": "copper mixing bowl",
+        "pop": "a fluffy sourdough starter creature with two big round bubbly eyes and a puffy yeasty body peeking over the rim of the copper mixing bowl trailing tiny flour bubbles",
+        "reveal": "Hee hee! Just fermenting over here!",
+        "sting": "plop",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands at a long kneading table dusted with flour under a warm hanging lamp, the golden whisk in his paw, a round mound of golden dough ready on the table surface, and flour clouds puffing gently with each pat. On the LEFT a golden bread mold shaped like a sun sits on the table beside the dough, on the RIGHT a big yellow sugar bag towers at the end of the table, both large, fully visible, clearly separated.",
+      "text": "The dough is PERFECT and the golden whisk makes it shimmer with every stir — all that is left is shaping it, but that enormous sugar bag at the end of the table is whispering sweet nothings and Pip has very little willpower when it comes to sugar. Bread mold or sugar bag?",
+      "choices": [
+        {
+          "label": "Press the bread mold",
+          "next": "end_sun_knead",
+          "spot": "golden bread mold"
+        },
+        {
+          "label": "Dump the sugar bag",
+          "next": "end_yeast_eruption",
+          "spot": "yellow sugar bag"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} carries a bowl of golden dough to a tall bakery window, the golden whisk balanced across the top of the bowl, the dark pre-dawn sky visible through the glass with a thin line of pink at the horizon, and cool air drifting across the flour-dusted sill. On the LEFT a wide tan bread board sitting on the windowsill catches the faint pink glow from the dawn sky, on the RIGHT a tall stack of ivory flour sacks piled against the wall makes a soft pillow-like mountain, both large, fully visible, clearly separated.",
+      "text": "The sky is JUST starting to blush pink and the golden whisk points toward the horizon like a tiny compass — if Pip times this right the first ray of dawn could touch the dough, but those flour sacks look dangerously comfortable for a puppy who has been awake since midnight. Bread board or flour sacks?",
+      "choices": [
+        {
+          "label": "Set dough on the bread board",
+          "next": "end_dawn_glow",
+          "spot": "tan bread board"
+        },
+        {
+          "label": "Flop onto the flour sacks",
+          "next": "end_flour_tumble",
+          "spot": "ivory flour sacks"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands at a wide rolling counter with the copper measuring cup in his paw, a round shaped dough ready on the counter surface, a rolling pin beside it. Signs and labels are blank or show only simple pictures. On the LEFT a golden honey jar with a sun-shaped lid glows amber in the oven light, in the MIDDLE an orange marmalade pot with a round cork stopper sits on a wooden trivet, on the RIGHT a purple berry bowl brimming with dark berries sits on a cloth napkin, all large, fully visible, clearly separated.",
+      "text": "The dough is shaped and ready but a sunrise loaf needs a GLAZE — the copper cup chimes differently near each one like it is trying to help Pip choose and honestly all three smell incredible. Honey, marmalade, or berries?",
+      "choices": [
+        {
+          "label": "Brush on golden honey",
+          "next": "end_honey_sunrise",
+          "spot": "golden honey jar"
+        },
+        {
+          "label": "Spread orange marmalade",
+          "next": "end_marmalade_dawn",
+          "spot": "orange marmalade pot"
+        },
+        {
+          "label": "Drizzle purple berries",
+          "next": "end_berry_blush",
+          "spot": "purple berry bowl"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands beside the brick oven with the copper measuring cup in his paw fitting into the old bellows slot, a shaped dough ball on a baking tray ready to slide in, glowing embers visible through the iron grate. On the LEFT a pair of red oven mitts sits on the brick hearth beside the bellows handle, on the RIGHT a big russet bread paddle leans against the oven wall within easy reach, both large, fully visible, clearly separated.",
+      "text": "The dough is shaped, the oven is ROARING, and the copper cup clicks into the bellows like it was born there — slow and careful with the mitts, or grab that paddle and go for the dramatic bread launch. Oven mitts or bread paddle?",
+      "choices": [
+        {
+          "label": "Grab the oven mitts",
+          "next": "end_slow_golden",
+          "spot": "red oven mitts"
+        },
+        {
+          "label": "Swing the bread paddle",
+          "next": "end_ember_crackle",
+          "spot": "russet bread paddle"
+        }
+      ]
+    },
+    "end_sun_knead": {
+      "scene": "{HERO} presses the golden dough into the sun-shaped bread mold on the kneading table, the golden whisk laid beside it humming softly, the finished sunrise loaf glowing golden and perfectly sun-shaped with warm steam rising, and a small lost hedgehog peeking in through the bakery window with a happy nose twitch drawn by the warm bread smell, the pre-dawn sky turning soft pink outside.",
+      "text": "Pip pressed the dough into the sun mold and the golden whisk hummed one last satisfied note — the sunrise loaf came out PERFECT, round and warm and golden as actual sunshine! Then a tiny hedgehog appeared at the window following the smell all the way from the cold meadow. The old baker arrived yawning, saw the loaf AND the hedgehog, and said THAT is the real sunrise recipe — warmth that brings everyone home. The End!"
+    },
+    "end_yeast_eruption": {
+      "scene": "{HERO} stands at the kneading table absolutely covered head to tail in exploded sticky dough, the golden whisk sticking out of a dough pile on the ceiling, the overturned yellow sugar bag empty beside an erupted dough crater, flour and sugar coating every surface of the bakery.",
+      "text": "Pip dumped the ENTIRE bag of sugar into the dough and the yeast went completely bananas — the dough ERUPTED like a sticky golden volcano, launched the whisk into the ceiling, and buried Pip up to the ears in warm gooey bread batter! The sunrise loaf is on the ceiling, Pip is basically a dough sculpture, and the most beautiful dawn in village history is happening without him. Oopsie ending!",
+      "bad": true
+    },
+    "end_dawn_glow": {
+      "scene": "{HERO} holds the bowl of golden dough on the wide tan bread board at the windowsill as the very first ray of pink dawn light touches the dough through the tall window, the golden whisk glowing bright in the bowl, the dough transforming into a perfectly round golden sunrise loaf that radiates warm light, and a small lost songbird landing on the windowsill drawn by the golden glow.",
+      "text": "Pip held the dough on the bread board and the very first ray of dawn hit it EXACTLY right — the golden whisk blazed, the dough turned into the most beautiful sunrise loaf anyone had ever baked, and a little songbird who had been flying lost all night followed the warm glow straight to the windowsill! The old baker arrived with tears in her eyes and said THAT is the real sunrise recipe — light that guides everyone home. The End!"
+    },
+    "end_flour_tumble": {
+      "scene": "{HERO} lies buried in the collapsed tall stack of ivory flour sacks against the wall, eyes barely visible through a mountain of spilled white flour, the golden whisk sticking out of the flour pile, the bowl of golden dough sitting untouched and slowly deflating on the tan bread board at the windowsill as dawn breaks pink through the tall window.",
+      "text": "Pip flopped onto the flour sacks and the ENTIRE stack came down like a floury avalanche — buried under a mountain of soft white powder while the dough sat on the bread board slowly deflating and the most gorgeous sunrise in village history happened without a single loaf to show for it. Pip is now the world's fluffiest flour ghost and the sunrise loaf is still just dough. Oopsie ending!",
+      "bad": true
+    },
+    "end_honey_sunrise": {
+      "scene": "{HERO} stands at the rolling counter holding the copper measuring cup, the sunrise loaf fresh from the oven glazed in golden honey and glowing amber like a tiny sun, warm honey-scented steam curling upward, and a small lost kitten padding through the bakery entrance following the sweet honey smell with wide happy eyes, dawn light turning pink through the windows.",
+      "text": "Pip brushed the golden honey on thick and the loaf came out of the oven glowing like a tiny amber sun — the smell was so warm and sweet that a little lost kitten followed it all the way from the village square right into the bakery! The copper cup chimed one perfect note, the old baker appeared and said THAT is the real sunrise recipe — sweetness that brings everyone home. The End!"
+    },
+    "end_marmalade_dawn": {
+      "scene": "{HERO} stands at the rolling counter with the copper measuring cup, a sunrise loaf covered in way too much orange marmalade sliding off the counter in a sticky orange cascade, Pip's paws stuck to the counter surface, the marmalade pot overturned and empty.",
+      "text": "Pip spread the orange marmalade but used the ENTIRE pot — the loaf was so sticky it slid right off the counter, pulling Pip's paws with it, and landed on the floor with a magnificent SPLAT that sounded like a citrus explosion! The copper cup chimed a sad note, the old baker arrived to find an orange puppy glued to an orange floor. Oopsie ending!",
+      "bad": true
+    },
+    "end_berry_blush": {
+      "scene": "{HERO} stands at the rolling counter absolutely covered in purple berry juice from head to tail, the sunrise loaf sitting pristine and unglazed on the counter, the purple berry bowl spinning on the floor, purple paw prints everywhere.",
+      "text": "Pip reached for the purple berries and knocked the ENTIRE bowl over — berries went bouncing everywhere, juice splattered from ceiling to floor, and somehow Pip got covered in purple while the loaf stayed completely untouched! The copper cup chimed in disbelief, and the old baker arrived to find a purple puppy, a white loaf, and berry juice on every surface except the bread. Oopsie ending!",
+      "bad": true
+    },
+    "end_slow_golden": {
+      "scene": "{HERO} kneels beside the brick oven wearing the red oven mitts, the copper measuring cup clicked into the bellows slot, gently pumping the bellows as the sunrise loaf inside the oven glows golden through the grate, a perfectly crusted round loaf visible on the oven stone, and a small lost field mouse peeking in through a crack in the brickwork following the warm bread smell with two tiny bright eyes, dawn light streaming through the bakery windows.",
+      "text": "Pip pumped the bellows slow and steady with the copper cup clicking in its slot — the loaf baked to the most gorgeous golden crust, crispy outside and cloud-soft inside, and a tiny field mouse followed the warm bread smell right through the brickwork to say hello! The old baker arrived and said THAT is the real sunrise recipe — patience that brings everyone home. The End!"
+    },
+    "end_ember_crackle": {
+      "scene": "{HERO} stands beside the brick oven holding the big russet bread paddle with the copper measuring cup in his satchel, sliding a beautifully crackling sunrise loaf out of the oven, the crust split into a sunburst pattern with golden crumbs falling, embers glowing bright orange behind, and a small lost squirrel bounding through the bakery window following the toasty bread smell with two wide bright eyes, dawn light filling the bakery.",
+      "text": "Pip grabbed the paddle and launched the dough in with a WHOOSH — the oven crackled, the crust split into a sunburst pattern, and the loaf came out so perfectly toasty that a lost squirrel followed the smell through the window and did a little backflip on the counter! The copper cup chimed, the old baker grinned and said THAT is the real sunrise recipe — boldness that brings everyone home. The End!"
+    }
+  }
+}

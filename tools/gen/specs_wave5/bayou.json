@@ -1,0 +1,158 @@
+{
+  "id": "bayou",
+  "title": "Willow and the Runaway Broom",
+  "hero": "WILLOW",
+  "style": "Moody Miyazaki watercolors — deep teals, warm violets, yellow-green bioluminescence, cypress silhouettes, glowing moss textures, misty layered backgrounds. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the foggy edge of a bioluminescent bayou at night, ancient cypress trees dripping glowing yellow-green moss, water mirroring a violet sky with wrong constellations, and a trail of orange sparks disappearing ahead where her runaway broomstick zoomed off. On the LEFT a violet spark trail winds between towering cypress trunks into deep teal fog, on the RIGHT a chain of large glowing teal mushroom caps floats above the dark water like stepping stones, both large, fully visible, clearly separated.",
+      "text": "Willow's broomstick just ZOOMED into the bayou like it had somewhere better to be, and her witch exam is at sunrise — she can see sparks fading in the fog and weird glowing mushroom caps bobbing on the water. Spark trail or mushroom caps?",
+      "choices": [
+        {"label": "Chase the spark trail", "next": "a", "spot": "violet spark trail"},
+        {"label": "Hop the mushroom caps", "next": "b", "spot": "teal mushroom caps"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} creeps through a deep cypress corridor draped in glowing yellow-green moss, violet sparks fading ahead, a carved cypress-root spell-lantern filled with shimmering teal water sitting on a mossy stump, and an amber hollow trunk with a faintly glowing crack at its base standing between the paths. On the LEFT a narrow foggy channel runs between massive cypress roots into silver mist, on the RIGHT a woven vine bridge stretches over dark water toward a warm clearing, both large, fully visible, clearly separated.",
+      "text": "The sparks lead deeper in and every tree hollow is GLOWING from inside like the swamp has nightlights — Willow grabs the spell-lantern from the stump because a witch in a dark bayou needs all the light she can get. Foggy channel or vine bridge?",
+      "choices": [
+        {"label": "Slip into the fog", "next": "aa", "spot": "foggy channel"},
+        {"label": "Cross the vine bridge", "next": "ab", "spot": "woven vine bridge"}
+      ],
+      "scare": {
+        "spot": "amber hollow trunk",
+        "pop": "a cluster of bright green tree frogs with two big round golden eyes each peering out of the amber hollow trunk in a tidy stack",
+        "reveal": "Ribbit! We were just watching the sparks go by!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} bounces across giant teal mushroom caps over dark bioluminescent water, will-o'-wisps swirling around her hat, the broomstick's orange sparks flickering on the far bank, and a hollow singing reed poking out of the muddy bank ahead humming in the breeze. On the LEFT a sandy bank leads to a fog-wrapped island with twisted trees and glowing moss, on the RIGHT a towering cypress cathedral arch drips with amber lantern-moss, both large, fully visible, clearly separated.",
+      "text": "Each mushroom cap BOUNCES like a trampoline and Willow nearly lost her hat twice — she grabs the humming singing reed from the mud and tucks it in her hat band because anything that sings might be useful later. Fog island or cypress cathedral?",
+      "choices": [
+        {"label": "Wade to the fog island", "next": "ba", "spot": "sandy bank"},
+        {"label": "Enter the cathedral", "next": "bb", "spot": "cypress cathedral arch"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} wades through a narrow foggy channel between massive cypress roots, the spell-lantern glowing teal in her hand, dark water swirling around her boots, a thick gnarled cypress root arching out of the water beside her, and the broomstick's violet glow flickering somewhere ahead in the mist. On the LEFT a moonlit clearing with flat moss-covered stones opens through the fog, on the RIGHT a twisted root tunnel winds between two ancient cypress trunks into warm amber light, both large, fully visible, clearly separated.",
+      "text": "The fog is so thick Willow can only hear the broomstick buzzing, and something VERY large just rippled the water near that root — moonlit clearing or root tunnel?",
+      "choices": [
+        {"label": "Step into the clearing", "next": "m1", "spot": "moonlit clearing"},
+        {"label": "Crawl through the tunnel", "next": "m2", "spot": "twisted root tunnel"}
+      ],
+      "scare": {
+        "spot": "cypress root",
+        "pop": "a huge moss-covered gator with two glowing amber eyes rising slowly from beneath the cypress root dripping with duckweed",
+        "reveal": "Easy there, little witch. Just scratching my back on this root.",
+        "sting": "thunder",
+        "delay": 2000
+      }
+    },
+    "ab": {
+      "scene": "{HERO} stands at the far end of the vine bridge on a mossy bank, the spell-lantern casting teal light across the ferns, the broomstick's violet glow weaving between the trees ahead, and Spanish moss curtains hanging like ghostly drapes between the cypress trunks. On the LEFT a moonlit clearing with flat moss-covered stones shimmers through the curtains, on the RIGHT a twisted root tunnel between ancient cypress trunks glows with warm amber light, both large, fully visible, clearly separated.",
+      "text": "The vine bridge wobbled so hard Willow's hat nearly flew off, but the broomstick glow is CLOSE and flickering like it cannot decide where to hide — clearing or tunnel?",
+      "choices": [
+        {"label": "Run to the clearing", "next": "m1", "spot": "moonlit clearing"},
+        {"label": "Duck into the tunnel", "next": "m2", "spot": "twisted root tunnel"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands on a fog-wrapped island with twisted trees and glowing moss underfoot, the singing reed humming in her hat, dark water perfectly still all around, a large green lily pad floating near the shore with Willow's silhouette reflected strangely, and orange sparks circling above. On the LEFT a wide mushroom circle of tall violet toadstools stands in a clearing between the trees, on the RIGHT a glowing teal waterfall tumbles from a moss-covered cliff into a hidden pool, both large, fully visible, clearly separated.",
+      "text": "The fog island is WEIRD — Willow looked into the water and her reflection was GRINNING when she was definitely not grinning, which is extremely rude of a reflection. Mushroom circle or waterfall?",
+      "choices": [
+        {"label": "Enter the mushroom circle", "next": "m3", "spot": "violet mushroom circle"},
+        {"label": "Approach the waterfall", "next": "m4", "spot": "teal waterfall"}
+      ],
+      "scare": {
+        "spot": "green lily pad",
+        "pop": "a fat bog-toad with two enormous bulging golden eyes leaping off the green lily pad with a huge goofy grin",
+        "reveal": "Croak! I was just copying your face for practice!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "bb": {
+      "scene": "{HERO} stands inside a towering cypress cathedral, massive trunks forming natural arches draped in amber lantern-moss, the singing reed humming in her hat, the broomstick's orange sparks visible high above near the canopy doing lazy figure-eights. On the LEFT a wide mushroom circle of tall violet toadstools glows through an opening in the trunk wall, on the RIGHT a glowing teal waterfall cascades from a mossy shelf into a hidden grotto, both large, fully visible, clearly separated.",
+      "text": "The cathedral is ENORMOUS and the broomstick is up there doing loop-de-loops near the ceiling like it is having the time of its life without Willow — the absolute nerve! Mushroom circle or waterfall?",
+      "choices": [
+        {"label": "Head for the mushroom circle", "next": "m3", "spot": "violet mushroom circle"},
+        {"label": "Climb toward the waterfall", "next": "m4", "spot": "teal waterfall"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in a moonlit clearing ringed by flat moss-covered stones, the spell-lantern glowing teal in her hand, the broomstick hovering in the center wreathed in violet sparks with a wild flickering shadow whipping around it. On the LEFT an amber cat-shaped rock crouches at the clearing edge casting a long graceful shadow in the moonlight, on the RIGHT an olive snake-shaped root coils up from the ground casting a long sinuous shadow, both large, fully visible, clearly separated.",
+      "text": "There it is — but the broomstick has a WILD SHADOW of its own that keeps scaring it in circles, and Willow needs to step behind a shape to cast a calmer shadow. Cat rock or snake root?",
+      "choices": [
+        {"label": "Step behind the cat rock", "next": "end_cat_grace", "spot": "amber cat rock"},
+        {"label": "Step behind the snake root", "next": "end_snake_flee", "spot": "olive snake root"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} emerges from the twisted root tunnel into a warm amber grotto, the spell-lantern glowing gold in her hand, the broomstick hovering nervously near the ceiling with its wild shadow thrashing against the curved walls. On the LEFT a teal frog-shaped stone sits at the pool edge casting a gentle round shadow, on the RIGHT a copper cat-shaped curl of bark rests against the wall casting a graceful arched shadow, both large, fully visible, clearly separated.",
+      "text": "The broomstick is backed into a corner and its wild shadow is FREAKING OUT — Willow needs a shadow shape that says I come in peace, not I come to crash into another tree. Frog stone or cat bark?",
+      "choices": [
+        {"label": "Step behind the frog stone", "next": "end_frog_bounce", "spot": "teal frog stone"},
+        {"label": "Step behind the cat bark", "next": "end_gentle_land", "spot": "copper cat bark"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in the center of the mushroom circle surrounded by tall violet toadstools, the singing reed humming in her hat, the broomstick zooming overhead in frantic loops with its wild shadow whipping behind it. On the LEFT a gray cat-shaped branch leans against a toadstool casting a pouncing shadow, in the MIDDLE a green snake-shaped vine dangles from the canopy casting a coiling shadow, on the RIGHT a teal frog-shaped toadstool squats at the circle edge casting a leaping shadow, all large, fully visible, clearly separated.",
+      "text": "The broomstick is doing LAPS around the mushroom circle and Willow has one shot at the perfect shadow shape — cat branch, snake vine, or frog toadstool?",
+      "choices": [
+        {"label": "Step behind the cat branch", "next": "end_cat_dance", "spot": "gray cat branch"},
+        {"label": "Step behind the snake vine", "next": "end_snake_spiral", "spot": "green snake vine"},
+        {"label": "Step behind the frog toadstool", "next": "end_frog_splash", "spot": "teal frog toadstool"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands behind the glowing teal waterfall in a hidden grotto, the singing reed humming softly in her hat, the broomstick trembling in the corner with its wild shadow pressed flat against the wet stone, bioluminescent moss pulsing gently all around. On the LEFT a silver snake-shaped piece of driftwood curves along the wall casting a gentle swaying shadow, on the RIGHT a green frog-shaped boulder sits by the pool casting a soft round shadow, both large, fully visible, clearly separated.",
+      "text": "The broomstick is SHAKING and its wild shadow looks exhausted — this is not a fight, it is a scared broomstick that needs to know Willow will fly gently. Snake driftwood or frog boulder?",
+      "choices": [
+        {"label": "Step behind the driftwood", "next": "end_waterfall_calm", "spot": "silver snake driftwood"},
+        {"label": "Step behind the boulder", "next": "end_dawn_race", "spot": "green frog boulder"}
+      ]
+    },
+    "end_cat_grace": {
+      "scene": "{HERO} steps behind the amber cat rock and her shadow stretches into a graceful arching cat across the moonlit clearing, the broomstick's wild shadow copying the cat shape in perfect sync, both shadows dancing together as the broomstick drifts down and nuzzles Willow's outstretched hand, the spell-lantern glowing warm gold.",
+      "text": "Willow's cat shadow stretched long and SLOW and the broomstick's wild shadow copied it perfectly — stretch, arch, purr-wiggle. The broomstick drifted down like a leaf and nuzzled her hand because the cat shadow proved she would never yank the handle or take a corner too fast again. The broomstick was never a phantom — it was a broom that wanted a rider who understood GRACE. Witch exam: passed with flying colors. The End!"
+    },
+    "end_snake_flee": {
+      "scene": "{HERO} steps behind the olive snake root and her shadow rears up into a hissing snake across the moonlit clearing, the broomstick's wild shadow panicking and thrashing, the broomstick rocketing into the fog leaving a trail of dying violet sparks while Willow stands alone as pink sunrise creeps over the cypress tops.",
+      "text": "The snake shadow HISSED and the broomstick decided nope nope NOPE — it rocketed into the fog so fast it left a violet comet trail, and by the time Willow stopped coughing on the sparks the sun was coming up. Turns out a scared broomstick does NOT like snakes. Witch exam: postponed! Oopsie ending!",
+      "bad": true
+    },
+    "end_frog_bounce": {
+      "scene": "{HERO} steps behind the teal frog stone and her shadow stretches into a cheerful bouncing frog on the amber grotto wall, the broomstick's wild shadow bouncing alongside in matching rhythm, the broomstick itself bobbing down to hover beside Willow and nudging her hand with its bristles while the spell-lantern pulses gold.",
+      "text": "The frog shadow went boing-boing-boing and the broomstick's shadow went boing-boing-boing right back — before Willow knew it the broomstick was BOUNCING beside her like a happy puppy! It bonked her hat with its bristles and she laughed so hard the whole grotto glowed. The broomstick just wanted a rider who could be SILLY. The End!"
+    },
+    "end_gentle_land": {
+      "scene": "{HERO} steps behind the copper cat bark and her shadow curls into a peaceful resting cat on the grotto wall, the broomstick's wild shadow slowly mirroring the calm pose, the broomstick floating down to rest across Willow's lap as the spell-lantern dims to a soft amber glow and bioluminescent moss pulses around them.",
+      "text": "The cat shadow curled up and tucked its paws, and the broomstick's wild shadow did EXACTLY the same thing — the broomstick floated down into Willow's lap like it had been waiting for permission to rest. The runaway was not being naughty — it was terrified of a crash-prone rider, and the gentle cat shadow proved those days were over. The End!"
+    },
+    "end_cat_dance": {
+      "scene": "{HERO} steps behind the gray cat branch and her shadow leaps gracefully between the tall violet toadstools, the broomstick's wild shadow chasing it playfully, the broomstick itself spiraling down to dance alongside Willow in the moonlit mushroom circle while the singing reed hums a happy tune.",
+      "text": "The cat shadow POUNCED between the toadstools and the broomstick chased it like a game of tag — around and around the mushroom circle until the broomstick swooped into Willow's arms, sparking with joy. The wild spirit was never a curse. It was a broomstick that wanted a rider who could PLAY. The End!"
+    },
+    "end_snake_spiral": {
+      "scene": "{HERO} steps behind the green snake vine and her shadow spirals into a dizzy corkscrew, the broomstick's wild shadow copying the spiral and spinning faster and faster until the broomstick corkscrews into the ground like a drill, burying its bristles in the mossy earth as the singing reed makes a sad descending note and the toadstools wobble from the impact.",
+      "text": "The snake shadow spiraled and the broomstick spiraled and they BOTH spiraled so hard the broomstick drilled itself straight into the ground like a sparkly corkscrew! Willow tugged and tugged but the bristles were wedged in solid and the singing reed played the saddest trombone sound. Flying home is going to be a LONG walk. Oopsie ending!",
+      "bad": true
+    },
+    "end_frog_splash": {
+      "scene": "{HERO} steps behind the teal frog toadstool and her shadow leaps wildly high, the broomstick's wild shadow leaping after it, both broomstick and Willow tumbling into the dark bayou water between the toadstools with an enormous teal splash, the singing reed gargling bubbles and the broomstick sputtering waterlogged sparks.",
+      "text": "The frog shadow leaped SO enthusiastically that the broomstick copied it right into the WATER — Willow went in after it and now they are both soaking, the bristles are full of duckweed, and the singing reed is making gargle noises. The mushroom circle is just watching like this is the funniest thing since tadpoles. Oopsie ending!",
+      "bad": true
+    },
+    "end_waterfall_calm": {
+      "scene": "{HERO} steps behind the silver snake driftwood and her shadow sways in a gentle rhythm on the wet grotto stone, the broomstick's wild shadow swaying in time, the broomstick drifting down to lean against Willow's shoulder as the teal waterfall hums and bioluminescent moss pulses warm and slow, the singing reed adding a soft note.",
+      "text": "The snake shadow swayed like a lullaby and the broomstick's wild shadow swayed right along until the shaking stopped — the broomstick leaned against Willow's shoulder with a tired little hum. The singing reed joined in and the waterfall sang harmony, and by the time they flew home the broomstick trusted her completely. Gentlest flight of the whole semester. The End!"
+    },
+    "end_dawn_race": {
+      "scene": "{HERO} steps behind the green frog boulder and her shadow bounces too hard, the broomstick's wild shadow bouncing THROUGH the teal waterfall and scattering water everywhere, the broomstick wedged between two mossy rocks as golden sunrise creeps over the cypress canopy outside the grotto.",
+      "text": "The frog shadow bounced and the broomstick bounced and then it bounced RIGHT THROUGH THE WATERFALL and wedged itself between two rocks like a very sparkly cork — by the time Willow pried it loose the sun was up and the exam was over. The broomstick looked extremely sorry but sorry does not un-miss a sunrise deadline. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "id": "acorn",
+  "title": "Pip and the Autumn Leaf Pile",
+  "hero": "PIP",
+  "style": "Warm autumn watercolor, amber and pumpkin oranges with crisp russet leaves swirling on the wind, low golden late-afternoon light. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a golden garden holding a big wooden rake, gazing at an enormous pile of amber and russet leaves that stretches taller than him. On the LEFT a bright orange magnifying glass rests on a tree stump, on the RIGHT a shiny red rake leans against a stone wall, both large, fully visible, clearly separated.",
+      "text": "Pip has been raking ALL day and this leaf pile is almost the biggest in the whole valley — but every time he turns around, the pile sneaks a little farther across the garden! Time to get to the bottom of this leafy mystery.",
+      "choices": [
+        {
+          "label": "Investigate the sneaky pile",
+          "next": "a",
+          "spot": "orange magnifying glass"
+        },
+        {
+          "label": "Rake a fresh new pile",
+          "next": "b",
+          "spot": "red rake"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} crouches behind a fat orange pumpkin, peering at the leaf pile which has crept halfway across the garden, leaving a trail of scattered leaves in the dirt. On the LEFT a pair of purple binoculars sits on a mossy log, on the RIGHT a basket of golden acorns gleams on a flat stone, both large, fully visible, clearly separated.",
+      "text": "The pile has moved THREE whole garden-lengths since lunch. There are tiny drag marks in the dirt and a faint snuffling sound coming from underneath.",
+      "choices": [
+        {
+          "label": "Sneak up on tiptoe",
+          "next": "aa",
+          "spot": "purple binoculars"
+        },
+        {
+          "label": "Set an acorn trail trap",
+          "next": "ab",
+          "spot": "golden acorn basket"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} pushes up his sleeves and surveys the garden, ready to start fresh. On the LEFT a grand copper-barked oak tree towers with heavy branches drooping under thick russet leaves, on the RIGHT a sturdy yellow wheelbarrow sits at the bottom of a breezy hilltop covered in swirling amber leaves, both large, fully visible, clearly separated.",
+      "text": "Fine — if that pile wants to wander off like it owns the place, Pip will just build a BETTER one. Two spots look absolutely loaded with leaves and the cold is coming fast.",
+      "choices": [
+        {
+          "label": "Rake under the big oak",
+          "next": "ba",
+          "spot": "copper oak tree"
+        },
+        {
+          "label": "Gather from the windy hill",
+          "next": "bb",
+          "spot": "yellow wheelbarrow"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} tiptoes through crunchy leaves toward the suspiciously wobbling pile, holding the purple binoculars up to his eyes. A gnarled brown tree stump sits in the foreground. On the LEFT a cozy orange wool blanket is draped over a garden bench, on the RIGHT a tall green watering can sits beside a row of chrysanthemums, both large, fully visible, clearly separated.",
+      "text": "Through the binoculars Pip spots a tiny snout poking out of the pile! Whatever is in there is round, prickly, and absolutely covered in leaf confetti.",
+      "scare": {
+        "spot": "brown tree stump",
+        "pop": "A fluffy tawny owl swoops up from behind the stump, blinking enormous golden eyes and hooting cheerfully with wings spread wide",
+        "reveal": "Just a neighborly owl checking on all the commotion!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Offer the warm blanket",
+          "next": "m1",
+          "spot": "orange wool blanket"
+        },
+        {
+          "label": "Block the escape route",
+          "next": "m2",
+          "spot": "green watering can"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} carefully arranges a trail of golden acorns leading from the leaf pile to a large wicker basket propped up with a stick. On the LEFT a striped red mushroom grows plump beside a mossy rock, on the RIGHT a copper bell hangs from a low branch on a leather cord, both large, fully visible, clearly separated.",
+      "text": "The acorn trail is set, the trap is ready, and — wait, something small and spiny is already munching the acorns! A sleepy hedgehog blinks up at Pip with cheeks stuffed.",
+      "choices": [
+        {
+          "label": "Share the acorn stash",
+          "next": "m1",
+          "spot": "striped red mushroom"
+        },
+        {
+          "label": "Ring the bell to chat",
+          "next": "m2",
+          "spot": "copper bell"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} rakes vigorously under the enormous oak, sending russet leaves flying into a growing pile. On the LEFT a plump blue cushion sits at the base of the oak's gnarled roots, on the RIGHT a tall stack of brown apple crates stands near a garden gate, both large, fully visible, clearly separated.",
+      "text": "The pile is getting ENORMOUS — but hang on, there is a tiny snoring sound coming from inside the roots. A hedgehog is curled up in a leaf nest, using Pip's raked leaves as a duvet!",
+      "choices": [
+        {
+          "label": "Tuck hedgehog in gently",
+          "next": "m3",
+          "spot": "plump blue cushion"
+        },
+        {
+          "label": "Wake and recruit hedgehog",
+          "next": "m4",
+          "spot": "brown apple crates"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} pushes the yellow wheelbarrow up the breezy hilltop, chasing swirling amber leaves that keep blowing just out of reach. On the LEFT a heavy gray stone anchor sits in the grass, on the RIGHT a cheerful pink kite is tangled in a hawthorn bush, both large, fully visible, clearly separated.",
+      "text": "Every leaf Pip grabs, the wind steals two more! Then a hedgehog tumbles out of a leaf-gust like a tiny spiky tumbleweed, looking extremely embarrassed.",
+      "choices": [
+        {
+          "label": "Anchor the pile down",
+          "next": "m3",
+          "spot": "gray stone anchor"
+        },
+        {
+          "label": "Use the kite to catch leaves",
+          "next": "m4",
+          "spot": "pink tangled kite"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} kneels beside the hedgehog in a sheltered garden hollow, surrounded by gathered leaves and soft materials. On the LEFT a bundle of dried golden grass tied with twine sits on a flat stone, on the RIGHT a small clay pot overflowing with crimson maple leaves rests near a birch log, both large, fully visible, clearly separated.",
+      "text": "The hedgehog — who introduces herself as Hazel — explains she needs the leaves for her winter blanket. Pip's heart melts faster than frost in sunshine.",
+      "choices": [
+        {
+          "label": "Weave a grass-leaf bed",
+          "next": "end_cozy_burrow",
+          "spot": "golden grass bundle"
+        },
+        {
+          "label": "Fill the pot with warm leaves",
+          "next": "end_leaf_quilt",
+          "spot": "crimson leaf pot"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} sits across from Hazel the hedgehog at a flat tree stump, negotiating like two tiny diplomats. On the LEFT a jar of amber honey glows in the late light, in the MIDDLE a small brown plank seesaw made from a board and a log sits between them, on the RIGHT a large brown paper bag stuffed with crunchy leaves rustles in the breeze, all three large, fully visible, clearly separated.",
+      "text": "Hazel drives a hard bargain for a hedgehog who was just caught stealing. Pip respects that energy enormously.",
+      "choices": [
+        {
+          "label": "Sweeten the deal with honey",
+          "next": "end_acorn_trade",
+          "spot": "amber honey jar"
+        },
+        {
+          "label": "Try the seesaw split",
+          "next": "end_oops_sneeze",
+          "spot": "brown plank seesaw"
+        },
+        {
+          "label": "Bag the leaves together",
+          "next": "end_leaf_slide",
+          "spot": "brown paper bag"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} carefully arranges leaves around the drowsy hedgehog, building a cozy windbreak in the low golden light. On the LEFT a tall scarlet toadstool grows beside the hedge, on the RIGHT a worn brown leather boot lies on its side half-filled with acorns, both large, fully visible, clearly separated.",
+      "text": "Hazel murmurs a sleepy thank-you and curls tighter. The leftover leaves are still enough for one absolutely spectacular jump — if Pip picks the right spot.",
+      "choices": [
+        {
+          "label": "Jump by the toadstool",
+          "next": "end_golden_jump",
+          "spot": "scarlet toadstool"
+        },
+        {
+          "label": "Jump near the old boot",
+          "next": "end_oops_mud",
+          "spot": "brown leather boot"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} and Hazel the hedgehog work side by side, raking and rolling leaves into two separate piles — one for sleeping, one for jumping. On the LEFT a round orange pumpkin carved into a bowl holds a heap of hazelnuts, on the RIGHT a rustic wooden archway draped in crimson vine leaves frames the garden path, both large, fully visible, clearly separated.",
+      "text": "Hazel turns out to be an EXCELLENT leaf-roller — those little legs move surprisingly fast. Together they are building something the whole valley will talk about.",
+      "choices": [
+        {
+          "label": "Celebrate with a feast",
+          "next": "end_autumn_feast",
+          "spot": "orange pumpkin bowl"
+        },
+        {
+          "label": "Build the grand archway pile",
+          "next": "end_valley_best",
+          "spot": "crimson vine archway"
+        }
+      ]
+    },
+    "end_cozy_burrow": {
+      "scene": "{HERO} sits beside a beautifully woven burrow of golden grass and russet leaves tucked into the garden hollow, while Hazel the hedgehog peeks out contentedly. A magnificent amber leaf pile towers behind Pip, glowing in the sunset.",
+      "text": "Pip built the coziest burrow in the valley AND still had enough leaves for one legendary jump. Hazel promised to guard the pile all winter — from the inside, naturally. The End!"
+    },
+    "end_leaf_quilt": {
+      "scene": "{HERO} holds up a patchwork quilt made entirely of crimson and amber leaves, stitched together with grass stems. Hazel the hedgehog is already snuggled underneath one corner in a garden nook, fast asleep with a contented smile.",
+      "text": "The leaf quilt was so beautiful that three more hedgehogs moved in by Tuesday. Pip jumped into the leftover pile seventeen times before dinner. The End!"
+    },
+    "end_acorn_trade": {
+      "scene": "{HERO} tumbles backward off the tree stump as Hazel the hedgehog does an excited backflip, sending the honey jar rolling away and every leaf in the garden flying into the air. The stump is bare and both look utterly surprised amid the leafless garden.",
+      "text": "Pip offered the honey to sweeten the deal, but Hazel got so excited she did a backflip off the tree stump, catapulting every single leaf into the neighbor's garden. The honey jar rolled into a rabbit hole and Pip spent the rest of autumn writing apology notes. Oopsie ending!",
+      "bad": true
+    },
+    "end_oops_sneeze": {
+      "scene": "{HERO} tumbles backward off the little seesaw as Hazel the hedgehog sneezes enormously, sending every single leaf in the garden spiraling into the sky like confetti. Both look utterly stunned amid bare ground.",
+      "text": "Turns out hedgehogs are allergic to diplomatic seesaws — who knew? Every leaf landed in the neighbor's garden and Pip had to start over from scratch. Oopsie ending!",
+      "bad": true
+    },
+    "end_leaf_slide": {
+      "scene": "{HERO} and Hazel the hedgehog zoom down a magnificent leaf slide built from a garden slope, trailing ribbons of amber and crimson leaves behind them. The slide curves around a birch tree and ends in a fluffy landing pile.",
+      "text": "The Great Leaf Slide of Autumn became a valley landmark. Hazel used the bottom pile as her winter bed, and Pip earned a season pass for unlimited slides. The End!"
+    },
+    "end_golden_jump": {
+      "scene": "{HERO} leaps high into the air above an enormous pile of russet and golden leaves beside the scarlet toadstool, arms spread wide with pure joy on his face. Hazel the hedgehog watches from her cozy nest nearby, wrapped snugly in leaves.",
+      "text": "The jump was so magnificent that even the crows applauded. Hazel slept through it of course, but Pip saved her a leaf crown for spring. The End!"
+    },
+    "end_oops_mud": {
+      "scene": "{HERO} sits in an enormous hidden mud puddle where the leaf pile used to be, covered head to toe in brown mud and looking completely shocked. The old boot nearby has tipped over, spilling acorns everywhere across the wet ground.",
+      "text": "The leaves were hiding a puddle the size of a small pond. Pip discovered that mud jumps are surprisingly squelchy and surprisingly cold. Oopsie ending!",
+      "bad": true
+    },
+    "end_autumn_feast": {
+      "scene": "{HERO} leaps up from the tiny pumpkin-bowl table with hazelnut soup splattered everywhere, hazelnuts flying through the air, while Hazel the hedgehog rolls on her back laughing into the now completely flattened leaf pile. Fireflies scatter in the dusky garden.",
+      "text": "The feast was going perfectly until Pip accidentally sat on the hazelnut soup, launching hazelnuts in every direction like tiny edible cannonballs. Hazel laughed so hard she rolled into the leaf pile and squished it completely flat. Oopsie ending!",
+      "bad": true
+    },
+    "end_valley_best": {
+      "scene": "{HERO} stands proudly beside the tallest leaf pile the valley has ever seen, framed by the crimson vine archway. Hazel the hedgehog has a matching mini-pile burrow right next to it, decorated with acorn caps and tiny leaf flags.",
+      "text": "The Valley's Best Pile earned a plaque from the Garden Council and a permanent neighbor — Hazel moved in year-round. Best jump of autumn, best friend of all time. The End!"
+    }
+  }
+}

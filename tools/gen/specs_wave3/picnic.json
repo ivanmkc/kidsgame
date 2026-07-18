@@ -1,0 +1,243 @@
+{
+  "id": "picnic",
+  "title": "Milo and the Shrinking Moon",
+  "hero": "MILO",
+  "style": "Dreamy night-sky gouache with crayon-grain texture, a huge glowing yellow cheese moon full of crater holes, red-and-white checkered picnic colors against deep navy, twinkling stars. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on a grassy hilltop under an enormous glowing yellow cheese moon riddled with crater holes, clutching a red-and-white checkered picnic basket with a jar of jam peeking out. On the LEFT a blue wooden sailboat with a patched white sail bobs on a glittering sea of stars, on the RIGHT a golden wooden ladder with thick rungs dangles from cotton-candy clouds, both large, fully visible, clearly separated.",
+      "text": "Milo packed his best crackers and jam for the grandest picnic in the sky — but that cheese moon is awfully far away. Sailboat or ladder?",
+      "choices": [
+        {
+          "label": "Sail the star sea",
+          "next": "a",
+          "spot": "blue wooden sailboat"
+        },
+        {
+          "label": "Climb the cloud ladder",
+          "next": "b",
+          "spot": "golden wooden ladder"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} sails a blue wooden sailboat with a patched white sail across a glittering sea of stars toward the enormous glowing cheese moon, red-and-white checkered picnic basket tucked at the bow. On the LEFT a cluster of pink glowing jellyfish with trailing luminous tentacles drift above the waves, on the RIGHT a silver whale arches its gleaming back with a tall spout of golden moonlight, both large, fully visible, clearly separated.",
+      "text": "The star sea sparkles like spilled lemonade, and something friendly glows on either side. Jellyfish or whale?",
+      "choices": [
+        {
+          "label": "Follow the jellyfish",
+          "next": "aa",
+          "spot": "pink glowing jellyfish"
+        },
+        {
+          "label": "Ride the whale spout",
+          "next": "ab",
+          "spot": "silver whale"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} climbs a golden wooden ladder through puffy navy-blue clouds toward the enormous glowing cheese moon, red-and-white checkered picnic basket swinging from one arm. On the LEFT a row of fluffy white cloud pillows form soft stepping stones curving upward, on the RIGHT a twisty rainbow slide with candy-stripe rails spirals toward the moon, both large, fully visible, clearly separated.",
+      "text": "The higher Milo climbs, the more the moon smells like aged cheddar — two shortcuts shimmer above. Cloud pillows or rainbow slide?",
+      "choices": [
+        {
+          "label": "Hop the cloud pillows",
+          "next": "ba",
+          "spot": "white cloud pillows"
+        },
+        {
+          "label": "Slide up the rainbow",
+          "next": "bb",
+          "spot": "twisty rainbow slide"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} floats among a school of pink glowing jellyfish above the star sea, red-and-white checkered picnic basket dangling from a jellyfish tentacle like a lantern, the enormous cheese moon looming close overhead. On the LEFT a tall coral tower with a nest of sea-moss on top rises from the waves, on the RIGHT a bouncy purple mushroom cap bobs on the glittering surface, both large, fully visible, clearly separated.",
+      "text": "The jellyfish hum a lullaby so lovely Milo nearly falls asleep — but two landing spots gleam ahead. Coral tower or mushroom cap?",
+      "scare": {
+        "spot": "pink glowing jellyfish",
+        "pop": "a chubby baby moon-mouse with star-shaped ears peeking from inside a jellyfish bell, waving a tiny cheese wedge",
+        "reveal": "Hee-hee! Hitching a ride to the picnic!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Land on the tower",
+          "next": "m1",
+          "spot": "tall coral tower"
+        },
+        {
+          "label": "Bounce on the mushroom",
+          "next": "m2",
+          "spot": "purple mushroom cap"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} rides a geyser of golden moonlight from a silver whale's spout high above the star sea, red-and-white checkered picnic basket clutched to his chest, the enormous cheese moon filling half the sky. On the LEFT a tall coral tower juts from a bank of low clouds, on the RIGHT a bouncy purple mushroom cap floats on a wisp of cloud, both large, fully visible, clearly separated.",
+      "text": "What a ride — the whale winks and launches Milo toward two cozy perches near the moon. Coral tower or mushroom cap?",
+      "choices": [
+        {
+          "label": "Land on the tower",
+          "next": "m1",
+          "spot": "tall coral tower"
+        },
+        {
+          "label": "Bounce on the mushroom",
+          "next": "m2",
+          "spot": "purple mushroom cap"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} bounces across fluffy white cloud pillows like stepping stones toward the enormous cheese moon, red-and-white checkered picnic basket bobbing with each hop, twinkling stars all around. On the LEFT a giant red toadstool with white polka dots grows from the next cloud, on the RIGHT a copper telescope on a sturdy tripod points straight at the moon, both large, fully visible, clearly separated.",
+      "text": "Each cloud goes boing like a trampoline — two moon-gazing spots appear on the next cloud bank. Toadstool or telescope?",
+      "choices": [
+        {
+          "label": "Sit on the toadstool",
+          "next": "m3",
+          "spot": "giant red toadstool"
+        },
+        {
+          "label": "Peek through telescope",
+          "next": "m4",
+          "spot": "copper telescope"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} slides up a twisty rainbow slide with candy-stripe rails spiraling toward the enormous cheese moon, red-and-white checkered picnic basket sliding behind him, stars streaking past in colorful trails. On the LEFT a giant red toadstool with white polka dots sprouts at the rainbow's end, on the RIGHT a copper telescope on a sturdy tripod stands on a cloud platform, both large, fully visible, clearly separated.",
+      "text": "The rainbow tastes like sherbet — and at the top, two moon-watching posts glow in the starlight. Toadstool or telescope?",
+      "scare": {
+        "spot": "twisty rainbow slide",
+        "pop": "a fluffy cloud-bunny with glowing whiskers tumbling down the rainbow on its belly",
+        "reveal": "Wheee! Save me a cracker, will you?",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Sit on the toadstool",
+          "next": "m3",
+          "spot": "giant red toadstool"
+        },
+        {
+          "label": "Peek through telescope",
+          "next": "m4",
+          "spot": "copper telescope"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands atop a tall coral tower just beneath the enormous glowing cheese moon, red-and-white checkered picnic basket open beside him, golden cheese dripping from the craters above. On the LEFT a red velvet cushion rests on a narrow moonbeam bridge, in the MIDDLE a silver cheese grater leans against the coral railing, on the RIGHT a huge green banana leaf curls upward from the tower's edge like a natural hang glider, all three large, fully visible, clearly separated.",
+      "text": "The moon is so close Milo can smell the rind — three ways to reach the midnight picnic. Cushion, grater, or leaf?",
+      "choices": [
+        {
+          "label": "Ride the moonbeam cushion",
+          "next": "end_cushion_feast",
+          "spot": "red velvet cushion"
+        },
+        {
+          "label": "Grab the cheese grater",
+          "next": "end_grate_tumble",
+          "spot": "silver cheese grater"
+        },
+        {
+          "label": "Glide on the leaf",
+          "next": "end_leaf_glide",
+          "spot": "green banana leaf"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} bounces on a huge purple mushroom cap high above the clouds, red-and-white checkered picnic basket strapped to his back, the enormous cheese moon glowing directly overhead with craters like Swiss cheese. On the LEFT a wicker moon-balloon with a flickering candle flame hovers nearby, on the RIGHT a springy orange trampoline pad sits on the mushroom's edge, both large, fully visible, clearly separated.",
+      "text": "One mega-bounce and Milo could touch the moon — but which launchpad looks safer for a picnic basket? Balloon or trampoline?",
+      "choices": [
+        {
+          "label": "Float in the balloon",
+          "next": "end_balloon_picnic",
+          "spot": "wicker moon-balloon"
+        },
+        {
+          "label": "Try the super-bounce",
+          "next": "end_bounce_splat",
+          "spot": "orange trampoline pad"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} sits on a giant red toadstool with white polka dots on a cloud bank right below the enormous cheese moon, red-and-white checkered picnic basket in lap, tiny moon-mice peeking from the craters above with whiskers twitching. On the LEFT a wooden catapult loaded with a soft checkered pillow waits on the cloud, on the RIGHT a sturdy wooden swing with a plump red cushion hangs from the moon's rim, both large, fully visible, clearly separated.",
+      "text": "The moon-mice wave tiny forks from above — dinner is almost ready and Milo has the dessert. Catapult or swing?",
+      "choices": [
+        {
+          "label": "Launch by catapult",
+          "next": "end_catapult_feast",
+          "spot": "wooden catapult"
+        },
+        {
+          "label": "Swing up to moon",
+          "next": "end_swing_banquet",
+          "spot": "red cushion swing"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} peers through a copper telescope on a sturdy tripod at the edge of a cloud platform, red-and-white checkered picnic basket at his feet, the enormous cheese moon filling the lens with golden craters and scurrying moon-mice. On the LEFT a giant paper airplane big enough to ride rests on the platform, on the RIGHT a polka-dot cannon with a wide brass mouth points at the moon, both large, fully visible, clearly separated.",
+      "text": "Through the lens Milo spots the moon-mice setting a long checkered table — he just needs one last ride up. Paper airplane or cannon?",
+      "choices": [
+        {
+          "label": "Fly the paper airplane",
+          "next": "end_airplane_landing",
+          "spot": "giant paper airplane"
+        },
+        {
+          "label": "Blast from the cannon",
+          "next": "end_cannon_party",
+          "spot": "polka-dot cannon"
+        }
+      ]
+    },
+    "end_cushion_feast": {
+      "scene": "{HERO} sits on the red velvet cushion as it drifts slowly past the long picnic table on the cheese moon, reaching for the table with both paws but floating just out of reach, the jam jar balanced on his head wobbling dangerously, moon-mice waving from the table.",
+      "text": "The cushion drifted Milo PAST the table — just close enough to smell the cheese but too far to grab any! He floated in slow circles reaching with both paws while the jam jar wobbled on his head, the moon-mice waved cheerfully, and Milo orbited the picnic like the world's hungriest tiny satellite. Oopsie ending!",
+      "bad": true
+    },
+    "end_grate_tumble": {
+      "scene": "{HERO} tumbles backward off a tall coral tower clutching a silver cheese grater, red-and-white checkered picnic basket tipping upside-down, crackers and jam jars scattering into the glittering star sea below, the enormous cheese moon watching from above.",
+      "text": "Milo gives the grater one eager tug and the whole tower ledge crumbles like stale crackers — down he tumbles in a shower of coral dust, trailing jam jars and crackers behind him like the world's saddest confetti. Oopsie ending!",
+      "bad": true
+    },
+    "end_leaf_glide": {
+      "scene": "{HERO} glides on a huge green banana leaf onto the cheese moon's surface, red-and-white checkered picnic basket balanced perfectly at the leaf's tip, a circle of moon-mice applauding with tiny paws around a grand checkered blanket piled with cheese wheels and crackers.",
+      "text": "The leaf drifts Milo onto the softest cheese crater, where the moon-mice saved him the best seat — the moon gives a little of itself every night to feed the sky's hungriest friends, and it always grows back by morning. The End!"
+    },
+    "end_balloon_picnic": {
+      "scene": "{HERO} floats down in a wicker moon-balloon onto the cheese moon's surface, red-and-white checkered picnic basket dangling below, moon-mice catching the basket with outstretched paws, a grand checkered tablecloth spread across a glowing golden crater.",
+      "text": "The balloon sets Milo down gentle as a goodnight kiss, and the moon-mice catch his basket with outstretched paws — they were never thieves, just hungry guests, and the moon always grows back because kindness refills itself. The End!"
+    },
+    "end_bounce_splat": {
+      "scene": "{HERO} stuck upside-down in a gooey golden cheese crater on the moon's far side, legs wiggling in the air, red-and-white checkered picnic basket wedged beside him, moon-mice giggling and nibbling a stray cracker, the orange trampoline pad visible far below on the purple mushroom cap.",
+      "text": "Milo bounces so hard he rockets right over the picnic table and lodges upside-down in a warm cheese crater — his crackers orbit past like tiny satellites while the moon-mice fetch a very long fork to pry him free. Oopsie ending!",
+      "bad": true
+    },
+    "end_catapult_feast": {
+      "scene": "{HERO} lands in a soft pile of fluffy cheese shavings on the moon's surface after a catapult launch, red-and-white checkered picnic basket caught mid-air by a line of moon-mice passing it paw to paw, a grand feast with tiny candles and cheese wheels spread on a checkered cloth.",
+      "text": "The catapult flings Milo in a perfect arc and he lands in the softest pile of cheese shavings ever — the mice were never stealing the moon, they were setting the sky's grandest midnight table, and Milo's crackers complete the menu. The End!"
+    },
+    "end_swing_banquet": {
+      "scene": "{HERO} swings on the wooden swing with too much force, sailing high over the cheese moon's surface and right past the candlelit table, Milo hanging upside down with the cushion on his face, moon-mice ducking as the swing whooshes overhead.",
+      "text": "The swing arced Milo OVER the table — he swung so high he flew right past the banquet, the cushion landed on his face, and by the time the swing came back down the moon-mice had eaten all the good cheese! Milo swung back and forth getting dizzier while the picnic happened without him. Oopsie ending!",
+      "bad": true
+    },
+    "end_airplane_landing": {
+      "scene": "{HERO} glides a giant paper airplane in for a smooth landing on the cheese moon's golden surface, red-and-white checkered picnic basket secured under one wing, moon-mice waving tiny flags made of cheese rinds, a feast of cheese wheels and crackers spread on a checkered blanket.",
+      "text": "The paper airplane touches down without a wobble and the moon-mice rush out waving cheese-rind flags — every slice of moon was a gift, never a theft, and Milo's jam jars are the perfect thank-you for the most generous host in the sky. The End!"
+    },
+    "end_cannon_party": {
+      "scene": "{HERO} pops out of a shower of star-shaped confetti onto the cheese moon's surface, red-and-white checkered picnic basket landing beside him with a soft thud, moon-mice wearing tiny party hats surrounding a grand midnight feast on a checkered cloth, the polka-dot cannon visible below on the cloud platform.",
+      "text": "The cannon goes POOF and Milo pops onto the moon like a cork from a bottle — the moon-mice throw confetti because every new friend means the midnight picnic just got bigger, and the moon has plenty of cheese to share. The End!"
+    }
+  }
+}

@@ -62,6 +62,9 @@ export type UIKey =
   | 'card.numbers.title'  | 'card.numbers.blurb'
   | 'card.compare.title'  | 'card.compare.blurb'
   | 'card.sums.title'     | 'card.sums.blurb'
+  | 'card.musicbox.title' | 'card.musicbox.blurb'
+  | 'card.bingo.title'    | 'card.bingo.blurb'
+  | 'card.escape.title'   | 'card.escape.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -120,6 +123,17 @@ export type UIKey =
   | 'shell.puzzle.title'
   | 'shell.puzzle.subPicker'
   | 'shell.puzzle.subPlay'
+  | 'shell.musicbox.title'
+  | 'shell.musicbox.subPicker'
+  | 'shell.musicbox.subPlay'
+  | 'shell.bingo.title'
+  | 'shell.bingo.sub'
+  | 'shell.bingo.subPhonics'
+  | 'shell.escape.title'
+  | 'shell.escape.subPicker'
+  | 'shell.escape.subPlay'
+  | 'picker.escape'
+  | 'escape.trayEmpty'
   // ── WinOverlay: labels + per-game messages ─────────────────────
   | 'overlay.next'
   | 'overlay.nextRound'
@@ -152,6 +166,18 @@ export type UIKey =
   | 'win.count'
   | 'win.compare'
   | 'win.sums'
+  | 'win.bingo'
+  | 'win.musicbox'
+  // ── Music box ──────────────────────────────────────────────────
+  | 'musicbox.intro'
+  | 'musicbox.introFree'
+  | 'musicbox.freeplay'
+  | 'song.twinkle'
+  | 'song.mary'
+  | 'song.row'
+  | 'song.london'
+  | 'song.spider'
+  | 'song.macdonald'
   // ── Displayed in-game hints ────────────────────────────────────
   | 'diff.pictureA'
   | 'diff.pictureB'
@@ -168,10 +194,15 @@ export type UIKey =
   | 'sticker.clear'
   | 'sticker.hint'
   | 'sticker.tab.dressup'
+  | 'sticker.tab.characters'
   | 'sticker.tab.animals'
   | 'sticker.tab.nature'
   | 'sticker.tab.food'
   | 'sticker.tab.things'
+  | 'sticker.size.small'
+  | 'sticker.size.medium'
+  | 'sticker.size.large'
+  | 'sticker.charactersEmpty'
   | 'memory.moves'
   | 'rhyme.comingSoon'
   | 'story.tryAgain'
@@ -260,6 +291,12 @@ const EN: Table = {
   'card.compare.blurb': 'Which side has more treats?',
   'card.sums.title': 'Little Sums',
   'card.sums.blurb': 'One more hops in — how many now?',
+  'card.musicbox.title': 'Music Box',
+  'card.musicbox.blurb': 'Tap along and play a song!',
+  'card.bingo.title': 'Picture Bingo',
+  'card.bingo.blurb': 'Listen for the call and find it on your board!',
+  'card.escape.title': 'Little Escapes',
+  'card.escape.blurb': 'Find, unlock, and save the day!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',
@@ -318,6 +355,17 @@ const EN: Table = {
   'shell.puzzle.title': 'Picture Puzzle',
   'shell.puzzle.subPicker': 'Choose a picture',
   'shell.puzzle.subPlay': '{name} — tap two pieces to swap them',
+  'shell.musicbox.title': 'Music Box',
+  'shell.musicbox.subPicker': 'Pick a song to play!',
+  'shell.musicbox.subPlay': 'Tap anywhere to play the next note!',
+  'shell.bingo.title': 'Picture Bingo',
+  'shell.bingo.sub': 'Listen to the call and tap the picture!',
+  'shell.bingo.subPhonics': 'Which picture starts with that sound?',
+  'shell.escape.title': 'Little Escapes',
+  'shell.escape.subPicker': 'Pick a room to explore!',
+  'shell.escape.subPlay': 'Search the picture — find things and use them!',
+  'picker.escape': 'Which room today?',
+  'escape.trayEmpty': 'Things you find go here…',
 
   'overlay.next': 'Next Level ▶️',
   'overlay.nextRound': 'Next Round ▶️',
@@ -350,6 +398,17 @@ const EN: Table = {
   'win.count': 'Amazing counter! You got them all!',
   'win.compare': 'Sharp eyes! You compared like a champ!',
   'win.sums': 'Sum superstar! You added them all!',
+  'win.bingo': 'BINGO! You got a line!',
+  'win.musicbox': 'Beautiful music! You played the whole song!',
+  'musicbox.intro': 'Tap, tap, tap anywhere to play the song!',
+  'musicbox.introFree': 'Magic keys! Every tap makes a pretty note!',
+  'musicbox.freeplay': 'Magic Keys',
+  'song.twinkle': 'Twinkle Twinkle Little Star',
+  'song.mary': 'Mary Had a Little Lamb',
+  'song.row': 'Row Row Row Your Boat',
+  'song.london': 'London Bridge',
+  'song.spider': 'Itsy Bitsy Spider',
+  'song.macdonald': 'Old MacDonald',
 
   'diff.pictureA': 'Picture A',
   'diff.pictureB': 'Picture B',
@@ -364,12 +423,17 @@ const EN: Table = {
   'puzzle.peek': '🖼️ Peek',
   'puzzle.hint': 'Tap one piece, then tap another to swap them!',
   'sticker.clear': '🧹 Clear',
-  'sticker.hint': 'Drag a sticker into the picture · drag to move · double-tap to pop it!',
+  'sticker.hint': 'Drag a sticker in · tap it to wiggle · use +/− to resize · double-tap to pop!',
   'sticker.tab.dressup': 'Dress-Up',
+  'sticker.tab.characters': 'Characters',
   'sticker.tab.animals': 'Animals',
   'sticker.tab.nature': 'Nature',
   'sticker.tab.food': 'Food',
   'sticker.tab.things': 'Toys',
+  'sticker.size.small': 'Small',
+  'sticker.size.medium': 'Medium',
+  'sticker.size.large': 'Large',
+  'sticker.charactersEmpty': 'Characters coming soon! ✨',
   'memory.moves': 'Moves: {n}',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
   'story.tryAgain': 'Oops! Try another way ↩️',
@@ -456,6 +520,12 @@ const JA: Table = {
   'card.compare.blurb': 'たくさん あるのは どっち？',
   'card.sums.title': 'たしざんタイム',
   'card.sums.blurb': 'もういっぴき ふえたら いくつ？',
+  'card.musicbox.title': 'オルゴール',
+  'card.musicbox.blurb': 'タップして うたを ひこう！',
+  'card.bingo.title': 'えビンゴ',
+  'card.bingo.blurb': 'よばれた えを みつけよう！',
+  'card.escape.title': 'ちいさな だっしゅつ',
+  'card.escape.blurb': 'さがして あけて たすけよう！',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',
@@ -514,6 +584,17 @@ const JA: Table = {
   'shell.puzzle.title': 'えパズル',
   'shell.puzzle.subPicker': 'えを えらぼう',
   'shell.puzzle.subPlay': '{name} — 2まいを タップして いれかえよう',
+  'shell.musicbox.title': 'オルゴール',
+  'shell.musicbox.subPicker': 'うたを えらんでね！',
+  'shell.musicbox.subPlay': 'どこでも タップして つぎのおとを ならそう！',
+  'shell.bingo.title': 'えビンゴ',
+  'shell.bingo.sub': 'よばれた えを タップして みつけよう！',
+  'shell.bingo.subPhonics': 'そのおとで はじまる えは どれ？',
+  'shell.escape.title': 'ちいさな だっしゅつ',
+  'shell.escape.subPicker': 'おへやを えらんでね！',
+  'shell.escape.subPlay': 'えを さがして みつけたものを つかおう！',
+  'picker.escape': 'きょうは どのおへや？',
+  'escape.trayEmpty': 'みつけたものが ここにはいるよ…',
 
   'overlay.next': 'つぎのレベル ▶️',
   'overlay.nextRound': 'つぎのラウンド ▶️',
@@ -546,6 +627,17 @@ const JA: Table = {
   'win.count': 'かぞえかた ばつぐん！ ぜんぶ できたね！',
   'win.compare': 'めがするどい！ よくくらべたね！',
   'win.sums': 'たしざん スーパースター！ ぜんぶ せいかい！',
+  'win.bingo': 'ビンゴ！ いちれつ そろったね！',
+  'win.musicbox': 'すてきな おんがく！ さいごまで ひけたね！',
+  'musicbox.intro': 'とん とん とん！ どこでも タップして うたを ひこう！',
+  'musicbox.introFree': 'まほうの けんばん！ タップすると きれいなおとが なるよ！',
+  'musicbox.freeplay': 'まほうの けんばん',
+  'song.twinkle': 'きらきらぼし',
+  'song.mary': 'メリーさんの ひつじ',
+  'song.row': 'こげこげ ボート',
+  'song.london': 'ロンドンばし',
+  'song.spider': 'ちいさな クモさん',
+  'song.macdonald': 'ゆかいな まきば',
 
   'diff.pictureA': 'えA',
   'diff.pictureB': 'えB',
@@ -560,12 +652,17 @@ const JA: Table = {
   'puzzle.peek': '🖼️ ちらみ',
   'puzzle.hint': '1まい タップして、もう1まい タップして いれかえよう！',
   'sticker.clear': '🧹 けす',
-  'sticker.hint': 'シールを えのなかへ · うごかせるよ · ダブルタップで けせるよ！',
+  'sticker.hint': 'シールを えへ · タップで うごく · +/− で おおきさ · ダブルタップで けす！',
   'sticker.tab.dressup': 'きせかえ',
+  'sticker.tab.characters': 'キャラクター',
   'sticker.tab.animals': 'どうぶつ',
   'sticker.tab.nature': 'しぜん',
   'sticker.tab.food': 'たべもの',
   'sticker.tab.things': 'おもちゃ',
+  'sticker.size.small': 'ちいさい',
+  'sticker.size.medium': 'ふつう',
+  'sticker.size.large': 'おおきい',
+  'sticker.charactersEmpty': 'キャラクター もうすぐ！ ✨',
   'memory.moves': 'てすう: {n}',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
   'story.tryAgain': 'あちゃ！ べつのみち ↩️',
@@ -651,6 +748,12 @@ const CMN: Table = {
   'card.compare.blurb': '哪一边多？',
   'card.sums.title': '小小加法',
   'card.sums.blurb': '又来一只 — 现在几只？',
+  'card.musicbox.title': '音乐盒',
+  'card.musicbox.blurb': '点一点，弹一首歌！',
+  'card.bingo.title': '图片宾果',
+  'card.bingo.blurb': '听提示，找出板上的图片！',
+  'card.escape.title': '小小密室',
+  'card.escape.blurb': '找一找，打开它，救出小伙伴！',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',
@@ -709,6 +812,17 @@ const CMN: Table = {
   'shell.puzzle.title': '拼图',
   'shell.puzzle.subPicker': '选一张图',
   'shell.puzzle.subPlay': '{name} — 点两块交换位置',
+  'shell.musicbox.title': '音乐盒',
+  'shell.musicbox.subPicker': '选一首歌吧！',
+  'shell.musicbox.subPlay': '点哪里都可以，弹出下一个音！',
+  'shell.bingo.title': '图片宾果',
+  'shell.bingo.sub': '听提示，点对应的图片！',
+  'shell.bingo.subPhonics': '哪张图是这个音开头的？',
+  'shell.escape.title': '小小密室',
+  'shell.escape.subPicker': '选一个房间吧！',
+  'shell.escape.subPlay': '找找图里的东西，用它们解开谜题！',
+  'picker.escape': '今天玩哪个房间？',
+  'escape.trayEmpty': '找到的东西会放在这里…',
 
   'overlay.next': '下一关 ▶️',
   'overlay.nextRound': '下一轮 ▶️',
@@ -741,6 +855,17 @@ const CMN: Table = {
   'win.count': '数数高手！全都数对了！',
   'win.compare': '眼力真尖！比得像冠军！',
   'win.sums': '加法小超人！全都算对了！',
+  'win.bingo': '宾果！你连成一排了！',
+  'win.musicbox': '好美的音乐！你弹完了整首歌！',
+  'musicbox.intro': '点、点、点！点哪里都能弹歌哦！',
+  'musicbox.introFree': '魔法琴键！每点一下都有好听的音！',
+  'musicbox.freeplay': '魔法琴键',
+  'song.twinkle': '小星星',
+  'song.mary': '玛丽有只小羊羔',
+  'song.row': '划船歌',
+  'song.london': '伦敦桥',
+  'song.spider': '小蜘蛛',
+  'song.macdonald': '王老先生有块地',
 
   'diff.pictureA': '图A',
   'diff.pictureB': '图B',
@@ -755,12 +880,17 @@ const CMN: Table = {
   'puzzle.peek': '🖼️ 偷看',
   'puzzle.hint': '点一块，再点另一块，就能交换！',
   'sticker.clear': '🧹 清除',
-  'sticker.hint': '把贴纸拖进画里 · 拖动可以移动 · 双击可以去掉！',
+  'sticker.hint': '把贴纸拖进画里 · 点一下会动 · +/− 调大小 · 双击去掉！',
   'sticker.tab.dressup': '换装',
+  'sticker.tab.characters': '角色',
   'sticker.tab.animals': '动物',
   'sticker.tab.nature': '自然',
   'sticker.tab.food': '食物',
   'sticker.tab.things': '玩具',
+  'sticker.size.small': '小',
+  'sticker.size.medium': '中',
+  'sticker.size.large': '大',
+  'sticker.charactersEmpty': '角色马上就来！ ✨',
   'memory.moves': '步数：{n}',
   'rhyme.comingSoon': '更多押韵马上就来！🎶',
   'story.tryAgain': '哎呀！换一条路 ↩️',
@@ -846,6 +976,12 @@ const YUE: Table = {
   'card.compare.blurb': '邊邊多啲嘢？',
   'card.sums.title': '加加加',
   'card.sums.blurb': '又嚟多隻 — 而家有幾多？',
+  'card.musicbox.title': '音樂盒',
+  'card.musicbox.blurb': '撳一撳，彈一首歌！',
+  'card.bingo.title': '圖片BINGO',
+  'card.bingo.blurb': '聽提示，搵出板上嘅圖！',
+  'card.escape.title': '小小密室',
+  'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
 
   'picker.surprise': '🎲 隨機嚟一個！',
   'picker.diff': '想喺邊玩？',
@@ -904,6 +1040,17 @@ const YUE: Table = {
   'shell.puzzle.title': '砌拼圖',
   'shell.puzzle.subPicker': '揀張圖',
   'shell.puzzle.subPlay': '{name} — 撳兩塊調位',
+  'shell.musicbox.title': '音樂盒',
+  'shell.musicbox.subPicker': '揀一首歌啦！',
+  'shell.musicbox.subPlay': '撳邊度都得，彈出下一個音！',
+  'shell.bingo.title': '圖片BINGO',
+  'shell.bingo.sub': '聽提示，撳對應嘅圖！',
+  'shell.bingo.subPhonics': '邊張圖係呢個音起頭？',
+  'shell.escape.title': '小小密室',
+  'shell.escape.subPicker': '揀一間房啦！',
+  'shell.escape.subPlay': '喺圖入面搵嘢，用佢哋解謎！',
+  'picker.escape': '今日玩邊間房？',
+  'escape.trayEmpty': '搵到嘅嘢會放喺呢度…',
 
   'overlay.next': '下一關 ▶️',
   'overlay.nextRound': '下一輪 ▶️',
@@ -936,6 +1083,17 @@ const YUE: Table = {
   'win.count': '數數高手！全部數啱！',
   'win.compare': '眼力好尖！比得好叻！',
   'win.sums': '加法小超人！全部計啱！',
+  'win.bingo': 'BINGO！你連成一行喇！',
+  'win.musicbox': '好靚嘅音樂！你彈晒成首歌喇！',
+  'musicbox.intro': '撳、撳、撳！撳邊度都彈到歌㗎！',
+  'musicbox.introFree': '魔法琴鍵！每撳一下都有好聽嘅音！',
+  'musicbox.freeplay': '魔法琴鍵',
+  'song.twinkle': '一閃一閃小星星',
+  'song.mary': '瑪莉有隻小綿羊',
+  'song.row': '划船歌',
+  'song.london': '倫敦橋',
+  'song.spider': '小蜘蛛',
+  'song.macdonald': '王老先生有塊地',
 
   'diff.pictureA': '圖A',
   'diff.pictureB': '圖B',
@@ -950,12 +1108,17 @@ const YUE: Table = {
   'puzzle.peek': '🖼️ 偷睇',
   'puzzle.hint': '撳一塊，再撳另一塊，就會調位！',
   'sticker.clear': '🧹 清除',
-  'sticker.hint': '將貼紙拖入畫面 · 拖動可以搬 · 連撳兩下可以除走！',
+  'sticker.hint': '將貼紙拖入畫面 · 撳一下會郁 · +/− 調大細 · 連撳兩下除走！',
   'sticker.tab.dressup': '換裝',
+  'sticker.tab.characters': '角色',
   'sticker.tab.animals': '動物',
   'sticker.tab.nature': '大自然',
   'sticker.tab.food': '食物',
   'sticker.tab.things': '玩具',
+  'sticker.size.small': '細',
+  'sticker.size.medium': '中',
+  'sticker.size.large': '大',
+  'sticker.charactersEmpty': '角色即將登場！ ✨',
   'memory.moves': '步數：{n}',
   'rhyme.comingSoon': '更多押韻就快嚟！🎶',
   'story.tryAgain': '咦！行第二條路 ↩️',

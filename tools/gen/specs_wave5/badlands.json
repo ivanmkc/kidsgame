@@ -1,0 +1,151 @@
+{
+  "id": "badlands",
+  "title": "Rex and the Runaway Echo",
+  "hero": "REX",
+  "style": "Bold Southwest flat geometric palette — terracotta, turquoise, burnt sienna, Charley Harper shapes, striped canyon walls, warm desert light with long violet shadows. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the mouth of a painted-desert canyon with red-orange striped rock walls stretching high on both sides, a visible wave of sound distortion rippling between the cliffs from his runaway echo. On the LEFT a turquoise slot canyon cuts between smooth blue-green walls into cool shadow, on the RIGHT a terracotta mesa arch frames a wide trail of orange striped stone, both large, fully visible, clearly separated.",
+      "text": "Rex opened his mouth to yawn and out came the BIGGEST accidental roar that ever roared — now it's bouncing off every canyon wall and getting LOUDER. He has to reach the Echo Stone and roar the counter-frequency before the whole desert shakes apart! Slot canyon or mesa arch?",
+      "choices": [
+        {"label": "Squeeze through the slot canyon", "next": "a", "spot": "turquoise slot canyon"},
+        {"label": "March under the mesa arch", "next": "b", "spot": "terracotta mesa arch"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} squeezes through a narrow turquoise slot canyon where smooth blue-green walls amplify every sound, a small turquoise singing stone sitting on a sandy ledge humming gently, and a red rock arch spanning the slot overhead. On the LEFT a blue grotto opens at the canyon floor glowing with cool mineral light, on the RIGHT a wide sandstone bridge spans a gap between striped canyon walls, both large, fully visible, clearly separated.",
+      "text": "The slot canyon squeezed Rex's roar into a SQUEAL like a dinosaur stepping on a squeaky toy — embarrassing! But that turquoise singing stone on the ledge hummed back so sweetly Rex tucked it under his arm. Blue grotto or sandstone bridge?",
+      "choices": [
+        {"label": "Explore the blue grotto", "next": "aa", "spot": "blue grotto"},
+        {"label": "Cross the sandstone bridge", "next": "ab", "spot": "wide sandstone bridge"}
+      ],
+      "scare": {
+        "spot": "red rock arch",
+        "pop": "a long sandstone serpent with two glinting amber eyes uncoiling slowly from behind the red rock arch",
+        "reveal": "Ssssorry! Your echo woke me from my ssssunbath!",
+        "sting": "thunder",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} walks under a terracotta mesa arch onto a wide trail of orange striped stone, pebbles shaking off the canyon rim above from the bouncing echo, a terracotta wind-chime dangling from a low juniper branch making soft counter-tones. On the LEFT a burnt sienna staircase carved into the canyon wall descends toward a lower level, on the RIGHT a red slot canyon cuts deep into the rock face ahead, both large, fully visible, clearly separated.",
+      "text": "Under the mesa arch Rex's echo bounced so hard pebbles rained down like confetti at a VERY loud party — but that terracotta wind-chime jingled the OPPOSITE sound and canceled the echo for one beautiful second. Rex grabbed it. Sienna staircase or red slot canyon?",
+      "choices": [
+        {"label": "Climb down the sienna staircase", "next": "ba", "spot": "burnt sienna staircase"},
+        {"label": "Duck into the red slot canyon", "next": "bb", "spot": "red slot canyon"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a blue grotto with smooth turquoise walls that amplify every whisper into a chorus, the turquoise singing stone under his arm humming steadily, cool mineral light filtering from crystal veins above. On the LEFT a large copper echo bell hangs from the grotto ceiling on a thick chain, on the RIGHT a purple crystal alcove glows with warm violet light deep in the grotto wall, both large, fully visible, clearly separated.",
+      "text": "The grotto turned Rex's breathing into a SYMPHONY and the singing stone hummed along like it knew every note — somewhere close the Echo Stone must be listening. Echo bell or crystal alcove?",
+      "choices": [
+        {"label": "Ring the echo bell", "next": "m1", "spot": "copper echo bell"},
+        {"label": "Step into the crystal alcove", "next": "m2", "spot": "purple crystal alcove"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} crosses a wide sandstone bridge with terracotta and cream striped rails, the turquoise singing stone under his arm vibrating as the runaway echo shakes the span, a vast painted canyon stretching below in bands of orange and violet. On the LEFT a turquoise boulder sits at the bridge's far end beside a carved passage, on the RIGHT an orange mesa ledge juts out over the canyon with a clear view of the valley, both large, fully visible, clearly separated.",
+      "text": "The bridge WOBBLED with every echo-bounce and Rex's singing stone vibrated so hard it nearly wiggled free — whatever is making all this noise is CLOSE and probably enormous. Turquoise boulder or mesa ledge?",
+      "choices": [
+        {"label": "Climb past the turquoise boulder", "next": "m1", "spot": "turquoise boulder"},
+        {"label": "Scout from the mesa ledge", "next": "m2", "spot": "orange mesa ledge"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} descends a burnt sienna staircase carved into layered canyon walls, the terracotta wind-chime jingling in his grip, a patch of cracked earth at the bottom of the stairs where the ground pulses rhythmically. On the LEFT a grey armadillo barricade made of stacked rocks blocks a wide canyon passage, on the RIGHT a rust-colored cave opens at the base of the cliff, both large, fully visible, clearly separated.",
+      "text": "Each step BONGED under Rex's feet and the wind-chime jingled the cancel-note just in time — but the ground at the bottom keeps rumbling and that armadillo barricade looks VERY intentional. Armadillo barricade or rust cave?",
+      "choices": [
+        {"label": "Approach the armadillo barricade", "next": "m3", "spot": "grey armadillo barricade"},
+        {"label": "Peek into the rust cave", "next": "m4", "spot": "rust-colored cave"}
+      ],
+      "scare": {
+        "spot": "cracked earth",
+        "pop": "an armored desert centipede with two gleaming green eyes bursting up through the cracked earth",
+        "reveal": "Phew! Just stretching my hundred legs after a nap!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "bb": {
+      "scene": "{HERO} squeezes into a red slot canyon with walls so narrow the striped orange-and-cream rock nearly touches both shoulders, the terracotta wind-chime chiming softly, warm light filtering down from a bright strip of sky above. On the LEFT a tan boulder sits where the slot canyon widens into a bright amphitheater space, on the RIGHT a sienna tunnel opens in the canyon wall toward a darker passage, both large, fully visible, clearly separated.",
+      "text": "This slot canyon was so tight Rex's echo squeezed into a WHISPER for once — the wind-chime barely had to cancel anything! But ahead the canyon opens into something BIG and echoey. Tan boulder or sienna tunnel?",
+      "choices": [
+        {"label": "Pass the tan boulder", "next": "m3", "spot": "tan boulder"},
+        {"label": "Enter the sienna tunnel", "next": "m4", "spot": "sienna tunnel"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands in a vaulted echo chamber where the runaway echo is deafening, the turquoise singing stone vibrating wildly, a massive golden Echo Stone sitting on a rock pedestal in the center pulsing with visible sound waves. On the LEFT the golden Echo Stone throbs on its pedestal with cracks of light, on the RIGHT a shallow turquoise crystal pool shimmers with gentle ripples beside the pedestal, both large, fully visible, clearly separated.",
+      "text": "There it is — the golden Echo Stone! It's practically SHAKING with Rex's trapped roar. One big counter-roar should shut it down — but the singing stone keeps humming toward that gentle crystal pool like it knows something Rex doesn't. Roar at the Echo Stone or dip the singing stone in the pool?",
+      "choices": [
+        {"label": "Roar at full blast", "next": "end_full_blast", "spot": "golden Echo Stone"},
+        {"label": "Dip the stone in the pool", "next": "end_gentle_hum", "spot": "turquoise crystal pool"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a mesa overlook where striped canyon walls form a natural amphitheater below, the turquoise singing stone humming in his grip, an armadillo captain in a tiny helmet watching from a terracotta pedestal with crossed arms. On the LEFT a wide copper canyon horn curves up from the amphitheater floor, on the RIGHT a flat ochre drumstone sits in the center of the amphitheater surrounded by sand, both large, fully visible, clearly separated.",
+      "text": "The armadillo captain tapped her helmet and pointed at the amphitheater — THIS is where Rex proves he can cancel his echo without scrambling every egg in the canyon. Canyon horn or drumstone?",
+      "choices": [
+        {"label": "Blow the canyon horn", "next": "end_canyon_chorus", "spot": "copper canyon horn"},
+        {"label": "Stomp the drumstone", "next": "end_mesa_dance", "spot": "ochre drumstone"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in a bright canyon amphitheater surrounded by armadillos in tiny helmets sitting on tiered rock seats, the terracotta wind-chime in his grip, the runaway echo thundering off the curved walls. On the LEFT a deep red bass horn carved from canyon rock sits on the amphitheater floor, in the MIDDLE a tall cream-colored screech pipe rises from a rock platform, on the RIGHT a small pink squeaky cactus sits on a sandy mound, all large, fully visible, clearly separated.",
+      "text": "The armadillo captain rolled onto the stage and declared ROAR CONTEST! Rex can blow the deep bass horn, screech into the screech pipe, or squeeze that suspicious little cactus. Bass horn, screech pipe, or squeaky cactus?",
+      "choices": [
+        {"label": "Blow the bass horn", "next": "end_low_rumble", "spot": "red bass horn"},
+        {"label": "Screech into the pipe", "next": "end_high_screech", "spot": "cream screech pipe"},
+        {"label": "Squeeze the squeaky cactus", "next": "end_surprise_squeak", "spot": "pink squeaky cactus"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} creeps into a warm rust-colored cave where the walls are lined with sandy nests holding speckled armadillo eggs that vibrate gently with every echo-bounce, the terracotta wind-chime softly canceling sound around him. On the LEFT a large sandy nest holds the biggest speckled egg glowing warm gold, on the RIGHT a flat terracotta platform holds a circle of smaller spotted eggs arranged carefully, both large, fully visible, clearly separated.",
+      "text": "Rex's jaw DROPPED — armadillo EGGS everywhere, and they're shaking with every echo-bounce! No WONDER the armadillos are so grumpy about noise. The wind-chime is keeping things calm but Rex needs to be super careful. Big golden egg or spotted eggs?",
+      "choices": [
+        {"label": "Hum to the golden egg", "next": "end_egg_lullaby", "spot": "large sandy nest"},
+        {"label": "Tiptoe past the spotted eggs", "next": "end_tail_thump", "spot": "terracotta platform"}
+      ]
+    },
+    "end_gentle_hum": {
+      "scene": "{HERO} dips the turquoise singing stone into the crystal pool and a gentle counter-frequency ripples outward as the golden Echo Stone dims peacefully, the runaway echo dissolving into warm golden light that fills the vaulted chamber, every canyon wall finally falling silent.",
+      "text": "Rex dipped the singing stone and the pool sang the gentlest hum — the Echo Stone LISTENED, the trapped roar melted away like butter on a hot rock, and the armadillo captain saluted from the entrance because NOT A SINGLE EGG CRACKED. Gentle beats loud every time. The End!"
+    },
+    "end_full_blast": {
+      "scene": "{HERO} rears back and ROARS at the golden Echo Stone at full blast as cracks spiderweb across the chamber ceiling and the Echo Stone vibrates wildly, rocks tumbling and the turquoise singing stone shattering on the ground, canyon walls amplifying the roar into total chaos.",
+      "text": "Rex's mega-roar hit the Echo Stone so hard every wall in the canyon CRACKED and the echo got TEN TIMES LOUDER — now there are a HUNDRED roars bouncing around like the world's worst concert and Rex is going to need a LOT more singing stones. Oopsie ending!",
+      "bad": true
+    },
+    "end_canyon_chorus": {
+      "scene": "{HERO} blows into the copper canyon horn and a warm deep note fills the amphitheater as the armadillo captain joins in with a tiny harmonica, the singing stone harmonizing, striped canyon walls glowing terracotta and turquoise as the counter-frequency spirals upward and the runaway echo fades to nothing.",
+      "text": "Rex blew that horn and the armadillo captain whipped out a HARMONICA — together they played the counter-frequency so beautifully the whole canyon hummed along, the echo melted, the eggs stopped shaking, and Rex learned the best roar is sometimes a duet. The End!"
+    },
+    "end_mesa_dance": {
+      "scene": "{HERO} stomps the ochre drumstone with both feet as a shockwave cracks the amphitheater floor in expanding fractures, the drumstone splitting in half, Rex losing his balance and tumbling off the platform into a sand dune as the armadillo captain covers her eyes with both paws and the runaway echo gets LOUDER from the vibration.",
+      "text": "Rex STOMPED so hard the drumstone cracked clean in half and he tumbled straight into a sand dune — the echo bounced off the broken stone TEN TIMES HARDER and now every armadillo is giving him the stink-eye from behind their tiny helmets while he spits out sand. Turns out the counter-frequency is NOT a stomp. Oopsie ending!",
+      "bad": true
+    },
+    "end_low_rumble": {
+      "scene": "{HERO} blows the deep red bass horn and a low powerful rumble rolls through the amphitheater shaking the tiered seats gently as every armadillo nods approvingly, the terracotta wind-chime harmonizing, the amphitheater walls absorbing the echo as the rumble settles into warm silence.",
+      "text": "Rex blew that bass horn and a RUMBLE so deep it made his bones buzz rolled through the amphitheater — every armadillo nodded, the captain taught him the secret gentle counter-hum, and Rex walked out humming so softly not a single egg even wobbled. The End!"
+    },
+    "end_high_screech": {
+      "scene": "{HERO} screeches into the tall cream screech pipe as a piercing blast rips through the amphitheater, armadillos covering their ears and curling into balls, stalactites cracking from the ceiling, the terracotta wind-chime vibrating wildly as the amphitheater rings with unbearable noise.",
+      "text": "Rex SCREECHED so hard the pipe shot sparks and every armadillo curled into a ball and rolled offstage — stalactites cracked, the echo got SCREECHY too, and somewhere in the caves the eggs were vibrating like maracas. NOT the counter-frequency. Oopsie ending!",
+      "bad": true
+    },
+    "end_surprise_squeak": {
+      "scene": "{HERO} squeezes the small pink squeaky cactus as a ridiculous tiny SQUEAK fills the amphitheater, every armadillo freezing then bursting into laughter, the terracotta wind-chime tinkling along, the runaway echo hiccupping and shrinking with each round of armadillo giggles.",
+      "text": "Rex squeezed that cactus and out came the TINIEST most ridiculous squeak — armadillos laughed so hard they fell off their seats, the echo hiccupped and shrank, and the captain was laughing too hard to be grumpy anymore! The counter-frequency to a big scary roar is one very silly squeak. The End!"
+    },
+    "end_egg_lullaby": {
+      "scene": "{HERO} crouches beside the large sandy nest and hums a low gentle lullaby as the biggest speckled egg glows warm gold and stops vibrating, the terracotta wind-chime adding soft notes, every egg in the cave settling into stillness as the armadillo captain appears at the entrance with tears in her eyes.",
+      "text": "Rex hummed the softest deepest lullaby a dinosaur ever hummed and the golden egg GLOWED — every egg in the cave stopped shaking, the armadillo captain cried actual armadillo tears, and she taught Rex the exact counter-frequency because anyone who hums THAT gently deserves to save the canyon. The End!"
+    },
+    "end_tail_thump": {
+      "scene": "{HERO} tiptoes carefully past the circle of spotted eggs but his big tail bumps the terracotta platform sending spotted eggs rolling in every direction, the wind-chime clanging chaotically, armadillo guards pouring in from every tunnel as Rex scrambles to catch rolling eggs with his stubby arms.",
+      "text": "Rex tiptoed like a champion but his tail had OTHER PLANS — THWACK went the platform and eggs rolled everywhere like the world's most stressful bowling alley! Rex spent the rest of the afternoon returning eggs to nests while armadillos supervised with VERY judgmental expressions. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

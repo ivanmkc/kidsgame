@@ -1,0 +1,243 @@
+{
+  "id": "ember",
+  "title": "Mo and the Cozy Volcano",
+  "hero": "MO",
+  "style": "Toasty dusk-palette gouache, charcoal purples with ember oranges and rosy curls of steam, a smiling round volcano above bubbling turquoise hot springs. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands beside a bubbling turquoise hot spring holding a marshmallow on a stick, gazing up at a round smiling volcano puffing wobbly smoke rings into a dusk-orange sky. On the LEFT a PURPLE STONE STAIRWAY winds uphill toward the volcano's slopes, on the RIGHT a TURQUOISE STONE BASIN steams among mossy rocks, both large, fully visible, clearly separated.",
+      "text": "Mo has one mission tonight: toast the world's most perfect marshmallow at the hot-spring picnic. But the little volcano just burped three smoke rings in a row, the springs are going lukewarm, and the grown-ups are muttering about packing up.",
+      "choices": [
+        {
+          "label": "Hike up the volcano",
+          "next": "a",
+          "spot": "purple stone stairway"
+        },
+        {
+          "label": "Check the cooling springs",
+          "next": "b",
+          "spot": "turquoise stone basin"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} climbs a warm ashy slope dotted with ember-orange wildflowers, the round volcano rumbling gently overhead. On the LEFT a GLOWING AMBER CAVE MOUTH opens in the hillside with warm air rippling out, on the RIGHT a CHARCOAL RIDGE BOULDER marks the start of a rocky scramble toward the crater rim, both large, fully visible, clearly separated.",
+      "text": "Halfway up, Mo spots a little marmot dropping a pinecone — Mo catches it and tucks it safe in a pocket. The volcano grumbles again and two ways forward appear.",
+      "scare": {
+        "spot": "amber cave mouth",
+        "pop": "A tiny round marmot with rosy cheeks peeking out of the cave holding a daisy, looking curious and friendly",
+        "reveal": "Just a fuzzy little friend saying hello!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Enter the warm cave",
+          "next": "aa",
+          "spot": "amber cave mouth"
+        },
+        {
+          "label": "Scramble up the ridge",
+          "next": "ab",
+          "spot": "charcoal ridge boulder"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} wades ankle-deep in a cooling turquoise hot spring, peering at tiny muddy pawprints leading through ferns. On the LEFT a BROWN FERN BOULDER sits beside a trail of small muddy pawprints disappearing into a purple-shadowed gully, on the RIGHT a MOSSY GREEN LEDGE overhangs the bubbling spring source with orange mineral streaks, both large, fully visible, clearly separated.",
+      "text": "The water is barely warm now — but look, tiny pawprints in the mud and a shivering baby marmot huddled by the rocks. Mo wraps it gently in a scarf and follows the trail.",
+      "choices": [
+        {
+          "label": "Follow pawprints into ferns",
+          "next": "ba",
+          "spot": "brown fern boulder"
+        },
+        {
+          "label": "Check under the ledge",
+          "next": "bb",
+          "spot": "mossy green ledge"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands inside a cozy cave glowing with ember-orange light from mineral veins in the walls, hearing echoey giggles from deeper inside. On the LEFT a DEEP ORANGE TUNNEL curves downward with tiny claw marks scored into the floor, on the RIGHT a FLAT ROSY STONE SHELF holds a row of perfectly round pebbles arranged like a tiny kitchen, both large, fully visible, clearly separated.",
+      "text": "The cave is toasty and full of giggly echoes — someone down there thinks something is hilarious. Mo notices the claw marks on the floor match those little marmot paws exactly.",
+      "choices": [
+        {
+          "label": "Tiptoe down the tunnel",
+          "next": "m1",
+          "spot": "deep orange tunnel"
+        },
+        {
+          "label": "Investigate the stone shelf",
+          "next": "m2",
+          "spot": "rosy stone shelf"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} perches on a charcoal-purple ridge near the crater rim, watching the volcano's round belly jiggle as rosy steam curls upward in spirals. On the LEFT a DEEP ORANGE TUNNEL entrance is visible in the crater wall with warm air billowing out, on the RIGHT a ROSY STONE SHELF juts from the ridge with a forgotten marmot-sized acorn cap sitting on it, both large, fully visible, clearly separated.",
+      "text": "From up here Mo can see the volcano's belly literally jiggling — it's not angry, it's being tickled. Little furry shapes are digging right at its base.",
+      "choices": [
+        {
+          "label": "Climb into the tunnel",
+          "next": "m1",
+          "spot": "deep orange tunnel"
+        },
+        {
+          "label": "Check the stone shelf",
+          "next": "m2",
+          "spot": "rosy stone shelf"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} pushes through a purple-shadowed fern gully with the scarf-wrapped baby marmot riding on one shoulder, reaching a fork where warm air rises from below. On the LEFT a FERNY MOSS HOLLOW opens into a wider clearing with soft chittering sounds, on the RIGHT a WARM STONE ARCHWAY leads down to a glowing underground passage, both large, fully visible, clearly separated.",
+      "text": "The baby marmot squeaks excitedly — it recognizes this place. The trail splits: chittering voices echo from one side, a warm underground glow beckons from the other.",
+      "scare": {
+        "spot": "ferny moss hollow",
+        "pop": "A baby marmot wearing a tiny purple flower crown popping up from behind fern fronds and waving one paw cheerfully",
+        "reveal": "A teensy marmot wants to show off its flower hat!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Enter the moss hollow",
+          "next": "m3",
+          "spot": "ferny moss hollow"
+        },
+        {
+          "label": "Explore underground passage",
+          "next": "m4",
+          "spot": "warm stone archway"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} crawls under a mossy green ledge beside the spring source, discovering a hidden grotto where warm turquoise water trickles from cracks in orange-streaked rock. On the LEFT a ROUND MOSS DOORWAY opens into a wider chamber where small shadows dart about, on the RIGHT a GLOWING ROCK CRACK reveals a warm passage sloping downward, both large, fully visible, clearly separated.",
+      "text": "Under the ledge Mo finds a secret grotto — and the baby marmot starts squeaking toward the shadows. Something furry is definitely moving in there.",
+      "choices": [
+        {
+          "label": "Peek through moss doorway",
+          "next": "m3",
+          "spot": "round moss doorway"
+        },
+        {
+          "label": "Squeeze through the crack",
+          "next": "m4",
+          "spot": "glowing rock crack"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} discovers a family of fluffy marmots digging frantically at the volcano's warm rocky toes inside a glowing cavern, the walls shaking with giggles. On the LEFT a big ORANGE WOOL BLANKET lies folded on a rock, in the MIDDLE a GOLDEN ACORN BASKET sits steaming on the ground, on the RIGHT a BRIGHT COPPER LANTERN glows on a stone ledge, all large, fully visible, clearly separated.",
+      "text": "The marmots are tickling the volcano's toes trying to dig a warm burrow — that's why it's been giggling and hiccupping. Three things nearby might help Mo relocate them gently.",
+      "choices": [
+        {
+          "label": "Offer the cozy blanket",
+          "next": "end_blanket_den",
+          "spot": "orange wool blanket"
+        },
+        {
+          "label": "Share the warm acorns",
+          "next": "end_acorn_feast",
+          "spot": "golden acorn basket"
+        },
+        {
+          "label": "Wave the bright lantern",
+          "next": "end_lantern_scare",
+          "spot": "bright copper lantern"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} finds a golden vent in the cave wall humming a warm melody with rosy steam curling out in musical spirals, while marmots peek from a nearby crack swaying to the sound. On the LEFT a GLOWING EMBER DRUM made of hollow stone sits near the vent, on the RIGHT a WARM TERRACOTTA BOWL full of soft clay sits beside the crack, both large, fully visible, clearly separated.",
+      "text": "A golden vent hums the volcano's own lullaby and the marmots seem almost hypnotized, swaying in time. Mo spots a drum to play along — or some warm clay that could be shaped into something cozy.",
+      "choices": [
+        {
+          "label": "Drum along gently",
+          "next": "end_lullaby",
+          "spot": "glowing ember drum"
+        },
+        {
+          "label": "Shape a clay den",
+          "next": "end_clay_den",
+          "spot": "warm terracotta bowl"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in a ferny hollow where a mama marmot carrying three baby marmots on her back chatters at the scarf-wearing baby marmot who squeaks back excitedly. On the LEFT a WARM ORANGE BURROW entrance glows invitingly in a mossy bank, on the RIGHT a PURPLE THISTLE BUSH rustles near the edge of a cold spring pool, both large, fully visible, clearly separated.",
+      "text": "Mama marmot chatters gratefully — the shivering baby Mo rescued is hers! The whole family's been tickling the volcano's toes hunting for a warm den, and that's why the springs went cold.",
+      "choices": [
+        {
+          "label": "Lead them to burrow",
+          "next": "end_warm_den",
+          "spot": "warm orange burrow"
+        },
+        {
+          "label": "Nudge them springward",
+          "next": "end_spring_splash",
+          "spot": "purple thistle bush"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} discovers a hidden underground tunnel where warm turquoise water trickles between the hot springs and the volcano's base, with marmot pawprints everywhere in the damp clay. On the LEFT a COZY RED ALCOVE carved by warm water opens into a perfect den shape, on the RIGHT a STACK OF FLAT GREY STONES could dam the tunnel flow, both large, fully visible, clearly separated.",
+      "text": "This tunnel is the volcano's plumbing — the marmots have been accidentally rerouting the hot water with all their digging. The scarf-wearing baby squeaks and points at a snug little alcove.",
+      "choices": [
+        {
+          "label": "Settle marmots in alcove",
+          "next": "end_tunnel_home",
+          "spot": "cozy red alcove"
+        },
+        {
+          "label": "Dam the tunnel instead",
+          "next": "end_geyser_oops",
+          "spot": "flat grey stone stack"
+        }
+      ]
+    },
+    "end_blanket_den": {
+      "scene": "{HERO} sits among a family of marmots all snuggled in an orange wool blanket inside a glowing amber cave, while outside the round volcano puffs gentle rosy steam and turquoise hot springs bubble warmly below under a dusk-purple sky.",
+      "text": "The marmots snuggle into their new den, the volcano lets out the coziest sigh, and every marshmallow at the picnic toasts itself golden-brown — Mo didn't even have to hold the stick. The End!"
+    },
+    "end_acorn_feast": {
+      "scene": "{HERO} splashes into a turquoise hot spring as round-cheeked marmots roll down the slope like furry bowling balls, the golden acorn basket tipped over, marshmallow dissolving in the water, the volcano puffing amused smoke rings overhead.",
+      "text": "The marmots loved the acorns SO much they stuffed their cheeks until they were rounder than the volcano — then they all rolled downhill like furry bowling balls, knocking Mo into the hot spring with a tremendous splash. The marshmallow dissolved instantly. Oopsie ending!",
+      "bad": true
+    },
+    "end_lantern_scare": {
+      "scene": "{HERO} stands covered in fluffy white marshmallow goo beside panicked marmots scurrying in circles inside a shaking cave, the bright copper lantern tipped over on the ground, the round volcano above shooting wobbly smoke rings into the dusk sky.",
+      "text": "The lantern was way too bright — the marmots panicked, dug faster, and the volcano laughed so hard it sneezed marshmallow-flavored smoke across the whole valley, coating Mo head to toe. Oopsie ending!",
+      "bad": true
+    },
+    "end_lullaby": {
+      "scene": "{HERO} plays a glowing ember drum beside a golden vent as marmots sway peacefully in a line, rosy steam spiraling through the cave, while outside the volcano glows steadily against a dusk-purple sky.",
+      "text": "The volcano-and-drum duet is the coziest sound the valley has ever heard — the marmots sway right into a warm den, the springs reheat, and Mo's marshmallow toasts itself to the beat. The End!"
+    },
+    "end_clay_den": {
+      "scene": "{HERO} admires a freshly shaped terracotta burrow entrance as marmots file inside one by one, the golden vent humming nearby, warm ember light filling the cave and rosy steam drifting upward.",
+      "text": "Mo sculpts the coziest little clay door any marmot has ever waddled through — the volcano settles to a warm purr, the springs reheat, and that marshmallow finally gets its moment of golden glory. The End!"
+    },
+    "end_warm_den": {
+      "scene": "{HERO} stands beside a warm orange burrow entrance as mama marmot and three baby marmots nestle inside among soft ferns, one baby still wearing a tiny scarf, the volcano puffing steady rosy steam above against a dusk sky.",
+      "text": "Mama marmot tucks everyone in, the scarf-wearing baby waves one tiny paw, the volcano stops jiggling and lets out a long warm sigh, and the springs bubble back to perfect marshmallow-toasting temperature. The End!"
+    },
+    "end_spring_splash": {
+      "scene": "{HERO} stands drenched beside a turquoise hot spring as an enormous splash wave radiates outward, the scarf-wearing baby marmot mid-cannonball, mama marmot sliding across wet rocks with a surprised expression, the marshmallow stick lying soggy on the ground.",
+      "text": "Mo led the marmots to the springs, but the scarf-wearing baby cannonballed in so enthusiastically that the splash soaked everyone, put out the marshmallow fire, and sent mama marmot skidding across the wet rocks like a furry hockey puck. Oopsie ending!",
+      "bad": true
+    },
+    "end_tunnel_home": {
+      "scene": "{HERO} waves goodbye to a marmot family settling into a cozy red alcove beside a turquoise underground stream, warm ember light glowing from mineral veins in the tunnel walls, the baby marmot waving back in its tiny scarf.",
+      "text": "The alcove is warm, the water flows right again, and the scarf-wearing baby marmot waves one tiny paw goodbye — up top, the volcano hums, the springs steam, and Mo's marshmallow is somehow already perfectly toasted. The End!"
+    },
+    "end_geyser_oops": {
+      "scene": "{HERO} watches in surprise as a geyser of turquoise water erupts from behind a stack of flat grey stones, marshmallows launching skyward, startled marmots clinging to rocks, and the round volcano wobbling with laughter against the dusk sky.",
+      "text": "Damming a volcano's plumbing is like plugging a garden hose — something's gonna blow, and every marshmallow in the valley just achieved low orbit while Mo got a turquoise shower. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

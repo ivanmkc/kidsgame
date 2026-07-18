@@ -1,0 +1,243 @@
+{
+  "id": "mend",
+  "title": "Mo and the Toy Hospital",
+  "hero": "MO",
+  "style": "Gentle pastel crayon-and-paper-collage style, mint greens and blush pinks, bandaged plush toys tucked into tiny beds, soft nightlight warmth. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a crowded toy-hospital waiting room clutching a one-eyed teddy bear with a popped seam and stuffing trailing out. Bandaged plush toys fill tiny beds along the walls under warm nightlights. On the LEFT a pink wooden waiting bench with a number dispenser on top, on the RIGHT a green striped hospital curtain half-open, both large, fully visible, clearly separated.",
+      "text": "Mo burst through the toy-hospital doors with Teddy tucked under one arm, stuffing trailing behind like a cottony breadcrumb trail. The waiting room was standing-room-only — apparently flu season hits stuffed animals too.",
+      "choices": [
+        {
+          "label": "Join the waiting line",
+          "next": "a",
+          "spot": "pink waiting bench"
+        },
+        {
+          "label": "Peek behind the curtain",
+          "next": "b",
+          "spot": "green striped curtain"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} sits on a pink waiting bench holding a one-eyed teddy bear with stuffing peeking out. A tall stuffed giraffe with a wobbly drooping neck sniffles beside them. On the LEFT a yellow stuffed giraffe with a floppy neck and big teary eyes, on the RIGHT an orange toy magazine on a small wooden table, both large, fully visible, clearly separated.",
+      "text": "Mo grabbed a number and plopped down on the bench. A giraffe with a neck wobblier than a dashboard bobblehead was sniffling in the next seat.",
+      "choices": [
+        {
+          "label": "Help the wobbly giraffe",
+          "next": "aa",
+          "spot": "yellow stuffed giraffe"
+        },
+        {
+          "label": "Read the toy magazine",
+          "next": "ab",
+          "spot": "orange toy magazine"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} tiptoes behind a green striped curtain into a pastel hospital ward with tiny beds and glowing nightlights. Bandaged plush toys peek from blankets. On the LEFT a white stuffed cat wearing a tiny nurse cap and holding a clipboard, on the RIGHT a blue wooden supply closet with a brass handle, both large, fully visible, clearly separated.",
+      "text": "Mo slipped behind the curtain into the ward, because waiting rooms are for toys with patience and Teddy's seam was on a deadline.",
+      "choices": [
+        {
+          "label": "Talk to the nurse cat",
+          "next": "ba",
+          "spot": "white nurse cat"
+        },
+        {
+          "label": "Open the supply closet",
+          "next": "bb",
+          "spot": "blue supply closet"
+        }
+      ],
+      "scare": {
+        "spot": "green striped curtain",
+        "pop": "A friendly jack-in-the-box toy with a wide grin and a tiny top hat, pastel crayon-and-paper-collage style, mint and pink, soft edges",
+        "reveal": "Surprise! Just a jack-in-the-box stretching his springs.",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "aa": {
+      "scene": "{HERO} holds a yellow stuffed giraffe steady while tying a mint ribbon around its wobbly neck. The grateful giraffe offers a spool of golden thread. On the LEFT a large wooden drawer cabinet with a button symbol carved on the front, on the RIGHT a pink sewing cushion with a silver needle resting on top, both large, fully visible, clearly separated.",
+      "text": "Mo held the giraffe's neck steady and tied a ribbon bow so perfect it would make a gift-wrapper weep. The grateful giraffe handed over a spool of golden thread — apparently the good stuff.",
+      "choices": [
+        {
+          "label": "Go to the eye drawer",
+          "next": "m1",
+          "spot": "wooden button drawer"
+        },
+        {
+          "label": "Ask doctor to sew first",
+          "next": "m2",
+          "spot": "pink sewing cushion"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} reads a big orange toy magazine with diagrams of famous toy repairs, a lightbulb hovering above. A one-eyed teddy sits beside them on the bench. On the LEFT a large wooden drawer cabinet with a button symbol carved on the front, on the RIGHT a pink sewing cushion with a silver needle resting on top, both large, fully visible, clearly separated.",
+      "text": "Mo flipped through Toy Repair Weekly and discovered the legendary double-knot stitch. Knowledge is power, especially when your bear is leaking.",
+      "choices": [
+        {
+          "label": "Go to the eye drawer",
+          "next": "m1",
+          "spot": "wooden button drawer"
+        },
+        {
+          "label": "Try the double-knot trick",
+          "next": "m2",
+          "spot": "pink sewing cushion"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} walks through the pastel ward with the white nurse cat, who holds out a tiny pink heart-shaped patch. Bandaged toys wave from their tiny beds. On the LEFT a pink doctor's bag with a white cross on the clasp, on the RIGHT a purple mending machine with dials and a brass funnel, both large, fully visible, clearly separated.",
+      "text": "The nurse cat handed Mo a tiny heart-shaped patch and whispered that it was lucky. Mo figured Teddy could use all the luck his one eye could see.",
+      "choices": [
+        {
+          "label": "Show teddy to the doctor",
+          "next": "m3",
+          "spot": "pink doctor bag"
+        },
+        {
+          "label": "Use the mending machine",
+          "next": "m4",
+          "spot": "purple mending machine"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} pulls open the blue supply closet and discovers a tiny stethoscope hidden under a fluffy pillow. A delighted doctor peeks in through the doorway. On the LEFT a pink doctor's bag with a white cross on the clasp, on the RIGHT a purple mending machine with dials and a brass funnel, both large, fully visible, clearly separated.",
+      "text": "Mo found the doctor's missing stethoscope wedged behind a pillow like it was hiding from its job. The doctor was so grateful she bumped Mo straight to the front of the line.",
+      "choices": [
+        {
+          "label": "Let doctor examine teddy",
+          "next": "m3",
+          "spot": "pink doctor bag"
+        },
+        {
+          "label": "Try the mending machine",
+          "next": "m4",
+          "spot": "purple mending machine"
+        }
+      ],
+      "scare": {
+        "spot": "blue supply closet",
+        "pop": "A fluffy wind-up penguin toy wobbling with surprise and wearing a tiny bandage on its wing, pastel crayon-and-paper-collage style, soft edges",
+        "reveal": "Just a penguin who got locked in! He seems fine, honestly.",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands before the famous open drawer of one hundred button eyes in every color and size, spilling over the edges. A one-eyed teddy sits on the counter waiting. On the LEFT a large blue glass button eye, in the MIDDLE a large gold sparkly button eye, on the RIGHT a wooden drawer handle ready to push closed, all large, fully visible, clearly separated.",
+      "text": "The famous eye drawer slid open and a hundred button eyes stared up at Mo — blues, golds, some that probably belonged in a craft store. But did Teddy really need a new eye, or did he need something else entirely?",
+      "choices": [
+        {
+          "label": "Pick the blue button",
+          "next": "end_1",
+          "spot": "blue glass button"
+        },
+        {
+          "label": "Pick the sparkly gold",
+          "next": "end_2",
+          "spot": "gold sparkle button"
+        },
+        {
+          "label": "Close the drawer instead",
+          "next": "end_3",
+          "spot": "wooden drawer handle"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} sits at a sewing station under a warm nightlight. A one-eyed teddy lies on a soft mint cushion with a popped seam visible. On the LEFT a golden thread spool glowing softly on a wooden holder, on the RIGHT a plain white thread spool on a wooden holder, both large, fully visible, clearly separated.",
+      "text": "Mo settled at the sewing station, Teddy's popped seam yawning open like a sleepy mouth. Time to pick a thread and get stitching — this bear had places to be.",
+      "choices": [
+        {
+          "label": "Sew with golden thread",
+          "next": "end_4",
+          "spot": "golden thread spool"
+        },
+        {
+          "label": "Use plain white thread",
+          "next": "end_5",
+          "spot": "white thread spool"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} places a one-eyed teddy on the doctor's examination table under a bright pastel lamp. A stuffed cat doctor adjusts tiny spectacles. On the LEFT a large red button eye sitting on a silver tray, on the RIGHT a mint-green sewing kit tied with a pink ribbon, both large, fully visible, clearly separated.",
+      "text": "The doctor peered at Teddy through her spectacles and hmmed in that doctorly way that means she is thinking very hard. Fix the eye or fix the seam — that was the question.",
+      "choices": [
+        {
+          "label": "Ask for a brand-new eye",
+          "next": "end_6",
+          "spot": "red button eye"
+        },
+        {
+          "label": "Fix just the seam",
+          "next": "end_7",
+          "spot": "mint sewing kit"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} faces the big purple mending machine, which whirs and blinks with friendly pastel lights. A one-eyed teddy sits in the machine's soft basket on a conveyor belt. On the LEFT a large red button on the machine's front panel, on the RIGHT a blue lever with a cushioned grip, both large, fully visible, clearly separated.",
+      "text": "The mending machine looked like a friendly robot crossed with a sewing box, and it was humming an inviting little tune. Mo just had to choose: the big dramatic button or the gentle careful lever.",
+      "choices": [
+        {
+          "label": "Press the big red button",
+          "next": "end_8",
+          "spot": "red machine button"
+        },
+        {
+          "label": "Pull the gentle blue lever",
+          "next": "end_9",
+          "spot": "blue machine lever"
+        }
+      ]
+    },
+    "end_1": {
+      "scene": "{HERO} holds up a one-eyed teddy bear who now has a mismatched bright blue button eye, looking like he is permanently winking. Stuffing pokes from the still-open seam onto the toy-hospital floor. Toys in the waiting room giggle from their beds.",
+      "text": "Teddy's new blue eye made him look like he was permanently winking at everyone, which was charming for about three seconds. His seam was still wide open and stuffing was now on the floor, the bench, and somehow in Mo's hair. Oopsie ending!",
+      "bad": true
+    },
+    "end_2": {
+      "scene": "{HERO} watches as glitter explodes from a one-eyed teddy bear's new gold sparkly button eye, coating every toy in the hospital ward in shimmering dust. Teddy's seam has popped wider with cotton puffs floating in the air like tiny clouds.",
+      "text": "The gold button eye exploded with glitter the instant it clicked in, coating every single toy in the ward like a craft-store snow globe. Teddy's seam popped wider from all the excitement and now he was sparklier and more broken than before. Oopsie ending!",
+      "bad": true
+    },
+    "end_3": {
+      "scene": "{HERO} hugs a one-eyed teddy bear tight, seam perfectly sewn shut with a tiny pink heart patch over the stitches. All the mended toys in the ward stand on their tiny beds cheering with bandaged arms raised, under warm flickering nightlight glow.",
+      "text": "Mo closed the drawer — Teddy already matched Mo, one eye and all, and that was exactly why Mo loved him. The doctor sewed Teddy's seam snug and added a tiny heart patch, and every mended toy in the ward cheered so loud the nightlights flickered. The End!"
+    },
+    "end_4": {
+      "scene": "{HERO} holds up a one-eyed teddy bear at the sewing station, golden stitches gleaming like tiny stars along a perfectly mended seam under the nightlight. Across the waiting room, a yellow giraffe with a steady neck gives a little salute.",
+      "text": "Mo stitched Teddy's seam with the golden thread, and every stitch gleamed like a tiny star under the nightlight. Across the room, a certain giraffe stood tall with a perfectly steady neck and gave Mo a little salute. The End!"
+    },
+    "end_5": {
+      "scene": "{HERO} ties one last careful knot in a one-eyed teddy bear's seam at the sewing station, plain white stitches small and perfectly neat. Teddy sits up straight on the mint cushion looking sturdy and loved under warm nightlight glow.",
+      "text": "Mo tied one last double knot — the secret trick from the magazine — and Teddy's seam held tighter than a bear hug. Simple thread, simple knot, and a whole lot of love did the job perfectly. The End!"
+    },
+    "end_6": {
+      "scene": "{HERO} watches the doctor cat sew a one-eyed teddy bear's seam with careful expert stitches on the examination table. The doctor pins a tiny golden star medal over teddy's heart. Teddy sits proudly with one bright eye under the pastel lamp.",
+      "text": "The doctor reached for the eye drawer, but Mo stopped her with a gentle tug — just the seam, please. The doctor smiled, sewed Teddy up perfectly, and pinned a tiny star medal right over his heart. The End!"
+    },
+    "end_7": {
+      "scene": "{HERO} cradles a one-eyed teddy bear whose seam is sewn shut with a tiny pink heart patch pressed over the mended stitches. The white nurse cat waves goodbye from the ward doorway, surrounded by smiling bandaged toys in their tiny beds.",
+      "text": "The doctor stitched Teddy up snug and pressed a tiny heart patch right over the mended seam. Teddy looked up at Mo with his one bright eye, perfectly whole and entirely loved. The End!"
+    },
+    "end_8": {
+      "scene": "{HERO} rolls across the toy-hospital ward floor clinging to an enormous ball of white bandages the size of a basketball with a one-eyed teddy bear somewhere inside, knocking over tiny beds and sending bandaged plush toys tumbling like dominoes, the purple mending machine whirring innocently in the background.",
+      "text": "The machine got VERY enthusiastic and wrapped Teddy in so many bandages he was now the size of a basketball. Mo could not find Teddy's head, his tail, or the door. They rolled out of the hospital like a giant cottony snowball, bouncing off every bed on the way. Oopsie ending!",
+      "bad": true
+    },
+    "end_9": {
+      "scene": "{HERO} lies fast asleep on the toy-hospital floor beside a sleeping one-eyed teddy bear, the purple mending machine slumped with its lights dimmed, the white nurse cat snoring against a wall, every patient in their tiny beds sound asleep, warm nightlight glow filling the silent ward.",
+      "text": "The machine hummed such a perfect lullaby that EVERYONE in the hospital fell asleep — Mo, Teddy, the nurse cat, three patients, and the machine itself. Nobody woke up until the night janitor tripped over Mo and sent all the stuffed animals tumbling like dominoes. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

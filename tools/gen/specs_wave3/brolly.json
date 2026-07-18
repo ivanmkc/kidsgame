@@ -1,0 +1,243 @@
+{
+  "id": "brolly",
+  "title": "Milo and the Dripping Mushroom",
+  "hero": "MILO",
+  "style": "Soft rainy-day gouache, oversized glossy mushroom caps in coral and cream, glowing honey-colored windows in the stems, gentle blue-grey drizzle, cozy woodland-floor scale. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the edge of a rain-soaked woodland, his tiny lantern glowing amber against the blue-grey drizzle — on the LEFT a wide coral mushroom archway dripping silver beads, on the RIGHT a row of cream mushroom caps forming a cozy tunnel, both large, fully visible, clearly separated.",
+      "text": "Milo's little lantern holds the only flame in the whole forest, and Mushroom Village is counting on him to light the Rain Festival tonight. Arch or tunnel?",
+      "choices": [
+        {
+          "label": "Duck under the arch",
+          "next": "a",
+          "spot": "coral mushroom arch"
+        },
+        {
+          "label": "Sneak through the tunnel",
+          "next": "b",
+          "spot": "cream mushroom tunnel"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} huddles beneath the wide coral arch, lantern tucked close, while a shivering blue beetle clings to a wet pebble nearby — on the LEFT a mossy stone bridge arcs over a silver puddle, on the RIGHT a wide hollow log lies on its side, both large, fully visible, clearly separated.",
+      "text": "A tiny beetle shivers on the path, so Milo holds his lantern close until the little bug stops shaking and hops aboard his shoulder like the world's smallest hitchhiker. Mossy bridge or log?",
+      "choices": [
+        {
+          "label": "Cross the stone bridge",
+          "next": "aa",
+          "spot": "mossy stone bridge"
+        },
+        {
+          "label": "Crawl through the log",
+          "next": "ab",
+          "spot": "hollow log"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} tiptoes through the cream mushroom tunnel, lantern casting honey light on the curved walls, while a dim firefly blinks weakly near the exit — on the LEFT a trail of spotted toadstool stepping stones crosses a shallow brook, on the RIGHT a curved bark canoe rests at the water's edge, both large, fully visible, clearly separated.",
+      "text": "A lost firefly flickers its last spark, so Milo shares a bit of his flame until the little light buzzes back to life and zips ahead like a tiny tour guide. Stepping stones or canoe?",
+      "scare": {
+        "spot": "green frog",
+        "pop": "A plump green frog with orange spots perched on a glossy cream mushroom cap, grinning wide, soft rainy-day gouache, cozy woodland scale",
+        "reveal": "Ribbit! Just me — I love rain festivals!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Hop the stepping stones",
+          "next": "ba",
+          "spot": "spotted toadstool stones"
+        },
+        {
+          "label": "Ride the bark canoe",
+          "next": "bb",
+          "spot": "curved bark canoe"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} crosses the mossy stone bridge with the beetle riding his shoulder, lantern flickering in the drizzle — on the LEFT a giant curled fern leaf leans against a rock like a green umbrella, on the RIGHT a pearly snail shell sits open like a little dome, both large, fully visible, clearly separated.",
+      "text": "The beetle chirps a warning — heavy drips ahead, and one good splash could end the whole festival before it starts! Fern leaf or snail shell?",
+      "scare": {
+        "spot": "pink worm",
+        "pop": "A cheerful pink worm wearing a tiny leaf hat poking out from between mossy bridge stones, soft rainy-day gouache, cozy woodland scale",
+        "reveal": "Ooh, warm lantern! Good luck out there!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Grab the fern leaf",
+          "next": "m1",
+          "spot": "curled fern leaf"
+        },
+        {
+          "label": "Hide in the shell",
+          "next": "m2",
+          "spot": "pearly snail shell"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} crawls out of the hollow log into a misty glade, the beetle clicking happily on his shoulder, lantern still bright — on the LEFT a giant curled fern leaf leans against a stump, on the RIGHT a pearly snail shell rests beside a mossy root, both large, fully visible, clearly separated.",
+      "text": "The log kept them perfectly dry, but now rain hammers the clearing and Mushroom Village glows tantalizingly close. Fern leaf or snail shell?",
+      "choices": [
+        {
+          "label": "Grab the fern leaf",
+          "next": "m1",
+          "spot": "curled fern leaf"
+        },
+        {
+          "label": "Hide in the shell",
+          "next": "m2",
+          "spot": "pearly snail shell"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} hops across the spotted toadstools with the firefly lighting each cap as he lands, lantern held high above the spray — on the LEFT a tall red toadstool umbrella with a thick stem, on the RIGHT a golden acorn cap sitting upside-down like a helmet, both large, fully visible, clearly separated.",
+      "text": "The firefly zips between two rain-proof treasures the woods left behind — something to hold high and something to wear. Toadstool umbrella or acorn cap?",
+      "choices": [
+        {
+          "label": "Hold the toadstool high",
+          "next": "m3",
+          "spot": "red toadstool umbrella"
+        },
+        {
+          "label": "Wear the acorn cap",
+          "next": "m4",
+          "spot": "golden acorn cap"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} glides downstream in the curved bark canoe, the firefly perched on the bow like a tiny captain, lantern safe between his knees — on the LEFT a tall red toadstool umbrella grows at the shore, on the RIGHT a golden acorn cap sits on the bank, both large, fully visible, clearly separated.",
+      "text": "The canoe bumps gently onto the bank, and two rain-proof finds sit waiting on the shore like little gifts from the forest. Toadstool umbrella or acorn cap?",
+      "choices": [
+        {
+          "label": "Grab the toadstool",
+          "next": "m3",
+          "spot": "red toadstool umbrella"
+        },
+        {
+          "label": "Snag the acorn cap",
+          "next": "m4",
+          "spot": "golden acorn cap"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} holds the curled fern leaf over his lantern like a green umbrella, the beetle cheering from his shoulder, as he approaches the Mushroom Village gate — on the LEFT the grumpy old mushroom with a cracked and sagging coral cap tilts over the path, on the RIGHT a low wooden gate opens to a lantern-lit lane, both large, fully visible, clearly separated.",
+      "text": "Almost there, but the grumpy old mushroom is pouring a waterfall right across the main entrance — classic. Grumpy mushroom or wooden gate?",
+      "choices": [
+        {
+          "label": "Sneak past grumpy cap",
+          "next": "end_1",
+          "spot": "cracked coral mushroom"
+        },
+        {
+          "label": "Slip through side gate",
+          "next": "end_2",
+          "spot": "low wooden gate"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} scurries along with the pearly snail shell balanced on his head, lantern peeking out the opening, the beetle tapping directions from his shoulder — on the LEFT a sturdy forked twig jammed upright in the mud near the grumpy mushroom, on the RIGHT a pile of dry oak leaves beside a puddle, both large, fully visible, clearly separated.",
+      "text": "The grumpy mushroom's cap sags so low it pours rain like a broken gutter, but something on the ground might just do the trick. Twig or leaves?",
+      "choices": [
+        {
+          "label": "Grab the forked twig",
+          "next": "end_3",
+          "spot": "forked twig"
+        },
+        {
+          "label": "Scoop up the leaves",
+          "next": "end_4",
+          "spot": "dry oak leaves"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} reaches the village gate holding his lantern under the red toadstool umbrella, the firefly orbiting his head — on the LEFT a wide bark shield leaning against a root, in the MIDDLE a sturdy forked twig stuck upright in the mud, on the RIGHT a tall hollow reed standing by the path, all three large, fully visible, clearly separated.",
+      "text": "The grumpy old mushroom blocks the gate with a curtain of drips, and three woodland odds and ends are Milo's last hope. Shield, twig, or reed?",
+      "choices": [
+        {
+          "label": "Block with bark shield",
+          "next": "end_5",
+          "spot": "wide bark shield"
+        },
+        {
+          "label": "Prop with forked twig",
+          "next": "end_6",
+          "spot": "sturdy forked twig"
+        },
+        {
+          "label": "Blow through the reed",
+          "next": "end_7",
+          "spot": "tall hollow reed"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} wears the golden acorn cap like a helmet, lantern tucked snugly underneath, the firefly buzzing beside him as the grumpy old mushroom looms ahead — on the LEFT a mossy boulder tall enough to climb over the drip zone, on the RIGHT a gnarled root arch just wide enough to squeeze through, both large, fully visible, clearly separated.",
+      "text": "The grumpy mushroom is dumping buckets, but the acorn cap keeps the flame cozy — now Milo just needs to get past. Boulder or root arch?",
+      "choices": [
+        {
+          "label": "Climb the boulder",
+          "next": "end_8",
+          "spot": "mossy boulder"
+        },
+        {
+          "label": "Squeeze through arch",
+          "next": "end_9",
+          "spot": "gnarled root arch"
+        }
+      ]
+    },
+    "end_1": {
+      "scene": "{HERO} tiptoes past the grumpy mushroom with his fern leaf held high, and the beetle leaps onto the sagging coral cap and clicks a cheerful rhythm — the old mushroom chuckles, its cap swings aside, and Milo's lantern flame blazes into the village square, lighting row after row of honey-colored mushroom windows.",
+      "text": "The beetle's tiny clicks told the best joke the grumpy mushroom had heard in forty years — its cap swung open like a door, and Milo's flame kissed every lantern in the square until the whole Rain Festival glowed like sunrise. The End!"
+    },
+    "end_2": {
+      "scene": "{HERO} squeezes through the low wooden gate into a dark lane, the beetle pointing frantically the wrong way from his shoulder, while the lantern-lit lane leads to a dead end with a tall brick wall and the rain pours down even harder behind them.",
+      "text": "The beetle was VERY confident about this shortcut and the side gate opened onto a lane that was bone dry — because it was a dead end with a roof! Milo followed the beetle's directions right into a corner, the gate swung shut behind him, and his festival flame went out trying to squeeze back through. Oopsie ending!",
+      "bad": true
+    },
+    "end_3": {
+      "scene": "{HERO} jams the forked twig under the grumpy mushroom's sagging coral cap, lantern clutched tight, and the cap springs upright with a creak — the waterfall of drips stops, the beetle claps its wings, and every mushroom house window in the village blazes with warm honey light.",
+      "text": "The grumpy old mushroom had been tilting its worn-out cap on purpose, spilling all the runoff so every little mushroom house stayed dry — Milo's twig propped the sagging cap straight, the drips stopped, and his flame lit every window in the village. The End!"
+    },
+    "end_4": {
+      "scene": "{HERO} piles the dry oak leaves over his lantern like a soggy nest, but the first fat raindrop soaks right through and the flame hisses out in a tiny puff of smoke — the beetle stares with all six legs crossed.",
+      "text": "Turns out dry leaves and rainstorms go together like sandcastles and waves — one fat drip and Milo's flame fizzled out while the beetle offered a very slow six-legged clap. Oopsie ending!",
+      "bad": true
+    },
+    "end_5": {
+      "scene": "{HERO} charges through the drip curtain behind the wide bark shield, lantern blazing, the firefly lighting a golden trail ahead — raindrops bounce off the bark like tiny drums, and Milo slides into the village square where coral and cream mushroom houses catch the flame one by one.",
+      "text": "The firefly blazed ahead like a tiny lighthouse, the bark shield bounced every drop sideways, and Milo charged into the village square where his little flame lit the festival lanterns one by one until the whole place sparkled. The End!"
+    },
+    "end_6": {
+      "scene": "{HERO} wedges the sturdy forked twig under the grumpy mushroom's drooping coral cap, lantern held high, and with a long creak the old cap lifts straight — the drip curtain vanishes, the firefly cheers, and every golden window in Mushroom Village blazes to life.",
+      "text": "All this time the grumpy mushroom had been sagging its cap sideways to keep every little house dry, dumping the runoff wherever Milo stood — the forked twig braced the old cap upright, the drips vanished, and his flame lit every golden window in the village. The End!"
+    },
+    "end_7": {
+      "scene": "{HERO} takes a mighty breath and blows through the tall hollow reed to scatter the drip curtain, but the gust curls back and snuffs his own lantern flame with a sad little puff — the firefly winces as the village square stays dark.",
+      "text": "Blowing through a reed near an open flame is the kind of plan that sounds brilliant for exactly two seconds — Milo's lantern puffed out, and the firefly tried to relight it by buzzing really fast, which only made everyone dizzy. Oopsie ending!",
+      "bad": true
+    },
+    "end_8": {
+      "scene": "{HERO} sits at the bottom of the mossy boulder in a muddy puddle, the golden acorn-cap helmet rolling away through the rain, the firefly flickering dimly from exhaustion, soaked from head to toe with a surprised expression.",
+      "text": "The firefly found ALMOST every handhold on that boulder — unfortunately the last one was moss, and Milo's paws went WHOOOP right out from under him! He slid all the way down like a very slow waterslide, the acorn cap bounced off and rolled into a puddle, and his festival flame fizzled out with a sad little pssst. Oopsie ending!",
+      "bad": true
+    },
+    "end_9": {
+      "scene": "{HERO} squeezes through the gnarled root arch with his golden acorn cap scraping the mossy ceiling, the firefly squishing flat to fit beside him — he pops out in the center of the festival stage, lantern first, and every mushroom-house window catches the flame.",
+      "text": "It was a tight squeeze and the acorn cap scraped the ceiling, but Milo popped out center stage, flame first, while the firefly took a bow — every wick in the village caught the glow, and the Rain Festival roared to life. The End!"
+    }
+  }
+}

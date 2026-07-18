@@ -1,0 +1,243 @@
+{
+  "id": "harvest",
+  "title": "Pip and the Rolling Pumpkins",
+  "hero": "PIP",
+  "style": "Golden-hour oil-pastel storybook style, an enormous amber harvest moon, rolling pumpkin fields in burnt orange and wheat gold, long soft shadows, one warm-lit red barn. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the edge of a golden pumpkin field at sunset, wearing a big straw hat, pumpkins scattered everywhere under an enormous amber harvest moon. On the LEFT a bright red barn with wide-open doors, on the RIGHT a tall wooden signpost pointing uphill, both large, fully visible, clearly separated.",
+      "text": "Every pumpkin Pip rolled into the barn sneaked right back out — tonight's harvest-moon party has zero decorations! Red barn or signpost?",
+      "choices": [
+        {
+          "label": "Head to the barn",
+          "next": "a",
+          "spot": "bright red barn"
+        },
+        {
+          "label": "Follow the signpost",
+          "next": "b",
+          "spot": "tall wooden signpost"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} steps into the warm-lit red barn, straw hat tilted, dusty golden light streaming through the rafters. On the LEFT a golden hay cart piled with straw, on the RIGHT a rusty orange wheelbarrow leaning on a post, both large, fully visible, clearly separated.",
+      "text": "Not a single pumpkin in here — just hay, cobwebs, and a tiny squeaking mouse Pip tucks into his hat. Hay cart or wheelbarrow?",
+      "choices": [
+        {
+          "label": "Roll the hay cart",
+          "next": "aa",
+          "spot": "golden hay cart"
+        },
+        {
+          "label": "Grab the wheelbarrow",
+          "next": "ab",
+          "spot": "rusty orange wheelbarrow"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} follows a dirt trail uphill, straw hat catching amber light, a tiny firefly freed from a spider web glowing on his shoulder, pumpkins rolling past in the opposite direction — uphill. On the LEFT a mossy grey stone wall running along the path, on the RIGHT a crooked wooden fence gate half-buried in vines, both large, fully visible, clearly separated.",
+      "text": "Pip freed a tangled firefly and now it won't leave his side — meanwhile pumpkins are rolling uphill, which is against every pumpkin rule! Stone wall or fence gate?",
+      "choices": [
+        {
+          "label": "Walk along the wall",
+          "next": "ba",
+          "spot": "mossy grey stone wall"
+        },
+        {
+          "label": "Open the fence gate",
+          "next": "bb",
+          "spot": "crooked wooden fence gate"
+        }
+      ],
+      "scare": {
+        "spot": "mossy grey stone wall",
+        "pop": "A friendly wide-eyed barn owl with fluffy golden feathers perched on the stone wall, golden-hour oil-pastel storybook style",
+        "reveal": "Hoo-hoo! Even the owls are watching pumpkins tonight!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "aa": {
+      "scene": "{HERO} pushes the golden hay cart through the stubble field, straw hat bouncing, the baby mouse riding on his shoulder, three pumpkins rolling alongside toward the moonlight. On the LEFT a shallow muddy creek with flat rocks, on the RIGHT a dense sunflower patch with tall golden heads, both large, fully visible, clearly separated.",
+      "text": "Pip loaded six pumpkins but they keep steering the hay cart toward the moonlight — worst passengers ever! Muddy creek or sunflower patch?",
+      "choices": [
+        {
+          "label": "Splash through the creek",
+          "next": "m1",
+          "spot": "shallow muddy creek"
+        },
+        {
+          "label": "Duck into sunflowers",
+          "next": "m2",
+          "spot": "dense sunflower patch"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} trundles the rusty orange wheelbarrow along a fence, straw hat askew, one enormous warty pumpkin wobbling inside, the baby mouse squeaking encouragement from the brim of his hat. On the LEFT a shallow muddy creek crossing the path, on the RIGHT a dense sunflower patch swaying in the breeze, both large, fully visible, clearly separated.",
+      "text": "The biggest pumpkin keeps tipping the wheelbarrow uphill — it has somewhere very important to be! Muddy creek or sunflower patch?",
+      "choices": [
+        {
+          "label": "Wade through the creek",
+          "next": "m1",
+          "spot": "shallow muddy creek"
+        },
+        {
+          "label": "Sneak past sunflowers",
+          "next": "m2",
+          "spot": "dense sunflower patch"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} walks along the mossy grey stone wall at dusk, straw hat glowing amber, a trail of small pumpkins tumbling ahead like ducklings, the freed firefly lighting their way. On the LEFT a twisted old apple tree heavy with red fruit, on the RIGHT a round golden hay bale sitting in the meadow, both large, fully visible, clearly separated.",
+      "text": "The little pumpkins follow the moonlight along the wall like a parade, and the freed firefly is lighting their way! Apple tree or hay bale?",
+      "choices": [
+        {
+          "label": "Rest at the apple tree",
+          "next": "m3",
+          "spot": "twisted old apple tree"
+        },
+        {
+          "label": "Hide behind hay bale",
+          "next": "m4",
+          "spot": "round golden hay bale"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} steps through the crooked fence gate into a moonlit clearing, straw hat shadowed, a dozen pumpkins gathered in a circle facing the rising moon, the freed firefly hovering above them. On the LEFT a twisted old apple tree with low branches, on the RIGHT a round golden hay bale at the clearing edge, both large, fully visible, clearly separated.",
+      "text": "A dozen pumpkins sit in a perfect moonlit ring — it looks like they are throwing their own party without an invitation! Apple tree or hay bale?",
+      "choices": [
+        {
+          "label": "Peek from apple tree",
+          "next": "m3",
+          "spot": "twisted old apple tree"
+        },
+        {
+          "label": "Spy from hay bale",
+          "next": "m4",
+          "spot": "round golden hay bale"
+        }
+      ],
+      "scare": {
+        "spot": "round golden hay bale",
+        "pop": "A friendly plump hedgehog with bright curious eyes peeking out from behind the golden hay bale, golden-hour oil-pastel storybook style",
+        "reveal": "Snuffle! I have been watching the pumpkins do their moon dance all evening!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands at the muddy creek bank, straw hat dripping, the baby mouse clinging to his collar, the enormous pumpkin bobbing in the shallow water ahead. On the LEFT a flat grey stepping stone in the middle of the creek, on the RIGHT a wobbly wooden plank laid across the water, both large, fully visible, clearly separated.",
+      "text": "The biggest pumpkin floated right across the creek — it has an appointment with the moon and it will not be late! Stepping stone or wooden plank?",
+      "choices": [
+        {
+          "label": "Hop the stepping stone",
+          "next": "end_hilltop_raft",
+          "spot": "flat grey stepping stone"
+        },
+        {
+          "label": "Cross the wooden plank",
+          "next": "end_dam_oops",
+          "spot": "wobbly wooden plank"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} crouches in the dense sunflower patch, straw hat brushing golden petals, the baby mouse sniffing curiously, three harvest treasures glinting on the ground between the roots. On the LEFT a brass cowbell on a leather strap, in the MIDDLE a painted orange gourd rattle, on the RIGHT a copper bucket with a wooden handle, all large, fully visible, clearly separated.",
+      "text": "Three treasures hidden among the sunflower roots — the pumpkins left these behind like trick-or-treat in reverse! Cowbell, gourd rattle, or copper bucket?",
+      "choices": [
+        {
+          "label": "Ring the cowbell",
+          "next": "end_cowbell_party",
+          "spot": "brass cowbell"
+        },
+        {
+          "label": "Shake the gourd rattle",
+          "next": "end_rattle_dance",
+          "spot": "painted orange gourd rattle"
+        },
+        {
+          "label": "Grab the copper bucket",
+          "next": "end_bucket_oops",
+          "spot": "copper bucket"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} sits under the twisted old apple tree on the hilltop, straw hat tipped back, the biggest warty pumpkin resting beside him in the moonlight, fireflies twinkling gently above. On the LEFT a red apple hanging on a low branch, on the RIGHT a worn wooden bench beneath the tree, both large, fully visible, clearly separated.",
+      "text": "The biggest pumpkin stopped right here, staring up at the harvest moon with what might actually be a smile! Red apple or wooden bench?",
+      "choices": [
+        {
+          "label": "Offer the apple",
+          "next": "end_apple_friends",
+          "spot": "red apple"
+        },
+        {
+          "label": "Sit on the bench",
+          "next": "end_moonrise_bench",
+          "spot": "worn wooden bench"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} peeks over the round golden hay bale on the hilltop, straw hat covered in straw bits, the pumpkin circle glowing amber under the harvest moon, fireflies drifting softly. On the LEFT a folded patchwork quilt draped over the hay, on the RIGHT a wooden cider crate packed with brown bottles, both large, fully visible, clearly separated.",
+      "text": "From up here Pip can see everything — the pumpkins are not being naughty, they just really want to watch the moon! Patchwork quilt or cider crate?",
+      "choices": [
+        {
+          "label": "Spread the quilt",
+          "next": "end_quilt_hilltop",
+          "spot": "folded patchwork quilt"
+        },
+        {
+          "label": "Open the cider crate",
+          "next": "end_cider_party",
+          "spot": "wooden cider crate"
+        }
+      ]
+    },
+    "end_hilltop_raft": {
+      "scene": "{HERO} stands on the moonlit hilltop beside the flat grey stepping stone, straw hat crowned with wildflowers, the baby mouse cheering from his shoulder, all the pumpkins arranged in a glowing circle around a harvest-moon picnic with hay-bale seats and lanterns.",
+      "text": "Pip followed the biggest pumpkin all the way to the hilltop and found the real party — pumpkins, friends, one proud mouse, and the most enormous amber moon anyone had ever seen. The End!"
+    },
+    "end_dam_oops": {
+      "scene": "{HERO} stands knee-deep in flooded creek water beside the wobbly wooden plank, straw hat floating downstream, the baby mouse perched on a bobbing pumpkin, the whole field turned into a muddy pond under the harvest moon.",
+      "text": "Pip used the plank to block the pumpkins and accidentally dammed the whole creek — now the party is a pool party and absolutely nobody brought swimsuits. Oopsie ending!",
+      "bad": true
+    },
+    "end_cowbell_party": {
+      "scene": "{HERO} rings the brass cowbell on the moonlit hilltop, straw hat bouncing with joy, the baby mouse dancing on the biggest pumpkin, farm animals and friends streaming uphill toward the glowing harvest-moon celebration.",
+      "text": "One clang of the cowbell and every friend on the farm came running to the hilltop — the pumpkins had picked the perfect party spot all along! The End!"
+    },
+    "end_rattle_dance": {
+      "scene": "{HERO} shakes the painted orange gourd rattle on the moonlit hilltop, straw hat tipped back in delight, pumpkins wobbling in a circle like dancing partners, the baby mouse conducting from atop the biggest pumpkin, the harvest moon enormous above.",
+      "text": "The pumpkins wobbled and spun to the rattle's beat — they were not escaping, they were throwing the greatest harvest-moon dance the farm had ever seen! The End!"
+    },
+    "end_bucket_oops": {
+      "scene": "{HERO} sits exhausted in the sunflower patch next to the copper bucket, straw hat wilted, the baby mouse asleep in the hat brim, one tiny pumpkin in the bucket while dozens more roll freely uphill under the harvest moon.",
+      "text": "Pip tried to bucket-brigade every pumpkin back to the barn one at a time — the sun came up before he finished the second trip! Oopsie ending!",
+      "bad": true
+    },
+    "end_apple_friends": {
+      "scene": "{HERO} sits beneath the twisted apple tree on the hilltop, straw hat tipped back, offering a red apple to the biggest pumpkin who has rolled slightly away, while all the other pumpkins have quietly rolled down the hill behind Pip leaving the hilltop empty.",
+      "text": "Pip sat down to share his apple with the oldest pumpkin but sat so quietly that every OTHER pumpkin on the farm thought the coast was clear and rolled away down the back of the hill — by the time Pip looked up, it was just him and one pumpkin watching the moon like the world's smallest, saddest party. Oopsie ending!",
+      "bad": true
+    },
+    "end_moonrise_bench": {
+      "scene": "{HERO} sits on the worn wooden bench under the apple tree, straw hat resting in his lap, pumpkins nestled around his feet like sleepy pets, fireflies glowing softly, the enormous amber harvest moon rising over the hilltop.",
+      "text": "Pip stopped chasing and just sat down — and every pumpkin on the farm rolled right up to join him for the most peaceful moonrise anyone could remember. The End!"
+    },
+    "end_quilt_hilltop": {
+      "scene": "{HERO} slides down the grassy slope on the patchwork quilt like a sled, straw hat flying off behind him, pumpkins watching from the hilltop as the quilt sails Pip over the edge with a surprised expression, fireflies scattering.",
+      "text": "Pip spread the quilt on the hilltop and a gust of wind grabbed it like a kite — with Pip still holding on! He slid down the grassy slope on his belly, straw hat flying, while every pumpkin on the hilltop watched him disappear over the edge like the world's least graceful magic carpet ride. Oopsie ending!",
+      "bad": true
+    },
+    "end_cider_party": {
+      "scene": "{HERO} pours apple cider from the wooden crate on the hilltop, straw hat raised in a toast, pumpkins glowing in a ring, fireflies dancing, friends arriving from below, the harvest moon enormous and amber overhead.",
+      "text": "Pip popped open the cider and the hilltop harvest-moon party officially began — the pumpkins knew the best view on the whole farm all along! The End!"
+    }
+  }
+}

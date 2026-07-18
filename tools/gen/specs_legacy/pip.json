@@ -1,0 +1,144 @@
+{
+  "id": "pip",
+  "hero": "PIP",
+  "title": "Pip Finds a Treasure",
+  "style": "Warm cheerful cartoon with soft outlines, golden tones, and friendly rounded characters",
+  "nodes": {
+    "start": {
+      "scene": "Pip the golden puppy trotting happily through a sunny garden with a rolled treasure map in his mouth, tall sunflowers on both sides and colorful wildflowers on the green grass.",
+      "text": "Pip the puppy found a treasure map! Where does the trail begin?",
+      "choices": [
+        {
+          "label": "Search the garden \ud83c\udf3b",
+          "next": "a",
+          "spot": "tall yellow sunflower"
+        },
+        {
+          "label": "Run to the park \ud83d\udedd",
+          "next": "b",
+          "spot": "colorful playground slide"
+        }
+      ]
+    },
+    "a": {
+      "scene": "Pip crouching nose-down in a vegetable garden with the map unrolled on the dirt, paw prints in the soil, red tomato plants on the left, orange pumpkins on the right, and tall sunflowers behind.",
+      "text": "Sniff sniff! The trail leads through the sunflowers. Pip hears a sound...",
+      "choices": [
+        {
+          "label": "Dig here! \ud83d\udd73\ufe0f",
+          "next": "aa",
+          "spot": "brown dirt patch"
+        },
+        {
+          "label": "Follow the sound \ud83d\udc42",
+          "next": "ab",
+          "spot": "tall sunflower row"
+        }
+      ]
+    },
+    "b": {
+      "scene": "Pip running through a playground park with the map in his mouth, a blue-and-yellow tube slide on the left, an orange swing set and monkey bars behind, a sandbox on the right, and a large green oak tree.",
+      "text": "The map shows the park! Where should Pip look first?",
+      "choices": [
+        {
+          "label": "Zoom down the slide! \ud83d\udedd",
+          "next": "ba",
+          "spot": "blue tube slide"
+        },
+        {
+          "label": "Sniff the oak tree \ud83c\udf33",
+          "next": "bb",
+          "spot": "green oak tree"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "Pip standing excitedly next to a small wooden treasure chest he just dug up from a dirt hole in the sunflower garden, flowers and greenery around.",
+      "text": "Pip digs up a mysterious little chest! It rattles. Should he...",
+      "choices": [
+        {
+          "label": "Open it now! \ud83d\udd13",
+          "next": "end_biscuits",
+          "spot": "wooden treasure chest"
+        },
+        {
+          "label": "Share it with friends \ud83d\udc3e",
+          "next": "end_share",
+          "spot": "friendly puppies gate"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "Pip sitting happily beside a metal watering can with three tiny kittens peeking out, surrounded by tall sunflowers in a warm garden.",
+      "text": "The sound was three tiny kittens, peeking out of an old watering can! 'Mew! Mew! We're hungry and a little lost.'",
+      "choices": [
+        {
+          "label": "Lead them home \ud83c\udfe1",
+          "next": "end_kittens",
+          "spot": "metal watering can"
+        },
+        {
+          "label": "Dig up the treasure to share \ud83e\uddb4",
+          "next": "end_share",
+          "spot": "bone marker stone"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "Pip sliding out of a blue tube slide at the park, a shiny golden ball rolling across the green grass nearby, with an orange swing set and sandbox in the background.",
+      "text": "Wheee! At the bottom waits a shiny golden ball \u2014 the map's treasure! And it's rolling away!",
+      "choices": [
+        {
+          "label": "Chase the ball! \ud83c\udfbe",
+          "next": "end_ball",
+          "spot": "golden ball"
+        },
+        {
+          "label": "Invite friends to play \u26bd",
+          "next": "end_game",
+          "spot": "orange swing set"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "Pip at sunset gazing at a large oak tree with a glowing hollow full of fireflies, the playground slide and swings visible in the warm background.",
+      "text": "The sun is setting at the old oak. Inside lives a family of glowing fireflies! They swirl around Pip.",
+      "choices": [
+        {
+          "label": "Follow the fireflies \u2728",
+          "next": "end_fireflies",
+          "spot": "glowing tree hollow"
+        },
+        {
+          "label": "Invite friends to play \u26bd",
+          "next": "end_game",
+          "spot": "blue tube slide"
+        }
+      ]
+    },
+    "end_biscuits": {
+      "scene": "Pip sitting proudly next to an open wooden treasure chest overflowing with golden bone-shaped biscuits in a sunny sunflower garden.",
+      "text": "The chest is full of golden biscuits! Best treasure a puppy ever found. The End!"
+    },
+    "end_share": {
+      "scene": "Pip sharing biscuits from an open treasure chest with kittens, a cat, and a bunny on a checkered picnic blanket among sunflowers and a tea set.",
+      "text": "Pip opens the chest and shares the biscuits with everyone. Sharing is the best treasure! The End!"
+    },
+    "end_kittens": {
+      "scene": "Pip leading three tiny kittens along a path to a cozy wooden house with warm glowing windows at twilight, a basket of blankets nearby.",
+      "text": "Pip leads the kittens safely home before dark. Three sleepy thank-you mews! The End!"
+    },
+    "end_ball": {
+      "scene": "Pip leaping high into the air to catch a large golden ball at the park, with a blue slide, trees, and a sandbox behind him.",
+      "text": "Pip catches the golden ball with a super jump! Champion Pip! The End!"
+    },
+    "end_game": {
+      "scene": "Pip playing with a beagle, a dalmatian, and an orange kitten chasing a golden ball at the park at sunset, with a blue slide and swings behind.",
+      "text": "Pip and his friends play until sunset. A treasure of a day! The End!"
+    },
+    "end_fireflies": {
+      "scene": "Pip trotting along a sparkling golden trail of fireflies through a magical garden with a flower-covered arch, mushrooms, and glowing sunflowers at dusk.",
+      "text": "The fireflies lead Pip to a secret glowing garden \u2014 right where X marks the spot! Magic! The End!"
+    }
+  }
+}

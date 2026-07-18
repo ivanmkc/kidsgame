@@ -1,0 +1,243 @@
+{
+  "id": "greenhouse",
+  "title": "Mo and the Century Bloom",
+  "hero": "MO",
+  "style": "Lush botanical greens, ornate Victorian iron-and-glass architecture, warm humid light with dewdrop lensing, fern frond textures, misty depth. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the entrance of a massive Victorian iron-framed greenhouse, warm humid air drifting out through the open ironwork, a large brass countdown clock embedded in the stone floor with its needle trembling near zero, the silhouette of an enormous flowering plant visible deep inside through thick jungle foliage. On the LEFT a green fern corridor stretches into dense tropical fronds under a wrought-iron archway with mist curling along the stone floor, on the RIGHT a purple orchid pavilion glows with cascading purple orchids draped from iron lattice racks in warm golden light, both large, fully visible, clearly separated.",
+      "text": "The century-bloom opens once every HUNDRED years and the brass clock in the floor says three minutes left — the seed has vanished into this overgrown jungle of a greenhouse and Mo is the only one small enough to look for it, which suddenly feels VERY brave or VERY silly. Fern corridor or orchid pavilion?",
+      "choices": [
+        {
+          "label": "Search the fern corridor",
+          "next": "a",
+          "spot": "green fern corridor"
+        },
+        {
+          "label": "Explore the orchid pavilion",
+          "next": "b",
+          "spot": "purple orchid pavilion"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} pushes through a green fern corridor under a wrought-iron archway, giant tropical ferns brushing against the iron frame overhead, a wooden potting bench with a small brass trowel sitting on top, and a large copper watering can resting beside the bench on the stone floor. On the LEFT a jade stone tunnel opens through a moss-covered stone wall where soft green light glows from within, on the RIGHT a blue butterfly pool shimmers in a sun-dappled clearing where painted butterflies circle low over still turquoise water, both large, fully visible, clearly separated.",
+      "text": "Mo pushes through ferns so tall they tickle the iron rafters — ACHOO — and a small brass trowel on the potting bench is practically BEGGING to be borrowed, snug in the fur it goes, because you never know when you need to dig. Stone tunnel or butterfly pool?",
+      "choices": [
+        {
+          "label": "Enter the stone tunnel",
+          "next": "aa",
+          "spot": "jade stone tunnel"
+        },
+        {
+          "label": "Visit the butterfly pool",
+          "next": "ab",
+          "spot": "blue butterfly pool"
+        }
+      ],
+      "scare": {
+        "spot": "copper watering can",
+        "pop": "a leafy vine creature with two big curious round eyes and a curly tendril tail, uncurling its whole body from behind the copper watering can",
+        "reveal": "Just stretching my leaves in the morning mist!",
+        "sting": "rustle",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} walks through a purple orchid pavilion with drooping orchid sprays hanging from iron lattice racks on both sides, warm mist rising from hidden vents in the stone floor, and a small terra cotta seed pot sitting on a low iron shelf within easy reach. On the LEFT an amber cactus terrace opens through an iron arch with flowering barrel cacti visible in warm golden light beyond, on the RIGHT a teal mushroom grotto glows with bioluminescent light behind a stone arch entrance, both large, fully visible, clearly separated.",
+      "text": "The orchids droop so low that Mo gets a face full of petals with every step, and there on a shelf sits the most adorable little terra cotta pot — just the right size for a century-bloom seed, IF Mo ever finds one. Into the fur it goes. Cactus terrace or mushroom grotto?",
+      "choices": [
+        {
+          "label": "Try the cactus terrace",
+          "next": "ba",
+          "spot": "amber cactus terrace"
+        },
+        {
+          "label": "Explore the mushroom grotto",
+          "next": "bb",
+          "spot": "teal mushroom grotto"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} crawls through a jade stone tunnel with soft green moss carpeting every surface, the brass trowel tucked in the fur, thick roots poking through cracks in the stone ceiling, and warm humid air carrying the scent of earth. On the LEFT a gray stone staircase descends through a root-framed opening toward a warm underground glow far below, on the RIGHT a brown vine bridge stretches across a gap between two iron walkways high above the greenhouse floor, both large, fully visible, clearly separated.",
+      "text": "The moss tunnel is so soft and squishy that Mo's paws leave perfect little prints behind, and somewhere below the earth HUMS like a sleeping garden while somewhere above vines sway in warm air — two very different somethings. Staircase down or vine bridge?",
+      "choices": [
+        {
+          "label": "Take the staircase down",
+          "next": "m1",
+          "spot": "gray stone staircase"
+        },
+        {
+          "label": "Cross the vine bridge",
+          "next": "m2",
+          "spot": "brown vine bridge"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands beside a blue butterfly pool in a warm clearing, the brass trowel tucked in the fur, painted butterflies circling lazily above still turquoise water, and fern fronds casting dappled shadows on the stone pool rim. On the LEFT a golden root archway opens through a thick tangle of ancient roots descending into warm underground light, on the RIGHT a crimson wooden walkway stretches upward along the iron greenhouse frame toward the high vine bridges above, both large, fully visible, clearly separated.",
+      "text": "A painted butterfly lands on Mo's nose and stares with GREAT seriousness before fluttering off toward the roots below, which feels like either a clue or an insult — meanwhile the walkway above sways invitingly in the warm air. Root archway or wooden walkway?",
+      "choices": [
+        {
+          "label": "Duck through the root archway",
+          "next": "m1",
+          "spot": "golden root archway"
+        },
+        {
+          "label": "Climb the wooden walkway",
+          "next": "m2",
+          "spot": "crimson wooden walkway"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} steps onto an amber cactus terrace lined with flowering barrel cacti in clay pots, the terra cotta seed pot tucked in the fur, warm golden light streaming through the iron framework above, and a stone fountain bubbling gently in the center. On the LEFT a white iron rotunda is visible through an ornate iron trellis with the great mother plant's trunk rising inside, on the RIGHT an emerald canopy walkway stretches along thick branches high above the terrace toward the treetop level, both large, fully visible, clearly separated.",
+      "text": "The barrel cacti are covered in the FLUFFIEST orange blooms Mo has ever seen and the stone fountain gurgles a tune that sounds suspiciously like hurry up — two paths ahead and the clock is still ticking. Iron rotunda or canopy walkway?",
+      "choices": [
+        {
+          "label": "Head to the iron rotunda",
+          "next": "m3",
+          "spot": "white iron rotunda"
+        },
+        {
+          "label": "Climb the canopy walkway",
+          "next": "m4",
+          "spot": "emerald canopy walkway"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} enters a teal mushroom grotto under a stone arch, bioluminescent mushrooms casting soft cyan and gold light on the damp walls, the terra cotta seed pot tucked in the fur, and a large brown barrel planter sitting against the stone wall with small mushrooms growing around its base. On the LEFT a scarlet brick archway leads through the grotto wall toward a warm open space where the mother plant's trunk is visible, on the RIGHT a tan rope bridge stretches from an iron anchor post across the grotto toward the canopy level above, both large, fully visible, clearly separated.",
+      "text": "The mushrooms glow like tiny lanterns and Mo is ENCHANTED — every step lights up a new ring of blue and gold, and the grotto hums a lullaby so gentle Mo nearly forgets about the century-bloom entirely. Brick archway or rope bridge?",
+      "choices": [
+        {
+          "label": "Go through the brick archway",
+          "next": "m3",
+          "spot": "scarlet brick archway"
+        },
+        {
+          "label": "Cross the rope bridge",
+          "next": "m4",
+          "spot": "tan rope bridge"
+        }
+      ],
+      "scare": {
+        "spot": "brown barrel planter",
+        "pop": "a mossy tree frog with two big shiny round golden eyes and webbed green feet, hopping out from behind the brown barrel planter with a wide surprised grin",
+        "reveal": "Ribbit! These mushrooms make the COZIEST bed!",
+        "sting": "ribbit",
+        "delay": 1500
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands in an underground root chamber among the thick ancient roots of the century-bloom mother plant, the brass trowel clutched in one paw, warm amber light filtering down through cracks in the stone ceiling, and rich dark soil visible between the enormous roots. On the LEFT a gray stone trough filled with dark loamy earth sits nestled between two massive roots, on the RIGHT a brown wooden stool stands on uneven ground near a steep earthen slope, both large, fully visible, clearly separated.",
+      "text": "The mother plant's roots are ENORMOUS — thick as tree trunks and humming with a hundred years of patience, and the soil in that stone trough looks freshly turned as if something WANTS to be planted. The stool near the slope has opinions about balance. Planting trough or wobbly stool?",
+      "choices": [
+        {
+          "label": "Dig in the stone trough",
+          "next": "end_trowel_bloom",
+          "spot": "gray stone trough"
+        },
+        {
+          "label": "Climb the wobbly stool",
+          "next": "end_peat_tumble",
+          "spot": "brown wooden stool"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} steps onto a brown vine bridge high above the greenhouse floor, the brass trowel tucked in the fur, thick twisted vines forming the handrails and walkway, the century-bloom mother plant visible far below through gaps in the foliage. On the LEFT a red hanging planter dangles from a thick iron chain just within reach over the bridge railing, on the RIGHT a green vine swing hangs from the iron rafters at the far end of the bridge, both large, fully visible, clearly separated.",
+      "text": "The vine bridge SWAYS with every step and Mo can see the whole greenhouse from up here — the mother plant far below, the fern fronds waving like a green ocean, and two very tempting things within reach. Hanging planter or vine swing?",
+      "choices": [
+        {
+          "label": "Tip the hanging planter",
+          "next": "end_planter_bloom",
+          "spot": "red hanging planter"
+        },
+        {
+          "label": "Grab the vine swing",
+          "next": "end_swing_bloom",
+          "spot": "green vine swing"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in the central dome clearing beneath the great iron framework, the terra cotta seed pot clutched in both paws, the century-bloom mother plant towering overhead with its buds trembling on the verge of opening, warm golden light pouring down from the dome above. On the LEFT a red clay flowerpot sits on a stone pedestal at the base of the mother plant, in the MIDDLE a mossy stone birdbath filled with clear rainwater sits in a patch of sunlight, on the RIGHT a yellow iron wheelbarrow leans against the mother plant's trunk half-filled with garden soil, all large, fully visible, clearly separated.",
+      "text": "The mother plant's buds are TREMBLING and Mo's little terra cotta pot feels warm against the fur — this is THE spot, Mo can feel it, but the question is WHERE to plant. The flowerpot looks cozy, the birdbath looks magical, and that wheelbarrow looks... adventurous. Flowerpot, birdbath, or wheelbarrow?",
+      "choices": [
+        {
+          "label": "Plant in the flowerpot",
+          "next": "end_pot_bloom",
+          "spot": "red clay flowerpot"
+        },
+        {
+          "label": "Splash in the birdbath",
+          "next": "end_bath_bloom",
+          "spot": "mossy stone birdbath"
+        },
+        {
+          "label": "Hop in the wheelbarrow",
+          "next": "end_wheelbarrow_ride",
+          "spot": "yellow iron wheelbarrow"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} walks along an emerald canopy walkway high among the greenhouse treetops, the terra cotta seed pot tucked in the fur, thick branches forming a living corridor with bright spots of sunlight streaming through the iron-framed roof far above. On the LEFT a copper garden bell hangs from an iron bracket at a walkway junction, on the RIGHT a green hanging basket overflows with trailing ferns at the end of the walkway near a misty clearing, both large, fully visible, clearly separated.",
+      "text": "Up here the greenhouse feels like a cloud forest and Mo can hear the century-bloom's buds CREAKING open far below — every second counts and there are two very interesting options at the end of this walkway. Garden bell or hanging basket?",
+      "choices": [
+        {
+          "label": "Ring the garden bell",
+          "next": "end_bell_bloom",
+          "spot": "copper garden bell"
+        },
+        {
+          "label": "Water the hanging basket",
+          "next": "end_crown_bloom",
+          "spot": "green hanging basket"
+        }
+      ]
+    },
+    "end_trowel_bloom": {
+      "scene": "{HERO} kneels beside the gray stone trough in the underground root chamber, the brass trowel planted in the fresh dark soil, as a tiny glowing century-bloom seed tumbles from {HERO}'s fur into the turned earth and immediately unfurls into a radiant golden flower, warm light illuminating the ancient roots all around.",
+      "text": "Mo dug into that stone trough with the brass trowel and PLING — a tiny seed tumbled right out of Mo's own fur into the turned earth, because it had been hitching a ride since the very first step into the greenhouse! The century-bloom sprouted INSTANTLY, glowing gold between the mother plant's roots, and Mo sat back on the soil and laughed because the world's biggest treasure hunt ended in Mo's own fur. The End!"
+    },
+    "end_peat_tumble": {
+      "scene": "{HERO} tumbles off the brown wooden stool in the underground root chamber, rolling down the steep earthen slope in a cloud of flying peat moss and soil, the brass trowel spinning away, landing in a heap of compost at the bottom of a greenhouse service tunnel with legs sticking up.",
+      "text": "Mo climbed that stool and it said NOPE — one wobble, two wobbles, and Mo was tumbling down the slope like a fuzzy little snowball collecting peat and potting soil the whole way down. The century-bloom is STILL waiting for its seed and Mo is basically a compost sculpture now. Oopsie ending!",
+      "bad": true
+    },
+    "end_planter_bloom": {
+      "scene": "{HERO} tips the red hanging planter on the brown vine bridge high above the greenhouse floor, the brass trowel tucked in the fur, as warm water cascades over {HERO} and a tiny glowing century-bloom seed washes free, floating down through golden sunbeams to land in a moss patch far below where it blooms instantly into a radiant golden flower.",
+      "text": "Mo reached up and tipped that planter with the brass trowel and WHOOSH — warm rainwater cascaded everywhere, and out of Mo's fur tumbled a tiny seed that had been tucked in there since the VERY FIRST fern brushed past at the entrance! It floated down like a golden parachute and bloomed the instant it touched the moss below, and Mo dripped happily on the bridge watching a hundred years of waiting finally pay off. The End!"
+    },
+    "end_swing_bloom": {
+      "scene": "{HERO} swings across the greenhouse on the green vine swing from the vine bridge, the brass trowel bouncing in the fur, as the warm breeze ruffles {HERO}'s fur and a tiny glowing seed spirals free, drifting down through golden sunbeams to land on the century-bloom mother plant's highest branch where it opens into a brilliant bloom.",
+      "text": "Mo grabbed the vine and SWOOPED across the greenhouse like the world's smallest jungle explorer, the brass trowel clinking against the vines — and the breeze ruffled Mo's fur just enough to shake loose a tiny seed that had been snuggled in there since the entrance! It spiraled down through the sunbeams and landed on the mother plant's crown, blooming in a flash of gold while Mo swung back and forth cheering. The End!"
+    },
+    "end_pot_bloom": {
+      "scene": "{HERO} kneels beside the red clay flowerpot at the base of the century-bloom mother plant in the central dome clearing, the terra cotta seed pot resting on the stone beside it, as a tiny glowing seed that tumbled from {HERO}'s fur sits in the flowerpot already unfurling into a radiant golden bloom while the mother plant's buds burst open in celebration above.",
+      "text": "Mo set the little terra cotta pot right next to the red clay flowerpot and reached down to pat the soil — and PLINK, a tiny seed tumbled from Mo's own fur into the fresh earth, because it had been riding along since the very FIRST step past the ferns! The century-bloom ERUPTED in gold and every bud on the mother plant burst open at once. Mo grew a hundred-year-old flower with nothing but fuzzy fur and excellent timing. The End!"
+    },
+    "end_bath_bloom": {
+      "scene": "{HERO} sits in the mossy stone birdbath in the central dome clearing, having climbed in and tipped it over, water flowing across the stone floor, the terra cotta seed pot floating away in the puddle, Mo soaked and wedged in the overturned birdbath.",
+      "text": "Mo leaned over the birdbath to dip a paw in and leaned a LITTLE too far — SPLOOSH! Mo went headfirst into the birdbath, tipped the whole thing over, and the century-bloom seed washed out of his fur and got carried away by a tiny river of birdbath water into a drain. Mo sat in the overturned bath like the world's wettest, saddest flowerpot. Oopsie ending!",
+      "bad": true
+    },
+    "end_wheelbarrow_ride": {
+      "scene": "{HERO} sits in the yellow iron wheelbarrow as it rolls downhill through the central dome clearing, crashing through fern fronds and orchid sprays, the terra cotta seed pot bouncing out behind, {HERO} clinging to the wheelbarrow sides with wide startled eyes as it heads for the greenhouse exit.",
+      "text": "Mo hopped into the wheelbarrow for a better view and it IMMEDIATELY started rolling because wheels plus slope equals WHOOOOSH — Mo crashed through three fern walls, an orchid display, and a very surprised garden beetle before rolling right out the service ramp into the parking lot, while the terra cotta pot bounced away behind like a tiny ceramic hitchhiker. The century-bloom is STILL waiting and Mo is now the greenhouse's most wanted wheelbarrow thief. Oopsie ending!",
+      "bad": true
+    },
+    "end_bell_bloom": {
+      "scene": "{HERO} rings the copper garden bell on the emerald canopy walkway, the terra cotta seed pot cradled under one arm, the bell vibrating with a warm golden tone as a tiny glowing seed shakes loose from {HERO}'s fur and drifts down through the greenhouse canopy, landing in a mossy crook of a branch below where it blooms into a radiant century-bloom.",
+      "text": "Mo grabbed the bell rope and BONG — the most beautiful warm note rang through the whole greenhouse, the terra cotta pot vibrating in sympathy, and the sound shook a tiny seed right out of Mo's fur because it had been hiding there since the entrance! It floated down through the canopy and landed in a mossy crook, blooming gold before it even settled, and every plant in the greenhouse rustled in applause. The End!"
+    },
+    "end_crown_bloom": {
+      "scene": "{HERO} stands drenched on the emerald canopy walkway after pouring the entire hanging basket of water directly onto his own head, the terra cotta seed pot rolling away on the railing, dripping from ears to toes with a surprised expression and a soggy leaf on his nose.",
+      "text": "Mo reached up to water the hanging basket and tipped it directly onto his OWN head — a waterfall of greenhouse water drenched him from ears to toes, the seed pot rolled off the railing, and the century-bloom seed got SO waterlogged it sneezed out of Mo's fur and landed in a puddle where it sat looking very unimpressed. Oopsie ending!",
+      "bad": true
+    }
+  }
+}
