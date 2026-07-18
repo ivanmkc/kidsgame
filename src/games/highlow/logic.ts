@@ -1,7 +1,5 @@
 import { Rng, pick, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
-import { LANGS } from '../../lang';
-import { t } from '../../i18n';
 
 export interface HighLowRound {
   noteA: number;  // midi
@@ -55,11 +53,5 @@ export function getLowNote(round: HighLowRound): number {
 }
 
 export function speechLines(): string[] {
-  const out: string[] = [];
-  for (const l of LANGS) {
-    out.push(t(l.id, 'music.highlow.prompt' as never));
-    out.push(t(l.id, 'music.highlow.high' as never));
-    out.push(t(l.id, 'music.highlow.low' as never));
-  }
-  return [...new Set(out.filter(Boolean))];
+  return [];
 }
