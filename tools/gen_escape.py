@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from gen.chroma import key_out_magenta  # noqa: E402
 from gen.judge import ask_yes_no  # noqa: E402
 from gen.nbp import _call, edit, generate  # noqa: E402
-from gen.escape_specs import ESCAPE_ROOMS, ESCAPE_STYLE  # noqa: E402
+from gen.escape_specs import ESCAPE_ROOMS, ESCAPE_STYLE, ESCAPE_TRANSLATIONS  # noqa: E402
 from gen_stories import _locate_scare  # noqa: E402
 from google.genai import types  # noqa: E402
 from PIL import Image  # noqa: E402
@@ -166,6 +166,54 @@ def _semantic_chain_gate(spec: dict) -> list[str]:
         else:
             print(f"  semantic gate OK: {h['needs']} → {h['id']}")
     return errs
+
+
+VALID_LANGS = {"ja", "cmn", "yue"}
+
+
+def _merge_translations(room: dict, rid: str) -> None:
+    """Merge ESCAPE_TRANSLATIONS into the generated room dict.
+
+    Room-level nameT and t are copied directly (already lang-first).
+    Item t is copied directly ({lang: label}).
+    Hotspot t needs transposition from spec shape {field: {lang: value}}
+    to manifest shape {lang: {field: value}}.
+    """
+    trans = ESCAPE_TRANSLATIONS.get(rid)
+    if not trans:
+        return
+    if "nameT" in trans:
+        room["nameT"] = trans["nameT"]
+    if "t" in trans:
+        room["t"] = trans["t"]
+    if "items" in trans:
+        for item in room["items"]:
+            if item["id"] in trans["items"]:
+                item["t"] = trans["items"][item["id"]]
+    if "hotspots" in trans:
+        for hotspot in room["hotspots"]:
+            if hotspot["id"] in trans["hotspots"]:
+                field_first = trans["hotspots"][hotspot["id"]]
+                lang_first: dict[str, dict[str, str]] = {}
+                for field, lang_map in field_first.items():
+                    for lang, value in lang_map.items():
+                        lang_first.setdefault(lang, {})[field] = value
+                hotspot["t"] = lang_first
+
+
+def _assert_t_shape(room: dict) -> None:
+    """Validate all t-tables use lang-first shape with keys in VALID_LANGS."""
+    if "t" in room:
+        bad = set(room["t"].keys()) - VALID_LANGS
+        assert not bad, f"room '{room['id']}' t keys {bad} not in {VALID_LANGS}"
+    for item in room.get("items", []):
+        if "t" in item:
+            bad = set(item["t"].keys()) - VALID_LANGS
+            assert not bad, f"item '{item['id']}' t keys {bad} not in {VALID_LANGS}"
+    for h in room.get("hotspots", []):
+        if "t" in h:
+            bad = set(h["t"].keys()) - VALID_LANGS
+            assert not bad, f"hotspot '{h['id']}' t keys {bad} not in {VALID_LANGS}"
 
 
 def _gen_pop(room_id: str, hid: str, prompt: str) -> str | None:
@@ -349,11 +397,14 @@ def gen_room(spec: dict) -> dict | None:
         hotspots.append(entry)
 
     print(f"  room {rid} OK ({len(hotspots)} hotspots, {len(state_scenes)} state scenes)")
-    return {
+    room = {
         "id": rid, "name": spec["name"], "level": spec.get("level", "easy"),
         "image": f"escape/{rid}.png", "intro": spec["intro"], "winText": spec["winText"],
         "items": spec["items"], "hotspots": hotspots,
     }
+    _merge_translations(room, rid)
+    _assert_t_shape(room)
+    return room
 
 
 def main() -> None:
