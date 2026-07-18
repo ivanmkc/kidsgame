@@ -5,22 +5,24 @@
 import { EscapeHotspot, EscapeRoom } from '../../manifest';
 
 export interface EscapeState {
-  used: string[];      // consumed hotspot ids (searched empty spots stay tappable)
+  used: string[];      // fully consumed hotspot ids
+  revealed: string[];  // hotspot ids in "revealed" phase (container open, item waiting to be collected)
   inventory: string[]; // item ids held, in found order
   selected: string | null;
   done: boolean;
 }
 
 export type TapEffect =
-  | { kind: 'found'; item: string; say?: string; pop?: string }     // item flies to tray
-  | { kind: 'unlocked'; say?: string; pop?: string; item?: string } // lock opened (may reveal another item)
+  | { kind: 'revealed'; item: string; say?: string }                // container opened, item visible and tappable
+  | { kind: 'collected'; item: string; say?: string; pop?: string } // item collected from revealed container → flies to tray
+  | { kind: 'unlocked'; say?: string }                              // lock opened (no item — pure state change)
   | { kind: 'win'; say?: string; pop?: string }
   | { kind: 'locked'; say?: string }                                // needs an item the kid hasn't selected
   | { kind: 'flavor'; say?: string }                                // empty search spot — harmless fun
   | { kind: 'nothing' };
 
 export function startState(): EscapeState {
-  return { used: [], inventory: [], selected: null, done: false };
+  return { used: [], revealed: [], inventory: [], selected: null, done: false };
 }
 
 /** Tray capacity is 3 — rooms are linted to never need more in hand. */
@@ -35,14 +37,27 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
   const h = room.hotspots.find((x) => x.id === hotspotId);
   if (!h || s.done || s.used.includes(h.id)) return { state: s, effect: { kind: 'nothing' } };
 
-  if (h.kind === 'search') {
-    if (!h.gives) return { state: s, effect: { kind: 'flavor', say: h.saySearch } };
+  // Collecting a revealed item: the container is open, the item is
+  // visible, tapping the hotspot (or the item region) collects it.
+  // Forgiveness: re-tapping the container also collects.
+  if (s.revealed.includes(h.id) && h.gives) {
     const state: EscapeState = {
       ...s,
+      revealed: s.revealed.filter((id) => id !== h.id),
       used: [...s.used, h.id],
       inventory: [...s.inventory, h.gives],
     };
-    return { state, effect: { kind: 'found', item: h.gives, say: h.sayFound, pop: h.pop } };
+    return { state, effect: { kind: 'collected', item: h.gives, say: h.sayFound, pop: h.pop } };
+  }
+
+  if (h.kind === 'search') {
+    if (!h.gives) return { state: s, effect: { kind: 'flavor', say: h.saySearch } };
+    // Reveal phase: container opens, item visible but not yet collected.
+    const state: EscapeState = {
+      ...s,
+      revealed: [...s.revealed, h.id],
+    };
+    return { state, effect: { kind: 'revealed', item: h.gives } };
   }
 
   // lock / win: an item requirement gates the tap. Forgiveness rule:
@@ -53,25 +68,51 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
     return { state: s, effect: { kind: 'locked', say: h.sayLocked } };
   }
   const inventory = h.needs ? s.inventory.filter((i) => i !== h.needs) : s.inventory.slice();
-  if (h.gives) inventory.push(h.gives);
+
+  if (h.kind === 'win') {
+    const state: EscapeState = {
+      ...s,
+      used: [...s.used, h.id],
+      inventory,
+      selected: null,
+      done: true,
+    };
+    return { state, effect: { kind: 'win', say: h.sayFound, pop: h.pop } };
+  }
+
+  // Lock with gives: reveal phase — consume the needed item, show the
+  // new item inside, wait for collection tap.
+  if (h.gives) {
+    const state: EscapeState = {
+      ...s,
+      revealed: [...s.revealed, h.id],
+      inventory,
+      selected: null,
+    };
+    return { state, effect: { kind: 'revealed', item: h.gives, say: h.sayFound } };
+  }
+
+  // Lock without gives: pure state change (e.g., opening a panel).
   const state: EscapeState = {
     ...s,
     used: [...s.used, h.id],
     inventory,
     selected: null,
-    done: h.kind === 'win',
   };
-  if (h.kind === 'win') return { state, effect: { kind: 'win', say: h.sayFound, pop: h.pop } };
-  return { state, effect: { kind: 'unlocked', say: h.sayFound, pop: h.pop, item: h.gives } };
+  return { state, effect: { kind: 'unlocked', say: h.sayFound } };
 }
 
 /** What the idle-hint should point at: the next hotspot that advances the
- *  chain. `selectItem` glows the matching tray item too — purely visual
- *  teaching now that holding the item is enough to use it. */
+ *  chain. Revealed items take priority — the kid needs to collect them
+ *  before moving on. */
 export function nextHint(room: EscapeRoom, s: EscapeState): { hotspotId: string; selectItem?: string } | null {
   if (s.done) return null;
+  // Revealed items first — kid must collect before the chain can advance.
   for (const h of room.hotspots) {
-    if (s.used.includes(h.id)) continue;
+    if (s.revealed.includes(h.id)) return { hotspotId: h.id };
+  }
+  for (const h of room.hotspots) {
+    if (s.used.includes(h.id) || s.revealed.includes(h.id)) continue;
     if (h.kind === 'search' && h.gives) return { hotspotId: h.id };
     if ((h.kind === 'lock' || h.kind === 'win') && h.needs && s.inventory.includes(h.needs)) {
       return { hotspotId: h.id, selectItem: s.selected === h.needs ? undefined : h.needs };
@@ -82,17 +123,18 @@ export function nextHint(room: EscapeRoom, s: EscapeState): { hotspotId: string;
 }
 
 /** Play the room greedily to completion — the solvability oracle shared
- *  by tests. Returns the number of taps or null if the room dead-ends. */
+ *  by tests. Returns the number of taps or null if the room dead-ends.
+ *  Now handles the two-tap reveal/collect flow. */
 export function solve(room: EscapeRoom): number | null {
   let s = startState();
   let taps = 0;
-  for (let guard = 0; guard < 100; guard++) {
+  for (let guard = 0; guard < 200; guard++) {
     if (s.done) return taps;
     const hint = nextHint(room, s);
     if (!hint) return null;
     if (hint.selectItem) s = selectItem(s, hint.selectItem);
     const r = applyTap(room, s, hint.hotspotId);
-    if (r.effect.kind === 'nothing' || r.effect.kind === 'locked') return null; // hint lied — structural bug
+    if (r.effect.kind === 'nothing' || r.effect.kind === 'locked') return null;
     s = r.state;
     taps++;
   }
@@ -119,9 +161,9 @@ export function lintRoom(room: EscapeRoom): string[] {
   if (solve(room) === null) errs.push('room is not solvable by greedy trace');
   // Tray pressure: greedy holds every unused item; cap at TRAY_SIZE.
   if (itemIds.length > TRAY_SIZE) errs.push(`room has ${itemIds.length} items (tray fits ${TRAY_SIZE})`);
-  // State-change chain must be linear: each afterScene hotspot must depend
+  // State-change chain must be linear: each state-changing hotspot must depend
   // (transitively) on the previous one, so scene images form a strict sequence.
-  const stateHotspots = room.hotspots.filter((h) => h.afterScene);
+  const stateHotspots = room.hotspots.filter((h) => h.afterScene || h.revealScene);
   if (stateHotspots.length > 1) {
     for (let i = 1; i < stateHotspots.length; i++) {
       const prev = stateHotspots[i - 1];
