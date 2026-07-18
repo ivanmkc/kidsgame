@@ -3443,12 +3443,48 @@
       "h": 720,
       "targets": [
         {
+          "id": "blackcat_w",
+          "label": "a black cat",
+          "x": 305,
+          "y": 448,
+          "w": 150,
+          "h": 182,
+          "thumb": "hidden/witch_kitchen_t_blackcat_w.png"
+        },
+        {
+          "id": "greenbottle",
+          "label": "a tall green glass bottle",
+          "x": 497,
+          "y": 20,
+          "w": 72,
+          "h": 157,
+          "thumb": "hidden/witch_kitchen_t_greenbottle.png"
+        },
+        {
+          "id": "pumpkin_w",
+          "label": "a round orange pumpkin",
+          "x": 364,
+          "y": 197,
+          "w": 133,
+          "h": 117,
+          "thumb": "hidden/witch_kitchen_t_pumpkin_w.png"
+        },
+        {
+          "id": "spellbook_w",
+          "label": "a big red book",
+          "x": 727,
+          "y": 101,
+          "w": 208,
+          "h": 81,
+          "thumb": "hidden/witch_kitchen_t_spellbook_w.png"
+        },
+        {
           "id": "mushroom_w",
           "label": "a red spotted mushroom",
-          "x": 528,
-          "y": 598,
-          "w": 102,
-          "h": 109,
+          "x": 529,
+          "y": 215,
+          "w": 92,
+          "h": 98,
           "thumb": "hidden/witch_kitchen_t_mushroom_w.png"
         }
       ]
@@ -24051,11 +24087,25 @@
           "choices": [
             {
               "label": "Peek into the parlor",
-              "next": "aa"
+              "next": "aa",
+              "hot": {
+                "x": 23,
+                "y": 0,
+                "w": 374,
+                "h": 672
+              },
+              "video": "story-video/manor_a_0.mp4"
             },
             {
               "label": "Tiptoe to the music room",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 690,
+                "y": 285,
+                "w": 137,
+                "h": 232
+              },
+              "video": "story-video/manor_a_1.mp4"
             }
           ],
           "scare": {
@@ -24076,11 +24126,25 @@
           "choices": [
             {
               "label": "Climb the spiral stairs",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 5,
+                "y": 8,
+                "w": 369,
+                "h": 653
+              },
+              "video": "story-video/manor_b_0.mp4"
             },
             {
               "label": "Search the pantry",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 935,
+                "y": 6,
+                "w": 344,
+                "h": 708
+              },
+              "video": "story-video/manor_b_1.mp4"
             }
           ]
         },
@@ -24383,11 +24447,25 @@
           "choices": [
             {
               "label": "Hop in the teacup ride",
-              "next": "aa"
+              "next": "aa",
+              "hot": {
+                "x": 67,
+                "y": 384,
+                "w": 225,
+                "h": 142
+              },
+              "video": "story-video/carnival_a_0.mp4"
             },
             {
               "label": "Walk through the archway",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 965,
+                "y": 171,
+                "w": 315,
+                "h": 398
+              },
+              "video": "story-video/carnival_a_1.mp4"
             }
           ],
           "scare": {
@@ -24408,11 +24486,25 @@
           "choices": [
             {
               "label": "Race the bumper cars",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 900,
+                "y": 107,
+                "w": 380,
+                "h": 557
+              },
+              "video": "story-video/carnival_b_0.mp4"
             },
             {
               "label": "Visit the fortune-teller",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 455,
+                "y": 141,
+                "w": 420,
+                "h": 540
+              },
+              "video": "story-video/carnival_b_1.mp4"
             }
           ]
         },
@@ -24436,11 +24528,25 @@
           "choices": [
             {
               "label": "Challenge at the carousel",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 1,
+                "w": 442,
+                "h": 603
+              },
+              "video": "story-video/carnival_ab_0.mp4"
             },
             {
               "label": "Play the calliope",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 920,
+                "y": 83,
+                "w": 360,
+                "h": 576
+              },
+              "video": "story-video/carnival_ab_1.mp4"
             }
           ]
         },
@@ -24531,11 +24637,25 @@
           "choices": [
             {
               "label": "Pump the bellows",
-              "next": "end_song"
+              "next": "end_song",
+              "hot": {
+                "x": 315,
+                "y": 375,
+                "w": 317,
+                "h": 303
+              },
+              "video": "story-video/carnival_m2_0.mp4"
             },
             {
               "label": "Press the valves",
-              "next": "end_fog"
+              "next": "end_fog",
+              "hot": {
+                "x": 923,
+                "y": 244,
+                "w": 275,
+                "h": 417
+              },
+              "video": "story-video/carnival_m2_1.mp4"
             }
           ]
         },
@@ -24835,11 +24955,25 @@
           "choices": [
             {
               "label": "Grab the weather vane",
-              "next": "end_redirect"
+              "next": "end_redirect",
+              "hot": {
+                "x": 41,
+                "y": 237,
+                "w": 362,
+                "h": 235
+              },
+              "video": "story-video/thunder_m2_0.mp4"
             },
             {
               "label": "Blow the signal horn",
-              "next": "end_blown"
+              "next": "end_blown",
+              "hot": {
+                "x": 1049,
+                "y": 408,
+                "w": 194,
+                "h": 251
+              },
+              "video": "story-video/thunder_m2_1.mp4"
             }
           ]
         },
@@ -24995,11 +25129,25 @@
           "choices": [
             {
               "label": "Wade to the fog island",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 0,
+                "y": 480,
+                "w": 382,
+                "h": 240
+              },
+              "video": "story-video/bayou_b_0.mp4"
             },
             {
               "label": "Enter the cathedral",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 600,
+                "h": 435
+              },
+              "video": "story-video/bayou_b_1.mp4"
             }
           ]
         },
@@ -25232,11 +25380,23 @@
           "choices": [
             {
               "label": "Climb to the telescope dome",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 282,
+                "y": 121,
+                "w": 464,
+                "h": 499
+              }
             },
             {
               "label": "Search the chart room",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 982,
+                "y": 14,
+                "w": 298,
+                "h": 634
+              }
             }
           ]
         },
@@ -25260,11 +25420,23 @@
           "choices": [
             {
               "label": "Follow the ink trail",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 45,
+                "y": 43,
+                "w": 361,
+                "h": 591
+              }
             },
             {
               "label": "Check the armchair desk",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 839,
+                "y": 299,
+                "w": 276,
+                "h": 314
+              }
             }
           ]
         },
@@ -25288,11 +25460,23 @@
           "choices": [
             {
               "label": "Take the Star Jar upstairs",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 16,
+                "y": 293,
+                "w": 337,
+                "h": 370
+              }
             },
             {
               "label": "Examine the astrolabe",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 952,
+                "y": 82,
+                "w": 309,
+                "h": 272
+              }
             }
           ]
         },
@@ -25302,11 +25486,23 @@
           "choices": [
             {
               "label": "Grab the spinning globe",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 0,
+                "y": 426,
+                "w": 327,
+                "h": 294
+              }
             },
             {
               "label": "Read the chalk equations",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 355,
+                "y": 538,
+                "w": 445,
+                "h": 172
+              }
             }
           ]
         },
@@ -25316,11 +25512,24 @@
           "choices": [
             {
               "label": "Dodge past the porcupine",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 735,
+                "y": 369,
+                "w": 250,
+                "h": 301
+              }
             },
             {
               "label": "Grab a quill from the pot",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 1071,
+                "y": 379,
+                "w": 85,
+                "h": 86
+              },
+              "video": "story-video/observatory_bb_1.mp4"
             }
           ]
         },
@@ -25330,11 +25539,23 @@
           "choices": [
             {
               "label": "Block the eyepiece",
-              "next": "end_blocked_view"
+              "next": "end_blocked_view",
+              "hot": {
+                "x": 123,
+                "y": 59,
+                "w": 141,
+                "h": 146
+              }
             },
             {
               "label": "Crank the dome open",
-              "next": "end_open_sky"
+              "next": "end_open_sky",
+              "hot": {
+                "x": 959,
+                "y": 93,
+                "w": 228,
+                "h": 226
+              }
             }
           ]
         },
@@ -25344,11 +25565,23 @@
           "choices": [
             {
               "label": "Roll the chair away",
-              "next": "end_chair_glide"
+              "next": "end_chair_glide",
+              "hot": {
+                "x": 225,
+                "y": 398,
+                "w": 160,
+                "h": 260
+              }
             },
             {
               "label": "Pull the dome lever",
-              "next": "end_lever_snap"
+              "next": "end_lever_snap",
+              "hot": {
+                "x": 464,
+                "y": 83,
+                "w": 489,
+                "h": 341
+              }
             }
           ]
         },
@@ -25447,11 +25680,25 @@
           "choices": [
             {
               "label": "Explore the Dinosaur Hall",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 36,
+                "y": 134,
+                "w": 291,
+                "h": 336
+              },
+              "video": "story-video/museum_start_0.mp4"
             },
             {
               "label": "Check the Gem Gallery",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 1040,
+                "y": 194,
+                "w": 208,
+                "h": 319
+              },
+              "video": "story-video/museum_start_1.mp4"
             }
           ]
         },
@@ -25461,11 +25708,25 @@
           "choices": [
             {
               "label": "Check the scratching sound",
-              "next": "aa"
+              "next": "aa",
+              "hot": {
+                "x": 0,
+                "y": 13,
+                "w": 331,
+                "h": 614
+              },
+              "video": "story-video/museum_a_0.mp4"
             },
             {
               "label": "Follow the feather to archives",
-              "next": "ab"
+              "next": "ab",
+              "hot": {
+                "x": 1067,
+                "y": 0,
+                "w": 213,
+                "h": 634
+              },
+              "video": "story-video/museum_a_1.mp4"
             }
           ]
         },
@@ -25475,11 +25736,25 @@
           "choices": [
             {
               "label": "Follow the glitter trail left",
-              "next": "ba"
+              "next": "ba",
+              "hot": {
+                "x": 207,
+                "y": 59,
+                "w": 127,
+                "h": 481
+              },
+              "video": "story-video/museum_b_0.mp4"
             },
             {
               "label": "Peek behind the curtain",
-              "next": "bb"
+              "next": "bb",
+              "hot": {
+                "x": 964,
+                "y": 0,
+                "w": 310,
+                "h": 606
+              },
+              "video": "story-video/museum_b_1.mp4"
             }
           ]
         },
@@ -25489,11 +25764,25 @@
           "choices": [
             {
               "label": "Grab the lantern",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 33,
+                "y": 227,
+                "w": 101,
+                "h": 149
+              },
+              "video": "story-video/museum_aa_0.mp4"
             },
             {
               "label": "Crawl under the bench",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 908,
+                "y": 334,
+                "w": 363,
+                "h": 292
+              },
+              "video": "story-video/museum_aa_1.mp4"
             }
           ]
         },
@@ -25503,11 +25792,25 @@
           "choices": [
             {
               "label": "Use the magnifying glass",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 884,
+                "y": 362,
+                "w": 396,
+                "h": 270
+              },
+              "video": "story-video/museum_ab_0.mp4"
             },
             {
               "label": "Read the old journal",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 0,
+                "y": 332,
+                "w": 479,
+                "h": 365
+              },
+              "video": "story-video/museum_ab_1.mp4"
             }
           ]
         },
@@ -25517,11 +25820,25 @@
           "choices": [
             {
               "label": "Hide behind the statue",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 63,
+                "y": 158,
+                "w": 193,
+                "h": 370
+              },
+              "video": "story-video/museum_ba_0.mp4"
             },
             {
               "label": "Duck under the bench",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 949,
+                "y": 461,
+                "w": 303,
+                "h": 146
+              },
+              "video": "story-video/museum_ba_1.mp4"
             }
           ]
         },
@@ -25531,11 +25848,25 @@
           "choices": [
             {
               "label": "Climb the spiral staircase",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 10,
+                "y": 0,
+                "w": 386,
+                "h": 601
+              },
+              "video": "story-video/museum_bb_0.mp4"
             },
             {
               "label": "Look through the telescope",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 904,
+                "y": 129,
+                "w": 348,
+                "h": 486
+              },
+              "video": "story-video/museum_bb_1.mp4"
             }
           ]
         },
@@ -25545,11 +25876,25 @@
           "choices": [
             {
               "label": "Shine through the ruby",
-              "next": "end_ruby_dazzle"
+              "next": "end_ruby_dazzle",
+              "hot": {
+                "x": 27,
+                "y": 43,
+                "w": 324,
+                "h": 600
+              },
+              "video": "story-video/museum_m1_0.mp4"
             },
             {
               "label": "Shine through the emerald",
-              "next": "end_emerald_forest"
+              "next": "end_emerald_forest",
+              "hot": {
+                "x": 930,
+                "y": 42,
+                "w": 312,
+                "h": 386
+              },
+              "video": "story-video/museum_m1_1.mp4"
             }
           ]
         },
@@ -25559,11 +25904,25 @@
           "choices": [
             {
               "label": "Blast the quartz cluster",
-              "next": "end_quartz_disco"
+              "next": "end_quartz_disco",
+              "hot": {
+                "x": 182,
+                "y": 188,
+                "w": 312,
+                "h": 315
+              },
+              "video": "story-video/museum_m2_0.mp4"
             },
             {
               "label": "Hide behind mammoth tusk",
-              "next": "end_bouncy_chaos"
+              "next": "end_bouncy_chaos",
+              "hot": {
+                "x": 877,
+                "y": 54,
+                "w": 377,
+                "h": 540
+              },
+              "video": "story-video/museum_m2_1.mp4"
             }
           ]
         },
@@ -25573,15 +25932,36 @@
           "choices": [
             {
               "label": "Ruby red dazzle",
-              "next": "end_ruby_sunset"
+              "next": "end_ruby_sunset",
+              "hot": {
+                "x": 145,
+                "y": 205,
+                "w": 110,
+                "h": 183
+              },
+              "video": "story-video/museum_m3_0.mp4"
             },
             {
               "label": "Emerald green camouflage",
-              "next": "end_emerald_meadow"
+              "next": "end_emerald_meadow",
+              "hot": {
+                "x": 462,
+                "y": 301,
+                "w": 98,
+                "h": 131
+              },
+              "video": "story-video/museum_m3_1.mp4"
             },
             {
               "label": "Quartz rainbow blast",
-              "next": "end_rainbow_cathedral"
+              "next": "end_rainbow_cathedral",
+              "hot": {
+                "x": 967,
+                "y": 220,
+                "w": 235,
+                "h": 237
+              },
+              "video": "story-video/museum_m3_2.mp4"
             }
           ]
         },
@@ -25698,11 +26078,25 @@
           "choices": [
             {
               "label": "Dive under the waterfall",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 77,
+                "y": 115,
+                "w": 163,
+                "h": 439
+              },
+              "video": "story-video/lagoon_aa_0.mp4"
             },
             {
               "label": "Climb the starfish ledge",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 814,
+                "y": 368,
+                "w": 466,
+                "h": 238
+              },
+              "video": "story-video/lagoon_aa_1.mp4"
             }
           ]
         },
@@ -25712,11 +26106,25 @@
           "choices": [
             {
               "label": "Slide down the cascade",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 970,
+                "y": 267,
+                "w": 239,
+                "h": 255
+              },
+              "video": "story-video/lagoon_ab_0.mp4"
             },
             {
               "label": "Hop across the starfish shelf",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 128,
+                "y": 566,
+                "w": 605,
+                "h": 154
+              },
+              "video": "story-video/lagoon_ab_1.mp4"
             }
           ]
         },
@@ -25754,11 +26162,25 @@
           "choices": [
             {
               "label": "Race down the coral staircase",
-              "next": "end_spring_bloom"
+              "next": "end_spring_bloom",
+              "hot": {
+                "x": 38,
+                "y": 107,
+                "w": 445,
+                "h": 613
+              },
+              "video": "story-video/lagoon_m1_0.mp4"
             },
             {
               "label": "Leap onto the lily pad",
-              "next": "end_seed_fade"
+              "next": "end_seed_fade",
+              "hot": {
+                "x": 774,
+                "y": 443,
+                "w": 440,
+                "h": 258
+              },
+              "video": "story-video/lagoon_m1_1.mp4"
             }
           ]
         },
@@ -25782,15 +26204,35 @@
           "choices": [
             {
               "label": "Fire rapid tiny bubbles",
-              "next": "end_tiny_tickle"
+              "next": "end_tiny_tickle",
+              "hot": {
+                "x": 48,
+                "y": 540,
+                "w": 229,
+                "h": 180
+              },
+              "video": "story-video/lagoon_m3_0.mp4"
             },
             {
               "label": "Launch one massive bubble",
-              "next": "end_mega_lift"
+              "next": "end_mega_lift",
+              "hot": {
+                "x": 485,
+                "y": 60,
+                "w": 349,
+                "h": 447
+              },
+              "video": "story-video/lagoon_m3_1.mp4"
             },
             {
               "label": "Unleash spiral stream",
-              "next": "end_spiral_heal"
+              "next": "end_spiral_heal",
+              "hot": {
+                "x": 1015,
+                "y": 171,
+                "w": 178,
+                "h": 520
+              }
             }
           ]
         },
@@ -25865,11 +26307,25 @@
           "choices": [
             {
               "label": "Explore the amethyst tunnel",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 116,
+                "y": 282,
+                "w": 437,
+                "h": 438
+              },
+              "video": "story-video/quarry_start_0.mp4"
             },
             {
               "label": "Enter the citrine passage",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 922,
+                "y": 163,
+                "w": 275,
+                "h": 303
+              },
+              "video": "story-video/quarry_start_1.mp4"
             }
           ]
         },
@@ -25921,11 +26377,25 @@
           "choices": [
             {
               "label": "Jump to the jade ledge",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 0,
+                "w": 468,
+                "h": 312
+              },
+              "video": "story-video/quarry_ab_0.mp4"
             },
             {
               "label": "Duck through the coral archway",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 505,
+                "y": 178,
+                "w": 221,
+                "h": 294
+              },
+              "video": "story-video/quarry_ab_1.mp4"
             }
           ]
         },
@@ -26186,11 +26656,25 @@
           "choices": [
             {
               "label": "Enter the grotto",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 10,
+                "y": 0,
+                "w": 572,
+                "h": 457
+              },
+              "video": "story-video/grotto_ba_0.mp4"
             },
             {
               "label": "Rest on the sand bank",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 863,
+                "y": 264,
+                "w": 417,
+                "h": 434
+              },
+              "video": "story-video/grotto_ba_1.mp4"
             }
           ]
         },
@@ -26434,11 +26918,25 @@
           "choices": [
             {
               "label": "Roar at full blast",
-              "next": "end_full_blast"
+              "next": "end_full_blast",
+              "hot": {
+                "x": 525,
+                "y": 129,
+                "w": 234,
+                "h": 343
+              },
+              "video": "story-video/badlands_m1_0.mp4"
             },
             {
               "label": "Dip the stone in the pool",
-              "next": "end_gentle_hum"
+              "next": "end_gentle_hum",
+              "hot": {
+                "x": 794,
+                "y": 502,
+                "w": 442,
+                "h": 115
+              },
+              "video": "story-video/badlands_m1_1.mp4"
             }
           ]
         },
@@ -26476,15 +26974,36 @@
           "choices": [
             {
               "label": "Blow the bass horn",
-              "next": "end_low_rumble"
+              "next": "end_low_rumble",
+              "hot": {
+                "x": 60,
+                "y": 278,
+                "w": 341,
+                "h": 393
+              },
+              "video": "story-video/badlands_m3_0.mp4"
             },
             {
               "label": "Screech into the pipe",
-              "next": "end_high_screech"
+              "next": "end_high_screech",
+              "hot": {
+                "x": 483,
+                "y": 230,
+                "w": 132,
+                "h": 287
+              },
+              "video": "story-video/badlands_m3_1.mp4"
             },
             {
               "label": "Squeeze the squeaky cactus",
-              "next": "end_surprise_squeak"
+              "next": "end_surprise_squeak",
+              "hot": {
+                "x": 1064,
+                "y": 491,
+                "w": 161,
+                "h": 141
+              },
+              "video": "story-video/badlands_m3_2.mp4"
             }
           ]
         },
@@ -26573,11 +27092,25 @@
           "choices": [
             {
               "label": "Follow the lantern trail",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 91,
+                "y": 9,
+                "w": 113,
+                "h": 105
+              },
+              "video": "story-video/bamboo_start_0.mp4"
             },
             {
               "label": "Follow the moonbeams",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 70,
+                "y": 146,
+                "w": 552,
+                "h": 177
+              },
+              "video": "story-video/bamboo_start_1.mp4"
             }
           ]
         },
@@ -26654,11 +27187,25 @@
           "choices": [
             {
               "label": "Step onto the sand clearing",
-              "next": "m1"
+              "next": "m1",
+              "hot": {
+                "x": 0,
+                "y": 450,
+                "w": 442,
+                "h": 217
+              },
+              "video": "story-video/bamboo_ab_0.mp4"
             },
             {
               "label": "Walk through the torii arch",
-              "next": "m2"
+              "next": "m2",
+              "hot": {
+                "x": 496,
+                "y": 31,
+                "w": 280,
+                "h": 280
+              },
+              "video": "story-video/bamboo_ab_1.mp4"
             }
           ]
         },
@@ -26682,11 +27229,25 @@
           "choices": [
             {
               "label": "Strike the bronze gong",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 53,
+                "y": 191,
+                "w": 276,
+                "h": 395
+              },
+              "video": "story-video/bamboo_bb_0.mp4"
             },
             {
               "label": "Climb the moss mound",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 883,
+                "y": 262,
+                "w": 358,
+                "h": 328
+              },
+              "video": "story-video/bamboo_bb_1.mp4"
             }
           ]
         },
@@ -26696,11 +27257,25 @@
           "choices": [
             {
               "label": "Run for the Moon Pool",
-              "next": "end_lantern_arch"
+              "next": "end_lantern_arch",
+              "hot": {
+                "x": 35,
+                "y": 0,
+                "w": 355,
+                "h": 688
+              },
+              "video": "story-video/bamboo_m1_0.mp4"
             },
             {
               "label": "Follow the blossoms",
-              "next": "end_blossom_lost"
+              "next": "end_blossom_lost",
+              "hot": {
+                "x": 1009,
+                "y": 383,
+                "w": 271,
+                "h": 337
+              },
+              "video": "story-video/bamboo_m1_1.mp4"
             }
           ]
         },
@@ -26710,11 +27285,25 @@
           "choices": [
             {
               "label": "Leap through the waterfall",
-              "next": "end_waterfall_pool"
+              "next": "end_waterfall_pool",
+              "hot": {
+                "x": 174,
+                "y": 94,
+                "w": 213,
+                "h": 507
+              },
+              "video": "story-video/bamboo_m2_0.mp4"
             },
             {
               "label": "Climb the bamboo tower",
-              "next": "end_tower_moonbath"
+              "next": "end_tower_moonbath",
+              "hot": {
+                "x": 925,
+                "y": 0,
+                "w": 227,
+                "h": 720
+              },
+              "video": "story-video/bamboo_m2_1.mp4"
             }
           ]
         },
@@ -26807,11 +27396,25 @@
           "choices": [
             {
               "label": "Squeeze through car canyon",
-              "next": "a"
+              "next": "a",
+              "hot": {
+                "x": 343,
+                "y": 402,
+                "w": 236,
+                "h": 160
+              },
+              "video": "story-video/junkyard_start_0.mp4"
             },
             {
               "label": "Sneak down appliance alley",
-              "next": "b"
+              "next": "b",
+              "hot": {
+                "x": 1092,
+                "y": 145,
+                "w": 149,
+                "h": 428
+              },
+              "video": "story-video/junkyard_start_1.mp4"
             }
           ]
         },
@@ -26916,11 +27519,25 @@
           "choices": [
             {
               "label": "Squeeze into the pipe maze",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 0,
+                "y": 65,
+                "w": 306,
+                "h": 488
+              },
+              "video": "story-video/junkyard_ba_0.mp4"
             },
             {
               "label": "Duck through the wheel arch",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 830,
+                "y": 63,
+                "w": 430,
+                "h": 530
+              },
+              "video": "story-video/junkyard_ba_1.mp4"
             }
           ]
         },
@@ -26930,11 +27547,25 @@
           "choices": [
             {
               "label": "Climb the radiator stack",
-              "next": "m3"
+              "next": "m3",
+              "hot": {
+                "x": 17,
+                "y": 379,
+                "w": 212,
+                "h": 229
+              },
+              "video": "story-video/junkyard_bb_0.mp4"
             },
             {
               "label": "Follow the hubcap trail",
-              "next": "m4"
+              "next": "m4",
+              "hot": {
+                "x": 770,
+                "y": 542,
+                "w": 147,
+                "h": 67
+              },
+              "video": "story-video/junkyard_bb_1.mp4"
             }
           ]
         },
@@ -26944,11 +27575,25 @@
           "choices": [
             {
               "label": "Grab the crane hook",
-              "next": "end_crane_rescue"
+              "next": "end_crane_rescue",
+              "hot": {
+                "x": 64,
+                "y": 23,
+                "w": 289,
+                "h": 272
+              },
+              "video": "story-video/junkyard_m1_0.mp4"
             },
             {
               "label": "Topple the hubcap tower",
-              "next": "end_hubcap_avalanche"
+              "next": "end_hubcap_avalanche",
+              "hot": {
+                "x": 936,
+                "y": 211,
+                "w": 203,
+                "h": 391
+              },
+              "video": "story-video/junkyard_m1_1.mp4"
             }
           ]
         },
