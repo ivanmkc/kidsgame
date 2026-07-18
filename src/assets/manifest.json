@@ -24079,7 +24079,8 @@
                 "y": 491,
                 "w": 388,
                 "h": 229
-              }
+              },
+              "video": "story-video/manor_start_0.mp4"
             },
             {
               "label": "Sneak through the corridor",
@@ -24596,7 +24597,8 @@
                 "y": 13,
                 "w": 228,
                 "h": 639
-              }
+              },
+              "video": "story-video/carnival_bb_0.mp4"
             },
             {
               "label": "Play ring-toss",
@@ -24822,7 +24824,8 @@
                 "y": 0,
                 "w": 285,
                 "h": 720
-              }
+              },
+              "video": "story-video/thunder_b_0.mp4"
             },
             {
               "label": "Trek the thunder ridge",
@@ -25125,7 +25128,8 @@
                 "y": 13,
                 "w": 634,
                 "h": 249
-              }
+              },
+              "video": "story-video/bayou_start_0.mp4"
             },
             {
               "label": "Hop the mushroom caps",
@@ -25135,7 +25139,8 @@
                 "y": 592,
                 "w": 336,
                 "h": 128
-              }
+              },
+              "video": "story-video/bayou_start_1.mp4"
             }
           ]
         },
@@ -25160,7 +25165,8 @@
             "pop": "story/bayou_a_pop.png",
             "sting": "boing",
             "reveal": "Ribbit! We were just watching the sparks go by!",
-            "delay": 1800
+            "delay": 1800,
+            "video": "story-video/bayou_a_scare.mp4"
           }
         },
         "b": {
@@ -25203,7 +25209,8 @@
                 "y": 0,
                 "w": 349,
                 "h": 474
-              }
+              },
+              "video": "story-video/bayou_aa_0.mp4"
             },
             {
               "label": "Crawl through the tunnel",
@@ -25223,7 +25230,8 @@
                 "y": 152,
                 "w": 406,
                 "h": 156
-              }
+              },
+              "video": "story-video/bayou_ab_0.mp4"
             },
             {
               "label": "Duck into the tunnel",
@@ -25558,10 +25566,10 @@
             }
           ],
           "scare": {
-            "x": 576,
-            "y": 601,
-            "w": 91,
-            "h": 119,
+            "x": 757,
+            "y": 551,
+            "w": 181,
+            "h": 123,
             "pop": "story/observatory_ba_pop.png",
             "sting": "boing",
             "reveal": "Hello! I'm trying to show you a MAP! The star-sprite settles into a gentle glow and points at the sky with a tiny arm of light.",
@@ -25938,14 +25946,15 @@
             }
           ],
           "scare": {
-            "x": 577,
-            "y": 640,
-            "w": 52,
-            "h": 65,
+            "x": 451,
+            "y": 185,
+            "w": 495,
+            "h": 404,
             "pop": "story/museum_bb_pop.png",
             "sting": "boing",
             "reveal": "Just a grumpy museum gecko who naps in the skeleton! She's been living there for years and does NOT appreciate visitors.",
-            "delay": 1600
+            "delay": 1600,
+            "video": "story-video/museum_bb_scare.mp4"
           }
         },
         "m1": {
@@ -26134,7 +26143,8 @@
                 "y": 0,
                 "w": 327,
                 "h": 720
-              }
+              },
+              "video": "story-video/lagoon_a_0.mp4"
             },
             {
               "label": "Climb the anemone cluster",
@@ -26154,7 +26164,8 @@
                 "y": 4,
                 "w": 488,
                 "h": 528
-              }
+              },
+              "video": "story-video/lagoon_b_0.mp4"
             },
             {
               "label": "Scramble up the urchin ridge",
@@ -26230,7 +26241,8 @@
                 "y": 128,
                 "w": 379,
                 "h": 544
-              }
+              },
+              "video": "story-video/lagoon_ba_0.mp4"
             },
             {
               "label": "Sneak through the spring tunnel",
@@ -26250,7 +26262,8 @@
                 "y": 26,
                 "w": 417,
                 "h": 434
-              }
+              },
+              "video": "story-video/lagoon_bb_0.mp4"
             },
             {
               "label": "Slip into the spring passage",
@@ -26298,7 +26311,8 @@
                 "y": 34,
                 "w": 484,
                 "h": 536
-              }
+              },
+              "video": "story-video/lagoon_m2_0.mp4"
             },
             {
               "label": "Zoom down the coral slide",
@@ -26340,7 +26354,8 @@
                 "y": 171,
                 "w": 178,
                 "h": 520
-              }
+              },
+              "video": "story-video/lagoon_m3_2.mp4"
             }
           ]
         },
@@ -26360,7 +26375,8 @@
                 "y": 572,
                 "w": 274,
                 "h": 148
-              }
+              },
+              "video": "story-video/lagoon_m4_1.mp4"
             }
           ]
         },
@@ -26459,7 +26475,8 @@
                 "y": 98,
                 "w": 500,
                 "h": 324
-              }
+              },
+              "video": "story-video/quarry_a_1.mp4"
             }
           ],
           "scare": {
@@ -26470,7 +26487,8 @@
             "pop": "story/quarry_a_pop.png",
             "sting": "thunder",
             "reveal": "Relax cousin! Just moonlight through old bones \u2014 happens every full moon!",
-            "delay": 1900
+            "delay": 1900,
+            "video": "story-video/quarry_a_scare.mp4"
           }
         },
         "b": {
@@ -26485,7 +26503,8 @@
                 "y": 66,
                 "w": 332,
                 "h": 547
-              }
+              },
+              "video": "story-video/quarry_b_0.mp4"
             },
             {
               "label": "Slide down the crystal chute",
@@ -26570,7 +26589,8 @@
             "pop": "story/quarry_bb_pop.png",
             "sting": "boing",
             "reveal": "Oh my! Nobody has visited this wall in a thousand years! How exciting!",
-            "delay": 1800
+            "delay": 1800,
+            "video": "story-video/quarry_bb_scare.mp4"
           }
         },
         "m1": {
@@ -26738,7 +26758,8 @@
                 "y": 28,
                 "w": 388,
                 "h": 622
-              }
+              },
+              "video": "story-video/grotto_start_0.mp4"
             },
             {
               "label": "Follow the coral passage",
@@ -26772,7 +26793,8 @@
                 "y": 378,
                 "w": 444,
                 "h": 342
-              }
+              },
+              "video": "story-video/grotto_b_0.mp4"
             },
             {
               "label": "Duck under the coral arch",
@@ -26806,7 +26828,8 @@
                 "y": 123,
                 "w": 539,
                 "h": 214
-              }
+              },
+              "video": "story-video/grotto_ab_0.mp4"
             },
             {
               "label": "Swim to the breathing chamber",
@@ -26814,14 +26837,15 @@
             }
           ],
           "scare": {
-            "x": 230,
-            "y": 143,
-            "w": 287,
-            "h": 145,
+            "x": 724,
+            "y": 8,
+            "w": 556,
+            "h": 500,
             "pop": "story/grotto_ab_pop.png",
             "sting": "thunder",
             "reveal": "Been saving this for someone! Take it!",
-            "delay": 1700
+            "delay": 1700,
+            "video": "story-video/grotto_ab_scare.mp4"
           }
         },
         "ba": {
@@ -26864,7 +26888,8 @@
                 "y": 6,
                 "w": 524,
                 "h": 246
-              }
+              },
+              "video": "story-video/grotto_bb_0.mp4"
             },
             {
               "label": "Climb the tidal ledge",
@@ -26895,7 +26920,8 @@
                 "y": 73,
                 "w": 288,
                 "h": 571
-              }
+              },
+              "video": "story-video/grotto_m1_0.mp4"
             },
             {
               "label": "Dive into the dark tunnel",
@@ -26929,7 +26955,8 @@
                 "y": 173,
                 "w": 389,
                 "h": 291
-              }
+              },
+              "video": "story-video/grotto_m3_0.mp4"
             },
             {
               "label": "Climb the crystal spire",
@@ -26953,7 +26980,8 @@
                 "y": 0,
                 "w": 505,
                 "h": 487
-              }
+              },
+              "video": "story-video/grotto_m4_0.mp4"
             },
             {
               "label": "Dive past the magenta eel",
@@ -26963,7 +26991,8 @@
                 "y": 555,
                 "w": 508,
                 "h": 165
-              }
+              },
+              "video": "story-video/grotto_m4_1.mp4"
             }
           ]
         },
@@ -27030,7 +27059,8 @@
                 "y": 130,
                 "w": 630,
                 "h": 192
-              }
+              },
+              "video": "story-video/badlands_start_0.mp4"
             },
             {
               "label": "March under the mesa arch",
@@ -27064,7 +27094,8 @@
                 "y": 568,
                 "w": 258,
                 "h": 152
-              }
+              },
+              "video": "story-video/badlands_b_0.mp4"
             },
             {
               "label": "Duck into the red slot canyon",
@@ -27084,7 +27115,8 @@
                 "y": 77,
                 "w": 734,
                 "h": 236
-              }
+              },
+              "video": "story-video/badlands_aa_0.mp4"
             },
             {
               "label": "Step into the crystal alcove",
@@ -27104,7 +27136,8 @@
                 "y": 267,
                 "w": 142,
                 "h": 242
-              }
+              },
+              "video": "story-video/badlands_ab_0.mp4"
             },
             {
               "label": "Scout from the mesa ledge",
@@ -27124,7 +27157,8 @@
                 "y": 373,
                 "w": 271,
                 "h": 347
-              }
+              },
+              "video": "story-video/badlands_ba_0.mp4"
             },
             {
               "label": "Peek into the rust cave",
@@ -27364,7 +27398,8 @@
                 "y": 576,
                 "w": 418,
                 "h": 144
-              }
+              },
+              "video": "story-video/bamboo_a_1.mp4"
             }
           ],
           "scare": {
@@ -27391,7 +27426,8 @@
                 "y": 2,
                 "w": 616,
                 "h": 406
-              }
+              },
+              "video": "story-video/bamboo_b_0.mp4"
             },
             {
               "label": "Into the stone garden",
@@ -27565,7 +27601,8 @@
                 "y": 157,
                 "w": 361,
                 "h": 276
-              }
+              },
+              "video": "story-video/bamboo_m3_0.mp4"
             },
             {
               "label": "Strobe-pulse reveal",
@@ -27763,7 +27800,8 @@
                 "y": 17,
                 "w": 552,
                 "h": 300
-              }
+              },
+              "video": "story-video/junkyard_ab_0.mp4"
             },
             {
               "label": "Slide down the tarp",
@@ -27899,7 +27937,8 @@
                 "y": 478,
                 "w": 396,
                 "h": 149
-              }
+              },
+              "video": "story-video/junkyard_m3_1.mp4"
             },
             {
               "label": "Sneak around the side",
