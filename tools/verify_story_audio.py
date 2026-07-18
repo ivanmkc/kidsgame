@@ -131,18 +131,9 @@ def main() -> int:
                         if key not in voice or not (VOICE_DIR / voice[key]).exists():
                             missing.append(("speechLines", "-", lang, sp[:60]))
 
-    # Partition: story+escape coverage is a hard gate; speechLines
-    # shortfalls (pre-existing single-letter / short-word TTS gaps) are
-    # reported but do not block.
-    hard_missing = [m_ for m_ in missing if m_[0] != "speechLines"]
-    soft_missing = [m_ for m_ in missing if m_[0] == "speechLines"]
-    print(f"coverage: {len(hard_missing)} missing story/escape clips")
-    for m_ in hard_missing[:40]:
+    print(f"coverage: {len(missing)} missing clips")
+    for m_ in missing[:40]:
         print("  MISSING", m_)
-    if soft_missing:
-        print(f"speechLines: {len(soft_missing)} game speech clips missing (non-blocking)")
-        for m_ in soft_missing[:10]:
-            print("  warn", m_)
 
     # duration sanity over story clips (cheap ffprobe)
     trunc = []
@@ -202,7 +193,7 @@ def main() -> int:
                     tmp.replace(src)
                 print(f"normalized {len(out)} clips toward {med:.1f} dB")
 
-    return 1 if (hard_missing or trunc) else 0
+    return 1 if (missing or trunc) else 0
 
 if __name__ == "__main__":
     sys.exit(main())

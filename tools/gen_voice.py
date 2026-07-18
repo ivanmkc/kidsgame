@@ -150,7 +150,7 @@ def fname_for(text: str) -> str:
 # some lines are too short for the TTS quality filter — speak a richer
 # form under the same map key
 TTS_OVERRIDES = {
-    "or maybe...": "Orrr... maybe...",
+    "or maybe...": "Or, maybe, hmm, maybe something else!",
     "Hug Great-Grandcat 💜": "Give Great-Grandcat a great big hug!",
     "Be Mo, but louder! 📣": "Be Mo... but louder!",
     "Scare the Principal back 😈": "Scare the Principal right back!",
@@ -166,6 +166,34 @@ TTS_OVERRIDES = {
     "Roar at full blast": "Give the biggest, loudest roar you can!",
     "Strobe-pulse reveal": "Do the strobe pulse reveal!",
     "Steady-beam illuminate": "Shine the steady beam to light it up!",
+    # single-letter exclamations — TTS needs a word, not a bare letter
+    "N!": "The letter N!",
+    "O!": "The letter O!",
+    "T!": "The letter T!",
+    "V!": "The letter V!",
+    "X!": "The letter X!",
+    # short name/word exclamations — pad with context so TTS doesn't choke
+    "Bear!": "It's a bear!",
+    "CHAIR!": "A chair!",
+    "Jar!": "It's a jar!",
+    "Koala!": "A koala!",
+    "LUNA!": "It's Luna!",
+    "MILO!": "It's Milo!",
+    "NOVA!": "It's Nova!",
+    "PIP!": "It's Pip!",
+    "REX!": "It's Rex!",
+    "PEARL!": "It's Pearl!",
+    "TALE!": "A tale!",
+    # animal sound
+    "Hoo hoo hoo!": "Hoo hoo hoo! Hoo hoo hoo!",
+    # dressup identity lines — period-ending originals need richer phrasing
+    "I am a big friendly dinosaur.": "Rawr! I am a big friendly dinosaur.",
+    "I am a brave fox knight.": "I am a brave brave fox knight, yes I am!",
+    "I am a fluffy mint monster.": "Grr! I am a fluffy mint monster.",
+    "I am a sparkly unicorn.": "Ta-da! I am a sparkly unicorn.",
+    "I am a wise little owl.": "Whooo! I am a very wise little owl!",
+    # compound instruction — lower-case keywords for cleaner TTS
+    "Tap once for TRUE! Tap twice for SILLY!": "Tap one time for true, and tap two times for silly!",
 }
 
 
