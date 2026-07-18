@@ -277,7 +277,9 @@ const GAME_CARDS: CardDef[] = [
   // model (route stays live for dev via #/musicbox deep link).
   // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
   { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape', beta: true },
-  { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
+  // carmode hidden pending rework (route stays live via #/carmode; its
+  // round engine is being reused by the music training games).
+  // { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
 ];
 
 function Menu({
