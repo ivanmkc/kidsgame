@@ -84,7 +84,7 @@ for (let i = 0; i < 4; i++) {
 await page.screenshot({ path: `${OUT}/03-after-4-taps.png` });
 console.log('shot: 03-after-4-taps');
 
-// 4. Tap in center to spawn objects — "before scroll-away" reference
+// 4. Tap to spawn objects — "before scroll-away"
 for (let i = 0; i < 5; i++) {
   const box = await stage.boundingBox();
   if (box) {
@@ -98,7 +98,7 @@ await page.waitForTimeout(600);
 await page.screenshot({ path: `${OUT}/04-spawns-before.png` });
 console.log('shot: 04-spawns-before');
 
-// 5. Tap many more times to scroll world — spawns should drift left
+// 5. Tap more to show scroll-away
 for (let i = 0; i < 20; i++) {
   const box = await stage.boundingBox();
   if (box) {
@@ -111,6 +111,50 @@ for (let i = 0; i < 20; i++) {
 await page.waitForTimeout(600);
 await page.screenshot({ path: `${OUT}/05-spawns-scrolled.png` });
 console.log('shot: 05-spawns-scrolled');
+
+// 6. Go back to picker, show 3-scene picker
+await page.goBack();
+await page.waitForTimeout(1500);
+await page.screenshot({ path: `${OUT}/06-picker-3scenes.png` });
+console.log('shot: 06-picker-3scenes');
+
+// 7. Pick Row scene
+const rowBtn = page.getByTestId('scene-pick-row');
+await rowBtn.waitFor({ timeout: 5000 }).catch(() => console.log('warn: row btn not found'));
+await rowBtn.click();
+await page.waitForTimeout(1500);
+for (let i = 0; i < 8; i++) {
+  const box = await stage.boundingBox();
+  if (box) {
+    const x = box.x + box.width * (0.3 + Math.random() * 0.4);
+    const y = box.y + box.height * (0.1 + Math.random() * 0.8);
+    await page.mouse.click(x, y);
+  }
+  await page.waitForTimeout(200);
+}
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${OUT}/07-row-scene.png` });
+console.log('shot: 07-row-scene');
+
+// 8. Pick Jingle scene
+await page.goBack();
+await page.waitForTimeout(1000);
+const jingleBtn = page.getByTestId('scene-pick-jingle');
+await jingleBtn.waitFor({ timeout: 5000 }).catch(() => console.log('warn: jingle btn not found'));
+await jingleBtn.click();
+await page.waitForTimeout(1500);
+for (let i = 0; i < 8; i++) {
+  const box = await stage.boundingBox();
+  if (box) {
+    const x = box.x + box.width * (0.3 + Math.random() * 0.4);
+    const y = box.y + box.height * (0.1 + Math.random() * 0.8);
+    await page.mouse.click(x, y);
+  }
+  await page.waitForTimeout(200);
+}
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${OUT}/08-jingle-scene.png` });
+console.log('shot: 08-jingle-scene');
 
 await b.close();
 srv.close();

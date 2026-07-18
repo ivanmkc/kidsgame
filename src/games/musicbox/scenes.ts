@@ -45,6 +45,60 @@ export const SCENES: SceneDef[] = [
       ],
     },
   },
+  {
+    id: 'row',
+    songId: 'row',
+    vehicleY: 0.48,
+    objects: {
+      sky: [
+        'obj_sky_seagull',
+        'obj_sky_cloud_fluffy',
+        'obj_sky_sun_rays',
+        'obj_sky_pelican',
+      ],
+      mid: [
+        'obj_mid_dolphin',
+        'obj_mid_fish_orange',
+        'obj_mid_jellyfish',
+        'obj_mid_sea_turtle',
+      ],
+      ground: [
+        'obj_ground_starfish',
+        'obj_ground_shell_pink',
+        'obj_ground_crab',
+        'obj_ground_seahorse',
+        'obj_ground_coral',
+        'obj_ground_anchor',
+      ],
+    },
+  },
+  {
+    id: 'jingle',
+    songId: 'jingle',
+    vehicleY: 0.42,
+    objects: {
+      sky: [
+        'obj_sky_snowflake',
+        'obj_sky_snowflake_big',
+        'obj_sky_cardinal',
+        'obj_sky_cloud_snowy',
+      ],
+      mid: [
+        'obj_mid_pine_tree',
+        'obj_mid_snowman',
+        'obj_mid_deer',
+        'obj_mid_cabin',
+      ],
+      ground: [
+        'obj_ground_gift_red',
+        'obj_ground_gift_blue',
+        'obj_ground_holly',
+        'obj_ground_candy_cane',
+        'obj_ground_snow_bunny',
+        'obj_ground_mitten',
+      ],
+    },
+  },
 ];
 
 export function sceneById(id: string): SceneDef | undefined {
