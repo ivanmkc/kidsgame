@@ -132,7 +132,7 @@ ESCAPE_ROOMS = [
              "sayLocked": "The battery slot is empty. We need something to power the rocket!",
              "sayFound": "The battery clicks in — three, two, one — BLAST OFF!",
              "after": "the green battery glowing brightly inside the open side panel of the silver rocket, warm orange light spilling from the engine nozzle, a cute little brown bunny with long ears peering excitedly through the round porthole window of the rocket",
-             "anim": "the battery snaps into the slot with a click, the rocket rumbles, and it blasts off with bright orange flames shooting from the bottom"},
+             "anim": "the battery snaps into the slot with a click, a cute brown bunny peeks through the porthole, the rocket rumbles and blasts off with bright orange flames shooting from the bottom"},
         ],
     },
     {
