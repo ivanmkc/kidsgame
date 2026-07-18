@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
+import { BetaPill } from '../../components/BetaPill';
 import { ScenePicker } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -118,7 +119,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
 
   if (!sceneId || !room) {
     return (
-      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill />}>
+      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" />}>
         <ScenePicker
           title={t(lang, 'picker.escape')}
           options={rooms.map((r) => ({ id: r.id, name: r.nameT?.[lang] ?? r.name, image: r.image, level: r.level }))}
@@ -181,7 +182,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
-      right={<BetaPill />}
+      right={<BetaPill testID="escape-beta" />}
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}>
@@ -314,24 +315,9 @@ function PopSprite({ path }: { path: string }) {
   );
 }
 
-// Small BETA pill in the header — parents should know this game is new.
-function BetaPill() {
-  return (
-    <View style={styles.betaPill} testID="escape-beta">
-      <Text style={styles.betaPillText}>BETA</Text>
-    </View>
-  );
-}
+// BETA pill now shared — see src/components/BetaPill.tsx.
 
 const styles = StyleSheet.create({
-  betaPill: {
-    backgroundColor: 'rgba(60,45,70,0.85)',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    height: 44,
-    justifyContent: 'center',
-  },
-  betaPillText: { color: colors.gold, fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.5 },
   wrap: { alignItems: 'center', paddingBottom: 20, gap: 12 },
   frame: {
     borderRadius: 22,

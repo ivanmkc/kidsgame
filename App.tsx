@@ -295,12 +295,12 @@ const GAME_CARDS: CardDef[] = [
   // { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
 ];
 const MUSIC_CARDS: CardDef[] = [
-  { route: 'highlow', color: '#5DA9E8', key: 'highlow', preview: 'music' },
-  { route: 'bells', color: '#FFC24B', key: 'bells', preview: 'music' },
-  { route: 'echobeat', color: '#E8874F', key: 'echobeat', preview: 'music' },
-  { route: 'steadybeat', color: '#9B7EDE', key: 'steadybeat', preview: 'music' },
-  { route: 'fastslow', color: '#2FB8AC', key: 'fastslow', preview: 'music' },
-  { route: 'samediff', color: '#E8564F', key: 'samediff', preview: 'music' },
+  { route: 'highlow', color: '#5DA9E8', key: 'highlow', preview: 'music', beta: true },
+  { route: 'bells', color: '#FFC24B', key: 'bells', preview: 'music', beta: true },
+  { route: 'echobeat', color: '#E8874F', key: 'echobeat', preview: 'music', beta: true },
+  { route: 'steadybeat', color: '#9B7EDE', key: 'steadybeat', preview: 'music', beta: true },
+  { route: 'fastslow', color: '#2FB8AC', key: 'fastslow', preview: 'music', beta: true },
+  { route: 'samediff', color: '#E8564F', key: 'samediff', preview: 'music', beta: true },
 ];
 
 function Menu({
