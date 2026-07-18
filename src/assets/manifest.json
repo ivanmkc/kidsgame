@@ -28404,7 +28404,8 @@
             "y": 386,
             "w": 153,
             "h": 169
-          }
+          },
+          "animVideo": "escape-video/dragoncave_haystack.mp4"
         },
         {
           "id": "crystal",
@@ -28574,7 +28575,8 @@
             "y": 269,
             "w": 330,
             "h": 362
-          }
+          },
+          "animVideo": "escape-video/piratecove_net.mp4"
         },
         {
           "id": "umbrella",
@@ -28776,7 +28778,8 @@
             "y": 247,
             "w": 234,
             "h": 168
-          }
+          },
+          "animVideo": "escape-video/rocketpad_crate.mp4"
         },
         {
           "id": "poster",
