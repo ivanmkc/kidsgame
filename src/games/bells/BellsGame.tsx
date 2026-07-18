@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -101,6 +101,32 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const { width } = useWindowDimensions();
   const bellSize = Math.min(110, (Math.min(width - 40, 600) - (round.bells.length - 1) * 14) / round.bells.length);
 
+  const earPulse = useRef(new Animated.Value(1)).current;
+  const bellBounce = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (phase === 'listen') {
+      bellBounce.setValue(0);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      earPulse.stopAnimation();
+      earPulse.setValue(1);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(bellBounce, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(bellBounce, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    }
+    return () => { earPulse.stopAnimation(); bellBounce.stopAnimation(); };
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const bellScale = bellBounce.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
+
   return (
     <GameShell
       title={t(lang, 'shell.bells.title' as never)}
@@ -112,11 +138,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         {phase === 'listen' ? (
           <View style={[styles.statusCard, shadows.soft]}>
-            <Text style={styles.statusEmoji}>👂</Text>
+            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
             <Text style={styles.statusText}>{t(lang, 'music.listen' as never)}</Text>
           </View>
         ) : (
-          <View style={[styles.statusCard, shadows.soft, wrongFlash && styles.wrongCard]}>
+          <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, wrongFlash && styles.wrongCard]}>
+            <Text style={styles.statusEmoji}>👆</Text>
             <Text style={styles.statusText}>
               {t(lang, 'music.yourTurn' as never)} ({tapped.length}/{round.sequence.length})
             </Text>
@@ -124,25 +151,31 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
         )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
-            <Pressable
+            <Animated.View
               key={i}
-              onPress={() => onBellTap(i)}
-              testID={`bell-${i}`}
-              style={({ pressed }) => [
-                styles.bell,
-                {
-                  width: bellSize,
-                  height: bellSize * 1.2,
-                  backgroundColor: bell.color,
-                  borderColor: glowIdx === i ? colors.gold : bell.color,
-                },
-                glowIdx === i && styles.bellGlow,
-                pressed && styles.pressed,
-              ]}
+              style={phase === 'play' ? { transform: [{ scale: bellScale }] } : undefined}
             >
-              <Text style={[styles.bellText, { fontSize: bellSize * 0.4 }]}>🔔</Text>
-              {glowIdx === i && <SparkleBurst trigger={sparkKey + i} count={4} size={12} />}
-            </Pressable>
+              <Pressable
+                onPress={() => onBellTap(i)}
+                testID={`bell-${i}`}
+                style={({ pressed }) => [
+                  styles.bell,
+                  {
+                    width: bellSize,
+                    height: bellSize * 1.2,
+                    backgroundColor: bell.color,
+                    borderColor: glowIdx === i ? colors.gold : bell.color,
+                    opacity: phase === 'listen' && glowIdx !== i ? 0.5 : 1,
+                  },
+                  glowIdx === i && styles.bellGlow,
+                  phase === 'play' && shadows.glowGold,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={[styles.bellText, { fontSize: bellSize * 0.4 }]}>🔔</Text>
+                {glowIdx === i && <SparkleBurst trigger={sparkKey + i} count={4} size={12} />}
+              </Pressable>
+            </Animated.View>
           ))}
         </View>
       </View>
@@ -171,6 +204,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  yourTurnCard: { borderColor: colors.green, backgroundColor: '#E8F5E9' },
   wrongCard: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.12)' },
   statusEmoji: { fontSize: 30 },
   statusText: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },

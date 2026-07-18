@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -104,6 +104,45 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     }
   }, [tapCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const earPulse = useRef(new Animated.Value(1)).current;
+  const drumGlow = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (phase === 'listen') {
+      drumGlow.setValue(0);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      earPulse.stopAnimation();
+      earPulse.setValue(1);
+      if (phase === 'tap') {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(drumGlow, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+            Animated.timing(drumGlow, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          ])
+        ).start();
+      }
+    }
+    return () => { earPulse.stopAnimation(); drumGlow.stopAnimation(); };
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const drumScale = drumGlow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
+
+  const tapDots = [];
+  const expectedHits = round.gaps.length + 1;
+  for (let i = 0; i < expectedHits; i++) {
+    tapDots.push(
+      <View
+        key={i}
+        style={[styles.tapDot, i < tapCount && styles.tapDotFilled]}
+      />
+    );
+  }
+
   return (
     <GameShell
       title={t(lang, 'shell.echobeat.title' as never)}
@@ -115,32 +154,39 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         {phase === 'listen' ? (
           <View style={[styles.statusCard, shadows.soft]}>
-            <Text style={styles.statusEmoji}>👂</Text>
+            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
             <Text style={styles.statusText}>{t(lang, 'music.listen' as never)}</Text>
           </View>
         ) : (
-          <View style={[styles.statusCard, shadows.soft, result === 'bad' && styles.wrongCard]}>
+          <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, result === 'bad' && styles.wrongCard]}>
+            <Text style={styles.statusEmoji}>
+              {result === 'good' ? '🎉' : result === 'bad' ? '🔄' : '👆'}
+            </Text>
             <Text style={styles.statusText}>
               {result === 'good' ? '🎉' : result === 'bad' ? '🔄' : t(lang, 'music.yourTurn' as never)}
             </Text>
           </View>
         )}
-        <Pressable
-          onPress={onTap}
-          testID="echobeat-drum"
-          disabled={phase !== 'tap'}
-          style={({ pressed }) => [
-            styles.drum,
-            shadows.lifted,
-            pressed && styles.drumPressed,
-          ]}
-        >
-          <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-            <Text style={styles.drumEmoji}>🥁</Text>
-          </Animated.View>
-          <Text style={styles.drumCount}>{tapCount > 0 ? tapCount : ''}</Text>
-          <SparkleBurst trigger={sparkKey} count={6} size={14} />
-        </Pressable>
+        <Animated.View style={phase === 'tap' ? { transform: [{ scale: drumScale }] } : undefined}>
+          <Pressable
+            onPress={onTap}
+            testID="echobeat-drum"
+            disabled={phase !== 'tap'}
+            style={({ pressed }) => [
+              styles.drum,
+              shadows.lifted,
+              phase === 'listen' && styles.drumDimmed,
+              phase === 'tap' && shadows.glowGold,
+              pressed && styles.drumPressed,
+            ]}
+          >
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <Text style={styles.drumEmoji}>🥁</Text>
+            </Animated.View>
+            <SparkleBurst trigger={sparkKey} count={6} size={14} />
+          </Pressable>
+        </Animated.View>
+        {phase === 'tap' && <View style={styles.tapDotRow}>{tapDots}</View>}
       </View>
       <WinOverlay
         visible={won}
@@ -167,6 +213,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  yourTurnCard: { borderColor: colors.green, backgroundColor: '#E8F5E9' },
   wrongCard: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.12)' },
   statusEmoji: { fontSize: 30 },
   statusText: { fontFamily: fonts.display, fontSize: 18, color: colors.ink, textAlign: 'center' },
@@ -181,6 +228,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   drumPressed: { transform: [{ scale: 0.92 }] },
+  drumDimmed: { opacity: 0.45 },
   drumEmoji: { fontSize: 64 },
-  drumCount: { fontFamily: fonts.display, fontSize: 28, color: colors.card, marginTop: -4 },
+  tapDotRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+  tapDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#C5693A',
+    backgroundColor: 'transparent',
+  },
+  tapDotFilled: {
+    backgroundColor: '#E8874F',
+  },
 });

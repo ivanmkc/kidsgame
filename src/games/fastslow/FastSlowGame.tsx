@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -77,6 +77,32 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     setRound(makeFastSlowRound(rngRef.current, difficulty));
   };
 
+  const earPulse = useRef(new Animated.Value(1)).current;
+  const pickGlow = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (phase === 'listen') {
+      pickGlow.setValue(0);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    } else {
+      earPulse.stopAnimation();
+      earPulse.setValue(1);
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pickGlow, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(pickGlow, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        ])
+      ).start();
+    }
+    return () => { earPulse.stopAnimation(); pickGlow.stopAnimation(); };
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pickScale = pickGlow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+
   return (
     <GameShell
       title={t(lang, 'shell.fastslow.title' as never)}
@@ -88,27 +114,30 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         {phase === 'listen' ? (
           <View style={[styles.listenCard, shadows.soft]}>
-            <Text style={styles.listenEmoji}>👂</Text>
+            <Animated.Text style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
             <Text style={styles.listenText}>{t(lang, 'music.listen' as never)}</Text>
           </View>
         ) : (
           <View style={styles.pickRow}>
-            <Pressable
-              onPress={() => onPick('fast')}
-              testID="fastslow-fast"
-              style={({ pressed }) => [
-                styles.pickBtn,
-                { backgroundColor: '#FFF0E5', borderColor: '#E8874F' },
-                wrongPick === 'fast' && styles.wrong,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.pickEmoji}>🐰</Text>
-              <Text style={[styles.pickLabel, { color: '#E8874F' }]}>
-                {t(lang, 'music.fast' as never)}
-              </Text>
-              <SparkleBurst trigger={getActualSpeed(round) === 'fast' ? sparkKey : 0} count={5} size={14} />
-            </Pressable>
+            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
+              <Pressable
+                onPress={() => onPick('fast')}
+                testID="fastslow-fast"
+                style={({ pressed }) => [
+                  styles.pickBtn,
+                  { backgroundColor: '#FFF0E5', borderColor: '#E8874F' },
+                  shadows.glowGold,
+                  wrongPick === 'fast' && styles.wrong,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.pickEmoji}>🐰</Text>
+                <Text style={[styles.pickLabel, { color: '#E8874F' }]}>
+                  {t(lang, 'music.fast' as never)}
+                </Text>
+                <SparkleBurst trigger={getActualSpeed(round) === 'fast' ? sparkKey : 0} count={5} size={14} />
+              </Pressable>
+            </Animated.View>
             <Pressable
               onPress={replay}
               testID="fastslow-replay"
@@ -116,22 +145,25 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
             >
               <Text style={styles.replayText}>🔊</Text>
             </Pressable>
-            <Pressable
-              onPress={() => onPick('slow')}
-              testID="fastslow-slow"
-              style={({ pressed }) => [
-                styles.pickBtn,
-                { backgroundColor: '#E3EEFB', borderColor: '#5DA9E8' },
-                wrongPick === 'slow' && styles.wrong,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.pickEmoji}>🐢</Text>
-              <Text style={[styles.pickLabel, { color: '#5DA9E8' }]}>
-                {t(lang, 'music.slow' as never)}
-              </Text>
-              <SparkleBurst trigger={getActualSpeed(round) === 'slow' ? sparkKey : 0} count={5} size={14} />
-            </Pressable>
+            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
+              <Pressable
+                onPress={() => onPick('slow')}
+                testID="fastslow-slow"
+                style={({ pressed }) => [
+                  styles.pickBtn,
+                  { backgroundColor: '#E3EEFB', borderColor: '#5DA9E8' },
+                  shadows.glowGold,
+                  wrongPick === 'slow' && styles.wrong,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.pickEmoji}>🐢</Text>
+                <Text style={[styles.pickLabel, { color: '#5DA9E8' }]}>
+                  {t(lang, 'music.slow' as never)}
+                </Text>
+                <SparkleBurst trigger={getActualSpeed(round) === 'slow' ? sparkKey : 0} count={5} size={14} />
+              </Pressable>
+            </Animated.View>
           </View>
         )}
       </View>
@@ -177,12 +209,12 @@ const styles = StyleSheet.create({
   wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.12)' },
   pressed: { transform: [{ scale: 0.94 }] },
   replayBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     backgroundColor: colors.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  replayText: { fontSize: 28 },
+  replayText: { fontSize: 36 },
 });
