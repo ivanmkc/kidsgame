@@ -5,13 +5,14 @@ import { SceneDef } from './scenes';
 
 interface Props {
   scene: SceneDef;
-  translateY: Animated.AnimatedInterpolation<number>;
+  translateY: Animated.AnimatedInterpolation<number> | Animated.AnimatedAddition<number>;
   scale: Animated.AnimatedInterpolation<number>;
+  rotate?: Animated.AnimatedInterpolation<string>;
 }
 
 const VEHICLE_SIZE = 160;
 
-export function VehicleSprite({ scene, translateY, scale }: Props) {
+export function VehicleSprite({ scene, translateY, scale, rotate }: Props) {
   const src = MUSICBOX_IMAGES[`${scene.id}/vehicle`];
   const topPct = `${scene.vehicleY * 100}%`;
 
@@ -21,9 +22,18 @@ export function VehicleSprite({ scene, translateY, scale }: Props) {
         styles.vehicle,
         {
           top: topPct as unknown as number,
-          transform: [{ translateY }, { scale }],
+          transform: rotate
+            ? [
+                { translateY: translateY as unknown as Animated.AnimatedInterpolation<number> },
+                { scale },
+                { rotate },
+              ]
+            : [
+                { translateY: translateY as unknown as Animated.AnimatedInterpolation<number> },
+                { scale },
+              ],
         },
-      ]}
+      ] as unknown as Animated.WithAnimatedObject<import('react-native').ViewStyle>[]}
       pointerEvents="none"
     >
       <Image

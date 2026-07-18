@@ -84,18 +84,33 @@ for (let i = 0; i < 4; i++) {
 await page.screenshot({ path: `${OUT}/03-after-4-taps.png` });
 console.log('shot: 03-after-4-taps');
 
-// 4. Tap rapidly to show scrolling progression
-for (let i = 0; i < 12; i++) {
+// 4. Tap in center to spawn objects — "before scroll-away" reference
+for (let i = 0; i < 5; i++) {
   const box = await stage.boundingBox();
   if (box) {
-    const x = box.x + box.width * (0.2 + Math.random() * 0.6);
+    const x = box.x + box.width * 0.5;
+    const y = box.y + box.height * (0.3 + i * 0.1);
+    await page.mouse.click(x, y);
+  }
+  await page.waitForTimeout(300);
+}
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${OUT}/04-spawns-before.png` });
+console.log('shot: 04-spawns-before');
+
+// 5. Tap many more times to scroll world — spawns should drift left
+for (let i = 0; i < 20; i++) {
+  const box = await stage.boundingBox();
+  if (box) {
+    const x = box.x + box.width * (0.6 + Math.random() * 0.3);
     const y = box.y + box.height * (0.1 + Math.random() * 0.8);
     await page.mouse.click(x, y);
   }
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(120);
 }
-await page.screenshot({ path: `${OUT}/04-after-many-taps.png` });
-console.log('shot: 04-after-many-taps');
+await page.waitForTimeout(600);
+await page.screenshot({ path: `${OUT}/05-spawns-scrolled.png` });
+console.log('shot: 05-spawns-scrolled');
 
 await b.close();
 srv.close();
