@@ -25151,7 +25151,17 @@
               "label": "Cross the vine bridge",
               "next": "ab"
             }
-          ]
+          ],
+          "scare": {
+            "x": 261,
+            "y": 373,
+            "w": 525,
+            "h": 193,
+            "pop": "story/bayou_a_pop.png",
+            "sting": "boing",
+            "reveal": "Ribbit! We were just watching the sparks go by!",
+            "delay": 1800
+          }
         },
         "b": {
           "image": "story/bayou_b.png",
@@ -25546,7 +25556,17 @@
                 "h": 172
               }
             }
-          ]
+          ],
+          "scare": {
+            "x": 576,
+            "y": 601,
+            "w": 91,
+            "h": 119,
+            "pop": "story/observatory_ba_pop.png",
+            "sting": "boing",
+            "reveal": "Hello! I'm trying to show you a MAP! The star-sprite settles into a gentle glow and points at the sky with a tiny arm of light.",
+            "delay": 1700
+          }
         },
         "bb": {
           "image": "story/observatory_bb.png",
@@ -25916,7 +25936,17 @@
               },
               "video": "story-video/museum_bb_1.mp4"
             }
-          ]
+          ],
+          "scare": {
+            "x": 577,
+            "y": 640,
+            "w": 52,
+            "h": 65,
+            "pop": "story/museum_bb_pop.png",
+            "sting": "boing",
+            "reveal": "Just a grumpy museum gecko who naps in the skeleton! She's been living there for years and does NOT appreciate visitors.",
+            "delay": 1600
+          }
         },
         "m1": {
           "image": "story/museum_m1.png",
@@ -26431,7 +26461,17 @@
                 "h": 324
               }
             }
-          ]
+          ],
+          "scare": {
+            "x": 252,
+            "y": 122,
+            "w": 365,
+            "h": 233,
+            "pop": "story/quarry_a_pop.png",
+            "sting": "thunder",
+            "reveal": "Relax cousin! Just moonlight through old bones \u2014 happens every full moon!",
+            "delay": 1900
+          }
         },
         "b": {
           "image": "story/quarry_b.png",
@@ -26521,7 +26561,17 @@
               "label": "Explore the calcite shelf",
               "next": "m4"
             }
-          ]
+          ],
+          "scare": {
+            "x": 281,
+            "y": 470,
+            "w": 214,
+            "h": 245,
+            "pop": "story/quarry_bb_pop.png",
+            "sting": "boing",
+            "reveal": "Oh my! Nobody has visited this wall in a thousand years! How exciting!",
+            "delay": 1800
+          }
         },
         "m1": {
           "image": "story/quarry_m1.png",
@@ -26762,7 +26812,17 @@
               "label": "Swim to the breathing chamber",
               "next": "m2"
             }
-          ]
+          ],
+          "scare": {
+            "x": 230,
+            "y": 143,
+            "w": 287,
+            "h": 145,
+            "pop": "story/grotto_ab_pop.png",
+            "sting": "thunder",
+            "reveal": "Been saving this for someone! Take it!",
+            "delay": 1700
+          }
         },
         "ba": {
           "image": "story/grotto_ba.png",
