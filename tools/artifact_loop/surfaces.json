@@ -1,0 +1,290 @@
+{
+  "viewport": { "width": 1024, "height": 768 },
+  "surfaces": [
+    {
+      "id": "menu-top",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "menu-learning",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": "section-learning"
+    },
+    {
+      "id": "menu-visual",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": "section-visual"
+    },
+    {
+      "id": "menu-music",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": "section-music"
+    },
+
+    {
+      "id": "musicbox-picker",
+      "route": "#/musicbox",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "musicbox-twinkle-start",
+      "route": "#/musicbox/twinkle",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null
+    },
+    {
+      "id": "musicbox-twinkle-tapped",
+      "route": "#/musicbox/twinkle",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null,
+      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+    },
+    {
+      "id": "musicbox-row-start",
+      "route": "#/musicbox/row",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null
+    },
+    {
+      "id": "musicbox-row-tapped",
+      "route": "#/musicbox/row",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null,
+      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+    },
+    {
+      "id": "musicbox-jingle-start",
+      "route": "#/musicbox/jingle",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null
+    },
+    {
+      "id": "musicbox-jingle-tapped",
+      "route": "#/musicbox/jingle",
+      "waitFor": "musicbox-stage",
+      "scrollTo": null,
+      "interact": { "kind": "tap-stage", "testId": "musicbox-stage", "count": 12 }
+    },
+
+    {
+      "id": "escape-picker",
+      "route": "#/escape",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "escape-toyroom-fresh",
+      "route": "#/escape/toyroom",
+      "waitFor": "escape-tray",
+      "scrollTo": null
+    },
+    {
+      "id": "escape-toyroom-chain",
+      "route": "#/escape/toyroom",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-pillow", "wait": 900 },
+          { "tap": "escape-spot-chest", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-toyroom-solved",
+      "route": "#/escape/toyroom",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-pillow", "wait": 900 },
+          { "tap": "escape-spot-chest", "wait": 900 },
+          { "tap": "escape-spot-pen", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-dragoncave-fresh",
+      "route": "#/escape/dragoncave",
+      "waitFor": "escape-tray",
+      "scrollTo": null
+    },
+    {
+      "id": "escape-dragoncave-chain",
+      "route": "#/escape/dragoncave",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-haystack", "wait": 900 },
+          { "tap": "escape-spot-stove", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-dragoncave-solved",
+      "route": "#/escape/dragoncave",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-haystack", "wait": 900 },
+          { "tap": "escape-spot-stove", "wait": 900 },
+          { "tap": "escape-spot-dragon", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-rocketpad-fresh",
+      "route": "#/escape/rocketpad",
+      "waitFor": "escape-tray",
+      "scrollTo": null
+    },
+    {
+      "id": "escape-rocketpad-chain",
+      "route": "#/escape/rocketpad",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-toolbox", "wait": 900 },
+          { "tap": "escape-spot-rocket", "wait": 900 },
+          { "tap": "escape-spot-crate", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-rocketpad-solved",
+      "route": "#/escape/rocketpad",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-toolbox", "wait": 900 },
+          { "tap": "escape-spot-rocket", "wait": 900 },
+          { "tap": "escape-spot-crate", "wait": 900 },
+          { "tap": "escape-spot-button", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-piratecove-fresh",
+      "route": "#/escape/piratecove",
+      "waitFor": "escape-tray",
+      "scrollTo": null
+    },
+    {
+      "id": "escape-piratecove-chain",
+      "route": "#/escape/piratecove",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-net", "wait": 900 },
+          { "tap": "escape-spot-pelican", "wait": 900 }
+        ]
+      }
+    },
+    {
+      "id": "escape-piratecove-solved",
+      "route": "#/escape/piratecove",
+      "waitFor": "escape-tray",
+      "scrollTo": null,
+      "interact": {
+        "kind": "escape-chain",
+        "steps": [
+          { "tap": "escape-spot-net", "wait": 900 },
+          { "tap": "escape-spot-pelican", "wait": 900 },
+          { "tap": "escape-spot-chest", "wait": 900 }
+        ]
+      }
+    },
+
+    {
+      "id": "bingo-board",
+      "route": "#/bingo",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "highlow",
+      "route": "#/highlow",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "bells",
+      "route": "#/bells",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "echobeat",
+      "route": "#/echobeat",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "steadybeat",
+      "route": "#/steadybeat",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "fastslow",
+      "route": "#/fastslow",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "samediff",
+      "route": "#/samediff",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "hidden-scene",
+      "route": "#/hidden",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "diff-scene",
+      "route": "#/diff",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "story-node",
+      "route": "#/story",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "sticker",
+      "route": "#/sticker",
+      "waitFor": null,
+      "scrollTo": null
+    },
+    {
+      "id": "lockdown-settings",
+      "route": "#/menu",
+      "waitFor": null,
+      "scrollTo": null,
+      "interact": { "kind": "open-lockdown" }
+    }
+  ]
+}
