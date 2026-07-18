@@ -49,7 +49,12 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
   const [clip, setClip] = useState<string | null>(null);
+  const [flyingItems, setFlyingItems] = useState<Array<{
+    key: string; emoji: string; fromX: number; fromY: number;
+  }>>([]);
   const lastAction = useRef(Date.now());
+  const framePos = useRef({ x: 0, y: 0 });
+  const trayPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const { width } = useWindowDimensions();
 
   // ALL hooks above the early returns (repo hard rule).
@@ -58,6 +63,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     setPops([]);
     setClip(null);
     setHintSpot(null);
+    setFlyingItems([]);
     lastAction.current = Date.now();
   }, [sceneId]);
 
@@ -146,11 +152,21 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         sfx.good();
         if (h?.animVideo) setClip(h.animVideo);
         break;
-      case 'collected':
+      case 'collected': {
         sfx.good();
         if (effect.pop) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
+        const item = room.items.find((i) => i.id === effect.item);
+        if (item && h) {
+          const box = h.itemBox ?? h.box;
+          const fromX = framePos.current.x + (box.x + box.w / 2) * scale;
+          const fromY = framePos.current.y + (box.y + box.h / 2) * scale;
+          setFlyingItems((f) => [...f, {
+            key: `${hotspotId}-${Date.now()}`, emoji: item.emoji, fromX, fromY,
+          }]);
+        }
         { const s = locSay('sayFound'); if (s) say(s); }
         break;
+      }
       case 'unlocked':
         sfx.good();
         if (h?.animVideo) setClip(h.animVideo);
@@ -190,7 +206,10 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       right={<BetaPill testID="escape-beta" />}
     >
       <ScrollView contentContainerStyle={styles.wrap}>
-        <View style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}>
+        <View
+          onLayout={(e) => { framePos.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y }; }}
+          style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}
+        >
           <Image source={SCENE_THUMBS[currentSceneKey] ?? SCENE_IMAGES[currentSceneKey]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
           {currentSceneKey !== room.image && (
             <Animated.Image
@@ -237,7 +256,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
             );
           })}
         </View>
-        <View style={styles.tray} testID="escape-tray">
+        <View
+          onLayout={(e) => {
+            const { x, y, width: w, height: h } = e.nativeEvent.layout;
+            trayPos.current = { x, y, w, h };
+          }}
+          style={styles.tray}
+          testID="escape-tray"
+        >
           {heldItems.length === 0 ? (
             <Text style={styles.trayEmpty}>{t(lang, 'escape.trayEmpty')}</Text>
           ) : heldItems.map((i) => (
@@ -253,6 +279,17 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
             </Pressable>
           ))}
         </View>
+        {flyingItems.map((fi) => (
+          <FlyingEmoji
+            key={fi.key}
+            emoji={fi.emoji}
+            fromX={fi.fromX}
+            fromY={fi.fromY}
+            toX={trayPos.current.x + trayPos.current.w / 2}
+            toY={trayPos.current.y + trayPos.current.h / 2}
+            onDone={() => setFlyingItems((f) => f.filter((x) => x.key !== fi.key))}
+          />
+        ))}
       </ScrollView>
       <WinOverlay
         visible={state.done}
@@ -319,6 +356,50 @@ function PopSprite({ path }: { path: string }) {
         resizeMode="contain"
       />
     </View>
+  );
+}
+
+function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
+  emoji: string; fromX: number; fromY: number;
+  toX: number; toY: number; onDone: () => void;
+}) {
+  const progress = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.spring(progress, {
+      toValue: 1, friction: 7, tension: 40, useNativeDriver: true,
+    }).start(({ finished }) => { if (finished) onDone(); });
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  const dx = toX - fromX;
+  const dy = toY - fromY;
+  const arcPeak = -Math.min(80, Math.abs(dy) * 0.4);
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left: fromX - 20,
+        top: fromY - 20,
+        width: 40,
+        height: 40,
+        zIndex: 100,
+        transform: [
+          { translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [0, dx] }) },
+          { translateY: progress.interpolate({
+            inputRange: [0, 0.2, 0.5, 0.8, 1],
+            outputRange: [
+              0,
+              dy * 0.2 + arcPeak * 0.64,
+              dy * 0.5 + arcPeak,
+              dy * 0.8 + arcPeak * 0.64,
+              dy,
+            ],
+          }) },
+          { scale: progress.interpolate({ inputRange: [0, 0.3, 0.7, 1], outputRange: [1.4, 1.6, 1.2, 1] }) },
+        ],
+      }}
+    >
+      <Text style={{ fontSize: 36, textAlign: 'center' }}>{emoji}</Text>
+    </Animated.View>
   );
 }
 
