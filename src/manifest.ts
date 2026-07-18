@@ -52,6 +52,7 @@ export interface HiddenScene {
 
 export interface StoryChoice {
   label: string;
+  t?: Record<string, string>; // ja/cmn/yue label — falls back to label
   next: string;
   icon?: string; // illustrated button — pre-readers pick by picture
   hot?: Box; // in-scene hotspot — the kid taps the door itself
@@ -59,6 +60,8 @@ export interface StoryChoice {
 }
 
 export interface StoryScare extends Box {
+  t?: Record<string, string>; // ja/cmn/yue reveal — falls back to reveal
+  video?: string; // Veo clip of the surprise bursting out (plays on tap)
   pop: string;        // transparent sprite that springs from the region
   sting: 'boing' | 'thunder';
   reveal: string;     // spoken after the pop (delay controls the beat)
@@ -75,6 +78,7 @@ export interface StoryFx extends Box {
 export interface StoryNode {
   image: string;
   text: string;
+  t?: Record<string, string>; // ja/cmn/yue narration — falls back to text
   choices?: StoryChoice[];
   fx?: StoryFx[];
   scare?: StoryScare;
@@ -85,7 +89,45 @@ export interface StoryNode {
 export interface Story {
   id: string;
   title: string;
+  titleT?: Record<string, string>; // ja/cmn/yue title — falls back to title
   nodes: Record<string, StoryNode>;
+}
+
+// ── Escape rooms ─────────────────────────────────────────────────
+// Kid-simplified escape: tap objects to search them, collect up to 3
+// items into a tray, tap a tray item then tap the lock that needs it.
+// Puzzle chains are 2-4 steps and statically verified solvable by the
+// generator lint (every `needs` obtainable, win reachable).
+
+export interface EscapeItem {
+  id: string;
+  label: string;   // spoken when found ("A shiny key!")
+  emoji: string;   // tray icon — big and readable for age 3
+}
+
+export interface EscapeHotspot {
+  id: string;
+  box: Box;
+  /** search: reveals/gives on tap. lock: needs an item. win: final goal (may need an item). */
+  kind: 'search' | 'lock' | 'win';
+  gives?: string;      // item id granted on successful tap
+  needs?: string;      // item id that must be SELECTED in the tray
+  pop?: string;        // transparent sprite that springs out (reveal beat)
+  sayFound?: string;   // spoken on success
+  saySearch?: string;  // spoken on plain search with nothing there (flavor)
+  sayLocked?: string;  // spoken when tapped without the needed item
+}
+
+export interface EscapeRoom {
+  id: string;
+  name: string;
+  nameT?: Record<string, string>;
+  level?: 'easy' | 'medium' | 'hard';
+  image: string;
+  intro: string;    // spoken once on entry — the mission
+  winText: string;  // spoken on completion
+  items: EscapeItem[];
+  hotspots: EscapeHotspot[];
 }
 
 export interface Manifest {
@@ -94,6 +136,7 @@ export interface Manifest {
   stories?: Story[];
   diff: DiffScene[];
   hidden: HiddenScene[];
+  escape?: EscapeRoom[];
 }
 
 export const manifest = raw as unknown as Manifest;

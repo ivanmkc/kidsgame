@@ -1,0 +1,243 @@
+{
+  "id": "carnival",
+  "title": "Nova and the Midnight Carnival",
+  "hero": "NOVA",
+  "style": "Neon-on-black carnival poster art, hot pink lights, electric teal glow, deep purple night sky, phantom light trails, glowing ride silhouettes. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands before a towering midnight carnival entrance glowing with phantom neon lights, an abandoned ticket counter to one side, a painted banner fluttering from the tallest tent pole showing only shapes. On the LEFT a pink neon ticket booth buzzes with flickering light under a striped awning, on the RIGHT a teal candy cart overflowing with glowing cotton-candy cones sits on iron wheels, both large, fully visible, clearly separated.",
+      "text": "The carnival is supposed to be CLOSED but every ride just lit up by itself and somewhere inside a masked raccoon has the village banner — Nova's fur is standing on end and not just from the static. Ticket booth or candy cart?",
+      "choices": [
+        {
+          "label": "Sneak to the ticket booth",
+          "next": "a",
+          "spot": "pink neon ticket booth"
+        },
+        {
+          "label": "Check the candy cart",
+          "next": "b",
+          "spot": "teal candy cart"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} explores the pink neon ticket booth under a striped awning, phantom lights flickering across the counter, a glowing carnival coin wedged behind a brass lever on the counter, a pink cotton-candy cart parked beside the booth with wisps of spun sugar trailing upward. On the LEFT a spinning magenta teacup ride with oversized cups rotates slowly in the dark, on the RIGHT a teal balloon archway curves over a pathway deeper into the carnival, both large, fully visible, clearly separated.",
+      "text": "Behind the brass lever Nova finds a coin that GLOWS like a tiny sun — into the pouch it goes, because glowing things at midnight carnivals are definitely trustworthy. Teacup ride or balloon archway?",
+      "choices": [
+        {
+          "label": "Hop in the teacup ride",
+          "next": "aa",
+          "spot": "magenta teacup ride"
+        },
+        {
+          "label": "Walk through the archway",
+          "next": "ab",
+          "spot": "teal balloon archway"
+        }
+      ],
+      "scare": {
+        "spot": "pink cotton-candy cart",
+        "pop": "a grinning jack-in-the-box clown with two big round glowing eyes and a too-wide painted smile springing up from behind the pink cotton-candy cart, neon-lit against the dark",
+        "reveal": "Ta-daaa! Just practicing my big entrance!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} rummages through a teal candy cart on iron wheels, glowing cotton-candy cones stacked in rows, a sparkly magenta ribbon tied around the cart handle catching the neon light. On the LEFT an orange bumper car arena with glowing bumper cars sits under a canopy of phantom lights, on the RIGHT a purple fortune-teller wagon with a crystal ball visible through a round window sits on painted wheels, both large, fully visible, clearly separated.",
+      "text": "The sparkly ribbon on the cart handle shimmers like it WANTS to be untied so Nova obliges — it coils neatly into a pocket like it belongs there, very suspicious but very pretty. Bumper cars or fortune-teller wagon?",
+      "choices": [
+        {
+          "label": "Race the bumper cars",
+          "next": "ba",
+          "spot": "orange bumper car arena"
+        },
+        {
+          "label": "Visit the fortune-teller",
+          "next": "bb",
+          "spot": "purple fortune-teller wagon"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} sits in an oversized spinning magenta teacup on the teacup ride, the glowing carnival coin tucked in the pouch, neon lights streaking past in circles, the ride slowing near two paths deeper into the carnival. On the LEFT a golden carousel with painted horses spins slowly under a canopy of twinkling lights, on the RIGHT a purple calliope organ with gleaming brass pipes sits on a wheeled stage, both large, fully visible, clearly separated.",
+      "text": "The teacup spins Nova past a carousel where a masked raccoon is LITERALLY sitting on the village banner like a throne — the glowing coin in her pouch pulses as if it knows what to do. Carousel or calliope?",
+      "choices": [
+        {
+          "label": "Challenge at the carousel",
+          "next": "m1",
+          "spot": "golden carousel"
+        },
+        {
+          "label": "Play the calliope",
+          "next": "m2",
+          "spot": "purple calliope organ"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} walks beneath a teal balloon archway into the heart of the carnival, the glowing carnival coin tucked in the pouch, neon-lit game stalls lining both sides, phantom music drifting from deeper inside. On the LEFT a golden carousel with painted horses glows under a canopy of twinkling phantom lights, on the RIGHT a purple calliope organ with gleaming brass pipes sits on a wheeled stage trailing wisps of phantom smoke, both large, fully visible, clearly separated.",
+      "text": "Through the archway Nova spots the Carnival King lounging on the carousel with the village banner draped over his shoulders like a royal cape — the coin in her pouch buzzes impatiently. Carousel or calliope?",
+      "choices": [
+        {
+          "label": "Challenge at the carousel",
+          "next": "m1",
+          "spot": "golden carousel"
+        },
+        {
+          "label": "Play the calliope",
+          "next": "m2",
+          "spot": "purple calliope organ"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands in an orange bumper car arena under a canopy of phantom lights, the sparkly magenta ribbon tucked in a pocket, glowing bumper cars parked in a circle, sparks crackling from the ceiling grid. On the LEFT a crimson prize tower stacked with stuffed animals and shiny trophies rises behind a counter, on the RIGHT a green ring-toss booth with tall pegs and neon rings sits beneath a striped awning, both large, fully visible, clearly separated.",
+      "text": "The bumper cars spark to life by themselves and one nudges Nova toward two carnival games — apparently even the rides are trying to help, which is either sweet or deeply unsettling. Prize tower or ring-toss?",
+      "choices": [
+        {
+          "label": "Try the prize tower",
+          "next": "m3",
+          "spot": "crimson prize tower"
+        },
+        {
+          "label": "Play ring-toss",
+          "next": "m4",
+          "spot": "green ring-toss booth"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} peers inside a purple fortune-teller wagon with a crystal ball glowing on a velvet table, the sparkly magenta ribbon tucked in a pocket, a gilded mirror frame standing in the corner reflecting neon carnival lights, tarot cards scattered across the table. On the LEFT a crimson prize tower stacked with stuffed animals and shiny trophies rises behind a carnival counter, on the RIGHT a green ring-toss booth with tall pegs and glowing neon rings sits beneath a striped awning, both large, fully visible, clearly separated.",
+      "text": "The crystal ball shows the village banner and then the mirror in the corner flickers — Nova's reflection just WAVED and Nova definitely did not wave first. Prize tower or ring-toss?",
+      "choices": [
+        {
+          "label": "Try the prize tower",
+          "next": "m3",
+          "spot": "crimson prize tower"
+        },
+        {
+          "label": "Play ring-toss",
+          "next": "m4",
+          "spot": "green ring-toss booth"
+        }
+      ],
+      "scare": {
+        "spot": "gilded mirror frame",
+        "pop": "a shadowy fox-shaped double with two wide glowing violet eyes stepping smoothly out of the gilded mirror frame, neon reflections rippling behind it",
+        "reveal": "Whoops, just your reflection stretching its legs!",
+        "sting": "thunder",
+        "delay": 1900
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands on the golden carousel platform facing the Carnival King, a masked raccoon ringmaster in a top hat sitting on a painted horse with the village banner draped behind him, two foam swords offered on a velvet cushion between them, carousel horses slowly spinning around them. On the LEFT a crimson foam sword raised HIGH above a rearing carousel horse catches the neon light, on the RIGHT an electric-teal foam sword held LOW near the carousel floor glows against the dark platform, both large, fully visible, clearly separated.",
+      "text": "The Carnival King bows dramatically and offers Nova a foam-sword duel for the banner — carousel horses spin as the calliope plays a battle theme, and this raccoon clearly watches too many adventure movies. High chop or low sweep?",
+      "choices": [
+        {
+          "label": "Swing the high chop",
+          "next": "end_crown",
+          "spot": "crimson foam sword"
+        },
+        {
+          "label": "Sweep the low strike",
+          "next": "end_dance",
+          "spot": "teal foam sword"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands at the purple calliope organ on its wheeled stage, gleaming brass pipes rising in rows, the glowing carnival coin pulsing in the pouch, the Carnival King watching curiously from the nearby carousel with the village banner over his shoulders. On the LEFT a hot-pink organ bellows with a brass crank handle sits at the base of the calliope, on the RIGHT a teal pipe cluster with a row of shiny valve buttons lines the top of the organ, both large, fully visible, clearly separated.",
+      "text": "The glowing coin practically LEAPS toward the calliope and the brass pipes hum — maybe music is the way to a masked raccoon's heart, but one wrong note and the carnival might have opinions. Pump the bellows or press the valves?",
+      "choices": [
+        {
+          "label": "Pump the bellows",
+          "next": "end_song",
+          "spot": "hot-pink organ bellows"
+        },
+        {
+          "label": "Press the valves",
+          "next": "end_fog",
+          "spot": "teal pipe cluster"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands before a crimson prize tower stacked with stuffed animals and shiny trophies, the sparkly magenta ribbon in a pocket catching the neon glow, a carnival barker's empty podium beside the tower, three carnival games arranged in front. On the LEFT a yellow ring-toss peg with glowing rings stacked on top sits on the counter, in the MIDDLE an orange strength-hammer mallet leans against a tall bell tower, on the RIGHT a violet dart board with colorful balloons pinned across it hangs on the booth wall, all three large, fully visible, clearly separated.",
+      "text": "Three games, three chances to win the banner back as a PRIZE — Nova ties the sparkly ribbon around one wrist for luck and picks up her game face, which looks a lot like her regular face but more determined. Rings, hammer, or darts?",
+      "choices": [
+        {
+          "label": "Toss the rings",
+          "next": "end_rings",
+          "spot": "yellow ring-toss peg"
+        },
+        {
+          "label": "Swing the hammer",
+          "next": "end_hammer",
+          "spot": "orange strength hammer"
+        },
+        {
+          "label": "Throw darts",
+          "next": "end_chicken",
+          "spot": "violet dart board"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands at the green ring-toss booth under a striped awning, neon rings scattered on the counter, the sparkly magenta ribbon tied around one wrist, the Carnival King peeking over from behind the prize shelves with the banner trailing from his hat. On the LEFT an amber spotlight pedestal glows in the center of the carnival midway with a single bright beam, on the RIGHT a magenta stage curtain hangs between two tent poles with tassels swaying, both large, fully visible, clearly separated.",
+      "text": "The Carnival King peeks over the prizes and wiggles the banner tauntingly — Nova's ribbon sparkles and two paths lead to where the raccoon cannot hide. Spotlight pedestal or stage curtain?",
+      "choices": [
+        {
+          "label": "Step onto the spotlight",
+          "next": "end_show",
+          "spot": "amber spotlight pedestal"
+        },
+        {
+          "label": "Pull the curtain",
+          "next": "end_trap",
+          "spot": "magenta stage curtain"
+        }
+      ]
+    },
+    "end_crown": {
+      "scene": "{HERO} stands victorious on the carousel platform holding the village banner high, the Carnival King's top hat knocked sideways revealing a smiling raccoon underneath, foam swords crossed in a friendly salute, neon carnival lights blazing in celebration against the deep purple sky.",
+      "text": "Nova's high chop bonks the Carnival King's hat clean off and underneath is just a lonely raccoon who collected the banner because it had a painting of a cheering crowd — Nova invites him to perform at the REAL village festival and his smile lights up brighter than every ride combined."
+    },
+    "end_dance": {
+      "scene": "{HERO} swings the teal foam sword in a low sweep but catches the carousel horse's saddle strap, the horse spinning loose and carrying Nova in dizzying circles as the Carnival King watches from his throne with the village banner still firmly draped over his shoulders, painted horses flying off the platform one by one.",
+      "text": "Nova's low sweep snagged a carousel horse and the horse SPUN her in circles so fast her ears went flat — round and round while the Carnival King watched from his throne eating cotton candy with the banner still on his shoulders. By the time Nova stopped spinning she was so dizzy she walked into three tent poles. Oopsie ending!",
+      "bad": true
+    },
+    "end_song": {
+      "scene": "{HERO} plays the calliope organ as golden music notes swirl visibly through the air, the Carnival King waltzing with the village banner draped over one arm, phantom carnival lights pulsing in rhythm against the deep purple night sky.",
+      "text": "The bellows pump a golden melody and the Carnival King cannot help but dance — he waltzes over with the banner and asks if Nova's village has a stage, because this raccoon has been performing for empty seats and a real audience sounds like heaven."
+    },
+    "end_fog": {
+      "scene": "{HERO} stands at the calliope organ as thick purple fog swirls around the carnival, the brass pipes blaring a sour note, rides flickering and sinking into mist, the Carnival King clutching the banner and disappearing into the fog with a shrug.",
+      "text": "Nova mashes the wrong valves and the calliope screams like a cat in a bathtub — the whole carnival sinks into fog three hours early and the banner vanishes with the Carnival King. Oopsie ending!",
+      "bad": true
+    },
+    "end_rings": {
+      "scene": "{HERO} holds the village banner overhead at the prize tower, glowing carnival rings stacked perfectly on every peg, the Carnival King applauding with both paws from behind the counter, neon lights spelling victory shapes in the purple night sky.",
+      "text": "Every ring lands PERFECTLY and the prize tower dings so loud the Carnival King comes running — he hands over the banner and begs Nova to teach him that throw at the village festival."
+    },
+    "end_hammer": {
+      "scene": "{HERO} swings the orange hammer and the bell at the top of the strength tower RINGS across the midnight carnival, the Carnival King covering his ears with the banner flapping loose, neon lights flashing in celebration against the deep purple sky.",
+      "text": "DING — the bell rings loud enough to wake up every sleeping scarecrow in three counties and the startled Carnival King drops the banner right into Nova's paws, then asks if she has ever considered a career in carnival strongfox."
+    },
+    "end_chicken": {
+      "scene": "{HERO} holds a large rubber chicken won from the dart board, looking confused, the village banner still visible on the Carnival King's shoulders in the distance as the carnival rides flicker in purple fog.",
+      "text": "Nova's dart pops a balloon but the prize that drops out is a rubber chicken the size of a loaf of bread — the Carnival King waves goodbye with the banner still firmly on his shoulders. Oopsie ending!",
+      "bad": true
+    },
+    "end_show": {
+      "scene": "{HERO} stands in a bright amber spotlight on the carnival stage, the Carnival King sitting in the audience clapping with the village banner draped over the seat beside him, phantom carnival lights twinkling like stars against the deep purple sky.",
+      "text": "Nova steps into the spotlight and takes a bow so magnificent that the Carnival King leaps up clapping — he has been performing to empty seats for so long that seeing a REAL showfox makes him hand over the banner and ask to join the village festival troupe."
+    },
+    "end_trap": {
+      "scene": "{HERO} pulls open the magenta stage curtain to reveal an empty stage with a single banana peel in the spotlight, the Carnival King giggling from behind a tent pole with the banner still wrapped around his shoulders, neon lights dimming as fog creeps in.",
+      "text": "Behind the curtain is nothing but a banana peel and the Carnival King's giggling — Nova slips, does an accidental somersault, and by the time the stars stop spinning the carnival has packed itself up. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

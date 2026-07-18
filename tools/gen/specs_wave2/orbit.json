@@ -1,0 +1,243 @@
+{
+  "id": "orbit",
+  "title": "Milo's Space Station Sleepover",
+  "hero": "MILO",
+  "style": "Cosmic soft-airbrush picture-book art, midnight blues and star-speckled black, warm cabin light against porthole views of a glowing blue-green planet. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} floats weightless in a cozy space-station bunk pod, wide eyes reflecting a single bright light drifting past a round porthole, a blanket and a milk carton orbiting slowly around him. On the LEFT a glowing BLUE OBSERVATION TUNNEL with glass walls revealing stars beyond, on the RIGHT an ORANGE CARGO BAY HATCH with heavy rivets and a small round window, both large, fully visible, clearly separated.",
+      "text": "Milo spotted it — a bright, wandering star drifting right past the window! He absolutely had to catch it, even though every pounce in zero gravity sent him spinning like a furry helicopter.",
+      "choices": [
+        {
+          "label": "Float toward the tunnel",
+          "next": "a",
+          "spot": "blue observation tunnel"
+        },
+        {
+          "label": "Drift to the hatch",
+          "next": "b",
+          "spot": "orange cargo hatch"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} tumbles gently through a glass-walled observation tunnel, blanket streaming behind him like a cape, stars visible in every direction. On the LEFT a RED MAGNETIC BOOT LOCKER bolted to the tunnel wall with two chunky boots visible inside, on the RIGHT a SILVER MILK THERMOS floating freely with tiny milk droplets orbiting it, both large, fully visible, clearly separated.",
+      "text": "The tunnel was spectacular — stars above, below, and somehow in his whiskers. Also in his whiskers: his own blanket. Milo needed a plan before he pinwheeled into the snack cabinet.",
+      "choices": [
+        {
+          "label": "Grab the magnet boots",
+          "next": "aa",
+          "spot": "red magnetic boots"
+        },
+        {
+          "label": "Catch the milk thermos",
+          "next": "ab",
+          "spot": "silver milk thermos"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} bounces gently between floating cargo crates in a dim bay, warm starlight streaming through a side porthole, the bright wandering light visible outside. On the LEFT a GOLDEN LANTERN spinning slowly in midair casting warm amber circles of light, on the RIGHT a PURPLE SLEEPING BAG tethered to the wall like a puffy cocoon, both large, fully visible, clearly separated.",
+      "text": "Milo ricocheted off a crate of freeze-dried sardines — dignity entirely intact, thank you very much. The wandering star gleamed through the porthole, tantalizingly close.",
+      "scare": {
+        "spot": "green supply crate",
+        "pop": "A round-cheeked HAMSTER in a tiny orange spacesuit, floating upside down and clutching a clipboard, waving cheerfully with one small paw.",
+        "reveal": "Just Biscuit the hamster, doing the overnight inventory. Upside down. As one does in space.",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Grab the spinning lantern",
+          "next": "ba",
+          "spot": "golden lantern"
+        },
+        {
+          "label": "Climb into the bag",
+          "next": "bb",
+          "spot": "purple sleeping bag"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} wearing oversized red magnetic boots, clomping confidently upside-down across the observation dome ceiling, the bright wandering light glimmering through the vast curved window ahead. On the LEFT a wide GLASS DOME WINDOW showing the drifting bright star against deep space, on the RIGHT a YELLOW GALLEY DOOR with a warm glow and floating mugs visible through its porthole, both large, fully visible, clearly separated.",
+      "text": "The boots worked beautifully — ceiling, walls, the vending machine, nothing was off-limits. The wandering star twinkled just beyond the dome, close enough to make his tail twitch.",
+      "choices": [
+        {
+          "label": "March to the dome window",
+          "next": "m1",
+          "spot": "glass dome window"
+        },
+        {
+          "label": "Stomp toward the galley",
+          "next": "m2",
+          "spot": "yellow galley door"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} floating amid a constellation of silvery milk droplets, each one catching starlight like a tiny moon, the observation tunnel opening into a wider junction ahead. On the LEFT a wide GLASS DOME WINDOW at the end of the tunnel with the bright wandering star visible beyond, on the RIGHT a YELLOW GALLEY DOOR with a sleepy hamster in an orange spacesuit peeking through its porthole, both large, fully visible, clearly separated.",
+      "text": "The thermos had popped open — now a hundred tiny milk-moons orbited Milo's head like the universe's coziest solar system. One floated toward the dome, another toward the galley.",
+      "choices": [
+        {
+          "label": "Follow milk to the dome",
+          "next": "m1",
+          "spot": "glass dome window"
+        },
+        {
+          "label": "Follow milk to the galley",
+          "next": "m2",
+          "spot": "yellow galley door"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} drifting through the cargo bay holding a golden lantern that casts warm amber light across floating crates, the bright wandering star visible through a large porthole ahead. On the LEFT a large round STEEL PORTHOLE with the bright star glowing just beyond the glass, on the RIGHT a TEAL HAMMOCK strung between two cargo crates with a small window visible behind it, both large, fully visible, clearly separated.",
+      "text": "The lantern turned the cargo bay into a golden cave. Every surface glowed warm — the crates, the walls, the porthole glass. And there was the star, hovering right outside.",
+      "scare": {
+        "spot": "orange cargo crate",
+        "pop": "A tiny FIREFLY wearing a miniature glass space helmet, blinking soft green-yellow light, giving a small salute with one leg.",
+        "reveal": "A stowaway firefly! She blinked hello from her tiny helmet — even bugs want to see the stars.",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Float to the porthole",
+          "next": "m3",
+          "spot": "steel porthole"
+        },
+        {
+          "label": "Nestle in the hammock",
+          "next": "m4",
+          "spot": "teal cargo hammock"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} wrapped snugly in a purple sleeping bag, drifting through the cargo bay like a cozy purple comet, tail poking out one end, the bright wandering star visible through a porthole. On the LEFT a large round STEEL PORTHOLE with the bright star glowing outside, on the RIGHT a TEAL HAMMOCK strung between two cargo crates with a small window behind it, both large, fully visible, clearly separated.",
+      "text": "Wrapped in the sleeping bag, Milo was basically a purring burrito hurtling through the cosmos. The wandering star kept pace outside, almost like it was waiting for him.",
+      "choices": [
+        {
+          "label": "Bounce to the porthole",
+          "next": "m3",
+          "spot": "steel porthole"
+        },
+        {
+          "label": "Drift into the hammock",
+          "next": "m4",
+          "spot": "teal cargo hammock"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} floating before the enormous curved dome window, the bright wandering star hovering just beyond the glass, three objects slowly spinning within paw's reach. On the LEFT a rolled-up BLUE STAR CHART with constellation drawings on its edge, in the MIDDLE a PINK BUTTERFLY NET with a long wooden handle, on the RIGHT a plump YELLOW CUSHION soft and round, all three large, fully visible, clearly separated.",
+      "text": "The star was RIGHT THERE, just beyond the glass! Three things floated within reach — surely one was the key to the greatest catch in feline space history.",
+      "choices": [
+        {
+          "label": "Unroll the star chart",
+          "next": "end_chart",
+          "spot": "blue star chart"
+        },
+        {
+          "label": "Swing the butterfly net",
+          "next": "end_net",
+          "spot": "pink butterfly net"
+        },
+        {
+          "label": "Hug the cushion tight",
+          "next": "end_cushion",
+          "spot": "yellow cushion"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} floating in the warm galley kitchen, mugs and crumb clouds drifting lazily, a round-cheeked hamster in an orange spacesuit yawning nearby. On the LEFT a CERAMIC MUG OF MILK steaming gently in zero gravity with orbiting droplets, on the RIGHT a GALLEY WINDOW showing the bright wandering star against deep space, both large, fully visible, clearly separated.",
+      "text": "The galley was warm and smelled like toast. Biscuit the hamster yawned so wide his whole face disappeared momentarily. The wandering star winked through the window — still drifting, still uncaught.",
+      "choices": [
+        {
+          "label": "Share milk with Biscuit",
+          "next": "end_share",
+          "spot": "ceramic milk mug"
+        },
+        {
+          "label": "Chase the star alone",
+          "next": "end_solo",
+          "spot": "galley window"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} hovering right before a large round porthole, nose nearly touching the glass, the bright wandering star gleaming inches away on the other side, warm cabin light reflecting softly on the curved glass surface. On the LEFT the wide GLASS PORTHOLE with the bright star hovering just outside, on the RIGHT a RED DIMMER DIAL mounted on the wall beside the porthole, both large, fully visible, clearly separated.",
+      "text": "Nose to the glass, Milo could practically feel the star's warmth. It seemed to move when he moved, shimmer when he breathed — the closest he'd ever been to catching something impossible.",
+      "choices": [
+        {
+          "label": "Press paw to the glass",
+          "next": "end_reflect",
+          "spot": "glass porthole"
+        },
+        {
+          "label": "Twist the dimmer dial",
+          "next": "end_dark",
+          "spot": "red dimmer dial"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} curled in a teal hammock strung between cargo crates, gently swaying, a small round window beside the hammock showing the bright wandering star and a distant blue shimmer. On the LEFT a small BRASS WINDOW FRAME with the star glowing softly outside, on the RIGHT a plump ORANGE CUSHION nestled in the hammock mesh, both large, fully visible, clearly separated.",
+      "text": "The hammock was impossibly cozy — gentle swaying, warm mesh, the whole universe framed in one small window. The star drifted lazily past, as if it had all the time in the cosmos.",
+      "choices": [
+        {
+          "label": "Pounce at the window",
+          "next": "end_pounce",
+          "spot": "brass window frame"
+        },
+        {
+          "label": "Sink into the cushion",
+          "next": "end_still",
+          "spot": "orange cushion"
+        }
+      ]
+    },
+    "end_chart": {
+      "scene": "{HERO} floating upside-down before the dome window completely wrapped in a blue star chart like a burrito, only wide green eyes and a tail-tip poking out, the bright wandering star twinkling mockingly through the glass, milk droplets orbiting his predicament like tiny amused spectators.",
+      "text": "Milo unrolled the star chart with such enthusiasm that it wrapped around him like a cosmic burrito, pinning his paws to his sides. He floated past the dome window upside-down and mummified in the chart, unable to see the star OR the Earth OR his own tail. Oopsie ending!",
+      "bad": true
+    },
+    "end_net": {
+      "scene": "{HERO} tangled hopelessly in a pink butterfly net, spinning in slow zero-gravity circles before the dome window, blanket knotted around the net handle, milk droplets orbiting the whole predicament like tiny amused spectators.",
+      "text": "Milo swung the net with the confidence of a seasoned star-catcher. The net caught: one blanket, one tail, zero stars, and all of his remaining dignity. He spun gently in place like the world's fluffiest disco ball. Oopsie ending!",
+      "bad": true
+    },
+    "end_cushion": {
+      "scene": "{HERO} hugging a round yellow cushion, floating in perfect stillness before the dome window, eyes half-closed in bliss, an enormous blue-green Earthrise filling the curved glass behind him, bathing the whole dome in soft blue-green light.",
+      "text": "Milo hugged the cushion and stopped trying. And when he finally floated still, something magnificent crept into view — not a wandering star, but the whole entire Earth, rising slow and blue and impossibly gentle. Some things you don't catch. Some things just come to you. The End!"
+    },
+    "end_share": {
+      "scene": "{HERO} and a small hamster in an orange spacesuit sharing a ceramic mug of warm milk in the galley, both gazing out the galley window where a breathtaking blue-green Earthrise glows, milk droplets floating between them like tiny shared stars.",
+      "text": "Milo poured warm milk for Biscuit, and they floated side by side watching the night. The wandering star? Forgotten entirely. Because Earth rose in the window like the biggest, bluest, most un-catchable miracle — and having a friend beside you made that perfectly okay. The End!"
+    },
+    "end_solo": {
+      "scene": "{HERO} crashed into the galley milk dispenser, an enormous eruption of milk globes filling the entire galley in zero gravity, mugs and spoons spinning in the dairy chaos, the hamster in an orange spacesuit watching wide-eyed from a safe distance.",
+      "text": "Milo launched himself at the window like a furry torpedo — and missed by exactly one milk dispenser. The resulting dairy explosion was, by volume, the largest in space station history. Biscuit floated by and gave it four stars out of five. Oopsie ending!",
+      "bad": true
+    },
+    "end_reflect": {
+      "scene": "{HERO} with one paw pressed flat against the porthole glass, the wandering star sliding directly under his paw pad, revealed as a reflection of warm cabin light on the glass, and behind the dissolving reflection an immense blue-green Earthrise emerging over the curve of the station hull.",
+      "text": "Milo pressed his paw to the star — and it slid right under his pad. It moved when he moved! The wandering star was cabin light reflected in the glass, drifting with every nudge of the station. Milo laughed, pressed his nose flat against the window, and there — beyond every reflection — Earth rose, blue and enormous and beautifully, wonderfully real. The End!"
+    },
+    "end_dark": {
+      "scene": "{HERO} floating in complete darkness before the porthole, every cabin light switched off, the glass now a crystal-clear window revealing thousands of stars, the Milky Way streaking across the void, and a luminous blue-green Earth rising at the bottom of the frame.",
+      "text": "When every light went out, the universe switched on. The wandering star vanished — just a reflection, gone with the glow. But the porthole became pure window, and through it Milo saw more stars than he had whiskers, and rising beneath them all, Earth, shining its own quiet, steady, uncatchable light. The End!"
+    },
+    "end_pounce": {
+      "scene": "{HERO} spinning slowly in zero gravity in the cargo bay wearing mismatched socks on his ears, a space-glove on his tail, and a tiny hamster-sized pajama top stretched over his head, the small brass-framed window behind him showing nothing but stars, laundry floating everywhere.",
+      "text": "Milo POUNCED from the hammock and bonked the window so hard he bounced off in slow zero-gravity spin, tumbling through every piece of laundry in the cargo bay. He ended up wearing two socks, a space-glove, and Biscuit's tiny pajamas, still spinning gently with no way to stop. Oopsie ending!",
+      "bad": true
+    },
+    "end_still": {
+      "scene": "{HERO} sunk deep into an orange cushion in the teal hammock, perfectly still, perfectly calm, watching through the small window as a majestic blue-green Earthrise fills the frame, the wandering star faded to nothing, the whole cargo bay bathed in soft blue-green planetlight.",
+      "text": "Milo stopped chasing. He stopped pouncing. He sank into the cushion and floated perfectly, wonderfully still — and the universe rewarded him. Earth rose in the little window, so big and blue it looked like it was rising just for him. The best things, Milo decided, come to cats who wait. The End!"
+    }
+  }
+}

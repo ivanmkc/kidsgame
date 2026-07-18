@@ -1,0 +1,243 @@
+{
+  "id": "mirror",
+  "title": "Luna in the Mirror Meadow",
+  "hero": "LUNA",
+  "style": "Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a mirrored meadow where everything is beautiful but backwards — lilac flowers grow downward and the sky reflects below like a second ground — facing a shimmering silver copy that blocks a glowing pond portal home. On the LEFT a tall LILAC CRYSTAL ARCHWAY rises from the mirrored grass, on the RIGHT a wide SILVER STONE BRIDGE arches over a stream of liquid moonlight, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Luna had only meant to touch the pond — but she fell right through into a world where everything was beautiful and backwards. Now a shimmery silver copy blocks the way home, and the moon is rising fast.",
+      "choices": [
+        {
+          "label": "Step through the archway",
+          "next": "a",
+          "spot": "lilac crystal archway"
+        },
+        {
+          "label": "Cross the stone bridge",
+          "next": "b",
+          "spot": "silver stone bridge"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} steps through the lilac crystal archway into an upside-down garden where flowers grow downward from a mirrored sky, with a tiny glass frog on a crystal ledge and a shimmering copy following every step below the glass ground. On the LEFT a SILVER MUSIC BOX sits on a glass pedestal, on the RIGHT a CRYSTAL LANTERN glows on a mirrored bench, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Through the archway everything was upside-down — flowers hung from the sky like chandeliers and Luna's mirror-twin walked on the ceiling. A tiny glass frog croaked for help from a ledge, so Luna gently lifted it free.",
+      "scare": {
+        "spot": "glass frog",
+        "pop": "A tiny transparent glass frog with enormous golden eyes sitting happily on a crystal lily pad, sparkling in silver light. Shimmering symmetrical storybook illustration, cool silvers and lilac. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "RIBBIT! Thanks for the rescue — I was stuck on that ledge for three whole reflections!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Wind the music box",
+          "next": "aa",
+          "spot": "silver music box"
+        },
+        {
+          "label": "Pick up the lantern",
+          "next": "ab",
+          "spot": "crystal lantern"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} crosses the silver stone bridge over a stream of liquid moonlight, with a shimmering copy walking upside-down beneath the bridge, silver tears drifting upward from the water. On the LEFT a tall LILAC WILLOW TREE bends over the stream with silver leaves, on the RIGHT a GLASS TELESCOPE stands on a mirrored platform, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The bridge felt like walking on a frozen cloud, and below it Mirror-Luna matched every step perfectly. Luna waved — and Mirror-Luna waved back so eagerly that a little silver tear rolled up from the water.",
+      "choices": [
+        {
+          "label": "Sit under the willow",
+          "next": "ba",
+          "spot": "lilac willow tree"
+        },
+        {
+          "label": "Look through the telescope",
+          "next": "bb",
+          "spot": "glass telescope"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} winds the silver music box in the upside-down garden, its tinkling melody making mirrored flowers sway in rhythm, while the rescued glass frog hops alongside happily. On the LEFT a CRYSTAL STAIRCASE spirals upward into silver clouds, on the RIGHT a MIRRORED DOORWAY stands in a frame of lilac gems, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The music box played a tune so sweet the upside-down flowers swayed like tiny ballet dancers. The glass frog Luna rescued hopped up and croaked along — apparently it knew all the words.",
+      "choices": [
+        {
+          "label": "Climb the crystal staircase",
+          "next": "m1",
+          "spot": "crystal staircase"
+        },
+        {
+          "label": "Step through the doorway",
+          "next": "m2",
+          "spot": "mirrored doorway"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} holds the crystal lantern high in the upside-down garden, its glow revealing hidden reflections in every surface — tiny worlds inside puddles and leaves — with the glass frog perched on the lantern handle. On the LEFT a SILVER SWING hangs from a mirrored tree branch, on the RIGHT a GLASS FOUNTAIN bubbles with sparkling silver water, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The lantern lit up secrets everywhere — every dewdrop held a tiny reflected world inside it. The glass frog Luna freed settled on the handle and glowed like a little emerald lighthouse.",
+      "choices": [
+        {
+          "label": "Swing on the silver swing",
+          "next": "m1",
+          "spot": "silver swing"
+        },
+        {
+          "label": "Make a fountain wish",
+          "next": "m2",
+          "spot": "glass fountain"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} sits under the lilac willow tree with silver leaves tinkling like wind chimes, while a shimmering copy sits in the reflected stream below looking up hopefully with one hand extended. On the LEFT a CRYSTAL FLUTE rests on a mossy silver stone, on the RIGHT a LILAC FLOWER CROWN hangs from a low willow branch, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Under the willow the silver leaves chimed a lullaby, and Mirror-Luna sat below reaching up through the water with a hopeful little wave. It was hard to be scared of someone who looked that lonely.",
+      "choices": [
+        {
+          "label": "Play the crystal flute",
+          "next": "m3",
+          "spot": "crystal flute"
+        },
+        {
+          "label": "Try on the flower crown",
+          "next": "m4",
+          "spot": "lilac flower crown"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} peers through the glass telescope on the mirrored platform, seeing the mirror world stretching infinitely, with a shimmering copy peering through an upside-down telescope right back and a small silver owl perched on a nearby mirrored branch. On the LEFT a SILVER DRUM sits on a mirrored lily pad, on the RIGHT a CRYSTAL SNOW GLOBE rests on a glass shelf, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Through the telescope Luna could see forever — and at every distance Mirror-Luna was looking right back. It was like the world's longest staring contest, and neither of them wanted to blink.",
+      "scare": {
+        "spot": "silver owl",
+        "pop": "A fluffy silver owl with mirror-like feathers perched upside-down on a branch, winking one enormous reflective eye. Shimmering symmetrical storybook illustration, cool silvers and lilac. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "Hoo! Everything looks better upside-down once you get used to it — trust me!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Beat the silver drum",
+          "next": "m3",
+          "spot": "silver drum"
+        },
+        {
+          "label": "Shake the snow globe",
+          "next": "m4",
+          "spot": "crystal snow globe"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} arrives at a shimmering mirrored clearing where the sky and ground are identical, standing face to face with a shimmering copy just an arm's length away, the glass frog perched on a crystal pillar between them. On the LEFT a MOONSTONE PENDANT hangs from a silver hook, on the RIGHT a pair of GLASS DANCING SHOES sit on a crystal pedestal, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "At the mirrored clearing Luna and Mirror-Luna stood nose to nose — and for the first time Mirror-Luna's expression was not a copy. It was a question. The glass frog gave an encouraging croak.",
+      "choices": [
+        {
+          "label": "Put on the pendant",
+          "next": "end_dance",
+          "spot": "moonstone pendant"
+        },
+        {
+          "label": "Try the dancing shoes",
+          "next": "end_shoes",
+          "spot": "glass dancing shoes"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} discovers a glass cabinet in a hidden mirrored room displaying three gleaming objects, each reflected infinitely in the walls, while the glass frog taps its tiny foot impatiently. On the LEFT a SILVER BELL with a lilac ribbon, in the MIDDLE a CRYSTAL COMPASS with a spinning needle, on the RIGHT a GLASS KALEIDOSCOPE with swirling colors, all three large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Behind the glass cabinet sat three shining things, each one reflected a thousand times in the mirrored walls. The glass frog pointed at all three, which was not very helpful.",
+      "choices": [
+        {
+          "label": "Ring the silver bell",
+          "next": "end_bell",
+          "spot": "silver bell"
+        },
+        {
+          "label": "Follow the compass needle",
+          "next": "end_compass",
+          "spot": "crystal compass"
+        },
+        {
+          "label": "Peek in the kaleidoscope",
+          "next": "end_kaleido",
+          "spot": "glass kaleidoscope"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands on the silver shore of the pond where moonlight is growing brighter, a shimmering copy on the other side mirroring a gentle sway, the water between them rippling with reflected starlight. On the LEFT a CRYSTAL TAMBOURINE leans against a mirrored rock, on the RIGHT a SILVER PAPER BOAT floats at the water's edge, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Moonrise painted the pond in pure silver, and Mirror-Luna swayed like she was hearing music only reflections can hear. Luna felt the same rhythm in her toes — maybe copying was never the problem at all.",
+      "choices": [
+        {
+          "label": "Tap the tambourine",
+          "next": "end_tamb",
+          "spot": "crystal tambourine"
+        },
+        {
+          "label": "Launch the paper boat",
+          "next": "end_boat",
+          "spot": "silver paper boat"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands in a gazebo of mirrors where every wall shows a different moment of the journey, and a shimmering copy presses her hands against the glass from the other side with wide hopeful eyes. On the LEFT a SILVER CROWN rests on a mirrored cushion, on the RIGHT a GLASS PINWHEEL spins slowly in a breeze that is not there, both large, fully visible, clearly separated. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "In the mirror gazebo every wall replayed a moment from Luna's adventure, and behind every pane Mirror-Luna pressed close, eyes wide with hope. The moon was almost up.",
+      "choices": [
+        {
+          "label": "Wear the silver crown",
+          "next": "end_crown",
+          "spot": "silver crown"
+        },
+        {
+          "label": "Spin the glass pinwheel",
+          "next": "end_spin",
+          "spot": "glass pinwheel"
+        }
+      ]
+    },
+    "end_dance": {
+      "scene": "{HERO} and a shimmering mirror-copy dance together in the mirrored clearing, a moonstone pendant glowing between them as the pond below ripples open into a swirling silver portal home, the glass frog conducting from a crystal lily pad. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The pendant glowed and Luna understood — Mirror-Luna was never blocking the way, she was waiting for a partner. They invented a dance where every move was meant to match, and the joy of it rippled the pond wide open. Luna leapt through with a wave and a promise to visit. The End!"
+    },
+    "end_shoes": {
+      "scene": "{HERO} slides wildly across the mirrored clearing in oversized glass dancing shoes, arms windmilling, while a shimmering mirror-copy slides in perfect reverse and a glass frog covers its eyes with tiny hands. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The glass shoes were six sizes too big and twice as slippery — Luna slid across the mirror floor like a bowling ball in ballet class, and Mirror-Luna slid the other way in a perfect backwards somersault. Neither of them went anywhere useful. Oopsie ending!",
+      "bad": true
+    },
+    "end_bell": {
+      "scene": "{HERO} rings a silver bell in the hidden mirrored room, its sound waves visible as silver ripples that dissolve the glass walls, while a shimmering mirror-copy steps joyfully through the vanishing barrier, the glass frog dancing on a lily pad. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The bell rang once and every mirror in the meadow hummed along. Mirror-Luna stepped through the dissolving glass with the biggest smile Luna had ever seen — on her own face or anyone else's. They walked home together, two friends who finally matched on purpose. The End!"
+    },
+    "end_compass": {
+      "scene": "{HERO} holds a crystal compass in the hidden mirrored room, its needle pointing steadily at a shimmering mirror-copy who holds the same compass pointing back, a bridge of silver light connecting both compasses across the glass floor. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The compass did not point north — it pointed at Mirror-Luna. Luna walked straight to her, and Mirror-Luna walked straight back, and the moment they touched hands the pond opened like a curtain call. Turns out home was just one friend away. The End!"
+    },
+    "end_kaleido": {
+      "scene": "{HERO} peers into a glass kaleidoscope in the hidden mirrored room and dozens of tiny shimmering copies tumble out in every direction, bumping into each other and tripping over a bewildered glass frog. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "One peek into the kaleidoscope and suddenly there were forty-seven Lunas, all bumping elbows and apologizing to themselves. Mirror-Luna tried to copy every single one and got so dizzy she toppled right over. Nobody was going anywhere tonight. Oopsie ending!",
+      "bad": true
+    },
+    "end_tamb": {
+      "scene": "{HERO} taps a crystal tambourine on the silver shore, creating ripples of light across the pond, while a shimmering mirror-copy dances in perfect rhythm on the water surface and the pond opens into a moonlit portal between them. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Luna tapped the tambourine and Mirror-Luna found the beat. They danced the first-ever mirror-meadow two-step — every move on purpose, every copy a compliment. The pond rippled open like a curtain of silver rain, and Luna danced right through it, home before moonrise. The End!"
+    },
+    "end_boat": {
+      "scene": "{HERO} launches a silver paper boat across the still pond at the silver shore, and a shimmering mirror-copy launches an identical boat from below the surface, the two boats meeting in the middle and merging into a glowing moonlight bridge. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Luna whispered 'Want to be friends for real?' and set the silver boat sailing. Mirror-Luna's boat met it in the middle, and where they touched a bridge of moonlight grew. They crossed from opposite sides, hugged in the center, and Luna skipped home with the moon just peeking over the hill. The End!"
+    },
+    "end_crown": {
+      "scene": "{HERO} stands bewildered in the gazebo of mirrors wearing a silver crown, surrounded by dozens and dozens of mirror-copy Lunas all wearing identical crowns, bumping into each other and gesturing wildly, the mirrored walls reflecting the chaos infinitely. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The crown was SO shiny it reflected forty-seven new Mirror-Lunas, each wearing a crown, each issuing different royal decrees at the top of their lungs. The original Luna could not find the real Mirror-Luna in the crowd, the gazebo sounded like a very confused parliament, and nobody went anywhere. Oopsie ending!",
+      "bad": true
+    },
+    "end_spin": {
+      "scene": "{HERO} and a shimmering mirror-copy sit dazed on opposite sides of the lilac meadow surrounded by fallen mirrors and scattered glass shards, the glass pinwheel still spinning wildly between them, the glass frog clinging to a lily pad looking dizzy, neither Luna sure which side of the pond is the real one. Shimmering symmetrical storybook illustration, cool silvers and lilac with doubled reflections in water and glass, dreamlike flipped scenery above and below. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The pinwheel spun SO fast it created a tiny tornado that picked up every loose mirror, Luna, Mirror-Luna, and the glass frog, swirling them around the meadow like a sparkling blender. When everything settled, Luna was in Mirror-Luna's spot and Mirror-Luna was in hers, and neither could remember which was which. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

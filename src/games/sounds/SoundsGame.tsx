@@ -35,6 +35,12 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, lang === 'en' ? 'win.sounds' : 'win.soundsWords'));
+  // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
+  const langMounted = useRef(false);
+  useEffect(() => {
+    if (!langMounted.current) { langMounted.current = true; return; }
+    setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount));
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
 

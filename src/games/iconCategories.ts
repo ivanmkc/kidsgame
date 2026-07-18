@@ -10,14 +10,30 @@ export const ICON_CATEGORIES: Record<string, string[]> = {
   things: ['balloon', 'car', 'plane', 'rocket', 'soccer', 'gift'],
 };
 
+import { Lang } from '../lang';
+
 // One home for how each category is worded to kids — Rule Time's "tap"
 // labels and Odd One Out's "which is not" questions must describe the same
 // membership, so they live next to it.
-export const CATEGORY_TEXT: Record<string, { tap: string; not: string }> = {
-  animals: { tap: 'Tap all the ANIMALS! 🐾', not: 'Which one is NOT an animal?' },
-  nature: { tap: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸', not: 'Which one is NOT a flower, rainbow or star?' },
-  food: { tap: 'Tap all the YUMMY FOOD! 🍎', not: 'Which one is NOT food?' },
-  things: { tap: 'Tap the TOYS & VEHICLES! 🚗', not: 'Which one is NOT a toy or vehicle?' },
+// `tap` stays English (Rule Time is an English-phonics game by design).
+// `not` is a per-lang Record so Odd One Out renders in the active UI language.
+export const CATEGORY_TEXT: Record<string, { tap: string; not: Record<Lang, string> }> = {
+  animals: {
+    tap: 'Tap all the ANIMALS! 🐾',
+    not: { en: 'Which one is NOT an animal?', ja: 'どうぶつじゃないのは？', cmn: '哪一个不是动物？', yue: '邊個唔係動物？' },
+  },
+  nature: {
+    tap: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
+    not: { en: 'Which one is NOT a flower, rainbow or star?', ja: 'おはな・にじ・ほしじゃないのは？', cmn: '哪一个不是花、彩虹或星星？', yue: '邊個唔係花、彩虹或星星？' },
+  },
+  food: {
+    tap: 'Tap all the YUMMY FOOD! 🍎',
+    not: { en: 'Which one is NOT food?', ja: 'たべものじゃないのは？', cmn: '哪一个不是食物？', yue: '邊個唔係食物？' },
+  },
+  things: {
+    tap: 'Tap the TOYS & VEHICLES! 🚗',
+    not: { en: 'Which one is NOT a toy or vehicle?', ja: 'おもちゃ・のりものじゃないのは？', cmn: '哪一个不是玩具或车辆？', yue: '邊個唔係玩具或車？' },
+  },
 };
 
 // Categories a kid could reasonably confuse — icons from these must not be

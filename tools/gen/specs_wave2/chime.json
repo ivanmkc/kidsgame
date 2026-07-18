@@ -1,0 +1,236 @@
+{
+  "id": "chime",
+  "title": "Luna and the Music Forest",
+  "hero": "LUNA",
+  "style": "Lush twilight watercolor forest, deep mossy greens with glowing gold bell-flowers, ribbons of musical light winding between the trunks. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in a hushed twilight forest where dozens of gold bell-flowers droop silently on mossy branches. On the LEFT a large drooping golden bell-flower on a low mossy branch, on the RIGHT a large glowing amber jar hanging from a low branch filled with swirling fireflies, both large, fully visible, clearly separated.",
+      "text": "The bell-flower forest has gone completely silent, and the Moonrise Song is only minutes away! Luna swishes her rainbow tail nervously — somebody needs to wake the music, and fast.",
+      "choices": [
+        {
+          "label": "Tap the bell-flower",
+          "next": "a",
+          "spot": "golden bell-flower"
+        },
+        {
+          "label": "Open the firefly jar",
+          "next": "b",
+          "spot": "amber firefly jar"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} reaches up and taps a large golden bell-flower, which vibrates with a sour CLANG that makes nearby leaves curl. On the LEFT a plump purple owl wearing tiny spectacles perched on a thick branch, on the RIGHT a long silver vine draped with dozens of tiny crystal chimes, both large, fully visible, clearly separated.",
+      "text": "CLANG — definitely not music, and now three squirrels are stuffing acorns in their ears. Maybe the owl in spectacles knows what went wrong, or that shimmery vine has better notes.",
+      "choices": [
+        {
+          "label": "Ask the wise owl",
+          "next": "aa",
+          "spot": "purple owl"
+        },
+        {
+          "label": "Shake the crystal vine",
+          "next": "ab",
+          "spot": "silver vine"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} follows a ribbon of glowing fireflies into a moonlit clearing with a still silver pond and a dark mossy log half-submerged at the water's edge. On the LEFT a large green frog dozing on an enormous lily pad, on the RIGHT a towering hollow tree covered in spiraling bark patterns, both large, fully visible, clearly separated.",
+      "text": "The fireflies lead Luna to a secret pond where everything is perfectly still — almost too still. A frog snores on the biggest lily pad she has ever seen, and a strange tree hums faintly in the breeze.",
+      "choices": [
+        {
+          "label": "Wake the snoring frog",
+          "next": "ba",
+          "spot": "green frog"
+        },
+        {
+          "label": "Climb the hollow tree",
+          "next": "bb",
+          "spot": "hollow tree"
+        }
+      ],
+      "scare": {
+        "spot": "dark mossy log",
+        "pop": "A fuzzy hedgehog wearing a tiny top hat pops out of the log, holding a miniature triangle instrument.",
+        "reveal": "Just practicing my ting! Carry on!",
+        "sting": "boing",
+        "delay": 1700
+      }
+    },
+    "aa": {
+      "scene": "{HERO} sits beside the purple owl on a thick branch as the owl holds out a shimmering crystal feather that hums with a pure note. On the LEFT a moss-covered boulder that pulses with a faint green glow, on the RIGHT a cluster of tall crystal mushrooms that sparkle with pink light, both large, fully visible, clearly separated.",
+      "text": "The owl hands Luna a crystal feather and whispers, 'The forest remembers every note, dear — you just have to find the right ones.' Two very different sounds drift from the darkness.",
+      "choices": [
+        {
+          "label": "Touch the glowing boulder",
+          "next": "m1",
+          "spot": "green boulder"
+        },
+        {
+          "label": "Tap the crystal mushrooms",
+          "next": "m2",
+          "spot": "pink mushrooms"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} shakes the silver vine and a cascade of tiny chimes rings out, drawing creatures from the shadows. On the LEFT a red cricket standing tall on a log and bowing a leaf-blade like a violin, on the RIGHT a large blue moth carrying a coiled silver thread in its legs, both large, fully visible, clearly separated.",
+      "text": "The vine's chimes are not perfect, but they wake the local talent! A cricket starts fiddling immediately, and a moth floats down trailing something shiny.",
+      "choices": [
+        {
+          "label": "Join the cricket's jam",
+          "next": "m1",
+          "spot": "red cricket"
+        },
+        {
+          "label": "Follow the silver moth",
+          "next": "m2",
+          "spot": "blue moth"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} gently pokes the large green frog, who blinks awake and stretches on the lily pad, revealing a deep resonant throat pouch. On the LEFT a golden reed pipe sticking straight up from the pond mud, on the RIGHT a golden fallen log bustling with rows of tiny glowing bell-bugs, both large, fully visible, clearly separated.",
+      "text": "The frog yawns so deeply the whole lily pad vibrates like a bass drum. 'Rhythm is the secret ingredient, little one!' he booms, and two things near the pond catch Luna's eye.",
+      "choices": [
+        {
+          "label": "Grab the reed pipe",
+          "next": "m3",
+          "spot": "golden reed pipe"
+        },
+        {
+          "label": "Conduct the bell-bugs",
+          "next": "m4",
+          "spot": "golden bell-bug log"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} climbs the spiraling bark of the hollow tree and peers out from a high knothole at the glittering twilight forest below. On the LEFT a ring of large glowing orange toadstools in a clearing, on the RIGHT a tall silver stone arch draped with luminous blue moss at the forest edge, both large, fully visible, clearly separated.",
+      "text": "From up here Luna can hear the whole forest breathing — every creature down there is a note waiting to be played. Two places below are practically begging for a conductor.",
+      "choices": [
+        {
+          "label": "Leap to the toadstools",
+          "next": "m3",
+          "spot": "orange toadstools"
+        },
+        {
+          "label": "Run to the stone arch",
+          "next": "m4",
+          "spot": "silver stone arch"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} stands before the enormous great bell tree, whose golden trunk shimmers faintly in the twilight. On the LEFT a heavy golden mallet leaning against the bell tree's trunk, on the RIGHT a woven basket overflowing with tiny glowing harmony seeds, both large, fully visible, clearly separated.",
+      "text": "The great bell tree towers above everything, silent as a held breath. Should Luna try to wake it by force, or be patient and grow something new?",
+      "choices": [
+        {
+          "label": "Whack it with the mallet",
+          "next": "end_clang",
+          "spot": "golden mallet"
+        },
+        {
+          "label": "Plant the harmony seeds",
+          "next": "end_garden",
+          "spot": "woven seed basket"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} discovers three instruments arranged on a mossy stump at the foot of the great bell tree, each glowing faintly. On the LEFT a large purple drum made from a hollowed acorn shell, in the MIDDLE a bright green flute carved from a curved reed, on the RIGHT an orange tambourine made of woven bark and seed-pod jingles, all large, fully visible, clearly separated.",
+      "text": "Three instruments, each humming with a different flavor of magic. The forest creatures watch expectantly — whatever Luna picks will set the tone for the whole Moonrise Song.",
+      "choices": [
+        {
+          "label": "Beat the acorn drum",
+          "next": "end_drum",
+          "spot": "purple acorn drum"
+        },
+        {
+          "label": "Play the reed flute",
+          "next": "end_solo",
+          "spot": "green reed flute"
+        },
+        {
+          "label": "Shake the bark tambourine",
+          "next": "end_dance",
+          "spot": "orange tambourine"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} and a parade of forest creatures arrive at the base of the great bell tree, which stretches into the starry sky. On the LEFT a spiraling vine staircase winding up the bell tree's enormous trunk, on the RIGHT a cozy moss-lined den nestled between the bell tree's golden roots glowing warmly from within, both large, fully visible, clearly separated.",
+      "text": "The great bell tree waits like a cathedral with the Moonrise moments away. Luna could climb up high where the sound would carry, or sing right here where the roots gather every echo.",
+      "choices": [
+        {
+          "label": "Climb to the crown",
+          "next": "end_moonrise",
+          "spot": "vine staircase"
+        },
+        {
+          "label": "Sing into the roots",
+          "next": "end_echo",
+          "spot": "golden root den"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} reaches a quiet glade beside the great bell tree where unexpected friends are waiting. On the LEFT a large honey-gold bear curled up against a mossy stump snoring musically, on the RIGHT a nest of four baby bluebirds on a low branch chirping in cheerful dissonance, both large, fully visible, clearly separated.",
+      "text": "A bear rumbles in its sleep like a cello, and four baby birds are trying SO hard but definitely have not found the right key yet. The bell tree is right behind them — almost there!",
+      "choices": [
+        {
+          "label": "Gently wake the bear",
+          "next": "end_lullaby",
+          "spot": "honey-gold bear"
+        },
+        {
+          "label": "Teach the baby birds",
+          "next": "end_choir",
+          "spot": "bluebird nest"
+        }
+      ]
+    },
+    "end_clang": {
+      "scene": "{HERO} swings the golden mallet into the great bell tree with all her might, and the entire forest rattles as a tremendous vibration sends bell-flower petals flying in every direction while startled animals tumble from branches.",
+      "text": "BONNNNG! Luna whacks the bell tree so hard that every bird, bug, and butterfly in a mile radius does a backflip — the tree rings all right, but it sounds like a kitchen falling down the stairs. The squirrels are already filing noise complaints. Oopsie ending!",
+      "bad": true
+    },
+    "end_garden": {
+      "scene": "{HERO} tumbles through the air above a ring of wildly overgrown bell-flowers that have erupted from the ground, the purple owl catching her with a startled expression, while the great bell tree vibrates with a sour off-key note and squirrels flee in every direction through the twilight forest.",
+      "text": "Luna planted the harmony seeds and they grew SO fast that bell-flowers popped up under her feet like flowery trampolines, launching her straight into the owl's lap. The bell tree played a startled kazoo sound that scared every squirrel in the forest, and none of it was music. Oopsie ending!",
+      "bad": true
+    },
+    "end_drum": {
+      "scene": "{HERO} beats the purple acorn drum in a steady rhythm at the foot of the great bell tree, and one by one every animal in the twilight forest begins to stomp, clap, or tap along until the bell tree vibrates and rings out a rich golden tone that fills the sky.",
+      "text": "Luna finds the beat, and the forest cannot help itself — even the trees start swaying. One by one every creature joins the rhythm, and when the great bell tree finally rings, it sounds like the world's happiest thunderclap. The End!"
+    },
+    "end_solo": {
+      "scene": "{HERO} plays the green reed flute all by herself under the great bell tree, but the notes spiral upward and pop like soap bubbles, and every firefly in the clearing hiccups its light off one by one until the forest goes dark.",
+      "text": "Luna plays a beautiful solo — so beautiful that every firefly stops to listen, forgets to glow, and the whole forest goes dark. Now nobody can find their instruments or their way home. Oopsie ending!",
+      "bad": true
+    },
+    "end_dance": {
+      "scene": "{HERO} shakes the orange bark tambourine and her rainbow tail swishes in time, creating ribbons of colored light that swirl through the twilight forest as every creature begins to dance and the great bell tree chimes joyfully overhead.",
+      "text": "Cha-cha-CHIME! Luna shakes the tambourine and her rainbow tail swishes in time, painting ribbons of light through the dark. The owl waltzes, the cricket tangos, and the great bell tree rings out the Moonrise Song while the whole forest boogies under the stars. The End!"
+    },
+    "end_moonrise": {
+      "scene": "{HERO} stands at the very top of the great bell tree, swishing her rainbow tail like a conductor's baton as every creature in the forest below plays together, and the moon rises over the canopy into a sky filled with ribbons of golden musical light.",
+      "text": "From the crown of the bell tree, Luna swishes her rainbow tail — left, right, down, UP — and the entire forest plays as one. The frog's deep bass, the cricket's fiddle, the owl's hoot: perfect harmony. The moon rises to the most beautiful song the forest has ever sung, conducted by one small tail. The End!"
+    },
+    "end_echo": {
+      "scene": "{HERO} sings softly into the mossy den between the great bell tree's roots, and the echo multiplies and harmonizes with itself, rising up through the trunk until the whole tree resonates with a warm layered chord that ripples out across the twilight forest.",
+      "text": "Luna sings one tiny note into the roots, and the tree does the rest — multiplying, harmonizing, building until a hundred voices ring from one. The Moonrise Song was always inside the bell tree, waiting for someone brave enough to whisper it awake. The End!"
+    },
+    "end_lullaby": {
+      "scene": "{HERO} lies fast asleep draped across the honey-gold bear's belly, her rainbow tail tickling the bear's nose as he sneezes enormously, golden bell-flowers raining down from the shaking bell tree, every creature in the glade snoring in a pile.",
+      "text": "The bear's hum was SO rumbly that every creature in the forest fell asleep instantly — including Luna. Her rainbow tail draped over the bear's nose, he sneezed so hard the bell tree shook every flower loose, and nobody woke up until Tuesday. Oopsie ending!",
+      "bad": true
+    },
+    "end_choir": {
+      "scene": "{HERO} sits on the low branch in the glade with four baby bluebirds, patiently teaching each one its note, until they sing a perfect four-part chord that makes the great bell tree burst into bloom with hundreds of glowing golden bell-flowers.",
+      "text": "It takes three tries, two squeaks, and one hilariously flat note, but when those four baby birds finally lock in — oh! The bell tree bursts into golden bloom and the Moonrise Song pours out like sunrise made of sound. Turns out the youngest voices ring the truest. The End!"
+    }
+  }
+}

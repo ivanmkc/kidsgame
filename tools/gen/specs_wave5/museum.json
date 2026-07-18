@@ -1,0 +1,151 @@
+{
+  "id": "museum",
+  "title": "Milo and the Midnight Museum",
+  "hero": "MILO",
+  "style": "Warm lamplight amber and cool moonlight blue, classical museum aesthetic with rich wood tones, gemstone refractions, polished marble floors and glass diorama cases catching moonbeams through a grand dome. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in the grand museum entrance hall under a glass dome flooding moonlight across polished marble floors, the Midnight Sapphire's pedestal sitting conspicuously empty in the center of the room. On the LEFT a green dinosaur skeleton towers in the shadowy Dinosaur Hall entrance, on the RIGHT a blue crystal cabinet sparkles behind a velvet rope in the Gem Gallery archway, both large, fully visible, clearly separated.",
+      "text": "The museum is closed but the moonlight is open for business! The Midnight Sapphire is gone from its pedestal and somebody needs to figure out who took it — let's investigate!",
+      "choices": [
+        {"label": "Explore the Dinosaur Hall", "next": "a", "spot": "green dinosaur skeleton"},
+        {"label": "Check the Gem Gallery", "next": "b", "spot": "blue crystal cabinet"}
+      ]
+    },
+    "a": {
+      "scene": "{HERO} tiptoes through the Dinosaur Hall where ancient bones stretch into shadow overhead, a single shimmering magpie feather lying on the marble floor catching lamplight. On the LEFT a silver diorama case reflects moonbeams with something moving behind the glass, on the RIGHT an orange fossil cabinet glows under warm amber lamplight near an archive doorway, both large, fully visible, clearly separated.",
+      "text": "Giant bones everywhere and something scratches behind the diorama glass! A shimmering magpie feather on the floor — that's a clue worth following.",
+      "choices": [
+        {"label": "Check the scratching sound", "next": "aa", "spot": "silver diorama case"},
+        {"label": "Follow the feather to archives", "next": "ab", "spot": "orange fossil cabinet"}
+      ]
+    },
+    "b": {
+      "scene": "{HERO} enters the Gem Gallery where the sapphire pedestal sits empty under a single amber spotlight, sparkly glitter trails leading in two directions across the marble floor. On the LEFT a pink marble column flanks a corridor toward the West Wing, on the RIGHT a teal velvet curtain hides a back passage upstairs, both large, fully visible, clearly separated.",
+      "text": "The sapphire is GONE and glitter trails sparkle both ways across the floor! The owl night-guard could swoop in any second so Milo had better pick a trail fast.",
+      "choices": [
+        {"label": "Follow the glitter trail left", "next": "ba", "spot": "pink marble column"},
+        {"label": "Peek behind the curtain", "next": "bb", "spot": "teal velvet curtain"}
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} creeps toward the large diorama case where a pack of taxidermy wolves stands in a painted forest scene, the glass fogging slightly from the inside as if something is breathing in there. On the LEFT an orange lantern flickers on a wooden shelf near the diorama, on the RIGHT a brown wooden bench sits against the wall under a hanging skeleton, both large, fully visible, clearly separated.",
+      "text": "The diorama wolf just turned its head — and now the WHOLE PACK is staring at Milo! One by one they shifted when he wasn't looking.",
+      "scare": {
+        "spot": "diorama glass panel",
+        "pop": "a grey wolf face pressing against the diorama glass from inside, two golden eyes gleaming through fog, warm breath clouding the pane",
+        "reveal": "Just the heating vent fogging the glass — the wolves are still stuffed! Phew, nobody tell Milo how fast his heart was beating.",
+        "sting": "thunder",
+        "delay": 1800
+      },
+      "choices": [
+        {"label": "Grab the lantern", "next": "m1", "spot": "orange lantern"},
+        {"label": "Crawl under the bench", "next": "m2", "spot": "brown wooden bench"}
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} finds the curator's archive room, dusty and moonlit, with magpie feathers trailing to a reading desk where an old logbook lies open beside a magnifying glass. On the LEFT a purple leather journal sits open on the desk with a fresh magpie sketch in the margins, on the RIGHT a golden magnifying glass rests on a faded map of the museum, both large, fully visible, clearly separated.",
+      "text": "The logbook says the sapphire vanished YEARS ago — and someone drew a little magpie in the margins with fresh ink! Whoever took it has been coming back.",
+      "choices": [
+        {"label": "Use the magnifying glass", "next": "m1", "spot": "golden magnifying glass"},
+        {"label": "Read the old journal", "next": "m2", "spot": "purple leather journal"}
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} follows the glitter trail into the West Wing where the stern owl night-guard circles above on silent wings, spectacles glinting in the moonlight, talons clicking. On the LEFT a white marble statue holds a stone lantern in a shadowy alcove, on the RIGHT a red velvet bench sits under a tall painting of the museum founder, both large, fully visible, clearly separated.",
+      "text": "Whooo goes there — the owl docent swoops overhead with spectacles glinting! Better find cover before those sharp eyes spot Milo.",
+      "choices": [
+        {"label": "Hide behind the statue", "next": "m3", "spot": "white marble statue"},
+        {"label": "Duck under the bench", "next": "m4", "spot": "red velvet bench"}
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} climbs the back stairs to the upper balcony overlooking the main atrium, where a towering dinosaur skeleton looms with its jaw hanging open one click too wide and something rustling inside its ribcage. On the LEFT a yellow spiral staircase winds up toward the dome skylight, on the RIGHT a bronze telescope on the balcony points at the glass dome overhead, both large, fully visible, clearly separated.",
+      "text": "The dinosaur skeleton just SHIFTED — its jaw clicked open wider and something alive scurries inside those giant ribs!",
+      "scare": {
+        "spot": "skeleton foot-bone",
+        "pop": "a huge iridescent gecko scrambling out of the dinosaur ribcage, two bulging eyes blinking in annoyance, rainbow scales shimmering",
+        "reveal": "Just a grumpy museum gecko who naps in the skeleton! She's been living there for years and does NOT appreciate visitors.",
+        "sting": "boing",
+        "delay": 1600
+      },
+      "choices": [
+        {"label": "Climb the spiral staircase", "next": "m3", "spot": "yellow spiral staircase"},
+        {"label": "Look through the telescope", "next": "m4", "spot": "bronze telescope"}
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} reaches the gem vault where the owl guard blocks the corridor, wings spread wide, the museum flashlight sitting on a shelf between two glowing gem displays. On the LEFT a red ruby display blazes under its spotlight sending crimson beams across the floor, on the RIGHT a green emerald display gleams in a velvet case casting soft green light, both large, fully visible, clearly separated.",
+      "text": "Flashlight tag! The owl is DIVING straight at Milo — grab the flashlight and shine it through a gem to dazzle her!",
+      "choices": [
+        {"label": "Shine through the ruby", "next": "end_ruby_dazzle", "spot": "red ruby display"},
+        {"label": "Shine through the emerald", "next": "end_emerald_forest", "spot": "green emerald display"}
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} finds a side gallery where the flashlight sits beside a spectacular quartz formation and a towering mammoth tusk curves along the wall, the owl's shadow swooping closer on the ceiling. On the LEFT a white quartz cluster sparkles like frozen fireworks under a spotlight, on the RIGHT a brown mammoth tusk curves along the wall creating a hiding space behind it, both large, fully visible, clearly separated.",
+      "text": "The owl's spectacles gleam in the dark! Blast the flashlight through the quartz for a rainbow scatter-shot, or hide behind that enormous mammoth tusk?",
+      "choices": [
+        {"label": "Blast the quartz cluster", "next": "end_quartz_disco", "spot": "white quartz cluster"},
+        {"label": "Hide behind mammoth tusk", "next": "end_bouncy_chaos", "spot": "brown mammoth tusk"}
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} enters the grand Moon Gallery where three gem displays sit under separate spotlights and the owl guard hoots from the rafters, moonlight pouring through the dome above. On the LEFT a red ruby prism sits on a marble pedestal catching crimson light, in the MIDDLE a green emerald lens hangs from a brass chain at eye height, on the RIGHT a white quartz cluster catches moonbeams and splits them into rainbows, all large, fully visible, clearly separated.",
+      "text": "Triple gem showdown — the owl hoots and CHARGES! Red ruby dazzle, green emerald camouflage, or white quartz rainbow scatter-shot?",
+      "choices": [
+        {"label": "Ruby red dazzle", "next": "end_ruby_sunset", "spot": "red ruby prism"},
+        {"label": "Emerald green camouflage", "next": "end_emerald_meadow", "spot": "green emerald lens"},
+        {"label": "Quartz rainbow blast", "next": "end_rainbow_cathedral", "spot": "white quartz cluster"}
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} spots the magpie on a moonlit windowsill, trembling, the Midnight Sapphire clutched gently in her beak, facing the empty pedestal across the hall with tears in her tiny eyes. On the LEFT a black magpie perches on a golden picture frame near the windowsill, on the RIGHT a blue sapphire glows faintly in the magpie's beak beside the window, both large, fully visible, clearly separated.",
+      "text": "The magpie is TREMBLING — she's carrying the sapphire TOWARD the pedestal, not away! She's been trying to return it and just needed someone brave to help.",
+      "choices": [
+        {"label": "Help the magpie", "next": "end_sapphire_together", "spot": "black magpie"},
+        {"label": "Grab the sapphire", "next": "end_fountain_splash", "spot": "blue sapphire"}
+      ]
+    },
+    "end_ruby_dazzle": {
+      "scene": "{HERO} shines the flashlight through the ruby and red light floods the hall like a glorious sunrise, the owl guard blinking and dazzled until she crash-lands on a cushioned bench with her spectacles askew. The magpie flutters down from the shadows and together she and Milo walk to the pedestal, placing the Midnight Sapphire gently back where it belongs, the gem sparkling blue in the red-gold light.",
+      "text": "Ruby-red light everywhere! The owl is so dazzled she topples onto a bench. The magpie finally returns the sapphire she stole years ago — Milo held her wing the whole way to the pedestal."
+    },
+    "end_emerald_forest": {
+      "scene": "{HERO} shines through the emerald and soft green light fills the hall, but the emerald slips from Milo's paw and rolls across the polished marble floor with the flashlight still shining through it, sending a spinning green laser show across every wall as the owl swoops after the rolling light, Milo chasing the emerald on all fours, and the magpie flapping in circles holding the sapphire away from the chaos.",
+      "text": "Milo fumbled the emerald and it rolled across the marble floor like a glowing green bowling ball — the flashlight sent spinning lasers everywhere, the owl chased the rolling light like a cat with a laser pointer, and Milo slid across the polished floor on his belly trying to catch it! The magpie watched from a rafter holding the sapphire and shaking her head. Oopsie ending!",
+      "bad": true
+    },
+    "end_quartz_disco": {
+      "scene": "{HERO} fires the flashlight through the quartz cluster and rainbow light EXPLODES across every surface like the world's fanciest disco ball, the owl guard so enchanted she begins waltzing with a marble bust. The magpie swoops down and places the Midnight Sapphire on its pedestal, tears in her little eyes, the rainbow light making the gem blaze every color at once.",
+      "text": "Rainbow disco party! The owl waltzes with a statue and the magpie finally returns the sapphire she has been too ashamed to face for years. Tonight Milo gave her the courage to set it right."
+    },
+    "end_bouncy_chaos": {
+      "scene": "{HERO} dives behind the mammoth tusk but BONKS into a display shelf full of rubber bouncy balls from the gift shop, sending hundreds cascading across the polished marble floor in every direction. The owl guard skids on bouncy balls, the magpie squawks and flaps in circles, and Milo tumbles face-first into a pile of stuffed-animal plushies.",
+      "text": "Bouncy balls EVERYWHERE! The owl slips, the magpie flaps in circles, and Milo lands face-first in gift-shop plushies. The sapphire stays lost tonight. Oopsie ending!",
+      "bad": true
+    },
+    "end_ruby_sunset": {
+      "scene": "{HERO} blasts the ruby and crimson light fills the gallery like a fiery sunset, the dazzled owl crashing into a hanging tapestry and getting wrapped up like a feathery burrito. The magpie lands beside the empty pedestal with the Midnight Sapphire in her beak, and she and Milo set it down together, the gem blazing blue against the red light.",
+      "text": "The owl is a BURRITO now! The magpie has been trying to return the sapphire for years — she just needed someone kind to stand beside her at the pedestal."
+    },
+    "end_emerald_meadow": {
+      "scene": "{HERO} beams the emerald and soft green light fills the gallery, but the light makes the owl guard sneeze instead of sleep, the sneeze blowing the emerald lens off its chain and clattering across the floor, Milo tripping over a display rope and landing in a pile of museum brochures as the owl resumes her patrol looking very alert.",
+      "text": "The green light made the owl SNEEZE so hard the emerald flew off its chain and Milo tripped over the velvet rope trying to catch it — he landed in a pile of brochures and the owl circled back looking MORE awake than ever! The magpie sighed from her windowsill and tucked the sapphire back under her wing for another night. Oopsie ending!",
+      "bad": true
+    },
+    "end_rainbow_cathedral": {
+      "scene": "{HERO} fires through the quartz and a rainbow tornado of light spirals through the entire museum, every gem and crystal and piece of glass catching the beams until the building glows like a cathedral of color. The owl is transfixed on a rafter, the magpie weeps with joy, and she places the Midnight Sapphire home at last while rainbow light dances across the pedestal.",
+      "text": "Rainbow scatter-shot lights the whole museum like stained glass! The magpie came back every night for years, too ashamed to face the empty pedestal alone. Tonight she finally had Milo."
+    },
+    "end_sapphire_together": {
+      "scene": "{HERO} takes the sapphire gently from the magpie's beak and they walk side by side to the pedestal under the glass dome, moonlight streaming down. Together they set the Midnight Sapphire back in its place with a soft click. The owl guard lands nearby, removes her spectacles, and bows deeply — she knew all along.",
+      "text": "Milo and the magpie return the sapphire together. The owl bows — she was never trying to catch a thief, she was waiting for the magpie to forgive herself."
+    },
+    "end_fountain_splash": {
+      "scene": "{HERO} lunges for the sapphire but the startled magpie drops it with a squawk, the gem bouncing off the marble floor, rolling across the hall, and plopping into the decorative fountain with a sad little splash. The owl glares, the magpie cries, and Milo stands there dripping wet.",
+      "text": "The sapphire sinks to the bottom of the fountain with a sad little blurp! The magpie cries, the owl is furious, and Milo is very, very wet. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

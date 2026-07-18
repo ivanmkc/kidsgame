@@ -1,0 +1,243 @@
+{
+  "id": "gumdrop",
+  "title": "Mo in the Candy Kingdom",
+  "hero": "MO",
+  "style": "Glossy candy-bright illustration, bubblegum pinks and mint swirls, glazed gumdrop cobblestones and peppermint lampposts dusted with sugar sparkle. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the sugary entrance to Candy Kingdom, fur already dotted with stuck-on sprinkles, gazing at a distant taffy parade winding between gumdrop buildings. On the LEFT a PINK gumdrop-cobblestone lane lined with frosted lampposts, on the RIGHT a BLUE cotton-candy cloud staircase spiraling upward, both large, fully visible, clearly separated.",
+      "text": "Mo got the fanciest invitation in town — a golden ticket to the Candy Kingdom's taffy parade! Only problem: everything here sticks to his fur like he's a walking lint roller.",
+      "choices": [
+        {
+          "label": "Walk down Gumdrop Lane",
+          "next": "a",
+          "spot": "pink gumdrop cobblestones"
+        },
+        {
+          "label": "Climb Cotton Candy Clouds",
+          "next": "b",
+          "spot": "blue cotton-candy staircase"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} trudging along a lane paved with glossy gumdrop cobblestones, feet lifting with sticky strings of candy, while a small cheerful jellybean creature offers him a pair of sparkling sugar-dust slippers. On the LEFT a RED licorice guard tower with candy-cane striped gates, on the RIGHT a YELLOW frosting-coated slide curving downhill, both large, fully visible, clearly separated.",
+      "text": "Every step goes SCHLORP — Mo's feet stick to the gumdrop cobblestones like sneakers on a movie-theater floor. A tiny jellybean creature hands him sparkly sugar-dust slippers and beams, 'They're non-stick!'",
+      "scare": {
+        "spot": "yellow gumdrop boulder",
+        "pop": "a giggling gummy worm wearing a tiny top hat popping out from behind a gumdrop boulder",
+        "reveal": "Boo! Just kidding — welcome to Gumdrop Lane, sticky stranger!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Visit the Licorice Guards",
+          "next": "aa",
+          "spot": "red licorice guard tower"
+        },
+        {
+          "label": "Take the Frosting Slide",
+          "next": "ab",
+          "spot": "yellow frosting slide"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} floating among fluffy cotton-candy clouds that cling to his fur turning him into a puffy pink ball, while a gentle marshmallow bird offers a striped candy-cane walking stick. On the LEFT a tall GREEN peppermint lamppost with a spiral viewing platform, on the RIGHT a GOLDEN caramel raft bobbing on a caramel creek between rock-candy banks, both large, fully visible, clearly separated.",
+      "text": "Mo bounces into the clouds and cotton candy gloms onto every inch of his fur until he looks like a sentient cotton-candy ball. A friendly marshmallow bird tucks a candy-cane walking stick under his arm: 'You'll need this, fluffball.'",
+      "choices": [
+        {
+          "label": "Climb the Peppermint Lamppost",
+          "next": "ba",
+          "spot": "green peppermint lamppost"
+        },
+        {
+          "label": "Ride the Caramel Raft",
+          "next": "bb",
+          "spot": "golden caramel raft"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} wearing sparkly sugar-dust slippers, standing before two tall stern licorice guards who peer down suspiciously, sticky candy strings trailing behind him. On the LEFT a DARK chocolate tunnel entrance carved into a fudge wall, on the RIGHT an ORANGE stage platform with candy-cane spotlights, both large, fully visible, clearly separated.",
+      "text": "The licorice guards narrow their beady candy eyes: 'No sticky creatures allowed — you'll gum up the parade!' Mo's sugar-dust slippers sparkle innocently, but the guards aren't buying it.",
+      "choices": [
+        {
+          "label": "Sneak through Chocolate Tunnel",
+          "next": "m1",
+          "spot": "dark chocolate tunnel"
+        },
+        {
+          "label": "Win them with dancing",
+          "next": "m2",
+          "spot": "orange stage platform"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} wearing sugar-dust slippers, tumbling through a shower of rainbow sprinkles at the bottom of a frosting-coated slide, covered head to toe in colorful bits. On the LEFT a PURPLE gummy-bear train car with jelly wheels, on the RIGHT a BROWN wafer bridge spanning a chocolate river, both large, fully visible, clearly separated.",
+      "text": "WHEEEEE — the frosting slide launches Mo straight into a mountain of sprinkles! His sugar-dust slippers kept his feet safe, but the rest of him looks like a disco ball at a birthday party.",
+      "choices": [
+        {
+          "label": "Hop the Gummy Bear Express",
+          "next": "m1",
+          "spot": "purple gummy-bear train"
+        },
+        {
+          "label": "Cross the Wafer Bridge",
+          "next": "m2",
+          "spot": "brown wafer bridge"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} perched atop a tall peppermint lamppost using a candy-cane stick for balance, looking out over the Candy Kingdom where a gingerbread bridge in the distance shows visible cracks. On the LEFT a BLACK licorice rope stretching like a zipline toward the bridge, on the RIGHT a SILVER spiral slide wrapping down the lamppost, both large, fully visible, clearly separated.",
+      "text": "From way up here Mo spots the parade route — and gasps! The gingerbread bridge has cracks spreading across it like a broken windshield, and his candy-cane stick is the only thing keeping him balanced.",
+      "scare": {
+        "spot": "green peppermint lamppost",
+        "pop": "a friendly candy bat with lollipop wings swooping out from behind the lamppost spiral",
+        "reveal": "Nice view, huh? Watch out for the sticky parts — oh wait, that's you!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Zipline on Licorice Rope",
+          "next": "m3",
+          "spot": "black licorice rope"
+        },
+        {
+          "label": "Spiral-slide down fast",
+          "next": "m4",
+          "spot": "silver spiral slide"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} riding a golden caramel raft down a winding caramel creek, using a candy-cane stick as a paddle, fur dripping with gooey caramel but all cotton candy washed clean. On the LEFT a MAGENTA lollipop tree with a swirling trunk at the creek bank, on the RIGHT a WHITE rock-candy boulder glittering at the top of a crystalline ridge, both large, fully visible, clearly separated.",
+      "text": "The raft ride washes off every scrap of cotton candy, but now Mo is coated in stretchy caramel instead. He paddles along with his trusty candy-cane stick, somehow managing to get stickier at every single turn.",
+      "choices": [
+        {
+          "label": "Enter the Lollipop Forest",
+          "next": "m3",
+          "spot": "magenta lollipop tree"
+        },
+        {
+          "label": "Climb Rock Candy Ridge",
+          "next": "m4",
+          "spot": "white rock-candy boulder"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} arriving at the cracking gingerbread bridge, chunks of gingerbread crumbling toward a swirling peppermint river below, a crowd of worried gummy bears gathered on the far bank. On the LEFT a BROWN crumbling gingerbread bridge with icing railings peeling apart, on the RIGHT a cluster of COLORFUL gummy bears waving frantically from the opposite bank, both large, fully visible, clearly separated.",
+      "text": "CRACK! A slab of gingerbread drops away and Mo's sugar-dust slippers skid on the crumbling edge. The bridge is falling apart, and a whole parade of gummy bears is stranded on the other side!",
+      "choices": [
+        {
+          "label": "Stick the bridge together",
+          "next": "end_bridge_hero",
+          "spot": "brown gingerbread bridge"
+        },
+        {
+          "label": "Call gummy bears for help",
+          "next": "end_gummy_pile",
+          "spot": "colorful gummy-bear cluster"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} standing in a bustling parade staging area, sugar-dust slippers twinkling under candy-cane spotlights, taffy streamers draped everywhere and confetti cannons ready to fire. On the LEFT a RAINBOW taffy parade float shaped like a giant crown, on the RIGHT a tall TEAL candy arch decorated with fondant flowers, both large, fully visible, clearly separated.",
+      "text": "Mo stumbles into parade headquarters, his sugar-dust slippers twinkling under the candy-cane spotlights. The Grand Marshal spots him instantly: 'You — the sparkly one — we need volunteers!'",
+      "choices": [
+        {
+          "label": "Ride the Taffy Float",
+          "next": "end_parade_star",
+          "spot": "rainbow taffy float"
+        },
+        {
+          "label": "Help build Candy Arch",
+          "next": "end_arch_artist",
+          "spot": "teal candy arch"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} standing before the crumbling gingerbread bridge with three glowing candy tools arranged on a frosted pedestal, the candy-cane walking stick propped beside it. On the LEFT a PINK taffy lasso coiled and glowing, in the MIDDLE an AMBER caramel glue pot bubbling warmly, on the RIGHT a SILVER sprinkle cannon with a star-shaped nozzle, all three large, fully visible, clearly separated.",
+      "text": "The gingerbread bridge is crumbling and Mo uses his candy-cane stick to crack open a frosted pedestal hiding three magical candy tools. He's already the stickiest creature in the kingdom — one of these might be just enough extra help!",
+      "choices": [
+        {
+          "label": "Grab the Taffy Lasso",
+          "next": "end_lasso_save",
+          "spot": "pink taffy lasso"
+        },
+        {
+          "label": "Scoop the Caramel Glue",
+          "next": "end_caramel_fix",
+          "spot": "amber caramel glue pot"
+        },
+        {
+          "label": "Fire the Sprinkle Cannon",
+          "next": "end_sprinkle_oops",
+          "spot": "silver sprinkle cannon"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} peeking into the grand Royal Candy Kitchen, where enormous pots bubble with chocolate and a towering parade cake rises in the center, the candy-cane walking stick hooked on the doorframe. On the LEFT a set of JEWEL-TONED tasting spoons beside bubbling candy pots, on the RIGHT a MASSIVE white parade cake with fondant decorations and a ladder, both large, fully visible, clearly separated.",
+      "text": "Mo's candy-cane stick snags a doorframe and swings him straight into the Royal Kitchen! A harried gingerbread chef looks him up and down: 'Sticky, huh? Either help or taste-test, but don't just stand there dripping!'",
+      "choices": [
+        {
+          "label": "Taste-test the candy pots",
+          "next": "end_taste_master",
+          "spot": "jewel-toned tasting spoons"
+        },
+        {
+          "label": "Help decorate parade cake",
+          "next": "end_cake_artist",
+          "spot": "massive white parade cake"
+        }
+      ]
+    },
+    "end_bridge_hero": {
+      "scene": "{HERO} stretched across the gingerbread bridge like a living glue strip, fur binding the cracked pieces together, while a joyful parade of gummy bears marches safely across showering him with rainbow sprinkles from above.",
+      "text": "Mo stretches across every crack, his legendary stickiness holding the whole bridge together while every last gummy bear marches safely across. The kingdom crowns him 'Royal Glue' and throws the most spectacular sprinkle-bath celebration in candy history! The End!"
+    },
+    "end_gummy_pile": {
+      "scene": "{HERO} at the edge of the broken bridge, completely buried under a pile of gummy bears who all stuck to his fur, forming one enormous wobbling gummy-Mo boulder teetering near the edge.",
+      "text": "Mo waves the gummy bears over for help, but the moment they touch him — STICK, STICK, STICK — every single one gloms on and won't let go. Now he's a giant wobbling gummy-Mo boulder who can't reach the bridge OR the parade. Oopsie ending!",
+      "bad": true
+    },
+    "end_parade_star": {
+      "scene": "{HERO} riding proudly atop the rainbow taffy parade float, waving to cheering candy citizens below, with streamers and confetti swirling all around and sprinkles decoratively stuck to his fur like sequins.",
+      "text": "Mo hops aboard and all the sprinkles and candy bits stuck to his fur turn him into the most DAZZLING float decoration anyone has ever seen. The crowd roars, the Grand Marshal pins a gumdrop medal on his chest, and Mo finally fits in — by standing out! The End!"
+    },
+    "end_arch_artist": {
+      "scene": "{HERO} stuck spread-eagle to the teal candy arch high above the parade route, fondant flowers and sugar gems glued firmly to both paws and both feet, waving sheepishly with one partially free paw as the parade marches obliviously underneath and candy citizens point and giggle.",
+      "text": "Mo pressed the fondant flowers SO firmly that his paws got completely stuck to the candy arch. The parade marched underneath while he dangled overhead like a very sticky gargoyle, waving politely with the one paw that was not glued to a sugar gem. Oopsie ending!",
+      "bad": true
+    },
+    "end_lasso_save": {
+      "scene": "{HERO} swinging a glowing pink taffy lasso around the gingerbread bridge pieces, pulling them tight while his own sticky fur seals every remaining gap, gummy bears cheering wildly from both banks.",
+      "text": "Mo lassos the crumbling pieces together, and wherever the taffy can't quite reach, his own sticky fur fills the gaps. The kingdom renames it 'Mo's Magnificent Sticky Span,' and he's never been prouder to be a walking glue stick! The End!"
+    },
+    "end_caramel_fix": {
+      "scene": "{HERO} carefully pouring warm amber caramel glue into the gingerbread bridge cracks while using his sticky body to hold the pieces steady, gummy bears lining up on the perfectly repaired bridge.",
+      "text": "Caramel glue plus Mo's natural stickiness makes the bridge stronger than it ever was — it isn't going ANYWHERE for a thousand years. The Candy Queen knights him with a peppermint sword, and Sir Sticky has a lovely ring to it! The End!"
+    },
+    "end_sprinkle_oops": {
+      "scene": "{HERO} standing in a crater of crumbled gingerbread bridge pieces, covered head to toe in a thick layer of rainbow sprinkles, the smoking sprinkle cannon tumbling away, while gummy bears stare in stunned silence from the far bank.",
+      "text": "BOOM — the sprinkle cannon packs way more punch than Mo expected, blasting the bridge into a million gingerbread crumbs and burying everything in sprinkles three feet deep. The gummy bears just stare, and Mo waves sheepishly from his sparkly crater. Oopsie ending!",
+      "bad": true
+    },
+    "end_taste_master": {
+      "scene": "{HERO} dangling from the ceiling of the Royal Candy Kitchen, tongue stuck to a golden whisk, one paw stuck to a bubbling candy pot, the other paw stuck to the kitchen table, while the gingerbread chef pours warm caramel that is clearly making the situation stickier, jewel-toned spoons scattered everywhere.",
+      "text": "Mo's sticky tongue sampled EVERYTHING — and then got stuck to the Royal Chef's golden whisk, the candy pot, and the kitchen table all at once. He dangled there like a very sticky chandelier while the Chef tried to unstick him with warm caramel, which only made things worse. Oopsie ending!",
+      "bad": true
+    },
+    "end_cake_artist": {
+      "scene": "{HERO} perched on a ladder beside the enormous white parade cake, pressing candy flowers and sugar pearls firmly into the frosting with his sticky paws, gingerbread bakers cheering below as confetti rains down.",
+      "text": "Mo's sticky paws press every candy flower and sugar pearl so firmly into the frosting that not even a hurricane could shake them loose. The cake wins 'Most Magnificent Dessert in Candy History,' and Mo gets the very first slice! The End!"
+    }
+  }
+}

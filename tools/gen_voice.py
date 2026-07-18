@@ -39,7 +39,7 @@ def client() -> genai.Client:
     return _client
 
 
-EMOJI = re.compile(r"[\U0001F000-\U0001FAFF☀-➿⬀-⯿]")
+EMOJI = re.compile(r"[\U0001F000-\U0001FAFF☀-➿⬀-⯿\uFE0E\uFE0F]")
 
 
 def spoken_form(text: str) -> str:
@@ -97,6 +97,15 @@ def collect_lines() -> list[tuple[str, str]]:
             for f in n.get("fx", []):
                 if f.get("line"):
                     lines.setdefault(f["line"], rstyle)
+    for room in m.get("escape", []):
+        lines.setdefault(room["intro"], STYLES["gentle"])
+        lines.setdefault(room["winText"], STYLES["instruction"])
+        for i in room.get("items", []):
+            lines.setdefault(i["label"], STYLES["choice"])
+        for h in room.get("hotspots", []):
+            for k in ("sayFound", "saySearch", "sayLocked"):
+                if h.get(k):
+                    lines.setdefault(h[k], STYLES["gentle"])
     cat = (ROOT / "src" / "games" / "iconCategories.ts").read_text()
     for t in re.findall(r"tap: '([^']+)'", cat) + re.findall(r"not: '([^']+)'", cat):
         lines.setdefault(t, STYLES["instruction"])
@@ -145,6 +154,13 @@ TTS_OVERRIDES = {
     "Hug Great-Grandcat 💜": "Give Great-Grandcat a great big hug!",
     "Be Mo, but louder! 📣": "Be Mo... but louder!",
     "Scare the Principal back 😈": "Scare the Principal right back!",
+    "Tap a gentle rhythm": "Tap out a gentle rhythm!",
+    "Prop with forked twig": "Prop it up with the forked twig!",
+    "Squeeze through arch": "Squeeze through the little arch!",
+    "Approach the sage": "Walk up to the sage bush.",
+    "Hide behind hay bale": "Hide behind the hay bale!",
+    "Spy from hay bale": "Spy from behind the hay bale!",
+    "Shout through the megaphone": "Give a big shout through the megaphone!",
 }
 
 
@@ -155,10 +171,14 @@ def synth(job: tuple[str, str]) -> bool:
         return True
     say = spoken_form(TTS_OVERRIDES.get(text, text))
     for attempt in range(3):
+        # bare short imperatives ("Slip through the vent") make the TTS
+        # return EMPTY audio; a trailing period reliably fixes it — use it
+        # on retries so first-attempt keys/prosody stay unchanged.
+        attempt_say = say if attempt == 0 or say[-1:] in '.!?。！？' else say + '.'
         try:
             resp = client().models.generate_content(
                 model="gemini-3.1-flash-tts-preview",
-                contents=style + say,
+                contents=style + attempt_say,
                 config=types.GenerateContentConfig(
                     response_modalities=["AUDIO"],
                     speech_config=types.SpeechConfig(voice_config=types.VoiceConfig(
@@ -195,6 +215,13 @@ LANG_STYLE = {
 LANG_NAME = {"ja": "Japanese", "cmn": "Mandarin", "yue": "Cantonese"}
 
 
+STORY_LEADS = {
+    "ja": ["つぎは どうなる？", "いきたい ほうを タップ！"],
+    "cmn": ["接下来会怎样？", "想去哪就点哪！"],
+    "yue": ["跟住會點樣呢？", "想去邊就撳邊！"],
+}
+
+
 def collect_lang_lines() -> list[tuple[str, str]]:
     """[(lang, text)] for every non-ASCII line the suites can speak."""
     f = ROOT / "tools" / "speech_lines.json"
@@ -202,6 +229,30 @@ def collect_lang_lines() -> list[tuple[str, str]]:
         return []
     texts = set(json.loads(f.read_text()))
     jobs: set[tuple[str, str]] = set()
+    # Story localization: node/choice "t" tables are lang-tagged at the
+    # source, so feed each line to exactly its own voice (the script
+    # detector below cannot split cmn from yue).
+    m = json.loads(MANIFEST.read_text())
+    for st in m.get("stories", []):
+        for n in st["nodes"].values():
+            for lang, txt in (n.get("t") or {}).items():
+                if spoken_form(txt):
+                    jobs.add((lang, spoken_form(txt)))
+            for c in n.get("choices", []):
+                for lang, txt in (c.get("t") or {}).items():
+                    if spoken_form(txt):
+                        jobs.add((lang, spoken_form(txt)))
+    for st in m.get("stories", []):
+        for n in st["nodes"].values():
+            for lang, txt in ((n.get("scare") or {}).get("t") or {}).items():
+                if spoken_form(txt):
+                    jobs.add((lang, spoken_form(txt)))
+    for lang, leads in STORY_LEADS.items():
+        for t in leads:
+            jobs.add((lang, t))
+    # spoken story-picker prompts (i18n picker.story values)
+    for lang, t in [("ja", "どの おはなし よもうか？"), ("cmn", "读哪个故事？"), ("yue", "睇邊個故事？")]:
+        jobs.add((lang, t))
     for t in texts:
         t = spoken_form(t)
         if not t or t.isascii():
@@ -238,10 +289,12 @@ def synth_lang(job: tuple[str, str]) -> tuple[str, str] | None:
     if out.exists():
         return (key, out.name)
     for attempt in range(3):
+        # same empty-audio workaround as synth(): CJK period on retries
+        attempt_text = text if attempt == 0 or text[-1:] in '.!?。！？' else text + '。'
         try:
             resp = client().models.generate_content(
                 model="gemini-3.1-flash-tts-preview",
-                contents=LANG_STYLE[lang] + text,
+                contents=LANG_STYLE[lang] + attempt_text,
                 config=types.GenerateContentConfig(
                     response_modalities=["AUDIO"],
                     speech_config=types.SpeechConfig(voice_config=types.VoiceConfig(

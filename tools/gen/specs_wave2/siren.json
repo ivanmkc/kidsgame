@@ -1,0 +1,243 @@
+{
+  "id": "siren",
+  "title": "Pip the Fire Station Pup",
+  "hero": "PIP",
+  "style": "Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} standing in the wide doorway of a bright animal fire station, gazing up at a shiny golden firefighter helmet on a high wall hook. A tall dalmatian fire chief in a red uniform stands near a gleaming red fire engine on a black-and-white checkered floor. On the LEFT a red fire engine bay with chrome bumpers and coiled yellow hoses, on the RIGHT a sunny outdoor training yard with orange cones and a wooden climbing wall, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip had one dream — earn the shiny firefighter helmet hanging on the wall. But every single thing in this station was built for animals ten times his size.",
+      "choices": [
+        {
+          "label": "Sniff around the engine",
+          "next": "a",
+          "spot": "red fire engine"
+        },
+        {
+          "label": "Trot to the yard",
+          "next": "b",
+          "spot": "orange training cones"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} sniffing around the massive wheels of a gleaming red fire engine on a black-and-white checkered floor, discovering a tiny pink squeaky mouse toy wedged under the front axle. On the LEFT a pair of enormous black rubber firefighter boots standing upright beside the engine, on the RIGHT a thick coiled yellow fire hose on a chrome wall rack, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Under the engine, Pip found a tiny pink squeaky mouse and tucked it into his collar — finally, something in this station that was actually his size.",
+      "choices": [
+        {
+          "label": "Climb into the big boots",
+          "next": "aa",
+          "spot": "black rubber boots"
+        },
+        {
+          "label": "Try the fire hose",
+          "next": "ab",
+          "spot": "yellow fire hose"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} trotting into a sunny outdoor training yard with orange cones and a wooden climbing wall. A tiny green gecko in an oversized red fire helmet sits on a cone nibbling a cracker. On the LEFT a tall wooden ladder leaning against a red practice tower, on the RIGHT a big shiny brass alarm bell hanging from a red post, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip shared his last biscuit with a nervous little gecko trainee whose helmet kept sliding over his eyes. Small ones stick together.",
+      "choices": [
+        {
+          "label": "Scale the tall ladder",
+          "next": "ba",
+          "spot": "wooden tall ladder"
+        },
+        {
+          "label": "Ring the brass bell",
+          "next": "bb",
+          "spot": "brass alarm bell"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} completely swallowed inside one enormous black rubber firefighter boot on the checkered floor, only tiny ears and bright eyes poking out from the boot top. A raccoon firefighter watches and chuckles. On the LEFT a chrome fire pole stretching from floor to ceiling, on the RIGHT a red metal equipment locker with yellow jackets hanging inside, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The boot swallowed Pip whole — he shuffled across the checkered floor like the world's most determined piece of footwear.",
+      "scare": {
+        "spot": "black rubber boot",
+        "pop": "{HERO} cheerfully popping his head out of the top of a giant black firefighter boot with ears flopping and a pink squeaky mouse toy in his mouth, grinning wide, bold cheerful flat-color art. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "Boo — I mean, woof!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Slide down the fire pole",
+          "next": "m1",
+          "spot": "chrome fire pole"
+        },
+        {
+          "label": "Open the equipment locker",
+          "next": "m2",
+          "spot": "red equipment locker"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} tumbling backwards across a wet checkered floor after being blasted by a thick yellow fire hose, water spraying everywhere. A bear firefighter rushes to turn the valve off. On the LEFT a chrome fire pole stretching from floor to ceiling, on the RIGHT a red metal equipment locker with yellow jackets hanging inside, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The hose had opinions of its own — it sent Pip skidding across the wet floor like a very soggy hockey puck.",
+      "choices": [
+        {
+          "label": "Try the fire pole instead",
+          "next": "m1",
+          "spot": "chrome fire pole"
+        },
+        {
+          "label": "Peek in the locker",
+          "next": "m2",
+          "spot": "red equipment locker"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} clinging to the third rung of a very tall wooden ladder leaning against a red practice tower, legs dangling, looking down nervously. The green gecko watches from below with concern. On the LEFT a dark opening of a gray concrete drainpipe under the parked red fire engine at the yard edge, on the RIGHT a row of black rubber tires set up as an obstacle course on green grass, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Three rungs up and Pip's legs were already doing the jelly dance. The ladder went up forever and his courage did not.",
+      "choices": [
+        {
+          "label": "Investigate the drainpipe",
+          "next": "m3",
+          "spot": "gray concrete pipe"
+        },
+        {
+          "label": "Try the tire course",
+          "next": "m4",
+          "spot": "black rubber tires"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} jumping as high as he can beneath a big shiny brass alarm bell on a red post, paws nowhere near the pull rope dangling above. The green gecko claps encouragingly from an orange cone. On the LEFT a dark opening of a gray concrete drainpipe under the parked red fire engine at the yard edge, on the RIGHT a row of black rubber tires set up as an obstacle course on green grass, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip jumped and jumped, but the bell rope dangled just out of reach — mocking him with a gentle swing each time he missed.",
+      "scare": {
+        "spot": "brass alarm bell",
+        "pop": "{HERO} sitting dazed beneath the brass bell with little cartoon stars circling his head and a goofy grin, bold cheerful flat-color art. Landscape orientation. No text, no letters, no watermark, no people.",
+        "reveal": "That bell finally rang — using my head!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Check the odd drainpipe",
+          "next": "m3",
+          "spot": "gray concrete pipe"
+        },
+        {
+          "label": "Race the tire course",
+          "next": "m4",
+          "spot": "black rubber tires"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} peering into a dark round concrete drainpipe under the red fire engine on the checkered floor, a tiny orange kitten with scared glowing eyes visible deep inside the pipe. No big firefighter can fit. On the LEFT a pink squeaky mouse toy on the floor, in the MIDDLE a tiny red metal bucket, on the RIGHT a coil of yellow rope, all three large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "A tiny meow echoed from the drainpipe — the station's kitten mascot was stuck where no big firefighter could possibly fit. But someone Pip's size? Perfect.",
+      "choices": [
+        {
+          "label": "Squeak the mouse toy",
+          "next": "end_whistle_lure",
+          "spot": "pink squeaky mouse"
+        },
+        {
+          "label": "Scoop with the bucket",
+          "next": "end_bucket_rescue",
+          "spot": "red metal bucket"
+        },
+        {
+          "label": "Toss in the rope",
+          "next": "end_oops_sock",
+          "spot": "yellow rope coil"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} standing before an open red metal equipment locker on the checkered engine bay floor, rows of oversized firefighter gear hanging inside. On the LEFT a huge red firefighter helmet sitting on a high shelf, on the RIGHT a neatly folded small yellow safety vest on a lower shelf, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Inside the locker, the gear ranged from too-big to way-too-big — except for one curious little yellow vest tucked in the back like it had been waiting for someone exactly Pip's size.",
+      "choices": [
+        {
+          "label": "Try the huge helmet",
+          "next": "end_oops_helmet",
+          "spot": "red firefighter helmet"
+        },
+        {
+          "label": "Grab the small vest",
+          "next": "end_vest_hero",
+          "spot": "yellow safety vest"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} crouching at the dark round opening of a gray concrete drainpipe at the edge of the sunny training yard, a tiny orange kitten with scared eyes visible deep inside the pipe. No big firefighter could possibly fit. On the LEFT an orange signal whistle lying on the grass, on the RIGHT a small blue flashlight resting on the ground beside the pipe, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "A frightened meow came from the drainpipe — the kitten mascot was wedged in tight, and every firefighter at the station was too big to reach her. Every firefighter except one.",
+      "choices": [
+        {
+          "label": "Blow the signal whistle",
+          "next": "end_team_rescue",
+          "spot": "orange signal whistle"
+        },
+        {
+          "label": "Shine the flashlight in",
+          "next": "end_solo_rescue",
+          "spot": "blue flashlight"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} standing at the start of a tire obstacle course in the sunny training yard, a row of black rubber tires stretching ahead on green grass, the green gecko doing warm-up stretches beside him. On the LEFT the row of black rubber tires leading through an obstacle tunnel, on the RIGHT a cozy red wool blanket draped over the last tire in a warm sunny patch, both large, fully visible, clearly separated. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The tire course stretched out ahead — the big animals always got hopelessly stuck in it, but those gaps looked just Pip-sized.",
+      "choices": [
+        {
+          "label": "Dash through the tires",
+          "next": "end_tiny_champ",
+          "spot": "black rubber tires"
+        },
+        {
+          "label": "Snuggle the warm blanket",
+          "next": "end_cozy_nap",
+          "spot": "red wool blanket"
+        }
+      ]
+    },
+    "end_whistle_lure": {
+      "scene": "{HERO} sitting proudly on the checkered floor of the engine bay beside the red fire engine, wearing a tiny shiny golden firefighter helmet, with a happy orange kitten nuzzling his side and the pink squeaky mouse toy between them. The dalmatian chief salutes and the raccoon firefighter wipes a tear. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "One squeak of the little pink mouse and the kitten came trotting right out. The Chief placed the golden helmet on Pip's head and said he was the bravest firefighter of all — no matter the size. The End!"
+    },
+    "end_bucket_rescue": {
+      "scene": "{HERO} standing on the checkered engine bay floor beside the red fire engine, wearing a tiny golden firefighter helmet, holding the tiny red bucket triumphantly while the happy orange kitten sits inside the bucket purring. All the animal firefighters cheer around them. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip slid the little red bucket in, the kitten hopped aboard, and out they came. One bucket-sized rescue later, Pip had his helmet and a kitten who refused to stop following him home. The End!"
+    },
+    "end_oops_sock": {
+      "scene": "{HERO} sitting on the checkered engine bay floor holding a soggy old brown sock dangling from the yellow rope, looking bewildered, while the orange kitten strolls casually out of the drainpipe behind him and the animal firefighters double over laughing. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip hauled on the rope with all his might and out came one ancient, extremely smelly sock. The kitten strolled out on her own and gave him a look that said everything. Oopsie ending!",
+      "bad": true
+    },
+    "end_oops_helmet": {
+      "scene": "{HERO} with an enormous red firefighter helmet completely covering his head and body on the checkered engine bay floor, only tiny paws sticking out underneath, having knocked over a yellow mop bucket that splashes soapy water everywhere. A moose firefighter covers a laugh. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The enormous helmet swallowed Pip even faster than the boot did — he wobbled three steps and belly-flopped into the mop bucket with a spectacular splash. At least he was the cleanest pup at the station. Oopsie ending!",
+      "bad": true
+    },
+    "end_vest_hero": {
+      "scene": "{HERO} wearing a perfectly fitted yellow safety vest and a tiny golden firefighter helmet, standing at attention beside the red fire engine on the checkered floor. The dalmatian chief pins a shiny gold badge onto the vest while the other animal firefighters salute in a proud row behind them. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "The yellow vest fit like it had been made just for him — because it had, tucked away in the back of the locker for exactly this day. Chief pinned on a badge and named Pip the station's official small-spaces rescue pup. The End!"
+    },
+    "end_team_rescue": {
+      "scene": "{HERO} and the tiny green gecko standing together in the sunny training yard beside the gray concrete drainpipe, both wearing tiny golden firefighter helmets, the happy orange kitten draped across both their shoulders purring. The dalmatian chief and the other animal firefighters applaud from behind orange cones. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "One blast of the whistle brought the gecko running, and together they coaxed the kitten free. The Chief gave them both helmets — the station's smallest heroes and its proudest. The End!"
+    },
+    "end_solo_rescue": {
+      "scene": "{HERO} emerging triumphantly from the gray concrete drainpipe at the edge of the sunny training yard, carrying the happy orange kitten on his back and the blue flashlight in his mouth, covered in dust but grinning ear to ear. The dalmatian chief holds out a tiny golden firefighter helmet. The green gecko cheers from an orange cone. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip shined the flashlight ahead, wiggled in, and nudged the kitten free with his nose. Dusty and grinning, he emerged to find the Chief waiting with a helmet that finally fit. The End!"
+    },
+    "end_tiny_champ": {
+      "scene": "{HERO} sitting drenched in an overturned silver water bucket at the end of the tire obstacle course, the dalmatian chief wiping water off his face with a stunned expression, orange training cones scattered everywhere, the green gecko proudly holding up a tiny flag from the last tire. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip zoomed through the tires so fast he could not stop — he shot out the end like a furry cannonball, bounced off a training cone, ricocheted into the water bucket, and splashed the Chief right in the face. The gecko held up a tiny ten-out-of-ten sign for the landing, though. Oopsie ending!",
+      "bad": true
+    },
+    "end_cozy_nap": {
+      "scene": "{HERO} blinking awake in the dark empty training yard at night, still wrapped in the red wool blanket inside the last tire, the green gecko snoring on his head, the fire station dark and locked behind them, a crescent moon overhead and no other animal in sight. Bold cheerful flat-color picture-book art, fire-engine reds and sunny yellows, gleaming chrome and checkered floors, friendly animal firefighters in uniform. Landscape orientation. No text, no letters, no watermark, no people.",
+      "text": "Pip snuggled into the warm blanket and fell asleep so deeply he missed the entire afternoon, the graduation ceremony, AND dinner. He woke up at midnight in a dark empty yard with the gecko snoring on his head and absolutely no idea what day it was. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

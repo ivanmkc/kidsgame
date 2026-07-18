@@ -1,0 +1,243 @@
+{
+  "id": "dune",
+  "title": "Mo and the Moving Mountain",
+  "hero": "MO",
+  "style": "Warm flat-color mid-century travel-poster style, apricot and terracotta dunes, long violet evening shadows, star-sprinkled turquoise sky, grainy paper texture. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the desert's edge beside a line of camels, a clay jar of spring water strapped to the lead camel's saddle. A colossal apricot dune blocks the horizon ahead. On the LEFT a golden sand slope ripples toward open sky, on the RIGHT a terracotta rock canyon cuts between tall walls, both large, fully visible, clearly separated.",
+      "text": "Mo promised the sleeping flowers one jar of spring water — but the biggest dune in the whole desert just parked itself right across the only road. Sand slope or canyon?",
+      "choices": [
+        {
+          "label": "Climb the sand slope",
+          "next": "a",
+          "spot": "golden sand slope"
+        },
+        {
+          "label": "Enter the rock canyon",
+          "next": "b",
+          "spot": "terracotta rock canyon"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} crests the golden sand slope with the camel caravan, a clay jar on the lead camel's saddle and a tarnished brass bell half-buried in the ridge catching the sunset. On the LEFT a pale salt flat stretches wide under the fading sky, on the RIGHT a cluster of red sandstone pillars casts long violet shadows, both large, fully visible, clearly separated.",
+      "text": "Mo tugs the old bell free and it rings once — every camel perks its ears like they remember a song from a hundred years ago. Salt flat or stone pillars?",
+      "choices": [
+        {
+          "label": "Cross the salt flat",
+          "next": "aa",
+          "spot": "pale salt flat"
+        },
+        {
+          "label": "Weave through pillars",
+          "next": "ab",
+          "spot": "red sandstone pillars"
+        }
+      ]
+    },
+    "b": {
+      "scene": "{HERO} leads the camel caravan into the terracotta rock canyon, a clay jar on the lead camel's saddle, where a tiny fennec fox pants beside a cracked boulder. On the LEFT a dark cave mouth breathes cool air from deep inside the rock, on the RIGHT an ochre dry riverbed curves between the canyon walls over smooth stones, both large, fully visible, clearly separated.",
+      "text": "Mo tips the jar just enough for the little fox to drink — tiny tongue, enormous ears, extremely grateful. Cave or riverbed?",
+      "choices": [
+        {
+          "label": "Explore the cave",
+          "next": "ba",
+          "spot": "dark cave mouth"
+        },
+        {
+          "label": "Follow the riverbed",
+          "next": "bb",
+          "spot": "ochre dry riverbed"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} trots across the pale salt flat with the camel caravan, the clay jar swaying on the lead camel's saddle and the brass bell jingling at each step. The colossal apricot dune has appeared ahead again blocking the way. On the LEFT a patch of blue desert sage grows at the dune's base, on the RIGHT a tall amber cactus stands beside a ring of smooth stones, both large, fully visible, clearly separated.",
+      "text": "That dune AGAIN — it followed them across the salt flat, and when the bell jingles the whole thing shivers like it is ticklish. Desert sage or cactus?",
+      "choices": [
+        {
+          "label": "Approach the sage",
+          "next": "m1",
+          "spot": "blue desert sage"
+        },
+        {
+          "label": "Rest by the cactus",
+          "next": "m2",
+          "spot": "tall amber cactus"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} winds between the red sandstone pillars with the camel caravan, the clay jar safe on the lead camel's saddle and the brass bell chiming against stone. The colossal apricot dune waits at the far end of the pillars blocking the way out. On the LEFT a patch of blue desert sage grows at the dune's base, on the RIGHT a tall amber cactus stands beside a ring of smooth stones, both large, fully visible, clearly separated.",
+      "text": "The pillars frame the enormous dune like a stage curtain — and Mo could swear that thing just breathed. Desert sage or cactus?",
+      "choices": [
+        {
+          "label": "Approach the sage",
+          "next": "m1",
+          "spot": "blue desert sage"
+        },
+        {
+          "label": "Rest by the cactus",
+          "next": "m2",
+          "spot": "tall amber cactus"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} pads through the dark cave with the camel caravan in single file, the clay jar glowing where starlight leaks through ceiling cracks, the grateful fennec fox trotting alongside. Ancient ochre paintings of a giant tortoise cover one wall. On the LEFT a turquoise stone door stands in the cave wall carved with tortoise patterns, on the RIGHT a low orange tunnel opens onto bright sand, both large, fully visible, clearly separated.",
+      "text": "The fox yips at the wall painting — that giant tortoise looks an awful lot like a certain stubborn dune outside. Stone door or tunnel?",
+      "choices": [
+        {
+          "label": "Open the stone door",
+          "next": "m3",
+          "spot": "turquoise stone door"
+        },
+        {
+          "label": "Crawl through tunnel",
+          "next": "m4",
+          "spot": "low orange tunnel"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} follows the ochre dry riverbed with the camel caravan over smooth boulders, the clay jar balanced on the lead camel's saddle, the grateful fennec fox bounding ahead. The riverbed ends where the colossal dune blocks everything. On the LEFT a turquoise stone door stands in the rock face at the dune's foot, on the RIGHT a low orange tunnel opens through the canyon wall, both large, fully visible, clearly separated.",
+      "text": "The fox sniffs the big dune and does a backflip — something about that sand smells warm and alive. Stone door or tunnel?",
+      "choices": [
+        {
+          "label": "Open the stone door",
+          "next": "m3",
+          "spot": "turquoise stone door"
+        },
+        {
+          "label": "Crawl through tunnel",
+          "next": "m4",
+          "spot": "low orange tunnel"
+        }
+      ]
+    },
+    "m1": {
+      "scene": "{HERO} creeps toward the blue desert sage with the camel caravan close behind, the clay jar ready and the brass bell in reach. The colossal dune SHIFTS and a massive scaly head rises from the sand with one sleepy amber eye. On the LEFT a violet silk cushion rests on the creature's mossy shell, in the MIDDLE the brass bell dangles from a sage branch at ringing height, on the RIGHT a red clay bowl sits brimming with cool sand, all large, fully visible, clearly separated.",
+      "text": "The dune has LEGS and a head and the most tremendous yawn Mo has ever seen — it is a tortoise the size of a hill! Cushion, bell, or bowl?",
+      "scare": {
+        "spot": "apricot dune",
+        "pop": "A colossal gentle desert tortoise with a mossy green shell and one sleepy amber eye rising from apricot sand, warm flat-color mid-century travel-poster style, grainy paper texture, landscape orientation, no text, no letters, no watermark, no people",
+        "reveal": "The dune has a FACE!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Fluff the cushion",
+          "next": "end_ride",
+          "spot": "violet silk cushion"
+        },
+        {
+          "label": "Ring the bell",
+          "next": "end_melody",
+          "spot": "brass bell"
+        },
+        {
+          "label": "Offer the sand bowl",
+          "next": "end_sneeze",
+          "spot": "red clay bowl"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} settles the camels beside the tall amber cactus, the clay jar propped on smooth stones and the brass bell hung from a cactus arm. The night sky blazes with stars above the dark silhouette of the colossal dune. On the LEFT a copper spyglass sits propped against a flat rock, on the RIGHT a cluster of orange glowing mushrooms rings the cactus base, both large, fully visible, clearly separated.",
+      "text": "Under a billion stars the dune almost looks like a sleeping animal — if animals were the size of apartment buildings. Spyglass or mushrooms?",
+      "choices": [
+        {
+          "label": "Peek through spyglass",
+          "next": "end_starwalk",
+          "spot": "copper spyglass"
+        },
+        {
+          "label": "Follow the mushrooms",
+          "next": "end_loop",
+          "spot": "orange glowing mushrooms"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} pushes through the turquoise stone door into open moonlit desert, the clay jar still safe and the fennec fox squeezing through behind. The colossal dune stands right here and its ridges catch the moonlight like an enormous shell. On the LEFT a patch of sleeping violet flowers lies at the dune's base, on the RIGHT an amber sandstone arch frames a warm glow inside the dune, both large, fully visible, clearly separated.",
+      "text": "This close the ridges look exactly like a shell — the fox purrs and presses its nose against the warm sand. Violet flowers or sandstone arch?",
+      "choices": [
+        {
+          "label": "Water the flowers",
+          "next": "end_garden",
+          "spot": "violet desert flowers"
+        },
+        {
+          "label": "Step through the arch",
+          "next": "end_carry",
+          "spot": "amber sandstone arch"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} crawls out of the low orange tunnel onto the top of the colossal dune, the clay jar clutched tight and the fennec fox popping out behind. The surface underfoot is not sand but hard ridged and warm. On the LEFT a mossy green ridge curves upward like a giant handle, on the RIGHT a tan sandstone ramp slopes gently back to the ground, both large, fully visible, clearly separated.",
+      "text": "This is NOT a dune — the ground just took a deep slow breath and Mo is standing on something very much alive. Mossy ridge or sandstone ramp?",
+      "scare": {
+        "spot": "amber ridged shell",
+        "pop": "Ancient mossy shell plates of a titanic desert tortoise gently rippling to reveal ridged amber and green patterns, warm flat-color mid-century travel-poster style, grainy paper texture, landscape orientation, no text, no letters, no watermark, no people",
+        "reveal": "The ground is BREATHING!",
+        "sting": "boing",
+        "delay": 1700
+      },
+      "choices": [
+        {
+          "label": "Grab the ridge",
+          "next": "end_summit",
+          "spot": "mossy green ridge"
+        },
+        {
+          "label": "Slide down the ramp",
+          "next": "end_oasis_run",
+          "spot": "tan sandstone ramp"
+        }
+      ]
+    },
+    "end_ride": {
+      "scene": "{HERO} sits atop the colossal tortoise's mossy shell on the violet silk cushion, the whole camel caravan balanced behind and the clay jar in reach, as the ancient creature walks across the desert toward a lush oasis where violet and gold flowers burst open in the evening light.",
+      "text": "The tortoise was never blocking the way — it was waiting for a polite passenger! Flowers bloom, camels hum, and Mo rides the tallest taxi in the desert. The End!"
+    },
+    "end_melody": {
+      "scene": "{HERO} rings the brass bell beside the colossal tortoise's ear as the creature hums a note so deep the sand ripples into waves, the whole camel caravan swaying along, the clay jar glinting in the last light as sleeping flowers pop open one by one across the far oasis in violet, gold, and turquoise.",
+      "text": "One bell plus one tortoise equals the world's biggest desert choir — the flowers woke up dancing and Mo's jar is finally empty in the best possible way. The End!"
+    },
+    "end_sneeze": {
+      "scene": "{HERO} tumbles through the starry sky alongside the camels and the clay jar after tipping the red clay bowl of sand toward the colossal tortoise's nose, the creature mid-sneeze below, all of them arcing toward a prickly bush two dunes back from where they started.",
+      "text": "Note to self — never offer a bowl of sand to a ticklish tortoise nose! Mo is fine, the camels are grumpy, and the jar is stuck in a cactus. Oopsie ending!",
+      "bad": true
+    },
+    "end_starwalk": {
+      "scene": "{HERO} follows a tortoise-shaped constellation across the night desert with the camel caravan, the clay jar gleaming under starlight and the brass bell chiming softly, arriving at dawn at the far oasis where Mo pours spring water and a carpet of violet flowers opens to the rising sun.",
+      "text": "The stars knew the way all along — Mo just needed to look up instead of arguing with a stubborn dune. The flowers stretch and yawn and bloom in every color. The End!"
+    },
+    "end_loop": {
+      "scene": "{HERO} marches the camel caravan past the same tall amber cactus for the third time, following orange glowing mushrooms in a perfect circle around the dark silhouette of the colossal dune, the clay jar still full and the camels looking very unimpressed.",
+      "text": "Round and round and round — Mo invented the world's first desert merry-go-round but the flowers are still asleep. At least the camels got their steps in! Oopsie ending!",
+      "bad": true
+    },
+    "end_garden": {
+      "scene": "{HERO} kneels and pours spring water from the clay jar onto sleeping violet flowers at the base of the colossal tortoise's shell, a crackling wave of blooms spreading across the desert all the way to the far oasis, the fennec fox rolling in petals under a turquoise sky.",
+      "text": "One splash started a chain reaction of flowers across the whole desert — the tortoise who was napping here all along finally has a nice lawn. The End!"
+    },
+    "end_carry": {
+      "scene": "{HERO} clings to the top of the colossal tortoise as it walks in the completely wrong direction away from the oasis, the fennec fox and camels watching in confusion from the amber sandstone arch, Mo waving frantically and unable to steer.",
+      "text": "The colossal tortoise stood up with Mo on top and took seven ENORMOUS steps — in the completely wrong direction! Turns out the shortcut was to the tortoise's favorite napping rock, not the oasis, and Mo ended up three dunes further away than where he started, clinging to a tortoise who had already fallen asleep. Oopsie ending!",
+      "bad": true
+    },
+    "end_summit": {
+      "scene": "{HERO} grips the mossy green ridge as the colossal tortoise rises to its full height above the canyon walls, the clay jar secure and the fennec fox clinging to one enormous ear, the far oasis sparkling below where the tortoise walks in three strides and sleeping flowers explode into color.",
+      "text": "From up here the desert looks small and the oasis looks close — because a tortoise the size of a hill makes everything a short walk. The fox is doing victory backflips! The End!"
+    },
+    "end_oasis_run": {
+      "scene": "{HERO} slides down the tan sandstone ramp too fast as the colossal tortoise shifts beneath, the clay jar flying out of his hands and shattering on a rock at the bottom, water splashing uselessly into the sand, the fennec fox facepalming with both paws.",
+      "text": "Mo slid off the tortoise and the surprise part was GREAT — the landing part, not so much! The clay jar flew out of his hands, did a triple spin in the air, and smashed on the one rock in the entire desert! All the water soaked into the sand in about two seconds and the flowers stayed very firmly asleep. The fennec fox just shook its head. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

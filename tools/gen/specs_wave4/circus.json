@@ -1,0 +1,243 @@
+{
+  "id": "circus",
+  "title": "Mo and the Quadruple Bounce",
+  "hero": "MO",
+  "style": "Bold primary circus stripes, candy-stripe patchwork tent, warm spotlight pools on sawdust, confetti highlights, cheerful poster-art energy. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands on the sawdust floor of a cheerful patchwork circus tent under warm colored spotlights, a tall striped top hat resting on a wooden post, an audience of stuffed animals sitting in tiny wooden chairs around the ring, banners and posters are blank or show only simple pictures. On the LEFT a red practice ring with soft sawdust and a low wooden railing is surrounded by friendly animal acrobats stretching, on the RIGHT a bright blue prop wagon overflowing with colorful scarves and juggling pins sits beside the tent wall, both large, fully visible, clearly separated.",
+      "text": "Tonight is the GRAND FINALE and the ringmaster needs a triple somersault — trouble is, every time Mo practices, those bouncy feet overshoot the landing by approximately one whole tent, and the last attempt ended in a hedge. Practice ring or prop wagon?",
+      "choices": [
+        {
+          "label": "Try the practice ring",
+          "next": "a",
+          "spot": "red practice ring"
+        },
+        {
+          "label": "Check the prop wagon",
+          "next": "b",
+          "spot": "blue prop wagon"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands inside a red practice ring on soft sawdust, surrounded by friendly animal acrobats — a bear balancing on a large ball and a rabbit doing stretches — a large red chalk barrel sits at the edge of the ring, and a large striped drum barrel stands against the tent wall, banners and posters are blank or show only simple pictures. On the LEFT an orange trapeze platform with a sturdy wooden ladder rises beside thick knotted ropes, on the RIGHT a stack of colorful tumbling mats in pink yellow and blue sits in a wide padded pit, both large, fully visible, clearly separated.",
+      "text": "A bear is balancing on a ball the size of a BOULDER and a rabbit just did a backflip so casual it yawned mid-air, and there on the ring's edge sits a big barrel of sparkly chalk dust — one dip and Mo's paws are coated in grippy glitter. Trapeze platform or tumbling mats?",
+      "choices": [
+        {
+          "label": "Climb the trapeze platform",
+          "next": "aa",
+          "spot": "orange trapeze platform"
+        },
+        {
+          "label": "Try the tumbling mats",
+          "next": "ab",
+          "spot": "colorful tumbling mats"
+        }
+      ],
+      "scare": {
+        "spot": "striped drum barrel",
+        "pop": "a friendly performing seal with two big sparkly round eyes popping up from inside the striped drum barrel while balancing a red ball on its nose, full body visible",
+        "reveal": "Honk! Just warming up my nose act!",
+        "sting": "honk",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} rummages through a bright blue prop wagon parked beside the patchwork tent wall, colorful juggling pins and silk scarves spilling from the sides, a shimmering sequin cape draped over a wooden barrel inside the wagon, banners and posters are blank or show only simple pictures. On the LEFT a green juggling corner with a soft green mat and scattered colorful juggling pins sits under a warm spotlight, on the RIGHT a large purple circus cannon on iron wheels points toward a big safety net across the ring, both large, fully visible, clearly separated.",
+      "text": "The prop wagon is an AVALANCHE of sparkly nonsense but there draped over a barrel is the most magnificent sequin cape Mo has ever seen — it shimmers like a disco fish and it is absolutely coming along. Juggling corner or circus cannon?",
+      "choices": [
+        {
+          "label": "Visit the juggling corner",
+          "next": "ba",
+          "spot": "green juggling corner"
+        },
+        {
+          "label": "Inspect the circus cannon",
+          "next": "bb",
+          "spot": "purple circus cannon"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} stands on the orange trapeze platform high above the practice ring, sparkly chalk dust visible on both front paws, thick knotted ropes hanging from the striped tent ceiling, the sawdust ring far below glowing under warm spotlights, banners and posters are blank or show only simple pictures. On the LEFT a wide bouncy red landing net stretches below the platform like a giant hammock, on the RIGHT a long yellow springboard ramp angles down toward the center ring, both large, fully visible, clearly separated.",
+      "text": "From up here the stuffed-animal audience looks adorably tiny and Mo's chalky paws leave sparkly prints on everything — the landing net below is bouncing gently like it is BEGGING someone to try a flip. Landing net or springboard ramp?",
+      "choices": [
+        {
+          "label": "Jump to the landing net",
+          "next": "m1",
+          "spot": "red landing net"
+        },
+        {
+          "label": "Slide the springboard ramp",
+          "next": "m2",
+          "spot": "yellow springboard ramp"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} bounces on a stack of colorful tumbling mats in pink yellow and blue in a wide padded pit, sparkly chalk dust visible on both front paws, rolled-up mats forming a soft runway beside the practice ring, a warm spotlight shining down, banners and posters are blank or show only simple pictures. On the LEFT a wide bouncy red landing net stretches across the ring like a giant hammock, on the RIGHT a long yellow springboard ramp angles toward the center ring, both large, fully visible, clearly separated.",
+      "text": "These mats are SO springy that even standing still makes Mo boing a little and each bounce leaves sparkly chalk-paw prints everywhere — somewhere between adorable and vandalism. Landing net or springboard ramp?",
+      "choices": [
+        {
+          "label": "Jump to the landing net",
+          "next": "m1",
+          "spot": "red landing net"
+        },
+        {
+          "label": "Slide the springboard ramp",
+          "next": "m2",
+          "spot": "yellow springboard ramp"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} stands in the green juggling corner on a soft green mat under a warm spotlight, the shimmering sequin cape tied around the neck and catching colored light, colorful juggling pins scattered on the mat, a friendly elephant tossing a pin in the background, banners and posters are blank or show only simple pictures. On the LEFT a large raised gold center platform glows in the middle of the sawdust ring under a bright spotlight, on the RIGHT a tall wooden rigging platform with thick wooden rungs rises beside the tent pole toward the tent peak, both large, fully visible, clearly separated.",
+      "text": "A friendly elephant just juggled six pins and a sandwich without dropping either and then nodded toward the center ring as if to say THAT is where the somersault happens — Mo's sequin cape ripples dramatically on cue. Center platform or rigging platform?",
+      "choices": [
+        {
+          "label": "Head to the center platform",
+          "next": "m3",
+          "spot": "gold center platform"
+        },
+        {
+          "label": "Climb the rigging platform",
+          "next": "m4",
+          "spot": "wooden rigging platform"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} stands beside the large purple circus cannon on iron wheels, the shimmering sequin cape tied around the neck and fluttering, a large striped popcorn cart sitting nearby with a brass popcorn scoop on top, a big safety net stretched across the ring behind the cannon, banners and posters are blank or show only simple pictures. On the LEFT a large raised gold center platform glows in the middle of the sawdust ring under a bright spotlight, on the RIGHT a tall wooden rigging platform with thick wooden rungs rises beside the tent pole toward the tent peak, both large, fully visible, clearly separated.",
+      "text": "That cannon is aimed at the safety net and looks like it could launch a HIPPOPOTAMUS which is both thrilling and slightly concerning — meanwhile something in the popcorn cart just went CRUNCH. Center platform or rigging platform?",
+      "choices": [
+        {
+          "label": "Head to the center platform",
+          "next": "m3",
+          "spot": "gold center platform"
+        },
+        {
+          "label": "Climb the rigging platform",
+          "next": "m4",
+          "spot": "wooden rigging platform"
+        }
+      ],
+      "scare": {
+        "spot": "striped popcorn cart",
+        "pop": "a tiny acrobat mouse in a sparkly vest with two bright round shiny eyes tumbling out of the striped popcorn cart in a shower of popcorn, full body visible",
+        "reveal": "Ta-da! Best entrance of the evening!",
+        "sting": "squeak",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands on the wide bouncy red landing net stretched across the ring, sparkly chalk dust on both front paws glinting under the spotlights, the net sagging gently under each step, the audience of stuffed animals leaning forward in their tiny chairs, banners and posters are blank or show only simple pictures. On the LEFT a pair of thick red rope handles hang from the net's edge tied with large knots, on the RIGHT the sagging net center dips low under a bright amber spotlight, both large, fully visible, clearly separated.",
+      "text": "The net is SO bouncy Mo's teeth are chattering with every step and the chalk on both paws is leaving the world's sparkliest trail — a steady flip from the ropes or one ENORMOUS bounce from dead center. Rope handles or net center?",
+      "choices": [
+        {
+          "label": "Grab the rope handles",
+          "next": "end_chalk_flip",
+          "spot": "thick red rope handles"
+        },
+        {
+          "label": "Bounce from the center",
+          "next": "end_net_oops",
+          "spot": "sagging net center"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} crouches at the top of the long yellow springboard ramp angling toward the center ring, sparkly chalk dust on both front paws gripping the ramp's surface, the audience of stuffed animals watching from their tiny chairs, warm spotlights converging on the landing zone below, banners and posters are blank or show only simple pictures. On the LEFT a round chalk circle is drawn on the ramp marking the best launch point, on the RIGHT the golden ramp curve swoops upward at the far end of the springboard, both large, fully visible, clearly separated.",
+      "text": "This springboard is MADE for somersaults and the chalk on Mo's paws is basically rocket fuel for grip — the launch circle says HERE but the golden swoop at the end says WHEEE. Chalk circle or ramp curve?",
+      "choices": [
+        {
+          "label": "Launch from the chalk circle",
+          "next": "end_spring_quad",
+          "spot": "round chalk circle"
+        },
+        {
+          "label": "Ride the ramp curve",
+          "next": "end_leap_star",
+          "spot": "golden ramp curve"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands in the center of the sawdust ring on the raised gold center platform under a large spotlight, the shimmering sequin cape billowing, the audience of stuffed animals packed into their chairs and leaning forward, banners and posters are blank or show only simple pictures. On the LEFT a round red trampoline pad sits low to the ground, in the MIDDLE a yellow curved springboard gleams under the light, on the RIGHT a big blue wooden barrel lies on its side, all large, fully visible, clearly separated.",
+      "text": "This is it — center ring, spotlight blazing, cape sparkling, stuffed animals on the edge of their tiny seats, and three ways to launch the triple somersault of a LIFETIME. Trampoline, springboard, or barrel?",
+      "choices": [
+        {
+          "label": "Bounce on the trampoline",
+          "next": "end_trampoline_quad",
+          "spot": "red trampoline pad"
+        },
+        {
+          "label": "Sprint up the springboard",
+          "next": "end_cape_twirl",
+          "spot": "yellow curved springboard"
+        },
+        {
+          "label": "Roll off the barrel",
+          "next": "end_barrel_oops",
+          "spot": "blue wooden barrel"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands on the tall wooden rigging platform near the tent peak, the shimmering sequin cape fluttering in the warm air rising from below, thick ropes and pulleys surrounding the platform, the sawdust ring glowing far below under spotlights, banners and posters are blank or show only simple pictures. On the LEFT a polished brass trapeze bar hangs within easy reach on two sturdy chains, on the RIGHT a wide orange seesaw plank sits balanced on the platform's edge over the ring, both large, fully visible, clearly separated.",
+      "text": "From this high up the stuffed animals look like SPRINKLES and the cape is catching updrafts like a tiny parachute — one swing or one stomp and tonight's grand finale writes itself. Trapeze bar or seesaw plank?",
+      "choices": [
+        {
+          "label": "Swing from the trapeze bar",
+          "next": "end_trapeze_quad",
+          "spot": "brass trapeze bar"
+        },
+        {
+          "label": "Jump onto the seesaw plank",
+          "next": "end_seesaw_launch",
+          "spot": "orange seesaw plank"
+        }
+      ]
+    },
+    "end_chalk_flip": {
+      "scene": "{HERO} swings from the thick red rope handles on the bouncy red landing net with sparkly chalked paws, spinning in a dazzling quadruple somersault above the net, chalk dust trailing through the spotlight beams like a comet tail, the stuffed animal audience toppling off their tiny chairs in excitement.",
+      "text": "Mo grabbed those rope handles with chalky paws and LAUNCHED into one two three — wait — FOUR perfect somersaults, the chalk streaming through the spotlights like a sparkly comet, and landed with a bounce so magnificent even the bear stopped balancing to applaud. The ringmaster ripped up the program and wrote THE MAGNIFICENT QUADRUPLE in enormous letters. The End!"
+    },
+    "end_net_oops": {
+      "scene": "{HERO} bounces wildly out of control from the sagging center of the bouncy red landing net, sparkly chalk dust flying everywhere like a glitter bomb, tumbling upward past the tent poles, chalk-paw prints stamped across the inside of the patchwork tent ceiling.",
+      "text": "Mo bounced from dead center and went UP and UP and kept going UP until those chalky paws stamped sparkly prints on the CEILING and then gravity remembered its job — SPLAT right back into the sawdust like a very sparkly pancake, and the triple somersault is still out there somewhere doing itself without Mo. Oopsie ending!",
+      "bad": true
+    },
+    "end_spring_quad": {
+      "scene": "{HERO} lies face-down in the sawdust on the circus floor beyond the springboard, the chalk from his paws making a long skid mark, the sequin cape wrapped around his head like a sparkly turban, having slipped off the springboard and slid instead of flipping.",
+      "text": "Mo planted those chalky paws on the springboard and LAUNCHED — straight forward instead of up! He slid across the sawdust like a sparkly penguin, the cape wrapped around his head, and he skidded to a stop at the ringmaster's feet in what was technically a SLIDE, not a somersault, and definitely not four of them. The chalk left a very dramatic skid mark though. Oopsie ending!",
+      "bad": true
+    },
+    "end_leap_star": {
+      "scene": "{HERO} rides the golden ramp curve at the end of the yellow springboard, sparkly chalk dust trailing from both paws in a shimmering arc, soaring in four graceful airborne rolls over the center ring, the stuffed animal audience frozen mid-gasp in their tiny chairs.",
+      "text": "Mo hit that golden curve and the chalk caught the spotlight like STARDUST as four perfect rolls unfolded across the whole tent — the ringmaster called it the smoothest quadruple in circus history even though Mo was mostly just trying not to sneeze from all the sparkle, and the stuffed animals gave a standing ovation on their tiny wobbly legs. The End!"
+    },
+    "end_trampoline_quad": {
+      "scene": "{HERO} bounces high off the round red trampoline pad on the gold center platform, the shimmering sequin cape spreading wide like wings, spinning in a dazzling quadruple somersault under the spotlight, confetti swirling through the air, the stuffed animal audience toppling sideways with excitement.",
+      "text": "Mo hit the trampoline and the sequin cape spread like WINGS as one two three FOUR somersaults lit up the tent — the cape caught every spotlight and threw rainbows across the ceiling, the ringmaster dropped the megaphone, and the program was rewritten on the spot: THE MAGNIFICENT QUADRUPLE, starring the bounciest performer who ever lived. The End!"
+    },
+    "end_cape_twirl": {
+      "scene": "{HERO} sprints up the yellow curved springboard on the gold center platform, the shimmering sequin cape swirling in a tight spiral, spinning in four rapid somersaults under the spotlight, landing in a shower of sawdust with the cape settling perfectly across both shoulders.",
+      "text": "Mo charged up that springboard and the sequin cape swirled into a TORNADO of sparkle — one two three FOUR flips and the cape settled back onto Mo's shoulders like it had rehearsed the whole thing in private, which honestly it probably had because that cape has OPINIONS. The ringmaster was already printing new posters for The Magnificent Quadruple. The End!"
+    },
+    "end_barrel_oops": {
+      "scene": "{HERO} rolls off the big blue wooden barrel on the gold center platform, the shimmering sequin cape tangled around both legs, tumbling across the sawdust in a rolling heap of sparkly fabric, the barrel rolling away in the opposite direction while the stuffed animal audience watches with their heads tilted.",
+      "text": "Mo rolled off that barrel like a sequined burrito and the cape wrapped around EVERYTHING — the somersault turned into a sideways roll across the whole ring, knocked over three juggling pins and a sandwich, and ended up tangled in the safety net while the barrel rolled off to start its OWN act. The triple somersault will have to wait and Mo is basically a very shiny cocoon right now. Oopsie ending!",
+      "bad": true
+    },
+    "end_trapeze_quad": {
+      "scene": "{HERO} swings from the polished brass trapeze bar on two sturdy chains high above the ring, the shimmering sequin cape streaming behind in a wide arc, releasing into four perfect somersaults over the sawdust ring, the stuffed animal audience craning their tiny necks upward in wonder.",
+      "text": "Mo swung from that trapeze bar and LET GO at the perfect moment — four somersaults unfolded like a sequined pinwheel while the cape caught the air like a tiny parachute, and Mo floated down to center ring in the most GRACEFUL landing the circus has seen since the bear learned to curtsy. The Magnificent Quadruple was born and the crowd went absolutely bananas. The End!"
+    },
+    "end_seesaw_launch": {
+      "scene": "{HERO} sits on the ground beside the wide orange seesaw plank, the sandbag having landed directly on the other end and launched Mo straight up into the circus tent ceiling where the sequin cape hangs tangled on a rafter, Mo looking up from below rubbing his head.",
+      "text": "Mo STOMPED that seesaw but the sandbag came DOWN on the other end instead of going up — which launched MO straight into the ceiling like a furry cannonball! The sequin cape caught on a rafter, Mo bounced back down and sat on the seesaw AGAIN, and the bear in the front row gave him a solid 2 out of 10 for the world's worst seesaw technique. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

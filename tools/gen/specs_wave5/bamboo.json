@@ -1,0 +1,243 @@
+{
+  "id": "bamboo",
+  "title": "Luna and the Moonlit Maze",
+  "hero": "LUNA",
+  "style": "Japanese woodblock print, gold-leaf moon, jade greens, ivory whites, delicate ink outlines, silver mist between bamboo stalks, paper lantern glow on wet stone. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands at the moonlit entrance of a towering bamboo labyrinth under a huge gold-leaf full moon, bamboo stalks thick as trees rising into silver mist, paper lanterns floating gently overhead casting warm amber pools on the stone path, and her horn flickering with faint fading light. On the LEFT a jade lantern trail of glowing green paper lanterns bobbing along a mossy stone path stretches into the bamboo, on the RIGHT a silver moonbeam trail of bright white moonlight pooling on polished stepping stones leads deeper into the maze, both large, fully visible, clearly separated.",
+      "text": "Luna's horn is flickering like a candle in a breeze and the Moon Pool is somewhere deep inside this bamboo maze — dawn is sneaking closer and if her horn goes dark she will be wandering in circles until breakfast. Lantern trail or moonbeam trail?",
+      "choices": [
+        {
+          "label": "Follow the lantern trail",
+          "next": "a",
+          "spot": "jade lantern trail"
+        },
+        {
+          "label": "Follow the moonbeams",
+          "next": "b",
+          "spot": "silver moonbeam trail"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} walks along a mossy stone path lined with floating jade paper lanterns casting warm amber glow on the bamboo walls, a small glowing lantern charm dangling from a low bamboo branch at eye level, and silver mist swirling gently between the stalks. On the LEFT a jade bamboo tunnel draped with hanging moss and trailing vines opens into darkness, on the RIGHT a row of silver stepping-stones crosses a narrow stream with golden koi flashing below, both large, fully visible, clearly separated.",
+      "text": "The lanterns bob along like they KNOW the way and hanging from a bamboo branch Luna finds a tiny glowing lantern charm that hums when she touches it — into her mane it goes because enchanted jewelry is always a good sign. Bamboo tunnel or stepping-stones?",
+      "choices": [
+        {
+          "label": "Enter the bamboo tunnel",
+          "next": "aa",
+          "spot": "jade bamboo tunnel"
+        },
+        {
+          "label": "Cross the stepping-stones",
+          "next": "ab",
+          "spot": "silver stepping-stones"
+        }
+      ],
+      "scare": {
+        "spot": "thick bamboo stalk",
+        "pop": "a giant silk moth with two enormous bright compound eyes and huge eye-patterned wings spread wide dropping silently from the bamboo canopy above",
+        "reveal": "Just stretching my wings in the moonlight!",
+        "sting": "boing",
+        "delay": 1800
+      }
+    },
+    "b": {
+      "scene": "{HERO} follows bright pools of silver moonlight along polished stepping stones, bamboo walls gleaming pale in the moon glow, a small moonstone pebble sitting in a hollow bamboo cup on a low stone pedestal, and faint blue sparkles drifting in the night air. On the LEFT an amber firefly archway of bent bamboo covered in flickering golden fireflies arches over a mossy path, on the RIGHT a slate stone garden with mossy fox statues arranged in a circle sits in a pool of moonlight, both large, fully visible, clearly separated.",
+      "text": "The moonbeams land in perfect pools like someone is AIMING them and inside a hollow bamboo cup Luna finds a moonstone pebble that glows warm when she picks it up — tucked behind her ear it goes because pockets are hard when you are a unicorn. Firefly archway or stone garden?",
+      "choices": [
+        {
+          "label": "Through the firefly archway",
+          "next": "ba",
+          "spot": "amber firefly archway"
+        },
+        {
+          "label": "Into the stone garden",
+          "next": "bb",
+          "spot": "slate stone garden"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} steps through a jade bamboo tunnel draped with hanging moss, the lantern charm in her mane casting a warm amber glow on the moss curtains, bamboo walls pressing close on both sides, and a faint melody drifting from somewhere ahead. On the LEFT an ivory paper screen painted with swirling mist blocks a clearing beyond with warm light glowing behind it, on the RIGHT a gold bamboo bridge with rope railings spans a dark ravine with silver mist rising from below, both large, fully visible, clearly separated.",
+      "text": "The moss curtains part like they were waiting for Luna and the lantern charm hums along with a melody coming from deeper inside the maze — somewhere ahead something is SINGING and it sounds like moonlight would if moonlight had a voice. Paper screen or bamboo bridge?",
+      "choices": [
+        {
+          "label": "Push past the paper screen",
+          "next": "m1",
+          "spot": "ivory paper screen"
+        },
+        {
+          "label": "Cross the bamboo bridge",
+          "next": "m2",
+          "spot": "gold bamboo bridge"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} balances on silver stepping-stones across a narrow stream, the lantern charm swinging from her mane and casting dancing light on the water, golden koi flashing between the stones below, and bamboo arching overhead like a cathedral ceiling. On the LEFT a white sand clearing with a flat meditation stone sits surrounded by raked sand patterns, on the RIGHT a crimson torii arch half-hidden by bamboo and draped with wisteria stands at the end of a mossy path, both large, fully visible, clearly separated.",
+      "text": "The koi follow Luna's lantern charm like it is their favorite nightlight and on the far bank the stream splits into two paths — one smells like warm sand and the other like wisteria blossoms which is a very fancy way of saying BOTH smell amazing. Sand clearing or torii arch?",
+      "choices": [
+        {
+          "label": "Step onto the sand clearing",
+          "next": "m1",
+          "spot": "white sand clearing"
+        },
+        {
+          "label": "Walk through the torii arch",
+          "next": "m2",
+          "spot": "crimson torii arch"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} passes through an amber firefly archway of bent bamboo, the moonstone pebble behind her ear pulsing gently, hundreds of golden fireflies swirling in spirals around her horn, and the bamboo walls beyond shimmering with reflected firefly light. On the LEFT a copper wind chime tree with dozens of tiny copper bells dangling from its branches stands in a pool of moonlight, on the RIGHT a jade bamboo fountain with water cascading down carved bamboo tiers into a stone basin burbles softly, both large, fully visible, clearly separated.",
+      "text": "The fireflies swirl around Luna's horn like they are trying to tell her something and the moonstone pebble behind her ear gets WARM whenever she faces the right direction — there is definitely something magical happening deeper in this maze. Wind chime tree or bamboo fountain?",
+      "choices": [
+        {
+          "label": "Listen at the wind chime tree",
+          "next": "m3",
+          "spot": "copper wind chime tree"
+        },
+        {
+          "label": "Check the bamboo fountain",
+          "next": "m4",
+          "spot": "jade bamboo fountain"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} walks carefully through a slate stone garden, the moonstone pebble behind her ear glowing blue, mossy fox statues arranged in a circle with their stone faces turned toward the center, and long shadows stretching between the statues in the bright moonlight. On the LEFT a bronze gong on a carved wooden stand sits between two bamboo pillars, on the RIGHT an emerald moss mound shaped like a sleeping dragon rises beside the path, both large, fully visible, clearly separated.",
+      "text": "Every fox statue seems to be watching Luna from the corner of its stone eyes which is VERY unsettling for a garden and the moonstone pebble flashes bright blue whenever she turns toward the center — something is definitely hiding here. Bronze gong or moss mound?",
+      "choices": [
+        {
+          "label": "Strike the bronze gong",
+          "next": "m3",
+          "spot": "bronze gong"
+        },
+        {
+          "label": "Climb the moss mound",
+          "next": "m4",
+          "spot": "emerald moss mound"
+        }
+      ],
+      "scare": {
+        "spot": "mossy fox statue",
+        "pop": "a chubby tanuki with two bright mischievous eyes and a green leaf perched on its head appearing from behind the mossy fox statue as every lantern in the garden goes dark and the maze walls shift",
+        "reveal": "Hee hee! Surprise shortcut! Or maybe longcut!",
+        "sting": "thunder",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands in a moonlit clearing where the bamboo walls have parted to reveal a shimmering pool of silver light ahead, but a chubby tanuki with a leaf on its head sits smugly between Luna and the pool surrounded by five identical tanuki copies all waving, and the lantern charm in Luna's mane buzzes urgently. On the LEFT a golden bamboo arch carved with crescent moons frames the path to the shimmering Moon Pool with moonlight streaming through, on the RIGHT a pink blossom carpet of fallen cherry petals leads along a fragrant side path deeper into the maze, both large, fully visible, clearly separated.",
+      "text": "The Moon Pool is RIGHT THERE but the tanuki has made five copies of itself and they are ALL waving which is adorable but EXTREMELY unhelpful — the lantern charm is buzzing like it knows which path is real. Bamboo arch or blossom carpet?",
+      "choices": [
+        {
+          "label": "Run for the Moon Pool",
+          "next": "end_lantern_arch",
+          "spot": "golden bamboo arch"
+        },
+        {
+          "label": "Follow the blossoms",
+          "next": "end_blossom_lost",
+          "spot": "pink blossom carpet"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} stands on a high bamboo platform where two paths branch under the full gold-leaf moon, the lantern charm glowing bright in her mane, silver mist below and stars above, and a faint shimmering reflection of the Moon Pool visible far below through a gap in the bamboo canopy. On the LEFT a silver waterfall curtain of glowing water cascading down a bamboo cliff face shimmers with moonlight and hides a passage behind it, on the RIGHT an amber bamboo tower spiraling upward toward the moon with climbing holds carved into its sides reaches above the canopy, both large, fully visible, clearly separated.",
+      "text": "Luna can SEE the Moon Pool shimmering far below through a gap in the bamboo and the lantern charm is pointing straight down like a tiny compass — go through the waterfall or climb the tower to catch the moon from above. Waterfall or tower?",
+      "choices": [
+        {
+          "label": "Leap through the waterfall",
+          "next": "end_waterfall_pool",
+          "spot": "silver waterfall curtain"
+        },
+        {
+          "label": "Climb the bamboo tower",
+          "next": "end_tower_moonbath",
+          "spot": "amber bamboo tower"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} faces the tanuki in a wide moonlit arena surrounded by tall bamboo walls, three identical grinning tanuki copies each blocking a different path forward, the moonstone pebble behind Luna's ear pulsing with each heartbeat, and Luna's horn crackling with stored sparkle energy ready to fire. On the LEFT a golden spark cluster of bright swirling sparks gathers at the tip of Luna's horn ready to burst, in the MIDDLE a white pulse ring of rapid concentric light circles radiates from Luna's horn ready to flash, on the RIGHT a blue light beam of calm steady light extends from Luna's horn ready to sweep, all large, fully visible, clearly separated.",
+      "text": "SPARKLE-HORN DUEL — the tanuki is blocking all three paths with copies of itself and Luna's horn is CRACKLING with enough sparkle energy for exactly ONE blast. Flash-blind to dazzle them, strobe-pulse to find the real one, or steady-beam to see through the trick?",
+      "choices": [
+        {
+          "label": "Flash-blind burst",
+          "next": "end_flash_dazzle",
+          "spot": "golden spark cluster"
+        },
+        {
+          "label": "Strobe-pulse reveal",
+          "next": "end_strobe_reveal",
+          "spot": "white pulse ring"
+        },
+        {
+          "label": "Steady-beam illuminate",
+          "next": "end_steady_truth",
+          "spot": "blue light beam"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands beside the jade bamboo fountain listening, the moonstone pebble warm behind her ear, and realizes the water cascading down the fountain tiers is making the SAME melody that the floating paper lanterns have been humming all night — the bamboo walls around her seem to sway gently in time with the music. On the LEFT a pearl moonlit path where the bamboo walls have parted just wide enough for Luna to walk through glows with soft white light, on the RIGHT a violet bamboo thicket of dense tangled bamboo with purple shadows between the stalks blocks a shortcut, both large, fully visible, clearly separated.",
+      "text": "Wait — the fountain is playing the SAME song the lanterns have been humming this whole time and the bamboo walls are swaying like they want to dance — maybe the trick is not to look harder but to LISTEN. Follow the song or push through the thicket?",
+      "choices": [
+        {
+          "label": "Follow the lantern song",
+          "next": "end_song_heart",
+          "spot": "pearl moonlit path"
+        },
+        {
+          "label": "Push through the thicket",
+          "next": "end_thicket_tangle",
+          "spot": "violet bamboo thicket"
+        }
+      ]
+    },
+    "end_lantern_arch": {
+      "scene": "{HERO} leaps through the golden bamboo arch as the lantern charm blazes bright and all five tanuki copies pop like soap bubbles, the real Moon Pool stretching wide and silver before Luna as she dips her horn into the glowing water, her horn-glow blazing back to full brilliant white, the tanuki sitting at the pool's edge applauding with both paws, and the first golden light of dawn touching the bamboo tops above.",
+      "text": "Luna charged through the bamboo arch and the lantern charm blazed so bright that every fake tanuki popped like a soap bubble — she dipped her horn into the Moon Pool and it ROARED back to life brighter than ever! The tanuki clapped and said THAT is how you navigate a maze — trust the light that chose you. The End!"
+    },
+    "end_blossom_lost": {
+      "scene": "{HERO} wanders down a spiral of falling cherry blossoms that go round and round in circles, the lantern charm growing dim in her mane, pink petals piling up around her hooves, the Moon Pool visible through the bamboo but getting FARTHER away with every step, and dawn light turning the sky gold as her horn flickers out completely.",
+      "text": "Luna followed the pretty blossoms and they led her in a GIANT circle — round and round while the petals piled up to her knees and the Moon Pool got farther away with every step! By the time dawn arrived her horn was completely dark and she was standing in a mountain of pink petals looking very confused and very sparkle-less. Oopsie ending!",
+      "bad": true
+    },
+    "end_waterfall_pool": {
+      "scene": "{HERO} leaps through the silver waterfall curtain, the lantern charm lighting her way, water parting around her horn in a sparkling arc, and lands in a hidden grotto where the Moon Pool glows brilliant silver beneath a canopy of bamboo, Luna dipping her horn into the water as it blazes back to full dazzling white, a family of fireflies swirling in celebration, and moonlight flooding the grotto through the waterfall.",
+      "text": "Luna jumped straight through the waterfall and behind it was the most beautiful hidden grotto with the Moon Pool glowing like liquid moonlight — she dipped her horn in and it blazed back BRIGHTER than a shooting star! A swirl of fireflies danced around her and the tanuki called from above that anyone brave enough to jump through a waterfall deserves the brightest horn in the forest. The End!"
+    },
+    "end_tower_moonbath": {
+      "scene": "{HERO} climbs the amber bamboo tower but her weight bends the top section sideways, the bamboo flexing like a fishing rod and catapulting Luna over the maze canopy, the lantern charm flying from her mane, Luna landing in a thick bamboo thicket upside down with her hooves tangled in the canopy and the Moon Pool glowing far below completely out of reach.",
+      "text": "Luna climbed the tower but bamboo is BENDY — the whole top section flexed like a catapult and FLUNG her over the canopy! She landed upside down in a thicket with her hooves tangled in bamboo and the lantern charm somewhere in the leaves below. The tanuki peeked up and said that is NOT how towers work. Oopsie ending!",
+      "bad": true
+    },
+    "end_flash_dazzle": {
+      "scene": "{HERO} fires a brilliant golden flash from her horn but it bounces off all three tanuki copies at once and reflects straight back into Luna's eyes, Luna stumbling backward dazzled and tripping over a bamboo root, the moonstone pebble flying from behind her ear, all three tanukis standing perfectly fine and waving while Luna blinks spots out of her vision.",
+      "text": "Luna fired the BIGGEST flash and it bounced off all three tanukis like a mirror ball — straight back into her OWN eyes! She stumbled around seeing spots, tripped over a root, and sat there blinking while every single tanuki waved cheerfully. The moonstone pebble rolled away and the tanuki said THAT is why you do not out-sparkle a trickster. Oopsie ending!",
+      "bad": true
+    },
+    "end_strobe_reveal": {
+      "scene": "{HERO} fires rapid white strobe pulses from her horn that flash across the moonlit arena, two of the three tanuki copies flicker and vanish like candle smoke with each pulse, the real tanuki stands alone caught mid-grin with two wide surprised eyes, the moonstone pebble pulsing behind Luna's ear, and the bamboo walls parting behind the revealed tanuki to show the glowing silver Moon Pool.",
+      "text": "Luna's horn pulsed STROBE STROBE STROBE and with each flash a fake tanuki vanished until only the real one stood there looking genuinely surprised that someone figured out his trick — he bowed so deep his leaf fell off and said THAT is the cleverest horn-work he had seen in a hundred moons! The walls parted and the Moon Pool was right there waiting. The End!"
+    },
+    "end_steady_truth": {
+      "scene": "{HERO} projects a calm blue steady beam from her horn that sweeps slowly across the moonlit arena, both fake tanuki copies turn transparent like glass and fade away, the real tanuki sits bathed in blue light with two gentle impressed eyes and his leaf hat glowing, the moonstone pebble warm behind Luna's ear, and the bamboo walls dissolving like mist to reveal the wide silver Moon Pool beyond.",
+      "text": "Luna held a steady blue beam and swept it across the arena like a lantern — the fake tanukis turned transparent and melted away and the real one just sat there with the most peaceful smile, saying that patience was the hardest lesson the maze could teach and Luna had passed without even trying! The walls dissolved and the Moon Pool opened wide and warm. The End!"
+    },
+    "end_song_heart": {
+      "scene": "{HERO} closes her eyes and walks along the pearl moonlit path following the lantern song instead of her horn-light, the bamboo walls gently swaying apart before her with each step, the moonstone pebble humming behind her ear, paper lanterns floating alongside her like old friends, and the path opening directly into a wide silver Moon Pool surrounded by blooming night flowers and the tanuki standing at the edge bowing with tears in his two bright eyes.",
+      "text": "Luna closed her eyes and followed the song — the bamboo walls PARTED before every step like they had been waiting for someone to finally listen instead of look! The tanuki was crying actual happy tears and said he had been guarding this maze for a hundred years waiting for someone wise enough to navigate by HEART instead of sight. Luna dipped her horn in the Moon Pool and it glowed warmer than it ever had before. The End!"
+    },
+    "end_thicket_tangle": {
+      "scene": "{HERO} pushes into the dense violet bamboo thicket, purple bamboo shoots tangling around her legs and mane, the moonstone pebble going cold behind her ear, her horn-light sputtering as the thicket gets thicker and darker, and dawn light visible through tiny gaps above but completely out of reach while the lanterns' song fades to silence behind her.",
+      "text": "Luna shoved into the thicket and the bamboo grabbed on like it had opinions about shortcuts — every step got more tangled and the lanterns' song got quieter until she was stuck up to her ears in purple bamboo with her horn completely dark and dawn happening without her. The tanuki sighed from somewhere above and said THAT is what happens when you stop listening. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

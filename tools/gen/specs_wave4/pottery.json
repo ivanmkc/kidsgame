@@ -1,0 +1,243 @@
+{
+  "id": "pottery",
+  "title": "Milo and the Wobbly Bowl",
+  "hero": "MILO",
+  "style": "Warm terracotta and earth tones, sun-dappled studio through wide windows, kiln ember glow, wet clay sheen, rustic shelving. Landscape orientation. No text, no letters, no watermark, no people.",
+  "nodes": {
+    "start": {
+      "scene": "{HERO} stands in the entrance of a sun-filled ceramics workshop, paws dusty with clay, a spinning pottery wheel to the right, shelves of drying pots on the walls, a brick kiln glowing amber in the back corner. On the LEFT a colorful glaze shelf holds rainbow jars of shiny glaze and a horsehair brush hanging from a hook, on the RIGHT a row of brown clay bins overflows with mounds of wet clay and sculpting tools, both large, fully visible, clearly separated.",
+      "text": "Grandmother's birthday is TODAY, the kiln is warm and ready, and Milo has exactly zero bowls made — his soft paws always squish clay lopsided but THIS time will be different. Glaze shelf or clay bins?",
+      "choices": [
+        {
+          "label": "Visit the glaze shelf",
+          "next": "a",
+          "spot": "colorful glaze shelf"
+        },
+        {
+          "label": "Dig in the clay bins",
+          "next": "b",
+          "spot": "brown clay bins"
+        }
+      ]
+    },
+    "a": {
+      "scene": "{HERO} stands beside a colorful glaze shelf lined with rainbow jars of shiny glaze, a small horsehair brush tucked behind his ear, a tall clay pot sitting on the floor beside the shelf, warm sunlight streaming through the window. On the LEFT a big wooden pottery wheel sits on a low platform under a wide window, on the RIGHT a sturdy hand-building table covered with slabs of flat clay and wooden tools stretches along the wall, both large, fully visible, clearly separated.",
+      "text": "Milo grabbed a horsehair brush and tucked it behind one ear like a proper artisan, which made him feel roughly four hundred percent more professional — SPLORCH, wet glaze dripped on his nose. Pottery wheel or building table?",
+      "choices": [
+        {
+          "label": "Try the pottery wheel",
+          "next": "aa",
+          "spot": "big wooden wheel"
+        },
+        {
+          "label": "Try the building table",
+          "next": "ab",
+          "spot": "sturdy building table"
+        }
+      ],
+      "scare": {
+        "spot": "tall clay pot",
+        "pop": "a kiln gecko with two big round curious eyes peeking over the rim of the tall clay pot and flicking its tongue cheerfully",
+        "reveal": "Just sunbathing on the warm clay!",
+        "sting": "chirp",
+        "delay": 1700
+      }
+    },
+    "b": {
+      "scene": "{HERO} digs through a row of brown clay bins filled with mounds of wet clay, holding up a smooth blue river stone with a leaf fossil pressed into its surface, warm light from the kiln glowing in the background. On the LEFT a drying rack corridor with shelves of half-finished pots leads toward the glowing brick kiln, on the RIGHT a long coil-building bench with rolled clay ropes and a brown clay jug on the shelf stretches along the wall, both large, fully visible, clearly separated.",
+      "text": "Buried in the clay like a tiny treasure, Milo found a smooth blue stone with a leaf pressed right into it — nature's own rubber stamp, and it fits perfectly in his paw. Drying racks or coil bench?",
+      "choices": [
+        {
+          "label": "Walk the drying racks",
+          "next": "ba",
+          "spot": "drying rack corridor"
+        },
+        {
+          "label": "Sit at the coil bench",
+          "next": "bb",
+          "spot": "long coil bench"
+        }
+      ]
+    },
+    "aa": {
+      "scene": "{HERO} sits at the big wooden pottery wheel under a wide window, the horsehair brush tucked behind his ear, paws on a lump of wet clay spinning slowly, sunlight catching the clay sheen. On the LEFT a jade tile shelf holds three sculpting tools neatly arranged, on the RIGHT a cushioned clay stool sits beside a warm copper basin of water, both large, fully visible, clearly separated.",
+      "text": "The wheel is spinning and the clay is ALREADY tilting sideways because Milo's left paw pushes harder than his right — classic kitten engineering problem. Tool shelf or clay stool?",
+      "choices": [
+        {
+          "label": "Pick from the tool shelf",
+          "next": "m1",
+          "spot": "jade tile shelf"
+        },
+        {
+          "label": "Sit at the clay stool",
+          "next": "m2",
+          "spot": "cushioned clay stool"
+        }
+      ]
+    },
+    "ab": {
+      "scene": "{HERO} stands at the sturdy hand-building table covered with slabs of flat clay and wooden rolling pins, the horsehair brush tucked behind his ear, patting a thick clay slab with both paws. On the LEFT a jade tile shelf holds three sculpting tools neatly arranged, on the RIGHT a cushioned clay stool sits beside a warm copper basin of water, both large, fully visible, clearly separated.",
+      "text": "The slab is thick, the table is solid, and every time Milo presses down his paw prints squish into the clay like the world's squishiest autograph book. Tool shelf or clay stool?",
+      "choices": [
+        {
+          "label": "Pick from the tool shelf",
+          "next": "m1",
+          "spot": "jade tile shelf"
+        },
+        {
+          "label": "Sit at the clay stool",
+          "next": "m2",
+          "spot": "cushioned clay stool"
+        }
+      ]
+    },
+    "ba": {
+      "scene": "{HERO} walks through the drying rack corridor lined with shelves of half-finished bowls and mugs, the smooth blue river stone clutched in his paw, the brick kiln glowing orange at the far end. On the LEFT a round clay turntable sits on a low wooden stand near the kiln, on the RIGHT a small finishing station with jars of colored slip and flat polishing stones lines the wall, both large, fully visible, clearly separated.",
+      "text": "Every pot on these shelves is wonkier than the last and they are ALL gorgeous — maybe this workshop runs on wobbly magic or maybe clay just has a mind of its own. Turntable or finishing station?",
+      "choices": [
+        {
+          "label": "Spin the turntable",
+          "next": "m3",
+          "spot": "round clay turntable"
+        },
+        {
+          "label": "Try the finishing station",
+          "next": "m4",
+          "spot": "small finishing station"
+        }
+      ]
+    },
+    "bb": {
+      "scene": "{HERO} sits at the long coil-building bench surrounded by rolled clay coils like fat terracotta snakes, the smooth blue river stone resting beside his paw, a brown clay jug sitting on the shelf above. On the LEFT a round clay turntable sits on a low wooden stand near the warm kiln, on the RIGHT a small finishing station with jars of colored slip and flat polishing stones lines the wall, both large, fully visible, clearly separated.",
+      "text": "Milo rolled a clay coil so long it fell off the bench and curled around his tail — he is now part of the art, which is either a problem or a feature depending on your perspective. Turntable or finishing station?",
+      "choices": [
+        {
+          "label": "Spin the turntable",
+          "next": "m3",
+          "spot": "round clay turntable"
+        },
+        {
+          "label": "Try the finishing station",
+          "next": "m4",
+          "spot": "small finishing station"
+        }
+      ],
+      "scare": {
+        "spot": "brown clay jug",
+        "pop": "a round clay-dusted tree frog with two big bright round eyes hopping out of the brown clay jug trailing a ribbon of wet clay",
+        "reveal": "Ribbit! This jug was SO cozy inside!",
+        "sting": "ribbit",
+        "delay": 1700
+      }
+    },
+    "m1": {
+      "scene": "{HERO} stands at the jade tile shelf near the pottery wheel, the horsehair brush tucked behind his ear, studying three sculpting tools arranged in a neat row. On the LEFT a red wooden rib smoother shaped like a crescent sits on the shelf, in the MIDDLE a round yellow sponge sits plump and damp beside it, on the RIGHT a blue clay pitcher full of water gleams in the sunlight, all large, fully visible, clearly separated.",
+      "text": "Three tools, one bowl, zero time to waste — the red rib is for smoothing, the sponge is for texturing, and that pitcher is SUSPICIOUSLY full of water for a clay situation. Rib, sponge, or pitcher?",
+      "choices": [
+        {
+          "label": "Use the red rib",
+          "next": "end_rib_bowl",
+          "spot": "red wooden rib"
+        },
+        {
+          "label": "Squeeze the yellow sponge",
+          "next": "end_sponge_bowl",
+          "spot": "round yellow sponge"
+        },
+        {
+          "label": "Pour from the pitcher",
+          "next": "end_splash_puddle",
+          "spot": "blue clay pitcher"
+        }
+      ]
+    },
+    "m2": {
+      "scene": "{HERO} sits on the cushioned clay stool holding a lopsided bowl he shaped with both soft paws, the horsehair brush tucked behind his ear, wet clay under his claws, the bowl's walls tilting charmingly in every direction. On the LEFT a warm amber kiln alcove glows with banked embers and an open shelf ready for firing, on the RIGHT a plush terracotta cushion sits on the floor beside the warm kiln wall, both large, fully visible, clearly separated.",
+      "text": "Both paws in, clay spinning, and EVERY press made the walls tilt a little more — it is objectively the wobbliest bowl in recorded pottery history but there is something weirdly beautiful about it. Kiln or cushion?",
+      "choices": [
+        {
+          "label": "Fire it in the kiln",
+          "next": "end_heartbeat_bowl",
+          "spot": "warm amber kiln"
+        },
+        {
+          "label": "Rest on the cushion",
+          "next": "end_kiln_nap",
+          "spot": "terracotta cushion"
+        }
+      ]
+    },
+    "m3": {
+      "scene": "{HERO} stands at the round clay turntable near the brick kiln, the smooth blue river stone clutched in one paw, a half-formed bowl wobbling on the spinning turntable surface. On the LEFT a rack of long wooden carving sticks sits within easy reach beside the turntable, on the RIGHT a wide orange glaze bowl filled with shimmering amber glaze sits on a low stool, both large, fully visible, clearly separated.",
+      "text": "The turntable is spinning and Milo's bowl is doing that signature wobble that would make any potter quietly concerned — the stone's leaf fossil would make a BEAUTIFUL stamp or that amber glaze could save everything. Carving sticks or glaze bowl?",
+      "choices": [
+        {
+          "label": "Grab the carving sticks",
+          "next": "end_fossil_stamp",
+          "spot": "wooden carving sticks"
+        },
+        {
+          "label": "Dip in the glaze bowl",
+          "next": "end_amber_glaze",
+          "spot": "orange glaze bowl"
+        }
+      ]
+    },
+    "m4": {
+      "scene": "{HERO} stands at the small finishing station with jars of colored slip, the smooth blue river stone resting on the table beside a lumpy pinch pot he has been squeezing into shape. On the LEFT a large copper polishing wheel with a smooth spinning disc sits at the end of the station, on the RIGHT a red clay stamp press with a lever handle sits bolted to the table, both large, fully visible, clearly separated.",
+      "text": "The pinch pot is EXTREMELY pinched and slightly resembles a hat more than a bowl, but Milo has options — polish it smooth on the copper wheel or press a fancy pattern with the stamp. Polishing wheel or stamp press?",
+      "choices": [
+        {
+          "label": "Use the polishing wheel",
+          "next": "end_pinch_gift",
+          "spot": "copper polishing wheel"
+        },
+        {
+          "label": "Press the stamp",
+          "next": "end_stone_mosaic",
+          "spot": "red clay stamp press"
+        }
+      ]
+    },
+    "end_rib_bowl": {
+      "scene": "{HERO} holds up a smooth wobble-edged bowl fresh from the pottery wheel, the horsehair brush leaving delicate curved lines across the rim as decoration, warm sunlight streaming through the workshop window, the bowl's walls gently uneven but gleaming with a soft clay sheen, grandmother's paws reaching into the frame to accept it.",
+      "text": "Milo smoothed the clay with the red rib until the bowl was ALMOST perfect and then grabbed the horsehair brush and painted tiny curving lines all around the rim, each one a little wiggly because painting with a brush behind your ear is harder than it looks. Grandmother said it was the most elegant bowl she had ever held, wobbles and all. The End!"
+    },
+    "end_sponge_bowl": {
+      "scene": "{HERO} squeezes the wet sponge too hard over the clay bowl on the wheel, the bowl collapsing into a flat wet pancake of clay, water splashing everywhere, the horsehair brush stuck in the clay, Milo holding a dripping sponge with a shocked expression.",
+      "text": "Milo squeezed the sponge and the clay went SQUISH SQUISH SQUIIISH — a little too much squish! The bowl went from round to flat to basically a clay puddle, water splashed in Milo's face, and the horsehair brush got stuck in the goop like a tiny flagpole on a very sad island. Grandmother would be getting a coaster instead of a bowl. Oopsie ending!",
+      "bad": true
+    },
+    "end_splash_puddle": {
+      "scene": "{HERO} stands at the pottery wheel looking down at a flat puddle of melted clay where a bowl used to be, the blue clay pitcher empty and tipped over, water pooled across the whole wheel and dripping onto the floor, the horsehair brush floating in the clay puddle like a tiny raft.",
+      "text": "Milo poured the ENTIRE pitcher onto the spinning clay and the bowl went from wobbly to wavy to SPLAT — now it is a clay puddle, the brush is surfing in circles, and grandmother's birthday bowl has officially become grandmother's birthday pancake. Maybe start over? Oopsie ending!",
+      "bad": true
+    },
+    "end_heartbeat_bowl": {
+      "scene": "{HERO} stands proudly beside the pottery wheel holding up a beautifully lopsided bowl with gentle uneven walls, the horsehair brush tucked behind his ear, grandmother cupping the bowl in both paws with happy tears in her eyes, warm kiln light glowing behind them, the wobble in the clay walls catching the light like a soft heartbeat rhythm.",
+      "text": "Milo trusted his paws and the bowl came out gloriously, magnificently, PERFECTLY wobbly — and grandmother burst into happy tears because in her village they call these heartbeat bowls, shaped by the natural wobble of loving paws, and they are the most treasured pottery of all. Milo's mistake was the tradition this whole time. The End!"
+    },
+    "end_kiln_nap": {
+      "scene": "{HERO} curled up on the plush terracotta cushion beside the brick kiln, eyes closed, the horsehair brush still tucked behind his ear, while the kiln embers fade from orange to gray and the unfired wet bowl sits forgotten on the wheel slowly drying crooked.",
+      "text": "That cushion was SO warm, the kiln was humming a lullaby, and Milo closed his eyes for just ONE second — he woke up to a cold kiln, a bone-dry cracked lump that used to be a bowl, and a birthday party that started an hour ago without a gift. That brush behind his ear is the only thing still ready to go. Oopsie ending!",
+      "bad": true
+    },
+    "end_fossil_stamp": {
+      "scene": "{HERO} presses the smooth blue river stone into the side of a wobbling bowl on the turntable, leaving a perfect leaf fossil imprint in the wet clay, the wooden carving sticks adding vine details around the leaf, warm kiln glow behind them, grandmother tracing the leaf pattern with one delighted claw.",
+      "text": "Milo pressed the river stone into the clay and the tiny leaf fossil came out PERFECT — then he grabbed the carving sticks and drew little vines around it until the whole bowl looked like a forest floor in miniature. Grandmother held it up to the window and said she could practically hear the leaves rustling. The End!"
+    },
+    "end_amber_glaze": {
+      "scene": "{HERO} lifts a gleaming amber-glazed bowl from beside the brick kiln, the smooth blue river stone set into the bottom of the bowl like a hidden jewel, the glaze shimmering golden in the warm light, grandmother peering into the bowl and discovering the stone's leaf fossil through the clear amber.",
+      "text": "Milo dipped the whole bowl in the amber glaze and it came out SHIMMERING like liquid honey — then he pressed the river stone into the very bottom so grandmother would always find a secret leaf when she finished her soup. She said it was like finding treasure at the bottom of every meal. The End!"
+    },
+    "end_pinch_gift": {
+      "scene": "{HERO} holds up a small polished pinch pot buffed smooth on the copper polishing wheel, the smooth blue river stone sitting inside the bowl like a gift within a gift, warm afternoon light from the workshop window making the clay glow, grandmother cradling the tiny pot with both paws.",
+      "text": "The pinch pot came off the polishing wheel smooth as a river pebble, and Milo tucked the blue stone right inside — a bowl AND a lucky charm in one tiny package. Grandmother said big things come in small pots and this was the biggest little gift she had ever received. The End!"
+    },
+    "end_stone_mosaic": {
+      "scene": "{HERO} stands beside the red clay stamp press looking at a bowl covered in overlapping smudged stamps that have completely obliterated each other, the smooth blue river stone having punched a hole through the bottom of the bowl, clay crumbs everywhere.",
+      "text": "Milo pressed the stone into the stamp and THUNK THUNK THUNK — but pressed a little too hard on the last one and punched the stone clean THROUGH the bottom of the bowl! Clay crumbs flew everywhere, the leaf fossil stamps all smooshed together into an unreadable blob, and Milo was left holding a bowl with a hole in it, which is technically a very short tube. Oopsie ending!",
+      "bad": true
+    }
+  }
+}

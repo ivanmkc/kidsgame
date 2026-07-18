@@ -99,4 +99,80 @@ EXTRA_HIDDEN_THEMES = [
     {"id": "orchard", "name": "Apple Orchard",
      "base": "A sunny apple orchard: rows of apple trees heavy with red apples, wooden ladders, bushel baskets, a tractor cart, a scarecrow with a floppy hat, rolling hills.",
      "targets": [("worm", "a happy worm popping out of an apple"), ("pie", "an apple pie on a crate"), ("crow", "a plump black crow"), ("basket", "a basket overflowing with apples"), ("hedgehog", "a hedgehog carrying an apple"), ("butterfly", "a yellow butterfly"), ("jug", "a jug of apple cider"), ("squirrel", "a red squirrel")]},
+
+    # --- Halloween / spooky / yokai themes ---
+
+    {"id": "haunted_house", "name": "Haunted House",
+     "base": "A fun-spooky haunted house hallway, painted in deep moody midnight blues and purples: creaky wooden stairs with a carved banister, cobwebs in every corner, flickering candelabras, rattling suits of armor, a grandfather clock with no numbers, portrait frames on the walls with only spooky eyes peeking out. No people, no text.",
+     "targets": [("jackolantern", "a glowing jack-o-lantern"), ("broomstick", "a witch's broomstick leaning on the wall"), ("cauldron", "a bubbling green cauldron"), ("blackcat", "a black cat with glowing yellow eyes"), ("batty", "a friendly purple bat"), ("cobweb", "a big silver cobweb with a tiny spider"), ("potion", "a glowing purple potion bottle"), ("tophat_h", "a dusty black top hat"), ("candlestick", "a tall brass candlestick")]},
+
+    {"id": "spooky_graveyard", "name": "Spooky Graveyard",
+     "base": "A playful, cartoonish graveyard at twilight with a warm golden-hour glow: rolling misty hills, round-topped tombstones with no text, a crooked iron fence, gnarled trees with hanging moss, a big orange harvest moon, fireflies twinkling. Everything fun-spooky, not scary. No people, no text.",
+     "targets": [("ghost", "a friendly smiling white ghost"), ("owl_g", "a wide-eyed owl on a branch"), ("toad", "a warty green toad on a tombstone"), ("raven", "a big glossy raven"), ("coffin", "a cartoon coffin standing upright"), ("lantern_g", "a glowing green lantern"), ("pumpkin_g", "a pumpkin sitting in the grass"), ("bones", "a pile of cartoon bones"), ("witchhat", "a pointy purple witch hat")]},
+
+    {"id": "yokai_festival", "name": "Yokai Festival",
+     "base": "A magical Japanese yokai festival at night, in a Japanese woodblock print style: a stone torii gate draped in red paper lanterns, festival stalls with striped curtains and no text on signs, cherry blossom petals drifting, a stone path, glowing will-o-wisps, stone fox statues. No people, no text.",
+     "targets": [("kitsune", "a cute white fox with a red bib"), ("tanuki", "a round tanuki with a big belly"), ("daruma", "a red daruma doll"), ("taiko", "a big red taiko drum"), ("mask_oni", "a colorful oni mask"), ("chochin", "a paper lantern with a funny face"), ("windchime", "a glass wind chime"), ("maneki", "a golden beckoning cat figurine"), ("wagasa", "a red paper umbrella")]},
+
+    {"id": "witch_kitchen", "name": "Witch's Kitchen",
+     "base": "A witch's kitchen in flat cartoon style with thick black outlines and bright solid colors, viewed straight on: open wooden shelves on the back wall with objects sitting on them spaced far apart, a bare stone floor with objects sitting directly on it spaced far apart. Each object fully visible, clearly separated from every other object, nothing overlapping anything else, nothing hidden behind anything. Minimal background clutter, plain walls, no decorative patterns. No people, no text.",
+     "targets": [("pumpkin_w", "a round orange pumpkin"), ("blackcat_w", "a black cat"), ("broom_w", "a straw broom"), ("spellbook_w", "a big red book"), ("greenbottle", "a tall green glass bottle"), ("purplebottle", "a round purple glass bottle"), ("cauldron_w", "a big black cauldron"), ("candle_w", "a tall yellow candle"), ("mushroom_w", "a red spotted mushroom")]},
+
+    {"id": "monster_bedroom", "name": "Monster's Bedroom",
+     "base": "A friendly monster's bedroom at night, with a retro 1950s atomic-age illustration feel: a big lumpy bed with a monster-shaped headboard, toys scattered on the floor, a glowing nightlight, curtains with star patterns, fuzzy slippers. No people, no text.",
+     "targets": [("nightlight", "a bright crescent moon nightlight"), ("monsterplush", "a big purple monster plushie"), ("slippers", "a pair of orange fuzzy monster slippers"), ("lavalamp", "a green lava lamp"), ("alarm_m", "a red alarm clock"), ("rocketship_m", "a yellow toy rocket"), ("drum_m", "a blue toy drum"), ("ball_m", "a striped bouncy ball"), ("teddy_m", "a brown teddy bear")]},
+
+    # --- Diverse creative scenes ---
+
+    {"id": "coral_reef", "name": "Coral Reef",
+     "base": "A vibrant coral reef teeming with life, painted in luminous watercolor washes: branching corals in pink, orange and purple, waving sea fans, a sandy ocean floor, shafts of sunlight filtering down through turquoise water, schools of tiny fish shimmering in the background. No people, no text.",
+     "targets": [("clownfish", "an orange clownfish in an anemone"), ("seahorse", "a curly pink seahorse"), ("morayeel", "a friendly green moray eel peeking out"), ("starfish_c", "a bright blue starfish"), ("seashell", "a big striped spiral shell"), ("jellyfish", "a translucent purple jellyfish"), ("angelfish", "a yellow and blue angelfish"), ("octopus_r", "a small red octopus"), ("urchin", "a round purple sea urchin")]},
+
+    {"id": "robot_factory", "name": "Robot Factory",
+     "base": "A cheerful robot factory floor with a retro 1950s atomic-age illustration feel: conveyor belts carrying colorful parts, robotic arms assembling toy robots, blinking control panels with big buttons, gears on the walls, sparks flying, bright overhead lights. No people, no text.",
+     "targets": [("gearwheel", "a big golden gear"), ("wrench", "a shiny red wrench"), ("tinrobot", "a little blue wind-up robot"), ("springcoil", "a bouncy silver spring"), ("lightbulb", "a glowing yellow light bulb"), ("battery", "a chunky green battery"), ("antenna", "a robot antenna with a blinking red tip"), ("oilcan_r", "a red oil can"), ("circuit", "a colorful circuit board")]},
+
+    {"id": "cloud_kingdom", "name": "Cloud Kingdom",
+     "base": "A magical kingdom built on fluffy clouds, in the style of a vintage children's book illustration: cloud castles with rainbow bridges, golden stairs, a big smiling sun, a colorful hot air balloon floating past. No people, no text.",
+     "targets": [("rainbow_c", "a bright rainbow arch"), ("sunface", "a big golden sun with a face"), ("umbrella_c", "a red polka-dot umbrella"), ("balloon_c", "a colorful hot air balloon"), ("crown_c", "a golden crown on a cloud"), ("bird_c", "a blue bird flying"), ("harp", "a big golden harp"), ("cake_c", "a pink frosted cake on a cloud"), ("flag_c", "a red triangular flag")]},
+
+    {"id": "giant_kitchen", "name": "Giant's Kitchen",
+     "base": "A giant's kitchen seen from the floor in flat cartoon style with bold outlines: a huge checkered tile floor stretching to the horizon, a towering red mug, an enormous yellow cheese wedge, a massive green apple, a giant chocolate chip cookie, a huge silver fork, all placed clearly on the floor like landmarks. Everything oversized and bright. No people, no text.",
+     "targets": [("redmug_g", "a huge red mug"), ("cheese_g", "a big yellow cheese wedge"), ("apple_g", "a massive green apple"), ("cookie_g", "a giant round cookie"), ("fork_g", "a huge silver fork"), ("eggcup_g", "a big blue egg cup"), ("tomato_g", "a giant red tomato"), ("carrot_g", "a huge orange carrot"), ("cupcake_g", "a big pink cupcake")]},
+
+    {"id": "wizard_library", "name": "Wizard's Library",
+     "base": "A grand wizard's library bathed in warm golden-hour glow: towering shelves of ancient leather-bound books, a spiraling wooden staircase, floating candles drifting through the air, a globe spinning by itself, a telescope by a tall arched window, scattered scrolls and parchment. No people, no text.",
+     "targets": [("owlwise", "a wise owl perched on a book stack"), ("scroll", "a rolled-up golden scroll"), ("globe_w", "a glowing magical globe"), ("quill", "a feather quill in an inkwell"), ("hourglass", "a sparkling hourglass"), ("potion_w", "a floating green potion bottle"), ("amulet", "a shiny golden amulet"), ("crystal_w", "a purple crystal cluster"), ("tome", "a thick red book with a golden clasp")]},
+
+    {"id": "ice_palace", "name": "Ice Palace",
+     "base": "An enchanted ice palace interior in deep moody midnight blues and silvers: glittering ice walls, a frozen chandelier, a grand staircase of blue ice, icicle columns, frost patterns on arched windows, a frozen fountain in the center, northern lights visible through a skylight. No people, no text.",
+     "targets": [("snowflake", "a giant ornate snowflake"), ("icecrystal", "a sparkling ice crystal"), ("penguin_i", "a penguin sliding on the floor"), ("frostflower", "a frozen blue flower"), ("tiara", "an icy crystal tiara"), ("snowglobe", "a snow globe on a pedestal"), ("polarbear", "a small polar bear cub"), ("icicle", "a big shimmering icicle"), ("sled_i", "a silver sled")]},
+
+    {"id": "mole_city", "name": "Underground Mole City",
+     "base": "A cross-section view of underground tunnels in flat cartoon style with bold outlines: round earthen rooms connected by tunnels, brown dirt walls, green roots hanging down. Bright distinct objects sit in each room: a red armchair, a yellow lamp, a blue teapot, a green wheelbarrow. Simple, chunky, colorful. No people, no text.",
+     "targets": [("redchair", "a small red armchair"), ("yellowlamp", "a bright yellow lamp"), ("blueteapot", "a blue teapot"), ("greencart", "a green wheelbarrow"), ("orangebook", "an orange book"), ("pinkworm", "a big pink worm"), ("purplegem", "a purple gemstone"), ("brownclock", "a brown cuckoo clock"), ("whitemug", "a white mug")]},
+
+    {"id": "treehouse_village", "name": "Treehouse Village",
+     "base": "A magical treehouse village at sunset with a warm golden-hour glow: wooden platforms and huts nestled in the branches of enormous trees, rope bridges connecting them, hanging flower baskets, lanterns strung between branches, a tire swing, a pulley basket for hauling supplies. No people, no text.",
+     "targets": [("birdfeeder", "a hanging bird feeder"), ("hammock", "a colorful striped hammock"), ("windchime_t", "a set of wooden wind chimes"), ("mailbox_t", "a tiny mailbox nailed to a branch"), ("teapot_t", "a teapot hanging over a small fire"), ("ladder_t", "a rope ladder dangling down"), ("lantern_t", "a glowing paper lantern"), ("squirrel_t", "a squirrel carrying a big nut"), ("flag_t", "a triangular pennant flag")]},
+
+    {"id": "steampunk_airship", "name": "Steampunk Airship",
+     "base": "A steampunk airship deck in flat cartoon style with bold outlines: a blue sky with orange sunset clouds behind, a wooden deck with brass railings, a big red steering wheel, a telescope on a stand, barrels and crates stacked on deck, a flag on a mast. Simple chunky objects in bright distinct colors. No people, no text.",
+     "targets": [("redwheel", "a big red steering wheel"), ("telescope_s", "a brass telescope on a tripod"), ("barrel_s", "a brown wooden barrel"), ("crate_s", "a green wooden crate"), ("flag_s", "a red flag on a mast"), ("lantern_s", "a hanging brass lantern"), ("compass_s", "a big golden compass"), ("bell_s", "a brass bell"), ("rope_s", "a coiled rope")]},
+
+    {"id": "crystal_cavern", "name": "Crystal Cavern",
+     "base": "A magnificent underground crystal cavern glowing with inner light: towering amethyst, emerald and topaz crystal formations, an underground river reflecting prismatic colors, stalactites dripping, a stone bridge arching over the water, bioluminescent moss on the cave walls. No people, no text.",
+     "targets": [("amethyst", "a tall purple amethyst crystal"), ("emerald", "a glowing green emerald"), ("geode", "a cracked-open geode"), ("glowworm", "a glowing blue worm on the ceiling"), ("cavebat", "a tiny bat hanging upside down"), ("fossilfish", "a fossil of a fish in the rock"), ("stalactite", "a dripping stalactite"), ("minecart", "a rusty mine cart on tracks"), ("caveshroom", "a cluster of glowing mushrooms")]},
+
+    {"id": "circus_backstage", "name": "Circus Backstage",
+     "base": "A bustling circus backstage area, painted in bold saturated primary colors: costume racks, a mirror with round light bulbs, stacked trunks and props, a red unicycle, a tall magician hat. No people, no text.",
+     "targets": [("unicycle", "a shiny red unicycle"), ("tophat_c", "a tall black magician top hat"), ("trumpet_c", "a golden trumpet"), ("drum_c", "a big red bass drum"), ("balloon_c2", "a bunch of colorful balloons"), ("trunk_c", "a large striped trunk"), ("cape_c", "a sparkly purple cape on a hanger"), ("stool_c", "a tall red stool"), ("megaphone_c", "a yellow megaphone")]},
+
+    {"id": "dragonfly_meadow", "name": "Dragonfly Meadow",
+     "base": "A close-up view of a sunny meadow at insect level, in luminous watercolor washes: towering wildflowers, big mushrooms, clover patches, a mossy rock, a shallow puddle. Everything drawn large and bold. No people, no text.",
+     "targets": [("dragonfly_m", "a big shimmering blue dragonfly"), ("ladybug_m", "a big red ladybug"), ("mushroom_m", "a big red spotted mushroom"), ("snail_m", "a large snail with a spiral shell"), ("daisy", "a big white daisy flower"), ("bumblebee_m", "a large fuzzy bumblebee"), ("frog_m", "a bright green frog"), ("butterfly_m", "a big orange butterfly"), ("acorn_md", "a brown acorn on the ground")]},
+
+    {"id": "sky_market", "name": "Market in the Sky",
+     "base": "A fantastical floating market among the clouds, in the style of a vintage children's book illustration: wooden market stalls perched on cloud platforms, rope bridges between them, baskets dangling from hot air balloons, striped awnings fluttering in the breeze, a distant rainbow. No people, no text.",
+     "targets": [("hotairballoon", "a striped hot air balloon"), ("windvane", "a rooster-shaped weather vane"), ("fruitbasket", "a basket of colorful fruit"), ("teapot_sky", "a copper teapot on a stall"), ("birdcage", "an ornate birdcage with a songbird"), ("kite_s", "a diamond-shaped kite"), ("flowerpot_s", "a hanging flowerpot with blooms"), ("scalebalance", "a balance scale on a counter"), ("cloudlantern", "a floating cloud lantern")]},
 ]
