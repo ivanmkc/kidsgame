@@ -53,6 +53,20 @@ python3 tools/tighten_hitboxes.py > /dev/null
 python3 tools/rate_levels.py
 python3 tools/gen_thumbs.py
 node tools/gen_images_ts.mjs
+# Every bundled asset must be committed — 758 files once shipped from disk
+# only, so a clean clone couldn't build (hard gate).
+python3 - <<'PYEOF'
+import re, subprocess, sys
+tracked = set(subprocess.run(['git','ls-files'], capture_output=True, text=True).stdout.splitlines())
+refs = {m.group(1) for m in re.finditer(r"require\('\.\./\.\./(assets/game/[^']+)'\)", open('src/assets/images.ts').read())}
+import json
+for r in json.load(open('src/assets/manifest.json')).get('escape', []):
+    refs.update('public/' + h['animVideo'] for h in r['hotspots'] if h.get('animVideo'))
+bad = sorted(refs - tracked)
+if bad:
+    print(f"REFUSING TO SHIP: {len(bad)} referenced assets not committed:", *bad[:20], sep='\n  ')
+    sys.exit(1)
+PYEOF
 npx tsc --noEmit
 npx vitest run src/games/__tests__/logic.test.ts 2>&1 | grep -E "Test Files|Tests "
 BUILD_ID=$(git rev-parse --short HEAD)-$(python3 -c "import time; print(int(time.time()))")
