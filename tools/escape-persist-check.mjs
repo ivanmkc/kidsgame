@@ -1,6 +1,6 @@
 // Proof for the animate-and-persist requirement: open the toyroom chest,
-// then keep playing and verify the chest STAYS open (full-scene state image
-// persists — no rectangular seam, lid fully visible with no clipping).
+// verify the Veo animation clip plays, then keep playing and verify the
+// chest STAYS open (full-scene state image persists — no clipping).
 import pw from '/home/ivanmkc/termchart/node_modules/playwright/index.js';
 import fs from 'fs';
 const { chromium } = pw;
@@ -16,10 +16,12 @@ await page.waitForTimeout(900);
 await page.getByTestId('escape-item-key').click();          // pick it up (taught flow)
 await page.waitForTimeout(300);
 await page.getByTestId('escape-spot-chest').click();        // chest animates open
-await page.waitForTimeout(900);
-await page.screenshot({ path: `${OUT}/persist-1-chest-open.png` });
+await page.waitForTimeout(500);
+await page.screenshot({ path: `${OUT}/persist-1a-chest-mid-anim.png` });  // mid-animation
+await page.waitForTimeout(3500);
+await page.screenshot({ path: `${OUT}/persist-1b-chest-open.png` });      // after clip ends
 await page.getByTestId('escape-spot-teddy').click();        // unrelated tap
 await page.waitForTimeout(900);
-await page.screenshot({ path: `${OUT}/persist-2-chest-still-open.png` });
+await page.screenshot({ path: `${OUT}/persist-2-chest-still-open.png` }); // persistence check
 console.log('DONE');
 await b.close();
