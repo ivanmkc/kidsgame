@@ -70,16 +70,19 @@ SCENES: dict[str, dict] = {
             f"the top edge is a soft grassy horizon against magenta, {STYLE}"
         ),
         "vehicle_prompt": (
-            f"{LUNA} happily riding in the wicker basket of a large colorful "
+            f"{LUNA} happily riding in the wicker basket of a compact colorful "
             f"hot-air balloon, the balloon envelope has wide stripes of cherry "
             f"red, sunny yellow, and sky blue, Luna is peeping over the basket "
             f"edge and waving one hoof, ropes connect basket to balloon, the "
-            f"full balloon and basket visible, on a solid magenta (#FF00FF) "
-            f"background, {STYLE}"
+            f"ENTIRE balloon and basket fully visible with generous margin on "
+            f"all sides especially the top, isolated character and balloon only, "
+            f"NO sky, NO clouds, NO ground, NO landscape, NO background elements, "
+            f"on a solid magenta (#FF00FF) background, {STYLE}"
         ),
         "picker_prompt": (
             f"Portrait of {LUNA} smiling, head and upper body, looking directly "
-            f"at the viewer, a small hot-air balloon floats behind her, on a "
+            f"at the viewer, centered in the frame with generous padding on all "
+            f"sides, character does not touch any edge of the canvas, on a "
             f"solid magenta (#FF00FF) background, {STYLE}"
         ),
         "objects": {
@@ -131,13 +134,17 @@ SCENES: dict[str, dict] = {
         "vehicle_prompt": (
             f"{PIP} happily sitting in a small red wooden rowboat with two "
             f"little oars, Pip is peeking over the side with tongue out, the "
-            f"boat bobs on gentle waves, full boat and character visible, on a "
-            f"solid magenta (#FF00FF) background, {STYLE}"
+            f"ENTIRE boat and character fully visible with generous margin on "
+            f"all sides, isolated character and boat only, NO water, NO waves, "
+            f"NO ocean, NO sea, NO ground, NO background elements, on a solid "
+            f"magenta (#FF00FF) background, {STYLE}"
         ),
         "picker_prompt": (
-            f"Portrait of {PIP} smiling, head and upper body, wearing a small "
-            f"sailor hat, looking directly at the viewer, a tiny anchor in the "
-            f"background, on a solid magenta (#FF00FF) background, {STYLE}"
+            f"Portrait of {PIP} smiling with tongue out, head and upper body, "
+            f"wearing a small sailor hat, looking directly at the viewer, "
+            f"centered in the frame with generous padding on all sides, "
+            f"character does not touch any edge of the canvas, on a solid "
+            f"magenta (#FF00FF) background, {STYLE}"
         ),
         "objects": {
             "sky": [
@@ -173,8 +180,9 @@ SCENES: dict[str, dict] = {
             f"A seamlessly tileable horizontal panoramic snowy pine forest strip "
             f"on a solid magenta (#FF00FF) background where the sky would be, "
             f"snow-covered evergreen pine trees of varying sizes in the distance, "
-            f"soft blue-white snow drifts, gentle rolling snowy hills, sky region "
-            f"is solid magenta, {STYLE}"
+            f"all trees fully contained within the frame with their tops well "
+            f"below the upper edge, soft blue-white snow drifts, gentle rolling "
+            f"snowy hills, sky region is solid magenta, {STYLE}"
         ),
         "fg_prompt": (
             f"A seamlessly tileable horizontal panoramic snowy ground strip "
@@ -185,14 +193,17 @@ SCENES: dict[str, dict] = {
         ),
         "vehicle_prompt": (
             f"{MILO} bundled up in a red scarf sitting on a wooden sled with "
-            f"curved runners, the sled is sliding down a snowy slope, Milo's "
-            f"scarf flutters behind, full sled and character visible, on a "
-            f"solid magenta (#FF00FF) background, {STYLE}"
+            f"curved runners, Milo's scarf flutters behind, the ENTIRE sled "
+            f"and character fully visible with generous margin on all sides, "
+            f"isolated character and sled only, NO snow, NO ground, NO slope, "
+            f"NO landscape, NO background elements, on a solid magenta "
+            f"(#FF00FF) background, {STYLE}"
         ),
         "picker_prompt": (
             f"Portrait of {MILO} wearing a red scarf, head and upper body, "
-            f"looking directly at the viewer, snowflakes in the air around him, "
-            f"on a solid magenta (#FF00FF) background, {STYLE}"
+            f"looking directly at the viewer, centered in the frame with "
+            f"generous padding on all sides, character does not touch any edge "
+            f"of the canvas, on a solid magenta (#FF00FF) background, {STYLE}"
         ),
         "objects": {
             "sky": [
@@ -330,8 +341,9 @@ def _gen_sprite(prompt: str, name: str, out_dir: Path, size: int = 256,
 
         ok = ask_yes_no(
             f"Is this a clean sprite of: {prompt.split(',')[0]}? "
-            f"Should be a single object, transparent background, "
-            f"painterly children's book style, no text.",
+            f"Requirements: single complete object on a transparent "
+            f"background, the character is NOT clipped or cut off at any "
+            f"edge, painterly children's book style, no text.",
             [sprite],
         )
         if ok:
