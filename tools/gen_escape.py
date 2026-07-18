@@ -39,8 +39,9 @@ def _escape_spots_ok(boxes: list[tuple[int, int, int, int]]) -> bool:
     """Escape-specific distinctness: stories' 240px center rule can't fit
     4-5 spots in one scene and isn't needed — escape taps are deliberate.
     Require: no box hogs the frame, and every pair of boxes keeps a
-    finger-width gap (28 scene-px ≈ a chubby finger at display scale) so
-    one tap can never land on two spots."""
+    finger-width gap so one tap can never land on two spots. The SAM
+    boxes already include 12px padding per side (_locate_scare), so any
+    remaining gap here is on top of that 24px total."""
     for (x, y, w, h) in boxes:
         if w * h > 0.35 * 1280 * 720:
             return False
@@ -48,7 +49,7 @@ def _escape_spots_ok(boxes: list[tuple[int, int, int, int]]) -> bool:
         for j in range(i + 1, len(boxes)):
             ax, ay, aw, ah = boxes[i]
             bx, by, bw, bh = boxes[j]
-            gap = 28
+            gap = 4
             if not (ax + aw + gap <= bx or bx + bw + gap <= ax or
                     ay + ah + gap <= by or by + bh + gap <= ay):
                 return False
