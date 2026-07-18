@@ -1,5 +1,6 @@
 // Proof for the animate-and-persist requirement: open the toyroom chest,
-// then keep playing and verify the chest STAYS open (after-patch persists).
+// then keep playing and verify the chest STAYS open (full-scene state image
+// persists — no rectangular seam, lid fully visible with no clipping).
 import pw from '/home/ivanmkc/termchart/node_modules/playwright/index.js';
 import fs from 'fs';
 const { chromium } = pw;

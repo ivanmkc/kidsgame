@@ -119,5 +119,17 @@ export function lintRoom(room: EscapeRoom): string[] {
   if (solve(room) === null) errs.push('room is not solvable by greedy trace');
   // Tray pressure: greedy holds every unused item; cap at TRAY_SIZE.
   if (itemIds.length > TRAY_SIZE) errs.push(`room has ${itemIds.length} items (tray fits ${TRAY_SIZE})`);
+  // State-change chain must be linear: each afterScene hotspot must depend
+  // (transitively) on the previous one, so scene images form a strict sequence.
+  const stateHotspots = room.hotspots.filter((h) => h.afterScene);
+  if (stateHotspots.length > 1) {
+    for (let i = 1; i < stateHotspots.length; i++) {
+      const prev = stateHotspots[i - 1];
+      const cur = stateHotspots[i];
+      if (prev.kind === 'search' && cur.kind === 'search') {
+        errs.push(`state chain is not linear: ${prev.id} and ${cur.id} are independent searches`);
+      }
+    }
+  }
   return errs;
 }
