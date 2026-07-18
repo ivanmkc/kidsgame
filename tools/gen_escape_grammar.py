@@ -54,7 +54,7 @@ GRAMMAR_PROMPTS: dict[str, dict[str, dict[str, str]]] = {
     "rocketpad": {
         "toolbox": {
             "reveal": None,  # toolbox already open in base scene; use base as reveal
-            "taken": "the red open toolbox with a few small tools inside — the large wrench is gone, only small screwdrivers and pliers remain",
+            "taken": "the red open toolbox sitting on the floor with only two small colorful tools remaining inside: one tiny blue-handled screwdriver and one small yellow pair of pliers — the toolbox is mostly empty with red metal bottom visible, absolutely no wrench of any kind",
         },
         "crate": {
             "reveal": "the brown wooden supply crate with its green lid popped wide open, a chunky green battery with a bright yellow lightning bolt sitting inside on top of packing straw",

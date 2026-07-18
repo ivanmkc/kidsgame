@@ -28774,10 +28774,10 @@
           "revealScene": "escape/rocketpad_crate_reveal.png",
           "takenScene": "escape/rocketpad_crate_taken.png",
           "itemBox": {
-            "x": 1042,
-            "y": 251,
-            "w": 238,
-            "h": 165
+            "x": 1045,
+            "y": 324,
+            "w": 177,
+            "h": 94
           },
           "animVideo": "escape-video/rocketpad_crate.mp4"
         },
