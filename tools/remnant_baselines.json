@@ -21,5 +21,16 @@
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
+  },
+  "rocketpad/rocket": {
+    "baseline": 0.022,
+    "justification": "rocket rest-layer alpha overlap on wall panels creates 2.1% unchanged fraction in alpha-core; residual is wall-panel texture matching original scene at rest-layer edges; mounting-bracket strip fully removed (v2: full-width warm-pixel scan + seam-line restoration); sub-perceptual at game scale and occluded by rest layer during gameplay",
+    "evidence": {
+      "ghost": "YES (false positive — fires on wall seams/rivets, same as v1; pairwise 3-0 overrides)",
+      "pairwise": "v2 wins 3-0 vs committed plate (defect-removal framing)",
+      "strip_removal": "full-width 0 warm pixels (R-B>8) on all wall columns; seam depth 51-91 across repair zone"
+    },
+    "reviewed_by": "team-lead",
+    "date": "2026-07-19"
   }
 }
