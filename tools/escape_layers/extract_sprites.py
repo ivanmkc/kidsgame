@@ -12,8 +12,9 @@ The pipeline:
   - Per-frame binary-alpha change masks (L1 > 90, within scene mask)
   - Morphological cleanup + core-region connected-component filter
   - 1px Gaussian feather at alpha edges
+  - Minimum connected-component area filter (kills ghost streaks)
   - Subsample 96→48 (every 2nd frame)
-  - Replace last subsampled frame with exact after-state overlay
+  - Smoothstep tail ease: last N frames blend toward after-state overlay
   - Pack into sprite sheet, save as lossless WebP + patch PNG
 
 Usage:
@@ -136,6 +137,8 @@ def extract_sprite_sheet(
     source_fps: int = 24,
     change_thresh: int = 90,
     stabilize_thresh: int = 15,
+    min_cc_area: int = 200,
+    ease_frames: int = 22,
 ) -> dict:
     """Full pipeline: extract, stabilize, matte, pack.
 
@@ -153,9 +156,14 @@ def extract_sprite_sheet(
         Image.open(after_path).convert("RGB").resize((1280, 720), Image.LANCZOS)
     )
 
-    print(f"[{name}] Extracting frames from {clip.name}...")
-    frame_count = extract_frames(clip, frames_dir)
-    print(f"[{name}] {frame_count} frames extracted")
+    existing = list(frames_dir.glob("f_*.png")) if frames_dir.exists() else []
+    if len(existing) >= 90:
+        frame_count = len(existing)
+        print(f"[{name}] Reusing {frame_count} existing frames")
+    else:
+        print(f"[{name}] Extracting frames from {clip.name}...")
+        frame_count = extract_frames(clip, frames_dir)
+        print(f"[{name}] {frame_count} frames extracted")
 
     print(f"[{name}] Building scene mask...")
     scene_mask = build_scene_mask(before_img, after_img, bbox)
@@ -190,8 +198,9 @@ def extract_sprite_sheet(
             core_labels = set(
                 labeled[int(core_y1):int(core_y2), int(core_x1):int(core_x2)].flatten()
             ) - {0}
+            sizes = ndimage.sum(change_mask, labeled, range(1, n + 1))
             for lbl in range(1, n + 1):
-                if lbl not in core_labels:
+                if lbl not in core_labels or sizes[lbl - 1] < min_cc_area:
                     change_mask[labeled == lbl] = False
 
         overlay = np.zeros((720, 1280, 4), dtype=np.uint8)
@@ -248,13 +257,25 @@ def extract_sprite_sheet(
     alpha_f = np.array(alpha_pil.filter(ImageFilter.GaussianBlur(radius=1)))
     after_overlay[:, :, 3] = np.maximum(after_overlay[:, :, 3], alpha_f)
 
-    subsampled[-1] = after_overlay
-    last_cov = float(np.sum(after_overlay[:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
-    sub_coverages[-1] = last_cov
+    actual_ease = min(ease_frames, sub_count)
+    print(f"[{name}] Easing tail: last {actual_ease} frames toward after-state (smoothstep)")
+    after_f = after_overlay.astype(np.float32)
+    for k in range(actual_ease):
+        idx = sub_count - actual_ease + k
+        if idx < 0:
+            continue
+        raw_t = k / max(actual_ease - 1, 1)
+        t = raw_t * raw_t * (3 - 2 * raw_t)
+        subsampled[idx] = (
+            subsampled[idx].astype(np.float32) * (1 - t) + after_f * t
+        ).clip(0, 255).astype(np.uint8)
+        sub_coverages[idx] = float(np.sum(subsampled[idx][:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
+        if k in (0, actual_ease // 2, actual_ease - 1):
+            print(f"[{name}]   ease frame {idx}: t={t:.3f}")
 
     composed = before_crop.copy().astype(np.float32)
-    alpha = after_overlay[:, :, 3:4].astype(np.float32) / 255.0
-    composed = composed * (1 - alpha) + after_overlay[:, :, :3].astype(np.float32) * alpha
+    alpha = subsampled[-1][:, :, 3:4].astype(np.float32) / 255.0
+    composed = composed * (1 - alpha) + subsampled[-1][:, :, :3].astype(np.float32) * alpha
     composed = np.clip(composed, 0, 255).astype(np.uint8)
     comp_delta = np.abs(composed.astype(np.int16) - after_crop.astype(np.int16))
     mean_d = float(comp_delta.mean())
