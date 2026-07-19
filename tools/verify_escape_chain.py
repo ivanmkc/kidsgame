@@ -11,6 +11,9 @@ Sprite-only path:
 Scene references (beforeScene, afterScene) are stored in the sprite block
 of each hotspot in the manifest.
 
+Coupling invariant: plate changes invalidate sprite mattes extracted against
+the prior plate — re-extract affected sheets in the same commit.
+
 Thresholds:
   sprite composed-vs-after  : mean < 2, frac30 < 0.5%
 
