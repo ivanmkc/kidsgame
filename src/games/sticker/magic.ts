@@ -27,6 +27,7 @@ export const DRESSUP_DESCRIPTIONS: Record<string, string> = {
   dress_rainbow: 'a rainbow-striped twirly party dress',
   dress_star: 'a midnight-blue dress covered in tiny gold stars',
   dress_flower: 'a spring dress covered in daisy flowers',
+  dress_snow: 'a sparkly white snowflake dress',
   dress_blue: 'a flowing blue princess dress',
   tutu: 'a pink ballet tutu',
   crown: 'a golden royal crown',
