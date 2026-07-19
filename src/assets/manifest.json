@@ -28955,9 +28955,9 @@
           "sprite": {
             "bbox": {
               "x": 0,
-              "y": 236,
-              "w": 419,
-              "h": 390
+              "y": 248,
+              "w": 458,
+              "h": 378
             },
             "beforeScene": "escape/rocketpad.png",
             "afterScene": "escape/rocketpad_toolbox_reveal.png",
@@ -29016,10 +29016,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 937,
-              "y": 323,
-              "w": 343,
-              "h": 331
+              "x": 913,
+              "y": 265,
+              "w": 367,
+              "h": 407
             },
             "beforeScene": "escape/rocketpad_toolbox_taken.png",
             "afterScene": "escape/rocketpad_crate_reveal.png",
@@ -29093,10 +29093,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 299,
-              "y": 243,
-              "w": 483,
-              "h": 307
+              "x": 291,
+              "y": 185,
+              "w": 549,
+              "h": 375
             },
             "beforeScene": "escape/rocketpad_crate_taken.png",
             "afterScene": "escape/rocketpad_panel_after.png",
@@ -29141,10 +29141,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 586,
-              "y": 26,
-              "w": 434,
-              "h": 602
+              "x": 557,
+              "y": 0,
+              "w": 492,
+              "h": 686
             },
             "beforeScene": "escape/rocketpad_panel_after.png",
             "afterScene": "escape/rocketpad_slot_after.png",
