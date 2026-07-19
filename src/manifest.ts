@@ -119,6 +119,14 @@ export interface EscapeHotspot {
   takenScene?: string;   // full-scene image with container open but item GONE (gives-hotspots)
   itemBox?: Box;         // tap target for the revealed item within the scene
   animVideo?: string;    // Veo transition clip played on unlock/reveal (fallback: crossfade)
+  sprite?: {             // RGBA sprite sheet animation (rotoscoped from Veo clip)
+    sheet: string;       // path to sprite sheet PNG (public/)
+    patch?: string;      // path to empty_bg_patch PNG (drawn before sprite to erase static object)
+    cols: number;        // sprite sheet grid columns
+    frameCount: number;  // total frames in the sheet
+    fps: number;         // playback fps
+    bbox: Box;           // position in the 1280x720 scene coordinate space
+  };
   sayFound?: string;     // spoken on collection (item flies to tray)
   saySearch?: string;    // spoken on plain search with nothing there (flavor)
   sayLocked?: string;    // spoken when tapped without the needed item

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES, SCENE_THUMBS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
@@ -12,6 +12,14 @@ import { say, sayThen, sfx } from '../../sound';
 import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
 import { EscapeState, applyTap, nextHint, selectItem, startState } from './logic';
+
+interface SpriteAnim {
+  hotspotId: string;
+  playing: boolean;
+  held: boolean;
+  frameIndex: number;
+  startTime: number;
+}
 
 // Kid escape room: search the picture, collect up to three items in the
 // tray, tap an item then tap the thing it opens. Chains are 2-4 steps and
@@ -49,6 +57,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
   const [clip, setClip] = useState<string | null>(null);
+  const [spriteAnims, setSpriteAnims] = useState<SpriteAnim[]>([]);
   const [flyingItems, setFlyingItems] = useState<Array<{
     key: string; emoji: string; fromX: number; fromY: number;
   }>>([]);
@@ -62,6 +71,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     setState(startState());
     setPops([]);
     setClip(null);
+    setSpriteAnims([]);
     setHintSpot(null);
     setFlyingItems([]);
     lastAction.current = Date.now();
@@ -139,6 +149,13 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     );
   }
 
+  const startSprite = useCallback((hotspotId: string) => {
+    setSpriteAnims((prev) => {
+      if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held))) return prev;
+      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0, startTime: Date.now() }];
+    });
+  }, []);
+
   const onSpot = (hotspotId: string) => {
     lastAction.current = Date.now();
     setHintSpot(null);
@@ -147,10 +164,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     setState(next);
     const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
       h ? hotText(h, field, lang) : undefined;
+    const playAnim = () => {
+      if (h?.sprite) startSprite(hotspotId);
+      else if (h?.animVideo) setClip(h.animVideo);
+    };
     switch (effect.kind) {
       case 'revealed':
         sfx.good();
-        if (h?.animVideo) setClip(h.animVideo);
+        playAnim();
         break;
       case 'collected': {
         sfx.good();
@@ -169,11 +190,11 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       }
       case 'unlocked':
         sfx.good();
-        if (h?.animVideo) setClip(h.animVideo);
+        playAnim();
         { const s = locSay('sayFound'); if (s) say(s); }
         break;
       case 'win':
-        if (h?.animVideo) setClip(h.animVideo);
+        playAnim();
         if (effect.pop && !h?.revealScene && !h?.takenScene && !h?.afterScene) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
         break;
@@ -231,6 +252,9 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               })}
             </View>
           ) : null}
+          {spriteAnims.length > 0 && (
+            <SpriteCanvas room={room} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
+          )}
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
@@ -401,6 +425,116 @@ function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
       <Text style={{ fontSize: 36, textAlign: 'center' }}>{emoji}</Text>
     </Animated.View>
   );
+}
+
+function SpriteCanvas({ room, anims, setAnims, scale }: {
+  room: EscapeRoom;
+  anims: SpriteAnim[];
+  setAnims: React.Dispatch<React.SetStateAction<SpriteAnim[]>>;
+  scale: number;
+}) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
+  const patchesRef = useRef<Record<string, HTMLImageElement>>({});
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    for (const h of room.hotspots) {
+      if (!h.sprite) continue;
+      const key = h.id;
+      if (!sheetsRef.current[key]) {
+        const img = new window.Image();
+        img.src = h.sprite.sheet;
+        sheetsRef.current[key] = img;
+      }
+      if (h.sprite.patch && !patchesRef.current[key]) {
+        const img = new window.Image();
+        img.src = h.sprite.patch;
+        patchesRef.current[key] = img;
+      }
+    }
+  }, [room]);
+
+  useEffect(() => {
+    if (anims.length === 0) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      return;
+    }
+
+    const tick = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let anyActive = false;
+      const now = Date.now();
+      const updatedAnims = anims.map((anim) => {
+        const h = room.hotspots.find((x) => x.id === anim.hotspotId);
+        if (!h?.sprite) return anim;
+        const sp = h.sprite;
+        const sheet = sheetsRef.current[h.id];
+        if (!sheet?.naturalWidth) return anim;
+
+        let frameIdx = anim.frameIndex;
+        if (anim.playing) {
+          const elapsed = (now - anim.startTime) / 1000;
+          frameIdx = Math.floor(elapsed * sp.fps);
+          if (frameIdx >= sp.frameCount) {
+            frameIdx = sp.frameCount - 1;
+            return { ...anim, playing: false, held: true, frameIndex: frameIdx };
+          }
+          anyActive = true;
+        }
+
+        const patch = patchesRef.current[h.id];
+        if (patch?.naturalWidth) {
+          ctx.drawImage(patch,
+            sp.bbox.x * scale, sp.bbox.y * scale,
+            sp.bbox.w * scale, sp.bbox.h * scale);
+        }
+
+        const frameW = sheet.naturalWidth / sp.cols;
+        const rows = Math.ceil(sp.frameCount / sp.cols);
+        const frameH = sheet.naturalHeight / rows;
+        const col = frameIdx % sp.cols;
+        const row = Math.floor(frameIdx / sp.cols);
+
+        ctx.drawImage(sheet,
+          col * frameW, row * frameH, frameW, frameH,
+          sp.bbox.x * scale, sp.bbox.y * scale,
+          sp.bbox.w * scale, sp.bbox.h * scale);
+
+        return { ...anim, frameIndex: frameIdx };
+      });
+
+      const changed = updatedAnims.some((a, i) =>
+        a.frameIndex !== anims[i].frameIndex || a.playing !== anims[i].playing || a.held !== anims[i].held);
+      if (changed) setAnims(updatedAnims);
+      if (anyActive || anims.some((a) => a.held)) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [anims, room, scale, setAnims]);
+
+  if (Platform.OS !== 'web') return null;
+  const w = Math.round(1280 * scale);
+  const h = Math.round(720 * scale);
+  return React.createElement('canvas', {
+    ref: canvasRef,
+    width: w,
+    height: h,
+    style: { position: 'absolute', top: 0, left: 0, width: w, height: h, pointerEvents: 'none' },
+  });
 }
 
 // BETA pill now shared — see src/components/BetaPill.tsx.

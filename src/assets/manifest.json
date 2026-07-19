@@ -28293,6 +28293,19 @@
             "y": 160,
             "w": 199,
             "h": 121
+          },
+          "sprite": {
+            "sheet": "escape-sprites/toyroom_chest.png",
+            "patch": "escape-sprites/toyroom_chest_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 288,
+              "y": 115,
+              "w": 356,
+              "h": 330
+            }
           }
         },
         {
