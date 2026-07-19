@@ -28479,9 +28479,9 @@
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 204,
-              "w": 358,
-              "h": 475
+              "y": 166,
+              "w": 472,
+              "h": 551
             },
             "beforeScene": "escape/dragoncave.png",
             "afterScene": "escape/dragoncave_haystack_reveal.png",
@@ -28562,10 +28562,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 724,
-              "y": 166,
-              "w": 375,
-              "h": 433
+              "x": 713,
+              "y": 144,
+              "w": 396,
+              "h": 483
             },
             "beforeScene": "escape/dragoncave_haystack_taken.png",
             "afterScene": "escape/dragoncave_stove_reveal.png",
@@ -28617,10 +28617,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 979,
-              "y": 255,
-              "w": 301,
-              "h": 334
+              "x": 971,
+              "y": 250,
+              "w": 309,
+              "h": 347
             },
             "beforeScene": "escape/dragoncave_stove_taken.png",
             "afterScene": "escape/dragoncave_dragon_after.png",
