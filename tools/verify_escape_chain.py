@@ -1090,7 +1090,7 @@ def main() -> int:
     else:
         print(f"Tail convergence: all {len(entries)} OK")
 
-    # Sheet consistency check (replaces former no-op outside-bbox check)
+    # Sheet consistency check
     print()
     sheet_fails = 0
     for room_id, hotspot_id, sprite in entries:
