@@ -19,6 +19,7 @@ Exit nonzero on any failure (ship.sh gates on this).
 """
 from __future__ import annotations
 
+import io
 import json
 import sys
 from pathlib import Path
@@ -37,6 +38,137 @@ THRESH_COVERAGE_MIN = 5.0
 
 THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
+
+# --- Gemini plate-emptiness gate (D.1) ---
+
+HOTSPOT_OBJECTS: dict[tuple[str, str], str] = {
+    ("toyroom", "pillow"): "blue striped pillow or cushion",
+    ("toyroom", "chest"): "red wooden toy chest with a lock",
+    ("toyroom", "pen"): "wooden playpen fence or golden puppy",
+    ("toyroom", "teddy"): "brown teddy bear",
+    ("dragoncave", "haystack"): "haystack or hay pile",
+    ("dragoncave", "crystal"): "glowing crystal",
+    ("dragoncave", "stove"): "stone cooking stove or furnace",
+    ("dragoncave", "dragon"): "small dragon",
+    ("piratecove", "net"): "fishing net with rope",
+    ("piratecove", "umbrella"): "beach umbrella",
+    ("piratecove", "pelican"): "pelican bird",
+    ("piratecove", "chest"): "treasure chest — a large rectangular wooden box with a curved domed lid, metal lock plate, and metal bands",
+    ("rocketpad", "toolbox"): "red toolbox",
+    ("rocketpad", "crate"): "shipping crate — a large wooden box with X-shaped cross braces on its sides and a rounded green dome canopy on top",
+    ("rocketpad", "poster"): "poster",
+    ("rocketpad", "panel"): "control panel with buttons and lights",
+    ("rocketpad", "slot"): "battery slot or vertical panel opening",
+}
+
+_gemini_client = None
+_JUDGE_MODELS = ["gemini-3.5-flash", "gemini-3.1-flash", "gemini-3-flash-preview"]
+
+
+def _get_gemini_client():
+    global _gemini_client
+    if _gemini_client is None:
+        from google import genai
+        _gemini_client = genai.Client(
+            vertexai=True, project="adk-coding-agents", location="global"
+        )
+    return _gemini_client
+
+
+def _png_bytes(image: Image.Image) -> bytes:
+    buf = io.BytesIO()
+    image.save(buf, "PNG")
+    return buf.getvalue()
+
+
+def _gemini_plate_check(
+    original_crop: Image.Image, clean_crop: Image.Image, obj: str
+) -> bool:
+    """Single-image check: does the cleaned crop contain the object?
+    Uses only the clean crop (no comparison) to avoid priming Gemini.
+    Returns True (= defect) on YES. Fail closed on errors."""
+    from google.genai import types
+
+    question = (
+        f"Look at this image carefully. Is there a {obj} present in "
+        f"this image?\n\n"
+        f"Do NOT count: walls, floor, sand, sky, rocks, vegetation, "
+        f"metal panels, wooden columns, window frames, or any "
+        f"architectural feature as part of the object.\n"
+        f"Only answer YES if the actual {obj} — its distinctive shape "
+        f"and structure — is clearly visible.\n"
+        f"Answer with exactly one word: YES or NO."
+    )
+
+    parts = [
+        types.Part(
+            inline_data=types.Blob(mime_type="image/png", data=_png_bytes(clean_crop))
+        ),
+        types.Part(text=question),
+    ]
+
+    client = _get_gemini_client()
+    votes = []
+    for attempt in range(3):
+        for model in _JUDGE_MODELS:
+            try:
+                resp = client.models.generate_content(model=model, contents=parts)
+                answer = resp.text.strip().upper()
+                if "YES" in answer:
+                    votes.append(True)
+                elif "NO" in answer:
+                    votes.append(False)
+                else:
+                    votes.append(True)  # ambiguous = fail closed
+                break
+            except Exception:
+                continue
+        else:
+            votes.append(True)  # all models failed = fail closed
+
+    yes_count = sum(votes)
+    return yes_count >= 2  # majority vote: 2/3 required to flag
+
+
+def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
+    """For each hotspot with a rest layer, crop both the original scene and
+    the clean plate at the animation bbox, then ask Gemini whether the
+    object was properly removed (no remnants, no hallucinated replacements).
+    Fail closed."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        return 0
+
+    clean = Image.open(clean_path).convert("RGB")
+    orig = Image.open(orig_path).convert("RGB")
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+
+        bbox = sp.get("bbox") or sp.get("restBbox")
+        if not bbox:
+            continue
+
+        x, y, w, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+        orig_crop = orig.crop((x, y, x + w, y + bh))
+        clean_crop = clean.crop((x, y, x + w, y + bh))
+
+        obj = HOTSPOT_OBJECTS.get((room_id, h["id"]), h["id"])
+        has_defect = _gemini_plate_check(orig_crop, clean_crop, obj)
+        if has_defect:
+            print(
+                f"  PLATE-EMPTY FAIL: {room_id}/{h['id']} "
+                f"— {obj} remnant or hallucinated replacement in clean plate"
+            )
+            fails += 1
+        else:
+            print(f"  PLATE-EMPTY PASS: {room_id}/{h['id']}")
+
+    return fails
 
 
 def _get_base_for_sprite(room_id: str, sprite: dict) -> np.ndarray:
@@ -291,6 +423,19 @@ def main() -> int:
         fails += bbox_fails
     else:
         print(f"Outside-bbox transparency: all {len(entries)} OK")
+
+    # Plate-emptiness check: Gemini verifies no object remnants in clean plates
+    print(f"\n{'hotspot':<36} {'result':>20}")
+    print("-" * 60)
+    plate_fails = 0
+    for room in m.get("escape", []):
+        pf = verify_plate_emptiness(room["id"], room.get("hotspots", []))
+        plate_fails += pf
+    if plate_fails:
+        print(f"\n{plate_fails} plate-emptiness failures (Gemini-verified)")
+        fails += plate_fails
+    else:
+        print("Plate emptiness: all clean plates verified")
 
     print(f"\n{len(entries)} sprite entries checked, {fails} failures")
     return 1 if fails else 0
