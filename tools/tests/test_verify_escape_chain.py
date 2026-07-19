@@ -509,8 +509,8 @@ class TestRealAssetsSmoke:
             )
 
         total = sum(results.values())
-        assert total == 1, (
-            f"Expected 1 D.1-PRE failure (rocket), got {total}: "
+        assert total == 0, (
+            f"Expected 0 D.1-PRE failures (all rooms pass via baselines), got {total}: "
             + ", ".join(f"{k}={v}" for k, v in results.items() if v > 0)
         )
 
