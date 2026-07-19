@@ -38,6 +38,7 @@ THRESH_COVERAGE_MIN = 5.0
 
 THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
+THRESH_HELD_VS_AFTER = 5  # held frame (last-frame composite) must match afterScene crop
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
 THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene — raise only with team-lead sign-off
@@ -812,15 +813,19 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
 
 def verify_tail_convergence(
     room_id: str, hotspot_id: str, sprite: dict
-) -> tuple[str, float, float]:
-    """Check that the animation tail converges monotonically to the held frame.
+) -> tuple[str, float, float, float]:
+    """Check that the animation tail converges monotonically to the held frame,
+    and that the held frame matches the afterScene at the sprite bbox.
 
     Reads frames at T-0.50s and T-0.25s from the sheet, composites each
-    on the patch, and compares to the composited held frame.
-    Returns (result, mean_at_half, mean_at_quarter).
+    on the patch, and compares to the composited held frame.  Also verifies
+    the held frame reproduces the afterScene crop (mean diff within
+    THRESH_HELD_VS_AFTER).
+
+    Returns (result, mean_at_half, mean_at_quarter, mean_held_vs_after).
     """
     if not sprite.get("sheet"):
-        return "SKIP", 0, 0
+        return "SKIP", 0, 0, 0
 
     sheet_path = SPRITES / sprite["sheet"]
     patch_path = SPRITES / sprite["patch"] if sprite.get("patch") else None
@@ -830,7 +835,7 @@ def verify_tail_convergence(
 
     for p in (sheet_path, before_path, after_path):
         if not p.exists():
-            return f"MISSING {p.name}", 999, 999
+            return f"MISSING {p.name}", 999, 999, 999
 
     sheet = np.array(Image.open(sheet_path))  # RGBA
     base = _get_base_for_sprite(room_id, sprite)
@@ -872,19 +877,25 @@ def verify_tail_convergence(
 
     delta_half = np.abs(comp_half.astype(np.int16) - held.astype(np.int16))
     delta_quarter = np.abs(comp_quarter.astype(np.int16) - held.astype(np.int16))
+    delta_held_after = np.abs(held.astype(np.int16) - target.astype(np.int16))
 
     mean_half = float(delta_half.mean())
     mean_quarter = float(delta_quarter.mean())
+    mean_held_vs_after = float(delta_held_after.mean())
 
-    ok = mean_half <= THRESH_TAIL_MEAN_HALF and mean_quarter <= THRESH_TAIL_MEAN_QUARTER
-    if not ok and mean_quarter <= mean_half:
+    tail_ok = mean_half <= THRESH_TAIL_MEAN_HALF and mean_quarter <= THRESH_TAIL_MEAN_QUARTER
+    held_ok = mean_held_vs_after <= THRESH_HELD_VS_AFTER
+
+    if not held_ok:
+        result = "FAIL-HELD"
+    elif not tail_ok and mean_quarter <= mean_half:
         result = "FAIL"
-    elif not ok:
+    elif not tail_ok:
         result = "FAIL-NONMONO"
     else:
         result = "PASS"
 
-    return result, mean_half, mean_quarter
+    return result, mean_half, mean_quarter, mean_held_vs_after
 
 
 def check_sheet_consistency(sprite: dict) -> tuple[str, int]:
@@ -1061,20 +1072,20 @@ def main() -> int:
                 result = f"FAIL m={mean_d:.2f} f={frac30:.4f}"
         print(f"{tag:<36} {mean_d:>8.2f} {frac30:>8.4f} {coverage:>8.1f} {result}")
 
-    # Tail-convergence check
-    print(f"\n{'hotspot':<36} {'T-0.5s':>8} {'T-0.25s':>8} {'result':>8}")
-    print("-" * 68)
+    # Tail-convergence + held-vs-after check
+    print(f"\n{'hotspot':<36} {'T-0.5s':>8} {'T-0.25s':>8} {'held/aft':>8} {'result':>12}")
+    print("-" * 80)
     tail_fails = 0
     for room_id, hotspot_id, sprite in entries:
         tag = f"{room_id}/{hotspot_id}"
-        result, mean_half, mean_quarter = verify_tail_convergence(
+        result, mean_half, mean_quarter, mean_held_after = verify_tail_convergence(
             room_id, hotspot_id, sprite
         )
         if result not in ("PASS", "SKIP"):
             tail_fails += 1
-        print(f"{tag:<36} {mean_half:>8.2f} {mean_quarter:>8.2f} {result:>8}")
+        print(f"{tag:<36} {mean_half:>8.2f} {mean_quarter:>8.2f} {mean_held_after:>8.2f} {result:>12}")
     if tail_fails:
-        print(f"\n{tail_fails} tail-convergence failures (thresholds: T-0.5s ≤{THRESH_TAIL_MEAN_HALF}, T-0.25s ≤{THRESH_TAIL_MEAN_QUARTER})")
+        print(f"\n{tail_fails} tail-convergence failures (thresholds: T-0.5s ≤{THRESH_TAIL_MEAN_HALF}, T-0.25s ≤{THRESH_TAIL_MEAN_QUARTER}, held/after ≤{THRESH_HELD_VS_AFTER})")
         fails += tail_fails
     else:
         print(f"Tail convergence: all {len(entries)} OK")

@@ -278,24 +278,49 @@ class TestItemBboxOutside:
 # Fixture (c): non-converging tail
 # ===================================================================
 class TestNonConvergingTail:
+    def _patch_after_solid(self, tmp_path, room, color):
+        """Overwrite the afterScene with a solid fill so the held-vs-after
+        check passes regardless of bbox position after 1280x720 resize."""
+        sp = room["hotspots"][0]["sprite"]
+        after_path = tmp_path / "assets" / "game" / sp["afterScene"]
+        sw, sh = SCENE_W, SCENE_H
+        _save_rgb(after_path, sw, sh, color)
+
     def test_nonconverging_tail_fails(self, tmp_path):
         room = _build_room(tmp_path, frame_count=24, vary_frames=True)
+        self._patch_after_solid(tmp_path, room, (200, 50, 50))
         sp = room["hotspots"][0]["sprite"]
         with _apply_patches(tmp_path):
-            result, mean_half, mean_quarter = vec.verify_tail_convergence(
+            result, mean_half, mean_quarter, _ = vec.verify_tail_convergence(
                 "testroom", "widget", sp
             )
-        assert result in ("FAIL", "FAIL-NONMONO"), (
+        assert result.startswith("FAIL"), (
             f"Expected tail FAIL, got: {result} "
             f"(half={mean_half:.2f}, quarter={mean_quarter:.2f})"
         )
 
     def test_converging_tail_passes(self, tmp_path):
         room = _build_room(tmp_path, frame_count=24, vary_frames=False)
+        self._patch_after_solid(tmp_path, room, (200, 50, 50))
         sp = room["hotspots"][0]["sprite"]
         with _apply_patches(tmp_path):
-            result, _, _ = vec.verify_tail_convergence("testroom", "widget", sp)
+            result, _, _, _ = vec.verify_tail_convergence("testroom", "widget", sp)
         assert result == "PASS"
+
+    def test_held_vs_after_mismatch_fails(self, tmp_path):
+        """After-scene filled with a different color than the sprite's held
+        frame triggers FAIL-HELD (simulates a corrupted afterScene)."""
+        room = _build_room(tmp_path, frame_count=24, vary_frames=False)
+        self._patch_after_solid(tmp_path, room, (50, 200, 50))
+        sp = room["hotspots"][0]["sprite"]
+        with _apply_patches(tmp_path):
+            result, _, _, mean_held_after = vec.verify_tail_convergence(
+                "testroom", "widget", sp
+            )
+        assert result == "FAIL-HELD", (
+            f"Expected FAIL-HELD, got: {result} "
+            f"(held_vs_after={mean_held_after:.2f})"
+        )
 
 
 # ===================================================================
