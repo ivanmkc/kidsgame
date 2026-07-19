@@ -18,7 +18,6 @@ interface SpriteAnim {
   playing: boolean;
   held: boolean;
   frameIndex: number;
-  startTime: number;
 }
 
 // Kid escape room: search the picture, collect up to three items in the
@@ -56,7 +55,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
-  const [clip, setClip] = useState<string | null>(null);
   const [spriteAnims, setSpriteAnims] = useState<SpriteAnim[]>([]);
   const [flyingItems, setFlyingItems] = useState<Array<{
     key: string; emoji: string; fromX: number; fromY: number;
@@ -70,7 +68,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   useEffect(() => {
     setState(startState());
     setPops([]);
-    setClip(null);
     setSpriteAnims([]);
     setHintSpot(null);
     setFlyingItems([]);
@@ -99,40 +96,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const scale = displayWidth / 1280;
   const displayHeight = 720 * scale;
 
-  // Full-scene state chain: find the latest scene for used/revealed hotspots.
-  // Hotspots with state-change scenes form a linear chain in spec order;
-  // the current scene = the scene matching the last changed hotspot's phase
-  // (revealed → revealScene, used → takenScene/afterScene).
-  const sceneChain = useMemo(() => {
-    if (!room) return [];
-    return room.hotspots.filter((h) => h.afterScene || h.revealScene).map((h) => h.id);
-  }, [room]);
-
-  const currentSceneKey = useMemo(() => {
-    if (!room) return '';
-    for (let i = sceneChain.length - 1; i >= 0; i--) {
-      const hid = sceneChain[i];
-      const h = room.hotspots.find((x) => x.id === hid);
-      if (!h) continue;
-      if (h.sprite) {
-        const sa = spriteAnims.find((a) => a.hotspotId === hid);
-        if (!sa || sa.playing) continue;
-      }
-      if (state.used.includes(hid)) return h.takenScene ?? h.afterScene ?? room.image;
-      if (state.revealed.includes(hid)) return h.revealScene ?? h.afterScene ?? room.image;
-    }
-    return room.image;
-  }, [room, sceneChain, state.used, state.revealed, spriteAnims]);
-
-  const prevSceneKey = useRef(currentSceneKey);
-  const crossfade = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    if (currentSceneKey !== prevSceneKey.current) {
-      crossfade.setValue(0);
-      Animated.timing(crossfade, { toValue: 1, duration: 400, useNativeDriver: true }).start();
-      prevSceneKey.current = currentSceneKey;
-    }
-  }, [currentSceneKey, crossfade]);
+  // Plate model: the base image is always room.image. Every visual state
+  // change is rendered as a sprite layer on top by the SpriteCanvas.
 
   const heldItems = useMemo(
     () => (room ? state.inventory.map((id) => room.items.find((i) => i.id === id)!).filter(Boolean) : []),
@@ -156,7 +121,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const startSprite = useCallback((hotspotId: string) => {
     setSpriteAnims((prev) => {
       if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held))) return prev;
-      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0, startTime: Date.now() }];
+      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0 }];
     });
   }, []);
 
@@ -169,8 +134,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
       h ? hotText(h, field, lang) : undefined;
     const playAnim = () => {
-      if (h?.sprite) startSprite(hotspotId);
-      else if (h?.animVideo) setClip(h.animVideo);
+      if (h?.sprite?.sheet) startSprite(hotspotId);
     };
     switch (effect.kind) {
       case 'revealed':
@@ -179,7 +143,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'collected': {
         sfx.good();
-        if (effect.pop && !h?.revealScene) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
+        if (effect.pop && !h?.sprite) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
           const box = h.itemBox ?? h.box;
@@ -199,7 +163,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'win':
         playAnim();
-        if (effect.pop && !h?.revealScene && !h?.takenScene && !h?.afterScene) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
+        if (effect.pop && !h?.sprite) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
         break;
       case 'locked':
@@ -235,30 +199,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           onLayout={(e) => { framePos.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y }; }}
           style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}
         >
-          <Image source={SCENE_THUMBS[currentSceneKey] ?? SCENE_IMAGES[currentSceneKey]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
-          {currentSceneKey !== room.image && (
-            <Animated.Image
-              source={SCENE_IMAGES[currentSceneKey]}
-              style={{ position: 'absolute', width: displayWidth, height: displayHeight, opacity: crossfade }}
-              resizeMode="cover"
-            />
-          )}
-          {clip && Platform.OS === 'web' ? (
-            <View style={StyleSheet.absoluteFill} pointerEvents="none" testID="escape-clip">
-              {React.createElement('video', {
-                src: clip,
-                autoPlay: true,
-                muted: true,
-                playsInline: true,
-                onEnded: () => setClip(null),
-                onError: () => setClip(null),
-                style: { width: '100%', height: '100%', objectFit: 'cover' },
-              })}
-            </View>
-          ) : null}
-          {spriteAnims.length > 0 && (
-            <SpriteCanvas room={room} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
-          )}
+          <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+          <SpriteCanvas room={room} state={state} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
@@ -439,8 +381,9 @@ interface SpriteEntry {
   accumulator: number;
 }
 
-function SpriteCanvas({ room, anims, setAnims, scale }: {
+function SpriteCanvas({ room, state, anims, setAnims, scale }: {
   room: EscapeRoom;
+  state: EscapeState;
   anims: SpriteAnim[];
   setAnims: React.Dispatch<React.SetStateAction<SpriteAnim[]>>;
   scale: number;
@@ -448,6 +391,7 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
   const patchesRef = useRef<Record<string, HTMLImageElement>>({});
+  const takenRef = useRef<Record<string, HTMLImageElement>>({});
   const rafRef = useRef<number>(0);
   const entriesRef = useRef<SpriteEntry[]>([]);
   const lastTimeRef = useRef<number>(0);
@@ -455,13 +399,16 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
   roomRef.current = room;
   const scaleRef = useRef(scale);
   scaleRef.current = scale;
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const setAnimsRef = useRef(setAnims);
   setAnimsRef.current = setAnims;
+  const needsRedrawRef = useRef(false);
 
   useEffect(() => {
     for (const h of room.hotspots) {
       if (!h.sprite) continue;
-      if (!sheetsRef.current[h.id]) {
+      if (h.sprite.sheet && !sheetsRef.current[h.id]) {
         const img = new window.Image();
         img.src = h.sprite.sheet;
         sheetsRef.current[h.id] = img;
@@ -471,8 +418,78 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
         img.src = h.sprite.patch;
         patchesRef.current[h.id] = img;
       }
+      if (h.sprite.takenPatch && !takenRef.current[h.id]) {
+        const img = new window.Image();
+        img.src = h.sprite.takenPatch;
+        takenRef.current[h.id] = img;
+      }
     }
   }, [room]);
+
+  const drawStatic = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const s = scaleRef.current;
+    const rm = roomRef.current;
+    const st = stateRef.current;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const h of rm.hotspots) {
+      if (!h.sprite) continue;
+      const sp = h.sprite;
+      const isUsed = st.used.includes(h.id);
+      const isRevealed = st.revealed.includes(h.id);
+
+      if (isUsed && sp.takenPatch) {
+        const taken = takenRef.current[h.id];
+        if (taken?.naturalWidth) {
+          ctx.drawImage(taken, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+        }
+        continue;
+      }
+
+      const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
+      if (!entry) {
+        if ((isUsed || isRevealed) && sp.sheet) {
+          const sheet = sheetsRef.current[h.id];
+          if (sheet?.naturalWidth && sp.cols && sp.frameCount && sp.fps) {
+            const patch = patchesRef.current[h.id];
+            if (patch?.naturalWidth) {
+              ctx.drawImage(patch, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+            }
+            const frameW = sheet.naturalWidth / sp.cols;
+            const rows = Math.ceil(sp.frameCount / sp.cols);
+            const frameH = sheet.naturalHeight / rows;
+            const lastIdx = sp.frameCount - 1;
+            const col = lastIdx % sp.cols;
+            const row = Math.floor(lastIdx / sp.cols);
+            ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
+              sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+          }
+        }
+        continue;
+      }
+
+      if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
+
+      const patch = patchesRef.current[h.id];
+      if (patch?.naturalWidth) {
+        ctx.drawImage(patch, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+      }
+
+      const sheet = sheetsRef.current[h.id];
+      if (!sheet?.naturalWidth) continue;
+      const frameW = sheet.naturalWidth / sp.cols;
+      const rows = Math.ceil(sp.frameCount / sp.cols);
+      const frameH = sheet.naturalHeight / rows;
+      const col = entry.frameIndex % sp.cols;
+      const row = Math.floor(entry.frameIndex / sp.cols);
+      ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
+        sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+    }
+  }, []);
 
   const startLoop = useCallback(() => {
     if (rafRef.current) return;
@@ -483,22 +500,13 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
         : 0;
       lastTimeRef.current = timestamp;
 
-      const canvas = canvasRef.current;
-      if (!canvas) { rafRef.current = requestAnimationFrame(tick); return; }
-      const ctx = canvas.getContext('2d');
-      if (!ctx) { rafRef.current = requestAnimationFrame(tick); return; }
-
-      const s = scaleRef.current;
-      const rm = roomRef.current;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       let anyPlaying = false;
       let anyCompleted = false;
 
       for (const entry of entriesRef.current) {
-        const h = rm.hotspots.find((x) => x.id === entry.hotspotId);
-        if (!h?.sprite) continue;
-        const sp = h.sprite;
+        const h = roomRef.current.hotspots.find((x) => x.id === entry.hotspotId);
+        if (!h?.sprite?.sheet || !h.sprite.cols || !h.sprite.frameCount || !h.sprite.fps) continue;
+        const { fps, frameCount } = h.sprite;
         const sheet = sheetsRef.current[h.id];
         if (!sheet?.naturalWidth) {
           if (entry.playing) anyPlaying = true;
@@ -507,14 +515,14 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
 
         if (entry.playing) {
           if (dt > 0) {
-            const frameDuration = 1 / sp.fps;
+            const frameDuration = 1 / fps;
             entry.accumulator += dt;
             while (entry.accumulator >= frameDuration) {
               entry.accumulator -= frameDuration;
               entry.frameIndex++;
             }
-            if (entry.frameIndex >= sp.frameCount - 1) {
-              entry.frameIndex = sp.frameCount - 1;
+            if (entry.frameIndex >= frameCount - 1) {
+              entry.frameIndex = frameCount - 1;
               entry.playing = false;
               entry.held = true;
               anyCompleted = true;
@@ -522,24 +530,9 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
           }
           if (entry.playing) anyPlaying = true;
         }
-
-        const patch = patchesRef.current[h.id];
-        if (patch?.naturalWidth) {
-          ctx.drawImage(patch,
-            sp.bbox.x * s, sp.bbox.y * s,
-            sp.bbox.w * s, sp.bbox.h * s);
-        }
-
-        const frameW = sheet.naturalWidth / sp.cols;
-        const rows = Math.ceil(sp.frameCount / sp.cols);
-        const frameH = sheet.naturalHeight / rows;
-        const col = entry.frameIndex % sp.cols;
-        const row = Math.floor(entry.frameIndex / sp.cols);
-        ctx.drawImage(sheet,
-          col * frameW, row * frameH, frameW, frameH,
-          sp.bbox.x * s, sp.bbox.y * s,
-          sp.bbox.w * s, sp.bbox.h * s);
       }
+
+      drawStatic();
 
       if (anyCompleted) {
         setAnimsRef.current((prev) => prev.map((a) => {
@@ -558,35 +551,42 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
       }
     };
     rafRef.current = requestAnimationFrame(tick);
-  }, []);
+  }, [drawStatic]);
 
   useEffect(() => {
     if (anims.length === 0) {
       entriesRef.current = [];
       if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
       lastTimeRef.current = 0;
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+      needsRedrawRef.current = true;
+    } else {
+      const existing = new Set(entriesRef.current.map((e) => e.hotspotId));
+      let added = false;
+      for (const a of anims) {
+        if (a.playing && !existing.has(a.hotspotId)) {
+          entriesRef.current.push({
+            hotspotId: a.hotspotId, playing: true, held: false,
+            frameIndex: 0, accumulator: 0,
+          });
+          added = true;
+        }
       }
-      return;
+      const validIds = new Set(anims.map((a) => a.hotspotId));
+      entriesRef.current = entriesRef.current.filter((e) => validIds.has(e.hotspotId));
+      if (added) startLoop();
+      else needsRedrawRef.current = true;
     }
-    const existing = new Set(entriesRef.current.map((e) => e.hotspotId));
-    let added = false;
-    for (const a of anims) {
-      if (a.playing && !existing.has(a.hotspotId)) {
-        entriesRef.current.push({
-          hotspotId: a.hotspotId, playing: true, held: false,
-          frameIndex: 0, accumulator: 0,
-        });
-        added = true;
-      }
-    }
-    const validIds = new Set(anims.map((a) => a.hotspotId));
-    entriesRef.current = entriesRef.current.filter((e) => validIds.has(e.hotspotId));
-    if (added) startLoop();
   }, [anims, startLoop]);
+
+  useEffect(() => {
+    needsRedrawRef.current = true;
+  }, [state.used.length, state.revealed.length]);
+
+  useEffect(() => {
+    if (!needsRedrawRef.current) return;
+    needsRedrawRef.current = false;
+    if (!rafRef.current) drawStatic();
+  });
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 

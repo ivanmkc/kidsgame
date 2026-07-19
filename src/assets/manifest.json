@@ -28226,15 +28226,28 @@
               "sayFound": "\u4e00\u628a\u9583\u9583\u5605\u9396\u5319\u6536\u57cb\u5497\u55ba\u6795\u982d\u5e95\u5440\uff01"
             }
           },
-          "revealScene": "escape/toyroom_pillow_reveal.png",
-          "takenScene": "escape/toyroom_pillow_taken.png",
           "itemBox": {
             "x": 268,
             "y": 410,
             "w": 141,
             "h": 148
           },
-          "animVideo": "escape-video/toyroom_pillow.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/toyroom_pillow.webp",
+            "patch": "escape-sprites/toyroom_pillow_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 0,
+              "y": 151,
+              "w": 380,
+              "h": 442
+            },
+            "takenPatch": "escape-sprites/toyroom_pillow_taken.png",
+            "beforeScene": "escape/toyroom.png",
+            "afterScene": "escape/toyroom_pillow_reveal.png"
+          }
         },
         {
           "id": "teddy",
@@ -28285,9 +28298,6 @@
               "sayLocked": "\u73a9\u5177\u7bb1\u9396\u5230\u5be6\u4e00\u5be6\u5440\u3002\u7528\u54a9\u53ef\u4ee5\u6253\u958b\u4f62\u5462\uff1f"
             }
           },
-          "animVideo": "escape-video/toyroom_chest.mp4",
-          "revealScene": "escape/toyroom_chest_reveal.png",
-          "takenScene": "escape/toyroom_chest_taken.png",
           "itemBox": {
             "x": 377,
             "y": 160,
@@ -28305,7 +28315,10 @@
               "y": 115,
               "w": 356,
               "h": 330
-            }
+            },
+            "takenPatch": "escape-sprites/toyroom_chest_taken.png",
+            "beforeScene": "escape/toyroom_pillow_taken.png",
+            "afterScene": "escape/toyroom_chest_reveal.png"
           }
         },
         {
@@ -28320,7 +28333,6 @@
           "needs": "bone",
           "sayFound": "The puppy wiggles out \u2014 you saved him!",
           "sayLocked": "The puppy is hungry. What does a puppy love best?",
-          "afterScene": "escape/toyroom_s2.png",
           "t": {
             "ja": {
               "sayFound": "\u308f\u3093\u3061\u3083\u3093\u3001\u3059\u308b\u3059\u308b\u3063\u3068 \u3067\u3066\u304d\u305f\uff01 \u305f\u3059\u3051\u3066\u3042\u3052\u305f\u306d\uff01",
@@ -28335,7 +28347,21 @@
               "sayLocked": "\u72d7\u72d7\u809a\u9913\u5566\u3002\u72d7\u72d7\u6700\u937e\u610f\u98df\u54a9\u35ce\uff1f"
             }
           },
-          "animVideo": "escape-video/toyroom_pen.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/toyroom_pen.webp",
+            "patch": "escape-sprites/toyroom_pen_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 990,
+              "y": 227,
+              "w": 290,
+              "h": 493
+            },
+            "beforeScene": "escape/toyroom_chest_taken.png",
+            "afterScene": "escape/toyroom_s2.png"
+          }
         }
       ],
       "nameT": {
@@ -28410,15 +28436,28 @@
               "sayFound": "\u5572\u8349\u5ea6\u6709\u96bb\u86cb\u4ed4\u6536\u57cb\u5497\u5440\uff01"
             }
           },
-          "revealScene": "escape/dragoncave_haystack_reveal.png",
-          "takenScene": "escape/dragoncave_haystack_taken.png",
           "itemBox": {
             "x": 118,
             "y": 386,
             "w": 153,
             "h": 169
           },
-          "animVideo": "escape-video/dragoncave_haystack.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/dragoncave_haystack.webp",
+            "patch": "escape-sprites/dragoncave_haystack_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 28,
+              "y": 261,
+              "w": 437,
+              "h": 443
+            },
+            "takenPatch": "escape-sprites/dragoncave_haystack_taken.png",
+            "beforeScene": "escape/dragoncave.png",
+            "afterScene": "escape/dragoncave_haystack_reveal.png"
+          }
         },
         {
           "id": "crystal",
@@ -28469,14 +28508,27 @@
               "sayLocked": "\u500b\u7210\u6e96\u5099\u597d\u5566\uff0c\u4f46\u4fc2\u716e\u5572\u4e5c\u5622\u597d\u5462\uff1f"
             }
           },
-          "animVideo": "escape-video/dragoncave_stove.mp4",
-          "revealScene": "escape/dragoncave_stove_reveal.png",
-          "takenScene": "escape/dragoncave_stove_taken.png",
           "itemBox": {
             "x": 841,
             "y": 270,
             "w": 143,
             "h": 64
+          },
+          "sprite": {
+            "sheet": "escape-sprites/dragoncave_stove.webp",
+            "patch": "escape-sprites/dragoncave_stove_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 691,
+              "y": 143,
+              "w": 409,
+              "h": 495
+            },
+            "takenPatch": "escape-sprites/dragoncave_stove_taken.png",
+            "beforeScene": "escape/dragoncave_haystack_taken.png",
+            "afterScene": "escape/dragoncave_stove_reveal.png"
           }
         },
         {
@@ -28491,7 +28543,6 @@
           "needs": "pancake",
           "sayFound": "The dragon gobbles it up and puffs a happy little smoke ring!",
           "sayLocked": "The baby dragon's tummy is rumbling\u2026",
-          "afterScene": "escape/dragoncave_dragon_after.png",
           "t": {
             "ja": {
               "sayFound": "\u30c9\u30e9\u30b4\u30f3 \u3082\u3050\u3082\u3050 \u305f\u3079\u3066\u3001\u3046\u308c\u3057\u305d\u3046\u306b \u3051\u3080\u308a\u306e \u308f\u3063\u304b\u3092 \u3077\u304b\u30fc\uff01",
@@ -28506,7 +28557,21 @@
               "sayLocked": "\u5c0f\u98db\u9f8d\u500b\u809a\u4ed4\u5495\u5495\u8072\u5440\u2026"
             }
           },
-          "animVideo": "escape-video/dragoncave_dragon.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/dragoncave_dragon.webp",
+            "patch": "escape-sprites/dragoncave_dragon_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 1016,
+              "y": 303,
+              "w": 230,
+              "h": 251
+            },
+            "beforeScene": "escape/dragoncave_stove_taken.png",
+            "afterScene": "escape/dragoncave_dragon_after.png"
+          }
         }
       ],
       "nameT": {
@@ -28581,15 +28646,28 @@
               "sayFound": "\u4e00\u689d\u626d\u5413\u626d\u5413\u5605\u9b5a\u4ed4\uff01"
             }
           },
-          "revealScene": "escape/piratecove_net_reveal.png",
-          "takenScene": "escape/piratecove_net_taken.png",
           "itemBox": {
             "x": 0,
             "y": 269,
             "w": 330,
             "h": 362
           },
-          "animVideo": "escape-video/piratecove_net.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/piratecove_net.webp",
+            "patch": "escape-sprites/piratecove_net_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 15,
+              "y": 319,
+              "w": 335,
+              "h": 334
+            },
+            "takenPatch": "escape-sprites/piratecove_net_taken.png",
+            "beforeScene": "escape/piratecove.png",
+            "afterScene": "escape/piratecove_net_reveal.png"
+          }
         },
         {
           "id": "umbrella",
@@ -28640,14 +28718,27 @@
               "sayLocked": "\u5858\u9d5d\u60f3\u98df\u5572\u5622\u5148\u5440\u2026"
             }
           },
-          "animVideo": "escape-video/piratecove_pelican.mp4",
-          "revealScene": "escape/piratecove_pelican_reveal.png",
-          "takenScene": "escape/piratecove_pelican_taken.png",
           "itemBox": {
             "x": 666,
             "y": 410,
             "w": 197,
             "h": 112
+          },
+          "sprite": {
+            "sheet": "escape-sprites/piratecove_pelican.webp",
+            "patch": "escape-sprites/piratecove_pelican_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 646,
+              "y": 239,
+              "w": 361,
+              "h": 302
+            },
+            "takenPatch": "escape-sprites/piratecove_pelican_taken.png",
+            "beforeScene": "escape/piratecove_net_taken.png",
+            "afterScene": "escape/piratecove_pelican_reveal.png"
           }
         },
         {
@@ -28662,7 +28753,6 @@
           "needs": "shell",
           "sayFound": "The chest bursts open \u2014 treasure for everyone!",
           "sayLocked": "The treasure chest has a shell-shaped slot!",
-          "afterScene": "escape/piratecove_chest_after.png",
           "t": {
             "ja": {
               "sayFound": "\u305f\u304b\u3089\u3070\u3053 \u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u307f\u3093\u306a \u306e \u304a\u305f\u304b\u3089 \u3060\uff01",
@@ -28677,7 +28767,21 @@
               "sayLocked": "\u500b\u5bf6\u7bb1\u6709\u500b\u8c9d\u6bbc\u5f62\u72c0\u5605\u7abf\u5440\uff01"
             }
           },
-          "animVideo": "escape-video/piratecove_chest.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/piratecove_chest.webp",
+            "patch": "escape-sprites/piratecove_chest_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 880,
+              "y": 318,
+              "w": 400,
+              "h": 370
+            },
+            "beforeScene": "escape/piratecove_pelican_taken.png",
+            "afterScene": "escape/piratecove_chest_after.png"
+          }
         }
       ],
       "nameT": {
@@ -28752,13 +28856,23 @@
               "sayFound": "\u4e00\u628a\u597d\u7528\u5605\u58eb\u5df4\u62ff\uff01"
             }
           },
-          "revealScene": "escape/rocketpad_toolbox_reveal.png",
-          "takenScene": "escape/rocketpad_toolbox_taken.png",
           "itemBox": {
             "x": 3,
             "y": 329,
             "w": 293,
             "h": 245
+          },
+          "sprite": {
+            "takenPatch": "escape-sprites/rocketpad_toolbox_taken.png",
+            "patch": "escape-sprites/rocketpad_toolbox_patch.png",
+            "bbox": {
+              "x": 30,
+              "y": 322,
+              "w": 291,
+              "h": 209
+            },
+            "beforeScene": "escape/rocketpad.png",
+            "afterScene": "escape/rocketpad_toolbox_reveal.png"
           }
         },
         {
@@ -28784,15 +28898,28 @@
               "sayFound": "\u500b\u7bb1\u5165\u9762\u6709\u7c92\u8d85\u7d1a\u96fb\u82af\uff01"
             }
           },
-          "revealScene": "escape/rocketpad_crate_reveal.png",
-          "takenScene": "escape/rocketpad_crate_taken.png",
           "itemBox": {
             "x": 1045,
             "y": 324,
             "w": 177,
             "h": 94
           },
-          "animVideo": "escape-video/rocketpad_crate.mp4"
+          "sprite": {
+            "sheet": "escape-sprites/rocketpad_crate.webp",
+            "patch": "escape-sprites/rocketpad_crate_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 891,
+              "y": 210,
+              "w": 389,
+              "h": 483
+            },
+            "takenPatch": "escape-sprites/rocketpad_crate_taken.png",
+            "beforeScene": "escape/rocketpad_toolbox_taken.png",
+            "afterScene": "escape/rocketpad_crate_reveal.png"
+          }
         },
         {
           "id": "poster",
@@ -28828,8 +28955,6 @@
           "needs": "wrench",
           "sayFound": "The wrench pops the panel open \u2014 there is an empty battery slot inside!",
           "sayLocked": "The rocket panel is stuck. We need a tool to open it!",
-          "afterScene": "escape/rocketpad_panel_after.png",
-          "animVideo": "escape-video/rocketpad_panel.mp4",
           "t": {
             "ja": {
               "sayFound": "\u30ec\u30f3\u30c1\u3067 \u30d1\u30cd\u30eb\u304c \u30d1\u30ab\u30c3\u3068 \u3042\u3044\u305f\uff01 \u3067\u3093\u3061\u306e \u30b9\u30ed\u30c3\u30c8\u304c \u304b\u3089\u3063\u307d\u3060\uff01",
@@ -28843,6 +28968,21 @@
               "sayFound": "\u58eb\u5df4\u62ff\u64ac\u958b\u5497\u584a\u677f\uff01\u5165\u9762\u6709\u500b\u7a7a\u5605\u96fb\u6c60\u4f4d\uff01",
               "sayLocked": "\u706b\u7bad\u584a\u677f\u5361\u4f4f\u5497\u3002 \u6211\u54cb\u8981\u6435\u5de5\u5177\u569f\u958b\u4f62\uff01"
             }
+          },
+          "sprite": {
+            "sheet": "escape-sprites/rocketpad_panel.webp",
+            "patch": "escape-sprites/rocketpad_panel_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 557,
+              "y": 74,
+              "w": 334,
+              "h": 411
+            },
+            "beforeScene": "escape/rocketpad_crate_taken.png",
+            "afterScene": "escape/rocketpad_panel_after.png"
           }
         },
         {
@@ -28857,8 +28997,6 @@
           "needs": "battery",
           "sayFound": "The battery clicks in \u2014 three, two, one \u2014 BLAST OFF!",
           "sayLocked": "The battery slot is empty. We need something to power the rocket!",
-          "afterScene": "escape/rocketpad_slot_after.png",
-          "animVideo": "escape-video/rocketpad_slot.mp4",
           "t": {
             "ja": {
               "sayFound": "\u3067\u3093\u3061\u304c \u30ab\u30c1\u30c3\uff01 \u3055\u3093\u3001\u306b\u3001\u3044\u3061 \u2014 \u306f\u3063\u3057\u3083\uff01",
@@ -28872,6 +29010,21 @@
               "sayFound": "\u96fb\u6c60\u5494\u5660\u4e00\u8072\u5165\u5497\u4f4d\uff01\u4e09\uff0c\u4e8c\uff0c\u4e00 \u2014 \u767c\u5c04\uff01",
               "sayLocked": "\u96fb\u6c60\u4f4d\u7a7a\u5497\u3002\u706b\u7bad\u9700\u8981\u5572\u5622\u569f\u767c\u52d5\uff01"
             }
+          },
+          "sprite": {
+            "sheet": "escape-sprites/rocketpad_slot.webp",
+            "patch": "escape-sprites/rocketpad_slot_patch.png",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12,
+            "bbox": {
+              "x": 535,
+              "y": 0,
+              "w": 535,
+              "h": 713
+            },
+            "beforeScene": "escape/rocketpad_panel_after.png",
+            "afterScene": "escape/rocketpad_slot_after.png"
           }
         }
       ],
