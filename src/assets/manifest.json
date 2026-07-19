@@ -28243,10 +28243,10 @@
             },
             "itemLayer": "escape-sprites/toyroom_pillow_item_key.png",
             "itemBbox": {
-              "x": 253,
-              "y": 395,
-              "w": 148,
-              "h": 166
+              "x": 251,
+              "y": 392,
+              "w": 171,
+              "h": 190
             },
             "cols": 7,
             "frameCount": 48,
@@ -28974,7 +28974,11 @@
               "y": 341,
               "w": 294,
               "h": 232
-            }
+            },
+            "sheet": "escape-sprites/rocketpad_toolbox.webp",
+            "cols": 7,
+            "frameCount": 48,
+            "fps": 12
           }
         },
         {
