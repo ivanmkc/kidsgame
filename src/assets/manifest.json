@@ -28719,9 +28719,9 @@
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 274,
-              "w": 318,
-              "h": 384
+              "y": 261,
+              "w": 328,
+              "h": 380
             },
             "beforeScene": "escape/piratecove.png",
             "afterScene": "escape/piratecove_net_reveal.png",
@@ -28802,10 +28802,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 665,
-              "y": 190,
-              "w": 324,
-              "h": 331
+              "x": 664,
+              "y": 188,
+              "w": 332,
+              "h": 340
             },
             "beforeScene": "escape/piratecove_net_taken.png",
             "afterScene": "escape/piratecove_pelican_reveal.png",
@@ -28857,10 +28857,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 924,
-              "y": 304,
-              "w": 356,
-              "h": 357
+              "x": 902,
+              "y": 296,
+              "w": 378,
+              "h": 372
             },
             "beforeScene": "escape/piratecove_pelican_taken.png",
             "afterScene": "escape/piratecove_chest_after.png",
