@@ -63,6 +63,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const framePos = useRef({ x: 0, y: 0 });
   const trayPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
   const { width } = useWindowDimensions();
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   // ALL hooks above the early returns (repo hard rule).
   useEffect(() => {
@@ -104,6 +106,13 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     [room, state.inventory],
   );
 
+  const startSprite = useCallback((hotspotId: string) => {
+    setSpriteAnims((prev) => {
+      if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held))) return prev;
+      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0 }];
+    });
+  }, []);
+
   if (!sceneId || !room) {
     return (
       <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" />}>
@@ -118,18 +127,13 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     );
   }
 
-  const startSprite = useCallback((hotspotId: string) => {
-    setSpriteAnims((prev) => {
-      if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held))) return prev;
-      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0 }];
-    });
-  }, []);
-
   const onSpot = (hotspotId: string) => {
     lastAction.current = Date.now();
     setHintSpot(null);
     const h = room.hotspots.find((x) => x.id === hotspotId);
-    const { state: next, effect } = applyTap(room, state, hotspotId);
+    const currentState = stateRef.current;
+    const { state: next, effect } = applyTap(room, currentState, hotspotId);
+    stateRef.current = next;
     setState(next);
     const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
       h ? hotText(h, field, lang) : undefined;
@@ -357,6 +361,7 @@ function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
     Animated.spring(progress, {
       toValue: 1, friction: 7, tension: 40, useNativeDriver: true,
     }).start(({ finished }) => { if (finished) onDone(); });
+    return () => { progress.stopAnimation(); };
   }, []);  // eslint-disable-line react-hooks/exhaustive-deps
   const dx = toX - fromX;
   const dy = toY - fromY;
@@ -425,14 +430,23 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
   const setAnimsRef = useRef(setAnims);
   setAnimsRef.current = setAnims;
   const needsRedrawRef = useRef(false);
+  const drawStaticRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    sheetsRef.current = {};
+    patchesRef.current = {};
+    takenRef.current = {};
+    restRef.current = {};
+
     for (const h of room.hotspots) {
       if (!h.sprite) continue;
-      if (h.sprite.sheet && !sheetsRef.current[h.id]) {
+      if (h.sprite.sheet) {
         const img = new window.Image();
         img.src = h.sprite.sheet;
-        img.onload = () => { needsRedrawRef.current = true; };
+        img.onload = () => {
+          needsRedrawRef.current = true;
+          if (!rafRef.current) drawStaticRef.current?.();
+        };
         sheetsRef.current[h.id] = img;
       }
       if (h.sprite.patch && !patchesRef.current[h.id]) {
@@ -445,13 +459,15 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
         img.src = h.sprite.takenPatch;
         takenRef.current[h.id] = img;
       }
-      if (h.sprite.rest && !restRef.current[h.id]) {
+      if (h.sprite.rest) {
         const img = new window.Image();
         img.src = h.sprite.rest;
-        img.onload = () => { needsRedrawRef.current = true; };
+        img.onload = () => {
+          needsRedrawRef.current = true;
+          if (!rafRef.current) drawStaticRef.current?.();
+        };
         restRef.current[h.id] = img;
       }
-      // Item layers are loaded by the browser directly as DOM <img> elements.
     }
   }, [room]);
 
@@ -463,7 +479,10 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
     const s = scaleRef.current;
     const rm = roomRef.current;
     const st = stateRef.current;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
+    ctx.scale(dpr, dpr);
 
     for (const h of rm.hotspots) {
       if (!h.sprite) continue;
@@ -565,6 +584,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
         sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
     }
   }, []);
+  drawStaticRef.current = drawStatic;
 
   const startLoop = useCallback(() => {
     if (rafRef.current) return;
@@ -668,10 +688,11 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
   if (Platform.OS !== 'web') return null;
   const w = Math.round(1280 * scale);
   const h = Math.round(720 * scale);
+  const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
   return React.createElement('canvas', {
     ref: canvasRef,
-    width: w,
-    height: h,
+    width: Math.round(w * dpr),
+    height: Math.round(h * dpr),
     style: { position: 'absolute', top: 0, left: 0, width: w, height: h, pointerEvents: 'none' },
   });
 }
