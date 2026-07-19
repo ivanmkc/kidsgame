@@ -952,6 +952,114 @@ def check_sheet_consistency(sprite: dict) -> tuple[str, int]:
 
 GAME_W, GAME_H = 1280, 720
 
+THRESH_SEAM_ENERGY = 8.0  # max excess gradient energy along bbox perimeter vs plain plate
+
+
+def _perimeter_gradient_energy(full_frame: np.ndarray, bbox: dict, band: int = 2) -> float:
+    """Mean absolute gradient across the sprite bbox perimeter.
+
+    Samples a 'band'-pixel strip straddling each bbox edge, computes the
+    cross-edge gradient (inner minus outer mean per row/column), and
+    returns the mean absolute value across all four edges.
+    """
+    x, y, w, h = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+    fh, fw = full_frame.shape[:2]
+    gray = full_frame.astype(np.float32)
+    if gray.ndim == 3:
+        gray = gray.mean(axis=-1)
+
+    energies: list[float] = []
+
+    # Top edge: rows y-band..y-1 (outer) vs y..y+band-1 (inner)
+    oy1, oy2 = max(0, y - band), y
+    iy1, iy2 = y, min(fh, y + band)
+    if oy2 > oy1 and iy2 > iy1:
+        outer = gray[oy1:oy2, x:x + w].mean(axis=0)
+        inner = gray[iy1:iy2, x:x + w].mean(axis=0)
+        energies.append(float(np.abs(inner - outer).mean()))
+
+    # Bottom edge
+    iy1, iy2 = max(0, y + h - band), y + h
+    oy1, oy2 = y + h, min(fh, y + h + band)
+    if oy2 > oy1 and iy2 > iy1:
+        inner = gray[iy1:iy2, x:x + w].mean(axis=0)
+        outer = gray[oy1:oy2, x:x + w].mean(axis=0)
+        energies.append(float(np.abs(inner - outer).mean()))
+
+    # Left edge
+    ox1, ox2 = max(0, x - band), x
+    ix1, ix2 = x, min(fw, x + band)
+    if ox2 > ox1 and ix2 > ix1:
+        outer = gray[y:y + h, ox1:ox2].mean(axis=1)
+        inner = gray[y:y + h, ix1:ix2].mean(axis=1)
+        energies.append(float(np.abs(inner - outer).mean()))
+
+    # Right edge
+    ix1, ix2 = max(0, x + w - band), x + w
+    ox1, ox2 = x + w, min(fw, x + w + band)
+    if ox2 > ox1 and ix2 > ix1:
+        inner = gray[y:y + h, ix1:ix2].mean(axis=1)
+        outer = gray[y:y + h, ox1:ox2].mean(axis=1)
+        energies.append(float(np.abs(inner - outer).mean()))
+
+    return float(np.mean(energies)) if energies else 0.0
+
+
+def verify_bbox_seam(
+    room_id: str, hotspot_id: str, sprite: dict
+) -> tuple[str, float]:
+    """Check for rectangular tonal seams at the sprite bbox boundary.
+
+    Composites mid-animation frames (25/50/75%) on the clean plate and
+    measures the excess gradient energy along the bbox perimeter compared
+    to the plain plate.  A baked wrong-tone background in the sprite
+    produces a rectangle-shaped seam that elevates the gradient.
+
+    Returns (result, max_excess_energy).
+    """
+    if not sprite.get("sheet"):
+        return "SKIP", 0.0
+
+    sheet_path = SPRITES / sprite["sheet"]
+    if not sheet_path.exists():
+        return f"MISSING {sheet_path.name}", 99.0
+
+    base = _get_base_for_sprite(room_id, sprite)
+    sheet = np.array(Image.open(sheet_path))
+    bbox = sprite["bbox"]
+    x, y, w, h = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+
+    cols = sprite["cols"]
+    fc = sprite["frameCount"]
+    frame_w = sheet.shape[1] // cols
+    rows_grid = (fc + cols - 1) // cols
+    frame_h = sheet.shape[0] // rows_grid
+
+    plate_energy = _perimeter_gradient_energy(base, bbox)
+
+    max_excess = 0.0
+    for pct in (0.25, 0.50, 0.75):
+        idx = min(int(pct * (fc - 1)), fc - 1)
+        col = idx % cols
+        row = idx // cols
+        frame = sheet[row * frame_h:(row + 1) * frame_h,
+                      col * frame_w:(col + 1) * frame_w]
+
+        comp = base.copy().astype(np.float32)
+        alpha = frame[:, :, 3:4].astype(np.float32) / 255.0
+        comp[y:y + h, x:x + w] = (
+            comp[y:y + h, x:x + w] * (1 - alpha)
+            + frame[:, :, :3].astype(np.float32) * alpha
+        )
+        comp = np.clip(comp, 0, 255).astype(np.uint8)
+
+        comp_energy = _perimeter_gradient_energy(comp, bbox)
+        excess = comp_energy - plate_energy
+        max_excess = max(max_excess, excess)
+
+    ok = max_excess <= THRESH_SEAM_ENERGY
+    return "PASS" if ok else "FAIL", max_excess
+
 
 def verify_item_layers(room_id: str, hotspots: list[dict]) -> int:
     """Verify item layers: (a) itemBbox fits within the game frame,
@@ -1108,6 +1216,24 @@ def main() -> int:
         fails += sheet_fails
     else:
         print(f"Sheet consistency: all {len(entries)} OK")
+
+    # Bbox-boundary seam energy: detects baked wrong-tone background in
+    # sprite mattes (coupling invariant violation).
+    print(f"\n--- Bbox seam energy ---")
+    seam_fails = 0
+    for room_id, hotspot_id, sprite in entries:
+        tag = f"{room_id}/{hotspot_id}"
+        result, excess = verify_bbox_seam(room_id, hotspot_id, sprite)
+        if result not in ("PASS", "SKIP"):
+            seam_fails += 1
+            print(f"  SEAM FAIL: {tag} — excess={excess:.2f} (threshold {THRESH_SEAM_ENERGY})")
+        else:
+            print(f"  SEAM PASS: {tag} — excess={excess:.2f}")
+    if seam_fails:
+        print(f"\n{seam_fails} bbox-seam failures")
+        fails += seam_fails
+    else:
+        print(f"Bbox seam energy: all {len(entries)} OK")
 
     # Item-layer composite check: verify item layers composite correctly
     # against the afterScene and that itemBbox fits within the game frame.
