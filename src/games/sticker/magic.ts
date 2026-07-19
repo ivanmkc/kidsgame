@@ -24,6 +24,9 @@ export const PUBLIC_SITE = 'https://ivanmkc.github.io/kidsgame/';
 // entries, so this is defence-in-depth, not the common path.
 export const DRESSUP_DESCRIPTIONS: Record<string, string> = {
   dress_pink: 'a pretty pink princess dress',
+  dress_rainbow: 'a rainbow-striped twirly party dress',
+  dress_star: 'a midnight-blue dress covered in tiny gold stars',
+  dress_flower: 'a spring dress covered in daisy flowers',
   dress_blue: 'a flowing blue princess dress',
   tutu: 'a pink ballet tutu',
   crown: 'a golden royal crown',
