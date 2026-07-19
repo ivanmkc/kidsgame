@@ -40,6 +40,7 @@ THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
+THRESH_ITEM_COMP_MEAN = 8  # item composite vs afterScene (looser: multiple error sources)
 
 # --- Gemini plate-emptiness gate (D.1) ---
 
@@ -597,6 +598,105 @@ def check_outside_bbox_transparency(sprite: dict) -> tuple[str, int]:
     return "PASS", 0
 
 
+GAME_W, GAME_H = 1280, 720
+
+
+def verify_item_layers(room_id: str, hotspots: list[dict]) -> int:
+    """Verify item layers: (a) itemBbox fits within the game frame,
+    (b) composite of clean plate + sprite last frame + item layer
+    matches the afterScene at the itemBbox region."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        return 0
+
+    clean = np.array(
+        Image.open(clean_path).convert("RGB").resize((GAME_W, GAME_H)),
+        dtype=np.uint8,
+    )
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("itemLayer") or not sp.get("itemBbox"):
+            continue
+
+        ib = sp["itemBbox"]
+        ix, iy, iw, ih = ib["x"], ib["y"], ib["w"], ib["h"]
+
+        if ix < 0 or iy < 0 or ix + iw > GAME_W or iy + ih > GAME_H:
+            print(
+                f"  ITEM-BBOX FAIL: {room_id}/{h['id']} "
+                f"— itemBbox ({ix},{iy},{iw},{ih}) outside game frame"
+            )
+            fails += 1
+            continue
+
+        item_path = SPRITES / sp["itemLayer"]
+        if not item_path.exists():
+            print(f"  ITEM-LAYER FAIL: {room_id}/{h['id']} — missing {sp['itemLayer']}")
+            fails += 1
+            continue
+
+        item = np.array(Image.open(item_path))
+        if item.ndim != 3 or item.shape[2] != 4:
+            print(f"  ITEM-LAYER FAIL: {room_id}/{h['id']} — not RGBA")
+            fails += 1
+            continue
+
+        after_path = SCENES / sp.get("afterScene", "")
+        if not after_path.exists():
+            continue
+
+        after = np.array(
+            Image.open(after_path).convert("RGB").resize((GAME_W, GAME_H)),
+            dtype=np.uint8,
+        )
+
+        comp = clean.copy()
+        bbox = sp.get("bbox")
+        if bbox and sp.get("sheet"):
+            sheet_path = SPRITES / sp["sheet"]
+            if sheet_path.exists():
+                sheet = np.array(Image.open(sheet_path))
+                cols = sp["cols"]
+                fc = sp["frameCount"]
+                fw = sheet.shape[1] // cols
+                rows = (fc + cols - 1) // cols
+                fh = sheet.shape[0] // rows
+                last = fc - 1
+                c, r = last % cols, last // cols
+                frame = sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw]
+                bx, by, bw, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+                alpha = frame[:, :, 3:4].astype(np.float32) / 255.0
+                roi = comp[by:by + bh, bx:bx + bw].astype(np.float32)
+                roi = roi * (1 - alpha) + frame[:, :, :3].astype(np.float32) * alpha
+                comp[by:by + bh, bx:bx + bw] = np.clip(roi, 0, 255).astype(np.uint8)
+
+        item_resized = np.array(
+            Image.fromarray(item).resize((iw, ih), Image.Resampling.LANCZOS)
+        )
+        alpha_i = item_resized[:, :, 3:4].astype(np.float32) / 255.0
+        roi_i = comp[iy:iy + ih, ix:ix + iw].astype(np.float32)
+        roi_i = roi_i * (1 - alpha_i) + item_resized[:, :, :3].astype(np.float32) * alpha_i
+        comp[iy:iy + ih, ix:ix + iw] = np.clip(roi_i, 0, 255).astype(np.uint8)
+
+        target = after[iy:iy + ih, ix:ix + iw]
+        rendered = comp[iy:iy + ih, ix:ix + iw]
+        delta = np.abs(rendered.astype(np.int16) - target.astype(np.int16))
+        mean_d = float(delta.mean())
+
+        if mean_d > THRESH_ITEM_COMP_MEAN:
+            print(
+                f"  ITEM-COMP FAIL: {room_id}/{h['id']} "
+                f"— composite-vs-after mean={mean_d:.2f} (threshold {THRESH_ITEM_COMP_MEAN})"
+            )
+            fails += 1
+        else:
+            print(f"  ITEM-COMP PASS: {room_id}/{h['id']} — mean={mean_d:.2f}")
+
+    return fails
+
+
 def main() -> int:
     m = json.loads(MANIFEST.read_text())
     entries = []
@@ -655,6 +755,19 @@ def main() -> int:
         fails += bbox_fails
     else:
         print(f"Outside-bbox transparency: all {len(entries)} OK")
+
+    # Item-layer composite check: verify item layers composite correctly
+    # against the afterScene and that itemBbox fits within the game frame.
+    print(f"\n--- Item layers ---")
+    item_fails = 0
+    for room in m.get("escape", []):
+        ilf = verify_item_layers(room["id"], room.get("hotspots", []))
+        item_fails += ilf
+    if item_fails:
+        print(f"\n{item_fails} item-layer failures")
+        fails += item_fails
+    else:
+        print("Item layers: all composites verified")
 
     # D.3 Plate-drift check: outside the union of hotspot masks,
     # the clean plate must be pixel-identical to the original scene.

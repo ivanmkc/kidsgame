@@ -201,6 +201,25 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         >
           <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
           <SpriteCanvas room={room} state={state} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
+          {Platform.OS === 'web' && room.hotspots.map((h) => {
+            if (!h.sprite?.itemLayer || !h.sprite.itemBbox) return null;
+            const revealed = state.revealed.includes(h.id);
+            const used = state.used.includes(h.id);
+            if (!revealed || used) return null;
+            const ib = h.sprite.itemBbox;
+            return React.createElement('img', {
+              key: `item-${h.id}`,
+              src: h.sprite.itemLayer,
+              style: {
+                position: 'absolute',
+                left: ib.x * scale,
+                top: ib.y * scale,
+                width: ib.w * scale,
+                height: ib.h * scale,
+                pointerEvents: 'none',
+              },
+            });
+          })}
           {room.hotspots.map((h) => {
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
@@ -393,7 +412,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
   const patchesRef = useRef<Record<string, HTMLImageElement>>({});
   const takenRef = useRef<Record<string, HTMLImageElement>>({});
   const restRef = useRef<Record<string, HTMLImageElement>>({});
-  const itemLayerRef = useRef<Record<string, HTMLImageElement>>({});
+  // Item layers are rendered as DOM <img> elements, not on the canvas.
   const rafRef = useRef<number>(0);
   const entriesRef = useRef<SpriteEntry[]>([]);
   const lastTimeRef = useRef<number>(0);
@@ -432,12 +451,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
         img.onload = () => { needsRedrawRef.current = true; };
         restRef.current[h.id] = img;
       }
-      if (h.sprite.itemLayer && !itemLayerRef.current[h.id]) {
-        const img = new window.Image();
-        img.src = h.sprite.itemLayer;
-        img.onload = () => { needsRedrawRef.current = true; };
-        itemLayerRef.current[h.id] = img;
-      }
+      // Item layers are loaded by the browser directly as DOM <img> elements.
     }
   }, [room]);
 
@@ -496,12 +510,9 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
           }
         }
 
-        if (isRevealed && !isUsed && sp.itemLayer && sp.itemBbox) {
-          const item = itemLayerRef.current[h.id];
-          if (item?.naturalWidth) {
-            ctx.drawImage(item, sp.itemBbox.x * s, sp.itemBbox.y * s, sp.itemBbox.w * s, sp.itemBbox.h * s);
-          }
-        }
+        // Item layers are rendered as separate DOM <img> elements
+        // (positioned absolutely within the frame View) so they are never
+        // clipped to the sprite canvas or parent bbox boundaries.
         continue;
       }
 
