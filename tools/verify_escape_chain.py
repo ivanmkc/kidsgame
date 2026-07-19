@@ -200,7 +200,9 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
-        return 0
+        missing = [p for p in (clean_path, orig_path) if not p.exists()]
+        print(f"  REMNANT FAIL: {room_id} — missing {[str(p.name) for p in missing]}")
+        return 1
 
     clean = np.array(Image.open(clean_path).convert("RGB"))
     orig = np.array(Image.open(orig_path).convert("RGB"))
@@ -249,7 +251,9 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
-        return 0
+        missing = [p for p in (clean_path, orig_path) if not p.exists()]
+        print(f"  PLATE-EMPTY FAIL: {room_id} — missing {[str(p.name) for p in missing]}")
+        return 1
 
     clean = Image.open(clean_path).convert("RGB")
     orig = Image.open(orig_path).convert("RGB")
@@ -318,7 +322,9 @@ def verify_plate_drift(room_id: str, hotspots: list[dict]) -> int:
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
-        return 0
+        missing = [p for p in (clean_path, orig_path) if not p.exists()]
+        print(f"  PLATE-DRIFT FAIL: {room_id} — missing {[str(p.name) for p in missing]}")
+        return 1
 
     orig = np.array(Image.open(orig_path).convert("RGB"))
     clean = np.array(Image.open(clean_path).convert("RGB"))
@@ -361,7 +367,8 @@ def verify_no_doubles(room_id: str, hotspots: list[dict]) -> int:
 
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     if not clean_path.exists():
-        return 0
+        print(f"  NO-DOUBLES FAIL: {room_id} — missing {clean_path.name}")
+        return 1
 
     clean = np.array(
         Image.open(clean_path).convert("RGB").resize((1280, 720)),
@@ -669,7 +676,8 @@ def verify_item_layers(room_id: str, hotspots: list[dict]) -> int:
     matches the afterScene at the itemBbox region."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     if not clean_path.exists():
-        return 0
+        print(f"  ITEM-LAYER FAIL: {room_id} — missing {clean_path.name}")
+        return 1
 
     clean = np.array(
         Image.open(clean_path).convert("RGB").resize((GAME_W, GAME_H)),
