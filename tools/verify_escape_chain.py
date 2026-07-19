@@ -46,6 +46,16 @@ THRESH_REMNANT_FRAC = 0.02  # SAM-mask emptiness: < 2% unchanged pixels within m
 THRESH_REMNANT_DIFF = 8  # pixel diff below which a pixel counts as "unchanged"
 SAM_MASKS_DIR = SCENES / "escape" / "sam_masks"
 
+# Hotspot→removed-object mapping.  Most hotspots map 1:1 to the object
+# they animate (pillow→pillow).  Panel and slot are hotspots ON the rocket
+# — the removed object is the rocket itself, so they share one SAM mask.
+# Mask files are named {room}_{hotspot}.png; panel.png and slot.png are
+# identical copies of the rocket object mask.
+HOTSPOT_OBJECT_MAP: dict[tuple[str, str], str] = {
+    ("rocketpad", "panel"): "rocket",
+    ("rocketpad", "slot"): "rocket",
+}
+
 # --- Gemini plate-emptiness gate (D.1) ---
 
 HOTSPOT_OBJECTS: dict[tuple[str, str], str] = {
@@ -183,7 +193,10 @@ def _mask_bbox_for_hotspot(
 
 
 def _load_sam_mask(room_id: str, hotspot_id: str) -> np.ndarray | None:
-    """Load the SAM segmentation mask for a specific hotspot."""
+    """Load the SAM segmentation mask for a specific hotspot.
+
+    Uses HOTSPOT_OBJECT_MAP to resolve hotspots that share a removed-object
+    mask (e.g. panel and slot both load the rocket mask)."""
     mask_path = SAM_MASKS_DIR / f"{room_id}_{hotspot_id}.png"
     if not mask_path.exists():
         return None
