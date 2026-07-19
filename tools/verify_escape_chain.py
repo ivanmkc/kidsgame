@@ -4,8 +4,8 @@ pixel-match its after-scene.
 Sprite-only path:
   - Composite base (plate or before-scene crop) + patch + final sheet frame
     at the hotspot bbox, compare against the after-scene ROI.
-  - Check outside-bbox transparency: sprite frames must have zero alpha
-    outside their bbox region.
+  - Sheet consistency: frame dimensions match bbox, frameCount fits grid,
+    last frame has non-zero alpha coverage.
   - Coverage sanity: final-frame alpha coverage within bbox must be > 5%.
 
 Scene references (beforeScene, afterScene) are stored in the sprite block
@@ -638,31 +638,51 @@ def verify_tail_convergence(
     return result, mean_half, mean_quarter
 
 
-def check_outside_bbox_transparency(sprite: dict) -> tuple[str, int]:
-    """Verify that sprite frames have zero alpha outside the bbox region.
-    Returns (result, leaking_pixel_count)."""
+def check_sheet_consistency(sprite: dict) -> tuple[str, int]:
+    """Verify sprite sheet geometry against manifest declarations.
+
+    Checks: (a) sheet file exists and is RGBA, (b) computed frame
+    dimensions from sheet size / cols / rows match the manifest bbox
+    dimensions, (c) frameCount fits within the sheet grid, (d) last
+    frame has non-zero alpha (animation isn't blank at held state).
+    Returns (result, detail_count)."""
     if not sprite.get("sheet"):
         return "SKIP", 0
 
     sheet_path = SPRITES / sprite["sheet"]
     if not sheet_path.exists():
-        return "MISSING", 0
+        return f"FAIL: missing {sheet_path.name}", 0
 
     sheet = np.array(Image.open(sheet_path))
+    if sheet.ndim != 3 or sheet.shape[2] != 4:
+        return "FAIL: sheet not RGBA", 0
+
     cols = sprite["cols"]
     fc = sprite["frameCount"]
     frame_w = sheet.shape[1] // cols
     rows = (fc + cols - 1) // cols
     frame_h = sheet.shape[0] // rows
 
-    # Each frame IS the bbox crop — the sheet stores only the bbox region.
-    # So "outside bbox" transparency is automatically guaranteed by construction:
-    # the frame IS the bbox, there's nothing outside it.
-    # This check verifies the sheet dimensions are consistent.
-    expected_w = cols * frame_w
-    expected_h = rows * frame_h
-    if sheet.shape[1] != expected_w or sheet.shape[0] != expected_h:
-        return "FAIL: sheet dimensions inconsistent", 0
+    bbox = sprite.get("bbox", {})
+    bw, bh = bbox.get("w", 0), bbox.get("h", 0)
+    if bw > 0 and bh > 0:
+        if frame_w != bw or frame_h != bh:
+            return (
+                f"FAIL: frame {frame_w}x{frame_h} != bbox {bw}x{bh}",
+                abs(frame_w - bw) + abs(frame_h - bh),
+            )
+
+    max_frames = rows * cols
+    if fc > max_frames:
+        return f"FAIL: frameCount {fc} > grid capacity {max_frames}", fc - max_frames
+
+    last_col = (fc - 1) % cols
+    last_row = (fc - 1) // cols
+    last_frame = sheet[last_row * frame_h:(last_row + 1) * frame_h,
+                       last_col * frame_w:(last_col + 1) * frame_w]
+    last_alpha = float(last_frame[:, :, 3].astype(bool).mean()) * 100
+    if last_alpha < THRESH_COVERAGE_MIN:
+        return f"FAIL: last-frame coverage {last_alpha:.1f}% < {THRESH_COVERAGE_MIN}%", 0
 
     return "PASS", 0
 
@@ -810,21 +830,21 @@ def main() -> int:
     else:
         print(f"Tail convergence: all {len(entries)} OK")
 
-    # Outside-bbox transparency check
+    # Sheet consistency check (replaces former no-op outside-bbox check)
     print()
-    bbox_fails = 0
+    sheet_fails = 0
     for room_id, hotspot_id, sprite in entries:
         tag = f"{room_id}/{hotspot_id}"
-        result, leaks = check_outside_bbox_transparency(sprite)
+        result, detail = check_sheet_consistency(sprite)
         if result not in ("PASS", "SKIP"):
-            bbox_fails += 1
-            print(f"  BBOX {tag}: {result}")
+            sheet_fails += 1
+            print(f"  SHEET {tag}: {result}")
 
-    if bbox_fails:
-        print(f"{bbox_fails} outside-bbox transparency failures")
-        fails += bbox_fails
+    if sheet_fails:
+        print(f"{sheet_fails} sheet-consistency failures")
+        fails += sheet_fails
     else:
-        print(f"Outside-bbox transparency: all {len(entries)} OK")
+        print(f"Sheet consistency: all {len(entries)} OK")
 
     # Item-layer composite check: verify item layers composite correctly
     # against the afterScene and that itemBbox fits within the game frame.
