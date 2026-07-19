@@ -28178,7 +28178,7 @@
       "id": "toyroom",
       "name": "The Sleepy Puppy",
       "level": "easy",
-      "image": "escape/toyroom.png",
+      "image": "escape/toyroom_clean.png",
       "intro": "Oh no! The puppy is stuck in the toy pen and the gate will not budge. Look around the toy room and help him out!",
       "winText": "Hooray! The puppy is free and SO happy!",
       "items": [
@@ -28234,17 +28234,29 @@
           },
           "sprite": {
             "sheet": "escape-sprites/toyroom_pillow.webp",
-            "patch": "escape-sprites/toyroom_pillow_patch.png",
+            "rest": "escape-sprites/toyroom_pillow_rest.png",
+            "restBbox": {
+              "x": 0,
+              "y": 222,
+              "w": 245,
+              "h": 345
+            },
+            "itemLayer": "escape-sprites/toyroom_pillow_item_key.png",
+            "itemBbox": {
+              "x": 253,
+              "y": 395,
+              "w": 148,
+              "h": 166
+            },
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 151,
-              "w": 380,
-              "h": 442
+              "y": 150,
+              "w": 316,
+              "h": 481
             },
-            "takenPatch": "escape-sprites/toyroom_pillow_taken.png",
             "beforeScene": "escape/toyroom.png",
             "afterScene": "escape/toyroom_pillow_reveal.png"
           }
@@ -28306,17 +28318,29 @@
           },
           "sprite": {
             "sheet": "escape-sprites/toyroom_chest.webp",
-            "patch": "escape-sprites/toyroom_chest_patch.png",
+            "rest": "escape-sprites/toyroom_chest_rest.png",
+            "restBbox": {
+              "x": 326,
+              "y": 159,
+              "w": 282,
+              "h": 249
+            },
+            "itemLayer": "escape-sprites/toyroom_chest_item_bone.png",
+            "itemBbox": {
+              "x": 362,
+              "y": 145,
+              "w": 140,
+              "h": 47
+            },
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 288,
-              "y": 115,
-              "w": 356,
-              "h": 330
+              "x": 261,
+              "y": 87,
+              "w": 411,
+              "h": 385
             },
-            "takenPatch": "escape-sprites/toyroom_chest_taken.png",
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
           }
@@ -28349,15 +28373,21 @@
           },
           "sprite": {
             "sheet": "escape-sprites/toyroom_pen.webp",
-            "patch": "escape-sprites/toyroom_pen_patch.png",
+            "rest": "escape-sprites/toyroom_pen_rest.png",
+            "restBbox": {
+              "x": 1032,
+              "y": 252,
+              "w": 248,
+              "h": 384
+            },
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 990,
-              "y": 227,
-              "w": 290,
-              "h": 493
+              "x": 967,
+              "y": 221,
+              "w": 313,
+              "h": 479
             },
             "beforeScene": "escape/toyroom_chest_taken.png",
             "afterScene": "escape/toyroom_s2.png"
@@ -28388,7 +28418,7 @@
       "id": "dragoncave",
       "name": "Dragon's Breakfast",
       "level": "easy",
-      "image": "escape/dragoncave.png",
+      "image": "escape/dragoncave_clean.png",
       "intro": "The baby dragon is too hungry to fly! Find something yummy and cook him breakfast.",
       "winText": "Yum! The baby dragon is full and zooming again!",
       "items": [
@@ -28444,19 +28474,31 @@
           },
           "sprite": {
             "sheet": "escape-sprites/dragoncave_haystack.webp",
-            "patch": "escape-sprites/dragoncave_haystack_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 28,
-              "y": 261,
-              "w": 437,
-              "h": 443
+              "x": 0,
+              "y": 204,
+              "w": 358,
+              "h": 475
             },
-            "takenPatch": "escape-sprites/dragoncave_haystack_taken.png",
             "beforeScene": "escape/dragoncave.png",
-            "afterScene": "escape/dragoncave_haystack_reveal.png"
+            "afterScene": "escape/dragoncave_haystack_reveal.png",
+            "rest": "escape-sprites/dragoncave_haystack_rest.png",
+            "restBbox": {
+              "x": 0,
+              "y": 276,
+              "w": 308,
+              "h": 336
+            },
+            "itemLayer": "escape-sprites/dragoncave_haystack_item_egg.png",
+            "itemBbox": {
+              "x": 194,
+              "y": 371,
+              "w": 92,
+              "h": 199
+            }
           }
         },
         {
@@ -28516,19 +28558,31 @@
           },
           "sprite": {
             "sheet": "escape-sprites/dragoncave_stove.webp",
-            "patch": "escape-sprites/dragoncave_stove_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 691,
-              "y": 143,
-              "w": 409,
-              "h": 495
+              "x": 724,
+              "y": 166,
+              "w": 375,
+              "h": 433
             },
-            "takenPatch": "escape-sprites/dragoncave_stove_taken.png",
             "beforeScene": "escape/dragoncave_haystack_taken.png",
-            "afterScene": "escape/dragoncave_stove_reveal.png"
+            "afterScene": "escape/dragoncave_stove_reveal.png",
+            "rest": "escape-sprites/dragoncave_stove_rest.png",
+            "restBbox": {
+              "x": 786,
+              "y": 236,
+              "w": 251,
+              "h": 300
+            },
+            "itemLayer": "escape-sprites/dragoncave_stove_item_pancake.png",
+            "itemBbox": {
+              "x": 826,
+              "y": 255,
+              "w": 173,
+              "h": 73
+            }
           }
         },
         {
@@ -28559,18 +28613,24 @@
           },
           "sprite": {
             "sheet": "escape-sprites/dragoncave_dragon.webp",
-            "patch": "escape-sprites/dragoncave_dragon_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 1016,
-              "y": 303,
-              "w": 230,
-              "h": 251
+              "x": 979,
+              "y": 255,
+              "w": 301,
+              "h": 334
             },
             "beforeScene": "escape/dragoncave_stove_taken.png",
-            "afterScene": "escape/dragoncave_dragon_after.png"
+            "afterScene": "escape/dragoncave_dragon_after.png",
+            "rest": "escape-sprites/dragoncave_dragon_rest.png",
+            "restBbox": {
+              "x": 1045,
+              "y": 322,
+              "w": 175,
+              "h": 203
+            }
           }
         }
       ],
@@ -28598,7 +28658,7 @@
       "id": "piratecove",
       "name": "The Pelican Trade",
       "level": "medium",
-      "image": "escape/piratecove.png",
+      "image": "escape/piratecove_clean.png",
       "intro": "A treasure chest washed up on the beach, but it will not open! Look around the cove for a way in.",
       "winText": "Treasure! You are the cleverest little pirate!",
       "items": [
@@ -28654,19 +28714,31 @@
           },
           "sprite": {
             "sheet": "escape-sprites/piratecove_net.webp",
-            "patch": "escape-sprites/piratecove_net_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 15,
-              "y": 319,
-              "w": 335,
-              "h": 334
+              "x": 0,
+              "y": 274,
+              "w": 318,
+              "h": 384
             },
-            "takenPatch": "escape-sprites/piratecove_net_taken.png",
             "beforeScene": "escape/piratecove.png",
-            "afterScene": "escape/piratecove_net_reveal.png"
+            "afterScene": "escape/piratecove_net_reveal.png",
+            "rest": "escape-sprites/piratecove_net_rest.png",
+            "restBbox": {
+              "x": 56,
+              "y": 342,
+              "w": 194,
+              "h": 252
+            },
+            "itemLayer": "escape-sprites/piratecove_net_item_fish.png",
+            "itemBbox": {
+              "x": 45,
+              "y": 297,
+              "w": 279,
+              "h": 329
+            }
           }
         },
         {
@@ -28726,19 +28798,31 @@
           },
           "sprite": {
             "sheet": "escape-sprites/piratecove_pelican.webp",
-            "patch": "escape-sprites/piratecove_pelican_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 646,
-              "y": 239,
-              "w": 361,
-              "h": 302
+              "x": 665,
+              "y": 190,
+              "w": 324,
+              "h": 331
             },
-            "takenPatch": "escape-sprites/piratecove_pelican_taken.png",
             "beforeScene": "escape/piratecove_net_taken.png",
-            "afterScene": "escape/piratecove_pelican_reveal.png"
+            "afterScene": "escape/piratecove_pelican_reveal.png",
+            "rest": "escape-sprites/piratecove_pelican_rest.png",
+            "restBbox": {
+              "x": 737,
+              "y": 262,
+              "w": 181,
+              "h": 190
+            },
+            "itemLayer": "escape-sprites/piratecove_pelican_item_shell.png",
+            "itemBbox": {
+              "x": 673,
+              "y": 395,
+              "w": 205,
+              "h": 120
+            }
           }
         },
         {
@@ -28769,18 +28853,24 @@
           },
           "sprite": {
             "sheet": "escape-sprites/piratecove_chest.webp",
-            "patch": "escape-sprites/piratecove_chest_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 880,
-              "y": 318,
-              "w": 400,
-              "h": 370
+              "x": 924,
+              "y": 304,
+              "w": 356,
+              "h": 357
             },
             "beforeScene": "escape/piratecove_pelican_taken.png",
-            "afterScene": "escape/piratecove_chest_after.png"
+            "afterScene": "escape/piratecove_chest_after.png",
+            "rest": "escape-sprites/piratecove_chest_rest.png",
+            "restBbox": {
+              "x": 990,
+              "y": 369,
+              "w": 268,
+              "h": 228
+            }
           }
         }
       ],
@@ -28808,7 +28898,7 @@
       "id": "rocketpad",
       "name": "Bunny Blast-Off",
       "level": "medium",
-      "image": "escape/rocketpad.png",
+      "image": "escape/rocketpad_clean.png",
       "intro": "The bunny's rocket will not start! Find what it needs and help her blast off to the moon.",
       "winText": "Whoosh! The bunny zooms to the moon \u2014 thanks to you!",
       "items": [
@@ -28863,8 +28953,6 @@
             "h": 245
           },
           "sprite": {
-            "takenPatch": "escape-sprites/rocketpad_toolbox_taken.png",
-            "patch": "escape-sprites/rocketpad_toolbox_patch.png",
             "bbox": {
               "x": 30,
               "y": 322,
@@ -28872,7 +28960,21 @@
               "h": 209
             },
             "beforeScene": "escape/rocketpad.png",
-            "afterScene": "escape/rocketpad_toolbox_reveal.png"
+            "afterScene": "escape/rocketpad_toolbox_reveal.png",
+            "rest": "escape-sprites/rocketpad_toolbox_rest.png",
+            "restBbox": {
+              "x": 0,
+              "y": 339,
+              "w": 299,
+              "h": 236
+            },
+            "itemLayer": "escape-sprites/rocketpad_toolbox_item_wrench.png",
+            "itemBbox": {
+              "x": 2,
+              "y": 341,
+              "w": 294,
+              "h": 232
+            }
           }
         },
         {
@@ -28906,19 +29008,31 @@
           },
           "sprite": {
             "sheet": "escape-sprites/rocketpad_crate.webp",
-            "patch": "escape-sprites/rocketpad_crate_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 891,
-              "y": 210,
-              "w": 389,
-              "h": 483
+              "x": 937,
+              "y": 323,
+              "w": 343,
+              "h": 331
             },
-            "takenPatch": "escape-sprites/rocketpad_crate_taken.png",
             "beforeScene": "escape/rocketpad_toolbox_taken.png",
-            "afterScene": "escape/rocketpad_crate_reveal.png"
+            "afterScene": "escape/rocketpad_crate_reveal.png",
+            "rest": "escape-sprites/rocketpad_crate_rest.png",
+            "restBbox": {
+              "x": 1002,
+              "y": 388,
+              "w": 276,
+              "h": 202
+            },
+            "itemLayer": "escape-sprites/rocketpad_crate_item_battery.png",
+            "itemBbox": {
+              "x": 1030,
+              "y": 309,
+              "w": 207,
+              "h": 113
+            }
           }
         },
         {
@@ -28971,18 +29085,24 @@
           },
           "sprite": {
             "sheet": "escape-sprites/rocketpad_panel.webp",
-            "patch": "escape-sprites/rocketpad_panel_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 557,
-              "y": 74,
-              "w": 334,
-              "h": 411
+              "x": 299,
+              "y": 243,
+              "w": 483,
+              "h": 307
             },
             "beforeScene": "escape/rocketpad_crate_taken.png",
-            "afterScene": "escape/rocketpad_panel_after.png"
+            "afterScene": "escape/rocketpad_panel_after.png",
+            "rest": "escape-sprites/rocketpad_panel_rest.png",
+            "restBbox": {
+              "x": 407,
+              "y": 293,
+              "w": 325,
+              "h": 207
+            }
           }
         },
         {
@@ -29013,18 +29133,24 @@
           },
           "sprite": {
             "sheet": "escape-sprites/rocketpad_slot.webp",
-            "patch": "escape-sprites/rocketpad_slot_patch.png",
             "cols": 7,
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 535,
-              "y": 0,
-              "w": 535,
-              "h": 713
+              "x": 586,
+              "y": 26,
+              "w": 434,
+              "h": 602
             },
             "beforeScene": "escape/rocketpad_panel_after.png",
-            "afterScene": "escape/rocketpad_slot_after.png"
+            "afterScene": "escape/rocketpad_slot_after.png",
+            "rest": "escape-sprites/rocketpad_slot_rest.png",
+            "restBbox": {
+              "x": 636,
+              "y": 98,
+              "w": 320,
+              "h": 460
+            }
           }
         }
       ],
