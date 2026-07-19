@@ -44,5 +44,30 @@
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
+  },
+  "rocketpad/crate.seam_energy": {
+    "baseline": 17.5,
+    "justification": "scene-edge content — the crate sits at the image's right boundary (x+w=1280=GAME_W, 3-edge averaging); the screen edge is the natural crop; no perceivable truncation (team-lead eyes, 5-phase mid-strip). Stale-matte component eliminated (18.85->15.95). Future crate bbox resize retires this baseline.",
+    "evidence": {
+      "pre_reextract": 18.85,
+      "post_reextract": 15.95,
+      "alpha_at_edges": "frame35: top=64.1%, right=38.4%; right edge at image boundary",
+      "mid_strip": "step10f_rocketpad_crate_mid.png"
+    },
+    "reviewed_by": "team-lead",
+    "date": "2026-07-19"
+  },
+  "rocketpad/panel.seam_energy": {
+    "baseline": 9.6,
+    "justification": "residual edge-touching animation content after runtime-stack correction (stack fix collapsed 6.09 of 14.22; frame-35 edge alphas: top=94.3, bottom=37.3, right=138.0; same class as chest/crate precedents). Future panel bbox resize retires this baseline.",
+    "evidence": {
+      "pre_stack_fix": 14.22,
+      "post_stack_fix": 8.13,
+      "stack_fix_delta": -6.09,
+      "alpha_at_edges": "frame35: top=94.3, bottom=37.3, left=41.6, right=138.0",
+      "mid_strip": "step10f_rocketpad_panel_mid.png (corrected-stack composite)"
+    },
+    "reviewed_by": "team-lead",
+    "date": "2026-07-19"
   }
 }

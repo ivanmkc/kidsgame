@@ -1005,14 +1005,64 @@ def _perimeter_gradient_energy(full_frame: np.ndarray, bbox: dict, band: int = 2
     return float(np.mean(energies)) if energies else 0.0
 
 
+def _build_runtime_base(room_id: str, hotspot_id: str, sprite: dict) -> np.ndarray:
+    """Build the true runtime compositing base for a hotspot.
+
+    For hotspots in HOTSPOT_OBJECT_MAP (shared-object siblings), the
+    runtime draws sibling rest layers underneath the sprite frame.
+    Compositing on the bare plate would show a disembodied sprite
+    floating on an object-free background, producing false gradient
+    energy at the bbox boundary.
+
+    Returns the base image with sibling rest layers composited.
+    """
+    base = _get_base_for_sprite(room_id, sprite)
+    mapped = HOTSPOT_OBJECT_MAP.get((room_id, hotspot_id))
+    if not mapped:
+        return base
+
+    m = json.loads(MANIFEST.read_text())
+    for room in m.get("escape", []):
+        if room["id"] != room_id:
+            continue
+        for h in room.get("hotspots", []):
+            if h["id"] == hotspot_id:
+                continue
+            sib_mapped = HOTSPOT_OBJECT_MAP.get((room_id, h["id"]))
+            if sib_mapped != mapped:
+                continue
+            sib_sp = h.get("sprite", {})
+            rest_file = sib_sp.get("rest")
+            rb = sib_sp.get("restBbox")
+            if not rest_file or not rb:
+                continue
+            rest_path = SPRITES / rest_file
+            if not rest_path.exists():
+                continue
+            rest = np.array(Image.open(rest_path))
+            rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+            rest_resized = np.array(
+                Image.fromarray(rest).resize((rw, rh), Image.LANCZOS)
+            )
+            alpha = rest_resized[:, :, 3:4].astype(np.float32) / 255.0
+            base_f = base.astype(np.float32)
+            base_f[ry:ry + rh, rx:rx + rw] = (
+                base_f[ry:ry + rh, rx:rx + rw] * (1 - alpha)
+                + rest_resized[:, :, :3].astype(np.float32) * alpha
+            )
+            base = np.clip(base_f, 0, 255).astype(np.uint8)
+    return base
+
+
 def verify_bbox_seam(
     room_id: str, hotspot_id: str, sprite: dict
 ) -> tuple[str, float]:
     """Check for rectangular tonal seams at the sprite bbox boundary.
 
-    Composites mid-animation frames (25/50/75%) on the clean plate and
+    Composites mid-animation frames (25/50/75%) on the true runtime base
+    (clean plate + sibling rest layers for shared-object hotspots) and
     measures the excess gradient energy along the bbox perimeter compared
-    to the plain plate.  A baked wrong-tone background in the sprite
+    to the plain base.  A baked wrong-tone background in the sprite
     produces a rectangle-shaped seam that elevates the gradient.
 
     Returns (result, max_excess_energy).
@@ -1024,7 +1074,7 @@ def verify_bbox_seam(
     if not sheet_path.exists():
         return f"MISSING {sheet_path.name}", 99.0
 
-    base = _get_base_for_sprite(room_id, sprite)
+    base = _build_runtime_base(room_id, hotspot_id, sprite)
     sheet = np.array(Image.open(sheet_path))
     bbox = sprite["bbox"]
     x, y, w, h = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
