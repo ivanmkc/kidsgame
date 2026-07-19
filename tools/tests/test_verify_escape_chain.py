@@ -496,8 +496,9 @@ class TestBaselineRegression:
 # ===================================================================
 class TestRealAssetsSmoke:
     """Run D.1-PRE on the actual escape room assets and verify the
-    two known failures (net, rocket) are reported.  Crate passes via
-    baseline (tan-wood coincidence, team-lead verified 2026-07-19)."""
+    one known failure (rocket) is reported.  Crate passes via baseline
+    (tan-wood coincidence, team-lead verified 2026-07-19).  Net passes
+    via baseline (gray-on-gray coincidence, team-lead verified 2026-07-19)."""
 
     def test_real_remnant_failures(self):
         m = json.loads(vec.MANIFEST.read_text())
@@ -508,8 +509,8 @@ class TestRealAssetsSmoke:
             )
 
         total = sum(results.values())
-        assert total == 2, (
-            f"Expected 2 D.1-PRE failures (net, rocket), got {total}: "
+        assert total == 1, (
+            f"Expected 1 D.1-PRE failure (rocket), got {total}: "
             + ", ".join(f"{k}={v}" for k, v in results.items() if v > 0)
         )
 
