@@ -528,8 +528,8 @@ class TestRealAssetsSmoke:
             vec.verify_rest_plate_match(r["id"], r.get("hotspots", []))
             for r in m.get("escape", [])
         )
-        assert total == 1, (
-            f"Expected 1 rest-hole failure (pen), got {total}"
+        assert total == 0, (
+            f"Expected 0 rest-hole failures (pen re-cut from SAM mask), got {total}"
         )
 
     def test_real_sheet_consistency(self):
