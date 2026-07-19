@@ -39,10 +39,27 @@ THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
 
+def _get_base_for_sprite(room_id: str, sprite: dict) -> np.ndarray:
+    """Return the compositing base for a sprite: clean plate for the
+    clean-plate model (sprite.rest is set), before-scene for legacy."""
+    if sprite.get("rest"):
+        # Clean-plate model: base is the room's clean plate
+        clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+        if clean_path.exists():
+            return np.array(Image.open(clean_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
+    before_path = SCENES / sprite["beforeScene"]
+    return np.array(Image.open(before_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
+
+
 def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, float, float, float]:
-    """Verify a sprite hotspot: composite base + patch + final sheet frame
+    """Verify a sprite hotspot: composite base + final sheet frame
     at the bbox, compare against the after-scene ROI.
-    Returns (result_str, mean_delta, frac30, coverage_pct)."""
+    Returns (result_str, mean_delta, frac30, coverage_pct).
+
+    Two compositing models:
+      - Legacy (patch): base = before-scene, draw patch then sprite on top
+      - Clean-plate (rest): base = clean plate, draw sprite on top directly
+    """
     before_path = SCENES / sprite["beforeScene"]
     after_path = SCENES / sprite["afterScene"]
     bbox = sprite["bbox"]
@@ -52,27 +69,18 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
     if not after_path.exists():
         return f"MISSING after: {after_path}", 999, 1, 0
 
-    base = np.array(Image.open(before_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
+    base = _get_base_for_sprite(room_id, sprite)
     after = np.array(Image.open(after_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
 
     x, y, w, h = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
     roi = base[y:y + h, x:x + w].copy().astype(np.float32)
 
     if not sprite.get("sheet"):
-        # Static sprite (no animation) — the after-scene itself is the target,
-        # but there's no sheet to composite. The takenPatch handles the visual.
-        # Just verify the takenPatch matches the after scene at the bbox.
         if sprite.get("takenPatch"):
             taken_path = SPRITES / sprite["takenPatch"]
             if not taken_path.exists():
                 return f"MISSING takenPatch: {taken_path}", 999, 1, 0
-            taken_img = np.array(Image.open(taken_path).convert("RGB"), dtype=np.uint8)
-            # takenPatch is an opaque crop — no alpha composition needed
-            # But the after-scene for the toolbox IS the reveal scene, which == plate.
-            # So this check is trivially true. Still verify for consistency.
             target = after[y:y + h, x:x + w]
-            # For static sprites without a sheet, the "held" state uses the patch
-            # which is the before-scene crop — verify after matches before (should be identical)
             delta = np.abs(roi.astype(np.int16) - target.astype(np.int16))
             mean_d = float(delta.mean())
             frac30 = float((delta.sum(axis=-1) > 30).mean())
@@ -142,7 +150,7 @@ def verify_tail_convergence(
             return f"MISSING {p.name}", 999, 999
 
     sheet = np.array(Image.open(sheet_path))  # RGBA
-    base = np.array(Image.open(before_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
+    base = _get_base_for_sprite(room_id, sprite)
     after = np.array(Image.open(after_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
 
     cols = sprite["cols"]

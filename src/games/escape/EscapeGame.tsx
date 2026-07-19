@@ -392,6 +392,8 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
   const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
   const patchesRef = useRef<Record<string, HTMLImageElement>>({});
   const takenRef = useRef<Record<string, HTMLImageElement>>({});
+  const restRef = useRef<Record<string, HTMLImageElement>>({});
+  const itemLayerRef = useRef<Record<string, HTMLImageElement>>({});
   const rafRef = useRef<number>(0);
   const entriesRef = useRef<SpriteEntry[]>([]);
   const lastTimeRef = useRef<number>(0);
@@ -411,6 +413,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
       if (h.sprite.sheet && !sheetsRef.current[h.id]) {
         const img = new window.Image();
         img.src = h.sprite.sheet;
+        img.onload = () => { needsRedrawRef.current = true; };
         sheetsRef.current[h.id] = img;
       }
       if (h.sprite.patch && !patchesRef.current[h.id]) {
@@ -422,6 +425,18 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
         const img = new window.Image();
         img.src = h.sprite.takenPatch;
         takenRef.current[h.id] = img;
+      }
+      if (h.sprite.rest && !restRef.current[h.id]) {
+        const img = new window.Image();
+        img.src = h.sprite.rest;
+        img.onload = () => { needsRedrawRef.current = true; };
+        restRef.current[h.id] = img;
+      }
+      if (h.sprite.itemLayer && !itemLayerRef.current[h.id]) {
+        const img = new window.Image();
+        img.src = h.sprite.itemLayer;
+        img.onload = () => { needsRedrawRef.current = true; };
+        itemLayerRef.current[h.id] = img;
       }
     }
   }, [room]);
@@ -441,7 +456,56 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
       const sp = h.sprite;
       const isUsed = st.used.includes(h.id);
       const isRevealed = st.revealed.includes(h.id);
+      const hasRestLayer = Boolean(sp.rest && sp.restBbox);
 
+      if (hasRestLayer) {
+        // Clean-plate model: rest layer drawn for untouched hotspots,
+        // sprite last frame for revealed/used, item layer for revealed
+        const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
+
+        if (!isUsed && !isRevealed && !entry) {
+          const rest = restRef.current[h.id];
+          if (rest?.naturalWidth && sp.restBbox) {
+            ctx.drawImage(rest, sp.restBbox.x * s, sp.restBbox.y * s, sp.restBbox.w * s, sp.restBbox.h * s);
+          }
+          continue;
+        }
+
+        if (entry) {
+          if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
+          const sheet = sheetsRef.current[h.id];
+          if (!sheet?.naturalWidth) continue;
+          const frameW = sheet.naturalWidth / sp.cols;
+          const rows = Math.ceil(sp.frameCount / sp.cols);
+          const frameH = sheet.naturalHeight / rows;
+          const col = entry.frameIndex % sp.cols;
+          const row = Math.floor(entry.frameIndex / sp.cols);
+          ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
+            sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+        } else if ((isUsed || isRevealed) && sp.sheet) {
+          const sheet = sheetsRef.current[h.id];
+          if (sheet?.naturalWidth && sp.cols && sp.frameCount) {
+            const frameW = sheet.naturalWidth / sp.cols;
+            const rows = Math.ceil(sp.frameCount / sp.cols);
+            const frameH = sheet.naturalHeight / rows;
+            const lastIdx = sp.frameCount - 1;
+            const col = lastIdx % sp.cols;
+            const row = Math.floor(lastIdx / sp.cols);
+            ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
+              sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
+          }
+        }
+
+        if (isRevealed && !isUsed && sp.itemLayer && sp.itemBbox) {
+          const item = itemLayerRef.current[h.id];
+          if (item?.naturalWidth) {
+            ctx.drawImage(item, sp.itemBbox.x * s, sp.itemBbox.y * s, sp.itemBbox.w * s, sp.itemBbox.h * s);
+          }
+        }
+        continue;
+      }
+
+      // Legacy patch model for unconverted rooms
       if (isUsed && sp.takenPatch) {
         const taken = takenRef.current[h.id];
         if (taken?.naturalWidth) {
