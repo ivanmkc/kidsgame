@@ -100,5 +100,57 @@ for (const room of ROOMS) {
   console.log(`  ${stepNum - 1} screenshots`);
 }
 
+// ── Boundary proof: for one reveal per room, screenshot near the end
+// of the video clip (~3.8s after tap) and again when the scene is shown
+// (~5.0s), then compute pixel diff between the pair.
+// With seamless clip endings, the diff should be near-zero.
+console.log('\n--- BOUNDARY PROOF ---');
+const BOUNDARY_ROOMS = [
+  { id: 'toyroom',     spot: 'pillow', name: 'pillow-reveal' },
+  { id: 'dragoncave',  spot: 'haystack', name: 'haystack-reveal' },
+  { id: 'piratecove',  spot: 'net', name: 'net-reveal' },
+  { id: 'rocketpad',   spot: 'crate', name: 'crate-reveal' },
+];
+
+for (const br of BOUNDARY_ROOMS) {
+  const page = await b.newPage({ viewport: { width: 1024, height: 768 } });
+  await page.goto(`http://localhost:8899/kidsgame/#/escape/${br.id}`, { waitUntil: 'networkidle' });
+  await page.waitForTimeout(1800);
+
+  // Tap the spot to trigger the video
+  await page.getByTestId(`escape-spot-${br.spot}`).click({ force: true });
+
+  // Screenshot near end of video (~3.8s after tap)
+  await page.waitForTimeout(3800);
+  const shotA = `${OUT}/${br.id}_boundary_${br.name}_3.8s.png`;
+  await page.screenshot({ path: shotA });
+
+  // Screenshot after video ends + scene shown (~5.0s after tap)
+  await page.waitForTimeout(1200);
+  const shotB = `${OUT}/${br.id}_boundary_${br.name}_5.0s.png`;
+  await page.screenshot({ path: shotB });
+
+  // Compare the two screenshots pixel-by-pixel
+  const { execSync } = await import('child_process');
+  try {
+    const result = execSync(
+      `python3 -c "
+import numpy as np
+from PIL import Image
+a = np.array(Image.open('${shotA}').convert('RGB'), dtype=np.int16)
+b = np.array(Image.open('${shotB}').convert('RGB'), dtype=np.int16)
+delta = np.abs(a - b).sum(axis=-1)
+print(f'mean={delta.mean():.2f} frac30={float((delta > 30).mean()):.4f}')
+"`,
+      { encoding: 'utf-8' }
+    ).trim();
+    console.log(`  ${br.id}/${br.name}: boundary diff ${result}`);
+  } catch (e) {
+    console.log(`  ${br.id}/${br.name}: could not compute diff: ${e.message}`);
+  }
+
+  await page.close();
+}
+
 await b.close();
 console.log('ALL WALKS DONE');
