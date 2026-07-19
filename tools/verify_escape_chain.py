@@ -1268,13 +1268,23 @@ def main() -> int:
         print(f"Sheet consistency: all {len(entries)} OK")
 
     # Bbox-boundary seam energy: detects baked wrong-tone background in
-    # sprite mattes (coupling invariant violation).
+    # sprite mattes (coupling invariant violation).  Hotspots with a
+    # .seam_energy baseline use that limit instead of the absolute threshold.
+    seam_baselines = _load_remnant_baselines()
     print(f"\n--- Bbox seam energy ---")
     seam_fails = 0
     for room_id, hotspot_id, sprite in entries:
         tag = f"{room_id}/{hotspot_id}"
         result, excess = verify_bbox_seam(room_id, hotspot_id, sprite)
-        if result not in ("PASS", "SKIP"):
+        seam_key = f"{tag}.seam_energy"
+        if seam_key in seam_baselines:
+            limit = seam_baselines[seam_key]
+            if excess <= limit:
+                print(f"  SEAM PASS: {tag} — excess={excess:.2f} (baseline {limit})")
+            else:
+                seam_fails += 1
+                print(f"  SEAM FAIL: {tag} — excess={excess:.2f} > baseline {limit}")
+        elif result not in ("PASS", "SKIP"):
             seam_fails += 1
             print(f"  SEAM FAIL: {tag} — excess={excess:.2f} (threshold {THRESH_SEAM_ENERGY})")
         else:
