@@ -570,7 +570,26 @@ class TestRealAssetsSmoke:
                         total += 1
         assert total == 0, f"Unexpected sheet-consistency failures: {total}"
 
-    # test_real_bbox_seam_energy added after all rooms re-extracted (final commit)
+    def test_real_bbox_seam_energy(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        baselines = json.loads(vec.REMNANT_BASELINES_PATH.read_text())
+        failures = []
+        for room in m.get("escape", []):
+            for h in room.get("hotspots", []):
+                sp = h.get("sprite")
+                if not sp or not sp.get("sheet"):
+                    continue
+                tag = f"{room['id']}/{h['id']}"
+                result, excess = vec.verify_bbox_seam(room["id"], h["id"], sp)
+                seam_key = f"{tag}.seam_energy"
+                if seam_key in baselines:
+                    limit = baselines[seam_key]["baseline"]
+                    if excess > limit:
+                        failures.append(f"{tag}: excess={excess:.2f} > baseline={limit}")
+                else:
+                    if result not in ("PASS", "SKIP"):
+                        failures.append(f"{tag}: {result} excess={excess:.2f} > {vec.THRESH_SEAM_ENERGY}")
+        assert not failures, "Seam energy failures:\n  " + "\n  ".join(failures)
 
 
 # ===================================================================
