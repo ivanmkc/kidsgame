@@ -15,6 +15,7 @@ fi
 cd "$(dirname "$0")/.."
 
 python3 tools/verify_story_audio.py || { echo "REFUSING TO SHIP: story audio coverage/duration failed."; exit 1; }
+python3 -m pytest tools/tests/test_verify_escape_chain.py -v --tb=short || { echo "REFUSING TO SHIP: escape gate self-test failed."; exit 1; }
 python3 tools/verify_escape_chain.py || { echo "REFUSING TO SHIP: escape chain continuity failed."; exit 1; }
 
 cp src/assets/manifest.json /tmp/kgb_manifest_full.json
