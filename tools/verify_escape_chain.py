@@ -44,7 +44,11 @@ THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene — raise only with t
 
 THRESH_REMNANT_FRAC = 0.02  # SAM-mask emptiness: < 2% unchanged pixels within mask
 THRESH_REMNANT_DIFF = 8  # pixel diff below which a pixel counts as "unchanged"
+BASELINE_MARGIN = 0.01  # 1 percentage point above baseline for regression gating
 SAM_MASKS_DIR = SCENES / "escape" / "sam_masks"
+REMNANT_BASELINES_PATH = ROOT / "tools" / "remnant_baselines.json"
+
+THRESH_REST_PLATE_MEAN = 5  # rest-layer-hole detector: composite-vs-original mean at restBbox
 
 # Hotspot→removed-object mapping.  Most hotspots map 1:1 to the object
 # they animate (pillow→pillow).  Panel and slot are hotspots ON the rocket
@@ -303,15 +307,130 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
         unchanged = int((union_core & (diff < THRESH_REMNANT_DIFF)).sum())
         frac = unchanged / core_px
 
-        if frac >= THRESH_REMNANT_FRAC:
+        baselines = _load_remnant_baselines()
+        baseline_key = f"{room_id}/{obj_name}"
+        if baseline_key in baselines:
+            threshold = baselines[baseline_key] + BASELINE_MARGIN
+            mode = "baseline"
+        else:
+            threshold = THRESH_REMNANT_FRAC
+            mode = "absolute"
+
+        if frac >= threshold:
+            thresh_label = (
+                f"baseline {baselines[baseline_key]*100:.1f}%+{BASELINE_MARGIN*100:.0f}pp"
+                if mode == "baseline"
+                else f"<{THRESH_REMNANT_FRAC*100:.0f}%"
+            )
             print(
                 f"  REMNANT FAIL: {tag} "
                 f"— {frac*100:.1f}% unchanged ({unchanged}/{core_px}) "
-                f"in alpha-core (threshold <{THRESH_REMNANT_FRAC*100:.0f}%)"
+                f"in alpha-core (threshold {thresh_label})"
             )
             fails += 1
         else:
             print(f"  REMNANT PASS: {tag} — {frac*100:.1f}% ({unchanged}/{core_px})")
+
+    return fails
+
+
+def _load_remnant_baselines() -> dict[str, float]:
+    """Load per-object baseline fractions for regression gating.
+
+    Objects listed here use baseline + BASELINE_MARGIN instead of the
+    absolute THRESH_REMNANT_FRAC.  Used for translucent objects (net,
+    rocket) where rest-alpha pollution inflates the unchanged fraction
+    beyond what absolute gating can distinguish from real remnants."""
+    if not REMNANT_BASELINES_PATH.exists():
+        return {}
+    data = json.loads(REMNANT_BASELINES_PATH.read_text())
+    return {k: v["baseline"] for k, v in data.items()}
+
+
+def verify_rest_sheet_integrity(room_id: str, hotspots: list[dict]) -> int:
+    """Manifest integrity: every hotspot with a rest layer (clean-plate
+    model) must also have a sprite sheet.  A rest-without-sheet hotspot
+    is a manifest defect — the runtime would show the rest layer with no
+    way to animate it away.  HARD FAIL."""
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if sp.get("rest") and not sp.get("sheet"):
+            print(
+                f"  REST-SHEET FAIL: {room_id}/{h['id']} "
+                f"— has rest layer but no sprite sheet"
+            )
+            fails += 1
+    return fails
+
+
+def verify_rest_plate_match(room_id: str, hotspots: list[dict]) -> int:
+    """Detect alpha holes in rest layers that expose plate texture.
+
+    Composites clean_plate + rest_layer at restBbox and compares to the
+    original scene.  At rest, plate + rest must reproduce the original —
+    any significant diff means the rest layer has holes exposing
+    inpainted plate texture (pen defect class).  HARD FAIL."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        return 0  # other checks catch missing files
+
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    orig = np.array(Image.open(orig_path).convert("RGB"))
+    if clean.shape != orig.shape:
+        return 0
+
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        rest_file = sp.get("rest")
+        rb = sp.get("restBbox")
+        if not rest_file or not rb:
+            continue
+
+        rest_path = SPRITES / rest_file
+        if not rest_path.exists():
+            continue
+
+        rest = np.array(Image.open(rest_path))
+        if rest.ndim != 3 or rest.shape[2] != 4:
+            continue
+
+        rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+        h_scene, w_scene = clean.shape[:2]
+
+        rest_rgba = rest
+        if rest_rgba.shape[:2] != (rh, rw):
+            rest_rgba = np.array(
+                Image.fromarray(rest_rgba).resize((rw, rh), Image.Resampling.NEAREST)
+            )
+
+        sy0, sy1 = max(0, ry), min(h_scene, ry + rh)
+        sx0, sx1 = max(0, rx), min(w_scene, rx + rw)
+        ry0, rx0 = sy0 - ry, sx0 - rx
+        crop_h, crop_w = sy1 - sy0, sx1 - sx0
+
+        rest_crop = rest_rgba[ry0:ry0 + crop_h, rx0:rx0 + crop_w]
+        alpha = rest_crop[:, :, 3:4].astype(np.float32) / 255.0
+
+        comp = clean[sy0:sy1, sx0:sx1].astype(np.float32)
+        comp = comp * (1 - alpha) + rest_crop[:, :, :3].astype(np.float32) * alpha
+        comp = np.clip(comp, 0, 255).astype(np.uint8)
+
+        orig_crop = orig[sy0:sy1, sx0:sx1]
+        delta = np.abs(comp.astype(np.float32) - orig_crop.astype(np.float32))
+        mean_d = float(delta.mean())
+
+        if mean_d > THRESH_REST_PLATE_MEAN:
+            print(
+                f"  REST-HOLE FAIL: {room_id}/{h['id']} "
+                f"— plate+rest vs original mean={mean_d:.2f} "
+                f"(threshold <{THRESH_REST_PLATE_MEAN})"
+            )
+            fails += 1
+        else:
+            print(f"  REST-HOLE PASS: {room_id}/{h['id']} — mean={mean_d:.2f}")
 
     return fails
 
@@ -932,6 +1051,30 @@ def main() -> int:
         fails += item_fails
     else:
         print("Item layers: all composites verified")
+
+    # Manifest integrity: rest layers must have matching sprite sheets
+    print(f"\n--- Rest/sheet integrity ---")
+    rest_sheet_fails = 0
+    for room in m.get("escape", []):
+        rsf = verify_rest_sheet_integrity(room["id"], room.get("hotspots", []))
+        rest_sheet_fails += rsf
+    if rest_sheet_fails:
+        print(f"\n{rest_sheet_fails} rest-without-sheet failures")
+        fails += rest_sheet_fails
+    else:
+        print("Rest/sheet integrity: all rest layers have matching sheets")
+
+    # Rest-layer hole check: plate + rest must reproduce the original
+    print(f"\n--- Rest-layer holes ---")
+    rest_hole_fails = 0
+    for room in m.get("escape", []):
+        rhf = verify_rest_plate_match(room["id"], room.get("hotspots", []))
+        rest_hole_fails += rhf
+    if rest_hole_fails:
+        print(f"\n{rest_hole_fails} rest-layer-hole failures")
+        fails += rest_hole_fails
+    else:
+        print("Rest-layer holes: all rest composites match original")
 
     # D.3 Plate-drift check: outside the union of hotspot masks,
     # the clean plate must be pixel-identical to the original scene.
