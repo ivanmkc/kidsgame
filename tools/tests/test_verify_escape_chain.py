@@ -1,6 +1,6 @@
 """Gate self-test suite for verify_escape_chain.py.
 
-Eight synthetic defective fixtures, each asserted to FAIL its check:
+Nine synthetic defective fixtures, each asserted to FAIL its check:
   (a) sheet with blank last frame
   (b) itemBbox outside game frame
   (c) non-converging tail
@@ -9,6 +9,7 @@ Eight synthetic defective fixtures, each asserted to FAIL its check:
   (f) sprite.rest without sheet (manifest defect)
   (g) rest layer with alpha hole exposing plate (pen defect class)
   (h) baseline regression — above-baseline fails, within-baseline passes
+  (i) bbox-boundary seam from baked wrong-tone background
 
 Plus all-real-assets smoke expecting the current honest reds.
 """
@@ -568,6 +569,79 @@ class TestRealAssetsSmoke:
                     if result not in ("PASS", "SKIP"):
                         total += 1
         assert total == 0, f"Unexpected sheet-consistency failures: {total}"
+
+    # test_real_bbox_seam_energy added after all rooms re-extracted (final commit)
+
+
+# ===================================================================
+# Fixture (i): bbox-boundary seam from baked wrong-tone background
+# ===================================================================
+class TestBboxSeamEnergy:
+    def test_baked_background_fails_seam_check(self, tmp_path):
+        """A sprite whose opaque pixels carry a different background tone
+        than the clean plate should produce a rectangular seam at the bbox
+        boundary — verify_bbox_seam must detect it."""
+        plate_color = (80, 80, 80)
+        baked_bg = (140, 100, 60)  # wrong tone baked into sprite
+        obj_color = (200, 50, 50)
+
+        room = _build_room(tmp_path, plate_color=plate_color,
+                           obj_color=obj_color, after_color=obj_color,
+                           frame_count=8, cols=4)
+        sp = room["hotspots"][0]["sprite"]
+
+        # Rebuild the sheet with baked wrong background in transparent areas
+        fw, fh = sp["bbox"]["w"], sp["bbox"]["h"]
+        cols_s = sp["cols"]
+        fc = sp["frameCount"]
+        rows_s = (fc + cols_s - 1) // cols_s
+        sheet = np.full((rows_s * fh, cols_s * fw, 4), (*baked_bg, 255), dtype=np.uint8)
+        for idx in range(fc):
+            r, c = divmod(idx, cols_s)
+            # Leave alpha fully opaque everywhere — simulating a sprite
+            # that covers the full bbox with baked background
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, :3] = baked_bg
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, 3] = 255
+        sheet_path = tmp_path / "public" / "escape-sprites" / "testroom_widget.png"
+        Image.fromarray(sheet, "RGBA").save(sheet_path)
+
+        with _apply_patches(tmp_path):
+            result, excess = vec.verify_bbox_seam("testroom", "widget", sp)
+        assert result == "FAIL", (
+            f"Expected FAIL for baked wrong-tone background, got {result} "
+            f"(excess={excess:.2f})"
+        )
+
+    def test_matching_background_passes_seam_check(self, tmp_path):
+        """When sprite has transparent edges (object silhouette, not full
+        rectangle), the gradient follows the object, not the bbox, so
+        excess seam energy stays low."""
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+        room = _build_room(tmp_path, plate_color=plate_color,
+                           obj_color=obj_color, after_color=obj_color)
+        sp = room["hotspots"][0]["sprite"]
+
+        # Rebuild sheet with a centered opaque circle and transparent edges
+        fw, fh = sp["bbox"]["w"], sp["bbox"]["h"]
+        cols_s = sp["cols"]
+        fc = sp["frameCount"]
+        rows_s = (fc + cols_s - 1) // cols_s
+        sheet = np.zeros((rows_s * fh, cols_s * fw, 4), dtype=np.uint8)
+        cy, cx = fh // 2, fw // 2
+        radius = min(fw, fh) // 3
+        yy, xx = np.ogrid[:fh, :fw]
+        circle = ((yy - cy) ** 2 + (xx - cx) ** 2) <= radius ** 2
+        for idx in range(fc):
+            r, c = divmod(idx, cols_s)
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, :3] = obj_color
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, 3] = np.where(circle, 255, 0)
+        sheet_path = tmp_path / "public" / "escape-sprites" / "testroom_widget.png"
+        Image.fromarray(sheet, "RGBA").save(sheet_path)
+
+        with _apply_patches(tmp_path):
+            result, excess = vec.verify_bbox_seam("testroom", "widget", sp)
+        assert result == "PASS", f"Expected PASS, got {result} (excess={excess:.2f})"
 
 
 # ===================================================================
