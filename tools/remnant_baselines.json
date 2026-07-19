@@ -1,0 +1,13 @@
+{
+  "rocketpad/crate": {
+    "baseline": 0.025,
+    "justification": "chromatic coincidence — architecturally correct tan-wood repair shares palette with removed tan-wood crate; residual = scattered seam-line matches, heatmap verified non-contiguous",
+    "evidence": {
+      "ghost": "PASS",
+      "pairwise": "2-of-3 vs incumbent",
+      "heatmap": "scatter-verified"
+    },
+    "reviewed_by": "team-lead",
+    "date": "2026-07-19"
+  }
+}
