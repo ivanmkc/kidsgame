@@ -203,13 +203,56 @@ def _load_sam_mask(room_id: str, hotspot_id: str) -> np.ndarray | None:
     return np.array(Image.open(mask_path).convert("L")) > 127
 
 
-def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
-    """Deterministic pre-check: within each SAM object mask, the fraction
-    of pixels where |plate - original| < THRESH_REMNANT_DIFF must be
-    below THRESH_REMNANT_FRAC (2%).  Catches object remnants the inpaint
-    missed — these are invisible to diff-based masks by construction.
+def _alpha_core_mask(
+    room_id: str, hotspot: dict, sam_mask: np.ndarray,
+) -> tuple[np.ndarray, int]:
+    """Build the alpha-core check region: SAM object mask ∩ rest-layer
+    opaque pixels (alpha > 200), placed at the hotspot's restBbox.
 
-    Runs BEFORE the Gemini D.1 check; hard fail blocks the whole gate."""
+    The rest layer is the object's own silhouette cutout from the original
+    scene.  Its high-alpha pixels are exactly the pixels the plate must
+    have changed.  Anti-aliased boundary pixels (alpha < 200) are excluded
+    automatically, so no morphological erosion is needed.  For mesh objects
+    like the net, holes in the weave have alpha ≈ 0 and drop out of the
+    check region by construction — no special-casing required."""
+    sp = hotspot.get("sprite", {})
+    rest_path = SPRITES / sp["rest"]
+    rb = sp.get("restBbox")
+    if not rest_path.exists() or not rb:
+        return sam_mask, int(sam_mask.sum())
+
+    rest = np.array(Image.open(rest_path))  # RGBA
+    if rest.ndim != 3 or rest.shape[2] != 4:
+        return sam_mask, int(sam_mask.sum())
+
+    rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+    h_scene, w_scene = sam_mask.shape
+
+    # Place rest-layer alpha on a scene-sized canvas at restBbox position
+    alpha_canvas = np.zeros((h_scene, w_scene), dtype=np.uint8)
+    rest_alpha = rest[:, :, 3]
+    # Handle size mismatch between rest layer and restBbox
+    if rest_alpha.shape != (rh, rw):
+        rest_pil = Image.fromarray(rest_alpha).resize((rw, rh), Image.Resampling.NEAREST)
+        rest_alpha = np.array(rest_pil)
+    # Clip to scene bounds
+    sy0, sy1 = max(0, ry), min(h_scene, ry + rh)
+    sx0, sx1 = max(0, rx), min(w_scene, rx + rw)
+    ry0, rx0 = sy0 - ry, sx0 - rx
+    alpha_canvas[sy0:sy1, sx0:sx1] = rest_alpha[ry0:ry0 + (sy1 - sy0), rx0:rx0 + (sx1 - sx0)]
+
+    core = sam_mask & (alpha_canvas > 200)
+    return core, int(core.sum())
+
+
+def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
+    """Deterministic pre-check (D.1-PRE): within the alpha-core region
+    (SAM mask ∩ rest-layer opaque pixels), the fraction of unchanged
+    pixels must be below THRESH_REMNANT_FRAC (2%).
+
+    HARD FAIL — blocks the gate.  The alpha-core region contains only
+    pixels that belong to the object's opaque silhouette, so any unchanged
+    pixel there is a genuine remnant the inpaint missed."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
@@ -224,7 +267,7 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
         return 1
 
     diff = np.abs(clean.astype(np.float32) - orig.astype(np.float32)).mean(axis=2)
-    warns = 0
+    fails = 0
 
     for h in hotspots:
         sp = h.get("sprite", {})
@@ -235,24 +278,25 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
         if sam_mask is None:
             continue
 
-        mask_px = int(sam_mask.sum())
-        if mask_px == 0:
+        core, core_px = _alpha_core_mask(room_id, h, sam_mask)
+        if core_px == 0:
+            print(f"  REMNANT SKIP: {room_id}/{h['id']} — empty alpha-core")
             continue
 
-        unchanged = int((sam_mask & (diff < THRESH_REMNANT_DIFF)).sum())
-        frac = unchanged / mask_px
+        unchanged = int((core & (diff < THRESH_REMNANT_DIFF)).sum())
+        frac = unchanged / core_px
 
         if frac >= THRESH_REMNANT_FRAC:
             print(
-                f"  REMNANT WARN: {room_id}/{h['id']} "
-                f"— {frac*100:.1f}% unchanged ({unchanged}/{mask_px}) "
-                f"within SAM mask (threshold <{THRESH_REMNANT_FRAC*100:.0f}%)"
+                f"  REMNANT FAIL: {room_id}/{h['id']} "
+                f"— {frac*100:.1f}% unchanged ({unchanged}/{core_px}) "
+                f"in alpha-core (threshold <{THRESH_REMNANT_FRAC*100:.0f}%)"
             )
-            warns += 1
+            fails += 1
         else:
-            print(f"  REMNANT PASS: {room_id}/{h['id']} — {frac*100:.1f}% ({unchanged}/{mask_px})")
+            print(f"  REMNANT PASS: {room_id}/{h['id']} — {frac*100:.1f}% ({unchanged}/{core_px})")
 
-    return warns
+    return fails
 
 
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
@@ -885,21 +929,20 @@ def main() -> int:
     else:
         print("Plate drift: all clean plates pixel-identical outside mask union")
 
-    # D.1-PRE: Deterministic SAM-mask remnant check (pre-check before Gemini)
-    # Reports per-hotspot unchanged fractions within SAM masks.
-    # SAM masks include background context around objects, so the < 2%
-    # threshold can fire on background pixels that are naturally unchanged.
-    # Gate outcome: WARN (not hard-fail) — logged for review, Gemini D.1
-    # is the final visual arbiter.
-    print(f"\n--- Plate remnants (D.1-PRE, SAM mask) ---")
-    remnant_warns = 0
+    # D.1-PRE: Deterministic alpha-core remnant check (pre-check before
+    # Gemini).  Check region = SAM mask ∩ rest-layer opaque pixels — the
+    # object's own silhouette, excluding anti-aliased edges and mesh holes.
+    # HARD FAIL — blocks the gate.
+    print(f"\n--- Plate remnants (D.1-PRE, alpha-core) ---")
+    remnant_fails = 0
     for room in m.get("escape", []):
-        rw = verify_plate_remnants(room["id"], room.get("hotspots", []))
-        remnant_warns += rw
-    if remnant_warns:
-        print(f"\n{remnant_warns} remnant warnings (threshold: <{THRESH_REMNANT_FRAC*100:.0f}% unchanged within SAM mask)")
+        rf = verify_plate_remnants(room["id"], room.get("hotspots", []))
+        remnant_fails += rf
+    if remnant_fails:
+        print(f"\n{remnant_fails} remnant failures (threshold: <{THRESH_REMNANT_FRAC*100:.0f}% unchanged in alpha-core)")
+        fails += remnant_fails
     else:
-        print("Plate remnants: all SAM-mask regions verified clean")
+        print("Plate remnants: all alpha-core regions verified clean")
 
     # D.1 Plate-emptiness check: Gemini verifies no object remnants in clean plates
     print(f"\n--- Plate emptiness (D.1) ---")
