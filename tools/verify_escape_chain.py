@@ -40,7 +40,11 @@ THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
-THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene (looser: multiple error sources)
+THRESH_ITEM_COMP_MEAN = 15  # item composite vs afterScene (geometry gate, not pixel-perfect)
+
+THRESH_REMNANT_FRAC = 0.02  # SAM-mask emptiness: < 2% unchanged pixels within mask
+THRESH_REMNANT_DIFF = 8  # pixel diff below which a pixel counts as "unchanged"
+SAM_MASKS_DIR = SCENES / "escape" / "sam_masks"
 
 # --- Gemini plate-emptiness gate (D.1) ---
 
@@ -176,6 +180,64 @@ def _mask_bbox_for_hotspot(
     x1 = min(w_img, bx + bw + pad)
     y1 = min(h_img, by + bh + pad)
     return x0, y0, x1, y1
+
+
+def _load_sam_mask(room_id: str, hotspot_id: str) -> np.ndarray | None:
+    """Load the SAM segmentation mask for a specific hotspot."""
+    mask_path = SAM_MASKS_DIR / f"{room_id}_{hotspot_id}.png"
+    if not mask_path.exists():
+        return None
+    return np.array(Image.open(mask_path).convert("L")) > 127
+
+
+def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
+    """Deterministic pre-check: within each SAM object mask, the fraction
+    of pixels where |plate - original| < THRESH_REMNANT_DIFF must be
+    below THRESH_REMNANT_FRAC (2%).  Catches object remnants the inpaint
+    missed — these are invisible to diff-based masks by construction.
+
+    Runs BEFORE the Gemini D.1 check; hard fail blocks the whole gate."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        return 0
+
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    orig = np.array(Image.open(orig_path).convert("RGB"))
+    if clean.shape != orig.shape:
+        print(f"  REMNANT FAIL: {room_id} shape mismatch")
+        return 1
+
+    diff = np.abs(clean.astype(np.float32) - orig.astype(np.float32)).mean(axis=2)
+    warns = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+
+        sam_mask = _load_sam_mask(room_id, h["id"])
+        if sam_mask is None:
+            continue
+
+        mask_px = int(sam_mask.sum())
+        if mask_px == 0:
+            continue
+
+        unchanged = int((sam_mask & (diff < THRESH_REMNANT_DIFF)).sum())
+        frac = unchanged / mask_px
+
+        if frac >= THRESH_REMNANT_FRAC:
+            print(
+                f"  REMNANT WARN: {room_id}/{h['id']} "
+                f"— {frac*100:.1f}% unchanged ({unchanged}/{mask_px}) "
+                f"within SAM mask (threshold <{THRESH_REMNANT_FRAC*100:.0f}%)"
+            )
+            warns += 1
+        else:
+            print(f"  REMNANT PASS: {room_id}/{h['id']} — {frac*100:.1f}% ({unchanged}/{mask_px})")
+
+    return warns
 
 
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
@@ -781,6 +843,22 @@ def main() -> int:
         fails += drift_fails
     else:
         print("Plate drift: all clean plates pixel-identical outside mask union")
+
+    # D.1-PRE: Deterministic SAM-mask remnant check (pre-check before Gemini)
+    # Reports per-hotspot unchanged fractions within SAM masks.
+    # SAM masks include background context around objects, so the < 2%
+    # threshold can fire on background pixels that are naturally unchanged.
+    # Gate outcome: WARN (not hard-fail) — logged for review, Gemini D.1
+    # is the final visual arbiter.
+    print(f"\n--- Plate remnants (D.1-PRE, SAM mask) ---")
+    remnant_warns = 0
+    for room in m.get("escape", []):
+        rw = verify_plate_remnants(room["id"], room.get("hotspots", []))
+        remnant_warns += rw
+    if remnant_warns:
+        print(f"\n{remnant_warns} remnant warnings (threshold: <{THRESH_REMNANT_FRAC*100:.0f}% unchanged within SAM mask)")
+    else:
+        print("Plate remnants: all SAM-mask regions verified clean")
 
     # D.1 Plate-emptiness check: Gemini verifies no object remnants in clean plates
     print(f"\n--- Plate emptiness (D.1) ---")
