@@ -1,7 +1,7 @@
 {
   "rocketpad/crate": {
     "baseline": 0.025,
-    "justification": "chromatic coincidence — architecturally correct tan-wood repair shares palette with removed tan-wood crate; residual = scattered seam-line matches, heatmap verified non-contiguous",
+    "justification": "chromatic coincidence \u2014 architecturally correct tan-wood repair shares palette with removed tan-wood crate; residual = scattered seam-line matches, heatmap verified non-contiguous",
     "evidence": {
       "ghost": "PASS",
       "pairwise": "2-of-3 vs incumbent",
@@ -12,7 +12,7 @@
   },
   "piratecove/net": {
     "baseline": 0.062,
-    "justification": "geometry-intrinsic gray-on-gray coincidence: net rope color lies within 4-8 sum-RGB units (<3 per channel) of architecturally correct rock; residual traces weave geometry because of this intrinsic overlap; sub-perceptual — ghost check PASS, team-lead eyes confirm no visible weave at 2x zoom; threshold-sensitivity: 1.8% at diff<4",
+    "justification": "geometry-intrinsic gray-on-gray coincidence: net rope color lies within 4-8 sum-RGB units (<3 per channel) of architecturally correct rock; residual traces weave geometry because of this intrinsic overlap; sub-perceptual \u2014 ghost check PASS, team-lead eyes confirm no visible weave at 2x zoom; threshold-sensitivity: 1.8% at diff<4",
     "evidence": {
       "ghost": "PASS",
       "pairwise": "v3 wins vs all second-pass variants (visual coherence > metric)",
@@ -26,46 +26,22 @@
     "baseline": 0.022,
     "justification": "rocket rest-layer alpha overlap on wall panels creates 2.1% unchanged fraction in alpha-core; residual is wall-panel texture matching original scene at rest-layer edges; mounting-bracket strip fully removed (v2: full-width warm-pixel scan + seam-line restoration); sub-perceptual at game scale and occluded by rest layer during gameplay",
     "evidence": {
-      "ghost": "YES (false positive — fires on wall seams/rivets, same as v1; pairwise 3-0 overrides)",
+      "ghost": "YES (false positive \u2014 fires on wall seams/rivets, same as v1; pairwise 3-0 overrides)",
       "pairwise": "v2 wins 3-0 vs committed plate (defect-removal framing)",
       "strip_removal": "full-width 0 warm pixels (R-B>8) on all wall columns; seam depth 51-91 across repair zone"
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
   },
-  "piratecove/chest.seam_energy": {
-    "baseline": 10.1,
-    "justification": "edge-touching animation content — genuine motion reaches bbox bottom/left; right edge at image boundary (x+w=1280=GAME_W) reduces averaging to 3 edges; no visible truncation (team-lead eyes, mid-strip 5-phase review). Stale-matte component eliminated (25.61->8.60). Future chest bbox resize retires this baseline.",
-    "evidence": {
-      "pre_reextract": 25.61,
-      "post_reextract": 8.60,
-      "alpha_at_edges": "frame23: bottom=77.8, left=33.2, right=1.2, top=0.0",
-      "mid_strip": "step10e_piratecove_chest_mid.png — organic fade at all edges"
-    },
-    "reviewed_by": "team-lead",
-    "date": "2026-07-19"
-  },
   "rocketpad/crate.seam_energy": {
     "baseline": 17.5,
-    "justification": "scene-edge content — the crate sits at the image's right boundary (x+w=1280=GAME_W, 3-edge averaging); the screen edge is the natural crop; no perceivable truncation (team-lead eyes, 5-phase mid-strip). Stale-matte component eliminated (18.85->15.95). Future crate bbox resize retires this baseline.",
+    "justification": "image-boundary clamp \u2014 crate bbox right edge at x+w=1280=GAME_W; content extends to screen edge (right-edge alpha 255.0 on last frame); seam energy 15.14 after content-derived bbox resize (was 15.95/13.92 on old bbox); 3-edge averaging persists because the right edge IS the screen boundary \u2014 no truncation, the game window is the natural crop",
     "evidence": {
-      "pre_reextract": 18.85,
-      "post_reextract": 15.95,
-      "alpha_at_edges": "frame35: top=64.1%, right=38.4%; right edge at image boundary",
-      "mid_strip": "step10f_rocketpad_crate_mid.png"
-    },
-    "reviewed_by": "team-lead",
-    "date": "2026-07-19"
-  },
-  "rocketpad/panel.seam_energy": {
-    "baseline": 9.6,
-    "justification": "residual edge-touching animation content after runtime-stack correction (stack fix collapsed 6.09 of 14.22; frame-35 edge alphas: top=94.3, bottom=37.3, right=138.0; same class as chest/crate precedents). Future panel bbox resize retires this baseline.",
-    "evidence": {
-      "pre_stack_fix": 14.22,
-      "post_stack_fix": 8.13,
-      "stack_fix_delta": -6.09,
-      "alpha_at_edges": "frame35: top=94.3, bottom=37.3, left=41.6, right=138.0",
-      "mid_strip": "step10f_rocketpad_panel_mid.png (corrected-stack composite)"
+      "pre_bbox_resize": 13.92,
+      "post_bbox_resize": 15.14,
+      "alpha_at_edges": "frame47: top=220.5, bottom=143.0, left=80.3, right=255.0",
+      "right_edge_position": "x+w=913+367=1280=GAME_W",
+      "mid_strip": "bbox_rocketpad_crate_mid.png"
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
