@@ -39,7 +39,7 @@ THRESH_PREBLEND_MEAN = 20
 
 
 def extract_frame(mp4: Path, select_expr: str, out_png: Path) -> bool:
-    r = subprocess.run(
+    subprocess.run(
         ["ffmpeg", "-y", "-loglevel", "error", "-i", str(mp4),
          "-vf", f"select='{select_expr}',scale=1280:720", "-frames:v", "1",
          "-update", "1", str(out_png)],

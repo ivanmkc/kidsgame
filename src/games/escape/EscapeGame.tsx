@@ -49,7 +49,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
   const [clip, setClip] = useState<string | null>(null);
-  const preTapSceneKey = useRef<string>('');
   const [flyingItems, setFlyingItems] = useState<Array<{
     key: string; emoji: string; fromX: number; fromY: number;
   }>>([]);
@@ -143,7 +142,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const onSpot = (hotspotId: string) => {
     lastAction.current = Date.now();
     setHintSpot(null);
-    preTapSceneKey.current = currentSceneKey;
     const h = room.hotspots.find((x) => x.id === hotspotId);
     const { state: next, effect } = applyTap(room, state, hotspotId);
     setState(next);
@@ -212,23 +210,16 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           onLayout={(e) => { framePos.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y }; }}
           style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}
         >
-          {(() => {
-            const shownKey = clip ? preTapSceneKey.current : currentSceneKey;
-            return (
-              <>
-                <Image source={SCENE_THUMBS[shownKey] ?? SCENE_IMAGES[shownKey]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
-                {shownKey !== room.image && (
-                  <Animated.Image
-                    source={SCENE_IMAGES[shownKey]}
-                    style={{ position: 'absolute', width: displayWidth, height: displayHeight, opacity: clip ? 1 : crossfade }}
-                    resizeMode="cover"
-                  />
-                )}
-              </>
-            );
-          })()}
+          <Image source={SCENE_THUMBS[currentSceneKey] ?? SCENE_IMAGES[currentSceneKey]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+          {currentSceneKey !== room.image && (
+            <Animated.Image
+              source={SCENE_IMAGES[currentSceneKey]}
+              style={{ position: 'absolute', width: displayWidth, height: displayHeight, opacity: crossfade }}
+              resizeMode="cover"
+            />
+          )}
           {clip && Platform.OS === 'web' ? (
-            <View style={{ position: 'absolute', top: 0, left: 0, width: displayWidth, height: displayHeight }} pointerEvents="none" testID="escape-clip">
+            <View style={StyleSheet.absoluteFill} pointerEvents="none" testID="escape-clip">
               {React.createElement('video', {
                 src: clip,
                 autoPlay: true,
@@ -236,7 +227,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
                 playsInline: true,
                 onEnded: () => setClip(null),
                 onError: () => setClip(null),
-                style: { width: displayWidth, height: displayHeight, objectFit: 'fill' },
+                style: { width: '100%', height: '100%', objectFit: 'cover' },
               })}
             </View>
           ) : null}
