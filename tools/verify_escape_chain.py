@@ -250,9 +250,10 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
     (SAM mask ∩ rest-layer opaque pixels), the fraction of unchanged
     pixels must be below THRESH_REMNANT_FRAC (2%).
 
-    HARD FAIL — blocks the gate.  The alpha-core region contains only
-    pixels that belong to the object's opaque silhouette, so any unchanged
-    pixel there is a genuine remnant the inpaint missed."""
+    HARD FAIL — blocks the gate.  Iterates per REMOVED OBJECT rather than
+    per hotspot — hotspots that animate parts of the same physical object
+    (e.g. panel and slot both animate the rocket) are unioned into one
+    check region with one verdict."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
@@ -267,34 +268,50 @@ def verify_plate_remnants(room_id: str, hotspots: list[dict]) -> int:
         return 1
 
     diff = np.abs(clean.astype(np.float32) - orig.astype(np.float32)).mean(axis=2)
-    fails = 0
 
+    # Group hotspots by removed object
+    obj_hotspots: dict[str, list[dict]] = {}
     for h in hotspots:
         sp = h.get("sprite", {})
         if not sp.get("rest"):
             continue
+        obj_name = HOTSPOT_OBJECT_MAP.get((room_id, h["id"]), h["id"])
+        obj_hotspots.setdefault(obj_name, []).append(h)
 
-        sam_mask = _load_sam_mask(room_id, h["id"])
-        if sam_mask is None:
-            continue
+    fails = 0
+    for obj_name, obj_hs in obj_hotspots.items():
+        hotspot_ids = [h["id"] for h in obj_hs]
+        tag = f"{room_id}/{obj_name}"
+        if len(obj_hs) > 1:
+            tag += f" ({'+'.join(hotspot_ids)})"
 
-        core, core_px = _alpha_core_mask(room_id, h, sam_mask)
+        h_scene, w_scene = diff.shape
+        union_core = np.zeros((h_scene, w_scene), dtype=bool)
+
+        for h in obj_hs:
+            sam_mask = _load_sam_mask(room_id, h["id"])
+            if sam_mask is None:
+                continue
+            core, _ = _alpha_core_mask(room_id, h, sam_mask)
+            union_core |= core
+
+        core_px = int(union_core.sum())
         if core_px == 0:
-            print(f"  REMNANT SKIP: {room_id}/{h['id']} — empty alpha-core")
+            print(f"  REMNANT SKIP: {tag} — empty alpha-core")
             continue
 
-        unchanged = int((core & (diff < THRESH_REMNANT_DIFF)).sum())
+        unchanged = int((union_core & (diff < THRESH_REMNANT_DIFF)).sum())
         frac = unchanged / core_px
 
         if frac >= THRESH_REMNANT_FRAC:
             print(
-                f"  REMNANT FAIL: {room_id}/{h['id']} "
+                f"  REMNANT FAIL: {tag} "
                 f"— {frac*100:.1f}% unchanged ({unchanged}/{core_px}) "
                 f"in alpha-core (threshold <{THRESH_REMNANT_FRAC*100:.0f}%)"
             )
             fails += 1
         else:
-            print(f"  REMNANT PASS: {room_id}/{h['id']} — {frac*100:.1f}% ({unchanged}/{core_px})")
+            print(f"  REMNANT PASS: {tag} — {frac*100:.1f}% ({unchanged}/{core_px})")
 
     return fails
 
