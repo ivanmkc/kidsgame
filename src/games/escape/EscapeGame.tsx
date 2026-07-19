@@ -500,23 +500,27 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
         if (!h?.sprite) continue;
         const sp = h.sprite;
         const sheet = sheetsRef.current[h.id];
-        if (!sheet?.naturalWidth) continue;
+        if (!sheet?.naturalWidth) {
+          if (entry.playing) anyPlaying = true;
+          continue;
+        }
 
-        if (entry.playing && dt > 0) {
-          const frameDuration = 1 / sp.fps;
-          entry.accumulator += dt;
-          while (entry.accumulator >= frameDuration) {
-            entry.accumulator -= frameDuration;
-            entry.frameIndex++;
+        if (entry.playing) {
+          if (dt > 0) {
+            const frameDuration = 1 / sp.fps;
+            entry.accumulator += dt;
+            while (entry.accumulator >= frameDuration) {
+              entry.accumulator -= frameDuration;
+              entry.frameIndex++;
+            }
+            if (entry.frameIndex >= sp.frameCount - 1) {
+              entry.frameIndex = sp.frameCount - 1;
+              entry.playing = false;
+              entry.held = true;
+              anyCompleted = true;
+            }
           }
-          if (entry.frameIndex >= sp.frameCount - 1) {
-            entry.frameIndex = sp.frameCount - 1;
-            entry.playing = false;
-            entry.held = true;
-            anyCompleted = true;
-          } else {
-            anyPlaying = true;
-          }
+          if (entry.playing) anyPlaying = true;
         }
 
         const patch = patchesRef.current[h.id];

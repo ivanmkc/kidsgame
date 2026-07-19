@@ -127,6 +127,81 @@ describe('escape logic', () => {
   });
 });
 
+describe('sprite accumulator math', () => {
+  const FPS = 12;
+  const FRAME_COUNT = 48;
+  const frameDuration = 1 / FPS;
+
+  function simulate(dtSequence: number[]): { frameIndex: number; playing: boolean; held: boolean } {
+    let accumulator = 0;
+    let frameIndex = 0;
+    let playing = true;
+    let held = false;
+    for (const dt of dtSequence) {
+      if (!playing) break;
+      if (dt > 0) {
+        accumulator += dt;
+        while (accumulator >= frameDuration) {
+          accumulator -= frameDuration;
+          frameIndex++;
+        }
+        if (frameIndex >= FRAME_COUNT - 1) {
+          frameIndex = FRAME_COUNT - 1;
+          playing = false;
+          held = true;
+        }
+      }
+    }
+    return { frameIndex, playing, held };
+  }
+
+  it('first tick (dt=0) keeps frame 0 and stays playing', () => {
+    const r = simulate([0]);
+    expect(r.frameIndex).toBe(0);
+    expect(r.playing).toBe(true);
+    expect(r.held).toBe(false);
+  });
+
+  it('advances one frame after 1/fps seconds', () => {
+    const r = simulate([0, frameDuration]);
+    expect(r.frameIndex).toBe(1);
+    expect(r.playing).toBe(true);
+  });
+
+  it('at 400ms (~frame 4) lid is barely moving, not held', () => {
+    // 60fps rAF: 24 ticks in 400ms, each ~16.67ms = 0.01667s
+    const ticks = [0, ...Array(24).fill(0.4 / 24)];
+    const r = simulate(ticks);
+    expect(r.frameIndex).toBe(4);
+    expect(r.playing).toBe(true);
+    expect(r.held).toBe(false);
+  });
+
+  it('at 2000ms (~frame 24) half open', () => {
+    const ticks = [0, ...Array(120).fill(2.0 / 120)];
+    const r = simulate(ticks);
+    expect(r.frameIndex).toBe(24);
+    expect(r.playing).toBe(true);
+  });
+
+  it('completes and holds at last frame after full duration', () => {
+    const totalDuration = FRAME_COUNT / FPS; // 4 seconds
+    const ticks = [0, ...Array(240).fill(totalDuration / 240)];
+    const r = simulate(ticks);
+    expect(r.frameIndex).toBe(FRAME_COUNT - 1);
+    expect(r.playing).toBe(false);
+    expect(r.held).toBe(true);
+  });
+
+  it('dt cap at 0.1s prevents skipping more than 1 frame per tick', () => {
+    // Even with a huge gap (tab backgrounded), dt is capped at 0.1s
+    // At 12fps, 0.1s = 1.2 frames → advances by 1 frame per tick
+    const r = simulate([0, 0.1]);
+    expect(r.frameIndex).toBe(1);
+    expect(r.playing).toBe(true);
+  });
+});
+
 describe('shipped escape rooms', () => {
   const rooms = manifest.escape ?? [];
   it.skipIf(rooms.length === 0)('every shipped room is lint-clean and solvable', () => {
