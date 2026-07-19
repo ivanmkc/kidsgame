@@ -114,11 +114,15 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       const hid = sceneChain[i];
       const h = room.hotspots.find((x) => x.id === hid);
       if (!h) continue;
+      if (h.sprite) {
+        const sa = spriteAnims.find((a) => a.hotspotId === hid);
+        if (!sa || sa.playing) continue;
+      }
       if (state.used.includes(hid)) return h.takenScene ?? h.afterScene ?? room.image;
       if (state.revealed.includes(hid)) return h.revealScene ?? h.afterScene ?? room.image;
     }
     return room.image;
-  }, [room, sceneChain, state.used, state.revealed]);
+  }, [room, sceneChain, state.used, state.revealed, spriteAnims]);
 
   const prevSceneKey = useRef(currentSceneKey);
   const crossfade = useRef(new Animated.Value(1)).current;
@@ -427,6 +431,14 @@ function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
   );
 }
 
+interface SpriteEntry {
+  hotspotId: string;
+  playing: boolean;
+  held: boolean;
+  frameIndex: number;
+  accumulator: number;
+}
+
 function SpriteCanvas({ room, anims, setAnims, scale }: {
   room: EscapeRoom;
   anims: SpriteAnim[];
@@ -437,27 +449,118 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
   const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
   const patchesRef = useRef<Record<string, HTMLImageElement>>({});
   const rafRef = useRef<number>(0);
+  const entriesRef = useRef<SpriteEntry[]>([]);
+  const lastTimeRef = useRef<number>(0);
+  const roomRef = useRef(room);
+  roomRef.current = room;
+  const scaleRef = useRef(scale);
+  scaleRef.current = scale;
+  const setAnimsRef = useRef(setAnims);
+  setAnimsRef.current = setAnims;
 
   useEffect(() => {
     for (const h of room.hotspots) {
       if (!h.sprite) continue;
-      const key = h.id;
-      if (!sheetsRef.current[key]) {
+      if (!sheetsRef.current[h.id]) {
         const img = new window.Image();
         img.src = h.sprite.sheet;
-        sheetsRef.current[key] = img;
+        sheetsRef.current[h.id] = img;
       }
-      if (h.sprite.patch && !patchesRef.current[key]) {
+      if (h.sprite.patch && !patchesRef.current[h.id]) {
         const img = new window.Image();
         img.src = h.sprite.patch;
-        patchesRef.current[key] = img;
+        patchesRef.current[h.id] = img;
       }
     }
   }, [room]);
 
+  const startLoop = useCallback(() => {
+    if (rafRef.current) return;
+    lastTimeRef.current = 0;
+    const tick = (timestamp: number) => {
+      const dt = lastTimeRef.current
+        ? Math.min((timestamp - lastTimeRef.current) / 1000, 0.1)
+        : 0;
+      lastTimeRef.current = timestamp;
+
+      const canvas = canvasRef.current;
+      if (!canvas) { rafRef.current = requestAnimationFrame(tick); return; }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { rafRef.current = requestAnimationFrame(tick); return; }
+
+      const s = scaleRef.current;
+      const rm = roomRef.current;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      let anyPlaying = false;
+      let anyCompleted = false;
+
+      for (const entry of entriesRef.current) {
+        const h = rm.hotspots.find((x) => x.id === entry.hotspotId);
+        if (!h?.sprite) continue;
+        const sp = h.sprite;
+        const sheet = sheetsRef.current[h.id];
+        if (!sheet?.naturalWidth) continue;
+
+        if (entry.playing && dt > 0) {
+          const frameDuration = 1 / sp.fps;
+          entry.accumulator += dt;
+          while (entry.accumulator >= frameDuration) {
+            entry.accumulator -= frameDuration;
+            entry.frameIndex++;
+          }
+          if (entry.frameIndex >= sp.frameCount - 1) {
+            entry.frameIndex = sp.frameCount - 1;
+            entry.playing = false;
+            entry.held = true;
+            anyCompleted = true;
+          } else {
+            anyPlaying = true;
+          }
+        }
+
+        const patch = patchesRef.current[h.id];
+        if (patch?.naturalWidth) {
+          ctx.drawImage(patch,
+            sp.bbox.x * s, sp.bbox.y * s,
+            sp.bbox.w * s, sp.bbox.h * s);
+        }
+
+        const frameW = sheet.naturalWidth / sp.cols;
+        const rows = Math.ceil(sp.frameCount / sp.cols);
+        const frameH = sheet.naturalHeight / rows;
+        const col = entry.frameIndex % sp.cols;
+        const row = Math.floor(entry.frameIndex / sp.cols);
+        ctx.drawImage(sheet,
+          col * frameW, row * frameH, frameW, frameH,
+          sp.bbox.x * s, sp.bbox.y * s,
+          sp.bbox.w * s, sp.bbox.h * s);
+      }
+
+      if (anyCompleted) {
+        setAnimsRef.current((prev) => prev.map((a) => {
+          const entry = entriesRef.current.find((e) => e.hotspotId === a.hotspotId);
+          if (entry && entry.held) {
+            return { ...a, playing: false, held: true, frameIndex: entry.frameIndex };
+          }
+          return a;
+        }));
+      }
+
+      if (anyPlaying) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = 0;
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+  }, []);
+
   useEffect(() => {
     if (anims.length === 0) {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      entriesRef.current = [];
+      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
+      lastTimeRef.current = 0;
       const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -465,66 +568,23 @@ function SpriteCanvas({ room, anims, setAnims, scale }: {
       }
       return;
     }
-
-    const tick = () => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      let anyActive = false;
-      const now = Date.now();
-      const updatedAnims = anims.map((anim) => {
-        const h = room.hotspots.find((x) => x.id === anim.hotspotId);
-        if (!h?.sprite) return anim;
-        const sp = h.sprite;
-        const sheet = sheetsRef.current[h.id];
-        if (!sheet?.naturalWidth) return anim;
-
-        let frameIdx = anim.frameIndex;
-        if (anim.playing) {
-          const elapsed = (now - anim.startTime) / 1000;
-          frameIdx = Math.floor(elapsed * sp.fps);
-          if (frameIdx >= sp.frameCount) {
-            frameIdx = sp.frameCount - 1;
-            return { ...anim, playing: false, held: true, frameIndex: frameIdx };
-          }
-          anyActive = true;
-        }
-
-        const patch = patchesRef.current[h.id];
-        if (patch?.naturalWidth) {
-          ctx.drawImage(patch,
-            sp.bbox.x * scale, sp.bbox.y * scale,
-            sp.bbox.w * scale, sp.bbox.h * scale);
-        }
-
-        const frameW = sheet.naturalWidth / sp.cols;
-        const rows = Math.ceil(sp.frameCount / sp.cols);
-        const frameH = sheet.naturalHeight / rows;
-        const col = frameIdx % sp.cols;
-        const row = Math.floor(frameIdx / sp.cols);
-
-        ctx.drawImage(sheet,
-          col * frameW, row * frameH, frameW, frameH,
-          sp.bbox.x * scale, sp.bbox.y * scale,
-          sp.bbox.w * scale, sp.bbox.h * scale);
-
-        return { ...anim, frameIndex: frameIdx };
-      });
-
-      const changed = updatedAnims.some((a, i) =>
-        a.frameIndex !== anims[i].frameIndex || a.playing !== anims[i].playing || a.held !== anims[i].held);
-      if (changed) setAnims(updatedAnims);
-      if (anyActive || anims.some((a) => a.held)) {
-        rafRef.current = requestAnimationFrame(tick);
+    const existing = new Set(entriesRef.current.map((e) => e.hotspotId));
+    let added = false;
+    for (const a of anims) {
+      if (a.playing && !existing.has(a.hotspotId)) {
+        entriesRef.current.push({
+          hotspotId: a.hotspotId, playing: true, held: false,
+          frameIndex: 0, accumulator: 0,
+        });
+        added = true;
       }
-    };
+    }
+    const validIds = new Set(anims.map((a) => a.hotspotId));
+    entriesRef.current = entriesRef.current.filter((e) => validIds.has(e.hotspotId));
+    if (added) startLoop();
+  }, [anims, startLoop]);
 
-    rafRef.current = requestAnimationFrame(tick);
-    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [anims, room, scale, setAnims]);
+  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
 
   if (Platform.OS !== 'web') return null;
   const w = Math.round(1280 * scale);

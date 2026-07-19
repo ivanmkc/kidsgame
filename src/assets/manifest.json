@@ -28295,7 +28295,7 @@
             "h": 121
           },
           "sprite": {
-            "sheet": "escape-sprites/toyroom_chest.png",
+            "sheet": "escape-sprites/toyroom_chest.webp",
             "patch": "escape-sprites/toyroom_chest_patch.png",
             "cols": 7,
             "frameCount": 48,
