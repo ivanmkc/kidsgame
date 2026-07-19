@@ -54,7 +54,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const room = rooms.find((r) => r.id === sceneId);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
-  const [pops, setPops] = useState<Array<{ id: string; pop: string }>>([]);
   const [spriteAnims, setSpriteAnims] = useState<SpriteAnim[]>([]);
   const [flyingItems, setFlyingItems] = useState<Array<{
     key: string; emoji: string; fromX: number; fromY: number;
@@ -69,7 +68,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   // ALL hooks above the early returns (repo hard rule).
   useEffect(() => {
     setState(startState());
-    setPops([]);
     setSpriteAnims([]);
     setHintSpot(null);
     setFlyingItems([]);
@@ -147,7 +145,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'collected': {
         sfx.good();
-        if (effect.pop && !h?.sprite) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
           const box = h.itemBox ?? h.box;
@@ -167,7 +164,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         break;
       case 'win':
         playAnim();
-        if (effect.pop && !h?.sprite) setPops((p) => [...p, { id: hotspotId, pop: effect.pop! }]);
         sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
         break;
       case 'locked':
@@ -243,7 +239,6 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               >
                 {revealed && <PulseRing strong />}
                 {!used && !revealed && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
-                {used && pops.find((p) => p.id === h.id) ? <PopSprite path={pops.find((p) => p.id === h.id)!.pop} /> : null}
                 {used ? <SparkleBurst trigger="found" /> : null}
               </Pressable>
             );
@@ -324,34 +319,6 @@ function PulseRing({ strong, dim }: { strong?: boolean; dim?: boolean }) {
   );
 }
 
-function PopSprite({ path }: { path: string }) {
-  const spring = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.spring(spring, { toValue: 1, friction: 4, useNativeDriver: true }).start();
-  }, [spring]);
-  const src = SCENE_IMAGES[path];
-  if (!src) return null;
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Animated.Image
-        source={src}
-        style={{
-          position: 'absolute',
-          left: '-15%',
-          top: '-30%',
-          width: '130%',
-          height: '130%',
-          transform: [
-            { translateY: spring.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) },
-            { scale: spring.interpolate({ inputRange: [0, 0.7, 1], outputRange: [0.2, 1.12, 1] }) },
-          ],
-        }}
-        resizeMode="contain"
-      />
-    </View>
-  );
-}
-
 function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
   emoji: string; fromX: number; fromY: number;
   toX: number; toY: number; onDone: () => void;
@@ -414,8 +381,6 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
-  const patchesRef = useRef<Record<string, HTMLImageElement>>({});
-  const takenRef = useRef<Record<string, HTMLImageElement>>({});
   const restRef = useRef<Record<string, HTMLImageElement>>({});
   // Item layers are rendered as DOM <img> elements, not on the canvas.
   const rafRef = useRef<number>(0);
@@ -434,8 +399,6 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
 
   useEffect(() => {
     sheetsRef.current = {};
-    patchesRef.current = {};
-    takenRef.current = {};
     restRef.current = {};
 
     for (const h of room.hotspots) {
@@ -448,16 +411,6 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
           if (!rafRef.current) drawStaticRef.current?.();
         };
         sheetsRef.current[h.id] = img;
-      }
-      if (h.sprite.patch && !patchesRef.current[h.id]) {
-        const img = new window.Image();
-        img.src = h.sprite.patch;
-        patchesRef.current[h.id] = img;
-      }
-      if (h.sprite.takenPatch && !takenRef.current[h.id]) {
-        const img = new window.Image();
-        img.src = h.sprite.takenPatch;
-        takenRef.current[h.id] = img;
       }
       if (h.sprite.rest) {
         const img = new window.Image();
@@ -529,59 +482,8 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
           }
         }
 
-        // Item layers are rendered as separate DOM <img> elements
-        // (positioned absolutely within the frame View) so they are never
-        // clipped to the sprite canvas or parent bbox boundaries.
         continue;
       }
-
-      // Legacy patch model for unconverted rooms
-      if (isUsed && sp.takenPatch) {
-        const taken = takenRef.current[h.id];
-        if (taken?.naturalWidth) {
-          ctx.drawImage(taken, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-        }
-        continue;
-      }
-
-      const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
-      if (!entry) {
-        if ((isUsed || isRevealed) && sp.sheet) {
-          const sheet = sheetsRef.current[h.id];
-          if (sheet?.naturalWidth && sp.cols && sp.frameCount && sp.fps) {
-            const patch = patchesRef.current[h.id];
-            if (patch?.naturalWidth) {
-              ctx.drawImage(patch, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-            }
-            const frameW = sheet.naturalWidth / sp.cols;
-            const rows = Math.ceil(sp.frameCount / sp.cols);
-            const frameH = sheet.naturalHeight / rows;
-            const lastIdx = sp.frameCount - 1;
-            const col = lastIdx % sp.cols;
-            const row = Math.floor(lastIdx / sp.cols);
-            ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
-              sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-          }
-        }
-        continue;
-      }
-
-      if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
-
-      const patch = patchesRef.current[h.id];
-      if (patch?.naturalWidth) {
-        ctx.drawImage(patch, sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-      }
-
-      const sheet = sheetsRef.current[h.id];
-      if (!sheet?.naturalWidth) continue;
-      const frameW = sheet.naturalWidth / sp.cols;
-      const rows = Math.ceil(sp.frameCount / sp.cols);
-      const frameH = sheet.naturalHeight / rows;
-      const col = entry.frameIndex % sp.cols;
-      const row = Math.floor(entry.frameIndex / sp.cols);
-      ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
-        sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
     }
   }, []);
   drawStaticRef.current = drawStatic;

@@ -117,8 +117,6 @@ export interface EscapeHotspot {
   itemBox?: Box;         // tap target for the revealed item within the scene
   sprite?: {             // rotoscoped sprite layer (animated or static)
     sheet?: string;      // path to sprite sheet WebP (public/); absent for static-overlay-only hotspots
-    patch?: string;      // before-scene crop at bbox (drawn under sprite to erase the resting visual)
-    takenPatch?: string; // taken-scene crop at bbox (drawn when item is collected, replacing held frame)
     rest?: string;       // RGBA rest-state layer (object cutout from original scene, clean-plate model)
     restBbox?: Box;      // position of the rest layer in scene coords (may differ from animation bbox)
     itemLayer?: string;  // RGBA item layer (revealed item cutout, toggled off on collection)
