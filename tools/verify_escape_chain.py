@@ -40,7 +40,7 @@ THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
-THRESH_ITEM_COMP_MEAN = 15  # item composite vs afterScene (geometry gate, not pixel-perfect)
+THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene — raise only with team-lead sign-off
 
 THRESH_REMNANT_FRAC = 0.02  # SAM-mask emptiness: < 2% unchanged pixels within mask
 THRESH_REMNANT_DIFF = 8  # pixel diff below which a pixel counts as "unchanged"
