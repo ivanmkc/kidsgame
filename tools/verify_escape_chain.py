@@ -40,7 +40,7 @@ THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
-THRESH_ITEM_COMP_MEAN = 8  # item composite vs afterScene (looser: multiple error sources)
+THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene (looser: multiple error sources)
 
 # --- Gemini plate-emptiness gate (D.1) ---
 

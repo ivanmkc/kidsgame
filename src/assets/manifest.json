@@ -28954,10 +28954,10 @@
           },
           "sprite": {
             "bbox": {
-              "x": 30,
-              "y": 322,
-              "w": 291,
-              "h": 209
+              "x": 0,
+              "y": 236,
+              "w": 419,
+              "h": 390
             },
             "beforeScene": "escape/rocketpad.png",
             "afterScene": "escape/rocketpad_toolbox_reveal.png",
