@@ -132,11 +132,57 @@ def _gemini_plate_check(
     return yes_count >= 2  # majority vote: 2/3 required to flag
 
 
+def _mask_bbox_for_hotspot(
+    room_mask: np.ndarray | None,
+    hotspot: dict,
+    pad: int = 20,
+) -> tuple[int, int, int, int]:
+    """Compute the crop rectangle for a hotspot.  When a room-level object
+    mask is available, uses the mask's connected component nearest the
+    hotspot bbox center to determine the crop (captures full object
+    silhouette including fringes beyond the tap-target bbox).  Falls back
+    to the sprite bbox with padding."""
+    sp = hotspot.get("sprite", {})
+    bbox = sp.get("bbox") or sp.get("restBbox")
+    if not bbox:
+        return 0, 0, 0, 0
+
+    bx, by, bw, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+    cx, cy = bx + bw // 2, by + bh // 2
+
+    if room_mask is not None:
+        from scipy import ndimage as _ndi
+        labeled, n = _ndi.label(room_mask)
+        best_label, best_dist = 0, 1e9
+        for lbl in range(1, n + 1):
+            ys, xs = np.where(labeled == lbl)
+            lcx, lcy = xs.mean(), ys.mean()
+            d = ((lcx - cx) ** 2 + (lcy - cy) ** 2) ** 0.5
+            if d < best_dist:
+                best_dist, best_label = d, lbl
+        if best_label:
+            ys, xs = np.where(labeled == best_label)
+            h_img, w_img = room_mask.shape
+            x0 = max(0, int(xs.min()) - pad)
+            y0 = max(0, int(ys.min()) - pad)
+            x1 = min(w_img, int(xs.max()) + 1 + pad)
+            y1 = min(h_img, int(ys.max()) + 1 + pad)
+            return x0, y0, x1, y1
+
+    h_img, w_img = 720, 1280
+    x0 = max(0, bx - pad)
+    y0 = max(0, by - pad)
+    x1 = min(w_img, bx + bw + pad)
+    y1 = min(h_img, by + bh + pad)
+    return x0, y0, x1, y1
+
+
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
     """For each hotspot with a rest layer, crop both the original scene and
-    the clean plate at the animation bbox, then ask Gemini whether the
-    object was properly removed (no remnants, no hallucinated replacements).
-    Fail closed."""
+    the clean plate at the object mask extent (or animation bbox as
+    fallback), then ask Gemini whether the object was properly removed.
+    Cropping at the full object mask extent catches remnants that extend
+    beyond the tap-target bbox.  Fail closed."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
@@ -144,6 +190,7 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
 
     clean = Image.open(clean_path).convert("RGB")
     orig = Image.open(orig_path).convert("RGB")
+    room_mask = _load_object_mask(room_id)
     fails = 0
 
     for h in hotspots:
@@ -151,13 +198,12 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
         if not sp.get("rest"):
             continue
 
-        bbox = sp.get("bbox") or sp.get("restBbox")
-        if not bbox:
+        x0, y0, x1, y1 = _mask_bbox_for_hotspot(room_mask, h)
+        if x1 <= x0 or y1 <= y0:
             continue
 
-        x, y, w, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
-        orig_crop = orig.crop((x, y, x + w, y + bh))
-        clean_crop = clean.crop((x, y, x + w, y + bh))
+        orig_crop = orig.crop((x0, y0, x1, y1))
+        clean_crop = clean.crop((x0, y0, x1, y1))
 
         obj = HOTSPOT_OBJECTS.get((room_id, h["id"]), h["id"])
         has_defect = _gemini_plate_check(orig_crop, clean_crop, obj)
@@ -173,9 +219,38 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
     return fails
 
 
+def _load_object_mask(room_id: str) -> np.ndarray | None:
+    """Load the precomputed object mask for a room.  Falls back to None
+    if no mask file exists (caller must handle)."""
+    mask_path = SCENES / "escape" / f"{room_id}_mask.png"
+    if not mask_path.exists():
+        return None
+    return np.array(Image.open(mask_path).convert("L")) > 127
+
+
+def _bbox_fallback_mask(hotspots: list[dict], h_img: int, w_img: int) -> np.ndarray:
+    """Union of bbox + restBbox (+8px dilation) — legacy fallback when no
+    precomputed object mask is available."""
+    mask = np.zeros((h_img, w_img), dtype=bool)
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+        for key in ("bbox", "restBbox"):
+            bb = sp.get(key)
+            if bb:
+                x, y, w, bh = bb["x"], bb["y"], bb["w"], bb["h"]
+                y0, x0 = max(0, y - 8), max(0, x - 8)
+                y1, x1 = min(h_img, y + bh + 8), min(w_img, x + w + 8)
+                mask[y0:y1, x0:x1] = True
+    return mask
+
+
 def verify_plate_drift(room_id: str, hotspots: list[dict]) -> int:
-    """Gate D.3: outside the union of all hotspot object bboxes (+8px),
-    the clean plate must be pixel-near-identical to the original scene.
+    """Gate D.3: outside the object mask, the clean plate must be
+    pixel-near-identical to the original scene.  Uses precomputed
+    object masks (combined inpaint + fix extent) that follow actual
+    object silhouettes, not hotspot bboxes.
     Returns number of failures (0 or 1)."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
@@ -189,18 +264,9 @@ def verify_plate_drift(room_id: str, hotspots: list[dict]) -> int:
         return 1
 
     h_img, w_img = orig.shape[:2]
-    mask = np.zeros((h_img, w_img), dtype=bool)
-    for h in hotspots:
-        sp = h.get("sprite", {})
-        if not sp.get("rest"):
-            continue
-        for key in ("bbox", "restBbox"):
-            bb = sp.get(key)
-            if bb:
-                x, y, w, bh = bb["x"], bb["y"], bb["w"], bb["h"]
-                y0, x0 = max(0, y - 8), max(0, x - 8)
-                y1, x1 = min(h_img, y + bh + 8), min(w_img, x + w + 8)
-                mask[y0:y1, x0:x1] = True
+    mask = _load_object_mask(room_id)
+    if mask is None:
+        mask = _bbox_fallback_mask(hotspots, h_img, w_img)
 
     outside = ~mask
     if outside.sum() == 0:
