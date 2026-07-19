@@ -1,6 +1,6 @@
 """Gate self-test suite for verify_escape_chain.py.
 
-Nine synthetic defective fixtures, each asserted to FAIL its check:
+Ten synthetic defective fixtures, each asserted to FAIL its check:
   (a) sheet with blank last frame
   (b) itemBbox outside game frame
   (c) non-converging tail
@@ -10,6 +10,7 @@ Nine synthetic defective fixtures, each asserted to FAIL its check:
   (g) rest layer with alpha hole exposing plate (pen defect class)
   (h) baseline regression — above-baseline fails, within-baseline passes
   (i) bbox-boundary seam from baked wrong-tone background
+  (j) sibling isolation — baked sibling rest-layer pixels in sheet
 
 Plus all-real-assets smoke expecting the current honest reds.
 """
@@ -756,6 +757,186 @@ class TestBboxSeamEnergy:
             f"With sibling rest layer should reduce excess: "
             f"without={excess_without:.2f}, with={excess_with:.2f}"
         )
+
+
+# ===================================================================
+# Fixture (j): sibling isolation — baked sibling pixels in sheet
+# ===================================================================
+class TestSiblingIsolation:
+    def test_baked_sibling_fails(self, tmp_path):
+        """A sprite sheet with opaque pixels inside a sibling's rest-layer
+        mask must be flagged by verify_sibling_isolation."""
+        sw, sh = 200, 200
+        fw, fh = 60, 60
+        obj_x, obj_y = 30, 20
+        sib_x, sib_y = 60, 20  # overlaps with primary bbox
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+        sib_color = (50, 50, 200)
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir = scenes_dir / "sam_masks"
+        scenes_dir.mkdir(parents=True)
+        sprites_dir.mkdir(parents=True)
+        sam_dir.mkdir(parents=True)
+
+        _save_rgb(scenes_dir / "sibroom_clean.png", sw, sh, plate_color)
+        orig = np.full((sh, sw, 3), plate_color, dtype=np.uint8)
+        orig[obj_y:obj_y+fh, obj_x:obj_x+fw] = obj_color
+        Image.fromarray(orig, "RGB").save(scenes_dir / "sibroom.png")
+        after = np.full((sh, sw, 3), plate_color, dtype=np.uint8)
+        after[obj_y:obj_y+fh, obj_x:obj_x+fw] = obj_color
+        Image.fromarray(after, "RGB").save(scenes_dir / "sibroom_primary_after.png")
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y+fh, obj_x:obj_x+fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "sibroom_primary.png")
+
+        # Primary sheet: bbox overlaps sibling, has opaque pixels there
+        cols, fc = 4, 4
+        bbox = {"x": obj_x, "y": obj_y, "w": fw, "h": fh}
+        rows = (fc + cols - 1) // cols
+        sheet = np.zeros((rows * fh, cols * fw, 4), dtype=np.uint8)
+        for idx in range(fc):
+            r, c = divmod(idx, cols)
+            sheet[r*fh:(r+1)*fh, c*fw:(c+1)*fw, :3] = obj_color
+            sheet[r*fh:(r+1)*fh, c*fw:(c+1)*fw, 3] = 255
+        Image.fromarray(sheet, "RGBA").save(sprites_dir / "sibroom_primary.png")
+
+        # Primary rest layer
+        rest = np.full((fh, fw, 4), (*obj_color, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "sibroom_primary_rest.png")
+
+        # Sibling rest layer: positioned so it overlaps primary's bbox
+        sib_rest = np.full((fh, fw, 4), (*sib_color, 255), dtype=np.uint8)
+        Image.fromarray(sib_rest, "RGBA").save(sprites_dir / "sibroom_sibling_rest.png")
+
+        primary_sprite = {
+            "bbox": bbox,
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/sibroom_primary_rest.png",
+            "beforeScene": "escape/sibroom.png",
+            "afterScene": "escape/sibroom_primary_after.png",
+            "sheet": "escape-sprites/sibroom_primary.png",
+            "cols": cols, "frameCount": fc, "fps": 12,
+        }
+        sibling_sprite = {
+            "bbox": {"x": sib_x, "y": sib_y, "w": fw, "h": fh},
+            "restBbox": {"x": sib_x, "y": sib_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/sibroom_sibling_rest.png",
+            "beforeScene": "escape/sibroom.png",
+            "afterScene": "escape/sibroom_primary_after.png",
+            "sheet": "escape-sprites/sibroom_primary.png",
+            "cols": cols, "frameCount": fc, "fps": 12,
+        }
+
+        hotspots = [
+            {"id": "primary", "sprite": primary_sprite},
+            {"id": "sibling", "sprite": sibling_sprite},
+        ]
+        manifest = {"escape": [{"id": "sibroom", "hotspots": hotspots}]}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_sibling_isolation("sibroom", hotspots)
+
+        assert fails > 0, "Sheet with baked sibling pixels should fail isolation check"
+
+    def test_clean_sheet_passes(self, tmp_path):
+        """A sheet with no sibling overlap passes isolation."""
+        room = _build_room(tmp_path, room_id="cleanroom")
+        with _apply_patches(tmp_path):
+            fails = vec.verify_sibling_isolation(
+                "cleanroom", room["hotspots"]
+            )
+        assert fails == 0, "Sheet with no sibling overlap should pass"
+
+    def test_shared_object_exemption(self, tmp_path):
+        """Hotspots sharing a HOTSPOT_OBJECT_MAP entry are exempted."""
+        sw, sh = 200, 200
+        fw, fh = 60, 60
+        obj_x, obj_y = 30, 20
+        sib_x, sib_y = 60, 20
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+        sib_color = (50, 50, 200)
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir = scenes_dir / "sam_masks"
+        scenes_dir.mkdir(parents=True)
+        sprites_dir.mkdir(parents=True)
+        sam_dir.mkdir(parents=True)
+
+        _save_rgb(scenes_dir / "maproom_clean.png", sw, sh, plate_color)
+        _save_rgb(scenes_dir / "maproom.png", sw, sh, plate_color)
+        _save_rgb(scenes_dir / "maproom_p_after.png", sw, sh, plate_color)
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        Image.fromarray(sam, "L").save(sam_dir / "maproom_p.png")
+
+        cols, fc = 4, 4
+        rows = (fc + cols - 1) // cols
+        sheet = np.zeros((rows * fh, cols * fw, 4), dtype=np.uint8)
+        for idx in range(fc):
+            r, c = divmod(idx, cols)
+            sheet[r*fh:(r+1)*fh, c*fw:(c+1)*fw, :3] = obj_color
+            sheet[r*fh:(r+1)*fh, c*fw:(c+1)*fw, 3] = 255
+        Image.fromarray(sheet, "RGBA").save(sprites_dir / "maproom_p.png")
+
+        rest_p = np.full((fh, fw, 4), (*obj_color, 255), dtype=np.uint8)
+        Image.fromarray(rest_p, "RGBA").save(sprites_dir / "maproom_p_rest.png")
+        rest_s = np.full((fh, fw, 4), (*sib_color, 255), dtype=np.uint8)
+        Image.fromarray(rest_s, "RGBA").save(sprites_dir / "maproom_s_rest.png")
+
+        hotspots = [
+            {"id": "p", "sprite": {
+                "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+                "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+                "rest": "escape-sprites/maproom_p_rest.png",
+                "beforeScene": "escape/maproom.png",
+                "afterScene": "escape/maproom_p_after.png",
+                "sheet": "escape-sprites/maproom_p.png",
+                "cols": cols, "frameCount": fc, "fps": 12,
+            }},
+            {"id": "s", "sprite": {
+                "bbox": {"x": sib_x, "y": sib_y, "w": fw, "h": fh},
+                "restBbox": {"x": sib_x, "y": sib_y, "w": fw, "h": fh},
+                "rest": "escape-sprites/maproom_s_rest.png",
+                "beforeScene": "escape/maproom.png",
+                "afterScene": "escape/maproom_p_after.png",
+                "sheet": "escape-sprites/maproom_p.png",
+                "cols": cols, "frameCount": fc, "fps": 12,
+            }},
+        ]
+        manifest = {"escape": [{"id": "maproom", "hotspots": hotspots}]}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+
+        saved_map = dict(vec.HOTSPOT_OBJECT_MAP)
+        vec.HOTSPOT_OBJECT_MAP[("maproom", "p")] = "shared"
+        vec.HOTSPOT_OBJECT_MAP[("maproom", "s")] = "shared"
+        try:
+            with _apply_patches(tmp_path):
+                fails = vec.verify_sibling_isolation("maproom", hotspots)
+        finally:
+            vec.HOTSPOT_OBJECT_MAP.clear()
+            vec.HOTSPOT_OBJECT_MAP.update(saved_map)
+
+        assert fails == 0, "Shared-object hotspots should be exempted"
+
+
+class TestRealSiblingIsolation:
+    def test_real_sibling_isolation(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        total = sum(
+            vec.verify_sibling_isolation(r["id"], r.get("hotspots", []))
+            for r in m.get("escape", [])
+        )
+        assert total == 0, f"Sibling isolation failures: {total}"
 
 
 # ===================================================================

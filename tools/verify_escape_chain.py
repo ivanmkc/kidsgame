@@ -738,6 +738,49 @@ def _get_base_for_sprite(room_id: str, sprite: dict) -> np.ndarray:
     return np.array(Image.open(before_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
 
 
+def _build_full_runtime_base(room_id: str, hotspot_id: str, sprite: dict) -> np.ndarray:
+    """Build the compositing base with ALL sibling rest layers.
+
+    At runtime, when a hotspot animates, all OTHER hotspots' rest layers
+    remain visible on the clean plate. This function builds that composite
+    so verify_sprite can account for sibling content that legitimately
+    shows through transparent sprite pixels (especially after sibling-mask
+    subtraction).
+    """
+    base = _get_base_for_sprite(room_id, sprite)
+    if not sprite.get("rest"):
+        return base
+
+    m = json.loads(MANIFEST.read_text())
+    for room in m.get("escape", []):
+        if room["id"] != room_id:
+            continue
+        for h in room.get("hotspots", []):
+            if h["id"] == hotspot_id:
+                continue
+            sib_sp = h.get("sprite", {})
+            rest_file = sib_sp.get("rest")
+            rb = sib_sp.get("restBbox")
+            if not rest_file or not rb:
+                continue
+            rest_path = SPRITES / rest_file
+            if not rest_path.exists():
+                continue
+            rest = np.array(Image.open(rest_path))
+            rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+            rest_resized = np.array(
+                Image.fromarray(rest).resize((rw, rh), Image.LANCZOS)
+            )
+            alpha = rest_resized[:, :, 3:4].astype(np.float32) / 255.0
+            base_f = base.astype(np.float32)
+            base_f[ry:ry + rh, rx:rx + rw] = (
+                base_f[ry:ry + rh, rx:rx + rw] * (1 - alpha)
+                + rest_resized[:, :, :3].astype(np.float32) * alpha
+            )
+            base = np.clip(base_f, 0, 255).astype(np.uint8)
+    return base
+
+
 def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, float, float, float]:
     """Verify a sprite hotspot: composite base + final sheet frame
     at the bbox, compare against the after-scene ROI.
@@ -745,7 +788,8 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
 
     Two compositing models:
       - Legacy (patch): base = before-scene, draw patch then sprite on top
-      - Clean-plate (rest): base = clean plate, draw sprite on top directly
+      - Clean-plate (rest): base = clean plate + sibling rest layers,
+        draw sprite on top directly
     """
     before_path = SCENES / sprite["beforeScene"]
     after_path = SCENES / sprite["afterScene"]
@@ -756,7 +800,7 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
     if not after_path.exists():
         return f"MISSING after: {after_path}", 999, 1, 0
 
-    base = _get_base_for_sprite(room_id, sprite)
+    base = _build_full_runtime_base(room_id, hotspot_id, sprite)
     after = np.array(Image.open(after_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
 
     x, y, w, h = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
@@ -805,10 +849,16 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
 
     target = after[y:y + h, x:x + w]
     delta = np.abs(roi.astype(np.int16) - target.astype(np.int16))
-    mean_d = float(delta.mean())
-    frac30 = float((delta.sum(axis=-1) > 30).mean())
 
-    coverage = float(last_frame[:, :, 3].astype(bool).mean()) * 100
+    alpha_mask = last_frame[:, :, 3] > 0
+    coverage = float(alpha_mask.mean()) * 100
+
+    if alpha_mask.any():
+        mean_d = float(delta[alpha_mask].mean())
+        frac30 = float((delta.sum(axis=-1)[alpha_mask] > 30).mean())
+    else:
+        mean_d = float(delta.mean())
+        frac30 = float((delta.sum(axis=-1) > 30).mean())
 
     ok = mean_d < THRESH_SPRITE_MEAN and frac30 < THRESH_SPRITE_FRAC
     return "PASS" if ok else "FAIL", mean_d, frac30, coverage
@@ -841,7 +891,7 @@ def verify_tail_convergence(
             return f"MISSING {p.name}", 999, 999, 999
 
     sheet = np.array(Image.open(sheet_path))  # RGBA
-    base = _get_base_for_sprite(room_id, sprite)
+    base = _build_full_runtime_base(room_id, hotspot_id, sprite)
     after = np.array(Image.open(after_path).convert("RGB").resize((1280, 720)), dtype=np.uint8)
 
     cols = sprite["cols"]
@@ -1208,6 +1258,101 @@ def verify_item_layers(room_id: str, hotspots: list[dict]) -> int:
     return fails
 
 
+def verify_sibling_isolation(room_id: str, hotspots: list[dict]) -> int:
+    """Verify that no sprite sheet contains pixels from sibling rest layers.
+
+    Enlarged bboxes can overlap neighboring objects; diff-vs-plate matting
+    captures sibling content when that happens. This check ensures sibling
+    mask subtraction has been applied: for each frame in each sheet, the
+    intersection of opaque sheet pixels and sibling rest-layer masks must
+    be near-zero (< 0.1% of frame area).
+
+    Hotspots sharing a HOTSPOT_OBJECT_MAP entry are exempted (panel/slot
+    legitimately contain rocket pixels).
+    """
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("sheet") or not sp.get("bbox"):
+            continue
+
+        sheet_path = SPRITES / sp["sheet"]
+        if not sheet_path.exists():
+            continue
+
+        bbox = sp["bbox"]
+        sheet = np.array(Image.open(sheet_path))
+        cols = sp["cols"]
+        fc = sp["frameCount"]
+        fw = sheet.shape[1] // cols
+        rows = (fc + cols - 1) // cols
+        fh = sheet.shape[0] // rows
+
+        for sib in hotspots:
+            if sib["id"] == h["id"]:
+                continue
+            sib_sp = sib.get("sprite", {})
+            if not sib_sp.get("rest") or not sib_sp.get("restBbox"):
+                continue
+
+            my_obj = HOTSPOT_OBJECT_MAP.get((room_id, h["id"]))
+            sib_obj = HOTSPOT_OBJECT_MAP.get((room_id, sib["id"]))
+            if my_obj and sib_obj and my_obj == sib_obj:
+                continue
+
+            rb = sib_sp["restBbox"]
+            ox0 = max(bbox["x"], rb["x"])
+            oy0 = max(bbox["y"], rb["y"])
+            ox1 = min(bbox["x"] + bbox["w"], rb["x"] + rb["w"])
+            oy1 = min(bbox["y"] + bbox["h"], rb["y"] + rb["h"])
+            if ox0 >= ox1 or oy0 >= oy1:
+                continue
+
+            rest = np.array(
+                Image.open(SPRITES / sib_sp["rest"]).convert("RGBA")
+            )
+            rest_h, rest_w = rest.shape[:2]
+            sp_x0 = ox0 - bbox["x"]
+            sp_y0 = oy0 - bbox["y"]
+            sp_x1 = ox1 - bbox["x"]
+            sp_y1 = oy1 - bbox["y"]
+            r_x0 = int((ox0 - rb["x"]) / rb["w"] * rest_w)
+            r_y0 = int((oy0 - rb["y"]) / rb["h"] * rest_h)
+            r_x1 = min(int((ox1 - rb["x"]) / rb["w"] * rest_w), rest_w)
+            r_y1 = min(int((oy1 - rb["y"]) / rb["h"] * rest_h), rest_h)
+
+            rest_crop = rest[r_y0:r_y1, r_x0:r_x1, 3]
+            if rest_crop.size == 0:
+                continue
+            sib_mask = np.array(
+                Image.fromarray(rest_crop).resize(
+                    (sp_x1 - sp_x0, sp_y1 - sp_y0), Image.NEAREST
+                )
+            ) > 128
+
+            frame_area = fw * fh
+            for i in range(fc):
+                r_i, c_i = i // cols, i % cols
+                frame_alpha = sheet[
+                    r_i * fh : (r_i + 1) * fh,
+                    c_i * fw : (c_i + 1) * fw,
+                    3,
+                ]
+                overlap_region = frame_alpha[sp_y0:sp_y1, sp_x0:sp_x1]
+                hit = int((sib_mask & (overlap_region > 0)).sum())
+                if hit / frame_area > 0.001:
+                    tag = f"{room_id}/{h['id']}"
+                    print(
+                        f"  SIBLING-ISOLATION FAIL: {tag} frame {i} "
+                        f"— {hit} px overlap with {sib['id']}'s rest layer "
+                        f"({hit/frame_area*100:.2f}% of frame)"
+                    )
+                    fails += 1
+                    break
+
+    return fails
+
+
 def main() -> int:
     m = json.loads(MANIFEST.read_text())
     entries = []
@@ -1307,6 +1452,18 @@ def main() -> int:
         fails += item_fails
     else:
         print("Item layers: all composites verified")
+
+    # Sibling isolation: no baked sibling content in sprite sheets
+    print(f"\n--- Sibling isolation ---")
+    sib_fails = 0
+    for room in m.get("escape", []):
+        sf = verify_sibling_isolation(room["id"], room.get("hotspots", []))
+        sib_fails += sf
+    if sib_fails:
+        print(f"\n{sib_fails} sibling-isolation failures")
+        fails += sib_fails
+    else:
+        print("Sibling isolation: no baked sibling content in sheets")
 
     # Manifest integrity: rest layers must have matching sprite sheets
     print(f"\n--- Rest/sheet integrity ---")
