@@ -32,5 +32,17 @@
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
+  },
+  "piratecove/chest.seam_energy": {
+    "baseline": 10.1,
+    "justification": "edge-touching animation content — genuine motion reaches bbox bottom/left; right edge at image boundary (x+w=1280=GAME_W) reduces averaging to 3 edges; no visible truncation (team-lead eyes, mid-strip 5-phase review). Stale-matte component eliminated (25.61->8.60). Future chest bbox resize retires this baseline.",
+    "evidence": {
+      "pre_reextract": 25.61,
+      "post_reextract": 8.60,
+      "alpha_at_edges": "frame23: bottom=77.8, left=33.2, right=1.2, top=0.0",
+      "mid_strip": "step10e_piratecove_chest_mid.png — organic fade at all edges"
+    },
+    "reviewed_by": "team-lead",
+    "date": "2026-07-19"
   }
 }
