@@ -102,8 +102,11 @@ def _build_room(
     item_layer: bool = False,
     item_bbox: dict | None = None,
     rest_alpha_hole: bool = False,
+    small_hole: bool = False,
     omit_sheet: bool = False,
     sam_mask_coverage: float = 1.0,
+    scene_size: tuple[int, int] | None = None,
+    obj_size: tuple[int, int] | None = None,
     extra_hotspots: list[dict] | None = None,
 ) -> dict:
     """Create a minimal room fixture and return the manifest dict.
@@ -120,54 +123,65 @@ def _build_room(
     if after_color is None:
         after_color = obj_color
 
-    # Original scene: plate_color background with obj_color block in the middle
-    orig = np.full((SCENE_H, SCENE_W, 3), plate_color, dtype=np.uint8)
+    sw = scene_size[0] if scene_size else SCENE_W
+    sh = scene_size[1] if scene_size else SCENE_H
+    fw = obj_size[0] if obj_size else FRAME_W
+    fh = obj_size[1] if obj_size else FRAME_H
+
     obj_y, obj_x = 20, 30
-    orig[obj_y:obj_y + FRAME_H, obj_x:obj_x + FRAME_W] = obj_color
+
+    # Original scene: plate_color background with obj_color block
+    orig = np.full((sh, sw, 3), plate_color, dtype=np.uint8)
+    orig[obj_y:obj_y + fh, obj_x:obj_x + fw] = obj_color
     Image.fromarray(orig, "RGB").save(scenes_dir / f"{room_id}.png")
 
     # Clean plate: plate_color everywhere (object removed)
-    _save_rgb(scenes_dir / f"{room_id}_clean.png", SCENE_W, SCENE_H, plate_color)
+    _save_rgb(scenes_dir / f"{room_id}_clean.png", sw, sh, plate_color)
 
     # Before scene = original
     before_rel = f"escape/{room_id}.png"
 
     # After scene: plate_color background + after_color block at anim bbox
-    # + item layer composited at itemBbox (if any)
-    after = np.full((SCENE_H, SCENE_W, 3), plate_color, dtype=np.uint8)
-    after[obj_y:obj_y + FRAME_H, obj_x:obj_x + FRAME_W] = after_color
+    after = np.full((sh, sw, 3), plate_color, dtype=np.uint8)
+    after[obj_y:obj_y + fh, obj_x:obj_x + fw] = after_color
     if item_layer:
         ib = item_bbox or {"x": 10, "y": 10, "w": 20, "h": 20}
         ix, iy, iw, ih = ib["x"], ib["y"], ib["w"], ib["h"]
-        if ix >= 0 and iy >= 0 and ix + iw <= SCENE_W and iy + ih <= SCENE_H:
-            after[iy:iy + ih, ix:ix + iw] = (255, 215, 0)  # gold item color
+        if ix >= 0 and iy >= 0 and ix + iw <= sw and iy + ih <= sh:
+            after[iy:iy + ih, ix:ix + iw] = (255, 215, 0)
     after_name = f"{room_id}_{hotspot_id}_after.png"
     Image.fromarray(after, "RGB").save(scenes_dir / after_name)
     after_rel = f"escape/{after_name}"
 
     # SAM mask: covers the object region
-    sam = np.zeros((SCENE_H, SCENE_W), dtype=np.uint8)
+    sam = np.zeros((sh, sw), dtype=np.uint8)
     if sam_mask_coverage > 0:
-        mask_h = int(FRAME_H * sam_mask_coverage)
-        mask_w = int(FRAME_W * sam_mask_coverage)
+        mask_h = int(fh * sam_mask_coverage)
+        mask_w = int(fw * sam_mask_coverage)
         sam[obj_y:obj_y + mask_h, obj_x:obj_x + mask_w] = 255
     Image.fromarray(sam, "L").save(sam_dir / f"{room_id}_{hotspot_id}.png")
 
     # Rest layer (RGBA at restBbox size)
-    rest_arr = np.full((FRAME_H, FRAME_W, 4), (*obj_color, 255), dtype=np.uint8)
+    rest_arr = np.full((fh, fw, 4), (*obj_color, 255), dtype=np.uint8)
     if rest_alpha_hole:
-        # Punch a hole in the middle
-        hole_y, hole_x = FRAME_H // 4, FRAME_W // 4
-        hole_h, hole_w = FRAME_H // 2, FRAME_W // 2
+        hole_y, hole_x = fh // 4, fw // 4
+        hole_h, hole_w = fh // 2, fw // 2
         rest_arr[hole_y:hole_y + hole_h, hole_x:hole_x + hole_w, 3] = 0
+    elif small_hole:
+        # ~5% of bbox area — small enough for whole-mean to miss,
+        # large enough for windowed metric to catch
+        hole_size = max(4, int((fw * fh * 0.05) ** 0.5))
+        hole_y = fh // 2 - hole_size // 2
+        hole_x = fw // 2 - hole_size // 2
+        rest_arr[hole_y:hole_y + hole_size, hole_x:hole_x + hole_size, 3] = 0
     rest_name = f"{room_id}_{hotspot_id}_rest.png"
     Image.fromarray(rest_arr, "RGBA").save(sprites_dir / rest_name)
 
     # Sprite sheet (PNG to preserve RGBA in synthetic tests)
     sheet_name = f"{room_id}_{hotspot_id}.png"
     sprite_block: dict = {
-        "bbox": {"x": obj_x, "y": obj_y, "w": FRAME_W, "h": FRAME_H},
-        "restBbox": {"x": obj_x, "y": obj_y, "w": FRAME_W, "h": FRAME_H},
+        "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+        "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
         "rest": f"escape-sprites/{rest_name}",
         "beforeScene": before_rel,
         "afterScene": after_rel,
@@ -177,7 +191,7 @@ def _build_room(
     }
 
     if not omit_sheet:
-        sheet_img = _make_sheet(cols, frame_count, FRAME_W, FRAME_H,
+        sheet_img = _make_sheet(cols, frame_count, fw, fh,
                                 last_alpha=last_alpha, color=after_color,
                                 vary=vary_frames)
         sheet_img.save(sprites_dir / sheet_name)
@@ -375,6 +389,22 @@ class TestRestAlphaHole:
             fails = vec.verify_rest_plate_match("testroom", room["hotspots"])
         assert fails > 0, "Expected REST-HOLE FAIL for alpha-holed rest layer"
 
+    def test_small_hole_caught_by_windowed_metric(self, tmp_path):
+        """Small hole (~5% of bbox) misses whole-mean but triggers the
+        interior-window metric.  Uses a larger bbox (64x64) so the
+        32x32 window can find an interior region."""
+        room = _build_room(
+            tmp_path,
+            obj_color=(240, 60, 60),
+            plate_color=(10, 10, 10),
+            small_hole=True,
+            scene_size=(192, 160),
+            obj_size=(64, 64),
+        )
+        with _apply_patches(tmp_path):
+            fails = vec.verify_rest_plate_match("testroom", room["hotspots"])
+        assert fails > 0, "Expected REST-HOLE FAIL for small interior hole"
+
     def test_solid_rest_passes(self, tmp_path):
         """Rest layer with no holes → composite matches original → PASS."""
         room = _build_room(
@@ -496,7 +526,9 @@ class TestRealAssetsSmoke:
             vec.verify_rest_plate_match(r["id"], r.get("hotspots", []))
             for r in m.get("escape", [])
         )
-        assert total == 0, f"Unexpected rest-hole failures: {total}"
+        assert total == 1, (
+            f"Expected 1 rest-hole failure (pen), got {total}"
+        )
 
     def test_real_sheet_consistency(self):
         m = json.loads(vec.MANIFEST.read_text())
