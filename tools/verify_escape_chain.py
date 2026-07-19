@@ -39,6 +39,8 @@ THRESH_COVERAGE_MIN = 5.0
 THRESH_TAIL_MEAN_HALF = 12
 THRESH_TAIL_MEAN_QUARTER = 8
 
+THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
+
 # --- Gemini plate-emptiness gate (D.1) ---
 
 HOTSPOT_OBJECTS: dict[tuple[str, str], str] = {
@@ -167,6 +169,170 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
             fails += 1
         else:
             print(f"  PLATE-EMPTY PASS: {room_id}/{h['id']}")
+
+    return fails
+
+
+def verify_plate_drift(room_id: str, hotspots: list[dict]) -> int:
+    """Gate D.3: outside the union of all hotspot object bboxes (+8px),
+    the clean plate must be pixel-near-identical to the original scene.
+    Returns number of failures (0 or 1)."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        return 0
+
+    orig = np.array(Image.open(orig_path).convert("RGB"))
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    if orig.shape != clean.shape:
+        print(f"  PLATE-DRIFT FAIL: {room_id} shape mismatch")
+        return 1
+
+    h_img, w_img = orig.shape[:2]
+    mask = np.zeros((h_img, w_img), dtype=bool)
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+        for key in ("bbox", "restBbox"):
+            bb = sp.get(key)
+            if bb:
+                x, y, w, bh = bb["x"], bb["y"], bb["w"], bb["h"]
+                y0, x0 = max(0, y - 8), max(0, x - 8)
+                y1, x1 = min(h_img, y + bh + 8), min(w_img, x + w + 8)
+                mask[y0:y1, x0:x1] = True
+
+    outside = ~mask
+    if outside.sum() == 0:
+        print(f"  PLATE-DRIFT SKIP: {room_id} (mask covers entire image)")
+        return 0
+
+    diff = np.abs(clean[outside].astype(np.float32) - orig[outside].astype(np.float32))
+    mean_diff = float(diff.mean())
+    max_diff = float(diff.max())
+    changed_px = int((diff.max(axis=1) > 0).sum())
+
+    if mean_diff > THRESH_DRIFT_MEAN:
+        print(
+            f"  PLATE-DRIFT FAIL: {room_id} — mean={mean_diff:.3f} "
+            f"(threshold {THRESH_DRIFT_MEAN}), max={max_diff:.0f}, "
+            f"changed={changed_px} px outside mask"
+        )
+        return 1
+    else:
+        print(f"  PLATE-DRIFT PASS: {room_id} — mean={mean_diff:.3f}")
+        return 0
+
+
+def verify_no_doubles(room_id: str, hotspots: list[dict]) -> int:
+    """Gate D.2: for each animated hotspot, composite 3 mid-animation
+    frames onto the clean plate and ask Gemini whether the object appears
+    twice.  Fail closed."""
+    from google.genai import types
+
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        return 0
+
+    clean = np.array(
+        Image.open(clean_path).convert("RGB").resize((1280, 720)),
+        dtype=np.uint8,
+    )
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("sheet") or not sp.get("rest"):
+            continue
+
+        sheet_path = SPRITES / sp["sheet"]
+        if not sheet_path.exists():
+            continue
+
+        obj = HOTSPOT_OBJECTS.get((room_id, h["id"]), h["id"])
+        bbox = sp["bbox"]
+        x, y, w, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+
+        sheet = np.array(Image.open(sheet_path))  # RGBA
+        cols = sp["cols"]
+        fc = sp["frameCount"]
+        frame_w = sheet.shape[1] // cols
+        rows = (fc + cols - 1) // cols
+        frame_h = sheet.shape[0] // rows
+
+        sample_indices = [fc // 4, fc // 2, 3 * fc // 4]
+        any_fail = False
+
+        for idx in sample_indices:
+            idx = max(0, min(idx, fc - 1))
+            r, c = divmod(idx, cols)
+            frame = sheet[
+                r * frame_h : (r + 1) * frame_h,
+                c * frame_w : (c + 1) * frame_w,
+            ]
+
+            comp = clean.copy()
+            alpha = frame[:, :, 3:4].astype(np.float32) / 255.0
+            roi = comp[y : y + bh, x : x + w].astype(np.float32)
+            roi = roi * (1 - alpha) + frame[:, :, :3].astype(np.float32) * alpha
+            comp[y : y + bh, x : x + w] = np.clip(roi, 0, 255).astype(np.uint8)
+
+            question = (
+                f"This game scene has an animated {obj} being revealed "
+                f"at one location — that is expected.\n\n"
+                f"Ignore the animated {obj}. Look ONLY at the background "
+                f"(walls, floor, sky, scenery). Is there a CLEAR, "
+                f"SEPARATE, unmistakable second copy of the {obj} visible "
+                f"elsewhere in the background?\n\n"
+                f"A second copy means another distinct {obj} — not a "
+                f"shadow, not a similar-looking architectural element, "
+                f"not part of the animation.\n"
+                f"Answer YES only if absolutely certain. If unsure, NO.\n"
+                f"Answer: YES or NO."
+            )
+            parts = [
+                types.Part(
+                    inline_data=types.Blob(
+                        mime_type="image/png",
+                        data=_png_bytes(Image.fromarray(comp)),
+                    )
+                ),
+                types.Part(text=question),
+            ]
+
+            client = _get_gemini_client()
+            votes = []
+            for attempt in range(3):
+                for model in _JUDGE_MODELS:
+                    try:
+                        resp = client.models.generate_content(
+                            model=model, contents=parts
+                        )
+                        answer = resp.text.strip().upper()
+                        if "YES" in answer:
+                            votes.append(True)
+                        elif "NO" in answer:
+                            votes.append(False)
+                        else:
+                            votes.append(True)
+                        break
+                    except Exception:
+                        continue
+                else:
+                    votes.append(True)
+
+            if sum(votes) >= 2:
+                any_fail = True
+                break
+
+        if any_fail:
+            print(
+                f"  NO-DOUBLES FAIL: {room_id}/{h['id']} "
+                f"— {obj} appears twice in composited frame"
+            )
+            fails += 1
+        else:
+            print(f"  NO-DOUBLES PASS: {room_id}/{h['id']}")
 
     return fails
 
@@ -424,8 +590,22 @@ def main() -> int:
     else:
         print(f"Outside-bbox transparency: all {len(entries)} OK")
 
-    # Plate-emptiness check: Gemini verifies no object remnants in clean plates
-    print(f"\n{'hotspot':<36} {'result':>20}")
+    # D.3 Plate-drift check: outside the union of hotspot masks,
+    # the clean plate must be pixel-identical to the original scene.
+    print(f"\n--- Plate drift (D.3) ---")
+    drift_fails = 0
+    for room in m.get("escape", []):
+        df = verify_plate_drift(room["id"], room.get("hotspots", []))
+        drift_fails += df
+    if drift_fails:
+        print(f"\n{drift_fails} plate-drift failures (threshold mean ≤ {THRESH_DRIFT_MEAN})")
+        fails += drift_fails
+    else:
+        print("Plate drift: all clean plates pixel-identical outside mask union")
+
+    # D.1 Plate-emptiness check: Gemini verifies no object remnants in clean plates
+    print(f"\n--- Plate emptiness (D.1) ---")
+    print(f"{'hotspot':<36} {'result':>20}")
     print("-" * 60)
     plate_fails = 0
     for room in m.get("escape", []):
@@ -436,6 +616,19 @@ def main() -> int:
         fails += plate_fails
     else:
         print("Plate emptiness: all clean plates verified")
+
+    # D.2 No-doubles check: Gemini verifies animated object doesn't appear
+    # twice in composited mid-animation frames.
+    print(f"\n--- No doubles (D.2) ---")
+    doubles_fails = 0
+    for room in m.get("escape", []):
+        ndf = verify_no_doubles(room["id"], room.get("hotspots", []))
+        doubles_fails += ndf
+    if doubles_fails:
+        print(f"\n{doubles_fails} no-doubles failures (Gemini-verified)")
+        fails += doubles_fails
+    else:
+        print("No doubles: all composited frames clean")
 
     print(f"\n{len(entries)} sprite entries checked, {fails} failures")
     return 1 if fails else 0
