@@ -6,14 +6,16 @@ set -euo pipefail
 
 # A running generator mutates the manifest mid-build (merge-on-save) —
 # shipping during generation raced once and let failing tests through.
-python3 tools/verify_story_audio.py || { echo "REFUSING TO SHIP: story audio coverage/duration failed."; exit 1; }
-python3 tools/verify_escape_chain.py || { echo "REFUSING TO SHIP: escape chain continuity failed."; exit 1; }
-
+# Check for running generation BEFORE any verification — a racing manifest
+# can make verify scripts pass on stale data.
 if pgrep -f "generate_assets.py" > /dev/null; then
   echo "REFUSING TO SHIP: generation loop is running (manifest would race)."
   exit 2
 fi
 cd "$(dirname "$0")/.."
+
+python3 tools/verify_story_audio.py || { echo "REFUSING TO SHIP: story audio coverage/duration failed."; exit 1; }
+python3 tools/verify_escape_chain.py || { echo "REFUSING TO SHIP: escape chain continuity failed."; exit 1; }
 
 cp src/assets/manifest.json /tmp/kgb_manifest_full.json
 # any gate failure must still restore the working manifest
