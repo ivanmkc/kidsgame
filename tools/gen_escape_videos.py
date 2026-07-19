@@ -2,7 +2,9 @@
 
 One 4-second clip per state-changing hotspot: the object visibly transforms
 (chest opens, stove ignites, dragon eats) conditioned on the BEFORE state
-scene as the first frame. Judged by frame sampling, compressed with ffmpeg.
+scene as the first frame. A deterministic 0.4s blend tail is appended so
+the clip's final frames land exactly on the after-scene PNG (pixel-perfect
+end by construction). Judged by frame sampling, compressed with ffmpeg.
 
 Follows the gen_story_videos.py pattern: veo-3.0-fast, first-frame
 conditioning, dual-judge frame sampling, H.264 CRF 29 + faststart.
@@ -34,6 +36,7 @@ SCENES = ROOT / "assets" / "game" / "escape"
 OUT = ROOT / "public" / "escape-video"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 MODEL = "veo-3.0-fast-generate-001"
+BLEND_DURATION = 0.4
 
 _tls = threading.local()
 
@@ -76,7 +79,86 @@ def _judge_clip(mp4: Path, action: str) -> bool:
             frames)
 
 
-def gen_clip(room_id: str, hid: str, anim: str, before_scene: str) -> str | None:
+def _derive_after_scenes(manifest: dict) -> dict[str, str]:
+    """Build {room_hotspot: after_scene_path} from the manifest chain."""
+    result = {}
+    for room in manifest.get("escape", []):
+        rid = room["id"]
+        for h in room.get("hotspots", []):
+            hid = h["id"]
+            if h.get("animVideo") or h.get("anim"):
+                if h.get("revealScene"):
+                    result[f"{rid}_{hid}"] = h["revealScene"]
+                elif h.get("afterScene"):
+                    result[f"{rid}_{hid}"] = h["afterScene"]
+    return result
+
+
+def _append_blend_tail(clip_mp4: Path, after_png: Path, out_mp4: Path) -> bool:
+    """Render blend+hold frames in NumPy (pixel-exact linear blend), encode
+    at CRF 10 for near-lossless quality, then stream-copy concat."""
+    import numpy as np
+    with tempfile.TemporaryDirectory() as td:
+        td = Path(td)
+        final_frame = td / "final.png"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error", "-sseof", "-0.05",
+             "-i", str(clip_mp4), "-frames:v", "1", "-update", "1",
+             str(final_frame)],
+            check=True, timeout=30)
+        if not final_frame.exists():
+            return False
+
+        fps = 24
+        final_arr = np.array(Image.open(final_frame).convert("RGB").resize((1280, 720)), dtype=np.float32)
+        after_arr = np.array(Image.open(after_png).convert("RGB").resize((1280, 720)), dtype=np.float32)
+
+        frames_dir = td / "frames"
+        frames_dir.mkdir()
+        n_blend = max(1, round(BLEND_DURATION * fps))
+        n_hold = max(1, 6)
+
+        for i in range(n_blend):
+            t = (i + 1) / n_blend
+            blended = (final_arr * (1 - t) + after_arr * t).clip(0, 255).astype(np.uint8)
+            Image.fromarray(blended).save(str(frames_dir / f"f_{i:04d}.png"))
+        after_uint8 = after_arr.astype(np.uint8)
+        for i in range(n_hold):
+            Image.fromarray(after_uint8).save(str(frames_dir / f"f_{n_blend + i:04d}.png"))
+
+        tail = td / "tail.mp4"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error",
+             "-framerate", str(fps),
+             "-i", str(frames_dir / "f_%04d.png"),
+             "-c:v", "libx264", "-crf", "5", "-preset", "medium",
+             "-pix_fmt", "yuv420p",
+             str(tail)],
+            check=True, timeout=60)
+        if not tail.exists():
+            return False
+
+        concat_list = td / "concat.txt"
+        concat_list.write_text(
+            f"file '{clip_mp4}'\nfile '{tail.resolve()}'\n")
+
+        output = td / "output.mp4"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loglevel", "error",
+             "-f", "concat", "-safe", "0", "-i", str(concat_list),
+             "-c", "copy", "-movflags", "+faststart",
+             str(output)],
+            check=True, timeout=60)
+        if not output.exists():
+            return False
+
+        import shutil
+        shutil.move(str(output), str(out_mp4))
+        return True
+
+
+def gen_clip(room_id: str, hid: str, anim: str, before_scene: str,
+             after_scene: str | None = None) -> str | None:
     fname = f"{room_id}_{hid}.mp4"
     if (OUT / fname).exists():
         print(f"  {fname}: exists")
@@ -126,11 +208,23 @@ def gen_clip(room_id: str, hid: str, anim: str, before_scene: str) -> str | None
                 else:
                     return None
             OUT.mkdir(parents=True, exist_ok=True)
+            compressed = OUT / fname
             subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(raw),
                             "-c:v", "libx264", "-crf", "29", "-preset", "medium", "-an",
-                            "-movflags", "+faststart", str(OUT / fname)], check=True)
+                            "-movflags", "+faststart", str(compressed)], check=True)
             raw.unlink(missing_ok=True)
-            print(f"  {fname}: OK ({(OUT / fname).stat().st_size // 1024}KB, attempt {attempt + 1})")
+
+            if after_scene:
+                after_png = Path(after_scene)
+                if after_png.exists():
+                    blended = OUT / f"{room_id}_{hid}_blended.mp4"
+                    if _append_blend_tail(compressed, after_png, blended):
+                        blended.rename(compressed)
+                        print(f"  {fname}: blend tail appended")
+                    else:
+                        print(f"  {fname}: blend tail failed, keeping raw clip")
+
+            print(f"  {fname}: OK ({compressed.stat().st_size // 1024}KB, attempt {attempt + 1})")
             return f"escape-video/{fname}"
         except Exception as e:  # noqa: BLE001
             print(f"  {fname}: attempt {attempt + 1} failed ({str(e)[:120]})")
@@ -139,11 +233,32 @@ def gen_clip(room_id: str, hid: str, anim: str, before_scene: str) -> str | None
     return None
 
 
+def _derive_before_scenes(manifest: dict) -> dict[str, str]:
+    """Build {room_hotspot: before_scene_path} from the manifest chain."""
+    result = {}
+    for room in manifest.get("escape", []):
+        rid = room["id"]
+        current = room["image"]
+        for h in room.get("hotspots", []):
+            hid = h["id"]
+            if h.get("animVideo") or h.get("anim"):
+                result[f"{rid}_{hid}"] = current
+            if h.get("takenScene"):
+                current = h["takenScene"]
+            elif h.get("afterScene"):
+                current = h["afterScene"]
+            elif h.get("revealScene"):
+                current = h["revealScene"]
+    return result
+
+
 def main() -> None:
     only = set(sys.argv[1:])
     OUT.mkdir(parents=True, exist_ok=True)
     m = json.loads(MANIFEST.read_text())
     rooms_manifest = {r["id"]: r for r in m.get("escape", [])}
+    after_map = _derive_after_scenes(m)
+    before_map = _derive_before_scenes(m)
 
     jobs = []
     for spec in ESCAPE_ROOMS:
@@ -155,23 +270,27 @@ def main() -> None:
             print(f"{rid}: not in manifest, skipping")
             continue
 
-        state_idx = 0
         for h in spec["hotspots"]:
             if not h.get("anim"):
                 continue
-            state_idx += 1
-            # Before scene: state_idx-1 (0 = base scene, 1+ = previous state scene)
-            if state_idx == 1:
-                before = str(SCENES / f"{rid}.png")
+            key = f"{rid}_{h['id']}"
+            before = before_map.get(key)
+            after = after_map.get(key)
+            if before:
+                before = str(SCENES.parent / before) if "/" in before else str(SCENES / before)
             else:
-                before = str(SCENES / f"{rid}_s{state_idx - 1}.png")
-            jobs.append((rid, h["id"], h["anim"], before))
+                print(f"  {key}: could not derive before scene, skipping")
+                continue
+            after_path = None
+            if after:
+                after_path = str(SCENES.parent / after) if "/" in after else str(SCENES / after)
+            jobs.append((rid, h["id"], h["anim"], before, after_path))
 
     print(f"{len(jobs)} escape clips to generate")
 
     def run(j):
-        rid, hid, anim, before = j
-        return (j, gen_clip(rid, hid, anim, before))
+        rid, hid, anim, before, after = j
+        return (j, gen_clip(rid, hid, anim, before, after))
 
     # Throttle to 2 concurrent (followups agent is running big Veo batches)
     with ThreadPoolExecutor(2) as ex:
@@ -181,7 +300,7 @@ def main() -> None:
     m = json.loads(MANIFEST.read_text())
     wired = 0
     filter_hits = []
-    for (rid, hid, anim, _), path in results:
+    for (rid, hid, anim, _, _), path in results:
         if not path:
             filter_hits.append(f"{rid}/{hid}")
             continue
