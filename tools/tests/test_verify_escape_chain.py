@@ -643,6 +643,101 @@ class TestBboxSeamEnergy:
             result, excess = vec.verify_bbox_seam("testroom", "widget", sp)
         assert result == "PASS", f"Expected PASS, got {result} (excess={excess:.2f})"
 
+    def test_shared_object_rest_layer_changes_measurement(self, tmp_path):
+        """For shared-object hotspots (HOTSPOT_OBJECT_MAP), the seam check
+        must build the runtime stack with sibling rest layers.  Measuring
+        without the sibling rest layer must yield a DIFFERENT (higher) value
+        than with it, proving the stack matters."""
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+
+        # Build a room with the primary hotspot "panel_h"
+        room = _build_room(
+            tmp_path, room_id="sharedroom", hotspot_id="panel_h",
+            plate_color=plate_color, obj_color=obj_color,
+            after_color=obj_color, frame_count=8, cols=4,
+            scene_size=(200, 200), obj_size=(60, 60),
+        )
+        sp = room["hotspots"][0]["sprite"]
+        bbox = sp["bbox"]  # x=30, y=20, w=60, h=60
+
+        # Create sibling "sibling_h" with a rest layer that covers the area
+        # AROUND the panel's bbox (fills a band of distinctive color that
+        # overlaps the panel bbox boundary region)
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sib_rest_w, sib_rest_h = 120, 120
+        sib_rest_x, sib_rest_y = 0, 0
+        sib_rest = np.zeros((sib_rest_h, sib_rest_w, 4), dtype=np.uint8)
+        sib_rest[:, :, :3] = (190, 60, 60)  # close to sprite color, far from plate
+        sib_rest[:, :, 3] = 255
+        sib_rest_name = "sharedroom_sibling_h_rest.png"
+        Image.fromarray(sib_rest, "RGBA").save(sprites_dir / sib_rest_name)
+
+        # Sibling sprite: a dummy sheet (not under test, just needs to exist
+        # for the manifest to be valid)
+        sib_sheet = np.zeros((60, 240, 4), dtype=np.uint8)
+        sib_sheet_name = "sharedroom_sibling_h.png"
+        Image.fromarray(sib_sheet, "RGBA").save(sprites_dir / sib_sheet_name)
+
+        # Update manifest with sibling hotspot
+        sib_sprite = {
+            "bbox": {"x": 0, "y": 0, "w": 60, "h": 60},
+            "restBbox": {"x": sib_rest_x, "y": sib_rest_y,
+                         "w": sib_rest_w, "h": sib_rest_h},
+            "rest": f"escape-sprites/{sib_rest_name}",
+            "beforeScene": f"escape/sharedroom.png",
+            "afterScene": f"escape/sharedroom_panel_h_after.png",
+            "sheet": f"escape-sprites/{sib_sheet_name}",
+            "cols": 4, "frameCount": 4, "fps": 12,
+        }
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["escape"][0]["hotspots"].append(
+            {"id": "sibling_h", "sprite": sib_sprite}
+        )
+        manifest_path.write_text(json.dumps(manifest, indent=2))
+
+        # Rebuild the panel sheet with opaque content reaching bbox edges
+        # (to create gradient energy at the boundary)
+        fw, fh = bbox["w"], bbox["h"]
+        cols_s, fc = sp["cols"], sp["frameCount"]
+        rows_s = (fc + cols_s - 1) // cols_s
+        sheet = np.zeros((rows_s * fh, cols_s * fw, 4), dtype=np.uint8)
+        for idx in range(fc):
+            r, c = divmod(idx, cols_s)
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, :3] = obj_color
+            sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, 3] = 255
+        sheet_path = sprites_dir / "sharedroom_panel_h.png"
+        Image.fromarray(sheet, "RGBA").save(sheet_path)
+
+        # Measure WITHOUT mapping (bare plate base)
+        with _apply_patches(tmp_path):
+            _, excess_without = vec.verify_bbox_seam(
+                "sharedroom", "panel_h", sp
+            )
+
+        # Measure WITH mapping (plate + sibling rest layer)
+        saved_map = dict(vec.HOTSPOT_OBJECT_MAP)
+        vec.HOTSPOT_OBJECT_MAP[("sharedroom", "panel_h")] = "shared_obj"
+        vec.HOTSPOT_OBJECT_MAP[("sharedroom", "sibling_h")] = "shared_obj"
+        try:
+            with _apply_patches(tmp_path):
+                _, excess_with = vec.verify_bbox_seam(
+                    "sharedroom", "panel_h", sp
+                )
+        finally:
+            vec.HOTSPOT_OBJECT_MAP.clear()
+            vec.HOTSPOT_OBJECT_MAP.update(saved_map)
+
+        assert excess_without != excess_with, (
+            f"Shared-object rest layer must change measurement: "
+            f"without={excess_without:.2f}, with={excess_with:.2f}"
+        )
+        assert excess_with < excess_without, (
+            f"With sibling rest layer should reduce excess: "
+            f"without={excess_without:.2f}, with={excess_with:.2f}"
+        )
+
 
 # ===================================================================
 # Helpers
