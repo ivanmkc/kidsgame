@@ -323,6 +323,110 @@ def extract_sprite_sheet(
     }
 
 
+def _build_sibling_mask(
+    sprite_bbox: dict[str, int],
+    sibling_rest_path: Path,
+    sibling_rest_bbox: dict[str, int],
+) -> np.ndarray:
+    """Build a boolean mask in sprite-bbox local coords where a sibling's
+    rest layer is opaque (alpha > 128)."""
+    sb = sprite_bbox
+    rb = sibling_rest_bbox
+    mask = np.zeros((sb["h"], sb["w"]), dtype=bool)
+
+    ox0 = max(sb["x"], rb["x"])
+    oy0 = max(sb["y"], rb["y"])
+    ox1 = min(sb["x"] + sb["w"], rb["x"] + rb["w"])
+    oy1 = min(sb["y"] + sb["h"], rb["y"] + rb["h"])
+    if ox0 >= ox1 or oy0 >= oy1:
+        return mask
+
+    rest = np.array(Image.open(sibling_rest_path).convert("RGBA"))
+    rest_h, rest_w = rest.shape[:2]
+
+    sp_x0 = ox0 - sb["x"]
+    sp_y0 = oy0 - sb["y"]
+    sp_x1 = ox1 - sb["x"]
+    sp_y1 = oy1 - sb["y"]
+
+    r_x0 = int((ox0 - rb["x"]) / rb["w"] * rest_w)
+    r_y0 = int((oy0 - rb["y"]) / rb["h"] * rest_h)
+    r_x1 = int((ox1 - rb["x"]) / rb["w"] * rest_w)
+    r_y1 = int((oy1 - rb["y"]) / rb["h"] * rest_h)
+    r_x1 = min(r_x1, rest_w)
+    r_y1 = min(r_y1, rest_h)
+
+    rest_crop = rest[r_y0:r_y1, r_x0:r_x1, 3]
+    if rest_crop.size == 0:
+        return mask
+    rest_resized = np.array(
+        Image.fromarray(rest_crop).resize(
+            (sp_x1 - sp_x0, sp_y1 - sp_y0), Image.NEAREST
+        )
+    )
+    mask[sp_y0:sp_y1, sp_x0:sp_x1] = rest_resized > 128
+    return mask
+
+
+def subtract_sibling_masks(
+    sheet_path: Path,
+    sprite_bbox: dict[str, int],
+    room_hotspots: list[dict],
+    hotspot_id: str,
+    room_id: str,
+    cols: int,
+    frame_count: int,
+    hotspot_object_map: dict[tuple[str, str], str] | None = None,
+    sprites_dir: Path = ROOT / "public",
+) -> int:
+    """Zero alpha on sheet pixels that fall within sibling rest-layer masks.
+
+    Prevents baked sibling content when sprite bboxes overlap neighboring
+    objects. Skips siblings that share a HOTSPOT_OBJECT_MAP entry (shared-
+    object hotspots like panel/slot keep rocket pixels).
+
+    Returns the total number of pixels zeroed across all frames.
+    """
+    combined = np.zeros((sprite_bbox["h"], sprite_bbox["w"]), dtype=bool)
+
+    for sib in room_hotspots:
+        if sib["id"] == hotspot_id:
+            continue
+        sib_sp = sib.get("sprite", {})
+        if not sib_sp.get("rest") or not sib_sp.get("restBbox"):
+            continue
+        if hotspot_object_map:
+            my_obj = hotspot_object_map.get((room_id, hotspot_id))
+            sib_obj = hotspot_object_map.get((room_id, sib["id"]))
+            if my_obj and sib_obj and my_obj == sib_obj:
+                continue
+        mask = _build_sibling_mask(
+            sprite_bbox, sprites_dir / sib_sp["rest"], sib_sp["restBbox"]
+        )
+        combined |= mask
+
+    if not combined.any():
+        return 0
+
+    sheet = np.array(Image.open(sheet_path))
+    fw = sheet.shape[1] // cols
+    rows = (frame_count + cols - 1) // cols
+    fh = sheet.shape[0] // rows
+
+    zeroed = 0
+    for i in range(frame_count):
+        r, c = i // cols, i % cols
+        frame_alpha = sheet[r * fh : (r + 1) * fh, c * fw : (c + 1) * fw, 3]
+        hit = combined & (frame_alpha > 0)
+        frame_alpha[hit] = 0
+        zeroed += int(hit.sum())
+
+    if zeroed > 0:
+        Image.fromarray(sheet).save(str(sheet_path), "webp", lossless=True, method=6)
+
+    return zeroed
+
+
 def get_chain() -> list[dict]:
     """Derive the hotspot chain from the manifest, returning entries for all
     animated hotspots with their before/after scenes."""
