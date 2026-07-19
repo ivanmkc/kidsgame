@@ -114,18 +114,17 @@ export interface EscapeHotspot {
   gives?: string;        // item id granted on successful tap
   needs?: string;        // item id that must be SELECTED in the tray
   pop?: string;          // transparent sprite that springs out (collect beat)
-  afterScene?: string;   // full-scene image after this hotspot is fully consumed (win hotspots, no-gives locks)
-  revealScene?: string;  // full-scene image with container open AND item visible (gives-hotspots)
-  takenScene?: string;   // full-scene image with container open but item GONE (gives-hotspots)
   itemBox?: Box;         // tap target for the revealed item within the scene
-  animVideo?: string;    // Veo transition clip played on unlock/reveal (fallback: crossfade)
-  sprite?: {             // RGBA sprite sheet animation (rotoscoped from Veo clip)
-    sheet: string;       // path to sprite sheet PNG (public/)
-    patch?: string;      // path to empty_bg_patch PNG (drawn before sprite to erase static object)
-    cols: number;        // sprite sheet grid columns
-    frameCount: number;  // total frames in the sheet
-    fps: number;         // playback fps
-    bbox: Box;           // position in the 1280x720 scene coordinate space
+  sprite?: {             // rotoscoped sprite layer (animated or static)
+    sheet?: string;      // path to sprite sheet WebP (public/); absent for static-overlay-only hotspots
+    patch?: string;      // before-scene crop at bbox (drawn under sprite to erase the resting visual)
+    takenPatch?: string; // taken-scene crop at bbox (drawn when item is collected, replacing held frame)
+    beforeScene?: string;// chain before-scene for gate verification
+    afterScene?: string; // chain after-scene for gate verification
+    cols?: number;       // sprite sheet grid columns (required when sheet is set)
+    frameCount?: number; // total frames in the sheet (required when sheet is set)
+    fps?: number;        // playback fps (required when sheet is set)
+    bbox: Box;           // position in the 1280×720 scene coordinate space
   };
   sayFound?: string;     // spoken on collection (item flies to tray)
   saySearch?: string;    // spoken on plain search with nothing there (flavor)
