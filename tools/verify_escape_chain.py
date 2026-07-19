@@ -49,6 +49,16 @@ SAM_MASKS_DIR = SCENES / "escape" / "sam_masks"
 REMNANT_BASELINES_PATH = ROOT / "tools" / "remnant_baselines.json"
 
 THRESH_REST_PLATE_MEAN = 5  # rest-layer-hole detector: composite-vs-original mean at restBbox
+# Localized rest-hole metric: sliding 32x32 window over interior regions
+# (excludes object-contour edges where transparency is expected).
+# Calibrated from the pen defect: pen=6.13, next-highest=3.02 (toolbox
+# edge artifact).  Threshold at 5 catches interior holes while passing
+# natural contour transparency.
+THRESH_REST_WINDOW_MEAN = 5.0
+_REST_WIN_SIZE = 32
+_REST_WIN_STRIDE = 16
+_REST_WIN_BORDER = 4
+_REST_WIN_MIN_BORDER_OPAQUE = 0.5
 
 # Hotspot→removed-object mapping.  Most hotspots map 1:1 to the object
 # they animate (pillow→pillow).  Panel and slot are hotspots ON the rocket
@@ -421,6 +431,9 @@ def verify_rest_plate_match(room_id: str, hotspots: list[dict]) -> int:
         orig_crop = orig[sy0:sy1, sx0:sx1]
         delta = np.abs(comp.astype(np.float32) - orig_crop.astype(np.float32))
         mean_d = float(delta.mean())
+        alpha_2d = rest_crop[:, :, 3]
+
+        window_max = _rest_hole_window_max(delta, alpha_2d, crop_h, crop_w)
 
         if mean_d > THRESH_REST_PLATE_MEAN:
             print(
@@ -429,10 +442,53 @@ def verify_rest_plate_match(room_id: str, hotspots: list[dict]) -> int:
                 f"(threshold <{THRESH_REST_PLATE_MEAN})"
             )
             fails += 1
+        elif window_max > THRESH_REST_WINDOW_MEAN:
+            print(
+                f"  REST-HOLE FAIL: {room_id}/{h['id']} "
+                f"— interior window max={window_max:.2f} "
+                f"(threshold <{THRESH_REST_WINDOW_MEAN})"
+            )
+            fails += 1
         else:
-            print(f"  REST-HOLE PASS: {room_id}/{h['id']} — mean={mean_d:.2f}")
+            print(
+                f"  REST-HOLE PASS: {room_id}/{h['id']} "
+                f"— mean={mean_d:.2f}, window={window_max:.2f}"
+            )
 
     return fails
+
+
+def _rest_hole_window_max(
+    delta: np.ndarray, alpha_2d: np.ndarray, crop_h: int, crop_w: int
+) -> float:
+    """Sliding-window max-of-means over interior regions of the rest layer.
+
+    Only evaluates windows that are (a) not touching the restBbox boundary,
+    (b) at least 50% opaque, and (c) have opaque pixels on all four border
+    strips.  This excludes natural contour edges where transparency is
+    expected and isolates interior alpha holes."""
+    wh, ww = _REST_WIN_SIZE, _REST_WIN_SIZE
+    stride = _REST_WIN_STRIDE
+    pad = stride
+    bw = _REST_WIN_BORDER
+    min_opaque = _REST_WIN_MIN_BORDER_OPAQUE
+
+    max_mean = 0.0
+    for y0 in range(pad, crop_h - wh - pad + 1, stride):
+        for x0 in range(pad, crop_w - ww - pad + 1, stride):
+            a_patch = alpha_2d[y0:y0 + wh, x0:x0 + ww]
+            if float((a_patch > 200).mean()) < 0.5:
+                continue
+            borders = (
+                a_patch[:bw, :], a_patch[-bw:, :],
+                a_patch[:, :bw], a_patch[:, -bw:],
+            )
+            if any(float((b > 200).mean()) < min_opaque for b in borders):
+                continue
+            m = float(delta[y0:y0 + wh, x0:x0 + ww].mean())
+            if m > max_mean:
+                max_mean = m
+    return max_mean
 
 
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
