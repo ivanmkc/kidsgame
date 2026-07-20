@@ -28955,18 +28955,18 @@
           "sprite": {
             "bbox": {
               "x": 0,
-              "y": 232,
-              "w": 474,
-              "h": 410
+              "y": 224,
+              "w": 482,
+              "h": 426
             },
             "beforeScene": "escape/rocketpad.png",
             "afterScene": "escape/rocketpad_toolbox_reveal.png",
             "rest": "escape-sprites/rocketpad_toolbox_rest.png",
             "restBbox": {
-              "x": 0,
-              "y": 339,
-              "w": 299,
-              "h": 236
+              "x": 5,
+              "y": 375,
+              "w": 306,
+              "h": 204
             },
             "itemLayer": "escape-sprites/rocketpad_toolbox_item_wrench.png",
             "itemBbox": {
