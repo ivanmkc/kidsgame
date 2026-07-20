@@ -28955,9 +28955,9 @@
           "sprite": {
             "bbox": {
               "x": 0,
-              "y": 248,
-              "w": 458,
-              "h": 378
+              "y": 232,
+              "w": 474,
+              "h": 410
             },
             "beforeScene": "escape/rocketpad.png",
             "afterScene": "escape/rocketpad_toolbox_reveal.png",
