@@ -34,7 +34,9 @@ CLIP_OVERRIDES = {('rocketpad', 'toolbox'): TMP / 'rocketpad_toolbox_raw_0.mp4'}
 # toolbox: its afterScene is a wholesale re-render doctored to the OLD
 # plate (ac5ebeb); re-extraction against the restored plate needs an
 # afterScene rebuild first. No sev3 findings of its own — keep sheet.
-SKIP_HOTSPOTS = {('rocketpad', 'toolbox')}
+SKIP_HOTSPOTS = {('rocketpad', 'toolbox'), ('dragoncave', 'dragon')}
+# dragon: sheet is the fix-2 clone-filled state, verified by eyes and
+# gate; a fresh extraction could resurrect the original frame glitch
 # pen: current sheet's take has no surviving source AND is the judged
 # broken-fence mess; the deployed/phase2 take is clean — take change OK
 ALLOW_TAKE_CHANGE = {('toyroom', 'pen')}
@@ -151,7 +153,9 @@ for h in room['hotspots']:
         seen.add(str(bpath))
         print(f'[{room_id}] chain-clean {bpath.name}: noise removed mean {chg:.2f}', flush=True)
     prev = np.array(Image.open(bpath).convert('RGB').resize((1280, 720), Image.LANCZOS))
-    if str(apath) not in seen:
+    if str(apath) not in seen and (room_id, h['id']) not in SKIP_HOTSPOTS:
+        # a skipped hotspot keeps its sheet, so its afterScene must stay
+        # on the sheet's lineage — cleaning it would desync the two
         az = actor_zone_of(h) | actor_changed.get(h['id'], ZERO)
         chg, msk = clean_chain_scene(prev, apath, hotspot_reach(h), az)
         actor_changed[h['id']] = actor_changed.get(h['id'], ZERO) | msk
