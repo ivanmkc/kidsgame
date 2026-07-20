@@ -688,6 +688,82 @@ def verify_alpha_contour(room_id: str, hotspots: list[dict]) -> int:
     return fails
 
 
+THRESH_ALL_HELD_OVERLAP = 150  # px of a later hotspot's opaque core over an earlier one's
+_SHARED_OBJECT = {("rocketpad", "panel"): "rocket", ("rocketpad", "slot"): "rocket"}
+
+
+def verify_all_held(room_id: str, hotspots: list[dict]) -> int:
+    """Gate the simultaneous-held configuration: every hotspot used, all
+    LAST frames stacked on the plate in draw order.
+
+    A later hotspot's held frame must not paint over an earlier one's
+    object (baked sibling state — the double-draw class), and each bbox
+    perimeter on the full stack must stay seam-free against the plate.
+    Shared-object pairs (panel/slot both draw the rocket) are exempt
+    from the overlap rule."""
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        return 0
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    h_scene, w_scene = clean.shape[:2]
+
+    cores: list[tuple[str, np.ndarray]] = []
+    comp = clean.astype(np.float32)
+    fails = 0
+
+    entries = [h for h in hotspots if h.get("sprite", {}).get("sheet")]
+    for h in entries:
+        sp = h["sprite"]
+        sheet_path = SPRITES / sp["sheet"]
+        bb = sp["bbox"]
+        if not sheet_path.exists():
+            continue
+        sheet = np.array(Image.open(sheet_path))
+        cols, fc = sp["cols"], sp["frameCount"]
+        rows_g = (fc + cols - 1) // cols
+        fh, fw = sheet.shape[0] // rows_g, sheet.shape[1] // cols
+        li = fc - 1
+        lf = sheet[(li // cols) * fh:(li // cols + 1) * fh,
+                   (li % cols) * fw:(li % cols + 1) * fw]
+        if lf.shape[:2] != (bb["h"], bb["w"]):
+            lf = np.array(Image.fromarray(lf).resize((bb["w"], bb["h"]), Image.LANCZOS))
+
+        core = np.zeros((h_scene, w_scene), dtype=bool)
+        core[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]] = lf[:, :, 3] >= 250
+
+        my_obj = _SHARED_OBJECT.get((room_id, h["id"]))
+        for earlier_id, earlier_core in cores:
+            if my_obj and _SHARED_OBJECT.get((room_id, earlier_id)) == my_obj:
+                continue
+            overlap = int((core & earlier_core).sum())
+            tag = f"{room_id}/{earlier_id}<-{h['id']}"
+            if overlap > THRESH_ALL_HELD_OVERLAP:
+                print(f"  ALL-HELD FAIL: {tag} — {overlap} px of held-over-held overlap")
+                fails += 1
+            else:
+                print(f"  ALL-HELD PASS: {tag} — overlap {overlap} px")
+        cores.append((h["id"], core))
+
+        a = lf[:, :, 3:4].astype(np.float32) / 255.0
+        comp[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]] = (
+            comp[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]] * (1 - a)
+            + lf[:, :, :3].astype(np.float32) * a
+        )
+
+    comp_u8 = np.clip(comp, 0, 255).astype(np.uint8)
+    for h in entries:
+        bb = h["sprite"]["bbox"]
+        excess = (_perimeter_gradient_energy(comp_u8, bb)
+                  - _perimeter_gradient_energy(clean, bb))
+        tag = f"{room_id}/{h['id']}"
+        if excess > THRESH_SEAM_ENERGY:
+            print(f"  ALL-HELD-SEAM FAIL: {tag} — excess={excess:.2f}")
+            fails += 1
+        else:
+            print(f"  ALL-HELD-SEAM PASS: {tag} — excess={excess:.2f}")
+    return fails
+
+
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
     """For each hotspot with a rest layer, crop both the original scene and
     the clean plate at the object mask extent (or animation bbox as
@@ -1731,6 +1807,18 @@ def main() -> int:
         fails += alpha_contour_fails
     else:
         print("Alpha-contour seam: all rest layers have natural contours")
+
+    # All-held stack: every hotspot used simultaneously is a real game
+    # configuration and must be seam-free with no held-over-held painting
+    print(f"\n--- All-held stack ---")
+    all_held_fails = 0
+    for room in m.get("escape", []):
+        all_held_fails += verify_all_held(room["id"], room.get("hotspots", []))
+    if all_held_fails:
+        print(f"\n{all_held_fails} all-held failures")
+        fails += all_held_fails
+    else:
+        print("All-held stack: every room clean")
 
     # D.3 Plate-drift check: outside the union of hotspot masks,
     # the clean plate must be pixel-identical to the original scene.
