@@ -65,6 +65,101 @@ after_diff = np.abs(clean_new.astype(np.float32) - orig).mean(-1)[~keep].mean()
 Image.fromarray(clean_new).save(clean_path)
 print(f'[{room_id}] plate restored: outside-silhouette diff {before_diff:.2f} -> {after_diff:.2f}', flush=True)
 
+# ---- 1b. chain-scene cleaning ----
+# Each afterScene is a Veo/NBP regeneration that drifts everywhere, not
+# just where the action changed things. Rebuild every chain scene as its
+# (cleaned) predecessor plus only the strong intended change, so state
+# files are honest edits of the chain and held-vs-after keying is clean.
+from scipy.ndimage import binary_propagation, binary_opening, binary_dilation as _bd, binary_fill_holes
+from PIL import ImageFilter
+
+def hotspot_reach(h):
+    """Where this hotspot's action can legitimately change the scene:
+    its draw bbox + margin, its silhouette, its rest rect."""
+    reach = np.zeros((720, 1280), dtype=bool)
+    sp = h.get('sprite', {})
+    for key, pad in (('bbox', 60), ('restBbox', 20)):
+        bbv = sp.get(key)
+        if bbv:
+            y0 = max(0, bbv['y'] - pad); x0 = max(0, bbv['x'] - pad)
+            reach[y0:bbv['y']+bbv['h']+pad, x0:bbv['x']+bbv['w']+pad] = True
+    sam_name = SAM_FOR_HOTSPOT.get((room_id, h['id']), f"{room_id}_{h['id']}")
+    sp_mask = scenes / 'sam_masks' / f'{sam_name}.png'
+    if sp_mask.exists():
+        reach |= _bd(np.array(Image.open(sp_mask).convert('L')) > 0, iterations=20)
+    return reach
+
+def clean_chain_scene(before_arr, after_path, reach, actor_zone):
+    after = np.array(Image.open(after_path).convert('RGB').resize((1280, 720), Image.LANCZOS))
+    d = np.abs(after.astype(np.int16) - before_arr.astype(np.int16)).sum(-1)
+    strong = binary_opening(d > 90, iterations=2)
+    mask = binary_propagation(strong, mask=d > 24)
+    # propagation regrows thin regen-noise rings (sibling outlines that
+    # rendered a pixel off) from tiny strong seeds — erode them back out
+    mask = binary_opening(mask, iterations=2)
+    # where two poses of the same object overlap, interior pixels can
+    # agree by luck and punch holes that mix both renders (ghost stripes)
+    mask = binary_fill_holes(mask)
+    # an action only changes the scene within the acting hotspot's reach;
+    # everything else is regeneration drift, no matter how strong
+    mask &= reach
+    # the before scene already shows every sibling in its current state
+    # (a moved pillow is NOT at its SAM position) — its plate-keyed
+    # footprint minus the actor's own zone is sibling territory, and the
+    # action cannot repaint siblings even inside its reach rect
+    dfp = np.abs(before_arr.astype(np.int16) - plate_arr.astype(np.int16)).sum(-1)
+    fp = binary_propagation(binary_opening(dfp > 90, iterations=2), mask=dfp > 24)
+    mask &= ~(fp & ~actor_zone)
+    mask = _bd(mask, iterations=2)
+    w_soft = np.array(Image.fromarray((mask * 255).astype(np.uint8), 'L')
+                      .filter(ImageFilter.GaussianBlur(1.5))).astype(np.float32) / 255.0
+    out = before_arr.astype(np.float32) * (1 - w_soft[..., None]) + after.astype(np.float32) * w_soft[..., None]
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    changed = float(np.abs(out.astype(np.float32) - after.astype(np.float32)).mean())
+    Image.fromarray(out).save(after_path)
+    return changed, mask
+
+def actor_zone_of(h):
+    zone = np.zeros((720, 1280), dtype=bool)
+    sam_name = SAM_FOR_HOTSPOT.get((room_id, h['id']), f"{room_id}_{h['id']}")
+    sp_mask = scenes / 'sam_masks' / f'{sam_name}.png'
+    if sp_mask.exists():
+        zone |= _bd(np.array(Image.open(sp_mask).convert('L')) > 0, iterations=10)
+    rbv = h.get('sprite', {}).get('restBbox')
+    if rbv:
+        zone[rbv['y']:rbv['y']+rbv['h'], rbv['x']:rbv['x']+rbv['w']] = True
+    return zone
+
+plate_arr = clean_new.astype(np.int16)
+ZERO = np.zeros((720, 1280), dtype=bool)
+actor_changed = {}
+prev = np.array(Image.open(scenes / f'{room_id}.png').convert('RGB').resize((1280, 720), Image.LANCZOS))
+seen = set()
+prev_h = None
+for h in room['hotspots']:
+    sp = h.get('sprite', {})
+    if not sp.get('sheet'):
+        continue
+    bpath = ROOT / 'assets/game' / sp['beforeScene']
+    apath = ROOT / 'assets/game' / sp['afterScene']
+    if str(bpath) not in seen and bpath.name != f'{room_id}.png':
+        # the before scene is the previous hotspot's post-collect state
+        ah = prev_h if prev_h else h
+        az = actor_zone_of(ah) | actor_changed.get(ah['id'], ZERO)
+        chg, msk = clean_chain_scene(prev, bpath, hotspot_reach(ah), az)
+        actor_changed[ah['id']] = actor_changed.get(ah['id'], ZERO) | msk
+        seen.add(str(bpath))
+        print(f'[{room_id}] chain-clean {bpath.name}: noise removed mean {chg:.2f}', flush=True)
+    prev = np.array(Image.open(bpath).convert('RGB').resize((1280, 720), Image.LANCZOS))
+    if str(apath) not in seen:
+        az = actor_zone_of(h) | actor_changed.get(h['id'], ZERO)
+        chg, msk = clean_chain_scene(prev, apath, hotspot_reach(h), az)
+        actor_changed[h['id']] = actor_changed.get(h['id'], ZERO) | msk
+        seen.add(str(apath))
+        print(f'[{room_id}] chain-clean {apath.name}: noise removed mean {chg:.2f}', flush=True)
+    prev = np.array(Image.open(apath).convert('RGB').resize((1280, 720), Image.LANCZOS))
+    prev_h = h
+
 # ---- 2. re-extract sheets ----
 for h in room['hotspots']:
     sp = h.get('sprite', {})

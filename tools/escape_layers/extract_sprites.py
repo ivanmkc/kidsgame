@@ -423,6 +423,23 @@ def extract_sprite_sheet(
         strong = ndimage.binary_opening(delta_plate > 90, iterations=1)
         weak = delta_plate > 24
         after_mask = ndimage.binary_propagation(strong, mask=weak)
+        # erode thin regen-noise rings regrown by the propagation, then
+        # close pose-overlap holes (two renders agreeing by luck)
+        after_mask = ndimage.binary_opening(after_mask, iterations=2)
+        after_mask = ndimage.binary_fill_holes(after_mask)
+        # constrain to own territory: an unconstrained plate key also
+        # covers SIBLINGS in their chain state (a moved pillow, an open
+        # crate), which then double-draws over the sibling's own layer
+        t_crop = scene_mask[
+            bbox["y"]:bbox["y"] + bbox["h"],
+            bbox["x"]:bbox["x"] + bbox["w"],
+        ].copy()
+        if object_mask_scene is not None:
+            t_crop |= ndimage.binary_dilation(object_mask_scene, iterations=3)[
+                bbox["y"]:bbox["y"] + bbox["h"],
+                bbox["x"]:bbox["x"] + bbox["w"],
+            ]
+        after_mask &= ndimage.binary_dilation(t_crop, iterations=4)
         if object_mask_scene is not None:
             after_mask |= object_mask_scene[
                 bbox["y"]:bbox["y"] + bbox["h"],
