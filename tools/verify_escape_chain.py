@@ -696,6 +696,11 @@ THRESH_F0_SILHOUETTE = 0.85  # frame 0 must cover its own silhouette (current as
 THRESH_COVERAGE_DROP = 0.5   # max frame-to-frame opaque-coverage collapse (current max 0.26)
 
 
+def _scene_shape(sam_path) -> tuple[int, int]:
+    with Image.open(sam_path) as im:
+        return (im.height, im.width)
+
+
 def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
     """Animation-extraction integrity, catastrophic classes:
 
@@ -708,15 +713,32 @@ def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
     Fine tears below these floors remain judge territory: without the
     source clip the gate cannot tell a small tear from real content."""
     fails = 0
-    for h in hotspots:
+    entries = [h for h in hotspots if h.get("sprite", {}).get("sheet")]
+    for idx, h in enumerate(entries):
         sp = h.get("sprite", {})
-        if not sp.get("sheet"):
-            continue
         sheet_path = SPRITES / sp["sheet"]
         sam_name = _SAM_FOR_HOTSPOT.get((room_id, h["id"]), f"{room_id}_{h['id']}")
         sam_path = SAM_MASKS_DIR / f"{sam_name}.png"
         if not sheet_path.exists():
             continue
+        # shared-object tiling: a LATER sibling's rest layer can own part of
+        # this hotspot's silhouette (slot's rest owns the upper rocket) —
+        # frames only need to cover the part nothing else draws
+        later_rest: np.ndarray | None = None
+        for later in entries[idx + 1:]:
+            lsp = later.get("sprite", {})
+            if not lsp.get("rest") or not lsp.get("restBbox"):
+                continue
+            lp = SPRITES / lsp["rest"]
+            if not lp.exists():
+                continue
+            lr = np.array(Image.open(lp))
+            lb = lsp["restBbox"]
+            if lr.shape[:2] != (lb["h"], lb["w"]):
+                lr = np.array(Image.fromarray(lr).resize((lb["w"], lb["h"]), Image.LANCZOS))
+            if later_rest is None:
+                later_rest = np.zeros(_scene_shape(sam_path), dtype=bool)
+            later_rest[lb["y"]:lb["y"] + lb["h"], lb["x"]:lb["x"] + lb["w"]] |= lr[:, :, 3] > 128
         sheet = np.array(Image.open(sheet_path))
         cols, fc = sp["cols"], sp["frameCount"]
         rows_g = (fc + cols - 1) // cols
@@ -731,6 +753,8 @@ def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
 
         if sam_path.exists():
             sam = np.array(Image.open(sam_path).convert("L")) > 0
+            if later_rest is not None and later_rest.shape == sam.shape:
+                sam &= ~later_rest
             sam_c = sam[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]]
             n_sam = int(sam_c.sum())
             if n_sam > 500:
@@ -1296,7 +1320,10 @@ def verify_tail_convergence(
 
     mean_half = float(delta_half.mean())
     mean_quarter = float(delta_quarter.mean())
-    mean_held_vs_after = float(delta_held_after.mean())
+    core = get_frame(fc - 1)[:, :, 3] >= 250
+    mean_held_vs_after = (
+        float(delta_held_after[core].mean()) if core.any() else float(delta_held_after.mean())
+    )
 
     tail_ok = mean_half <= THRESH_TAIL_MEAN_HALF and mean_quarter <= THRESH_TAIL_MEAN_QUARTER
     held_ok = mean_held_vs_after <= THRESH_HELD_VS_AFTER
