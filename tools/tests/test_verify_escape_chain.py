@@ -1,6 +1,6 @@
 """Gate self-test suite for verify_escape_chain.py.
 
-Ten synthetic defective fixtures, each asserted to FAIL its check:
+Thirteen synthetic defective fixtures, each asserted to FAIL its check:
   (a) sheet with blank last frame
   (b) itemBbox outside game frame
   (c) non-converging tail
@@ -8,9 +8,12 @@ Ten synthetic defective fixtures, each asserted to FAIL its check:
   (e) object-at-rest doubles in mid-anim composite (mocked Gemini)
   (f) sprite.rest without sheet (manifest defect)
   (g) rest layer with alpha hole exposing plate (pen defect class)
+  (g2) rest layer with afterScene content (wrong pre-interaction state)
   (h) baseline regression — above-baseline fails, within-baseline passes
   (i) bbox-boundary seam from baked wrong-tone background
   (j) sibling isolation — baked sibling rest-layer pixels in sheet
+  (k) rest-boundary seam — stale-lineage rest layer on current plate
+  (l) alpha-contour seam — interior alpha cliff on current plate
 
 Plus all-real-assets smoke expecting the current honest reds.
 """
@@ -403,18 +406,23 @@ class TestRestWithoutSheet:
 # Fixture (g): rest layer alpha hole exposing plate
 # ===================================================================
 class TestRestAlphaHole:
-    def test_alpha_hole_fails_rest_plate_match(self, tmp_path):
-        """Rest layer with alpha hole: plate texture bleeds through,
-        composite differs from original → FAIL."""
+    def test_alpha_hole_fails_contour_check(self, tmp_path):
+        """Rest layer with alpha hole: composite has a gradient where the
+        original is smooth (hole exposes plate inside the object) → FAIL
+        on alpha-contour.  Alpha-weighted rest-hole mean is zero because
+        the hole pixels have alpha=0, so detection is delegated to the
+        contour check."""
         room = _build_room(
             tmp_path,
             obj_color=(200, 50, 50),
             plate_color=(20, 20, 20),
             rest_alpha_hole=True,
+            scene_size=(200, 200),
+            obj_size=(80, 80),
         )
         with _apply_patches(tmp_path):
-            fails = vec.verify_rest_plate_match("testroom", room["hotspots"])
-        assert fails > 0, "Expected REST-HOLE FAIL for alpha-holed rest layer"
+            fails = vec.verify_alpha_contour("testroom", room["hotspots"])
+        assert fails > 0, "Expected ALPHA-CONTOUR FAIL for alpha-holed rest layer"
 
     def test_small_hole_caught_by_windowed_metric(self, tmp_path):
         """Small hole (~5% of bbox) misses whole-mean but triggers the
@@ -442,6 +450,37 @@ class TestRestAlphaHole:
         with _apply_patches(tmp_path):
             fails = vec.verify_rest_plate_match("testroom", room["hotspots"])
         assert fails == 0
+
+    def test_afterscene_derived_rest_fails(self, tmp_path):
+        """Rest built from afterScene content (wrong state) must FAIL.
+
+        A rest layer shows the PRE-interaction state (original scene).
+        If its RGB comes from afterScene instead, clean + rest produces
+        afterScene content where the original had different content —
+        the composite diverges from the original and must be caught."""
+        obj_color = (200, 50, 50)
+        after_color = (50, 200, 50)
+        plate_color = (80, 80, 80)
+        room = _build_room(
+            tmp_path,
+            obj_color=obj_color,
+            after_color=after_color,
+            plate_color=plate_color,
+        )
+        # Overwrite rest layer with afterScene-derived content (wrong state)
+        sp = room["hotspots"][0]["sprite"]
+        rest_path = tmp_path / "public" / sp["rest"]
+        rb = sp["restBbox"]
+        rest_arr = np.full(
+            (rb["h"], rb["w"], 4), (*after_color, 255), dtype=np.uint8
+        )
+        Image.fromarray(rest_arr, "RGBA").save(rest_path)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_rest_plate_match("testroom", room["hotspots"])
+        assert fails > 0, (
+            "afterScene-derived rest must FAIL rest-hole — "
+            "wrong state: original has obj_color, rest has after_color"
+        )
 
 
 # ===================================================================
@@ -927,6 +966,179 @@ class TestSiblingIsolation:
             vec.HOTSPOT_OBJECT_MAP.update(saved_map)
 
         assert fails == 0, "Shared-object hotspots should be exempted"
+
+
+# ===================================================================
+# Fixture (k): rest-boundary seam — stale-lineage rest layer
+# ===================================================================
+class TestRestBoundary:
+    def test_stale_lineage_rect_rest_fails(self, tmp_path):
+        """A near-rectangular rest layer with old-lineage background that
+        reaches the restBbox edges must produce elevated excess gradient
+        energy — verify_rest_boundary must catch it (same methodology as
+        verify_bbox_seam: composite energy minus bare-plate energy)."""
+        plate_color = (80, 80, 80)
+        old_bg = (140, 100, 60)  # stale-lineage background, far from plate
+        obj_color = (200, 50, 50)
+
+        room = _build_room(
+            tmp_path, plate_color=plate_color,
+            obj_color=obj_color, after_color=obj_color,
+            scene_size=(200, 200), obj_size=(60, 60),
+        )
+        sp = room["hotspots"][0]["sprite"]
+        bbox = sp["bbox"]
+
+        # Rect-alpha rest layer with old background baked in —
+        # fully opaque to the restBbox edges, old-lineage RGB
+        rest_w, rest_h = bbox["w"], bbox["h"]
+        rest = np.full((rest_h, rest_w, 4), (*old_bg, 255), dtype=np.uint8)
+        # Object in center, old background at edges — the defect
+        rest[10:-10, 10:-10, :3] = obj_color
+        rest_name = "testroom_widget_rest.png"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        Image.fromarray(rest, "RGBA").save(sprites_dir / rest_name)
+
+        sp["rest"] = f"escape-sprites/{rest_name}"
+        sp["restBbox"] = {"x": bbox["x"], "y": bbox["y"],
+                          "w": rest_w, "h": rest_h}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.write_text(json.dumps(
+            {"escape": [room]}, indent=2
+        ))
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_rest_boundary("testroom", room["hotspots"])
+        assert fails > 0, "Stale-lineage rect rest layer should FAIL rest-boundary check"
+
+    def test_feathered_rest_passes(self, tmp_path):
+        """A rest layer with feathered alpha (transparent at restBbox edges)
+        must pass the rest-boundary check — no excess gradient at the
+        restBbox perimeter."""
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+
+        room = _build_room(
+            tmp_path, plate_color=plate_color,
+            obj_color=obj_color, after_color=obj_color,
+            scene_size=(200, 200), obj_size=(60, 60),
+        )
+        sp = room["hotspots"][0]["sprite"]
+        bbox = sp["bbox"]
+
+        rest_w, rest_h = bbox["w"], bbox["h"]
+        rest = np.zeros((rest_h, rest_w, 4), dtype=np.uint8)
+        # Object centered with feathered alpha — transparent at edges
+        cy, cx = rest_h // 2, rest_w // 2
+        for y in range(rest_h):
+            for x in range(rest_w):
+                dist = max(abs(y - cy) / (rest_h / 2), abs(x - cx) / (rest_w / 2))
+                alpha = max(0, int(255 * (1 - dist * 1.2)))
+                rest[y, x] = (*obj_color, alpha)
+        rest_name = "testroom_widget_rest.png"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        Image.fromarray(rest, "RGBA").save(sprites_dir / rest_name)
+
+        sp["rest"] = f"escape-sprites/{rest_name}"
+        sp["restBbox"] = {"x": bbox["x"], "y": bbox["y"],
+                          "w": rest_w, "h": rest_h}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.write_text(json.dumps(
+            {"escape": [room]}, indent=2
+        ))
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_rest_boundary("testroom", room["hotspots"])
+        assert fails == 0, "Feathered rest layer should PASS rest-boundary check"
+
+
+class TestRealRestBoundary:
+    def test_real_rest_boundary(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        total = sum(
+            vec.verify_rest_boundary(r["id"], r.get("hotspots", []))
+            for r in m.get("escape", [])
+        )
+        assert total == 0, f"Rest-boundary failures: {total}"
+
+
+class TestAlphaContour:
+    def test_interior_cliff_rect_rest_fails(self, tmp_path):
+        """Interior alpha cliff (sharp alpha=0→255 well inside bbox)
+        produces high composite gradient where original is smooth → FAIL."""
+        obj_color = (200, 50, 50)
+        plate_color = (80, 80, 80)
+        room = _build_room(
+            tmp_path,
+            obj_color=obj_color, after_color=obj_color,
+            plate_color=plate_color,
+            scene_size=(200, 200), obj_size=(80, 80),
+        )
+        sp = room["hotspots"][0]["sprite"]
+        bbox = sp["bbox"]
+        rw, rh = bbox["w"], bbox["h"]
+
+        rest = np.full((rh, rw, 4), (*obj_color, 255), dtype=np.uint8)
+        rest[:12, :, 3] = 0
+        rest[-12:, :, 3] = 0
+        rest[:, :12, 3] = 0
+        rest[:, -12:, 3] = 0
+        rest_name = "testroom_widget_rest.png"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        Image.fromarray(rest, "RGBA").save(sprites_dir / rest_name)
+        sp["rest"] = f"escape-sprites/{rest_name}"
+        sp["restBbox"] = {"x": bbox["x"], "y": bbox["y"], "w": rw, "h": rh}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.write_text(json.dumps({"escape": [room]}, indent=2))
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_alpha_contour("testroom", room["hotspots"])
+        assert fails > 0, (
+            "Interior-cliff rect rest must FAIL alpha-contour — "
+            "composite has gradient where original is smooth"
+        )
+
+    def test_feathered_silhouette_passes(self, tmp_path):
+        """Feathered silhouette matching original object boundary → PASS."""
+        obj_color = (200, 50, 50)
+        plate_color = (80, 80, 80)
+        room = _build_room(
+            tmp_path,
+            obj_color=obj_color, after_color=obj_color,
+            plate_color=plate_color,
+            scene_size=(200, 200), obj_size=(80, 80),
+        )
+        sp = room["hotspots"][0]["sprite"]
+        bbox = sp["bbox"]
+        rw, rh = bbox["w"], bbox["h"]
+
+        rest = np.full((rh, rw, 4), (*obj_color, 255), dtype=np.uint8)
+        from PIL import ImageFilter as IF
+        alpha_img = Image.fromarray(
+            np.full((rh, rw), 255, dtype=np.uint8), mode="L"
+        ).filter(IF.GaussianBlur(radius=2.0))
+        rest[:, :, 3] = np.array(alpha_img)
+        rest_name = "testroom_widget_rest.png"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        Image.fromarray(rest, "RGBA").save(sprites_dir / rest_name)
+        sp["rest"] = f"escape-sprites/{rest_name}"
+        sp["restBbox"] = {"x": bbox["x"], "y": bbox["y"], "w": rw, "h": rh}
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.write_text(json.dumps({"escape": [room]}, indent=2))
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_alpha_contour("testroom", room["hotspots"])
+        assert fails == 0, "Feathered silhouette should PASS alpha-contour"
+
+
+class TestRealAlphaContour:
+    def test_real_alpha_contour(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        total = sum(
+            vec.verify_alpha_contour(r["id"], r.get("hotspots", []))
+            for r in m.get("escape", [])
+        )
+        assert total == 0, f"Alpha-contour failures: {total}"
 
 
 class TestRealSiblingIsolation:
