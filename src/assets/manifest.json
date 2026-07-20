@@ -28253,9 +28253,9 @@
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 109,
-              "w": 372,
-              "h": 542
+              "y": 101,
+              "w": 536,
+              "h": 558
             },
             "beforeScene": "escape/toyroom.png",
             "afterScene": "escape/toyroom_pillow_reveal.png"
@@ -28336,10 +28336,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 203,
-              "y": 36,
-              "w": 485,
-              "h": 492
+              "x": 19,
+              "y": 28,
+              "w": 677,
+              "h": 508
             },
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
@@ -28384,10 +28384,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 959,
-              "y": 239,
-              "w": 321,
-              "h": 481
+              "x": 724,
+              "y": 231,
+              "w": 556,
+              "h": 489
             },
             "beforeScene": "escape/toyroom_chest_taken.png",
             "afterScene": "escape/toyroom_s2.png"

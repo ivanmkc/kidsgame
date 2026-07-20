@@ -932,45 +932,67 @@ def _get_base_for_sprite(room_id: str, sprite: dict) -> np.ndarray:
 
 
 def _build_full_runtime_base(room_id: str, hotspot_id: str, sprite: dict) -> np.ndarray:
-    """Build the compositing base with ALL sibling rest layers.
+    """Build the chain-aware compositing base for a hotspot.
 
-    At runtime, when a hotspot animates, all OTHER hotspots' rest layers
-    remain visible on the clean plate. This function builds that composite
-    so verify_sprite can account for sibling content that legitimately
-    shows through transparent sprite pixels (especially after sibling-mask
-    subtraction).
-    """
+    At the moment a hotspot settles, siblings EARLIER in the chain have
+    already been used — the runtime draws their LAST frames — while
+    LATER siblings are still at rest. Comparing against an afterScene
+    (a chain-state snapshot) is only honest against this base; using
+    rests for everyone silently required each sprite to bake its
+    siblings' states (the all-held hazard)."""
     base = _get_base_for_sprite(room_id, sprite)
     if not sprite.get("rest"):
         return base
 
+    def draw(layer_rgba: np.ndarray, bx: int, by: int, bw: int, bh: int) -> None:
+        nonlocal base
+        if layer_rgba.shape[:2] != (bh, bw):
+            layer_rgba = np.array(
+                Image.fromarray(layer_rgba).resize((bw, bh), Image.LANCZOS)
+            )
+        alpha = layer_rgba[:, :, 3:4].astype(np.float32) / 255.0
+        base_f = base.astype(np.float32)
+        base_f[by:by + bh, bx:bx + bw] = (
+            base_f[by:by + bh, bx:bx + bw] * (1 - alpha)
+            + layer_rgba[:, :, :3].astype(np.float32) * alpha
+        )
+        base = np.clip(base_f, 0, 255).astype(np.uint8)
+
     m = json.loads(MANIFEST.read_text())
+    before_me = True
     for room in m.get("escape", []):
         if room["id"] != room_id:
             continue
         for h in room.get("hotspots", []):
             if h["id"] == hotspot_id:
+                before_me = False
                 continue
             sib_sp = h.get("sprite", {})
-            rest_file = sib_sp.get("rest")
-            rb = sib_sp.get("restBbox")
-            if not rest_file or not rb:
-                continue
-            rest_path = SPRITES / rest_file
-            if not rest_path.exists():
-                continue
-            rest = np.array(Image.open(rest_path))
-            rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
-            rest_resized = np.array(
-                Image.fromarray(rest).resize((rw, rh), Image.LANCZOS)
-            )
-            alpha = rest_resized[:, :, 3:4].astype(np.float32) / 255.0
-            base_f = base.astype(np.float32)
-            base_f[ry:ry + rh, rx:rx + rw] = (
-                base_f[ry:ry + rh, rx:rx + rw] * (1 - alpha)
-                + rest_resized[:, :, :3].astype(np.float32) * alpha
-            )
-            base = np.clip(base_f, 0, 255).astype(np.uint8)
+            if before_me and sib_sp.get("sheet"):
+                sheet_path = SPRITES / sib_sp["sheet"]
+                bb = sib_sp.get("bbox")
+                if not sheet_path.exists() or not bb:
+                    continue
+                sheet = np.array(Image.open(sheet_path))
+                cols = sib_sp["cols"]
+                fc = sib_sp["frameCount"]
+                rows_g = (fc + cols - 1) // cols
+                fh = sheet.shape[0] // rows_g
+                fw = sheet.shape[1] // cols
+                li = fc - 1
+                lf = sheet[(li // cols) * fh:(li // cols + 1) * fh,
+                           (li % cols) * fw:(li % cols + 1) * fw]
+                draw(lf, bb["x"], bb["y"], bb["w"], bb["h"])
+            else:
+                rest_file = sib_sp.get("rest")
+                rb = sib_sp.get("restBbox")
+                if not rest_file or not rb:
+                    continue
+                rest_path = SPRITES / rest_file
+                if not rest_path.exists():
+                    continue
+                rest = np.array(Image.open(rest_path))
+                draw(rest, rb["x"], rb["y"], rb["w"], rb["h"])
     return base
 
 
@@ -1043,8 +1065,12 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
     target = after[y:y + h, x:x + w]
     delta = np.abs(roi.astype(np.int16) - target.astype(np.int16))
 
-    alpha_mask = last_frame[:, :, 3] > 0
-    coverage = float(alpha_mask.mean()) * 100
+    coverage = float((last_frame[:, :, 3] > 0).mean()) * 100
+    # opaque core only: feathered pixels blend base with content by
+    # design, and the base is chain-aware runtime state, not the
+    # afterScene snapshot — comparing the feather to the snapshot would
+    # re-require baked sibling states
+    alpha_mask = last_frame[:, :, 3] >= 250
 
     if alpha_mask.any():
         mean_d = float(delta[alpha_mask].mean())
