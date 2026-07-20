@@ -1169,3 +1169,77 @@ def _apply_patches(tmp_path: Path):
     finally:
         for cm in reversed(ctx_managers):
             cm.__exit__(None, None, None)
+
+
+# ===================================================================
+# Fixture: all-held stack — held-over-held painting
+# ===================================================================
+class TestAllHeld:
+    def _room(self, tmp_path, bake_sibling: bool):
+        """Two overlapping hotspots; B's last frame optionally bakes A's
+        object (the double-draw / stale-sibling-state class)."""
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        scenes_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        plate = np.full((200, 200, 3), (80, 80, 80), dtype=np.uint8)
+        Image.fromarray(plate).save(scenes_dir / "stackroom_clean.png")
+
+        def sheet_for(obj_rects, size=60, cols=2, fc=4):
+            frame = np.zeros((size, size, 4), dtype=np.uint8)
+            for (y0, y1, x0, x1, color) in obj_rects:
+                frame[y0:y1, x0:x1, :3] = color
+                frame[y0:y1, x0:x1, 3] = 255
+            rows = (fc + cols - 1) // cols
+            sheet = np.zeros((rows * size, cols * size, 4), dtype=np.uint8)
+            for i in range(fc):
+                r, c = i // cols, i % cols
+                sheet[r*size:(r+1)*size, c*size:(c+1)*size] = frame
+            return sheet
+
+        # A at (20,20): red core at local 15..45
+        Image.fromarray(sheet_for([(15, 45, 15, 45, (200, 50, 50))]), "RGBA").save(
+            sprites_dir / "stackroom_a.webp", "webp", lossless=True)
+        # B at (50,50): blue core at local 30..55; A's red core in scene
+        # coords 35..65 = B-local -15..15 → bake local 0..15 if requested
+        b_rects = [(30, 55, 30, 55, (50, 50, 200))]
+        if bake_sibling:
+            b_rects.append((0, 15, 0, 15, (200, 50, 50)))
+        Image.fromarray(sheet_for(b_rects), "RGBA").save(
+            sprites_dir / "stackroom_b.webp", "webp", lossless=True)
+
+        def hs(hid, name, x, y):
+            return {
+                "id": hid,
+                "sprite": {
+                    "sheet": f"escape-sprites/{name}.webp",
+                    "cols": 2, "frameCount": 4,
+                    "bbox": {"x": x, "y": y, "w": 60, "h": 60},
+                },
+            }
+        return {"id": "stackroom",
+                "hotspots": [hs("a", "stackroom_a", 20, 20),
+                             hs("b", "stackroom_b", 50, 50)]}
+
+    def test_baked_sibling_state_fails(self, tmp_path):
+        room = self._room(tmp_path, bake_sibling=True)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_all_held("stackroom", room["hotspots"])
+        assert fails > 0, "held-over-held painting must fail the all-held stack"
+
+    def test_clean_stack_passes(self, tmp_path):
+        room = self._room(tmp_path, bake_sibling=False)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_all_held("stackroom", room["hotspots"])
+        assert fails == 0, "non-overlapping held cores must pass"
+
+
+class TestRealAllHeld:
+    def test_real_all_held(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        total = sum(
+            vec.verify_all_held(r["id"], r.get("hotspots", []))
+            for r in m.get("escape", [])
+        )
+        assert total == 0, f"All-held failures: {total}"
