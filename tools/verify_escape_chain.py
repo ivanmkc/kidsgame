@@ -39,8 +39,11 @@ THRESH_SPRITE_MEAN = 2
 THRESH_SPRITE_FRAC = 0.005
 THRESH_COVERAGE_MIN = 5.0
 
-THRESH_TAIL_MEAN_HALF = 12
-THRESH_TAIL_MEAN_QUARTER = 8
+# Tail contract (motion-through design): raw motion may play until the
+# final ease window; the cross-fade must complete monotonically with at
+# most this residual one frame before the anim->held handoff.
+TAIL_WINDOW = 4
+THRESH_TAIL_LAST = 8
 THRESH_HELD_VS_AFTER = 5  # held frame (last-frame composite) must match afterScene crop
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
@@ -1253,13 +1256,17 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
 def verify_tail_convergence(
     room_id: str, hotspot_id: str, sprite: dict
 ) -> tuple[str, float, float, float]:
-    """Check that the animation tail converges monotonically to the held frame,
-    and that the held frame matches the afterScene at the sprite bbox.
+    """Check that the animation tail converges to the held frame within
+    the final ease window, and that the held frame matches the afterScene.
 
-    Reads frames at T-0.50s and T-0.25s from the sheet, composites each
-    on the patch, and compares to the composited held frame.  Also verifies
-    the held frame reproduces the afterScene crop (mean diff within
-    THRESH_HELD_VS_AFTER).
+    The motion-through tail design keeps raw clip motion playing until a
+    short smoothstep ease (TAIL_WINDOW frames); mid-animation frames are
+    NOT expected to resemble the held state.  The contract is: deltas to
+    the held composite are monotonically non-increasing over the last
+    TAIL_WINDOW frames, the frame before the handoff is within
+    THRESH_TAIL_LAST, and the held frame reproduces the afterScene crop
+    (THRESH_HELD_VS_AFTER).  T-0.5s / T-0.25s deltas are reported as
+    context only.
 
     Returns (result, mean_at_half, mean_at_quarter, mean_held_vs_after).
     """
@@ -1325,14 +1332,20 @@ def verify_tail_convergence(
         float(delta_held_after[core].mean()) if core.any() else float(delta_held_after.mean())
     )
 
-    tail_ok = mean_half <= THRESH_TAIL_MEAN_HALF and mean_quarter <= THRESH_TAIL_MEAN_QUARTER
+    window = min(TAIL_WINDOW, fc - 1)
+    win_deltas = []
+    for idx in range(fc - window, fc):
+        comp = composite(get_frame(idx))
+        win_deltas.append(float(np.abs(comp.astype(np.int16) - held.astype(np.int16)).mean()))
+    last_ok = win_deltas[-2] <= THRESH_TAIL_LAST if len(win_deltas) >= 2 else True
+    mono_ok = all(win_deltas[i] >= win_deltas[i + 1] - 0.5 for i in range(len(win_deltas) - 1))
     held_ok = mean_held_vs_after <= THRESH_HELD_VS_AFTER
 
     if not held_ok:
         result = "FAIL-HELD"
-    elif not tail_ok and mean_quarter <= mean_half:
+    elif not last_ok:
         result = "FAIL"
-    elif not tail_ok:
+    elif not mono_ok:
         result = "FAIL-NONMONO"
     else:
         result = "PASS"
@@ -1780,7 +1793,7 @@ def main() -> int:
             tail_fails += 1
         print(f"{tag:<36} {mean_half:>8.2f} {mean_quarter:>8.2f} {mean_held_after:>8.2f} {result:>12}")
     if tail_fails:
-        print(f"\n{tail_fails} tail-convergence failures (thresholds: T-0.5s ≤{THRESH_TAIL_MEAN_HALF}, T-0.25s ≤{THRESH_TAIL_MEAN_QUARTER}, held/after ≤{THRESH_HELD_VS_AFTER})")
+        print(f"\n{tail_fails} tail-convergence failures (contract: monotone over last {TAIL_WINDOW} frames, T-1f ≤{THRESH_TAIL_LAST}, held/after ≤{THRESH_HELD_VS_AFTER}; T-0.5s/T-0.25s are context)")
         fails += tail_fails
     else:
         print(f"Tail convergence: all {len(entries)} OK")

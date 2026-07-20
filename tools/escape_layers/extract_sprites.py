@@ -15,6 +15,8 @@ The pipeline:
   - Minimum connected-component area filter (kills ghost streaks)
   - Subsample 96→48 (every 2nd frame)
   - Smoothstep tail ease: last N frames blend toward after-state overlay
+    (default 4: raw motion plays through, cross-fade exposure ~0.3s at the
+    settle — a 22-frame ease reads as a lingering mid-animation double image)
   - Pack into sprite sheet, save as lossless WebP + patch PNG
 
 Usage:
@@ -258,7 +260,7 @@ def extract_sprite_sheet(
     change_thresh: int = 90,
     stabilize_thresh: int = 15,
     min_cc_area: int = 200,
-    ease_frames: int = 22,
+    ease_frames: int = 4,
     normalize: bool = False,
     keep_all_components: bool = False,
     core_filter: bool = True,
