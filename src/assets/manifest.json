@@ -29025,10 +29025,10 @@
             "afterScene": "escape/rocketpad_crate_reveal.png",
             "rest": "escape-sprites/rocketpad_crate_rest.png",
             "restBbox": {
-              "x": 1002,
-              "y": 388,
-              "w": 276,
-              "h": 202
+              "x": 1008,
+              "y": 323,
+              "w": 272,
+              "h": 261
             },
             "itemLayer": "escape-sprites/rocketpad_crate_item_battery.png",
             "itemBbox": {

@@ -52,7 +52,12 @@ BASELINE_MARGIN = 0.01  # 1 percentage point above baseline for regression gatin
 SAM_MASKS_DIR = SCENES / "escape" / "sam_masks"
 REMNANT_BASELINES_PATH = ROOT / "tools" / "remnant_baselines.json"
 
-THRESH_REST_PLATE_MEAN = 5  # rest-layer-hole detector: composite-vs-original mean at restBbox
+THRESH_REST_BOUNDARY = 8.0  # rest-boundary seam: gradient energy at rest-alpha contour on current plate
+
+THRESH_ALPHA_CONTOUR = 55.0  # alpha-contour seam: gradient excess along alpha>200 contour
+_ALPHA_CONTOUR_LEVEL = 200  # contour threshold: 200 measures deep interior (less repair-zone noise)
+
+THRESH_REST_PLATE_MEAN = 5  # rest-layer-hole detector: alpha-weighted composite-vs-original mean
 # Localized rest-hole metric: sliding 32x32 window over interior regions
 # (excludes object-contour edges where transparency is expected).
 # Calibrated from the pen defect: pen=6.13, next-highest=3.02 (toolbox
@@ -379,12 +384,20 @@ def verify_rest_sheet_integrity(room_id: str, hotspots: list[dict]) -> int:
 
 
 def verify_rest_plate_match(room_id: str, hotspots: list[dict]) -> int:
-    """Detect alpha holes in rest layers that expose plate texture.
+    """Detect rest-layer content errors via alpha-weighted mean diff.
 
     Composites clean_plate + rest_layer at restBbox and compares to the
-    original scene.  At rest, plate + rest must reproduce the original —
-    any significant diff means the rest layer has holes exposing
-    inpainted plate texture (pen defect class).  HARD FAIL."""
+    original scene using an alpha-weighted mean: only pixels where the
+    rest has coverage contribute.  This lets SAM-silhouette rests pass
+    even when the repair area outside the object footprint differs from
+    the original (that diff is intentional — the plate was repaired).
+
+    Interior alpha holes are caught by the windowed metric and the
+    alpha-contour seam check (verify_alpha_contour).
+
+    Reference is ALWAYS the original scene ({room_id}.png) — a rest
+    that matches afterScene better than original is a wrong-state asset
+    (afterScene content in a pre-interaction layer) and must fail."""
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     orig_path = SCENES / "escape" / f"{room_id}.png"
     if not clean_path.exists() or not orig_path.exists():
@@ -432,17 +445,23 @@ def verify_rest_plate_match(room_id: str, hotspots: list[dict]) -> int:
         comp = comp * (1 - alpha) + rest_crop[:, :, :3].astype(np.float32) * alpha
         comp = np.clip(comp, 0, 255).astype(np.uint8)
 
-        orig_crop = orig[sy0:sy1, sx0:sx1]
-        delta = np.abs(comp.astype(np.float32) - orig_crop.astype(np.float32))
-        mean_d = float(delta.mean())
+        ref_crop = orig[sy0:sy1, sx0:sx1]
+        delta = np.abs(comp.astype(np.float32) - ref_crop.astype(np.float32))
         alpha_2d = rest_crop[:, :, 3]
+        alpha_f = alpha_2d.astype(np.float32) / 255.0
+        alpha_sum = float(alpha_f.sum())
+        mean_d = (
+            float((delta.mean(axis=2) * alpha_f).sum() / alpha_sum)
+            if alpha_sum > 0
+            else float(delta.mean())
+        )
 
         window_max = _rest_hole_window_max(delta, alpha_2d, crop_h, crop_w)
 
         if mean_d > THRESH_REST_PLATE_MEAN:
             print(
                 f"  REST-HOLE FAIL: {room_id}/{h['id']} "
-                f"— plate+rest vs original mean={mean_d:.2f} "
+                f"— plate+rest vs original alpha-weighted mean={mean_d:.2f} "
                 f"(threshold <{THRESH_REST_PLATE_MEAN})"
             )
             fails += 1
@@ -493,6 +512,180 @@ def _rest_hole_window_max(
             if m > max_mean:
                 max_mean = m
     return max_mean
+
+
+def verify_rest_boundary(room_id: str, hotspots: list[dict]) -> int:
+    """Detect stale-lineage rest layers via restBbox perimeter seam energy.
+
+    Composites each rest layer onto the CURRENT clean plate at its restBbox
+    and measures excess perimeter gradient energy at the restBbox boundary
+    (composite energy minus bare-plate energy).  A rest layer whose alpha
+    reaches the restBbox edges with old-lineage RGB produces elevated
+    gradient energy — the same methodology as verify_bbox_seam.
+
+    Threshold is consistent with THRESH_REST_BOUNDARY (same scale as
+    THRESH_SEAM_ENERGY).
+    """
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        return 0
+
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        rest_file = sp.get("rest")
+        rb = sp.get("restBbox")
+        if not rest_file or not rb:
+            continue
+
+        rest_path = SPRITES / rest_file
+        if not rest_path.exists():
+            continue
+
+        rest = np.array(Image.open(rest_path))
+        if rest.ndim != 3 or rest.shape[2] != 4:
+            continue
+
+        rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+        if rest.shape[:2] != (rh, rw):
+            rest = np.array(
+                Image.fromarray(rest).resize((rw, rh), Image.Resampling.LANCZOS)
+            )
+
+        alpha_f = rest[:, :, 3:4].astype(np.float32) / 255.0
+        comp = clean.copy().astype(np.float32)
+        comp[ry:ry + rh, rx:rx + rw] = (
+            comp[ry:ry + rh, rx:rx + rw] * (1 - alpha_f)
+            + rest[:, :, :3].astype(np.float32) * alpha_f
+        )
+        comp = np.clip(comp, 0, 255).astype(np.uint8)
+
+        plate_energy = _perimeter_gradient_energy(clean, rb)
+        comp_energy = _perimeter_gradient_energy(comp, rb)
+        excess = comp_energy - plate_energy
+        tag = f"{room_id}/{h['id']}"
+        baseline_key = f"{tag}.rest_boundary"
+        baselines = _load_remnant_baselines()
+        has_baseline = baseline_key in baselines
+        threshold = baselines[baseline_key] if has_baseline else THRESH_REST_BOUNDARY
+
+        if excess > threshold:
+            print(
+                f"  REST-BOUNDARY FAIL: {tag} "
+                f"— excess={excess:.2f} (threshold {threshold})"
+            )
+            fails += 1
+        else:
+            suffix = f" (baseline {threshold})" if has_baseline else ""
+            print(f"  REST-BOUNDARY PASS: {tag} — excess={excess:.2f}{suffix}")
+
+    return fails
+
+
+def verify_alpha_contour(room_id: str, hotspots: list[dict]) -> int:
+    """Detect interior alpha cliffs via gradient excess at the alpha contour.
+
+    Composites each rest layer onto the CURRENT clean plate, then
+    measures Sobel gradient magnitude along the alpha≈128 contour on the
+    composite, minus the same contour path energy on the original scene.
+
+    At natural SAM-silhouette boundaries the composite gradient tracks
+    the original scene's object boundary → excess near zero.  At
+    artificial boundaries (interior cliffs, alpha holes), the composite
+    has a gradient where the original is smooth → excess is elevated.
+
+    Contour is sampled at alpha > _ALPHA_CONTOUR_LEVEL (200),
+    deeper inside the mask where composite gradient tracks the
+    original more closely even in repair zones.
+
+    THRESH_ALPHA_CONTOUR is calibrated from (at level 200): old
+    rect-alpha crate rest 65.07 (FAIL), SAM-silhouette crate
+    -19.69 (PASS), interior-cliff fixture ~80 (FAIL).
+    """
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        return 0
+
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    orig = np.array(Image.open(orig_path).convert("RGB"))
+    if clean.shape != orig.shape:
+        return 0
+
+    from scipy.ndimage import binary_erosion, binary_dilation, sobel
+
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        rest_file = sp.get("rest")
+        rb = sp.get("restBbox")
+        if not rest_file or not rb:
+            continue
+
+        rest_path = SPRITES / rest_file
+        if not rest_path.exists():
+            continue
+
+        rest = np.array(Image.open(rest_path))
+        if rest.ndim != 3 or rest.shape[2] != 4:
+            continue
+
+        rx, ry, rw, rh = rb["x"], rb["y"], rb["w"], rb["h"]
+        h_scene, w_scene = clean.shape[:2]
+        if rest.shape[:2] != (rh, rw):
+            rest = np.array(
+                Image.fromarray(rest).resize((rw, rh), Image.Resampling.LANCZOS)
+            )
+
+        sy0, sy1 = max(0, ry), min(h_scene, ry + rh)
+        sx0, sx1 = max(0, rx), min(w_scene, rx + rw)
+        ry0, rx0 = sy0 - ry, sx0 - rx
+        crop_h, crop_w = sy1 - sy0, sx1 - sx0
+
+        rest_crop = rest[ry0:ry0 + crop_h, rx0:rx0 + crop_w]
+        a = rest_crop[:, :, 3:4].astype(np.float32) / 255.0
+
+        comp = (
+            clean[sy0:sy1, sx0:sx1].astype(np.float32) * (1 - a)
+            + rest_crop[:, :, :3].astype(np.float32) * a
+        )
+        comp = np.clip(comp, 0, 255).astype(np.uint8)
+
+        alpha_2d = rest_crop[:, :, 3]
+        mask = alpha_2d > _ALPHA_CONTOUR_LEVEL
+        eroded = binary_erosion(mask, iterations=1)
+        dilated = binary_dilation(mask, iterations=1)
+        contour = dilated & ~eroded
+        if contour.sum() < 10:
+            print(f"  ALPHA-CONTOUR PASS: {room_id}/{h['id']} — no contour")
+            continue
+
+        comp_gray = comp.astype(np.float32).mean(axis=-1)
+        orig_gray = orig[sy0:sy1, sx0:sx1].astype(np.float32).mean(axis=-1)
+
+        comp_gx = sobel(comp_gray, axis=1)
+        comp_gy = sobel(comp_gray, axis=0)
+        comp_grad = np.sqrt(comp_gx ** 2 + comp_gy ** 2)
+
+        orig_gx = sobel(orig_gray, axis=1)
+        orig_gy = sobel(orig_gray, axis=0)
+        orig_grad = np.sqrt(orig_gx ** 2 + orig_gy ** 2)
+
+        excess = float(comp_grad[contour].mean() - orig_grad[contour].mean())
+        tag = f"{room_id}/{h['id']}"
+
+        if excess > THRESH_ALPHA_CONTOUR:
+            print(
+                f"  ALPHA-CONTOUR FAIL: {tag} "
+                f"— excess={excess:.2f} (threshold {THRESH_ALPHA_CONTOUR})"
+            )
+            fails += 1
+        else:
+            print(f"  ALPHA-CONTOUR PASS: {tag} — excess={excess:.2f}")
+
+    return fails
 
 
 def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
@@ -1488,6 +1681,30 @@ def main() -> int:
         fails += rest_hole_fails
     else:
         print("Rest-layer holes: all rest composites match original")
+
+    # Rest-boundary seam: stale-lineage detection at rest-alpha contour
+    print(f"\n--- Rest-boundary seam ---")
+    rest_boundary_fails = 0
+    for room in m.get("escape", []):
+        rbf = verify_rest_boundary(room["id"], room.get("hotspots", []))
+        rest_boundary_fails += rbf
+    if rest_boundary_fails:
+        print(f"\n{rest_boundary_fails} rest-boundary failures (threshold {THRESH_REST_BOUNDARY})")
+        fails += rest_boundary_fails
+    else:
+        print("Rest-boundary seam: all rest layers match current plate")
+
+    # Alpha-contour seam: interior cliff / hole detection
+    print(f"\n--- Alpha-contour seam ---")
+    alpha_contour_fails = 0
+    for room in m.get("escape", []):
+        acf = verify_alpha_contour(room["id"], room.get("hotspots", []))
+        alpha_contour_fails += acf
+    if alpha_contour_fails:
+        print(f"\n{alpha_contour_fails} alpha-contour failures (threshold {THRESH_ALPHA_CONTOUR})")
+        fails += alpha_contour_fails
+    else:
+        print("Alpha-contour seam: all rest layers have natural contours")
 
     # D.3 Plate-drift check: outside the union of hotspot masks,
     # the clean plate must be pixel-identical to the original scene.
