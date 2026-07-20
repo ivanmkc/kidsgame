@@ -32,18 +32,5 @@
     },
     "reviewed_by": "team-lead",
     "date": "2026-07-19"
-  },
-  "rocketpad/crate.seam_energy": {
-    "baseline": 17.5,
-    "justification": "image-boundary clamp \u2014 crate bbox right edge at x+w=1280=GAME_W; content extends to screen edge (right-edge alpha 255.0 on last frame); seam energy 15.14 after content-derived bbox resize (was 15.95/13.92 on old bbox); 3-edge averaging persists because the right edge IS the screen boundary \u2014 no truncation, the game window is the natural crop",
-    "evidence": {
-      "pre_bbox_resize": 13.92,
-      "post_bbox_resize": 15.14,
-      "alpha_at_edges": "frame47: top=220.5, bottom=143.0, left=80.3, right=255.0",
-      "right_edge_position": "x+w=913+367=1280=GAME_W",
-      "mid_strip": "bbox_rocketpad_crate_mid.png"
-    },
-    "reviewed_by": "team-lead",
-    "date": "2026-07-19"
   }
 }
