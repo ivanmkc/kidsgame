@@ -76,6 +76,117 @@ def compute_scene_bbox(
     return {"x": 0, "y": 0, "w": before.shape[1], "h": before.shape[0]}
 
 
+def normalize_to_reference(
+    frame: np.ndarray,
+    ref: np.ndarray,
+    agree_thresh: int = 20,
+    gain_clip: tuple[float, float] = (0.85, 1.18),
+) -> np.ndarray:
+    """Correct global Veo tonal drift: per-channel gain matched on pixels
+    where frame and reference already roughly agree (background)."""
+    diff = np.abs(frame.astype(np.int16) - ref.astype(np.int16)).mean(axis=-1)
+    agree = diff < agree_thresh
+    if agree.sum() < 5000:
+        return frame
+    out = frame.astype(np.float32)
+    for ch in range(3):
+        f_med = float(np.median(frame[:, :, ch][agree]))
+        r_med = float(np.median(ref[:, :, ch][agree]))
+        if f_med < 1:
+            continue
+        gain = np.clip(r_med / f_med, *gain_clip)
+        out[:, :, ch] *= gain
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def compute_content_bbox(
+    frames_dir: Path,
+    before_img: np.ndarray,
+    after_img: np.ndarray,
+    old_bbox: dict[str, int],
+    frame_count: int,
+    rest_mask_scene: np.ndarray | None = None,
+    sibling_exclude: np.ndarray | None = None,
+    sibling_silhouettes: np.ndarray | None = None,
+    change_thresh: int = 90,
+    after_thresh: int = 60,
+    min_cc_area: int = 250,
+    pad: int = 8,
+    stabilize_thresh: int = 15,
+) -> dict[str, int]:
+    """True content-derived bbox measured on FULL-SCENE frames before any
+    crop: union of per-frame change extents (components intersecting the
+    seed region) + after-vs-before extents + rest silhouette + pad.
+
+    The seed is the old bbox plus the strong after-diff near it, so motion
+    that crosses the old bbox edge (a puppy walking out, a lid opening
+    upward) widens the bbox instead of being sliced. Sibling territory and
+    weak broad after-diff (chain-state regeneration drift) cannot seed —
+    that is what blew the toolbox bbox to 1073x634 on the first attempt."""
+    h_full, w_full = before_img.shape[:2]
+    seed = np.zeros((h_full, w_full), dtype=bool)
+    y0, x0 = old_bbox["y"], old_bbox["x"]
+    seed[y0:y0 + old_bbox["h"], x0:x0 + old_bbox["w"]] = True
+    if sibling_exclude is not None:
+        sib = sibling_exclude & ~seed
+    else:
+        sib = np.zeros((h_full, w_full), dtype=bool)
+
+    after_d = np.abs(after_img.astype(np.int16) - before_img.astype(np.int16)).sum(-1) > after_thresh
+    after_d = ndimage.binary_opening(after_d, iterations=3)
+    after_d &= ~sib
+    labels, num = ndimage.label(after_d)
+    after_keep = np.zeros_like(after_d)
+    for lbl in range(1, num + 1):
+        comp = labels == lbl
+        if comp.sum() >= min_cc_area and (comp & seed).any():
+            after_keep |= comp
+    seed |= after_keep
+
+    union = seed.copy()
+    if rest_mask_scene is not None:
+        union |= rest_mask_scene
+
+    # late frames belong to the tail-ease zone at runtime and Veo clip
+    # endings can diverge wholesale from the before scene — measure
+    # motion extents on the pre-tail frames only (the after-state's own
+    # extents are already in the seed)
+    for i in range(0, min(frame_count, 80), 2):
+        path = frames_dir / f"f_{i + 1:04d}.png"
+        if not path.exists():
+            continue
+        frame = np.array(Image.open(path).convert("RGB").resize((w_full, h_full), Image.LANCZOS))
+        stabilized, _, _ = stabilize_frame(
+            before_img, frame,
+            threshold=stabilize_thresh, min_area=50,
+            correct_shift=True, feather_px=1,
+        )
+        stabilized = normalize_to_reference(stabilized, before_img)
+        delta = np.abs(stabilized.astype(np.int16) - before_img.astype(np.int16)).sum(-1)
+        d = delta > change_thresh
+        d = ndimage.binary_opening(d, iterations=2)
+        # moving action content may cross sibling draw rects; only baked
+        # sibling objects (their silhouettes) are off-limits per frame
+        d &= ~(sibling_silhouettes if sibling_silhouettes is not None else sib)
+        labels, num = ndimage.label(d)
+        for lbl in range(1, num + 1):
+            comp = labels == lbl
+            if comp.sum() < min_cc_area or not (comp & seed).any():
+                continue
+            # growing past the old bbox needs strong evidence — residual
+            # drift components are mild, real motion content is not
+            if float(delta[comp].mean()) < 140:
+                comp = comp & seed
+            union |= comp
+
+    ys, xs = np.where(union)
+    x1 = max(0, int(xs.min()) - pad)
+    y1 = max(0, int(ys.min()) - pad)
+    x2 = min(w_full, int(xs.max()) + 1 + pad)
+    y2 = min(h_full, int(ys.max()) + 1 + pad)
+    return {"x": x1, "y": y1, "w": x2 - x1, "h": y2 - y1}
+
+
 def extract_frames(clip: Path, out_dir: Path, width: int = 1280, height: int = 720) -> int:
     """Extract all frames from a clip at the target resolution."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -97,6 +208,7 @@ def build_scene_mask(
     after: np.ndarray,
     bbox: dict[str, int],
     pad: int = 15,
+    keep_all_min: int | None = None,
 ) -> np.ndarray:
     """Build a boolean mask of the region where before and after scenes differ,
     constrained to the bbox neighborhood."""
@@ -117,8 +229,16 @@ def build_scene_mask(
 
     labels, num = ndimage.label(mask)
     if num > 0:
-        sizes = ndimage.sum(mask, labels, range(1, num + 1))
-        mask = labels == (int(np.argmax(sizes)) + 1)
+        if keep_all_min is not None:
+            sizes = ndimage.sum(mask, labels, range(1, num + 1))
+            keep = np.zeros_like(mask)
+            for lbl in range(1, num + 1):
+                if sizes[lbl - 1] >= keep_all_min:
+                    keep |= labels == lbl
+            mask = keep
+        else:
+            sizes = ndimage.sum(mask, labels, range(1, num + 1))
+            mask = labels == (int(np.argmax(sizes)) + 1)
 
     mask = ndimage.binary_dilation(mask, iterations=5)
     return mask & constraint
@@ -139,6 +259,11 @@ def extract_sprite_sheet(
     stabilize_thresh: int = 15,
     min_cc_area: int = 200,
     ease_frames: int = 22,
+    normalize: bool = False,
+    keep_all_components: bool = False,
+    core_filter: bool = True,
+    object_mask_scene: np.ndarray | None = None,
+    plate_img: np.ndarray | None = None,
 ) -> dict:
     """Full pipeline: extract, stabilize, matte, pack.
 
@@ -166,7 +291,10 @@ def extract_sprite_sheet(
         print(f"[{name}] {frame_count} frames extracted")
 
     print(f"[{name}] Building scene mask...")
-    scene_mask = build_scene_mask(before_img, after_img, bbox)
+    scene_mask = build_scene_mask(
+        before_img, after_img, bbox,
+        keep_all_min=150 if keep_all_components else None,
+    )
 
     core_y1 = bbox["y"] + bbox["h"] * 0.25
     core_y2 = bbox["y"] + bbox["h"] * 0.75
@@ -185,10 +313,37 @@ def extract_sprite_sheet(
             threshold=stabilize_thresh, min_area=50,
             correct_shift=True, feather_px=1,
         )
+        if normalize:
+            stabilized = normalize_to_reference(stabilized, before_img)
 
-        diff = np.abs(stabilized.astype(np.int16) - before_img.astype(np.int16))
-        diff_l1 = diff.sum(axis=-1)
-        change_mask = (diff_l1 > change_thresh) & scene_mask
+        if plate_img is not None:
+            # Key against the objectless plate: static object bodies key
+            # strongly every frame (diff-vs-before only sees motion, and
+            # with drift normalized away the body would vanish). Territory
+            # = change region + own silhouette + motion components that
+            # touch them, so re-render drift elsewhere stays out.
+            diff_plate = np.abs(stabilized.astype(np.int16) - plate_img.astype(np.int16)).sum(axis=-1)
+            strong = ndimage.binary_opening(diff_plate > change_thresh, iterations=2)
+            mask_plate = ndimage.binary_propagation(strong, mask=diff_plate > 30)
+
+            motion_l1 = np.abs(stabilized.astype(np.int16) - before_img.astype(np.int16)).sum(axis=-1)
+            motion = ndimage.binary_opening(motion_l1 > change_thresh, iterations=2)
+
+            t_base = scene_mask.copy()
+            if object_mask_scene is not None:
+                t_base |= ndimage.binary_dilation(object_mask_scene, iterations=3)
+            m_labels, m_num = ndimage.label(motion)
+            territory = t_base.copy()
+            for lbl in range(1, m_num + 1):
+                comp = m_labels == lbl
+                if comp.sum() >= min_cc_area and (comp & t_base).any():
+                    territory |= comp
+
+            change_mask = mask_plate & territory
+        else:
+            diff = np.abs(stabilized.astype(np.int16) - before_img.astype(np.int16))
+            diff_l1 = diff.sum(axis=-1)
+            change_mask = (diff_l1 > change_thresh) & scene_mask
 
         change_mask = ndimage.binary_opening(change_mask, iterations=2)
         change_mask = ndimage.binary_closing(change_mask, iterations=2)
@@ -200,7 +355,7 @@ def extract_sprite_sheet(
             ) - {0}
             sizes = ndimage.sum(change_mask, labeled, range(1, n + 1))
             for lbl in range(1, n + 1):
-                if lbl not in core_labels or sizes[lbl - 1] < min_cc_area:
+                if (core_filter and lbl not in core_labels) or sizes[lbl - 1] < min_cc_area:
                     change_mask[labeled == lbl] = False
 
         overlay = np.zeros((720, 1280, 4), dtype=np.uint8)
@@ -210,7 +365,8 @@ def extract_sprite_sheet(
         alpha_pil = Image.fromarray(overlay[:, :, 3])
         alpha_feathered = np.array(alpha_pil.filter(ImageFilter.GaussianBlur(radius=1)))
         overlay[:, :, 3] = np.maximum(overlay[:, :, 3], alpha_feathered)
-        overlay[:, :, 3][~scene_mask] = 0
+        if plate_img is None:
+            overlay[:, :, 3][~scene_mask] = 0
 
         crop = overlay[
             bbox["y"]:bbox["y"] + bbox["h"],
@@ -247,10 +403,35 @@ def extract_sprite_sheet(
     delta_l1 = np.abs(
         after_crop.astype(np.int16) - before_crop.astype(np.int16)
     ).sum(axis=-1)
-    # Cover ALL changed pixels — no scene-mask clipping for the after-state.
-    # Video frames need the scene mask to filter compression noise, but
-    # the after-state compares two clean PNGs where every delta is real.
-    after_mask = delta_l1 > 0
+    if plate_img is not None:
+        # After-state alpha keyed against the CLEAN PLATE: the runtime
+        # shows the plate wherever this layer is transparent, so the
+        # honest coverage is exactly where after differs from plate
+        # (object footprint in its after state — including parts SAM
+        # undersegments). A delta>0 rect vs beforeScene also captures
+        # chain-regeneration noise, and with overlapping bboxes the held
+        # stack then paints stale sibling states over neighbors (the
+        # all-held hazard). Sibling content picked up here is zeroed by
+        # subtract_sibling_masks afterwards.
+        plate_crop = plate_img[
+            bbox["y"]:bbox["y"] + bbox["h"],
+            bbox["x"]:bbox["x"] + bbox["w"],
+        ]
+        delta_plate = np.abs(
+            after_crop.astype(np.int16) - plate_crop.astype(np.int16)
+        ).sum(axis=-1)
+        strong = ndimage.binary_opening(delta_plate > 90, iterations=1)
+        weak = delta_plate > 24
+        after_mask = ndimage.binary_propagation(strong, mask=weak)
+        if object_mask_scene is not None:
+            after_mask |= object_mask_scene[
+                bbox["y"]:bbox["y"] + bbox["h"],
+                bbox["x"]:bbox["x"] + bbox["w"],
+            ]
+        after_mask = ndimage.binary_closing(after_mask, iterations=2)
+        after_mask = ndimage.binary_dilation(after_mask, iterations=2)
+    else:
+        after_mask = delta_l1 > 0
     after_overlay[:, :, 3] = np.where(after_mask, 255, 0).astype(np.uint8)
 
     alpha_pil = Image.fromarray(after_overlay[:, :, 3])
