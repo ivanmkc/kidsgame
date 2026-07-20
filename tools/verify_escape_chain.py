@@ -690,6 +690,73 @@ def verify_alpha_contour(room_id: str, hotspots: list[dict]) -> int:
 
 THRESH_ALL_HELD_OVERLAP = 150  # px of a later hotspot's opaque core over an earlier one's
 _SHARED_OBJECT = {("rocketpad", "panel"): "rocket", ("rocketpad", "slot"): "rocket"}
+_SAM_FOR_HOTSPOT = {("rocketpad", "panel"): "rocketpad_slot", ("rocketpad", "slot"): "rocketpad_slot"}
+
+THRESH_F0_SILHOUETTE = 0.85  # frame 0 must cover its own silhouette (current assets 0.91-1.00)
+THRESH_COVERAGE_DROP = 0.5   # max frame-to-frame opaque-coverage collapse (current max 0.26)
+
+
+def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
+    """Animation-extraction integrity, catastrophic classes:
+
+    - frame 0 must cover the hotspot's own silhouette (the object is
+      still at rest at tap time) — catches vanished bodies and large
+      holes at the tap transition;
+    - opaque coverage must not collapse between consecutive frames —
+      catches mid-animation vanishing and mass alpha loss.
+
+    Fine tears below these floors remain judge territory: without the
+    source clip the gate cannot tell a small tear from real content."""
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("sheet"):
+            continue
+        sheet_path = SPRITES / sp["sheet"]
+        sam_name = _SAM_FOR_HOTSPOT.get((room_id, h["id"]), f"{room_id}_{h['id']}")
+        sam_path = SAM_MASKS_DIR / f"{sam_name}.png"
+        if not sheet_path.exists():
+            continue
+        sheet = np.array(Image.open(sheet_path))
+        cols, fc = sp["cols"], sp["frameCount"]
+        rows_g = (fc + cols - 1) // cols
+        fh, fw = sheet.shape[0] // rows_g, sheet.shape[1] // cols
+        bb = sp["bbox"]
+        tag = f"{room_id}/{h['id']}"
+
+        covs = []
+        for i in range(fc):
+            r, c = i // cols, i % cols
+            covs.append(int((sheet[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw, 3] > 128).sum()))
+
+        if sam_path.exists():
+            sam = np.array(Image.open(sam_path).convert("L")) > 0
+            sam_c = sam[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]]
+            n_sam = int(sam_c.sum())
+            if n_sam > 500:
+                a0 = sheet[0:fh, 0:fw, 3] > 128
+                cov0 = float((a0 & sam_c).sum()) / n_sam
+                if cov0 < THRESH_F0_SILHOUETTE:
+                    print(f"  FRAME-BODY FAIL: {tag} — frame 0 covers {cov0:.2f} of silhouette "
+                          f"(threshold {THRESH_F0_SILHOUETTE})")
+                    fails += 1
+                else:
+                    print(f"  FRAME-BODY PASS: {tag} — frame 0 silhouette coverage {cov0:.2f}")
+
+        worst_drop, worst_at = 0.0, -1
+        floor = 0.02 * fh * fw
+        for i in range(1, fc):
+            if covs[i - 1] > floor:
+                drop = 1 - covs[i] / covs[i - 1]
+                if drop > worst_drop:
+                    worst_drop, worst_at = drop, i
+        if worst_drop > THRESH_COVERAGE_DROP:
+            print(f"  FRAME-DROP FAIL: {tag} — coverage collapses {worst_drop:.2f} "
+                  f"at frame {worst_at} (threshold {THRESH_COVERAGE_DROP})")
+            fails += 1
+        else:
+            print(f"  FRAME-DROP PASS: {tag} — worst frame-to-frame drop {worst_drop:.2f}")
+    return fails
 
 
 def verify_all_held(room_id: str, hotspots: list[dict]) -> int:
@@ -1807,6 +1874,17 @@ def main() -> int:
         fails += alpha_contour_fails
     else:
         print("Alpha-contour seam: all rest layers have natural contours")
+
+    # Frame integrity: extraction produced usable animation frames
+    print(f"\n--- Frame integrity ---")
+    frame_integrity_fails = 0
+    for room in m.get("escape", []):
+        frame_integrity_fails += verify_frame_integrity(room["id"], room.get("hotspots", []))
+    if frame_integrity_fails:
+        print(f"\n{frame_integrity_fails} frame-integrity failures")
+        fails += frame_integrity_fails
+    else:
+        print("Frame integrity: all sheets carry their bodies")
 
     # All-held stack: every hotspot used simultaneously is a real game
     # configuration and must be seam-free with no held-over-held painting

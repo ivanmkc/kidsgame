@@ -1243,3 +1243,55 @@ class TestRealAllHeld:
             for r in m.get("escape", [])
         )
         assert total == 0, f"All-held failures: {total}"
+
+
+# ===================================================================
+# Fixture: frame integrity — vanished bodies, mid-anim collapse
+# ===================================================================
+class TestFrameIntegrity:
+    def _room(self, tmp_path, blank_f0=False, blank_mid=False):
+        room = _build_room(tmp_path, scene_size=(200, 200), obj_size=(80, 80))
+        sp = room["hotspots"][0]["sprite"]
+        sheet_path = tmp_path / "public" / sp["sheet"]
+        sheet = np.array(Image.open(sheet_path))
+        cols, fc = sp["cols"], sp["frameCount"]
+        rows = (fc + cols - 1) // cols
+        fh, fw = sheet.shape[0] // rows, sheet.shape[1] // cols
+        if blank_f0:
+            sheet[0:fh, 0:fw, 3] = 0
+        if blank_mid:
+            i = fc // 2
+            r, c = i // cols, i % cols
+            sheet[r*fh:(r+1)*fh, c*fw:(c+1)*fw, 3] = 0
+        Image.fromarray(sheet).save(sheet_path)
+        manifest_path = tmp_path / "src" / "assets" / "manifest.json"
+        manifest_path.write_text(json.dumps({"escape": [room]}, indent=2))
+        return room
+
+    def test_blank_frame0_fails(self, tmp_path):
+        room = self._room(tmp_path, blank_f0=True)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_frame_integrity("testroom", room["hotspots"])
+        assert fails > 0, "empty frame 0 must fail frame-body coverage"
+
+    def test_midframe_collapse_fails(self, tmp_path):
+        room = self._room(tmp_path, blank_mid=True)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_frame_integrity("testroom", room["hotspots"])
+        assert fails > 0, "mid-animation coverage collapse must fail"
+
+    def test_intact_sheet_passes(self, tmp_path):
+        room = self._room(tmp_path)
+        with _apply_patches(tmp_path):
+            fails = vec.verify_frame_integrity("testroom", room["hotspots"])
+        assert fails == 0
+
+
+class TestRealFrameIntegrity:
+    def test_real_frame_integrity(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        total = sum(
+            vec.verify_frame_integrity(r["id"], r.get("hotspots", []))
+            for r in m.get("escape", [])
+        )
+        assert total == 0, f"Frame-integrity failures: {total}"
