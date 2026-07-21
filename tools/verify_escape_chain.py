@@ -696,7 +696,8 @@ _SHARED_OBJECT = {("rocketpad", "panel"): "rocket", ("rocketpad", "slot"): "rock
 _SAM_FOR_HOTSPOT = {("rocketpad", "panel"): "rocketpad_slot", ("rocketpad", "slot"): "rocketpad_slot"}
 
 THRESH_F0_SILHOUETTE = 0.85  # frame 0 must cover its own silhouette (current assets 0.91-1.00)
-THRESH_COVERAGE_DROP = 0.5   # max frame-to-frame opaque-coverage collapse (current max 0.26)
+THRESH_COVERAGE_DROP = 0.5   # max frame-to-frame opaque-coverage collapse
+THRESH_VANISH_RGB = 40       # lost-region RGB vs plate: below = source-content vanish
 
 
 def _scene_shape(sam_path) -> tuple[int, int]:
@@ -711,7 +712,13 @@ def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
       still at rest at tap time) — catches vanished bodies and large
       holes at the tap transition;
     - opaque coverage must not collapse between consecutive frames —
-      catches mid-animation vanishing and mass alpha loss.
+      catches mid-animation vanishing and mass alpha loss. A collapse is
+      excused when it is a SOURCE-CONTENT departure: if the afterScene
+      matches the plate over the lost region (the object is absent from
+      the final state there — net yank-away), the matte is following the
+      clip honestly. A dropout keeps failing: the object still occupies
+      that region in the afterScene. (Stored RGB under alpha=0 is NOT
+      usable: libwebp lossless discards it without exact=True.)
 
     Fine tears below these floors remain judge territory: without the
     source clip the gate cannot tell a small tear from real content."""
@@ -780,9 +787,33 @@ def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
                 if drop > worst_drop:
                     worst_drop, worst_at = drop, i
         if worst_drop > THRESH_COVERAGE_DROP:
-            print(f"  FRAME-DROP FAIL: {tag} — coverage collapses {worst_drop:.2f} "
-                  f"at frame {worst_at} (threshold {THRESH_COVERAGE_DROP})")
-            fails += 1
+            i = worst_at
+            ra, ca_ = (i - 1) // cols, (i - 1) % cols
+            rb_, cb_ = i // cols, i % cols
+            fa = sheet[ra * fh:(ra + 1) * fh, ca_ * fw:(ca_ + 1) * fw]
+            fb = sheet[rb_ * fh:(rb_ + 1) * fh, cb_ * fw:(cb_ + 1) * fw]
+            lost = (fa[:, :, 3] > 128) & (fb[:, :, 3] <= 128)
+            clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+            after_path = SCENES / sp["afterScene"]
+            vanish_rgb = 999.0
+            if lost.sum() > 0 and clean_path.exists() and after_path.exists():
+                plate = np.array(Image.open(clean_path).convert("RGB"))
+                after = np.array(Image.open(after_path).convert("RGB").resize(
+                    (plate.shape[1], plate.shape[0])))
+                pl = plate[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]]
+                af = after[bb["y"]:bb["y"] + bb["h"], bb["x"]:bb["x"] + bb["w"]]
+                d = np.abs(af.astype(np.int16) - pl.astype(np.int16)).sum(-1)
+                vanish_rgb = float(d[lost].mean())
+            if vanish_rgb < THRESH_VANISH_RGB:
+                print(f"  FRAME-DROP PASS: {tag} — collapse {worst_drop:.2f} at frame "
+                      f"{worst_at} is a source-content departure (afterScene matches "
+                      f"plate over lost region, mean {vanish_rgb:.0f} < {THRESH_VANISH_RGB})")
+            else:
+                print(f"  FRAME-DROP FAIL: {tag} — coverage collapses {worst_drop:.2f} "
+                      f"at frame {worst_at} (threshold {THRESH_COVERAGE_DROP}; afterScene "
+                      f"vs plate over lost region mean {vanish_rgb:.0f} — object still "
+                      f"present in the final state)")
+                fails += 1
         else:
             print(f"  FRAME-DROP PASS: {tag} — worst frame-to-frame drop {worst_drop:.2f}")
     return fails
