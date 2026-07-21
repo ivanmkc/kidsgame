@@ -265,8 +265,16 @@ def extract_sprite_sheet(
     core_filter: bool = True,
     object_mask_scene: np.ndarray | None = None,
     plate_img: np.ndarray | None = None,
+    external_alpha_dir: Path | None = None,
 ) -> dict:
     """Full pipeline: extract, stabilize, matte, pack.
+
+    external_alpha_dir: per-frame object masks (mask_%04d.png, 255=object,
+    frame resolution, 0-based to match f_%04d.png 1-based frames) replace
+    the plate-difference keying as the alpha source — the SAM3.1 video
+    matte path (Exp C). Everything else (stabilization, normalization,
+    after-state overlay, tail ease, packing) is unchanged so matte source
+    is the only variable.
 
     Returns a dict with sprite metadata suitable for manifest.json.
     """
@@ -317,7 +325,18 @@ def extract_sprite_sheet(
         if normalize:
             stabilized = normalize_to_reference(stabilized, before_img)
 
-        if plate_img is not None:
+        if external_alpha_dir is not None:
+            mp = external_alpha_dir / f"mask_{i:04d}.png"
+            ext = np.array(Image.open(mp).convert("L")) if mp.exists() else np.zeros((720, 1280), np.uint8)
+            if ext.shape != (720, 1280):
+                ext = np.array(Image.fromarray(ext).resize((1280, 720), Image.NEAREST))
+            change_mask = ext > 127
+            # NOTE: no see-through punching. Plate-identical opaque pixels
+            # inside a SAM mask render pixel-equivalently to transparency
+            # (that is what plate-identical means), while per-frame
+            # punching flickers at the threshold — measured worse
+            # temporally on the pen pilot.
+        elif plate_img is not None:
             # Key against the objectless plate: static object bodies key
             # strongly every frame (diff-vs-before only sees motion, and
             # with drift normalized away the body would vanish). Territory
@@ -346,10 +365,15 @@ def extract_sprite_sheet(
             diff_l1 = diff.sum(axis=-1)
             change_mask = (diff_l1 > change_thresh) & scene_mask
 
-        change_mask = ndimage.binary_opening(change_mask, iterations=2)
-        change_mask = ndimage.binary_closing(change_mask, iterations=2)
+        # morphology + component filters de-noise the diff-key; SAM masks
+        # are clean instance masks and thin structures must survive
+        if external_alpha_dir is None:
+            change_mask = ndimage.binary_opening(change_mask, iterations=2)
+            change_mask = ndimage.binary_closing(change_mask, iterations=2)
 
         labeled, n = ndimage.label(change_mask)
+        if external_alpha_dir is not None:
+            n = 0
         if n > 0:
             core_labels = set(
                 labeled[int(core_y1):int(core_y2), int(core_x1):int(core_x2)].flatten()

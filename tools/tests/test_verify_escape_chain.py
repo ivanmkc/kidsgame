@@ -280,6 +280,47 @@ class TestItemBboxOutside:
 
 
 # ===================================================================
+# Fixture (c2): frame-drop vanish discrimination
+# ===================================================================
+class TestFrameDropVanish:
+    """A coverage collapse is excused iff the lost region's RGB went
+    plate-like (source-content vanish); a dropout with the object still
+    visible in RGB keeps failing."""
+
+    def _room_with_drop(self, tmp_path, after_color):
+        room = _build_room(tmp_path, frame_count=8, cols=4)
+        sp = room["hotspots"][0]["sprite"]
+        _save_rgb(tmp_path / "assets" / "game" / sp["afterScene"], SCENE_W, SCENE_H, after_color)
+        sheet_p = tmp_path / "public" / sp["sheet"]
+        im = Image.open(sheet_p)
+        cols, fc = sp["cols"], sp["frameCount"]
+        rows = (fc + cols - 1) // cols
+        fw, fh = im.width // cols, im.height // rows
+        arr = np.zeros((im.height, im.width, 4), dtype=np.uint8)
+        for i in range(fc):
+            r, c = divmod(i, cols)
+            blk = arr[r * fh:(r + 1) * fh, c * fw:(c + 1) * fw]
+            if i < 4:
+                blk[:, :, :3] = (200, 50, 50)
+                blk[:, :, 3] = 255
+            else:
+                blk[:, :, 3] = 0
+        Image.fromarray(arr, "RGBA").save(sheet_p)
+        return room
+
+    def test_vanish_vs_dropout(self, tmp_path):
+        room_v = self._room_with_drop(tmp_path, (80, 80, 80))   # plate color -> vanish
+        with _apply_patches(tmp_path):
+            fails_vanish = vec.verify_frame_integrity("testroom", room_v["hotspots"])
+        room_d = self._room_with_drop(tmp_path, (200, 50, 50))  # object color -> dropout
+        with _apply_patches(tmp_path):
+            fails_dropout = vec.verify_frame_integrity("testroom", room_d["hotspots"])
+        assert fails_dropout == fails_vanish + 1, (
+            f"vanish={fails_vanish} dropout={fails_dropout}: the vanish branch "
+            f"must excuse exactly the FRAME-DROP failure")
+
+
+# ===================================================================
 # Fixture (c): non-converging tail
 # ===================================================================
 class TestNonConvergingTail:
