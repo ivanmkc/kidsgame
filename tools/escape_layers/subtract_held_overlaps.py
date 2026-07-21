@@ -17,6 +17,8 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent.parent
 SPRITES = ROOT / "public"
 SHARED_OBJECT = {("rocketpad", "panel"): "rocket", ("rocketpad", "slot"): "rocket"}
+# Verified sheets that must never be rewritten (same set as reextract_room)
+FROZEN = {("rocketpad", "toolbox"), ("dragoncave", "dragon")}
 
 
 def last_frame_view(sheet: np.ndarray, sp: dict, back: int = 0) -> np.ndarray:
@@ -35,6 +37,7 @@ def process_room(room: dict) -> None:
     for h in entries:
         sp = h["sprite"]
         path = SPRITES / sp["sheet"]
+        frozen = (room_id, h["id"]) in FROZEN
         sheet = np.array(Image.open(path))
         bb = sp["bbox"]
         lf = last_frame_view(sheet, sp)
@@ -54,7 +57,9 @@ def process_room(room: dict) -> None:
                 sel = hit_scene & (fr[:, :, 3] > 0)
                 fr[:, :, 3][sel] = 0
                 zeroed += int(sel.sum())
-        if zeroed:
+        if zeroed and frozen:
+            print(f"{room_id}/{h['id']}: FROZEN — would zero {zeroed} px, NOT saving")
+        elif zeroed:
             Image.fromarray(sheet).save(path, "webp", lossless=True, method=6)
             print(f"{room_id}/{h['id']}: zeroed {zeroed} px of held-over-held")
         cores.append((h["id"], core))

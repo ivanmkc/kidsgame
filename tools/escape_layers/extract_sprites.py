@@ -33,7 +33,6 @@ Or use extract_all() programmatically for batch processing.
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -392,10 +391,6 @@ def extract_sprite_sheet(
         bbox["x"]:bbox["x"] + bbox["w"],
     ]
     after_crop = after_img[
-        bbox["y"]:bbox["y"] + bbox["h"],
-        bbox["x"]:bbox["x"] + bbox["w"],
-    ]
-    scene_mask_crop = scene_mask[
         bbox["y"]:bbox["y"] + bbox["h"],
         bbox["x"]:bbox["x"] + bbox["w"],
     ]
