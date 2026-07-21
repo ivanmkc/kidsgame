@@ -241,11 +241,27 @@ def _patch_paths(tmp_path: Path):
 # ===================================================================
 class TestBlankLastFrame:
     def test_blank_last_frame_fails_sheet_consistency(self, tmp_path):
+        """Blank held frame while the afterScene still SHOWS the object at
+        the bbox = a genuine dropout; the departed-object excuse must not
+        fire (it only applies when the after state is plate-like there)."""
         room = _build_room(tmp_path, last_alpha=0)
         sp = room["hotspots"][0]["sprite"]
+        _save_rgb(tmp_path / "assets" / "game" / sp["afterScene"],
+                  SCENE_W, SCENE_H, (200, 50, 50))  # object-colored after
         with _apply_patches(tmp_path):
             result, _ = vec.check_sheet_consistency(sp)
         assert "FAIL" in result, f"Expected FAIL for blank last frame, got: {result}"
+
+    def test_blank_last_frame_excused_when_departed(self, tmp_path):
+        """Same blank held frame, but the afterScene matches the plate at
+        the bbox (object left the scene) -> faithful low coverage, PASS."""
+        room = _build_room(tmp_path, last_alpha=0)
+        sp = room["hotspots"][0]["sprite"]
+        _save_rgb(tmp_path / "assets" / "game" / sp["afterScene"],
+                  SCENE_W, SCENE_H, (80, 80, 80))  # plate-colored after
+        with _apply_patches(tmp_path):
+            result, _ = vec.check_sheet_consistency(sp)
+        assert result == "PASS", f"Expected departed-object PASS, got: {result}"
 
     def test_nonblank_last_frame_passes(self, tmp_path):
         room = _build_room(tmp_path, last_alpha=255)
