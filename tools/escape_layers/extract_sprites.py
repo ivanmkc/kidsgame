@@ -500,23 +500,39 @@ def extract_sprite_sheet(
         after_mask = ndimage.binary_dilation(after_mask, iterations=2)
         if external_alpha_dir is not None and plate_img is not None:
             # held frames draw forever: after-scene drift baked beyond the
-            # object hard-cuts at the bbox edge (chest rug seam). Punch the
-            # after overlay with the same plate-close, size-gated test as
-            # the raw frames: plate-close (<60 L1) regions >=200 px go
-            # transparent; genuinely visible after content (items, opened
-            # lids, sand marks) survives regardless of SAM end pose.
+            # object hard-cuts at bbox edges (chest rug seam) — but any
+            # BINARY cut on smoothly-varying drift creates visible interior
+            # boundaries (walk regression: rectangular sand patches, a seam
+            # through the puppy). Fractional alpha instead: the SAM end-pose
+            # object stays fully opaque; surrounding after-drift FADES with
+            # drift magnitude (smoothstep 25..90 L1) — no boundary anywhere.
             plate_crop2 = plate_img[
                 bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
-            close_a = np.abs(after_crop.astype(np.int16)
-                             - plate_crop2.astype(np.int16)).sum(axis=-1) < 60
-            lab_a, na = ndimage.label(close_a)
-            if na:
-                sizes_a = ndimage.sum(close_a, lab_a, range(1, na + 1))
-                big_a = np.isin(lab_a, [k + 1 for k, sz in enumerate(sizes_a) if sz >= 200])
-                after_mask &= ~big_a
+            drift = np.abs(after_crop.astype(np.int16)
+                           - plate_crop2.astype(np.int16)).sum(axis=-1).astype(np.float32)
+            t = np.clip((drift - 25.0) / (90.0 - 25.0), 0.0, 1.0)
+            t = t * t * (3 - 2 * t)
+            soft = (t * 255.0).astype(np.uint8)
+            lp = sorted(external_alpha_dir.glob("mask_*.png"))
+            endc = None
+            if lp:
+                endm = np.array(Image.open(lp[-1]).convert("L"))
+                if endm.shape != (720, 1280):
+                    endm = np.array(Image.fromarray(endm).resize((1280, 720), Image.NEAREST))
+                endc = ndimage.binary_dilation(endm > 127, iterations=3)[
+                    bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
+            frac_alpha = np.where(after_mask, soft, 0).astype(np.uint8)
+            if endc is not None:
+                frac_alpha = np.where(endc & after_mask, 255, frac_alpha)
+            _external_after_alpha = frac_alpha
+        else:
+            _external_after_alpha = None
     else:
         after_mask = delta_l1 > 0
-    after_overlay[:, :, 3] = np.where(after_mask, 255, 0).astype(np.uint8)
+    if _external_after_alpha is not None:
+        after_overlay[:, :, 3] = _external_after_alpha
+    else:
+        after_overlay[:, :, 3] = np.where(after_mask, 255, 0).astype(np.uint8)
 
     alpha_pil = Image.fromarray(after_overlay[:, :, 3])
     alpha_f = np.array(alpha_pil.filter(ImageFilter.GaussianBlur(radius=1)))
