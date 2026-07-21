@@ -313,6 +313,7 @@ def extract_sprite_sheet(
     print(f"[{name}] Processing {frame_count} frames...")
     overlays: list[np.ndarray] = []
     coverages: list[float] = []
+    plate_close_frames: list[np.ndarray] = []
 
     for i in range(frame_count):
         path = frames_dir / f"f_{i + 1:04d}.png"
@@ -331,11 +332,9 @@ def extract_sprite_sheet(
             if ext.shape != (720, 1280):
                 ext = np.array(Image.fromarray(ext).resize((1280, 720), Image.NEAREST))
             change_mask = ext > 127
-            # NOTE: no see-through punching. Plate-identical opaque pixels
-            # inside a SAM mask render pixel-equivalently to transparency
-            # (that is what plate-identical means), while per-frame
-            # punching flickers at the threshold — measured worse
-            # temporally on the pen pilot.
+            if plate_img is not None:
+                plate_close_frames.append(
+                    np.abs(stabilized.astype(np.int16) - plate_img.astype(np.int16)).sum(axis=-1) < 60)
         elif plate_img is not None:
             # Key against the objectless plate: static object bodies key
             # strongly every frame (diff-vs-before only sees motion, and
@@ -403,6 +402,37 @@ def extract_sprite_sheet(
 
         if i % 24 == 0 or i == frame_count - 1:
             print(f"[{name}]   frame {i:3d}: coverage={coverage:.1f}%")
+
+    if external_alpha_dir is not None and plate_close_frames:
+        # Temporally-stable, size-gated see-through punch: a covered pixel
+        # goes transparent only if it is plate-close (<60 L1) across a
+        # 5-frame window (no per-frame threshold flicker) AND part of a
+        # >=200px plate-close component (small wood-tone speckles that
+        # caused the diff-key's pinholes stay opaque). Restores
+        # decomposition purity where SAM covered see-through gaps with
+        # clip-toned background — the visible warm wash / bbox seams.
+        n = len(plate_close_frames)
+        punched_total = 0
+        stable = []
+        for i in range(n):
+            j0, j1 = max(0, i - 2), min(n, i + 3)
+            s = plate_close_frames[j0]
+            for j in range(j0 + 1, j1):
+                s = s & plate_close_frames[j]
+            stable.append(s)
+        for i in range(n):
+            s = stable[i][bbox["y"]:bbox["y"] + bbox["h"],
+                          bbox["x"]:bbox["x"] + bbox["w"]]
+            lab, nn = ndimage.label(s)
+            if nn:
+                sizes = ndimage.sum(s, lab, range(1, nn + 1))
+                big = np.isin(lab, [k + 1 for k, sz in enumerate(sizes) if sz >= 200])
+            else:
+                big = np.zeros_like(s)
+            sel = big & (overlays[i][:, :, 3] > 0)
+            overlays[i][:, :, 3][sel] = 0
+            punched_total += int(sel.sum())
+        print(f"[{name}] stable see-through punch: {punched_total} px across {n} frames")
 
     step = source_fps // target_fps
     subsampled = [overlays[i] for i in range(0, frame_count, step)]
