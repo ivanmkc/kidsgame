@@ -156,7 +156,7 @@ def _gemini_plate_check(
         for model in _JUDGE_MODELS:
             try:
                 resp = client.models.generate_content(model=model, contents=parts)
-                answer = resp.text.strip().upper()
+                answer = (resp.text or "").strip().upper()
                 if "YES" in answer:
                     votes.append(True)
                 elif "NO" in answer:
@@ -735,12 +735,14 @@ def verify_frame_integrity(room_id: str, hotspots: list[dict]) -> int:
             lp = SPRITES / lsp["rest"]
             if not lp.exists():
                 continue
-            lr = np.array(Image.open(lp))
+            lr = np.array(Image.open(lp).convert("RGBA"))
             lb = lsp["restBbox"]
             if lr.shape[:2] != (lb["h"], lb["w"]):
                 lr = np.array(Image.fromarray(lr).resize((lb["w"], lb["h"]), Image.LANCZOS))
             if later_rest is None:
-                later_rest = np.zeros(_scene_shape(sam_path), dtype=bool)
+                later_rest = np.zeros(
+                    _scene_shape(sam_path) if sam_path.exists() else (720, 1280),
+                    dtype=bool)
             later_rest[lb["y"]:lb["y"] + lb["h"], lb["x"]:lb["x"] + lb["w"]] |= lr[:, :, 3] > 128
         sheet = np.array(Image.open(sheet_path))
         cols, fc = sp["cols"], sp["frameCount"]
@@ -1060,7 +1062,7 @@ def verify_no_doubles(room_id: str, hotspots: list[dict]) -> int:
                         resp = client.models.generate_content(
                             model=model, contents=parts
                         )
-                        answer = resp.text.strip().upper()
+                        answer = (resp.text or "").strip().upper()
                         if "YES" in answer:
                             votes.append(True)
                         elif "NO" in answer:
@@ -1818,7 +1820,7 @@ def main() -> int:
     # sprite mattes (coupling invariant violation).  Hotspots with a
     # .seam_energy baseline use that limit instead of the absolute threshold.
     seam_baselines = _load_remnant_baselines()
-    print(f"\n--- Bbox seam energy ---")
+    print("\n--- Bbox seam energy ---")
     seam_fails = 0
     for room_id, hotspot_id, sprite in entries:
         tag = f"{room_id}/{hotspot_id}"
@@ -1844,7 +1846,7 @@ def main() -> int:
 
     # Item-layer composite check: verify item layers composite correctly
     # against the afterScene and that itemBbox fits within the game frame.
-    print(f"\n--- Item layers ---")
+    print("\n--- Item layers ---")
     item_fails = 0
     for room in m.get("escape", []):
         ilf = verify_item_layers(room["id"], room.get("hotspots", []))
@@ -1856,7 +1858,7 @@ def main() -> int:
         print("Item layers: all composites verified")
 
     # Sibling isolation: no baked sibling content in sprite sheets
-    print(f"\n--- Sibling isolation ---")
+    print("\n--- Sibling isolation ---")
     sib_fails = 0
     for room in m.get("escape", []):
         sf = verify_sibling_isolation(room["id"], room.get("hotspots", []))
@@ -1868,7 +1870,7 @@ def main() -> int:
         print("Sibling isolation: no baked sibling content in sheets")
 
     # Manifest integrity: rest layers must have matching sprite sheets
-    print(f"\n--- Rest/sheet integrity ---")
+    print("\n--- Rest/sheet integrity ---")
     rest_sheet_fails = 0
     for room in m.get("escape", []):
         rsf = verify_rest_sheet_integrity(room["id"], room.get("hotspots", []))
@@ -1880,7 +1882,7 @@ def main() -> int:
         print("Rest/sheet integrity: all rest layers have matching sheets")
 
     # Rest-layer hole check: plate + rest must reproduce the original
-    print(f"\n--- Rest-layer holes ---")
+    print("\n--- Rest-layer holes ---")
     rest_hole_fails = 0
     for room in m.get("escape", []):
         rhf = verify_rest_plate_match(room["id"], room.get("hotspots", []))
@@ -1892,7 +1894,7 @@ def main() -> int:
         print("Rest-layer holes: all rest composites match original")
 
     # Rest-boundary seam: stale-lineage detection at rest-alpha contour
-    print(f"\n--- Rest-boundary seam ---")
+    print("\n--- Rest-boundary seam ---")
     rest_boundary_fails = 0
     for room in m.get("escape", []):
         rbf = verify_rest_boundary(room["id"], room.get("hotspots", []))
@@ -1904,7 +1906,7 @@ def main() -> int:
         print("Rest-boundary seam: all rest layers match current plate")
 
     # Alpha-contour seam: interior cliff / hole detection
-    print(f"\n--- Alpha-contour seam ---")
+    print("\n--- Alpha-contour seam ---")
     alpha_contour_fails = 0
     for room in m.get("escape", []):
         acf = verify_alpha_contour(room["id"], room.get("hotspots", []))
@@ -1916,7 +1918,7 @@ def main() -> int:
         print("Alpha-contour seam: all rest layers have natural contours")
 
     # Frame integrity: extraction produced usable animation frames
-    print(f"\n--- Frame integrity ---")
+    print("\n--- Frame integrity ---")
     frame_integrity_fails = 0
     for room in m.get("escape", []):
         frame_integrity_fails += verify_frame_integrity(room["id"], room.get("hotspots", []))
@@ -1928,7 +1930,7 @@ def main() -> int:
 
     # All-held stack: every hotspot used simultaneously is a real game
     # configuration and must be seam-free with no held-over-held painting
-    print(f"\n--- All-held stack ---")
+    print("\n--- All-held stack ---")
     all_held_fails = 0
     for room in m.get("escape", []):
         all_held_fails += verify_all_held(room["id"], room.get("hotspots", []))
@@ -1940,7 +1942,7 @@ def main() -> int:
 
     # D.3 Plate-drift check: outside the union of hotspot masks,
     # the clean plate must be pixel-identical to the original scene.
-    print(f"\n--- Plate drift (D.3) ---")
+    print("\n--- Plate drift (D.3) ---")
     drift_fails = 0
     for room in m.get("escape", []):
         df = verify_plate_drift(room["id"], room.get("hotspots", []))
@@ -1955,7 +1957,7 @@ def main() -> int:
     # Gemini).  Check region = SAM mask ∩ rest-layer opaque pixels — the
     # object's own silhouette, excluding anti-aliased edges and mesh holes.
     # HARD FAIL — blocks the gate.
-    print(f"\n--- Plate remnants (D.1-PRE, alpha-core) ---")
+    print("\n--- Plate remnants (D.1-PRE, alpha-core) ---")
     remnant_fails = 0
     for room in m.get("escape", []):
         rf = verify_plate_remnants(room["id"], room.get("hotspots", []))
@@ -1967,7 +1969,7 @@ def main() -> int:
         print("Plate remnants: all alpha-core regions verified clean")
 
     # D.1 Plate-emptiness check: Gemini verifies no object remnants in clean plates
-    print(f"\n--- Plate emptiness (D.1) ---")
+    print("\n--- Plate emptiness (D.1) ---")
     print(f"{'hotspot':<36} {'result':>20}")
     print("-" * 60)
     plate_fails = 0
@@ -1982,7 +1984,7 @@ def main() -> int:
 
     # D.2 No-doubles check: Gemini verifies animated object doesn't appear
     # twice in composited mid-animation frames.
-    print(f"\n--- No doubles (D.2) ---")
+    print("\n--- No doubles (D.2) ---")
     doubles_fails = 0
     for room in m.get("escape", []):
         ndf = verify_no_doubles(room["id"], room.get("hotspots", []))
