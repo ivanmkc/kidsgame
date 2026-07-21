@@ -1430,6 +1430,21 @@ def check_sheet_consistency(sprite: dict) -> tuple[str, int]:
                        last_col * frame_w:(last_col + 1) * frame_w]
     last_alpha = float(last_frame[:, :, 3].astype(bool).mean()) * 100
     if last_alpha < THRESH_COVERAGE_MIN:
+        # departed-object excuse: when the after scene itself has (almost)
+        # no non-plate content in the bbox (net yanked away, only the fish
+        # remains), a low held coverage is faithful, not a vanished body.
+        after_p = SCENES / sprite.get("afterScene", "_missing_")
+        rid = Path(sprite.get("sheet", "x/x")).stem.split("_")[0]
+        clean_p = SCENES / "escape" / f"{rid}_clean.png"
+        if after_p.exists() and clean_p.exists() and bw > 0:
+            after = np.array(Image.open(after_p).convert("RGB").resize((1280, 720)))
+            plate = np.array(Image.open(clean_p).convert("RGB"))
+            y, x = bbox["y"], bbox["x"]
+            af = after[y:y + bh, x:x + bw].astype(np.int16)
+            pl = plate[y:y + bh, x:x + bw].astype(np.int16)
+            nonplate = float((np.abs(af - pl).sum(-1) > 60).mean()) * 100
+            if nonplate < THRESH_COVERAGE_MIN:
+                return "PASS", 0
         return f"FAIL: last-frame coverage {last_alpha:.1f}% < {THRESH_COVERAGE_MIN}%", 0
 
     return "PASS", 0

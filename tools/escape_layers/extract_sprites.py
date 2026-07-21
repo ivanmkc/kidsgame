@@ -498,6 +498,22 @@ def extract_sprite_sheet(
             ]
         after_mask = ndimage.binary_closing(after_mask, iterations=2)
         after_mask = ndimage.binary_dilation(after_mask, iterations=2)
+        if external_alpha_dir is not None and plate_img is not None:
+            # held frames draw forever: after-scene drift baked beyond the
+            # object hard-cuts at the bbox edge (chest rug seam). Punch the
+            # after overlay with the same plate-close, size-gated test as
+            # the raw frames: plate-close (<60 L1) regions >=200 px go
+            # transparent; genuinely visible after content (items, opened
+            # lids, sand marks) survives regardless of SAM end pose.
+            plate_crop2 = plate_img[
+                bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
+            close_a = np.abs(after_crop.astype(np.int16)
+                             - plate_crop2.astype(np.int16)).sum(axis=-1) < 60
+            lab_a, na = ndimage.label(close_a)
+            if na:
+                sizes_a = ndimage.sum(close_a, lab_a, range(1, na + 1))
+                big_a = np.isin(lab_a, [k + 1 for k, sz in enumerate(sizes_a) if sz >= 200])
+                after_mask &= ~big_a
     else:
         after_mask = delta_l1 > 0
     after_overlay[:, :, 3] = np.where(after_mask, 255, 0).astype(np.uint8)
