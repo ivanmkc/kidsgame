@@ -46,6 +46,11 @@ from tools.stabilize import stabilize_frame  # type: ignore[import-untyped]
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 
+# Held-frame drift fade window (fractional after-alpha): drift below LO is
+# transparent, above HI fully opaque, smoothstep between. E4 sweeps HI.
+AFTER_FADE_LO = 25.0
+AFTER_FADE_HI = 90.0
+
 
 def compute_scene_bbox(
     before: np.ndarray,
@@ -499,6 +504,16 @@ def extract_sprite_sheet(
         after_mask = ndimage.binary_closing(after_mask, iterations=2)
         after_mask = ndimage.binary_dilation(after_mask, iterations=2)
         if external_alpha_dir is not None and plate_img is not None:
+            # thin-structure strand rescue: the after-mask morphology
+            # (opening) erodes 2-3px strands (net mesh tails) exactly like
+            # it would erode fence pickets on raw frames — re-admit strong
+            # drift adjacent to the mask body so thin content survives
+            # without letting far-field noise in.
+            plate_crop_sr = plate_img[
+                bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
+            strong_sr = np.abs(after_crop.astype(np.int16)
+                               - plate_crop_sr.astype(np.int16)).sum(axis=-1) > 90
+            after_mask |= strong_sr & ndimage.binary_dilation(after_mask, iterations=8)
             # held frames draw forever: after-scene drift baked beyond the
             # object hard-cuts at bbox edges (chest rug seam) — but any
             # BINARY cut on smoothly-varying drift creates visible interior
@@ -510,7 +525,7 @@ def extract_sprite_sheet(
                 bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
             drift = np.abs(after_crop.astype(np.int16)
                            - plate_crop2.astype(np.int16)).sum(axis=-1).astype(np.float32)
-            t = np.clip((drift - 25.0) / (90.0 - 25.0), 0.0, 1.0)
+            t = np.clip((drift - AFTER_FADE_LO) / (AFTER_FADE_HI - AFTER_FADE_LO), 0.0, 1.0)
             t = t * t * (3 - 2 * t)
             soft = (t * 255.0).astype(np.uint8)
             lp = sorted(external_alpha_dir.glob("mask_*.png"))
