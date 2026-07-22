@@ -44,7 +44,8 @@ THRESH_COVERAGE_MIN = 5.0
 # most this residual one frame before the anim->held handoff.
 TAIL_WINDOW = 4
 THRESH_TAIL_LAST = 8
-THRESH_HELD_VS_AFTER = 5  # held frame (last-frame composite) must match afterScene crop
+THRESH_HELD_VS_AFTER = 5
+THRESH_REST_IMPURITY = 15.0
 
 THRESH_DRIFT_MEAN = 1.0  # outside-mask mean pixel diff ceiling
 THRESH_ITEM_COMP_MEAN = 10  # item composite vs afterScene — raise only with team-lead sign-off
@@ -1286,6 +1287,30 @@ def verify_sprite(room_id: str, hotspot_id: str, sprite: dict) -> tuple[str, flo
     return "PASS" if ok else "FAIL", mean_d, frac30, coverage
 
 
+def verify_rest_purity(room_id: str, sprite: dict) -> tuple[str, float]:
+    """A rest layer must contain its OBJECT, not a background slab: the
+    fraction of opaque pixels that are plate-identical (<25 L1) must stay
+    under THRESH_REST_IMPURITY. Moderate plate-identical fringes are
+    tolerated (they compensate plate-inpaint halos); majority-background
+    rests are a decomposition failure."""
+    if not sprite.get("rest") or not sprite.get("restBbox"):
+        return "SKIP", 0.0
+    rp = SPRITES / sprite["rest"]
+    cp = SCENES / "escape" / f"{room_id}_clean.png"
+    if not rp.exists() or not cp.exists():
+        return "SKIP", 0.0
+    lay = np.array(Image.open(rp).convert("RGBA"))
+    rb = sprite["restBbox"]
+    if lay.shape[:2] != (rb["h"], rb["w"]):
+        lay = np.array(Image.fromarray(lay).resize((rb["w"], rb["h"])))
+    plate = np.array(Image.open(cp).convert("RGB"))
+    pl = plate[rb["y"]:rb["y"] + rb["h"], rb["x"]:rb["x"] + rb["w"]]
+    dd = np.abs(lay[:, :, :3].astype(np.int16) - pl.astype(np.int16)).sum(-1)
+    op = lay[:, :, 3] > 128
+    imp = float((op & (dd < 25)).sum()) / max(int(op.sum()), 1) * 100
+    return ("FAIL" if imp > THRESH_REST_IMPURITY else "PASS"), imp
+
+
 def verify_tail_convergence(
     room_id: str, hotspot_id: str, sprite: dict
 ) -> tuple[str, float, float, float]:
@@ -1845,6 +1870,25 @@ def main() -> int:
         fails += tail_fails
     else:
         print(f"Tail convergence: all {len(entries)} OK")
+
+    # Rest-purity check (E3): a rest layer must be its object, not a
+    # background slab (the panel 82% case).
+    # panel rest is a known slab (82%) — needs SAM rebuild (GPU); warn, don't gate
+    REST_PURITY_KNOWN_SLABS = {("rocketpad", "panel")}
+    print()
+    rest_fails = 0
+    for room_id2, hotspot_id2, sprite2 in entries:
+        result2, imp = verify_rest_purity(room_id2, sprite2)
+        tag2 = f"{room_id2}/{hotspot_id2}"
+        if result2 == "FAIL":
+            if (room_id2, hotspot_id2) in REST_PURITY_KNOWN_SLABS:
+                print(f"  REST-PURITY WARN: {tag2} — {imp:.1f}% slab (known, needs rebuild)")
+            else:
+                print(f"  REST-PURITY FAIL: {tag2} — {imp:.1f}% of opaque rest is plate-identical (max {THRESH_REST_IMPURITY}%)")
+                rest_fails += 1
+        elif result2 == "PASS":
+            print(f"  REST-PURITY PASS: {tag2} — impurity {imp:.1f}%")
+    fails += rest_fails
 
     # Sheet consistency check
     print()

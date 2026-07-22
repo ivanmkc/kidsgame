@@ -296,6 +296,30 @@ class TestItemBboxOutside:
 
 
 # ===================================================================
+# Fixture (c3): rest-layer purity
+# ===================================================================
+class TestRestPurity:
+    def test_background_slab_rest_fails(self, tmp_path):
+        """Rest painted plate-colored across its full rect = background slab."""
+        room = _build_room(tmp_path)
+        sp = room["hotspots"][0]["sprite"]
+        rb = sp["restBbox"]
+        _save_rgba(tmp_path / "public" / sp["rest"], rb["w"], rb["h"], (80, 80, 80), 255)
+        with _apply_patches(tmp_path):
+            result, imp = vec.verify_rest_purity("testroom", sp)
+        assert result == "FAIL" and imp > 90, f"{result} {imp}"
+
+    def test_object_rest_passes(self, tmp_path):
+        room = _build_room(tmp_path)
+        sp = room["hotspots"][0]["sprite"]
+        rb = sp["restBbox"]
+        _save_rgba(tmp_path / "public" / sp["rest"], rb["w"], rb["h"], (200, 50, 50), 255)
+        with _apply_patches(tmp_path):
+            result, imp = vec.verify_rest_purity("testroom", sp)
+        assert result == "PASS" and imp < 5, f"{result} {imp}"
+
+
+# ===================================================================
 # Fixture (c2): frame-drop vanish discrimination
 # ===================================================================
 class TestFrameDropVanish:
