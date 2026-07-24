@@ -60,8 +60,12 @@ THRESH_REST_BOUNDARY = 8.0  # rest-boundary seam: gradient energy at rest-alpha 
 
 THRESH_INFILL_SEAM = 12.0  # max gradient energy at object-mask boundary in clean plate
 THRESH_INFILL_COLOR_DIFF = 20.0  # max mean L1 color diff between infill interior and surrounding plate
+THRESH_INFILL_PATCH_SEAM = 35.0  # p95 of 32px-window boundary seams (catches localized hard edges)
+THRESH_INFILL_TEXTURE_RATIO = 1.5  # max local-variance ratio inside/outside mask (catches texture discontinuity)
 _INFILL_BOUNDARY_BAND = 4  # pixel width of the boundary band for seam measurement
 _INFILL_SURROUND_BAND = 16  # how far outside the mask to sample surrounding plate
+_INFILL_PATCH_SIZE = 32  # sliding window size for patch seam measurement
+_INFILL_TEXTURE_WINDOW = 7  # uniform_filter window for local variance
 
 THRESH_ALPHA_CONTOUR = 55.0  # alpha-contour seam: gradient excess along alpha>200 contour
 _ALPHA_CONTOUR_LEVEL = 200  # contour threshold: 200 measures deep interior (less repair-zone noise)
@@ -992,15 +996,88 @@ def _infill_color_consistency(clean: np.ndarray, mask: np.ndarray,
     return float(np.abs(infill_mean - surround_mean).mean())
 
 
+def _infill_patch_seam(clean: np.ndarray, mask: np.ndarray,
+                       band: int, patch: int) -> float:
+    """P95 of per-patch boundary seam energy.
+
+    Same inner/outer band logic as _infill_boundary_energy, but computed
+    per sliding window along the mask boundary.  Returns the 95th
+    percentile — robust to a single outlier patch from inherent scene
+    geometry while still catching localized hard seams.
+    """
+    from scipy.ndimage import binary_dilation, binary_erosion
+    dilated = binary_dilation(mask, iterations=band)
+    eroded = binary_erosion(mask, iterations=band)
+    outer_ring = dilated & ~mask
+    inner_ring = mask & ~eroded
+
+    boundary_pixels = np.argwhere(outer_ring | inner_ring)
+    if len(boundary_pixels) == 0:
+        return 0.0
+
+    gray = clean.astype(np.float32)
+    if gray.ndim == 3:
+        gray = gray.mean(axis=-1)
+
+    ymin, xmin = boundary_pixels.min(axis=0)
+    ymax, xmax = boundary_pixels.max(axis=0)
+
+    seams: list[float] = []
+    for y in range(ymin, ymax, patch):
+        for x in range(xmin, xmax, patch):
+            lo = outer_ring[y:y + patch, x:x + patch]
+            li = inner_ring[y:y + patch, x:x + patch]
+            if lo.sum() < 5 or li.sum() < 5:
+                continue
+            lg = gray[y:y + patch, x:x + patch]
+            seams.append(abs(float(lg[lo].mean()) - float(lg[li].mean())))
+
+    if not seams:
+        return 0.0
+    return float(np.percentile(seams, 95))
+
+
+def _infill_texture_ratio(clean: np.ndarray, mask: np.ndarray,
+                          surround_band: int, window: int) -> float:
+    """Local-variance ratio of infill interior vs surrounding plate.
+
+    Computes per-pixel local variance via uniform_filter, then compares
+    the mean local variance inside the mask against the mean in a band
+    just outside.  A good infill has similar texture energy to its
+    surroundings (ratio near 1.0).  High ratio = infill is noisier /
+    has artifacts; low ratio = infill is suspiciously flat / blurry.
+    """
+    from scipy.ndimage import binary_dilation, uniform_filter
+    dilated = binary_dilation(mask, iterations=surround_band)
+    surround = dilated & ~mask
+
+    if mask.sum() == 0 or surround.sum() == 0:
+        return 1.0
+
+    gray = clean.astype(np.float32)
+    if gray.ndim == 3:
+        gray = gray.mean(axis=-1)
+
+    mu = uniform_filter(gray, window)
+    var = uniform_filter(gray * gray, window) - mu * mu
+
+    inside_var = float(var[mask].mean())
+    outside_var = float(var[surround].mean())
+    if outside_var < 0.01:
+        return 1.0
+    return inside_var / outside_var
+
+
 def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
     """Check clean plate inpainting quality at each object location.
 
-    Measures two things per hotspot:
-    1. Boundary seam energy: gradient at the mask edge in the clean plate.
-       A good infill blends smoothly; a bad one has visible edges.
-    2. Color consistency: mean color difference between the infill patch
-       and the surrounding background.  A good infill matches; a bad one
-       has obviously different hue/brightness.
+    Measures four things per hotspot:
+    1. Boundary seam energy: global mean gradient at the mask edge.
+    2. Color consistency: global mean color diff inside vs outside.
+    3. Patch seam (p95): catches localized hard edges the global mean
+       averages away — the primary fill-seam detector.
+    4. Texture ratio: local-variance ratio inside vs outside — catches
+       texture discontinuities and hallucinated replacement textures.
 
     Uses the SAM mask to define the object region.  Falls back to bbox
     if no SAM mask is available.  Per-hotspot baselines in
@@ -1044,22 +1121,37 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
 
         seam = _infill_boundary_energy(clean, obj_mask, _INFILL_BOUNDARY_BAND)
         color_diff = _infill_color_consistency(clean, obj_mask, _INFILL_SURROUND_BAND)
+        patch_seam = _infill_patch_seam(clean, obj_mask, _INFILL_BOUNDARY_BAND, _INFILL_PATCH_SIZE)
+        tex_ratio = _infill_texture_ratio(clean, obj_mask, _INFILL_SURROUND_BAND, _INFILL_TEXTURE_WINDOW)
 
-        seam_key = f"{tag}.infill_seam"
-        color_key = f"{tag}.infill_color"
-        seam_bl = raw_baselines.get(seam_key)
-        color_bl = raw_baselines.get(color_key)
-        seam_limit = seam_bl["baseline"] if seam_bl else THRESH_INFILL_SEAM
-        color_limit = color_bl["baseline"] if color_bl else THRESH_INFILL_COLOR_DIFF
+        def _bl(suffix: str, default: float) -> float:
+            entry = raw_baselines.get(f"{tag}.{suffix}")
+            return entry["baseline"] if entry else default
 
+        seam_limit = _bl("infill_seam", THRESH_INFILL_SEAM)
+        color_limit = _bl("infill_color", THRESH_INFILL_COLOR_DIFF)
+        patch_limit = _bl("infill_patch_seam", THRESH_INFILL_PATCH_SEAM)
+        tex_limit = _bl("infill_texture", THRESH_INFILL_TEXTURE_RATIO)
+
+        reason = None
         if seam > seam_limit:
-            print(f"  INFILL-QUALITY FAIL: {tag} — seam={seam:.2f} > {seam_limit}")
-            fails += 1
+            reason = f"seam={seam:.2f} > {seam_limit}"
         elif color_diff > color_limit:
-            print(f"  INFILL-QUALITY FAIL: {tag} — color_diff={color_diff:.2f} > {color_limit}")
+            reason = f"color_diff={color_diff:.2f} > {color_limit}"
+        elif patch_seam > patch_limit:
+            reason = f"patch_seam={patch_seam:.2f} > {patch_limit}"
+        elif tex_ratio > tex_limit:
+            reason = f"texture_ratio={tex_ratio:.2f} > {tex_limit}"
+
+        if reason:
+            print(f"  INFILL-QUALITY FAIL: {tag} — {reason}")
             fails += 1
         else:
-            print(f"  INFILL-QUALITY PASS: {tag} — seam={seam:.2f}, color_diff={color_diff:.2f}")
+            print(
+                f"  INFILL-QUALITY PASS: {tag}"
+                f" — seam={seam:.2f}, color={color_diff:.2f}"
+                f", patch_seam={patch_seam:.2f}, texture={tex_ratio:.2f}"
+            )
 
     return fails
 

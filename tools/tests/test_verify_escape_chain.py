@@ -1346,9 +1346,89 @@ class TestInfillQuality:
         assert fails > 0, "Color mismatch in infill should FAIL"
 
 
+    def test_localized_seam_fails(self, tmp_path):
+        """Clean plate where the infill has a localized hard edge that the
+        global mean averages away — should FAIL on patch seam (p95)."""
+        sw, sh = 200, 200
+        fw, fh = 80, 80
+        obj_x, obj_y = 60, 60
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sam_dir = scenes_dir / "sam_masks"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        plate_val = 120
+        _save_rgb(scenes_dir / "seamroom.png", sw, sh, (plate_val,) * 3)
+
+        clean = np.full((sh, sw, 3), plate_val, dtype=np.uint8)
+        # Most of the infill matches the plate, but a 32px strip has a
+        # sharp brightness jump — simulates a localized fill seam.
+        clean[obj_y:obj_y + fh, obj_x:obj_x + fw] = plate_val
+        clean[obj_y:obj_y + 32, obj_x:obj_x + fw] = plate_val + 60
+        Image.fromarray(clean, "RGB").save(scenes_dir / "seamroom_clean.png")
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y + fh, obj_x:obj_x + fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "seamroom_widget.png")
+
+        rest = np.full((fh, fw, 4), (200, 50, 50, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "seamroom_widget_rest.png")
+
+        hotspots = [{"id": "widget", "sprite": {
+            "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/seamroom_widget_rest.png",
+        }}]
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_plate_infill_quality("seamroom", hotspots)
+        assert fails > 0, "Localized hard seam should FAIL on patch_seam"
+
+    def test_texture_mismatch_fails(self, tmp_path):
+        """Clean plate where the infill is noisy while surroundings are
+        smooth — should FAIL on texture ratio."""
+        sw, sh = 200, 200
+        fw, fh = 80, 80
+        obj_x, obj_y = 60, 60
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sam_dir = scenes_dir / "sam_masks"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        _save_rgb(scenes_dir / "texroom.png", sw, sh, (128,) * 3)
+
+        clean = np.full((sh, sw, 3), 128, dtype=np.uint8)
+        # Infill region has high-variance noise; surroundings are flat.
+        rng = np.random.RandomState(42)
+        noisy = rng.randint(60, 200, (fh, fw, 3)).astype(np.uint8)
+        clean[obj_y:obj_y + fh, obj_x:obj_x + fw] = noisy
+        Image.fromarray(clean, "RGB").save(scenes_dir / "texroom_clean.png")
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y + fh, obj_x:obj_x + fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "texroom_widget.png")
+
+        rest = np.full((fh, fw, 4), (200, 50, 50, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "texroom_widget_rest.png")
+
+        hotspots = [{"id": "widget", "sprite": {
+            "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/texroom_widget_rest.png",
+        }}]
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_plate_infill_quality("texroom", hotspots)
+        assert fails > 0, "Noisy infill on smooth background should FAIL on texture_ratio"
+
+
 class TestRealInfillQuality:
     """Run infill quality on real assets. All plates should pass after
-    re-inpainting (net, toolbox rocket regions fixed 2026-07-24)."""
+    re-inpainting and with baselines for inherent cases."""
 
     def test_real_infill_quality(self):
         m = json.loads(vec.MANIFEST.read_text())
