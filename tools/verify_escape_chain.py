@@ -58,6 +58,11 @@ REMNANT_BASELINES_PATH = ROOT / "tools" / "remnant_baselines.json"
 
 THRESH_REST_BOUNDARY = 8.0  # rest-boundary seam: gradient energy at rest-alpha contour on current plate
 
+THRESH_INFILL_SEAM = 12.0  # max gradient energy at object-mask boundary in clean plate
+THRESH_INFILL_COLOR_DIFF = 20.0  # max mean L1 color diff between infill interior and surrounding plate
+_INFILL_BOUNDARY_BAND = 4  # pixel width of the boundary band for seam measurement
+_INFILL_SURROUND_BAND = 16  # how far outside the mask to sample surrounding plate
+
 THRESH_ALPHA_CONTOUR = 55.0  # alpha-contour seam: gradient excess along alpha>200 contour
 _ALPHA_CONTOUR_LEVEL = 200  # contour threshold: 200 measures deep interior (less repair-zone noise)
 
@@ -932,6 +937,124 @@ def verify_plate_emptiness(room_id: str, hotspots: list[dict]) -> int:
             fails += 1
         else:
             print(f"  PLATE-EMPTY PASS: {room_id}/{h['id']}")
+
+    return fails
+
+
+def _infill_boundary_energy(clean: np.ndarray, mask: np.ndarray, band: int) -> float:
+    """Gradient energy at the object-mask boundary in the clean plate.
+
+    Dilates the mask by `band` pixels and erodes it by `band` pixels,
+    then measures the mean absolute gradient between the inner band
+    (just inside the mask edge) and the outer band (just outside).
+    High energy = visible seam where inpainting meets real background.
+    """
+    from scipy.ndimage import binary_dilation, binary_erosion
+    dilated = binary_dilation(mask, iterations=band)
+    eroded = binary_erosion(mask, iterations=band)
+
+    outer_band = dilated & ~mask
+    inner_band = mask & ~eroded
+
+    if outer_band.sum() == 0 or inner_band.sum() == 0:
+        return 0.0
+
+    gray = clean.astype(np.float32)
+    if gray.ndim == 3:
+        gray = gray.mean(axis=-1)
+
+    outer_mean = gray[outer_band].mean()
+    inner_mean = gray[inner_band].mean()
+    return float(abs(inner_mean - outer_mean))
+
+
+def _infill_color_consistency(clean: np.ndarray, mask: np.ndarray,
+                               surround_band: int) -> float:
+    """Mean L1 color difference between infill interior and surrounding plate.
+
+    Compares the mean RGB of pixels inside the mask (the infill) against
+    the mean RGB of pixels in a band just outside the mask (real background).
+    High difference = color mismatch in the inpainting.
+    """
+    from scipy.ndimage import binary_dilation
+    dilated = binary_dilation(mask, iterations=surround_band)
+    surround = dilated & ~mask
+
+    if mask.sum() == 0 or surround.sum() == 0:
+        return 0.0
+
+    clean_f = clean.astype(np.float32)
+    if clean_f.ndim == 2:
+        clean_f = clean_f[:, :, np.newaxis]
+
+    infill_mean = clean_f[mask].mean(axis=0)
+    surround_mean = clean_f[surround].mean(axis=0)
+    return float(np.abs(infill_mean - surround_mean).mean())
+
+
+def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
+    """Check clean plate inpainting quality at each object location.
+
+    Measures two things per hotspot:
+    1. Boundary seam energy: gradient at the mask edge in the clean plate.
+       A good infill blends smoothly; a bad one has visible edges.
+    2. Color consistency: mean color difference between the infill patch
+       and the surrounding background.  A good infill matches; a bad one
+       has obviously different hue/brightness.
+
+    Uses the SAM mask to define the object region.  Falls back to bbox
+    if no SAM mask is available.
+    """
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        print(f"  INFILL-QUALITY SKIP: {room_id} — no clean plate")
+        return 0
+
+    clean = np.array(Image.open(clean_path).convert("RGB"))
+    room_mask = _load_object_mask(room_id)
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+
+        tag = f"{room_id}/{h['id']}"
+
+        sam_path = SAM_MASKS_DIR / f"{room_id}_{h['id']}.png"
+        mapped_obj = HOTSPOT_OBJECT_MAP.get((room_id, h["id"]))
+        if mapped_obj:
+            sam_path = SAM_MASKS_DIR / f"{room_id}_{mapped_obj}.png"
+
+        if sam_path.exists():
+            obj_mask = np.array(Image.open(sam_path).convert("L")) > 127
+            if obj_mask.shape != clean.shape[:2]:
+                obj_mask = np.array(
+                    Image.fromarray(obj_mask.astype(np.uint8) * 255).resize(
+                        (clean.shape[1], clean.shape[0]), Image.NEAREST
+                    )
+                ) > 127
+        else:
+            bb = sp.get("bbox", {})
+            if not bb:
+                continue
+            obj_mask = np.zeros(clean.shape[:2], dtype=bool)
+            obj_mask[bb["y"]:bb["y"]+bb["h"], bb["x"]:bb["x"]+bb["w"]] = True
+
+        if obj_mask.sum() == 0:
+            continue
+
+        seam = _infill_boundary_energy(clean, obj_mask, _INFILL_BOUNDARY_BAND)
+        color_diff = _infill_color_consistency(clean, obj_mask, _INFILL_SURROUND_BAND)
+
+        if seam > THRESH_INFILL_SEAM:
+            print(f"  INFILL-QUALITY FAIL: {tag} — seam={seam:.2f} > {THRESH_INFILL_SEAM}")
+            fails += 1
+        elif color_diff > THRESH_INFILL_COLOR_DIFF:
+            print(f"  INFILL-QUALITY FAIL: {tag} — color_diff={color_diff:.2f} > {THRESH_INFILL_COLOR_DIFF}")
+            fails += 1
+        else:
+            print(f"  INFILL-QUALITY PASS: {tag} — seam={seam:.2f}, color_diff={color_diff:.2f}")
 
     return fails
 
@@ -2071,6 +2194,18 @@ def main() -> int:
         fails += plate_fails
     else:
         print("Plate emptiness: all clean plates verified")
+
+    # D.1-POST: Plate infill quality — seam and color consistency of inpainting
+    print("\n--- Plate infill quality (D.1-POST) ---")
+    infill_fails = 0
+    for room in m.get("escape", []):
+        iqf = verify_plate_infill_quality(room["id"], room.get("hotspots", []))
+        infill_fails += iqf
+    if infill_fails:
+        print(f"\n{infill_fails} infill-quality failures (seam ≤ {THRESH_INFILL_SEAM}, color ≤ {THRESH_INFILL_COLOR_DIFF})")
+        fails += infill_fails
+    else:
+        print("Plate infill quality: all clean plates have smooth inpainting")
 
     # D.2 No-doubles check: Gemini verifies animated object doesn't appear
     # twice in composited mid-animation frames.

@@ -1233,6 +1233,138 @@ class TestRealSiblingIsolation:
 
 
 # ===================================================================
+# Fixture (m): plate infill quality — seam and color consistency
+# ===================================================================
+class TestInfillQuality:
+    def test_bad_infill_seam_fails(self, tmp_path):
+        """Clean plate with a sharp color discontinuity at the object
+        boundary (simulating a bad inpaint seam) must FAIL."""
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+        sw, sh = 200, 200
+        fw, fh = 60, 60
+        obj_x, obj_y = 40, 40
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sam_dir = scenes_dir / "sam_masks"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        _save_rgb(scenes_dir / "seamroom.png", sw, sh, plate_color)
+
+        clean = np.full((sh, sw, 3), plate_color, dtype=np.uint8)
+        clean[obj_y:obj_y+fh, obj_x:obj_x+fw] = (200, 180, 50)
+        Image.fromarray(clean, "RGB").save(scenes_dir / "seamroom_clean.png")
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y+fh, obj_x:obj_x+fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "seamroom_widget.png")
+
+        rest = np.full((fh, fw, 4), (*obj_color, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "seamroom_widget_rest.png")
+
+        hotspots = [{"id": "widget", "sprite": {
+            "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/seamroom_widget_rest.png",
+        }}]
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_plate_infill_quality("seamroom", hotspots)
+        assert fails > 0, "Sharp color discontinuity at mask edge should FAIL"
+
+    def test_smooth_infill_passes(self, tmp_path):
+        """Clean plate where the infill region matches surrounding
+        background color → smooth transition → PASS."""
+        plate_color = (80, 80, 80)
+        obj_color = (200, 50, 50)
+        sw, sh = 200, 200
+        fw, fh = 60, 60
+        obj_x, obj_y = 40, 40
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sam_dir = scenes_dir / "sam_masks"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        _save_rgb(scenes_dir / "smoothroom.png", sw, sh, plate_color)
+        _save_rgb(scenes_dir / "smoothroom_clean.png", sw, sh, plate_color)
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y+fh, obj_x:obj_x+fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "smoothroom_widget.png")
+
+        rest = np.full((fh, fw, 4), (*obj_color, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "smoothroom_widget_rest.png")
+
+        hotspots = [{"id": "widget", "sprite": {
+            "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/smoothroom_widget_rest.png",
+        }}]
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_plate_infill_quality("smoothroom", hotspots)
+        assert fails == 0, "Matching infill color should PASS"
+
+    def test_color_mismatch_infill_fails(self, tmp_path):
+        """Clean plate where the infill region has visibly different color
+        from surrounding background → FAIL on color consistency."""
+        sw, sh = 200, 200
+        fw, fh = 60, 60
+        obj_x, obj_y = 60, 60
+
+        scenes_dir = tmp_path / "assets" / "game" / "escape"
+        sam_dir = scenes_dir / "sam_masks"
+        sprites_dir = tmp_path / "public" / "escape-sprites"
+        sam_dir.mkdir(parents=True, exist_ok=True)
+        sprites_dir.mkdir(parents=True, exist_ok=True)
+
+        _save_rgb(scenes_dir / "colorroom.png", sw, sh, (80, 80, 80))
+
+        clean = np.full((sh, sw, 3), (80, 80, 80), dtype=np.uint8)
+        clean[obj_y:obj_y+fh, obj_x:obj_x+fw] = (180, 60, 60)
+        Image.fromarray(clean, "RGB").save(scenes_dir / "colorroom_clean.png")
+
+        sam = np.zeros((sh, sw), dtype=np.uint8)
+        sam[obj_y:obj_y+fh, obj_x:obj_x+fw] = 255
+        Image.fromarray(sam, "L").save(sam_dir / "colorroom_widget.png")
+
+        rest = np.full((fh, fw, 4), (200, 50, 50, 255), dtype=np.uint8)
+        Image.fromarray(rest, "RGBA").save(sprites_dir / "colorroom_widget_rest.png")
+
+        hotspots = [{"id": "widget", "sprite": {
+            "bbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "restBbox": {"x": obj_x, "y": obj_y, "w": fw, "h": fh},
+            "rest": "escape-sprites/colorroom_widget_rest.png",
+        }}]
+
+        with _apply_patches(tmp_path):
+            fails = vec.verify_plate_infill_quality("colorroom", hotspots)
+        assert fails > 0, "Color mismatch in infill should FAIL"
+
+
+class TestRealInfillQuality:
+    """Run infill quality on real assets. Expected: 4 known failures
+    (net, toolbox, panel, slot) from existing inpainting quality issues."""
+
+    def test_real_infill_quality_detects_known_issues(self):
+        m = json.loads(vec.MANIFEST.read_text())
+        results: dict[str, int] = {}
+        for room in m.get("escape", []):
+            results[room["id"]] = vec.verify_plate_infill_quality(
+                room["id"], room.get("hotspots", [])
+            )
+        total = sum(results.values())
+        assert total >= 1, (
+            f"Expected at least 1 infill quality failure (known issues: "
+            f"net, toolbox, panel, slot), got {total}"
+        )
+
+
+# ===================================================================
 # Helpers
 # ===================================================================
 import contextlib
