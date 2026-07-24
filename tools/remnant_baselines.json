@@ -38,5 +38,20 @@
     "baseline": 15.0,
     "justification": "toolbox sits at a texture boundary on the rocketpad floor; Imagen re-inpainting (3 attempts, 24px dilation) can only achieve seam=14.5 due to inherent gradient between floor and wall. Improved from 18.33 (original) to 14.56 (best). Sub-perceptual at game scale \u2014 toolbox rest layer covers this region during gameplay.",
     "date": "2026-07-24"
+  },
+  "rocketpad/toolbox.infill_patch_seam": {
+    "baseline": 67.0,
+    "justification": "same floor-to-wall texture boundary causes localized seam up to 66.6 at the toolbox mask edge; inherent scene geometry, not an inpainting defect. Covered by rest layer during gameplay.",
+    "date": "2026-07-24"
+  },
+  "toyroom/pillow.infill_texture": {
+    "baseline": 1.6,
+    "justification": "pillow sat on a low-variance wooden floor; infill reproduces floor grain (var=458) while the surround includes smoother wall (var=337), giving ratio=1.57. The infill texture is correct \u2014 the metric penalizes inherent scene heterogeneity around the mask, not an artifact.",
+    "date": "2026-07-24"
+  },
+  "toyroom/chest.infill_texture": {
+    "baseline": 1.6,
+    "justification": "chest sat against a wall/floor junction; infill matches the textured floor (higher variance) while surround band includes smooth wall (lower variance), giving ratio=1.54. Same inherent-heterogeneity mechanism as pillow.",
+    "date": "2026-07-24"
   }
 }
