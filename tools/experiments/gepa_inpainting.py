@@ -463,6 +463,28 @@ CANDIDATES: list[InpaintCandidate] = [
     ),
 ]
 
+# Hill-climb mutations (run separately, not in initial sweep)
+MUTATIONS: list[InpaintCandidate] = [
+    InpaintCandidate(
+        name="mid_blend",
+        mask_dilation=22,
+        composite_dilation=12,
+    ),
+    InpaintCandidate(
+        name="art_blend",
+        removal_prompt=(
+            "empty background, seamless continuation of the surrounding "
+            "scenery, matching art style"
+        ),
+        negative_prompt=(
+            "a new object, a new animal, a new character, text, watermark, "
+            "visible seam"
+        ),
+        mask_dilation=24,
+        composite_dilation=12,
+    ),
+]
+
 
 # --- Report ---
 
@@ -532,7 +554,7 @@ def run_experiment(
         agg = aggregate_score(res)
         passes = sum(1 for r in res if r.gate_pass)
         total = len(res)
-        print(f"{cand.name:25s} {agg:12.3f} {passes}/{total:>9s}")
+        print(f"{cand.name:25s} {agg:12.3f} {passes:>5d}/{total}")
 
     return all_results
 
