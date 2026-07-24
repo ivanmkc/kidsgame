@@ -1347,10 +1347,10 @@ class TestInfillQuality:
 
 
 class TestRealInfillQuality:
-    """Run infill quality on real assets. Expected: 4 known failures
-    (net, toolbox, panel, slot) from existing inpainting quality issues."""
+    """Run infill quality on real assets. All plates should pass after
+    re-inpainting (net, toolbox rocket regions fixed 2026-07-24)."""
 
-    def test_real_infill_quality_detects_known_issues(self):
+    def test_real_infill_quality(self):
         m = json.loads(vec.MANIFEST.read_text())
         results: dict[str, int] = {}
         for room in m.get("escape", []):
@@ -1358,9 +1358,9 @@ class TestRealInfillQuality:
                 room["id"], room.get("hotspots", [])
             )
         total = sum(results.values())
-        assert total >= 1, (
-            f"Expected at least 1 infill quality failure (known issues: "
-            f"net, toolbox, panel, slot), got {total}"
+        assert total == 0, (
+            f"Expected 0 infill quality failures, got {total}: "
+            + ", ".join(f"{k}={v}" for k, v in results.items() if v > 0)
         )
 
 
