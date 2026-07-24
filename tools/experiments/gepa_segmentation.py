@@ -16,7 +16,7 @@ Journeys (animations):
   - Holdout (3): pen, haystack, crate (crate = the hardest)
 
 Metrics (multi-axis scorer, weighted harmonic mean):
-  - frame_body: FRAME-BODY coverage at f0 (primary tracking quality)
+  - iou: IoU of SAM mask vs plate-diff ground truth at f0
   - temporal_stability: warp_error p95 across frame pairs
   - contour_quality: alpha-contour excess energy
   - rest_purity: plate-identical fraction in rest layer
@@ -61,11 +61,14 @@ VAL_SET = ["rocketpad/panel", "piratecove/net"]
 HOLDOUT_SET = ["toyroom/pen", "dragoncave/haystack", "rocketpad/crate"]
 
 METRIC_WEIGHTS = {
-    "frame_body": 0.40,
+    "iou": 0.40,
     "temporal_stability": 0.25,
     "contour_quality": 0.15,
     "gate_pass": 0.20,
 }
+
+PLATE_DIFF_FADE_LO = 25
+PLATE_DIFF_FADE_HI = 90
 
 
 @dataclass
@@ -94,7 +97,9 @@ class ExperimentResult:
     """Result of running a candidate on a journey."""
     animation: str
     candidate_name: str
-    frame_body: float = 0.0
+    iou: float = 0.0
+    recall: float = 0.0
+    precision: float = 0.0
     temporal_stability: float = 0.0
     contour_quality: float = 0.0
     rest_purity: float = 0.0
@@ -107,7 +112,7 @@ class ExperimentResult:
     def score(self) -> float:
         """Weighted harmonic mean of normalized metrics."""
         vals = {
-            "frame_body": min(self.frame_body / 0.85, 1.0),
+            "iou": min(self.iou / 0.70, 1.0),
             "temporal_stability": max(0, 1.0 - self.temporal_stability / 0.05),
             "contour_quality": max(0, 1.0 - max(0, self.contour_quality - 10) / 45),
             "gate_pass": 1.0 if self.gate_pass else 0.0,
@@ -135,16 +140,43 @@ def get_hotspot(anim_key: str) -> dict:
     raise KeyError(f"No hotspot {anim_key}")
 
 
-def measure_frame_body(masks_dir: Path, bbox: dict) -> tuple[float, int]:
-    """FRAME-BODY: coverage of mask within bbox at frame 0."""
+def _plate_diff_mask(room_id: str) -> np.ndarray | None:
+    """Compute plate-diff ground-truth mask for an object using smoothstep."""
+    scene_path = ROOT / "assets" / "game" / "escape" / f"{room_id}.png"
+    plate_path = ROOT / "assets" / "game" / "escape" / f"{room_id}_clean.png"
+    if not scene_path.exists() or not plate_path.exists():
+        return None
+    scene = np.array(Image.open(scene_path).convert("RGB")).astype(np.float32)
+    plate = np.array(Image.open(plate_path).convert("RGB")).astype(np.float32)
+    diff = np.abs(scene - plate).max(axis=2)
+    t = np.clip((diff - PLATE_DIFF_FADE_LO) / (PLATE_DIFF_FADE_HI - PLATE_DIFF_FADE_LO), 0, 1)
+    return t * t * (3 - 2 * t)
+
+
+def measure_iou(masks_dir: Path, room_id: str) -> tuple[float, float, float, int]:
+    """IoU of SAM mask vs plate-diff ground truth at frame 0.
+    Returns (iou, recall, precision, zero_frame_count)."""
     m0_path = masks_dir / "mask_0000.png"
     if not m0_path.exists():
-        return 0.0, 96
+        return 0.0, 0.0, 0.0, 96
     m0 = np.array(Image.open(m0_path).convert("L"))
     if m0.shape != (720, 1280):
         m0 = np.array(Image.fromarray(m0).resize((1280, 720), Image.NEAREST))
-    crop = m0[bbox["y"]:bbox["y"] + bbox["h"], bbox["x"]:bbox["x"] + bbox["w"]]
-    fb = float((crop > 0).mean())
+    sam_mask = m0 > 127
+
+    gt = _plate_diff_mask(room_id)
+    if gt is None:
+        return 0.0, 0.0, 0.0, 96
+    gt_mask = gt > 0.5
+
+    intersection = float((sam_mask & gt_mask).sum())
+    union = float((sam_mask | gt_mask).sum())
+    gt_sum = float(gt_mask.sum())
+    sam_sum = float(sam_mask.sum())
+
+    iou = intersection / union if union > 0 else 0.0
+    recall = intersection / gt_sum if gt_sum > 0 else 0.0
+    precision = intersection / sam_sum if sam_sum > 0 else 0.0
 
     zeros = 0
     for i in range(96):
@@ -155,7 +187,7 @@ def measure_frame_body(masks_dir: Path, bbox: dict) -> tuple[float, int]:
                 zeros += 1
         else:
             zeros += 1
-    return fb, zeros
+    return iou, recall, precision, zeros
 
 
 def measure_temporal_stability(masks_dir: Path, frames_dir: Path) -> float:
@@ -276,28 +308,27 @@ def run_experiment(
 
     Requires GPU VM for SAM-based candidates. Diff-key baseline runs locally.
     """
-    h = get_hotspot(animation)
-    sp = h.get("sprite", {})
-    bb = sp.get("bbox", {})
-
     result = ExperimentResult(
         animation=animation,
         candidate_name=candidate.name,
     )
 
+    room_id, hotspot_id = animation.split("/")
+
     if candidate.seeding_method == "plate_diff":
-        sheet_path = ROOT / "public" / sp.get("sheet", "")
-        if sheet_path.exists():
-            result.frame_body = 0.98
+        gt = _plate_diff_mask(room_id)
+        if gt is not None:
+            result.iou = 1.0
+            result.recall = 1.0
+            result.precision = 1.0
             result.gate_pass = True
-            result.notes = "baseline diff-key (committed state passes gate)"
+            result.notes = "baseline diff-key (ground truth = itself)"
         return result
 
     if gpu_vm is None:
         result.notes = "SKIPPED: no GPU available"
         return result
 
-    room_id, hotspot_id = animation.split("/")
     masks_dir = TMP / f"gepa/{candidate.name}/{room_id}_{hotspot_id}/masks"
     frames_dir = TMP / f"fix3/{room_id}_{hotspot_id}/frames"
 
@@ -305,10 +336,10 @@ def run_experiment(
         result.notes = f"NEEDS_RUN: masks not yet generated at {masks_dir}"
         return result
 
-    result.frame_body, result.zero_frames = measure_frame_body(masks_dir, bb)
+    result.iou, result.recall, result.precision, result.zero_frames = measure_iou(masks_dir, room_id)
     if frames_dir.exists():
         result.temporal_stability = measure_temporal_stability(masks_dir, frames_dir)
-    result.gate_pass = result.frame_body >= 0.85 and result.zero_frames == 0
+    result.gate_pass = result.iou >= 0.50 and result.zero_frames == 0
 
     return result
 
@@ -323,11 +354,12 @@ def generate_report(results: list[ExperimentResult]) -> str:
 
     for anim in sorted(by_anim):
         lines.append(f"\n## {anim}")
-        lines.append(f"| Candidate | FRAME-BODY | Zeros | Temporal | Gate | Score |")
-        lines.append(f"|---|---|---|---|---|---|")
+        lines.append(f"| Candidate | IoU | Recall | Precision | Zeros | Temporal | Gate | Score |")
+        lines.append(f"|---|---|---|---|---|---|---|---|")
         for r in sorted(by_anim[anim], key=lambda x: -x.score):
             lines.append(
-                f"| {r.candidate_name} | {r.frame_body:.3f} | {r.zero_frames} "
+                f"| {r.candidate_name} | {r.iou:.3f} | {r.recall:.3f} | {r.precision:.3f} "
+                f"| {r.zero_frames} "
                 f"| {r.temporal_stability:.4f} | {'PASS' if r.gate_pass else 'FAIL'} "
                 f"| {r.score:.3f} |"
             )
