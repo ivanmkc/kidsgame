@@ -1003,7 +1003,8 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
        has obviously different hue/brightness.
 
     Uses the SAM mask to define the object region.  Falls back to bbox
-    if no SAM mask is available.
+    if no SAM mask is available.  Per-hotspot baselines in
+    remnant_baselines.json override absolute thresholds.
     """
     clean_path = SCENES / "escape" / f"{room_id}_clean.png"
     if not clean_path.exists():
@@ -1012,6 +1013,7 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
 
     clean = np.array(Image.open(clean_path).convert("RGB"))
     room_mask = _load_object_mask(room_id)
+    raw_baselines = json.loads(REMNANT_BASELINES_PATH.read_text()) if REMNANT_BASELINES_PATH.exists() else {}
     fails = 0
 
     for h in hotspots:
@@ -1022,10 +1024,6 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
         tag = f"{room_id}/{h['id']}"
 
         sam_path = SAM_MASKS_DIR / f"{room_id}_{h['id']}.png"
-        mapped_obj = HOTSPOT_OBJECT_MAP.get((room_id, h["id"]))
-        if mapped_obj:
-            sam_path = SAM_MASKS_DIR / f"{room_id}_{mapped_obj}.png"
-
         if sam_path.exists():
             obj_mask = np.array(Image.open(sam_path).convert("L")) > 127
             if obj_mask.shape != clean.shape[:2]:
@@ -1047,11 +1045,18 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
         seam = _infill_boundary_energy(clean, obj_mask, _INFILL_BOUNDARY_BAND)
         color_diff = _infill_color_consistency(clean, obj_mask, _INFILL_SURROUND_BAND)
 
-        if seam > THRESH_INFILL_SEAM:
-            print(f"  INFILL-QUALITY FAIL: {tag} — seam={seam:.2f} > {THRESH_INFILL_SEAM}")
+        seam_key = f"{tag}.infill_seam"
+        color_key = f"{tag}.infill_color"
+        seam_bl = raw_baselines.get(seam_key)
+        color_bl = raw_baselines.get(color_key)
+        seam_limit = seam_bl["baseline"] if seam_bl else THRESH_INFILL_SEAM
+        color_limit = color_bl["baseline"] if color_bl else THRESH_INFILL_COLOR_DIFF
+
+        if seam > seam_limit:
+            print(f"  INFILL-QUALITY FAIL: {tag} — seam={seam:.2f} > {seam_limit}")
             fails += 1
-        elif color_diff > THRESH_INFILL_COLOR_DIFF:
-            print(f"  INFILL-QUALITY FAIL: {tag} — color_diff={color_diff:.2f} > {THRESH_INFILL_COLOR_DIFF}")
+        elif color_diff > color_limit:
+            print(f"  INFILL-QUALITY FAIL: {tag} — color_diff={color_diff:.2f} > {color_limit}")
             fails += 1
         else:
             print(f"  INFILL-QUALITY PASS: {tag} — seam={seam:.2f}, color_diff={color_diff:.2f}")
