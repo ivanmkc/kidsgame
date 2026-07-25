@@ -1156,6 +1156,127 @@ def verify_plate_infill_quality(room_id: str, hotspots: list[dict]) -> int:
     return fails
 
 
+def _gemini_collateral_check(
+    orig_crop: Image.Image, clean_crop: Image.Image, obj: str
+) -> bool:
+    """Compare before/after crops and ask Gemini whether inpainting
+    damaged surrounding scene elements (furniture, architecture,
+    surfaces, other objects).  Returns True = collateral damage found."""
+    from google.genai import types
+
+    question = (
+        f"These two images show the SAME scene location before and after "
+        f"digitally removing a {obj}.\n\n"
+        f"IMAGE 1 (before): the original scene with the {obj} present.\n"
+        f"IMAGE 2 (after): the scene after the {obj} was removed via "
+        f"inpainting.\n\n"
+        f"Ignore the area where the {obj} used to be — that area is "
+        f"expected to look different.\n\n"
+        f"Focus on EVERYTHING ELSE in the scene: furniture, walls, "
+        f"floor, platforms, pedestals, shelves, other objects, "
+        f"architectural elements, decorations.\n\n"
+        f"Has any surrounding scene element been damaged, partially "
+        f"erased, deformed, or lost detail compared to the original? "
+        f"For example: a pedestal top gone, a shelf edge broken, a wall "
+        f"pattern disrupted, furniture partially erased.\n\n"
+        f"Answer YES if ANY surrounding element was damaged.\n"
+        f"Answer NO if the surrounding scene is intact.\n"
+        f"Answer with exactly one word: YES or NO."
+    )
+
+    parts = [
+        types.Part(
+            inline_data=types.Blob(
+                mime_type="image/png", data=_png_bytes(orig_crop)
+            )
+        ),
+        types.Part(
+            inline_data=types.Blob(
+                mime_type="image/png", data=_png_bytes(clean_crop)
+            )
+        ),
+        types.Part(text=question),
+    ]
+
+    client = _get_gemini_client()
+    votes = []
+    for attempt in range(3):
+        for model in _JUDGE_MODELS:
+            try:
+                resp = client.models.generate_content(
+                    model=model, contents=parts
+                )
+                answer = (resp.text or "").strip().upper()
+                if "YES" in answer:
+                    votes.append(True)
+                elif "NO" in answer:
+                    votes.append(False)
+                else:
+                    votes.append(True)
+                break
+            except Exception:
+                continue
+        else:
+            votes.append(True)
+
+    yes_count = sum(votes)
+    return yes_count >= 2
+
+
+def verify_plate_collateral(room_id: str, hotspots: list[dict]) -> int:
+    """Gate D.1-VIS: Gemini vision check for collateral scene damage.
+
+    For each hotspot, crops the object region (with padding) from both
+    the original scene and clean plate, then asks Gemini whether any
+    surrounding scene element was damaged during inpainting.  Catches
+    semantic artifacts that pixel metrics miss — e.g. a pedestal top
+    erased along with the dragon sitting on it.
+
+    Per-hotspot baselines in remnant_baselines.json can suppress known
+    false positives (key: '{room}/{hotspot}.collateral_skip').
+    """
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    orig_path = SCENES / "escape" / f"{room_id}.png"
+    if not clean_path.exists() or not orig_path.exists():
+        missing = [p for p in (clean_path, orig_path) if not p.exists()]
+        print(f"  COLLATERAL SKIP: {room_id} — missing {[str(p.name) for p in missing]}")
+        return 0
+
+    clean = Image.open(clean_path).convert("RGB")
+    orig = Image.open(orig_path).convert("RGB")
+    room_mask = _load_object_mask(room_id)
+    raw_baselines = json.loads(REMNANT_BASELINES_PATH.read_text()) if REMNANT_BASELINES_PATH.exists() else {}
+    fails = 0
+
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("rest"):
+            continue
+
+        tag = f"{room_id}/{h['id']}"
+
+        if raw_baselines.get(f"{tag}.collateral_skip"):
+            print(f"  COLLATERAL SKIP: {tag} — baseline override")
+            continue
+
+        x0, y0, x1, y1 = _mask_bbox_for_hotspot(room_mask, h, pad=40)
+        if x1 <= x0 or y1 <= y0:
+            continue
+
+        orig_crop = orig.crop((x0, y0, x1, y1))
+        clean_crop = clean.crop((x0, y0, x1, y1))
+
+        obj = HOTSPOT_OBJECTS.get((room_id, h["id"]), h["id"])
+        has_damage = _gemini_collateral_check(orig_crop, clean_crop, obj)
+        if has_damage:
+            print(f"  COLLATERAL FAIL: {tag} — surrounding scene damage detected")
+            fails += 1
+        else:
+            print(f"  COLLATERAL PASS: {tag}")
+
+    return fails
+
+
 def _load_object_mask(room_id: str) -> np.ndarray | None:
     """Load the precomputed object mask for a room.  Falls back to None
     if no mask file exists (caller must handle)."""
@@ -2303,6 +2424,20 @@ def main() -> int:
         fails += infill_fails
     else:
         print("Plate infill quality: all clean plates have smooth inpainting")
+
+    # D.1-VIS: Gemini vision check for collateral scene damage.
+    # Compares before/after crops — catches semantic artifacts that
+    # pixel metrics miss (e.g. pedestal top erased with the dragon).
+    print("\n--- Collateral damage (D.1-VIS) ---")
+    collateral_fails = 0
+    for room in m.get("escape", []):
+        cf = verify_plate_collateral(room["id"], room.get("hotspots", []))
+        collateral_fails += cf
+    if collateral_fails:
+        print(f"\n{collateral_fails} collateral-damage failures (Gemini-verified)")
+        fails += collateral_fails
+    else:
+        print("Collateral damage: all clean plates have intact surroundings")
 
     # D.2 No-doubles check: Gemini verifies animated object doesn't appear
     # twice in composited mid-animation frames.

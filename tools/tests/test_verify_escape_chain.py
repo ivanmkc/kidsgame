@@ -467,6 +467,59 @@ class TestDoubles:
 
 
 # ===================================================================
+# Fixture (e2): collateral damage — Gemini catches scene damage
+# ===================================================================
+class TestCollateral:
+    def test_collateral_fail_with_gemini_yes(self, tmp_path):
+        """Mock Gemini to say YES (scene damage) → FAIL."""
+        room = _build_room(tmp_path)
+        mock_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.text = "YES"
+        mock_client.models.generate_content.return_value = mock_resp
+
+        with _apply_patches(tmp_path):
+            with patch.object(vec, "_get_gemini_client", return_value=mock_client):
+                with patch.object(vec, "HOTSPOT_OBJECTS", {("testroom", "widget"): "test widget"}):
+                    fails = vec.verify_plate_collateral("testroom", room["hotspots"])
+        assert fails > 0, "Expected collateral FAIL with Gemini YES"
+
+    def test_collateral_pass_with_gemini_no(self, tmp_path):
+        """Mock Gemini to say NO (no damage) → PASS."""
+        room = _build_room(tmp_path)
+        mock_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.text = "NO"
+        mock_client.models.generate_content.return_value = mock_resp
+
+        with _apply_patches(tmp_path):
+            with patch.object(vec, "_get_gemini_client", return_value=mock_client):
+                with patch.object(vec, "HOTSPOT_OBJECTS", {("testroom", "widget"): "test widget"}):
+                    fails = vec.verify_plate_collateral("testroom", room["hotspots"])
+        assert fails == 0
+
+    def test_collateral_skip_with_baseline(self, tmp_path):
+        """Collateral skip via baseline override."""
+        room = _build_room(tmp_path)
+        mock_client = MagicMock()
+        mock_resp = MagicMock()
+        mock_resp.text = "YES"
+        mock_client.models.generate_content.return_value = mock_resp
+
+        baselines = {"testroom/widget.collateral_skip": {"baseline": True}}
+        baselines_path = tmp_path / "tools" / "remnant_baselines.json"
+        baselines_path.parent.mkdir(parents=True, exist_ok=True)
+        baselines_path.write_text(json.dumps(baselines))
+
+        with _apply_patches(tmp_path):
+            with patch.object(vec, "REMNANT_BASELINES_PATH", baselines_path):
+                with patch.object(vec, "_get_gemini_client", return_value=mock_client):
+                    with patch.object(vec, "HOTSPOT_OBJECTS", {("testroom", "widget"): "test widget"}):
+                        fails = vec.verify_plate_collateral("testroom", room["hotspots"])
+        assert fails == 0, "Expected collateral SKIP with baseline override"
+
+
+# ===================================================================
 # Fixture (f): rest without sheet
 # ===================================================================
 class TestRestWithoutSheet:
