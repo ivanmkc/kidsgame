@@ -210,4 +210,29 @@ describe('shipped escape rooms', () => {
       expect(errs, `${room.id}: ${errs.join('; ')}`).toEqual([]);
     }
   });
+
+  it.skipIf(rooms.length === 0)('every item-giving hotspot has a pop sprite path', () => {
+    for (const room of rooms) {
+      for (const h of room.hotspots) {
+        if (h.gives) {
+          expect(h.pop, `${room.id}/${h.id} gives '${h.gives}' but has no pop sprite`).toBeTruthy();
+        }
+      }
+    }
+  });
+
+  it.skipIf(rooms.length === 0)('every room and hotspot has ja/cmn/yue translations', () => {
+    const LANGS = ['ja', 'cmn', 'yue'];
+    for (const room of rooms) {
+      for (const lang of LANGS) {
+        expect(room.t?.[lang]?.intro, `${room.id} missing ${lang} intro`).toBeTruthy();
+        expect(room.t?.[lang]?.winText, `${room.id} missing ${lang} winText`).toBeTruthy();
+      }
+      for (const item of room.items) {
+        for (const lang of LANGS) {
+          expect(item.t?.[lang], `${room.id}/item ${item.id} missing ${lang} label`).toBeTruthy();
+        }
+      }
+    }
+  });
 });
