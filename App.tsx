@@ -43,6 +43,7 @@ import { MusicBoxGame } from './src/games/musicbox/MusicBoxGame';
 import { BingoGame } from './src/games/bingo/BingoGame';
 import { CarModeGame } from './src/games/carmode/CarModeGame';
 import { EscapeGame } from './src/games/escape/EscapeGame';
+import { CrimsonGame } from './src/games/crimson/CrimsonGame';
 import { HighLowGame } from './src/games/highlow/HighLowGame';
 import { BellsGame } from './src/games/bells/BellsGame';
 import { EchoBeatGame } from './src/games/echobeat/EchoBeatGame';
@@ -135,7 +136,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'crimson', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff'];
   // A stale/mistyped hash must never strand a kid on a blank page.
   const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
@@ -223,6 +224,7 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'crimson' && <CrimsonGame onHome={goHome} lang={lang} />}
       {screen === 'carmode' && <CarModeGame onHome={goHome} lang={lang} />}
       {screen === 'bingo' && <BingoGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
@@ -259,7 +261,7 @@ export default function App() {
 type CardKey =
   | 'letters' | 'sounds' | 'rhyme' | 'spell'
   | 'count' | 'numbers' | 'compare' | 'sums'
-  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'carmode'
+  | 'spotit' | 'diff' | 'hidden' | 'memory' | 'puzzle' | 'shadow' | 'oddone' | 'rules' | 'sticker' | 'story' | 'bingo' | 'musicbox' | 'escape' | 'crimson' | 'carmode'
   | 'highlow' | 'bells' | 'echobeat' | 'steadybeat' | 'fastslow' | 'samediff';
 interface CardDef { route: string; color: string; key: CardKey; preview: string; beta?: boolean }
 const WORD_CARDS: CardDef[] = [
@@ -290,6 +292,7 @@ const GAME_CARDS: CardDef[] = [
   // model (route stays live for dev via #/musicbox deep link).
   // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
   { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape', beta: true },
+  { route: 'crimson', color: '#A72636', key: 'crimson', preview: 'crimson', beta: true },
   // carmode hidden pending rework (route stays live via #/carmode; its
   // round engine is being reused by the music training games).
   // { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
@@ -347,6 +350,7 @@ function Menu({
       const src = room ? (SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]) : null;
       return src ? <Image source={src} style={styles.preview} /> : <EscapePreview />;
     }
+    if (key === 'crimson') return <CrimsonPreview />;
     if (key === 'carmode') return <CarModePreview />;
     if (key === 'music') return <MusicPreview />;
 
@@ -669,6 +673,19 @@ function EscapePreview() {
       <Text style={{ fontSize: 26, color: colors.inkSoft }}>➜</Text>
       <Text style={{ fontSize: 34 }}>🔒</Text>
       <Text style={{ fontSize: 34 }}>🐶</Text>
+    </View>
+  );
+}
+
+// Crimson Escape preview: the classic room-escape loop in icons
+function CrimsonPreview() {
+  return (
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(167,38,54,0.12)' }]}>
+      <Text style={{ fontSize: 34 }}>🕯️</Text>
+      <Text style={{ fontSize: 30 }}>🔦</Text>
+      <Text style={{ fontSize: 26, color: colors.inkSoft }}>➜</Text>
+      <Text style={{ fontSize: 30 }}>🔢</Text>
+      <Text style={{ fontSize: 34 }}>🚪</Text>
     </View>
   );
 }

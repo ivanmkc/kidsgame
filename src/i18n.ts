@@ -66,6 +66,7 @@ export type UIKey =
   | 'card.bingo.title'    | 'card.bingo.blurb'
   | 'card.carmode.title'  | 'card.carmode.blurb'
   | 'card.escape.title'   | 'card.escape.blurb'
+  | 'card.crimson.title'  | 'card.crimson.blurb'
   | 'card.highlow.title'  | 'card.highlow.blurb'
   | 'card.bells.title'    | 'card.bells.blurb'
   | 'card.echobeat.title' | 'card.echobeat.blurb'
@@ -141,6 +142,8 @@ export type UIKey =
   | 'shell.escape.title'
   | 'shell.escape.subPicker'
   | 'shell.escape.subPlay'
+  | 'shell.crimson.title'
+  | 'shell.crimson.sub'
   | 'picker.escape'
   | 'escape.trayEmpty'
   // ── Music game shells ──────────────────────────────────────────
@@ -193,6 +196,7 @@ export type UIKey =
   | 'win.sums'
   | 'win.bingo'
   | 'win.musicbox'
+  | 'win.crimson'
   | 'win.highlow'
   | 'win.bells'
   | 'win.echobeat'
@@ -331,6 +335,8 @@ const EN: Table = {
   'card.carmode.blurb': 'Audio games for the car — no looking needed!',
   'card.escape.title': 'Little Escapes',
   'card.escape.blurb': 'Find, unlock, and save the day!',
+  'card.crimson.title': 'Crimson Escape',
+  'card.crimson.blurb': 'Find clues, crack the safe, escape the red room!',
   'card.highlow.title': 'High or Low',
   'card.highlow.blurb': 'Which note is higher?',
   'card.bells.title': 'Melody Bells',
@@ -412,6 +418,8 @@ const EN: Table = {
   'shell.escape.title': 'Little Escapes',
   'shell.escape.subPicker': 'Pick a room to explore!',
   'shell.escape.subPlay': 'Search the picture — find things and use them!',
+  'shell.crimson.title': 'Crimson Escape',
+  'shell.crimson.sub': 'Tap to search. Tap an item, then tap where to use it.',
   'picker.escape': 'Which room today?',
   'escape.trayEmpty': 'Things you find go here…',
 
@@ -470,6 +478,7 @@ const EN: Table = {
   'win.sums': 'Sum superstar! You added them all!',
   'win.bingo': 'BINGO! You got a line!',
   'win.musicbox': 'Beautiful music! You played the whole song!',
+  'win.crimson': 'You escaped the crimson room!',
   'win.highlow': 'Great ears! You heard every note!',
   'win.bells': 'Bell master! You played them all back!',
   'win.echobeat': 'Rhythm star! Perfect echo!',
@@ -605,6 +614,8 @@ const JA: Table = {
   'card.carmode.blurb': 'みみだけで あそぶ おとゲーム！',
   'card.escape.title': 'ちいさな だっしゅつ',
   'card.escape.blurb': 'さがして あけて たすけよう！',
+  'card.crimson.title': 'クリムゾン・エスケープ',
+  'card.crimson.blurb': '手がかりを見つけて、赤い部屋から脱出しよう！',
   'card.highlow.title': 'たかい ひくい',
   'card.highlow.blurb': 'どっちの おとが たかい？',
   'card.bells.title': 'メロディベル',
@@ -686,6 +697,8 @@ const JA: Table = {
   'shell.escape.title': 'ちいさな だっしゅつ',
   'shell.escape.subPicker': 'おへやを えらんでね！',
   'shell.escape.subPlay': 'えを さがして みつけたものを つかおう！',
+  'shell.crimson.title': 'クリムゾン・エスケープ',
+  'shell.crimson.sub': 'タップで調べる。アイテムをタップしてから、使う場所をタップ。',
   'picker.escape': 'きょうは どのおへや？',
   'escape.trayEmpty': 'みつけたものが ここにはいるよ…',
 
@@ -744,6 +757,7 @@ const JA: Table = {
   'win.sums': 'たしざん スーパースター！ ぜんぶ せいかい！',
   'win.bingo': 'ビンゴ！ いちれつ そろったね！',
   'win.musicbox': 'すてきな おんがく！ さいごまで ひけたね！',
+  'win.crimson': '真紅の部屋から脱出した！',
   'win.highlow': 'みみがいいね！ ぜんぶ ききとれた！',
   'win.bells': 'ベルマスター！ ぜんぶ ひけたね！',
   'win.echobeat': 'リズムスター！ かんぺきな エコー！',
@@ -878,6 +892,8 @@ const CMN: Table = {
   'card.carmode.blurb': '不用看屏幕的声音游戏！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '找一找，打开它，救出小伙伴！',
+  'card.crimson.title': '深红逃脱',
+  'card.crimson.blurb': '寻找线索，打开保险箱，逃出红色房间！',
   'card.highlow.title': '高低音',
   'card.highlow.blurb': '哪个音更高？',
   'card.bells.title': '旋律铃铛',
@@ -959,6 +975,8 @@ const CMN: Table = {
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '选一个房间吧！',
   'shell.escape.subPlay': '找找图里的东西，用它们解开谜题！',
+  'shell.crimson.title': '深红逃脱',
+  'shell.crimson.sub': '点一点来搜索。先点物品，再点要用的地方。',
   'picker.escape': '今天玩哪个房间？',
   'escape.trayEmpty': '找到的东西会放在这里…',
 
@@ -1017,6 +1035,7 @@ const CMN: Table = {
   'win.sums': '加法小超人！全都算对了！',
   'win.bingo': '宾果！你连成一排了！',
   'win.musicbox': '好美的音乐！你弹完了整首歌！',
+  'win.crimson': '你逃出了深红房间！',
   'win.highlow': '好耳朵！每个音都听出来了！',
   'win.bells': '铃铛大师！全都弹对了！',
   'win.echobeat': '节拍之星！完美回声！',
@@ -1151,6 +1170,8 @@ const YUE: Table = {
   'card.carmode.blurb': '唔使睇屏幕嘅聲音遊戲！',
   'card.escape.title': '小小密室',
   'card.escape.blurb': '搵一搵，打開佢，救出小朋友！',
+  'card.crimson.title': '深紅逃脫',
+  'card.crimson.blurb': '搵線索、開保險箱、逃出紅色房間！',
   'card.highlow.title': '高低音',
   'card.highlow.blurb': '邊個音高啲？',
   'card.bells.title': '旋律鈴鐺',
@@ -1232,6 +1253,8 @@ const YUE: Table = {
   'shell.escape.title': '小小密室',
   'shell.escape.subPicker': '揀一間房啦！',
   'shell.escape.subPlay': '喺圖入面搵嘢，用佢哋解謎！',
+  'shell.crimson.title': '深紅逃脫',
+  'shell.crimson.sub': '撳下就搵到嘢。撳件物品，再撳要用嘅地方。',
   'picker.escape': '今日玩邊間房？',
   'escape.trayEmpty': '搵到嘅嘢會放喺呢度…',
 
@@ -1290,6 +1313,7 @@ const YUE: Table = {
   'win.sums': '加法小超人！全部計啱！',
   'win.bingo': 'BINGO！你連成一行喇！',
   'win.musicbox': '好靚嘅音樂！你彈晒成首歌喇！',
+  'win.crimson': '你逃出咗深紅房間喇！',
   'win.highlow': '好耳仔！每個音都聽到！',
   'win.bells': '鈴鐺大師！全部撳返晒！',
   'win.echobeat': '節拍之星！完美回聲！',
