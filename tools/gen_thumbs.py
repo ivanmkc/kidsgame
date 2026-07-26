@@ -34,6 +34,10 @@ def main() -> None:
         thumb_for(d.get("image") or d["imageA"]); n += 1
     for h in m["hidden"]:
         thumb_for(h["image"]); n += 1
+    for st in m.get("stories", []):
+        thumb_for(st["nodes"]["start"]["image"]); n += 1
+    for e in m.get("escape", []):
+        thumb_for(e["image"]); n += 1
     print(f"{n} scene thumbnails ensured")
 
 
