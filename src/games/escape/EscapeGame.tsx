@@ -58,6 +58,9 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
   const [flyingItems, setFlyingItems] = useState<Array<{
     key: string; emoji: string; fromX: number; fromY: number;
   }>>([]);
+  const [popBursts, setPopBursts] = useState<Array<{
+    key: string; source: number; cx: number; cy: number;
+  }>>([]);
   const lastAction = useRef(Date.now());
   const framePos = useRef({ x: 0, y: 0 });
   const trayPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -71,6 +74,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     setSpriteAnims([]);
     setHintSpot(null);
     setFlyingItems([]);
+    setPopBursts([]);
     lastAction.current = Date.now();
   }, [sceneId]);
 
@@ -150,6 +154,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           const box = h.itemBox ?? h.box;
           const fromX = framePos.current.x + (box.x + box.w / 2) * scale;
           const fromY = framePos.current.y + (box.y + box.h / 2) * scale;
+          if (h.pop && SCENE_IMAGES[h.pop]) {
+            setPopBursts((p) => [...p, {
+              key: `pop-${hotspotId}-${Date.now()}`,
+              source: SCENE_IMAGES[h.pop!],
+              cx: (box.x + box.w / 2) * scale,
+              cy: (box.y + box.h / 2) * scale,
+            }]);
+          }
           setFlyingItems((f) => [...f, {
             key: `${hotspotId}-${Date.now()}`, emoji: item.emoji, fromX, fromY,
           }]);
@@ -243,6 +255,15 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               </Pressable>
             );
           })}
+          {popBursts.map((pb) => (
+            <PopBurst
+              key={pb.key}
+              source={pb.source}
+              cx={pb.cx}
+              cy={pb.cy}
+              onDone={() => setPopBursts((p) => p.filter((x) => x.key !== pb.key))}
+            />
+          ))}
         </View>
         <View
           onLayout={(e) => {
@@ -360,6 +381,43 @@ function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
       }}
     >
       <Text style={{ fontSize: 36, textAlign: 'center' }}>{emoji}</Text>
+    </Animated.View>
+  );
+}
+
+function PopBurst({ source, cx, cy, onDone }: {
+  source: number; cx: number; cy: number; onDone: () => void;
+}) {
+  const pop = useRef(new Animated.Value(0)).current;
+  const fade = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    Animated.spring(pop, {
+      toValue: 1, friction: 5, tension: 60, useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(fade, {
+        toValue: 0, duration: 350, delay: 250, useNativeDriver: true,
+      }).start(({ finished }) => { if (finished) onDone(); });
+    });
+    return () => { pop.stopAnimation(); fade.stopAnimation(); };
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+  const size = 120;
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left: cx - size / 2,
+        top: cy - size / 2,
+        width: size,
+        height: size,
+        zIndex: 90,
+        opacity: fade,
+        transform: [{
+          scale: pop.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0.2, 1.25, 1.0] }),
+        }],
+      }}
+    >
+      <Image source={source} style={{ width: size, height: size }} resizeMode="contain" />
     </Animated.View>
   );
 }
