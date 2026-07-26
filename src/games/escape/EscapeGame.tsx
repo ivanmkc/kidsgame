@@ -241,6 +241,8 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
                 key={h.id}
                 testID={`escape-spot-${h.id}`}
                 onPress={() => onSpot(h.id)}
+                accessibilityRole="button"
+                accessibilityLabel={h.id}
                 style={{
                   position: 'absolute',
                   left: (h.box.x - 8) * scale,
