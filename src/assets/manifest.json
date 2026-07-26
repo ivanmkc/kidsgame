@@ -28259,7 +28259,8 @@
             },
             "beforeScene": "escape/toyroom.png",
             "afterScene": "escape/toyroom_pillow_reveal.png"
-          }
+          },
+          "pop": "escape/toyroom_pillow_pop.png"
         },
         {
           "id": "teddy",
@@ -28343,7 +28344,8 @@
             },
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
-          }
+          },
+          "pop": "escape/toyroom_chest_pop.png"
         },
         {
           "id": "pen",
@@ -28499,7 +28501,8 @@
               "w": 92,
               "h": 199
             }
-          }
+          },
+          "pop": "escape/dragoncave_haystack_pop.png"
         },
         {
           "id": "crystal",
@@ -28583,7 +28586,8 @@
               "w": 173,
               "h": 73
             }
-          }
+          },
+          "pop": "escape/dragoncave_stove_pop.png"
         },
         {
           "id": "dragon",
@@ -28739,7 +28743,8 @@
               "w": 279,
               "h": 329
             }
-          }
+          },
+          "pop": "escape/piratecove_net_pop.png"
         },
         {
           "id": "umbrella",
@@ -28823,7 +28828,8 @@
               "w": 205,
               "h": 120
             }
-          }
+          },
+          "pop": "escape/piratecove_pelican_pop.png"
         },
         {
           "id": "chest",
@@ -28979,7 +28985,8 @@
             "cols": 7,
             "frameCount": 48,
             "fps": 12
-          }
+          },
+          "pop": "escape/rocketpad_toolbox_pop.png"
         },
         {
           "id": "crate",
