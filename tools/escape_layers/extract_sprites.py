@@ -569,6 +569,37 @@ def extract_sprite_sheet(
         if k in (0, actual_ease // 2, actual_ease - 1):
             print(f"[{name}]   ease frame {idx}: t={t:.3f}")
 
+    # Full-coverage last frame: extend alpha to cover everywhere the
+    # after-scene differs from the clean plate (within the bbox).  The
+    # tail ease only covers the territory derived from the before-scene
+    # SAM mask; objects that change shape (chest opens, pillow moves)
+    # leave gaps.  Fix: merge the plate→after alpha into the last frame
+    # so the held composition exactly reconstructs the after-scene.
+    if plate_img is not None:
+        plate_crop_fc = plate_img[
+            bbox["y"]:bbox["y"] + bbox["h"],
+            bbox["x"]:bbox["x"] + bbox["w"],
+        ]
+        delta_fc = np.abs(
+            after_crop.astype(np.int16) - plate_crop_fc.astype(np.int16)
+        ).sum(axis=-1)
+        full_mask = ndimage.binary_closing(delta_fc > 25, iterations=2)
+        full_mask = ndimage.binary_fill_holes(full_mask)
+        full_alpha = full_mask.astype(np.uint8) * 255
+        full_alpha_f = np.array(
+            Image.fromarray(full_alpha).filter(ImageFilter.GaussianBlur(radius=1))
+        )
+        last = subsampled[-1].copy()
+        merged_a = np.maximum(last[:, :, 3], full_alpha_f)
+        new_px = (merged_a > 0) & (last[:, :, 3] == 0)
+        last[:, :, :3][new_px] = after_crop[new_px]
+        last[:, :, 3] = merged_a
+        old_cov = float(np.sum(subsampled[-1][:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
+        new_cov = float(np.sum(last[:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
+        subsampled[-1] = last
+        sub_coverages[-1] = new_cov
+        print(f"[{name}] Full-coverage last frame: {old_cov:.1f}% → {new_cov:.1f}%")
+
     composed = before_crop.copy().astype(np.float32)
     alpha = subsampled[-1][:, :, 3:4].astype(np.float32) / 255.0
     composed = composed * (1 - alpha) + subsampled[-1][:, :, :3].astype(np.float32) * alpha
