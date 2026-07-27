@@ -196,6 +196,7 @@ def _clean_one_scene(
 def step_extract(room_id: str, room: dict, plate_img: np.ndarray, work_base: Path | None = None) -> None:
     """Step 3: Extract sprite sheets from video clips."""
     print(f"\n  [{room_id}] Extracting sprite sheets...")
+    manifest_dirty = False
 
     for h in room["hotspots"]:
         sp = h.get("sprite", {})
@@ -264,8 +265,17 @@ def step_extract(room_id: str, room: dict, plate_img: np.ndarray, work_base: Pat
         sp["bbox"] = meta["bbox"]
         sp["cols"] = meta["cols"]
         sp["frameCount"] = meta["frameCount"]
+        manifest_dirty = True
 
-    _save_manifest(_load_manifest() | {"escape": _load_manifest()["escape"]})
+    if manifest_dirty:
+        m = _load_manifest()
+        room_list = m.get("escape", [])
+        for i, r in enumerate(room_list):
+            if r["id"] == room_id:
+                room_list[i] = room
+                break
+        m["escape"] = room_list
+        _save_manifest(m)
 
 
 def step_rest_layers(room_filter: set[str] | None = None) -> None:

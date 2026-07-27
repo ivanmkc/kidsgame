@@ -28253,9 +28253,9 @@
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 101,
-              "w": 536,
-              "h": 558
+              "y": 93,
+              "w": 560,
+              "h": 574
             },
             "beforeScene": "escape/toyroom.png",
             "afterScene": "escape/toyroom_pillow_reveal.png"
@@ -28337,10 +28337,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 19,
-              "y": 28,
-              "w": 677,
-              "h": 508
+              "x": 11,
+              "y": 20,
+              "w": 693,
+              "h": 536
             },
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
@@ -28386,10 +28386,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 724,
-              "y": 231,
-              "w": 556,
-              "h": 489
+              "x": 602,
+              "y": 223,
+              "w": 678,
+              "h": 497
             },
             "beforeScene": "escape/toyroom_chest_taken.png",
             "afterScene": "escape/toyroom_s2.png"
@@ -28481,9 +28481,9 @@
             "fps": 12,
             "bbox": {
               "x": 0,
-              "y": 158,
-              "w": 480,
-              "h": 562
+              "y": 150,
+              "w": 488,
+              "h": 570
             },
             "beforeScene": "escape/dragoncave.png",
             "afterScene": "escape/dragoncave_haystack_reveal.png",
@@ -28565,10 +28565,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 705,
-              "y": 30,
-              "w": 527,
-              "h": 605
+              "x": 697,
+              "y": 8,
+              "w": 583,
+              "h": 635
             },
             "beforeScene": "escape/dragoncave_haystack_taken.png",
             "afterScene": "escape/dragoncave_stove_reveal.png",
@@ -28621,10 +28621,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 971,
-              "y": 250,
-              "w": 309,
-              "h": 347
+              "x": 956,
+              "y": 201,
+              "w": 324,
+              "h": 404
             },
             "beforeScene": "escape/dragoncave_stove_taken.png",
             "afterScene": "escape/dragoncave_dragon_after.png",
@@ -28724,8 +28724,8 @@
             "bbox": {
               "x": 0,
               "y": 0,
-              "w": 475,
-              "h": 671
+              "w": 483,
+              "h": 679
             },
             "beforeScene": "escape/piratecove.png",
             "afterScene": "escape/piratecove_net_reveal.png",
@@ -28807,10 +28807,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 656,
-              "y": 180,
-              "w": 348,
-              "h": 386
+              "x": 648,
+              "y": 172,
+              "w": 364,
+              "h": 402
             },
             "beforeScene": "escape/piratecove_net_taken.png",
             "afterScene": "escape/piratecove_pelican_reveal.png",
@@ -28863,10 +28863,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 558,
-              "y": 158,
-              "w": 722,
-              "h": 547
+              "x": 467,
+              "y": 79,
+              "w": 813,
+              "h": 634
             },
             "beforeScene": "escape/piratecove_pelican_taken.png",
             "afterScene": "escape/piratecove_chest_after.png",
@@ -28961,9 +28961,9 @@
           "sprite": {
             "bbox": {
               "x": 0,
-              "y": 224,
-              "w": 482,
-              "h": 426
+              "y": 216,
+              "w": 490,
+              "h": 442
             },
             "beforeScene": "escape/rocketpad.png",
             "afterScene": "escape/rocketpad_toolbox_reveal.png",
@@ -29023,10 +29023,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 895,
-              "y": 229,
-              "w": 385,
-              "h": 451
+              "x": 887,
+              "y": 221,
+              "w": 393,
+              "h": 467
             },
             "beforeScene": "escape/rocketpad_toolbox_taken.png",
             "afterScene": "escape/rocketpad_crate_reveal.png",
@@ -29100,10 +29100,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 283,
-              "y": 96,
-              "w": 666,
-              "h": 472
+              "x": 259,
+              "y": 88,
+              "w": 699,
+              "h": 488
             },
             "beforeScene": "escape/rocketpad_crate_taken.png",
             "afterScene": "escape/rocketpad_panel_after.png",
@@ -29148,10 +29148,10 @@
             "frameCount": 48,
             "fps": 12,
             "bbox": {
-              "x": 254,
+              "x": 150,
               "y": 0,
-              "w": 872,
-              "h": 694
+              "w": 1130,
+              "h": 702
             },
             "beforeScene": "escape/rocketpad_panel_after.png",
             "afterScene": "escape/rocketpad_slot_after.png",
