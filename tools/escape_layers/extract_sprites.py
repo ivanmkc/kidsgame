@@ -576,6 +576,9 @@ def extract_sprite_sheet(
     # SAM mask; objects that change shape (chest opens, pillow moves)
     # leave gaps.  Fix: merge the plate→after alpha into the last frame
     # so the held composition exactly reconstructs the after-scene.
+    # Constrain to proximity of the last animation mask to prevent
+    # capturing unrelated siblings (pillow, etc.) that also differ
+    # from the plate.
     if plate_img is not None:
         plate_crop_fc = plate_img[
             bbox["y"]:bbox["y"] + bbox["h"],
@@ -586,6 +589,8 @@ def extract_sprite_sheet(
         ).sum(axis=-1)
         full_mask = ndimage.binary_closing(delta_fc > 25, iterations=2)
         full_mask = ndimage.binary_fill_holes(full_mask)
+        anim_territory = subsampled[-1][:, :, 3] > 0
+        full_mask &= ndimage.binary_dilation(anim_territory, iterations=20)
         full_alpha = full_mask.astype(np.uint8) * 255
         full_alpha_f = np.array(
             Image.fromarray(full_alpha).filter(ImageFilter.GaussianBlur(radius=1))
