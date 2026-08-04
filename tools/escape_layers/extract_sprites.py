@@ -459,6 +459,7 @@ def extract_sprite_sheet(
     delta_l1 = np.abs(
         after_crop.astype(np.int16) - before_crop.astype(np.int16)
     ).sum(axis=-1)
+    _external_after_alpha = None
     if plate_img is not None:
         # After-state alpha keyed against the CLEAN PLATE: the runtime
         # shows the plate wherever this layer is transparent, so the
