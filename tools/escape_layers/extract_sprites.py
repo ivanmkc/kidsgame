@@ -563,9 +563,11 @@ def extract_sprite_sheet(
             continue
         raw_t = k / max(actual_ease - 1, 1)
         t = raw_t * raw_t * (3 - 2 * raw_t)
+        orig_alpha = subsampled[idx][:, :, 3].copy()
         subsampled[idx] = (
             subsampled[idx].astype(np.float32) * (1 - t) + after_f * t
         ).clip(0, 255).astype(np.uint8)
+        subsampled[idx][:, :, 3] = orig_alpha
         sub_coverages[idx] = float(np.sum(subsampled[idx][:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
         if k in (0, actual_ease // 2, actual_ease - 1):
             print(f"[{name}]   ease frame {idx}: t={t:.3f}")
