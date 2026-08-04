@@ -28334,13 +28334,13 @@
               "h": 47
             },
             "cols": 7,
-            "frameCount": 48,
+            "frameCount": 72,
             "fps": 12,
             "bbox": {
-              "x": 11,
-              "y": 20,
-              "w": 693,
-              "h": 536
+              "x": 248,
+              "y": 75,
+              "w": 376,
+              "h": 234
             },
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
