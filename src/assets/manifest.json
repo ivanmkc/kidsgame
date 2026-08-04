@@ -28337,10 +28337,10 @@
             "frameCount": 72,
             "fps": 12,
             "bbox": {
-              "x": 248,
-              "y": 75,
-              "w": 376,
-              "h": 234
+              "x": 207,
+              "y": 28,
+              "w": 411,
+              "h": 392
             },
             "beforeScene": "escape/toyroom_pillow_taken.png",
             "afterScene": "escape/toyroom_chest_reveal.png"
