@@ -869,6 +869,7 @@ if __name__ == "__main__":
     parser.add_argument("--before", help="Path to before-scene PNG")
     parser.add_argument("--after", help="Path to after-scene PNG")
     parser.add_argument("--bbox", help="Bounding box as x,y,w,h (auto-detected if omitted)")
+    parser.add_argument("--plate", help="Path to clean plate PNG (objectless background)")
     parser.add_argument("--out-dir", default="public/escape-sprites")
     parser.add_argument("--name", help="Output name prefix")
     parser.add_argument("--all", action="store_true", help="Process all un-migrated hotspots")
@@ -889,6 +890,12 @@ if __name__ == "__main__":
             Image.open(args.after).convert("RGB").resize((1280, 720), Image.LANCZOS)
         )
 
+        plate_img = None
+        if args.plate:
+            plate_img = np.array(
+                Image.open(args.plate).convert("RGB").resize((1280, 720), Image.LANCZOS)
+            )
+
         if args.bbox:
             x, y, w, h = map(int, args.bbox.split(","))
             bbox = {"x": x, "y": y, "w": w, "h": h}
@@ -902,6 +909,7 @@ if __name__ == "__main__":
             bbox=bbox,
             out_dir=Path(args.out_dir),
             name=args.name,
+            plate_img=plate_img,
         )
         print(f"\nResult: {result}")
     else:
