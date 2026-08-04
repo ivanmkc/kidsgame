@@ -87,7 +87,7 @@ def step_plate_restore(room_id: str) -> np.ndarray:
 
     keep = np.zeros(orig.shape[:2], dtype=bool)
     for mp in sorted(SAM_DIR.glob(f"{room_id}_*.png")):
-        keep |= binary_dilation(np.array(Image.open(mp).convert("L")) > 0, iterations=5)
+        keep |= binary_dilation(np.array(Image.open(mp).convert("L")) > 0, iterations=30)
 
     w = np.clip(distance_transform_edt(~keep) / 10.0, 0, 1)
     before_diff = np.abs(clean - orig).mean(-1)[~keep].mean()
