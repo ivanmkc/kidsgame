@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 SCENES = ROOT / "assets" / "game" / "escape"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 OUT = ROOT / "public" / "escape-video"
-MODEL = "veo-3.0-fast-generate-001"
+MODEL = "veo-3.1-fast-generate-001"
 
 _tls = threading.local()
 
@@ -63,8 +63,12 @@ def _build_prompt(room_spec: dict, hotspot_spec: dict) -> str:
         f"{ESCAPE_STYLE} Starting from this exact scene, animate: {anim}. "
         f"The animation should be smooth and gentle, suitable for young children. "
         f"Keep the background and all other objects EXACTLY as they appear in the "
-        f"first frame — only the interacted object should move. The camera stays "
-        f"completely still. No text, no letters. Bright and cheerful."
+        f"first frame — only the interacted object should move. "
+        f"CRITICAL: The camera must stay PERFECTLY LOCKED — absolutely no zoom, "
+        f"no pan, no dolly, no camera movement of any kind. The framing and field "
+        f"of view must be identical in every frame. Objects must not change size "
+        f"or deform — only animate their motion. "
+        f"No text, no letters. Bright and cheerful."
     )
 
 
@@ -128,6 +132,11 @@ def gen_clip(
                     number_of_videos=1, duration_seconds=6, aspect_ratio="16:9",
                     resolution="720p", generate_audio=False,
                     person_generation="allow_all",
+                    negative_prompt=(
+                        "camera zoom, camera movement, camera pan, camera dolly, "
+                        "tracking shot, scale change, perspective change, "
+                        "field of view change, object deformation"
+                    ),
                 ),
             )
             t0 = time.time()
