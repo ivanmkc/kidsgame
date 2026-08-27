@@ -9,7 +9,7 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
-import { say, saySequence, sfx, useSay } from '../../sound';
+import { say, sayThen, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 
 interface Props {
@@ -19,6 +19,15 @@ interface Props {
   onBackToPicker: () => void;
   lang?: Lang;
 }
+
+// Backstop for the hotspot gate: how long to wait for a spoken page before
+// showing the choices anyway. Only reached when audio stalls (autoplay
+// still blocked, a clip that never fires 'ended') — the normal path is the
+// sequence's own completion callback. Sized off the shipped clips: a
+// hotspot page reads for 20s at the median and 29s at the 99th percentile
+// (tools/voice_durations.py), so 35s never cuts a real page short, and it
+// bounds the damage when a clip is wrong.
+const NARRATION_CAP_MS = 35000;
 
 // A narrated picture story where the kid steers: every node is spoken
 // aloud (pre-readers), two big choices branch the tale, four endings per
@@ -35,6 +44,12 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   // Veo action clip playing over the scene (the hero DOES the tapped action)
   const [clip, setClip] = useState<{ src: string; next: string } | null>(null);
   const animating = useRef(false);
+  // Hotspots stay hidden until the page has been read aloud. A pre-reader
+  // who can already see a glowing door taps it instead of listening, and
+  // the story IS the game — so the picture holds no targets until the
+  // narration lets go. Keyed off the spoken sequence actually finishing,
+  // never a bare timer.
+  const [narrated, setNarrated] = useState(false);
   // breadcrumb trail for Go back / Try another way (+ redo for arrow keys)
   const hist = useRef<string[]>([]);
   const redo = useRef<string[]>([]);
@@ -88,13 +103,26 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
 
   useEffect(() => {
     if (!node) return;
+    let stale = false;
+    setNarrated(false);
     if (!node.choices?.length && node.bad) sfx.boing();
     const cs = node.choices ?? [];
     const menu = cs.map((c) => c.label);
     const hots = cs.length > 0 && cs.every((c) => c.hot);
     const lead = hots ? 'Tap where you want to go!' : 'What should happen next?';
-    saySequence(menu.length ? [node.text, lead, ...menu] : [node.text]);
+    const lines = menu.length ? [node.text, lead, ...menu] : [node.text];
+    // sayThen (not saySequence) so muted play, a missing clip and a stalled
+    // one all still reveal: silence must never leave a dead picture.
+    sayThen(lines, () => { if (!stale) setNarrated(true); }, NARRATION_CAP_MS);
+    return () => { stale = true; };
   }, [node]);
+
+  // A scare or fx tap supersedes the page narration, which kills its
+  // completion callback — so the interrupting line takes over the gate and
+  // the hotspots arrive when IT finishes.
+  const speakOver = (line: string) => {
+    sayThen([line], () => setNarrated(true), NARRATION_CAP_MS);
+  };
 
   useSay(story ? null : 'Which story shall we read?');
   const { width, height } = useWindowDimensions();
@@ -220,11 +248,11 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 })}
               </View>
             ) : null}
-            {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
+            {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} onSpeak={speakOver} /> : null}
             {(node.fx ?? []).map((f, i) => (
-              <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} />
+              <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} onSpeak={speakOver} />
             ))}
-            {hasHots && !clip
+            {hasHots && !clip && narrated
               ? node.choices!.map((c, i) => (
                   <ChoiceSpot key={c.next} choice={c} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
                 ))
@@ -356,7 +384,9 @@ function ChoiceSpot({ choice, index, scale, onPick }: {
 // Non-nav surprise: a whisper-subtle shimmer invites a tap; tapping makes
 // the region itself bounce with a sparkle burst + sfx (+ optional spoken
 // line). Never navigates — a toy inside the page, re-tappable forever.
-function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
+function FxSpot({ fx, scale, onSpeak }: {
+  fx: StoryFx; scale: number; onSpeak: (line: string) => void;
+}) {
   const bounce = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
   const [burst, setBurst] = useState(0);
@@ -370,7 +400,7 @@ function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
   }, [pulse]);
   const trigger = () => {
     if (fx.sting === 'flip') sfx.flip(); else if (fx.sting === 'tap') sfx.tap(); else sfx.boing();
-    if (fx.line) say(fx.line);
+    if (fx.line) onSpeak(fx.line);
     setBurst((b) => b + 1);
     bounce.setValue(0);
     Animated.spring(bounce, { toValue: 1, friction: 3, useNativeDriver: true }).start(() => bounce.setValue(0));
@@ -403,7 +433,9 @@ function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
 // The dare-spot: a soft shimmer marks the region; tapping it makes the
 // surprise SPRING out with a sting, then (after the story's beat) the
 // spoken reveal lands. Re-tappable forever — that's the toy.
-function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
+function ScareSpot({ scare, scale, onSpeak }: {
+  scare: StoryScare; scale: number; onSpeak: (line: string) => void;
+}) {
   const [popped, setPopped] = useState(false);
   const spring = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
@@ -425,7 +457,7 @@ function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
     spring.setValue(0);
     Animated.spring(spring, { toValue: 1, friction: 3.2, tension: 160, useNativeDriver: true }).start();
     if (revealTimer.current) clearTimeout(revealTimer.current);
-    revealTimer.current = setTimeout(() => say(scare.reveal), scare.delay);
+    revealTimer.current = setTimeout(() => onSpeak(scare.reveal), scare.delay);
   };
 
   const l = scare.x * scale;
