@@ -11,7 +11,7 @@ import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
 import { playNote, playSequence, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeHighLowRound, roundsToWin, HighLowRound, getHighNote, getLowNote } from './logic';
+import { makeHighLowRound, roundsToWin, HighLowRound, correctAnswer, isCorrect } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -49,11 +49,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: 'high' | 'low') => {
     if (won || phase !== 'pick') return;
-    const highNote = getHighNote(round);
-    const lowNote = getLowNote(round);
-    const isRight = (picked === 'high' && round.answer === 'high') ||
-                    (picked === 'low' && round.answer === 'low');
-    if (isRight) {
+    if (isCorrect(round, picked)) {
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
@@ -141,7 +137,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.pickLabel, { color: '#5DA9E8' }]}>
                   {t(lang, 'music.high' as never)}
                 </Text>
-                <SparkleBurst trigger={round.answer === 'high' ? sparkKey : 0} count={5} size={14} />
+                <SparkleBurst trigger={correctAnswer(round) === 'high' ? sparkKey : 0} count={5} size={14} />
               </Pressable>
             </Animated.View>
             <Pressable
@@ -167,7 +163,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.pickLabel, { color: '#E8874F' }]}>
                   {t(lang, 'music.low' as never)}
                 </Text>
-                <SparkleBurst trigger={round.answer === 'low' ? sparkKey : 0} count={5} size={14} />
+                <SparkleBurst trigger={correctAnswer(round) === 'low' ? sparkKey : 0} count={5} size={14} />
               </Pressable>
             </Animated.View>
           </View>
