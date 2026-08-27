@@ -3,7 +3,7 @@
 // non-EN modes the tile set can't accidentally offer two "duh" answers.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, wordFor } from '../language/words';
+import { WORDS, WordEntry, soundsFor, wordFor } from '../language/words';
 
 export interface SoundsTile {
   key: string;
@@ -59,11 +59,17 @@ export function makeSoundsRound(
   const candidates = pool.filter((w) => w.icon !== avoidIcon);
   const target = candidates[Math.floor(rng() * candidates.length)];
 
-  // Distractors must (a) be different words and (b) carry a different
-  // phonic sound so a first-sounds prompt has exactly one right answer.
+  // Distractors must (a) be different words, (b) carry a different phonic
+  // sound so a first-sounds prompt has exactly one right answer — including
+  // under any name a kid might use for the picture ("bunny" for the rabbit
+  // is a 'buh' answer too) — and (c) never be something the kid would call
+  // by the TARGET's name, which is what a non-EN word prompt asks for.
+  const twins = new Set(target.nameTwins ?? []);
+  const ambiguous = (w: WordEntry) =>
+    twins.has(w.icon) || soundsFor(w).includes(target.sound);
   const usedSounds = new Set<string>([target.sound]);
   const distractors: WordEntry[] = [];
-  const shuffled = shuffle(rng, pool.filter((w) => w.icon !== target.icon));
+  const shuffled = shuffle(rng, pool.filter((w) => w.icon !== target.icon && !ambiguous(w)));
   for (const w of shuffled) {
     if (distractors.length >= tileCount - 1) break;
     if (usedSounds.has(w.sound)) continue;
@@ -71,7 +77,7 @@ export function makeSoundsRound(
     distractors.push(w);
   }
   // Extremely narrow WORDS lists could run out of unique sounds; fall back
-  // to any word (still icon-distinct) rather than crashing.
+  // to any unambiguous word (still icon-distinct) rather than crashing.
   if (distractors.length < tileCount - 1) {
     for (const w of shuffled) {
       if (distractors.length >= tileCount - 1) break;

@@ -4,10 +4,12 @@
 //   phonics — "Find something that starts with buh!" (EN only, 3x3)
 //
 // Board is constructed around the call list: every call has EXACTLY one
-// correct tile. For phonics, board icons carry distinct sounds.
+// correct tile — phonics boards carry distinct first-sounds (alternate
+// child names included), name boards never show two icons a kid would
+// call by the same word.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, wordFor } from '../language/words';
+import { WORDS, WordEntry, soundsFor, wordFor } from '../language/words';
 
 export type BingoMode = 'name' | 'phonics';
 
@@ -104,28 +106,48 @@ export function makeBoard(
 
   let selected: WordEntry[];
   if (mode === 'phonics') {
-    const bySound = new Map<string, WordEntry[]>();
-    for (const w of pool) {
-      const arr = bySound.get(w.sound) ?? [];
-      arr.push(w);
-      bySound.set(w.sound, arr);
-    }
-    const sounds = shuffle(rng, [...bySound.keys()]);
+    // Every cell becomes a call, so the whole BOARD has to be unambiguous:
+    // no two icons may share a first-sound — counting the alternate names a
+    // kid might use ("bunny" makes the rabbit a 'buh' answer next to the
+    // butterfly). Icons that carry only their canonical sound go in first;
+    // the alternate-carrying ones claim two sounds each and would starve a
+    // 9-cell board if they went first.
+    const claimed = new Set<string>();
+    const byPickiness = [
+      ...shuffle(rng, pool.filter((w) => soundsFor(w).length === 1)),
+      ...shuffle(rng, pool.filter((w) => soundsFor(w).length > 1)),
+    ];
     selected = [];
-    for (const s of sounds) {
+    for (const w of byPickiness) {
       if (selected.length >= cellCount) break;
-      const candidates = bySound.get(s)!;
-      selected.push(candidates[Math.floor(rng() * candidates.length)]);
+      const sounds = soundsFor(w);
+      if (sounds.some((snd) => claimed.has(snd))) continue;
+      sounds.forEach((snd) => claimed.add(snd));
+      selected.push(w);
     }
     if (selected.length < cellCount) {
-      const remaining = pool.filter((w) => !selected.includes(w));
-      for (const w of shuffle(rng, remaining)) {
+      // Pool too thin for a fully clean board: fall back to canonical-sound
+      // uniqueness (the pre-existing guarantee) rather than shipping a
+      // short board.
+      const canonical = new Set(selected.map((w) => w.sound));
+      for (const w of shuffle(rng, pool.filter((w) => !selected.includes(w)))) {
         if (selected.length >= cellCount) break;
+        if (canonical.has(w.sound)) continue;
+        canonical.add(w.sound);
         selected.push(w);
       }
     }
   } else {
-    selected = shuffle(rng, [...pool]).slice(0, cellCount);
+    // Name mode: "Find the flower!" must not have both the blossom and the
+    // sunflower to choose from.
+    const twinned = new Set<string>();
+    selected = [];
+    for (const w of shuffle(rng, [...pool])) {
+      if (selected.length >= cellCount) break;
+      if (twinned.has(w.icon)) continue;
+      (w.nameTwins ?? []).forEach((t) => twinned.add(t));
+      selected.push(w);
+    }
   }
 
   const boardIcons = shuffle(rng, selected.map((w) => w.icon));
