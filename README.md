@@ -63,6 +63,7 @@ npm test                          # vitest: game logic + manifest invariants
 python3 tools/generate_assets.py  # regenerate art (resumable; --only icons,diff,hidden,ui)
 python3 tools/compress_assets.py  # scenes PNG→JPEG + manifest rewrite
 node tools/gen_images_ts.mjs      # regenerate the static require() map
+python3 tools/shadow_confusability.py  # Shadow Match: no two icons cast the same silhouette
 ```
 
 ## Deploy
