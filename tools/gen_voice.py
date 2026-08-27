@@ -197,6 +197,37 @@ TTS_OVERRIDES = {
 }
 
 
+# A clip should take about as long to play as its text takes to read. When
+# it does not, the model did something other than read the line — "Sing the
+# lullaby" came back as 105 seconds of actual singing. Reject and retry.
+#
+# Rates are the median seconds-per-character measured over the shipped
+# clips, PER SCRIPT: a hanzi or kana character carries about 2.5x the sound
+# of a latin one (0.29 vs 0.12 s/char), so one rate for both would reject
+# perfectly good Japanese and Chinese reads. tools/voice_durations.py
+# re-derives them. 3x plus 8s of headroom leaves room for an expressive
+# read without letting a whole song through.
+SEC_PER_CHAR_LATIN = 0.1163
+SEC_PER_CHAR_CJK = 0.2916
+LENGTH_FACTOR = 3.0
+LENGTH_SLACK = 8.0
+
+
+def _length_ok(text: str, mp3: Path) -> bool:
+    """False when the clip runs far longer than its text can account for."""
+    try:
+        from mutagen.mp3 import MP3
+    except ImportError:
+        return True  # gate must not block on a missing dev dependency
+    try:
+        seconds = MP3(mp3).info.length
+    except Exception:  # noqa: BLE001
+        return True
+    rate = SEC_PER_CHAR_LATIN if text.isascii() else SEC_PER_CHAR_CJK
+    implied = len(text) * rate
+    return seconds <= max(implied * LENGTH_FACTOR, implied + LENGTH_SLACK)
+
+
 def synth(job: tuple[str, str]) -> bool:
     text, style = job
     out = VOICE_DIR / fname_for(text)
@@ -225,6 +256,10 @@ def synth(job: tuple[str, str]) -> bool:
                             "-ac", "1", "-i", raw, "-codec:a", "libmp3lame", "-q:a", "4",
                             str(out)], check=True)
             Path(raw).unlink()
+            if not _length_ok(say, out):
+                print(f"  clip runs far longer than the text, retry {attempt + 1}: {say[:40]!r}")
+                out.unlink(missing_ok=True)
+                continue
             print(f"  voiced: {say[:60]!r}")
             return True
         except Exception as e:  # noqa: BLE001
@@ -359,6 +394,10 @@ def synth_lang(job: tuple[str, str]) -> tuple[str, str] | None:
                             "-ac", "1", "-i", raw, "-codec:a", "libmp3lame", "-q:a", "4",
                             str(out)], check=True)
             Path(raw).unlink()
+            if not _length_ok(text, out):
+                print(f"  {lang} clip runs far longer than the text, retry {attempt + 1}: {text[:30]!r}")
+                out.unlink(missing_ok=True)
+                continue
             if len(text) > 2 and not _lang_check(lang, out):
                 print(f"  {lang} clip failed language check, retry {attempt + 1}: {text[:30]!r}")
                 out.unlink(missing_ok=True)
