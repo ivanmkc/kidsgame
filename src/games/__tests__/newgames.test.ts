@@ -139,6 +139,31 @@ describe('shadow match', () => {
       }
     }
   });
+
+  it('never offers an icon whose silhouette is the same shape as the answer', async () => {
+    // The pig and the panda cast the same shadow — a round head with two
+    // small rounded ears (IoU 0.93, measured by
+    // tools/shadow_confusability.py). Whichever is the answer, the other
+    // cannot be on the board: nothing in the shadow separates them.
+    const { makeShadowRound, SHADOW_TWINS } = await import('../shadow/logic');
+    const diffs = [
+      { choices: 3, categoryDistractors: false, transform: false },
+      { choices: 4, categoryDistractors: true, transform: true },
+      { choices: 5, categoryDistractors: true, transform: true },
+    ];
+    let sawTwinAnswer = false;
+    for (let seed = 1; seed <= 600; seed++) {
+      for (const d of diffs) {
+        const r = makeShadowRound(makeRng(seed * d.choices), manifest.spotit.icons, d);
+        expect(r.options).toHaveLength(d.choices);
+        expect(r.options).toContain(r.answer);
+        const twins = SHADOW_TWINS[r.answer] ?? [];
+        if (twins.length) sawTwinAnswer = true;
+        for (const twin of twins) expect(r.options).not.toContain(twin);
+      }
+    }
+    expect(sawTwinAnswer).toBe(true); // the guard was actually exercised
+  });
 });
 
 describe('odd one out (which does not belong)', () => {
