@@ -7,7 +7,7 @@ import { Lang } from '../../lang';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import {
-  LETTER_CONFUSABLES, LETTER_SOUNDS, KANA_POOL,
+  LETTER_CONFUSABLES, LETTER_SOUNDS, KANA_POOL, glyphTwinsOf,
   makeLetterRound, speechLines as letterSpeechLines,
 } from '../letters/logic';
 import {
@@ -20,7 +20,7 @@ import {
   availableEntries, canPlay, effectiveLang, makeRhymeRound, playableFamilies,
   settingsForRhyme, speechLines as rhymeSpeechLines,
 } from '../rhymegame/logic';
-import { RHYME_WORDS, WORDS, WordEntry } from '../language/words';
+import { RHYME_WORDS, WORDS, WordEntry, soundsFor } from '../language/words';
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i + 1);
 
@@ -39,6 +39,22 @@ describe('letters: quiz round', () => {
       expect(r.tiles[r.answerIdx].isAnswer).toBe(true);
       expect(r.tiles.filter((t) => t.isAnswer)).toHaveLength(1);
       expect(lines.has(r.promptLine)).toBe(true);
+    }
+  });
+
+  it('mixed tier: no tile is drawn as the target\u2019s look-alike glyph', () => {
+    // Capital I and lowercase l are the same bare bar in the display face,
+    // and the mixed tier deliberately prefers the I/L/J confusable group —
+    // so "Find the letter I!" could put two identical-looking tiles up and
+    // score only one of them.
+    for (let seed = 1; seed <= 5000; seed++) {
+      const r = makeLetterRound(makeRng(seed), 'mixed', 8);
+      const twins = new Set(glyphTwinsOf(r.tiles[r.answerIdx].label));
+      if (!twins.size) continue;
+      for (const [i, tile] of r.tiles.entries()) {
+        if (i === r.answerIdx) continue;
+        expect(twins.has(tile.label)).toBe(false);
+      }
     }
   });
 
@@ -164,6 +180,26 @@ describe('sounds: quiz round', () => {
       }
     },
   );
+
+  it('no distractor can answer the prompt under a name the kid might use', () => {
+    // The prompt names ONE first-sound; a picture a kid would call by
+    // another name ("bunny" for the rabbit, "soccer ball" for the ball)
+    // carries that name's sound too, and must not sit next to the answer.
+    // Same for the non-EN word prompts: "\u306f\u306a" must not show two flowers.
+    for (const lang of ['en', 'ja', 'cmn', 'yue'] as Lang[]) {
+      for (const seed of SEEDS) {
+        const r = makeSoundsRound(makeRng(seed), manifest.spotit.icons, lang, 4);
+        const answer = WORDS.find((w) => w.icon === r.tiles[r.answerIdx].key)!;
+        const twins = new Set(answer.nameTwins ?? []);
+        for (const [i, tile] of r.tiles.entries()) {
+          if (i === r.answerIdx) continue;
+          const w = WORDS.find((x) => x.icon === tile.key)!;
+          expect(soundsFor(w)).not.toContain(answer.sound);
+          expect(twins.has(w.icon)).toBe(false);
+        }
+      }
+    }
+  });
 
   it('en: prompt line is enumerated in speechLines', () => {
     const lines = new Set(soundsSpeechLines());
