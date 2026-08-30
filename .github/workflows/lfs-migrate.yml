@@ -23,6 +23,10 @@ jobs:
         working-directory: repo.git
         run: git update-ref -d refs/heads/gh-pages
 
+      - name: Disable implicit mirror push (conflicts with explicit refspecs)
+        working-directory: repo.git
+        run: git config --unset remote.origin.mirror
+
       - name: Install local LFS hooks (needed for push to upload objects)
         working-directory: repo.git
         run: git lfs install --local
