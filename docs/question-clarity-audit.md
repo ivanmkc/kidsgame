@@ -156,23 +156,39 @@ into the English pass and `ja`/`cmn`/`yue` into the language-tagged pass.
 
 ---
 
+## Noted, then fixed separately
+
+Three findings were deferred out of the first pass and carried in their own
+changes — Mandarin finals here, Shadow Match in #23, More or Less in #24.
+Two of the three deferrals were wrong about *why*, and the record should say
+so:
+
+- **Rhyme Time, Mandarin finals.** I first called the `i` family broken for
+  grouping neutral-tone 子 (apical *-i*) with palatal *-i*. On a closer look
+  that grouping is correct — 一七辙 covers *i*, *ü*, *er* and the apical
+  vowel together, which is how Mandarin verse has always rhymed. The
+  families that *were* broken are different ones, and the bug is the same in
+  both: they were cut by bare pinyin spelling rather than by rhyme category.
+  `u` mixed 猪 *zhū* (*u*, 姑苏) with 鱼 *yú* (*ü*, 一七); `e` mixed 螃蟹
+  *xiè* and 蝴蝶 *dié* (*ie*, 乜斜) with 汽车 *chē* (*e*, 梭波). Re-cut by
+  十三辙, with a test that states each word's category independently of the
+  game data so the two have to agree.
+- **Shadow Match silhouettes.** I called this unanswerable without eyes on
+  the sprites. It is perfectly answerable from the pixels:
+  `tools/shadow_confusability.py` scores every icon pair's silhouettes under
+  every pose the game can reach for that pair. Across 930 pairs the 99th
+  percentile is 0.89 IoU, and exactly one pair is an outlier — **pig/panda
+  at 0.931, with no rotation at all** (both are a round head with two small
+  rounded ears; the fox next to them has pointed ears). Now declared as
+  `SHADOW_TWINS` and kept off each other's boards.
+- **More or Less, hard tier.** This one was correctly diagnosed and just
+  deferred: `minGap: 1` over `[3, 10]` treats 3 vs 4 and 9 vs 10 as the same
+  question. Fixed by adding the Weber half of the rule — the larger side
+  must also be 1.25× the smaller — which leaves easy and medium bit-for-bit
+  unchanged and drops exactly the five tight big-number pairs from hard.
+
 ## Noted, not fixed
 
-- **Rhyme Time, Mandarin `i` family.** Groups 狮子 *shīzi*, 猴子 *hóuzi*,
-  兔子 *tùzi* (neutral-tone 子, apical vowel) with 飞机 *fēijī* and 狐狸
-  *húli* (palatal *i*). Those do not rhyme to a native ear. Fixing it means
-  re-cutting the `cmnRhyme` finals — a linguistic data call, not a code
-  bug, and worth a native speaker rather than my judgement.
-- **More or Less, hard tier.** `minGap: 1` over counts up to 10 asks a
-  four-year-old to eyeball 9 scattered critters against 10. The question is
-  unambiguous and the answer is well defined — it is a difficulty choice,
-  so I left it alone, but it is the one tier where a correct listener still
-  loses a lot.
-- **Shadow Match silhouettes.** Whether two icons cast indistinguishable
-  shadows once rotated up to 70° and mirrored can't be settled from the
-  data — it needs eyes on the sprites. The round builder's guarantees
-  (answer present, options unique, same-category distractors only when the
-  tier asks for them) all hold.
 - **`CATEGORY_CONFLICTS` is applied by Rule Time but not Odd One Out.** It
   is a filler rule ("don't offer an animal as a non-match against
   flowers"), and Odd One Out's questions enumerate their categories, so no
@@ -223,3 +239,6 @@ answer, and matches its wording:
 | `bingo`: *no call has two plausible answers, under any child name* | Phonics board ambiguity |
 | `bingo`: *never shows two icons a kid calls by the same word* | Name board twins |
 | `newgames`: *every category has a spoken question in all four langs* | A new category reaching the generic fallback |
+| `newgames`: *never offers an icon whose silhouette is the same shape* | Shadow Match twins |
+| `quizsuite`: *no family mixes two rhyme categories* | A cmnRhyme key cut by spelling instead of by 辙 |
+| `mathsuite`: *counts differ by ≥ gap and ≥ ratio* | An unfair big-number pair in More or Less |
