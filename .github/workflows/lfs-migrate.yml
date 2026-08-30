@@ -1,0 +1,42 @@
+name: LFS History Migration (one-off)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Install git-lfs (global filters)
+        run: git lfs install --skip-smudge
+
+      - name: Mirror clone (all branches/tags)
+        env:
+          REPO_URL: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+        run: git clone --mirror "$REPO_URL" repo.git
+
+      - name: Exclude gh-pages (served raw by Pages, must not become LFS pointers)
+        working-directory: repo.git
+        run: git update-ref -d refs/heads/gh-pages
+
+      - name: Install local LFS hooks (needed for push to upload objects)
+        working-directory: repo.git
+        run: git lfs install --local
+
+      - name: Rewrite history to move large binaries into LFS
+        working-directory: repo.git
+        run: |
+          git lfs migrate import --everything \
+            --include="*.png,*.jpg,*.jpeg,*.webp,*.gif,*.mp4,*.mp3,*.mov,*.wav,*.m4a,*.aac"
+
+      - name: Force-push rewritten branches (uploads LFS objects via pre-push hook)
+        working-directory: repo.git
+        run: git push --force origin 'refs/heads/*:refs/heads/*'
+
+      - name: Force-push tags
+        working-directory: repo.git
+        run: git push --force origin 'refs/tags/*:refs/tags/*'
