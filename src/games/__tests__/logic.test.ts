@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { manifest } from '../../manifest';
@@ -81,6 +81,23 @@ describe('spot it duel', () => {
     expect(hintAfterMs(3, 1, 3)).toBe(Infinity); // leader gets no hint
     expect(hintAfterMs(0, 2, 3)).toBe(3000);
     expect(hintAfterMs(1, 4, 5)).toBe(5000);
+  });
+});
+
+describe('asset manifest: every image require resolves', () => {
+  // images.ts is generated: it maps manifest entries to require() paths. A
+  // scene committed without its derived file leaves a require pointing at
+  // nothing, and Metro refuses to bundle the whole app — `expo export`
+  // failed outright on a missing ice_palace_thumb.jpg, with no test and no
+  // CI to notice. Cheap to check, and it needs no image bytes (an LFS
+  // pointer still exists on disk), so it runs anywhere.
+  it('no require() in images.ts points at a missing file', () => {
+    const src = readFileSync(join(__dirname, '../../assets/images.ts'), 'utf8');
+    const requires = [...src.matchAll(/require\('(\.\.\/\.\.\/assets\/[^']+)'\)/g)].map((m) => m[1]);
+    expect(requires.length).toBeGreaterThan(100);
+    // paths are relative to src/assets/images.ts, so resolve from there
+    const missing = requires.filter((rel) => !existsSync(join(__dirname, '../../assets', rel)));
+    expect(missing, `missing asset files: ${missing.join(', ')}`).toEqual([]);
   });
 });
 
