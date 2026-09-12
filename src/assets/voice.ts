@@ -1701,8 +1701,6 @@ export const VOICE: Record<string, string> = {
   "Simon says... Wave hello!": '8eabdff5752be869.mp3',
   "Simon says... Wiggle your toes!": 'a5967aab459135f1.mp3',
   "Sing into the roots": '7f6b1b036782fc77.mp3',
-  "Sing the lullaby": '60e85e733328198c.mp3',
-  "Sing the lullaby together": 'c7121985e95cdd0f.mp3',
   "Sink into the cushion": '2271175fb42864f8.mp3',
   "Sir Stretch was folded under there ALL MORNING waiting! 'Worth it,' he says, un-crumpling.": '0a60a9e47a794d64.mp3',
   "Sit and wait quietly": '7c38c8ba3353bbba.mp3',
