@@ -173,11 +173,14 @@ into the English pass and `ja`/`cmn`/`yue` into the language-tagged pass.
   data — it needs eyes on the sprites. The round builder's guarantees
   (answer present, options unique, same-category distractors only when the
   tier asks for them) all hold.
-- **`CATEGORY_CONFLICTS` is applied by Rule Time but not Odd One Out.** It
-  is a filler rule ("don't offer an animal as a non-match against
-  flowers"), and Odd One Out's questions enumerate their categories, so no
-  round it can build is ambiguous today. Left as-is rather than widening a
-  rule that isn't currently buying anything.
+- ~~**`CATEGORY_CONFLICTS` is applied by Rule Time but not Odd One Out.**~~
+  **Fixed.** I first judged this not worth widening: it is a filler rule
+  ("don't offer an animal as a non-match against flowers"), and Odd One
+  Out's questions enumerate their categories, so no round looked ambiguous.
+  That was too generous. Asked *"which one is NOT a flower, rainbow or
+  star?"* with a butterfly on the board, a kid who counts the butterfly as
+  nature — exactly the doubt the conflict table exists to record — has
+  nowhere to go. The intruder is now drawn from a non-conflicting category.
 
 ---
 
