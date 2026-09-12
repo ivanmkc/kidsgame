@@ -12,15 +12,25 @@ from .judge import ask_yes_no
 from .nbp import generate
 
 # index-aligned with the emoji list the game logic was built on
+#
+# Poses are load-bearing, not flavour. Shadow Match plays the SILHOUETTE of
+# an icon, so anything that identifies an animal from inside its outline —
+# colour, snout, whiskers, markings — is thrown away before the kid sees it.
+# The eight animals were once prompted as "a <thing> face" and every pair of
+# them scored 0.80-0.93 silhouette IoU (tools/shadow_confusability.py): a
+# round head with two small ears, eight times over. They are full-body now,
+# each with its species cue clear of the body — tail, ears, snout, legs.
+# Keep them that way; rabbit and koala stay faces only because their ears
+# already carry the outline (worst-case 0.69 and 0.77).
 ICONS = [
-    ("dog", "a happy puppy dog face"),
-    ("cat", "a cute cat face"),
-    ("lion", "a friendly lion face with a fluffy mane"),
-    ("frog", "a smiling green frog face"),
-    ("panda", "a panda bear face"),
-    ("fox", "an orange fox face"),
-    ("monkey", "a cheeky monkey face"),
-    ("pig", "a pink pig face"),
+    ("dog", "a happy puppy dog standing side-on, full body, tail up and wagging, one floppy ear"),
+    ("cat", "a cute cat sitting, full body, long tail curving upright, pointed ears"),
+    ("lion", "a friendly lion standing side-on, full body, fluffy mane and a tufted tail"),
+    ("frog", "a smiling green frog squatting front-on, full body, splayed webbed feet and bent hind legs"),
+    ("panda", "a panda bear sitting, full body, arms and legs out from the body"),
+    ("fox", "an orange fox standing side-on, full body, big bushy tail and sharp pointed ears"),
+    ("monkey", "a cheeky monkey sitting, full body, long curled tail and arms away from the body"),
+    ("pig", "a pink pig standing side-on, full body, round snout, curly tail and four short legs"),
     ("rabbit", "a white rabbit face with long ears"),
     ("koala", "a grey koala face"),
     ("unicorn", "a magical unicorn head with rainbow mane"),
@@ -31,7 +41,7 @@ ICONS = [
     ("ladybug", "a red ladybug with black dots"),
     ("blossom", "a pink cherry blossom flower"),
     ("sunflower", "a bright yellow sunflower"),
-    ("apple", "a shiny red apple"),
+    ("apple", "a shiny red apple with a stem and one leaf angled out to the side"),
     ("banana", "a yellow banana"),
     ("strawberry", "a red strawberry"),
     ("pizza", "a slice of cheese pizza"),
@@ -43,7 +53,7 @@ ICONS = [
     ("soccer", "a black and white soccer ball"),
     ("rainbow", "a rainbow with two small clouds"),
     ("star", "a golden five-pointed star with a smiling face, classic star shape with correct proportions (as tall as it is wide)"),
-    ("gift", "a wrapped gift box with a bow"),
+    ("gift", "a tall wrapped gift box with a big bow and two ribbon tails"),
 ]
 
 def _touches_edge(img, tol: int = 6) -> bool:
