@@ -31,8 +31,11 @@ export const CATEGORY_TEXT: Record<string, { tap: string; not: Record<Lang, stri
     not: { en: 'Which one is NOT food?', ja: 'たべものじゃないのは？', cmn: '哪一个不是食物？', yue: '邊個唔係食物？' },
   },
   things: {
-    tap: 'Tap the TOYS & VEHICLES! 🚗',
-    not: { en: 'Which one is NOT a toy or vehicle?', ja: 'おもちゃ・のりものじゃないのは？', cmn: '哪一个不是玩具或车辆？', yue: '邊個唔係玩具或車？' },
+    // The present is a member too, so both wordings name it — "NOT a toy
+    // or vehicle" made the gift a second right answer in Odd One Out, and
+    // an untappable match in Rule Time.
+    tap: 'Tap the TOYS, VEHICLES & PRESENTS! 🚗',
+    not: { en: 'Which one is NOT a toy, vehicle or present?', ja: 'おもちゃ・のりもの・プレゼントじゃないのは？', cmn: '哪一个不是玩具、车辆或礼物？', yue: '邊個唔係玩具、車或者禮物？' },
   },
 };
 

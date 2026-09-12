@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
-import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote } from '../highlow/logic';
+import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
 import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
-import { makeFastSlowRound, getActualSpeed, roundsToWin as fsRounds } from '../fastslow/logic';
+import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
 import { makeSameDiffRound, isCorrect, roundsToWin as sdRounds } from '../samediff/logic';
 
 describe('high or low', () => {
@@ -18,6 +18,25 @@ describe('high or low', () => {
         expect(['high', 'low']).toContain(r.answer);
       }
     }
+  });
+
+  it('the answer is what the ears heard, never a coin flip', () => {
+    // The kid hears note A then note B and taps HIGH or LOW for where the
+    // second one landed — so the answer has to follow the notes. When it
+    // was drawn independently the round was pure 50/50 luck.
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const d of ['easy', 'medium', 'hard'] as const) {
+        const r = makeHighLowRound(makeRng(seed), d);
+        const wentUp = r.noteB > r.noteA;
+        expect(r.answer).toBe(wentUp ? 'high' : 'low');
+        expect(hlAnswer(r)).toBe(r.answer);
+        expect(hlCorrect(r, r.answer)).toBe(true);
+        expect(hlCorrect(r, r.answer === 'high' ? 'low' : 'high')).toBe(false);
+        seen.add(r.answer);
+      }
+    }
+    expect(seen).toEqual(new Set(['high', 'low']));
   });
 
   it('roundsToWin increases with difficulty', () => {
@@ -167,6 +186,20 @@ describe('fast or slow', () => {
         expect(['fast', 'slow']).toContain(speed);
       }
     }
+  });
+
+  it('the answer field always agrees with the tempo played', () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const d of ['easy', 'medium', 'hard'] as const) {
+        const r = makeFastSlowRound(makeRng(seed), d);
+        expect(r.answer).toBe(getActualSpeed(r));
+        expect(fsCorrect(r, r.answer)).toBe(true);
+        expect(fsCorrect(r, r.answer === 'fast' ? 'slow' : 'fast')).toBe(false);
+        seen.add(r.answer);
+      }
+    }
+    expect(seen).toEqual(new Set(['fast', 'slow']));
   });
 
   it('roundsToWin increases with difficulty', () => {
