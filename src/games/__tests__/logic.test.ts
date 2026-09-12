@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { manifest } from '../../manifest';
@@ -93,6 +93,39 @@ describe('asset manifest: spot it icons', () => {
   it('every icon sprite exists on disk', () => {
     for (const name of manifest.spotit.icons) {
       expect(existsSync(join(ASSETS, 'spotit', `${name}.png`)), name).toBe(true);
+    }
+  });
+});
+
+describe('asset manifest: picker thumbnails', () => {
+  // Every picture a ScenePicker card can show. The picker falls back to the
+  // full-size scene when a thumb is missing, so the failure is silent and
+  // only shows up as megabytes on the wire — the story picker was pulling
+  // 43.7 MB of 1280x720 PNGs to draw 48 cards because gen_thumbs.py rendered
+  // story thumbs that gen_images_ts.mjs never mapped. Two generators, one
+  // list: they have to agree.
+  const pickerScenes: string[] = [
+    ...manifest.diff.map((d) => d.image ?? d.imageA),
+    ...manifest.hidden.map((h) => h.image),
+    ...(manifest.escape ?? []).map((r) => r.image),
+    ...(manifest.stories ?? []).map((s) => s.nodes.start.image),
+  ].filter((x): x is string => !!x);
+  const imagesTs = readFileSync(join(__dirname, '../../assets/images.ts'), 'utf8');
+  const thumbMap = imagesTs.slice(
+    imagesTs.indexOf('export const SCENE_THUMBS'),
+    imagesTs.indexOf('export const DRESSUP_ICONS'),
+  );
+
+  it('every picker scene has a thumbnail on disk', () => {
+    for (const image of pickerScenes) {
+      const thumb = image.replace(/\.(png|jpg)$/, '_thumb.jpg');
+      expect(existsSync(join(ASSETS, thumb)), thumb).toBe(true);
+    }
+  });
+
+  it('every picker scene is mapped in SCENE_THUMBS', () => {
+    for (const image of pickerScenes) {
+      expect(thumbMap.includes(`'${image}':`), image).toBe(true);
     }
   });
 });

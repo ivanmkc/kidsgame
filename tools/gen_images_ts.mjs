@@ -64,10 +64,15 @@ for (const f of [...sceneFiles].sort()) {
 }
 lines.push('};', '', '// small jpg derivatives for picker cards (fall back to full image)');
 lines.push('export const SCENE_THUMBS: Record<string, number> = {');
+// Every picture a ScenePicker card can show. Keep this in step with what
+// gen_thumbs.py renders: a scene that has a thumb on disk but no entry here
+// silently falls back to the full-size image in the picker, which is how
+// the story picker came to load 43.7 MB of 1280x720 PNGs to draw 48 cards.
 const thumbable = new Set();
 for (const d of manifest.diff) thumbable.add(d.image ?? d.imageA);
 for (const h of manifest.hidden) thumbable.add(h.image);
 for (const r of manifest.escape ?? []) thumbable.add(r.image);
+for (const st of manifest.stories ?? []) thumbable.add(st.nodes.start.image);
 for (const f of [...thumbable].sort()) {
   const t = f.replace(/\.(png|jpg)$/, '_thumb.jpg');
   if (exists(t)) lines.push(`  '${f}': require('../../assets/game/${t}'),`);
