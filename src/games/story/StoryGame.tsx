@@ -44,11 +44,12 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   // Veo action clip playing over the scene (the hero DOES the tapped action)
   const [clip, setClip] = useState<{ src: string; next: string } | null>(null);
   const animating = useRef(false);
-  // Hotspots stay hidden until the page has been read aloud. A pre-reader
-  // who can already see a glowing door taps it instead of listening, and
-  // the story IS the game — so the picture holds no targets until the
-  // narration lets go. Keyed off the spoken sequence actually finishing,
-  // never a bare timer.
+  // Choices stay hidden until the page has been read aloud — the in-scene
+  // hotspots and the button row below the picture alike. A pre-reader who
+  // can already see a glowing door (or a big green button) taps it instead
+  // of listening, and the story IS the game, so the page offers nothing to
+  // tap until the narration lets go. Keyed off the spoken sequence actually
+  // finishing, never a bare timer.
   const [narrated, setNarrated] = useState(false);
   // breadcrumb trail for Go back / Try another way (+ redo for arrow keys)
   const hist = useRef<string[]>([]);
@@ -305,7 +306,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               minWidth={230}
             />
           </View>
-        ) : hasHots ? null : (
+        ) : hasHots || !narrated ? null : (
           <View style={styles.choices}>
             {node.choices!.map((c, i) => c.icon ? (
               <Pressable
