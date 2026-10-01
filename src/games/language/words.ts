@@ -7,6 +7,23 @@
 // (ja) or the last-syllable final (cmn/yue) rather than translating the
 // EN rhymes. Only entries that share a family with ≥1 other icon-backed
 // entry carry a key; singletons stay bare so the pool builder skips them.
+//
+// cmnRhyme follows the 十三辙 rhyme categories, not the bare pinyin
+// spelling — that is what Mandarin verse and children's rhymes actually
+// rhyme by, and spelling alone gets it wrong in both directions:
+//   一七 i, ü, er, apical -i  →  狮子 shīzi, 狐狸 húli, 飞机 fēijī,
+//                                兔子 tùzi, 猴子 hóuzi, 鱼 yú, 章鱼 zhāngyú
+//   姑苏 u                    →  猪 zhū, 礼物 lǐwù   (NOT 鱼 yú — that is ü)
+//   乜斜 ie, üe               →  螃蟹 xiè, 蝴蝶 dié  (NOT 汽车 chē — that is 梭波)
+//   发花 a, ia, ua            →  青蛙 wā, 考拉 lā, 花 huā, 披萨 sà
+//   遥条 ao, iao              →  猫 māo, 熊猫 māo, 香蕉 jiāo
+//   灰堆 ei, ui               →  草莓 méi, 向日葵 kuí
+//   由求 ou, iu               →  狗 gǒu, 独角兽 shòu | 气球 qiú, 足球 qiú
+//   中东 eng, ing, ong, iong  →  瓢虫 chóng, 彩虹 hóng
+// 由求 is deliberately split into 'ou' and 'iu' so the game only ever
+// pairs exact finals — stricter than the 辙 requires, which is the right
+// side to err on when the point is teaching a kid what rhyming sounds
+// like. 汽车 chē is the only 梭波 word with an icon, so it goes bare.
 import { Lang } from '../../lang';
 
 export interface WordEntry {
@@ -44,10 +61,10 @@ export const WORDS: WordEntry[] = [
   { icon: 'rabbit', en: 'rabbit', letter: 'R', sound: 'rrr', altSounds: ['buh'], /* bunny */ cmnRhyme: 'i', yueRhyme: 'ai', ja: 'うさぎ', jaR: 'usagi', cmn: '兔子', cmnR: 'tùzi', yue: '兔仔', yueR: 'tou-zai' },
   { icon: 'koala', en: 'koala', letter: 'K', sound: 'kuh', cmnRhyme: 'a', yueRhyme: 'ung', ja: 'コアラ', jaR: 'koara', cmn: '考拉', cmnR: 'kǎolā', yue: '樹熊', yueR: 'syu-hung' },
   { icon: 'unicorn', en: 'unicorn', letter: 'U', sound: 'yoo', jaRhyme: 'n', cmnRhyme: 'ou', yueRhyme: 'au', ja: 'ユニコーン', jaR: 'yunikoon', cmn: '独角兽', cmnR: 'dújiǎoshòu', yue: '獨角獸', yueR: 'duk-gok-sau' },
-  { icon: 'octopus', en: 'octopus', letter: 'O', sound: 'ah', jaRhyme: 'ko', cmnRhyme: 'u', yueRhyme: 'yu', ja: 'たこ', jaR: 'tako', cmn: '章鱼', cmnR: 'zhāngyú', yue: '八爪魚', yueR: 'baat-zaau-jyu' },
-  { icon: 'crab', en: 'crab', letter: 'C', sound: 'kuh', cmnRhyme: 'e', ja: 'かに', jaR: 'kani', cmn: '螃蟹', cmnR: 'pángxiè', yue: '蟹', yueR: 'haai' },
-  { icon: 'fish', en: 'fish', letter: 'F', sound: 'fff', jaRhyme: 'na', cmnRhyme: 'u', yueRhyme: 'yu', ja: 'さかな', jaR: 'sakana', cmn: '鱼', cmnR: 'yú', yue: '魚', yueR: 'jyu' },
-  { icon: 'butterfly', en: 'butterfly', letter: 'B', sound: 'buh', cmnRhyme: 'e', ja: 'ちょうちょ', jaR: 'choucho', cmn: '蝴蝶', cmnR: 'húdié', yue: '蝴蝶', yueR: 'wu-dip' },
+  { icon: 'octopus', en: 'octopus', letter: 'O', sound: 'ah', jaRhyme: 'ko', cmnRhyme: 'i', yueRhyme: 'yu', ja: 'たこ', jaR: 'tako', cmn: '章鱼', cmnR: 'zhāngyú', yue: '八爪魚', yueR: 'baat-zaau-jyu' },
+  { icon: 'crab', en: 'crab', letter: 'C', sound: 'kuh', cmnRhyme: 'ie', ja: 'かに', jaR: 'kani', cmn: '螃蟹', cmnR: 'pángxiè', yue: '蟹', yueR: 'haai' },
+  { icon: 'fish', en: 'fish', letter: 'F', sound: 'fff', jaRhyme: 'na', cmnRhyme: 'i', yueRhyme: 'yu', ja: 'さかな', jaR: 'sakana', cmn: '鱼', cmnR: 'yú', yue: '魚', yueR: 'jyu' },
+  { icon: 'butterfly', en: 'butterfly', letter: 'B', sound: 'buh', cmnRhyme: 'ie', ja: 'ちょうちょ', jaR: 'choucho', cmn: '蝴蝶', cmnR: 'húdié', yue: '蝴蝶', yueR: 'wu-dip' },
   { icon: 'ladybug', en: 'ladybug', letter: 'L', sound: 'lll', jaRhyme: 'shi', cmnRhyme: 'ong', yueRhyme: 'ung', ja: 'てんとうむし', jaR: 'tentoumushi', cmn: '瓢虫', cmnR: 'piáochóng', yue: '甲蟲', yueR: 'gaap-cung' },
   { icon: 'blossom', en: 'flower', letter: 'F', sound: 'fff', nameTwins: ['sunflower'], jaRhyme: 'na', cmnRhyme: 'a', yueRhyme: 'aa', ja: 'はな', jaR: 'hana', cmn: '花', cmnR: 'huā', yue: '花', yueR: 'faa' },
   { icon: 'sunflower', en: 'sunflower', letter: 'S', sound: 'sss', altSounds: ['fff'], nameTwins: ['blossom'], /* flower */ cmnRhyme: 'ei', yueRhyme: 'ai', ja: 'ひまわり', jaR: 'himawari', cmn: '向日葵', cmnR: 'xiàngrìkuí', yue: '向日葵', yueR: 'hoeng-jat-kwai' },
@@ -57,7 +74,7 @@ export const WORDS: WordEntry[] = [
   { icon: 'pizza', en: 'pizza', letter: 'P', sound: 'puh', cmnRhyme: 'a', ja: 'ピザ', jaR: 'piza', cmn: '披萨', cmnR: 'pīsà', yue: '薄餅', yueR: 'bok-beng' },
   { icon: 'icecream', en: 'ice cream', letter: 'I', sound: 'eye', ja: 'アイスクリーム', jaR: 'aisukuriimu', cmn: '冰淇淋', cmnR: 'bīngqílín', yue: '雪糕', yueR: 'syut-gou' },
   { icon: 'balloon', en: 'balloon', letter: 'B', sound: 'buh', jaRhyme: 'n', cmnRhyme: 'iu', yueRhyme: 'au', ja: 'ふうせん', jaR: 'fuusen', cmn: '气球', cmnR: 'qìqiú', yue: '氣球', yueR: 'hei-kau' },
-  { icon: 'car', en: 'car', letter: 'C', sound: 'kuh', rhymeKey: 'ar', cmnRhyme: 'e', ja: 'くるま', jaR: 'kuruma', cmn: '汽车', cmnR: 'qìchē', yue: '車', yueR: 'ce' },
+  { icon: 'car', en: 'car', letter: 'C', sound: 'kuh', rhymeKey: 'ar', ja: 'くるま', jaR: 'kuruma', cmn: '汽车', cmnR: 'qìchē', yue: '車', yueR: 'ce' },
   { icon: 'plane', en: 'plane', letter: 'P', sound: 'puh', cmnRhyme: 'i', yueRhyme: 'ei', ja: 'ひこうき', jaR: 'hikouki', cmn: '飞机', cmnR: 'fēijī', yue: '飛機', yueR: 'fei-gei' },
   { icon: 'rocket', en: 'rocket', letter: 'R', sound: 'rrr', altSounds: ['sss'], /* spaceship */ jaRhyme: 'to', ja: 'ロケット', jaR: 'roketto', cmn: '火箭', cmnR: 'huǒjiàn', yue: '火箭', yueR: 'fo-zin' },
   { icon: 'soccer', en: 'ball', letter: 'B', sound: 'buh', altSounds: ['sss'], /* soccer ball */ jaRhyme: 'ru', cmnRhyme: 'iu', yueRhyme: 'au', ja: 'ボール', jaR: 'booru', cmn: '足球', cmnR: 'zúqiú', yue: '足球', yueR: 'zuk-kau' },

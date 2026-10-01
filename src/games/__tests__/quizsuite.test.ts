@@ -365,6 +365,58 @@ describe('rhyme: per-language families', () => {
   });
 });
 
+// The 十三辙 rhyme category each Mandarin word's LAST SYLLABLE belongs to,
+// stated here from the romanization rather than read out of the game data —
+// so a mis-keyed cmnRhyme is caught by disagreement between two independent
+// statements of the same fact, not by restating the key.
+const CMN_ZHE: Record<string, string> = {
+  lion: '一七', fox: '一七', monkey: '一七', rabbit: '一七',   // shīzi húli hóuzi tùzi
+  octopus: '一七', fish: '一七', plane: '一七',                 // zhāngyú yú fēijī
+  pig: '姑苏', gift: '姑苏',                                    // zhū lǐwù
+  crab: '乜斜', butterfly: '乜斜',                              // pángxiè húdié
+  frog: '发花', koala: '发花', blossom: '发花', pizza: '发花',   // qīngwā kǎolā huā pīsà
+  cat: '遥条', panda: '遥条', banana: '遥条',                    // māo xióngmāo xiāngjiāo
+  sunflower: '灰堆', strawberry: '灰堆',                        // xiàngrìkuí cǎoméi
+  dog: '由求', unicorn: '由求', balloon: '由求', soccer: '由求', // gǒu shòu qiú qiú
+  ladybug: '中东', rainbow: '中东',                             // piáochóng cǎihóng
+};
+
+describe('rhyme: Mandarin families follow the 十三辙 categories', () => {
+  const families = playableFamilies(availableEntries('cmn', manifest.spotit.icons));
+
+  it('no family mixes two rhyme categories', () => {
+    // 鱼 yú is ü (一七), not u (姑苏); 螃蟹 xiè and 蝴蝶 dié are ie (乜斜),
+    // not e (梭波). Grouping by bare pinyin spelling got both wrong.
+    for (const [key, members] of Object.entries(families)) {
+      const zhe = members.map((m) => CMN_ZHE[m.icon]);
+      for (const z of zhe) expect(z, `${key}: ${members.map((m) => m.icon).join()}`).toBeDefined();
+      expect(new Set(zhe).size, `${key} spans ${[...new Set(zhe)].join(' + ')}`).toBe(1);
+    }
+  });
+
+  it('only 由求 is split across families, and only into exact finals', () => {
+    // Splitting is stricter than the 辙 requires: the game then pairs gǒu
+    // with shòu and qiú with qiú, never gǒu with qiú. That is the right
+    // side to err on when the point is teaching what rhyming sounds like.
+    const byZhe = new Map<string, string[]>();
+    for (const [key, members] of Object.entries(families)) {
+      const z = CMN_ZHE[members[0].icon];
+      byZhe.set(z, [...(byZhe.get(z) ?? []), key]);
+    }
+    for (const [zhe, keys] of byZhe) {
+      if (zhe === '由求') expect(keys.sort()).toEqual(['iu', 'ou']);
+      else expect(keys, `${zhe} should be one family`).toHaveLength(1);
+    }
+  });
+
+  it('still clears the 8-family bar, so hard keeps its full 12 rounds', () => {
+    const count = Object.keys(families).length;
+    expect(count).toBeGreaterThanOrEqual(8);
+    expect(settingsForRhyme('hard', count).rounds).toBe(12);
+    expect(effectiveLang('cmn', manifest.spotit.icons)).toBe('cmn');
+  });
+});
+
 describe('rhyme: settings scale with pool size', () => {
   it('≥8 families: easy/medium/hard = 8/10/12 rounds', () => {
     expect(settingsForRhyme('easy', 8)).toEqual({ rounds: 8, tiles: 3 });
