@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
 import { CRITTER_ICONS, countSettings, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
-import { compareSettings, makeCompareRound, speechLines as compareSpeechLines } from '../compare/logic';
+import { compareSettings, isFairPair, makeCompareRound, speechLines as compareSpeechLines } from '../compare/logic';
 import { makeSumChoices, makeSumsRound, speechLines as sumsSpeechLines, sumsSettings } from '../sums/logic';
 
 const DIFFS = ['easy', 'medium', 'hard'] as const;
@@ -74,14 +74,18 @@ describe('count with me', () => {
 
 describe('more or less', () => {
   for (const d of DIFFS) {
-    const { minGap, range: [lo, hi], fewerFraction } = compareSettings(d);
-    it(`${d}: counts differ by ≥ ${minGap}, in [${lo},${hi}], correct side flagged (200 seeds)`, () => {
+    const { minGap, minRatio, range: [lo, hi], fewerFraction } = compareSettings(d);
+    it(`${d}: counts differ by ≥ ${minGap} and ≥ ${minRatio}×, in [${lo},${hi}], correct side flagged (200 seeds)`, () => {
       let fewerCount = 0;
       const seeds = 200;
       for (let seed = 1; seed <= seeds; seed++) {
         const r = makeCompareRound(makeRng(seed), d);
         expect(r.left.count).not.toBe(r.right.count);
         expect(Math.abs(r.left.count - r.right.count)).toBeGreaterThanOrEqual(minGap);
+        // and far enough apart in PROPORTION: 9 vs 10 is one apart like
+        // 3 vs 4, but no four-year-old can see it.
+        expect(Math.max(r.left.count, r.right.count))
+          .toBeGreaterThanOrEqual(Math.min(r.left.count, r.right.count) * minRatio);
         for (const c of [r.left.count, r.right.count]) {
           expect(c).toBeGreaterThanOrEqual(lo);
           expect(c).toBeLessThanOrEqual(hi);
@@ -109,6 +113,42 @@ describe('more or less', () => {
       }
     });
   }
+});
+
+describe('more or less: the hard tier stays hard without being unfair', () => {
+  it('keeps one-apart pairs at small counts and drops them at big ones', () => {
+    const { minGap, minRatio } = compareSettings('hard');
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 5000; seed++) {
+      const r = makeCompareRound(makeRng(seed), 'hard');
+      const lo = Math.min(r.left.count, r.right.count);
+      const hi = Math.max(r.left.count, r.right.count);
+      expect(isFairPair(lo, hi, minGap, minRatio)).toBe(true);
+      seen.add(`${lo}v${hi}`);
+    }
+    // small counts: one apart is still fair game, so the tier keeps its bite
+    expect(seen.has('3v4')).toBe(true);
+    expect(seen.has('4v5')).toBe(true);
+    // big counts: one apart means counting both sides perfectly to win a
+    // question the kid already understood
+    for (const unfair of ['5v6', '6v7', '7v8', '8v9', '9v10']) {
+      expect(seen.has(unfair), unfair).toBe(false);
+    }
+    // ...but a wider gap at the top of the range is still offered
+    expect(seen.has('8v10')).toBe(true);
+  });
+
+  it('easy and medium are untouched — their gaps already clear the ratio', () => {
+    for (const d of ['easy', 'medium'] as const) {
+      const { minGap, minRatio, range: [lo, hi] } = compareSettings(d);
+      for (let a = lo; a <= hi; a++) {
+        for (let b = a + minGap; b <= hi; b++) {
+          // every pair the old gap-only rule allowed is still allowed
+          expect(isFairPair(a, b, minGap, minRatio), `${d} ${a}v${b}`).toBe(true);
+        }
+      }
+    }
+  });
 });
 
 describe('little sums', () => {
