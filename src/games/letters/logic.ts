@@ -65,6 +65,21 @@ function confusableGroup(letter: string): string[] {
   return LETTER_CONFUSABLES.find((g) => g.includes(letter)) ?? [];
 }
 
+// Labels that render as the SAME glyph in the display face (Baloo 2):
+// capital I and lowercase l are both a bare vertical bar. Shape-confusable
+// letters are the point of the mixed tier, but two tiles a kid cannot tell
+// apart are not a lesson — one of them is simply wrong for no readable
+// reason. Keyed by label (case matters), not by letter.
+const GLYPH_TWINS: Record<string, string[]> = {
+  I: ['l'],
+  l: ['I'],
+};
+
+/** Labels indistinguishable from `label` when drawn on a tile. */
+export function glyphTwinsOf(label: string): string[] {
+  return GLYPH_TWINS[label] ?? [];
+}
+
 // Dedup (letter, sound) pairs so each SOUND maps to exactly one letter —
 // otherwise "Which letter says kuh?" has two right answers (C and K).
 export const LETTER_SOUNDS: { letter: string; sound: string }[] = (() => {
@@ -150,11 +165,15 @@ export function makeLetterRound(
     ].slice(0, tileCount - 1);
   }
 
+  // Mixed tier draws each distractor's case at random; flip that coin back
+  // if it would render the target's look-alike glyph (I vs l).
+  const targetTwins = new Set(glyphTwinsOf(displayed));
   const tiles: LetterTile[] = shuffle(rng, [
     { key, label: displayed, isAnswer: true },
     ...distractorLetters.map((L) => {
       const lower = tier === 'mixed' && rng() < 0.5;
-      const lbl = lower ? L.toLowerCase() : L;
+      let lbl = lower ? L.toLowerCase() : L;
+      if (targetTwins.has(lbl)) lbl = lower ? L : L.toLowerCase();
       return { key: lbl, label: lbl, isAnswer: false };
     }),
   ]);

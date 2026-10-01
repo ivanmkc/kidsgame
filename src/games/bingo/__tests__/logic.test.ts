@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../../rng';
 import { manifest } from '../../../manifest';
-import { WORDS } from '../../language/words';
+import { WORDS, soundsFor } from '../../language/words';
 import {
   BingoBoard, checkBingo, makeBoard, settingsForBingo, speechLines,
 } from '../logic';
@@ -54,6 +54,38 @@ describe('makeBoard', () => {
       return w?.sound;
     });
     expect(new Set(sounds).size).toBe(9);
+  });
+
+  it('phonics board: no call has two plausible answers, under any child name', () => {
+    // "Find something that starts with buh!" must not offer BOTH the
+    // butterfly and the rabbit (a kid calls it a bunny).
+    for (let seed = 1; seed <= 200; seed++) {
+      const b = boardWith(seed, 3, 'phonics');
+      expect(b.cells).toHaveLength(9);
+      const claimed = new Set<string>();
+      for (const c of b.cells) {
+        const w = WORDS.find((entry) => entry.icon === c.icon)!;
+        for (const snd of soundsFor(w)) {
+          expect(claimed.has(snd)).toBe(false);
+          claimed.add(snd);
+        }
+      }
+    }
+  });
+
+  it('name board: never shows two icons a kid calls by the same word', () => {
+    // "Find the flower!" fits the blossom and the sunflower equally.
+    for (const size of [3, 4] as const) {
+      for (let seed = 1; seed <= 200; seed++) {
+        const b = boardWith(seed, size, 'name');
+        expect(b.cells).toHaveLength(size * size);
+        const onBoard = new Set(b.cells.map((c) => c.icon));
+        for (const icon of onBoard) {
+          const w = WORDS.find((entry) => entry.icon === icon)!;
+          for (const twin of w.nameTwins ?? []) expect(onBoard.has(twin)).toBe(false);
+        }
+      }
+    }
   });
 
   it('works in all four languages', () => {

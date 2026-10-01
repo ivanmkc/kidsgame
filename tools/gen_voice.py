@@ -81,6 +81,20 @@ STORY_STYLES = {
 }
 
 
+def category_lines() -> dict[str, list[str]]:
+    """Rule Time tap labels + Odd One Out "which is not" questions, keyed by
+    language. The `not` field became a per-language Record; the old
+    `not: '...'` regex silently stopped matching, which is why Odd One Out's
+    questions had no clips and fell back to browser TTS in every language."""
+    src = (ROOT / "src" / "games" / "iconCategories.ts").read_text()
+    out: dict[str, list[str]] = {"en": [], "ja": [], "cmn": [], "yue": []}
+    out["en"] += re.findall(r"tap: '([^']+)'", src)
+    for block in re.findall(r"not: \{(.*?)\}", src, re.S):
+        for lang, txt in re.findall(r"(en|ja|cmn|yue): '([^']*)'", block):
+            out[lang].append(txt)
+    return out
+
+
 def collect_lines() -> list[tuple[str, str]]:
     lines: dict[str, str] = {}
     m = json.loads(MANIFEST.read_text())
@@ -106,8 +120,7 @@ def collect_lines() -> list[tuple[str, str]]:
             for k in ("sayFound", "saySearch", "sayLocked"):
                 if h.get(k):
                     lines.setdefault(h[k], STYLES["gentle"])
-    cat = (ROOT / "src" / "games" / "iconCategories.ts").read_text()
-    for t in re.findall(r"tap: '([^']+)'", cat) + re.findall(r"not: '([^']+)'", cat):
+    for t in category_lines()["en"]:
         lines.setdefault(t, STYLES["instruction"])
     lines.setdefault("Which one does not belong?", STYLES["instruction"])
     for n in range(1, 11):
@@ -304,6 +317,12 @@ def collect_lang_lines() -> list[tuple[str, str]]:
     # spoken story-picker prompts (i18n picker.story values)
     for lang, t in [("ja", "どの おはなし よもうか？"), ("cmn", "读哪个故事？"), ("yue", "睇邊個故事？")]:
         jobs.add((lang, t))
+    # Odd One Out asks its category question in the active UI language.
+    for lang, texts_ in category_lines().items():
+        if lang == "en":
+            continue
+        for t in texts_:
+            jobs.add((lang, spoken_form(t)))
     for t in texts:
         t = spoken_form(t)
         if not t or t.isascii():
