@@ -53,5 +53,15 @@
     "baseline": 1.6,
     "justification": "chest sat against a wall/floor junction; infill matches the textured floor (higher variance) while surround band includes smooth wall (lower variance), giving ratio=1.54. Same inherent-heterogeneity mechanism as pillow.",
     "date": "2026-07-24"
+  },
+  "rocketpad/toolbox": {
+    "baseline": 0.07,
+    "justification": "toolbox sat at rocketpad floor-wall junction; 78% of unchanged pixels form one CC at the SAM mask top edge (y=383, toolbox base) where inpainted floor texture closely matches the original floor behind the toolbox. Removal scored 5/5/5/5/5 by rubric judge; no visible ghost at game scale. Covered by rest layer during gameplay.",
+    "evidence": {
+      "ghost": "PASS (no visible outline)",
+      "spatial": "1 CC of 1536px at mask edge, 37 scatter fragments",
+      "rubric": "obj=5 sha=5 col=5 bou=5 fil=5"
+    },
+    "date": "2026-07-27"
   }
 }

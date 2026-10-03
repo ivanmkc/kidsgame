@@ -1464,6 +1464,165 @@ def verify_no_doubles(room_id: str, hotspots: list[dict]) -> int:
     return fails
 
 
+COMPOSITION_RUBRIC_PROMPT = """\
+You are an expert evaluator for sprite composition quality in a children's \
+escape-room game. A sprite sheet's last frame was composited over a clean \
+background plate. You are comparing the composited result against the \
+expected after-scene.
+
+Image 1: COMPOSITED (plate + rest layers + sprite last frame).
+Image 2: EXPECTED (the target after-scene).
+
+Focus on the region where the animated object sits. Score each criterion 1-5:
+
+OBJECT_COMPLETENESS: 5=full object visible, 4=minor edge clipping, \
+3=noticeable missing parts, 2=significant gaps, 1=object mostly absent
+EDGE_QUALITY: 5=invisible edges, 4=subtle fringe, 3=visible halo/fringe, \
+2=harsh cut-out edges, 1=severe artifacts
+COMPOSITION_MATCH: 5=indistinguishable from expected, 4=very close (minor \
+color shift), 3=recognizably same but off, 2=clearly different, 1=wrong
+BACKGROUND_INTEGRITY: 5=background identical, 4=negligible difference, \
+3=minor artifacts, 2=noticeable damage, 1=corrupted
+
+Reason step-by-step, then end with JSON:
+```json
+{"object_completeness": N, "edge_quality": N, "composition_match": N, \
+"background_integrity": N}
+```
+"""
+
+COMPOSITION_CRITERIA = [
+    "object_completeness", "edge_quality",
+    "composition_match", "background_integrity",
+]
+
+
+def _composition_rubric_judge(
+    composed_crop: Image.Image,
+    expected_crop: Image.Image,
+) -> dict[str, int]:
+    from google.genai import types
+
+    parts = [
+        types.Part(text=COMPOSITION_RUBRIC_PROMPT),
+        types.Part(text="Image 1 (COMPOSITED):"),
+        types.Part(
+            inline_data=types.Blob(
+                mime_type="image/png", data=_png_bytes(composed_crop)
+            )
+        ),
+        types.Part(text="Image 2 (EXPECTED):"),
+        types.Part(
+            inline_data=types.Blob(
+                mime_type="image/png", data=_png_bytes(expected_crop)
+            )
+        ),
+    ]
+
+    client = _get_gemini_client()
+    for model in _JUDGE_MODELS:
+        try:
+            resp = client.models.generate_content(
+                model=model, contents=parts
+            )
+            text = (resp.text or "").strip()
+            import re as _re
+            match = _re.search(
+                r'\{[^{}]*"object_completeness"[^{}]*\}', text
+            )
+            if match:
+                import json as _json
+                scores = _json.loads(match.group())
+                for c in COMPOSITION_CRITERIA:
+                    v = scores.get(c)
+                    if not isinstance(v, int) or v < 1 or v > 5:
+                        scores[c] = 0
+                return scores
+        except Exception:
+            continue
+    return {c: 0 for c in COMPOSITION_CRITERIA}
+
+
+def verify_composition_rubric(room_id: str, hotspots: list[dict]) -> int:
+    """Gate D.3: Gemini rubric judge for sprite composition quality.
+
+    For each animated hotspot, composites the held state (plate + rest +
+    last frame) and compares it against the after-scene using a 4-criterion
+    rubric. Catches semantic issues that pixel metrics miss — e.g. object
+    partially invisible due to alpha gaps, halo artifacts at sprite edges,
+    or composition that looks structurally wrong despite low pixel error.
+
+    Pass: all 4 criteria >= 3. Fail closed on errors.
+    """
+    clean_path = SCENES / "escape" / f"{room_id}_clean.png"
+    if not clean_path.exists():
+        return 0
+
+    fails = 0
+    for h in hotspots:
+        sp = h.get("sprite", {})
+        if not sp.get("sheet") or not sp.get("afterScene"):
+            continue
+
+        bbox = sp.get("bbox")
+        if not bbox:
+            continue
+
+        x, y, w, bh = bbox["x"], bbox["y"], bbox["w"], bbox["h"]
+
+        base = _build_full_runtime_base(room_id, h["id"], sp)
+        sheet_path = SPRITES / sp["sheet"]
+        if not sheet_path.exists():
+            continue
+
+        sheet = np.array(Image.open(sheet_path))
+        cols = sp["cols"]
+        fc = sp["frameCount"]
+        frame_w = sheet.shape[1] // cols
+        rows = (fc + cols - 1) // cols
+        frame_h = sheet.shape[0] // rows
+        li = fc - 1
+        last_frame = sheet[
+            (li // cols) * frame_h : (li // cols + 1) * frame_h,
+            (li % cols) * frame_w : (li % cols + 1) * frame_w,
+        ]
+
+        comp = base.copy()
+        alpha = last_frame[:, :, 3:4].astype(np.float32) / 255.0
+        roi = comp[y : y + bh, x : x + w].astype(np.float32)
+        roi = roi * (1 - alpha) + last_frame[:, :, :3].astype(np.float32) * alpha
+        comp[y : y + bh, x : x + w] = np.clip(roi, 0, 255).astype(np.uint8)
+
+        after_path = SCENES / sp["afterScene"]
+        if not after_path.exists():
+            continue
+        after = np.array(
+            Image.open(after_path).convert("RGB").resize((1280, 720)),
+            dtype=np.uint8,
+        )
+
+        pad = 30
+        cx0 = max(0, x - pad)
+        cy0 = max(0, y - pad)
+        cx1 = min(1280, x + w + pad)
+        cy1 = min(720, y + bh + pad)
+
+        comp_crop = Image.fromarray(comp[cy0:cy1, cx0:cx1])
+        after_crop = Image.fromarray(after[cy0:cy1, cx0:cx1])
+
+        scores = _composition_rubric_judge(comp_crop, after_crop)
+        tag = " ".join(f"{c[:4]}={scores[c]}" for c in COMPOSITION_CRITERIA)
+        all_pass = all(scores.get(c, 0) >= 3 for c in COMPOSITION_CRITERIA)
+
+        if all_pass:
+            print(f"  COMP-RUBRIC PASS: {room_id}/{h['id']} — {tag}")
+        else:
+            print(f"  COMP-RUBRIC FAIL: {room_id}/{h['id']} — {tag}")
+            fails += 1
+
+    return fails
+
+
 def _get_base_for_sprite(room_id: str, sprite: dict) -> np.ndarray:
     """Return the compositing base for a sprite: clean plate for the
     clean-plate model (sprite.rest is set), before-scene for legacy."""
@@ -2451,6 +2610,18 @@ def main() -> int:
         fails += doubles_fails
     else:
         print("No doubles: all composited frames clean")
+
+    # D.3 Composition rubric: Gemini judges held-state composition quality
+    print("\n--- Composition rubric (D.3) ---")
+    rubric_fails = 0
+    for room in m.get("escape", []):
+        rf = verify_composition_rubric(room["id"], room.get("hotspots", []))
+        rubric_fails += rf
+    if rubric_fails:
+        print(f"\n{rubric_fails} composition-rubric failures (Gemini-verified)")
+        fails += rubric_fails
+    else:
+        print("Composition rubric: all held states pass visual quality check")
 
     print(f"\n{len(entries)} sprite entries checked, {fails} failures")
     return 1 if fails else 0
