@@ -15,8 +15,18 @@ fi
 cd "$(dirname "$0")/.."
 
 python3 tools/verify_story_audio.py || { echo "REFUSING TO SHIP: story audio coverage/duration failed."; exit 1; }
-python3 -m pytest tools/tests/test_verify_escape_chain.py -v --tb=short || { echo "REFUSING TO SHIP: escape gate self-test failed."; exit 1; }
-python3 tools/verify_escape_chain.py || { echo "REFUSING TO SHIP: escape chain continuity failed."; exit 1; }
+# Little Escapes is held back while its clean plates fail the escape gates
+# (object remnants and seams on piratecove and rocketpad; draft PRs #20/#21
+# carry the fixes). Held back, its rooms leave the ship manifest — which
+# hides the card and the #/escape route — so its gates have nothing to judge
+# and can't block the rest of the box. SHIP_ESCAPE=1 ships it, gates and all.
+export SHIP_ESCAPE="${SHIP_ESCAPE:-0}"
+if [ "$SHIP_ESCAPE" = 1 ]; then
+  python3 -m pytest tools/tests/test_verify_escape_chain.py -v --tb=short || { echo "REFUSING TO SHIP: escape gate self-test failed."; exit 1; }
+  python3 tools/verify_escape_chain.py || { echo "REFUSING TO SHIP: escape chain continuity failed."; exit 1; }
+else
+  echo "ship: holding back Little Escapes (SHIP_ESCAPE=0) — escape gates skipped, no rooms shipped"
+fi
 
 cp src/assets/manifest.json /tmp/kgb_manifest_full.json
 # any gate failure must still restore the working manifest
@@ -44,8 +54,10 @@ held = [s['id'] for s in m.get('stories', []) if s['id'] not in LEGACY_TILE_OK a
 m['stories'] = [s for s in m.get('stories', []) if s['id'] in LEGACY_TILE_OK or fully_wired(s)]
 if held:
     print(f"ship manifest: holding back {len(held)} un-wired stories: {' '.join(sorted(held))}")
+if os.environ.get('SHIP_ESCAPE') != '1':
+    m['escape'] = []
 json.dump(m, open('src/assets/manifest.json', 'w'), indent=2)
-print(f"ship manifest: {before} -> {len(m['diff'])} diff + {len(m['hidden'])} hidden (ledger-verified only), {len(m['stories'])} stories")
+print(f"ship manifest: {before} -> {len(m['diff'])} diff + {len(m['hidden'])} hidden (ledger-verified only), {len(m['stories'])} stories, {len(m.get('escape', []))} escape rooms")
 PYEOF
 
 # Story content rules (hotspot nav on every decision node, no bracket text
@@ -76,6 +88,8 @@ npx vitest run src/games/__tests__/logic.test.ts 2>&1 | grep -E "Test Files|Test
 BUILD_ID=$(git rev-parse --short HEAD)-$(python3 -c "import time; print(int(time.time()))")
 printf "// GENERATED at ship time\nexport const KGB_BUILD = '%s';\n" "$BUILD_ID" > src/assets/build.ts
 npx expo export --platform web 2>&1 | tail -1
+# Expo copies public/ wholesale; a held-back game's media stays out too.
+[ "$SHIP_ESCAPE" = 1 ] || rm -rf dist/escape-sprites
 printf '{"build": "%s"}\n' "$BUILD_ID" > dist/version.json
 # PWA: inject manifest + iOS meta into the exported page (Metro owns index.html)
 PWA_TAGS='<link rel="manifest" href="manifest.json"/><link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/><meta name="theme-color" content="#FFC24B"/><meta name="apple-mobile-web-app-capable" content="yes"/><meta name="apple-mobile-web-app-title" content="Kids Games"/><meta name="mobile-web-app-capable" content="yes"/>'

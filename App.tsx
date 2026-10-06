@@ -136,8 +136,9 @@ export default function App() {
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
   const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff'];
-  // A stale/mistyped hash must never strand a kid on a blank page.
-  const knownScreen = KNOWN.includes(parts.screen) ? parts.screen : 'menu';
+  // A stale/mistyped hash must never strand a kid on a blank page — nor
+  // must a link to a game this deploy holds back.
+  const knownScreen = KNOWN.includes(parts.screen) && (parts.screen !== 'escape' || ESCAPE_SHIPPED) ? parts.screen : 'menu';
   const screen = (knownScreen !== 'menu' && lockdown.isGameHidden(knownScreen)) ? 'menu' : knownScreen;
   const param = parts.param;
   const goHome = () => navigate('menu');
@@ -274,6 +275,10 @@ const NUMBER_CARDS: CardDef[] = [
   { route: 'compare', color: '#D66FA8', key: 'compare', preview: 'icons13' },
   { route: 'sums', color: '#7A6FD6', key: 'sums', preview: 'icons20' },
 ];
+// tools/ship.sh holds Little Escapes' rooms back while its clean plates fail
+// the escape gates; with no rooms in the deploy, the card and the #/escape
+// route go too. Dev builds (full manifest) keep both.
+const ESCAPE_SHIPPED = (manifest.escape?.length ?? 0) > 0;
 const GAME_CARDS: CardDef[] = [
   { route: 'spotit', color: colors.red, key: 'spotit', preview: 'icons0' },
   { route: 'diff', color: colors.teal, key: 'diff', preview: 'diff' },
@@ -289,7 +294,7 @@ const GAME_CARDS: CardDef[] = [
   // musicbox hidden pending redesign — v1 missed the Sago Mini interaction
   // model (route stays live for dev via #/musicbox deep link).
   // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
-  { route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape', beta: true },
+  ...(ESCAPE_SHIPPED ? [{ route: 'escape', color: '#4FB06D', key: 'escape', preview: 'escape', beta: true } as CardDef] : []),
   // carmode hidden pending rework (route stays live via #/carmode; its
   // round engine is being reused by the music training games).
   // { route: 'carmode', color: '#E8A24F', key: 'carmode', preview: 'carmode' },
