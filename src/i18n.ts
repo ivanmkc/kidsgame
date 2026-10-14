@@ -1,16 +1,14 @@
 import { Lang } from './lang';
 
-// UI-text localization for the app chrome (menu + shared game surfaces).
-// Game-internal SPOKEN lines are localized elsewhere (via lang.ts /
-// per-game logic modules) and MUST stay in their own tables — this module
-// only owns what actually paints on screen.
-//
-// Contract:
-//   t(lang, key)        → returns the translated string for `lang`.
-//   t(lang, key, {..})  → same, with `{name}` placeholders interpolated.
-//
-// English strings must be byte-identical to what they were before this
-// module existed — English mode is the untouched baseline.
+/** UI-text localization for the app chrome (menu + shared game surfaces).
+ * Game-internal SPOKEN lines are localized elsewhere (via lang.ts /
+ * per-game logic modules) and MUST stay in their own tables — this module
+ * only owns what actually paints on screen.
+ * Contract:
+ *   t(lang, key)        → returns the translated string for `lang`.
+ *   t(lang, key, {..})  → same, with `{name}` placeholders interpolated.
+ * English strings must be byte-identical to what they were before this
+ * module existed — English mode is the untouched baseline. */
 export type UIKey =
   // ── Menu chrome ────────────────────────────────────────────────
   | 'menu.heading'
