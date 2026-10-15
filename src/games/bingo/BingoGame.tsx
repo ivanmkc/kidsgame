@@ -35,6 +35,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const processingRef = useRef<string>('');
   const [celebrate, setCelebrate] = useState(0);
   const [winLine, setWinLine] = useState<number[] | null>(null);
 
@@ -68,7 +69,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   const onTile = (cellIdx: number) => {
     if (won || !call) return;
     if (marked[cellIdx]) return;
+    
+    const stepKey = `${gameKey}-${callIdx}`;
+    if (processingRef.current === stepKey) return;
+    
+    
     if (cellIdx === call.answerIdx) {
+      processingRef.current = stepKey;
       sfx.good();
       const next = [...marked];
       next[cellIdx] = true;
