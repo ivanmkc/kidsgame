@@ -34,24 +34,29 @@ interface Props {
   testID?: string;
 }
 
+type WebViewStyle = ViewStyle & { backgroundImage?: string };
+
 export function TimerRing({ elapsed, size, stroke = 8, style, showLabel, children, testID }: Props) {
   if (Platform.OS !== 'web') return <View style={style}>{children}</View>;
   const lap = Math.floor(elapsed / 60);
   const deg = ((elapsed % 60) / 60) * 360;
   const color = LAP_COLORS[lap % LAP_COLORS.length];
   const track = lap === 0 ? 'rgba(67,48,75,0.10)' : LAP_COLORS[(lap - 1) % LAP_COLORS.length];
+
+  const ringStyle: WebViewStyle = {
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundImage: `conic-gradient(${color} ${deg}deg, ${track} ${deg}deg)`,
+  };
+
   return (
     <View
       testID={testID}
       style={[
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundImage: `conic-gradient(${color} ${deg}deg, ${track} ${deg}deg)`,
-        } as any,
+        ringStyle as ViewStyle,
         style,
       ]}
     >
