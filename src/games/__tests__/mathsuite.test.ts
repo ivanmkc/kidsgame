@@ -60,6 +60,12 @@ describe('count with me', () => {
     });
   }
 
+  it('scales minimum item count by difficulty', () => {
+    expect(countSettings('easy').min).toBe(1);
+    expect(countSettings('medium').min).toBeGreaterThanOrEqual(4);
+    expect(countSettings('hard').min).toBeGreaterThanOrEqual(6);
+  });
+
   it('makeCountChoices never returns duplicates even at the corners', () => {
     for (let seed = 1; seed <= 60; seed++) {
       for (const [answer, max] of [[1, 1], [1, 3], [5, 5], [8, 8], [10, 10]] as const) {
