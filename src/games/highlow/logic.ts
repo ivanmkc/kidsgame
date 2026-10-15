@@ -55,3 +55,7 @@ export function getLowNote(round: HighLowRound): number {
 export function speechLines(): string[] {
   return [];
 }
+
+export function getDotOffset(round: HighLowRound): number {
+  return round.noteB > round.noteA ? -20 : 20;
+}

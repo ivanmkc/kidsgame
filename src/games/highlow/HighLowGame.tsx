@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -9,9 +9,9 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
-import { playNote, playSequence, stopSequence } from '../../music';
+import { playSequence, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeHighLowRound, roundsToWin, HighLowRound, correctAnswer, isCorrect } from './logic';
+import { makeHighLowRound, roundsToWin, HighLowRound, correctAnswer, isCorrect, getDotOffset } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -25,6 +25,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<HighLowRound>(() => makeHighLowRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'pick'>('listen');
+  const [listenStep, setListenStep] = useState(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [wrongPick, setWrongPick] = useState<'high' | 'low' | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
@@ -32,18 +34,29 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 
   const playRound = useCallback((r: HighLowRound) => {
     stopSequence();
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+    setPhase('listen');
+    setListenStep(0);
     const notes = [
       { m: r.noteA, b: 2 },
       { m: r.noteB, b: 2 },
     ];
-    playSequence(notes, 80, undefined, () => setPhase('pick'));
+    playSequence(notes, 80);
+    timersRef.current.push(setTimeout(() => setListenStep(1), 1500));
+    timersRef.current.push(setTimeout(() => setPhase('pick'), 3000));
   }, []);
 
   useEffect(() => {
     if (!won) {
       setPhase('listen');
+      setListenStep(0);
       const timer = setTimeout(() => playRound(round), 400);
-      return () => { clearTimeout(timer); stopSequence(); };
+      return () => { 
+        clearTimeout(timer); 
+        stopSequence(); 
+        timersRef.current.forEach(clearTimeout);
+      };
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -74,25 +87,15 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 
   const replay = () => {
     if (phase === 'pick') {
-      setPhase('listen');
       playRound(round);
     }
   };
 
-  const earPulse = useRef(new Animated.Value(1)).current;
   const pickGlow = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (phase === 'listen') {
       pickGlow.setValue(0);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        ])
-      ).start();
     } else {
-      earPulse.stopAnimation();
-      earPulse.setValue(1);
       Animated.loop(
         Animated.sequence([
           Animated.timing(pickGlow, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
@@ -100,7 +103,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
         ])
       ).start();
     }
-    return () => { earPulse.stopAnimation(); pickGlow.stopAnimation(); };
+    return () => { pickGlow.stopAnimation(); };
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickScale = pickGlow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
@@ -115,8 +118,11 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     >
       <View style={styles.board}>
         {phase === 'listen' ? (
-          <View style={[styles.listenCard, shadows.soft]}>
-            <Animated.Text style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
+          <View style={[styles.listenCard, shadows.soft, { minHeight: 220 }]}>
+            <View style={styles.dotsContainer}>
+              <View style={[styles.dot, listenStep >= 0 && styles.dotActive]} />
+              <View style={[styles.dot, listenStep >= 1 && styles.dotActive, { transform: [{ translateY: getDotOffset(round) }] }]} />
+            </View>
             <Text style={styles.listenText}>{t(lang, 'music.listen' as never)}</Text>
           </View>
         ) : (
@@ -193,7 +199,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  listenEmoji: { fontSize: 56 },
+  dotsContainer: { flexDirection: 'row', gap: 32, alignItems: 'center', height: 80, paddingHorizontal: 20 },
+  dot: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.ink, opacity: 0 },
+  dotActive: { opacity: 1 },
   listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },
   pickRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
   pickBtn: {
