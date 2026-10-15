@@ -20,7 +20,6 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
     track('feedback', {
       kind: kind ?? 'idea',
       text: text.trim().slice(0, 500),
-      route: typeof window !== 'undefined' ? window.location.hash || '#/' : '',
     });
     sfx.good();
     setSent(true);
