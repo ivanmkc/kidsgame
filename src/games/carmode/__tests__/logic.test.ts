@@ -21,6 +21,20 @@ describe('round engine', () => {
     expect(s.pack).toBe('boops');
   });
 
+  it('shuffles effectively for large seeds', () => {
+    const firsts = new Set();
+    for (let k = 0; k < 2000; k++) {
+      firsts.add(startState('boops', 1e8 + k * 4099).rounds[0].id);
+    }
+    expect(firsts.has('boops-1')).toBe(true);
+  });
+
+  it('same seed gives same order', () => {
+    const s1 = startState('boops', 123456789);
+    const s2 = startState('boops', 123456789);
+    expect(s1.rounds.map((r) => r.id)).toEqual(s2.rounds.map((r) => r.id));
+  });
+
   it('transitions prompt → gap → reveal → advance', () => {
     let s = startState('rhyme', 1);
     expect(s.phase).toBe('prompt');
