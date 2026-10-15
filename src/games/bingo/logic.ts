@@ -9,7 +9,8 @@
 // call by the same word.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../language/words';
+import { capitalize } from '../../text';
+import { WORDS, WordEntry, soundsFor, wordFor, playablePool } from '../language/words';
 
 export type BingoMode = 'name' | 'phonics';
 
@@ -48,10 +49,6 @@ const NAME_ASK: Record<Lang, string> = {
   cmn: '找一找',
   yue: '搵一搵',
 };
-
-function capitalize(s: string): string {
-  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
-}
 
 function entryFor(icon: string): WordEntry | undefined {
   return WORDS.find((w) => w.icon === icon);
@@ -92,10 +89,6 @@ function phonicsConfirmLines(icon: string): string[] {
     `${capitalize(entry.en)}!`,
     `${capitalize(entry.en)} starts with ${entry.sound}!`,
   ];
-}
-
-function playablePool(icons: string[]): WordEntry[] {
-  return WORDS.filter((w) => icons.includes(w.icon));
 }
 
 export function makeBoard(

@@ -3,7 +3,8 @@
 // non-EN modes the tile set can't accidentally offer two "duh" answers.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../language/words';
+import { capitalize } from '../../text';
+import { WORDS, WordEntry, soundsFor, wordFor, playablePool } from '../language/words';
 
 export interface SoundsTile {
   key: string;
@@ -40,17 +41,6 @@ const ASK: Record<Lang, string> = {
   cmn: '哪一个是？',
   yue: '邊個係？',
 };
-
-function capitalize(s: string): string {
-  return s.length ? s[0].toUpperCase() + s.slice(1) : s;
-}
-
-// Filter the master WORDS list to entries whose icon is actually shipped —
-// SPOTIT_ICONS is the source of truth. WORDS today matches it, but the
-// filter keeps us honest if the icon pipeline ever drops one.
-function playablePool(icons: string[]): WordEntry[] {
-  return WORDS.filter((w) => icons.includes(w.icon));
-}
 
 export function makeSoundsRound(
   rng: Rng, icons: string[], lang: Lang, tileCount: number, avoidIcon?: string,

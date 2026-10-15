@@ -32,6 +32,13 @@ export interface WordEntry {
   yue: string; yueR: string;
 }
 
+// Filter the master WORDS list to entries whose icon is actually shipped —
+// SPOTIT_ICONS is the source of truth. WORDS today matches it, but the
+// filter keeps us honest if the icon pipeline ever drops one.
+export function playablePool(icons: string[]): WordEntry[] {
+  return WORDS.filter((w) => icons.includes(w.icon));
+}
+
 export const WORDS: WordEntry[] = [
   { icon: 'dog', en: 'dog', letter: 'D', sound: 'duh', altSounds: ['puh'], /* puppy */ rhymeKey: 'og', cmnRhyme: 'ou', yueRhyme: 'au', ja: 'いぬ', jaR: 'inu', cmn: '狗', cmnR: 'gǒu', yue: '狗', yueR: 'gau' },
   { icon: 'cat', en: 'cat', letter: 'C', sound: 'kuh', rhymeKey: 'at', jaRhyme: 'ko', cmnRhyme: 'ao', yueRhyme: 'aau', ja: 'ねこ', jaR: 'neko', cmn: '猫', cmnR: 'māo', yue: '貓', yueR: 'maau' },
