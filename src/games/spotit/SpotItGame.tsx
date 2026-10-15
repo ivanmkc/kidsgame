@@ -13,6 +13,7 @@ import { TimerRing, fmtTime, useElapsed } from '../../components/TimerRing';
 import { DealIn, Slot, SpotCard, layoutSlots } from './cards';
 import { buildDeck, dealRound } from './logic';
 import { SpotItDuel } from './SpotItDuel';
+import { formatScore } from '../../utils/format';
 
 interface Props {
   onHome: () => void;
@@ -107,7 +108,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
       subtitle={t(lang, 'shell.spotit.sub')}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
+      right={<ScoreChip label={formatScore(score, roundsToWin)} testID="spotit-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
         <DealIn key={`t${roundKey}`} from={-1}>
