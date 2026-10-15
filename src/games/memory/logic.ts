@@ -1,3 +1,4 @@
+import { Difficulty } from '../../difficulty';
 import { PlayerIx, nextTurn } from '../../multiplayer';
 import { Rng, shuffle } from '../../rng';
 
@@ -47,4 +48,12 @@ export function duelWinner(s: DuelState): PlayerIx | 'tie' {
 export function nextStarter(s: DuelState): PlayerIx {
   const w = duelWinner(s);
   return w === 'tie' ? nextTurn(s.turn) : nextTurn(w);
+}
+
+export function mismatchDelay(difficulty: Difficulty): number {
+  switch (difficulty) {
+    case 'easy': return 1500;
+    case 'medium': return 1200;
+    case 'hard': return 900;
+  }
 }

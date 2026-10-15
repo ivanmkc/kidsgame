@@ -13,7 +13,7 @@ import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../mu
 import { makeRng } from '../../rng';
 import { say, sfx, useSay } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
-import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from './logic';
+import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter, mismatchDelay } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -122,7 +122,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
             setDuelState((d) => duelResolve(d, false));
             say(`${MP_PLAYERS[nextTurn(duelState.turn)].name}'s turn!`);
           }
-        }, 750);
+        }, mismatchDelay(difficulty));
       }
     }
   };
