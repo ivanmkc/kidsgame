@@ -106,22 +106,18 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
         </View>
         <View style={[styles.plates, { width: totalW }]}>
           <Plate
-            side="left"
             data={round.left}
             width={plateW}
             height={plateH}
             wrong={wrongSide === 'left'}
-            correct={round.correctSide}
             onPress={() => pickSide('left')}
             testID={`compare-plate-left-${round.left.icon}-${round.left.count}${round.correctSide === 'left' ? '-correct' : ''}`}
           />
           <Plate
-            side="right"
             data={round.right}
             width={plateW}
             height={plateH}
             wrong={wrongSide === 'right'}
-            correct={round.correctSide}
             onPress={() => pickSide('right')}
             testID={`compare-plate-right-${round.right.icon}-${round.right.count}${round.correctSide === 'right' ? '-correct' : ''}`}
           />
@@ -140,12 +136,10 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
 }
 
 interface PlateProps {
-  side: 'left' | 'right';
   data: Side;
   width: number;
   height: number;
   wrong: boolean;
-  correct: 'left' | 'right';
   onPress: () => void;
   testID: string;
 }
