@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../../rng';
 import { manifest } from '../../../manifest';
+import { VOICE } from '../../../assets/voice';
 import { WORDS, soundsFor } from '../../language/words';
 import {
   BingoBoard, checkBingo, makeBoard, settingsForBingo, speechLines,
+  bingoShout,
 } from '../logic';
 
 const icons = manifest.spotit.icons;
@@ -186,7 +188,6 @@ describe('speechLines', () => {
     expect(lines).toContain('BINGO!');
     expect(lines).toContain('ビンゴ！');
     expect(lines).toContain('宾果！');
-    expect(lines).toContain('BINGO！');
   });
 
   it('includes name-mode prompts', () => {
@@ -200,5 +201,22 @@ describe('speechLines', () => {
   it('includes phonics prompts', () => {
     const lines = speechLines();
     expect(lines).toContain('Find something that starts with duh!');
+  });
+});
+
+describe('bingoShout', () => {
+  it('returns ASCII shout for Cantonese matching English', () => {
+    expect(bingoShout('yue')).toBe('BINGO!');
+  });
+
+  it('maps every language shout to a pre-rendered voice clip', () => {
+    const langs = ['en', 'ja', 'cmn', 'yue'] as const;
+    for (const lang of langs) {
+      const shout = bingoShout(lang);
+      const clip =
+        (lang !== 'en' ? VOICE[`${lang}|${shout}`] : undefined) ??
+        VOICE[shout];
+      expect(clip).toBeDefined();
+    }
   });
 });
