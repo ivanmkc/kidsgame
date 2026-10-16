@@ -123,12 +123,14 @@ function FoundRing({ color }: { color?: string }) {
 function HintRing() {
   const pulse = useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, { toValue: 1, duration: 450, useNativeDriver: true }),
         Animated.timing(pulse, { toValue: 0, duration: 450, useNativeDriver: true }),
       ])
-    ).start();
+    );
+    loop.start();
+    return () => loop.stop();
   }, [pulse]);
   return (
     <Animated.View
