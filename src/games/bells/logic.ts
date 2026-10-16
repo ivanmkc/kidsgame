@@ -1,4 +1,4 @@
-import { Rng, randInt, shuffle } from '../../rng';
+import { Rng, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
