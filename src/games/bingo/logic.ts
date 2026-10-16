@@ -188,7 +188,7 @@ const BINGO_SHOUT: Record<Lang, string> = {
   en: 'BINGO!',
   ja: 'ビンゴ！',
   cmn: '宾果！',
-  yue: 'BINGO！',
+  yue: 'BINGO!',
 };
 
 export function bingoShout(lang: Lang): string {
