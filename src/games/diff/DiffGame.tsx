@@ -1,4 +1,4 @@
-import { say, useSay } from '../../sound';
+import { say, sfx, useSay } from '../../sound';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
@@ -150,6 +150,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 
   const onHit = (id: string) => {
     if (won) return;
+    sfx.good();
     setFound((f) => (f.includes(id) ? f : [...f, id]));
     if (hintId === id) setHintId(null);
     setHintRegion(null);
