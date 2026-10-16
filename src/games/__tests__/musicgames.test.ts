@@ -4,9 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
-import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
-import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
-import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
+import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canReplay } from '../bells/logic';
+import { makeEchoBeatRound, checkEcho, tolerancePct } from '../echobeat/logic';
+import { makeSteadyBeatRound, scoreTaps, passThreshold, windowMs } from '../steadybeat/logic';
 import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
 import { makeSameDiffRound, isCorrect, roundsToWin as sdRounds } from '../samediff/logic';
 
@@ -80,6 +80,16 @@ describe('melody bells', () => {
     expect(bellRounds('medium')).toBeLessThan(bellRounds('hard'));
   });
 
+  it('allows replay during player turn before completion and blocks it otherwise', () => {
+    expect(canReplay('play', false, 0, 3)).toBe(true);
+    expect(canReplay('play', false, 2, 3)).toBe(true);
+    expect(canReplay('play', false, 3, 3)).toBe(false);
+    expect(canReplay('play', false, 4, 3)).toBe(false);
+    expect(canReplay('listen', false, 0, 3)).toBe(false);
+    expect(canReplay('play', true, 0, 3)).toBe(false);
+    expect(canReplay('listen', true, 0, 3)).toBe(false);
+  });
+
   it('renders BellsGame and displays localized strings', () => {
     const noop = () => {};
     const html = renderToString(
@@ -92,6 +102,7 @@ describe('melody bells', () => {
     expect(html).toContain('Melody Bells');
     expect(html).toContain('Listen, then play the tune back!');
     expect(html).toContain('Listen...');
+    expect(html).toContain('data-testid="bells-replay"');
   });
 });
 

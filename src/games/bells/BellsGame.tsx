@@ -11,7 +11,7 @@ import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
 import { playNote, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeBellsRound, roundsToWin, checkSequence, BellsRound, Bell } from './logic';
+import { makeBellsRound, roundsToWin, checkSequence, canReplay, BellsRound } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -98,6 +98,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     setRound(makeBellsRound(rngRef.current, difficulty));
   };
 
+  const replay = () => {
+    if (!canReplay(phase, won, tapped.length, round.sequence.length)) return;
+    setTapped([]);
+    playDemo(round);
+  };
+
   const { width } = useWindowDimensions();
   const bellSize = Math.min(110, (Math.min(width - 40, 600) - (round.bells.length - 1) * 14) / round.bells.length);
 
@@ -136,19 +142,36 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       right={<ScoreChip label={`🔔 ${score}/${total}`} testID="bells-score" />}
     >
       <View style={styles.board}>
-        {phase === 'listen' ? (
-          <View style={[styles.statusCard, shadows.soft]}>
-            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
-          </View>
-        ) : (
-          <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, wrongFlash && styles.wrongCard]}>
-            <Text style={styles.statusEmoji}>👆</Text>
-            <Text style={styles.statusText}>
-              {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
-            </Text>
-          </View>
-        )}
+        <View style={styles.statusRow}>
+          {phase === 'listen' ? (
+            <View style={[styles.statusCard, shadows.soft]}>
+              <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
+              <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
+            </View>
+          ) : (
+            <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, wrongFlash && styles.wrongCard]}>
+              <Text style={styles.statusEmoji}>👆</Text>
+              <Text style={styles.statusText}>
+                {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
+              </Text>
+            </View>
+          )}
+          <Pressable
+            onPress={replay}
+            disabled={!canReplay(phase, won, tapped.length, round.sequence.length)}
+            testID="bells-replay"
+            accessibilityLabel={t(lang, 'spell.hearAgain')}
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.replayBtn,
+              shadows.soft,
+              phase !== 'play' && styles.hidden,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.replayText}>🔊</Text>
+          </Pressable>
+        </View>
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
             <Animated.View
@@ -193,6 +216,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
 const styles = StyleSheet.create({
   board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 28, paddingHorizontal: 16 },
+  statusRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   statusCard: {
     backgroundColor: '#F7EDDA',
     borderRadius: 18,
@@ -208,6 +232,18 @@ const styles = StyleSheet.create({
   wrongCard: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.12)' },
   statusEmoji: { fontSize: 30 },
   statusText: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
+  hidden: { display: 'none' },
+  replayBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.card,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  replayText: { fontSize: 26 },
   bellRow: { flexDirection: 'row', gap: 14, alignItems: 'flex-end' },
   bell: {
     borderRadius: 20,
