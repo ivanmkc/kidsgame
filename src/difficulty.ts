@@ -102,6 +102,9 @@ export function nextSceneId<T extends { id: string; level?: Difficulty }>(
 ): string {
   const pool = byLevel(visible.some((s) => s.id === currentId) ? visible : all);
   const ids = pool.map((s) => s.id);
+  if (ids.length === 0) {
+    throw new Error('nextSceneId called with empty pool');
+  }
   return ids[(ids.indexOf(currentId) + 1) % ids.length];
 }
 
