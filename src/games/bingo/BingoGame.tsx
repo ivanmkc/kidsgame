@@ -127,7 +127,12 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       <View style={[styles.board, shortH && { gap: 8 }]} key={gameKey}>
         {call && (
           <Pressable
-            onPress={() => { sfx.tap(); saySequence(call.promptLines); }}
+            disabled={won}
+            onPress={() => {
+              if (won) return;
+              sfx.tap();
+              saySequence(call.promptLines);
+            }}
             accessibilityLabel={call.displayPrompt}
             accessibilityRole="button"
             style={({ pressed }) => [styles.prompt, shadows.soft, pressed && styles.pressed]}
