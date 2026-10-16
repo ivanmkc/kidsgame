@@ -24,8 +24,8 @@ export interface CountRound {
 
 /** Rounds/count-range per difficulty — hardcoded per the task spec. */
 export function countSettings(d: Difficulty): { rounds: number; min: number; max: number } {
-  if (d === 'hard') return { rounds: 8, min: 1, max: 10 };
-  if (d === 'medium') return { rounds: 6, min: 1, max: 8 };
+  if (d === 'hard') return { rounds: 8, min: 6, max: 10 };
+  if (d === 'medium') return { rounds: 6, min: 4, max: 8 };
   return { rounds: 5, min: 1, max: 5 };
 }
 
