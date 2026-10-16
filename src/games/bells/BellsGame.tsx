@@ -30,7 +30,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const [wrongFlash, setWrongFlash] = useState(false);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
-  useWinLine(won, t(lang, 'win.bells' as never));
+  useWinLine(won, t(lang, 'win.bells'));
 
   const playDemo = useCallback((r: BellsRound) => {
     stopSequence();
@@ -129,8 +129,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={t(lang, 'shell.bells.title' as never)}
-      subtitle={t(lang, 'shell.bells.sub' as never)}
+      title={t(lang, 'shell.bells.title')}
+      subtitle={t(lang, 'shell.bells.sub')}
       onBack={onHome}
       lang={lang}
       right={<ScoreChip label={`🔔 ${score}/${total}`} testID="bells-score" />}
@@ -139,13 +139,13 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
         {phase === 'listen' ? (
           <View style={[styles.statusCard, shadows.soft]}>
             <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.statusText}>{t(lang, 'music.listen' as never)}</Text>
+            <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
           </View>
         ) : (
           <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, wrongFlash && styles.wrongCard]}>
             <Text style={styles.statusEmoji}>👆</Text>
             <Text style={styles.statusText}>
-              {t(lang, 'music.yourTurn' as never)} ({tapped.length}/{round.sequence.length})
+              {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
             </Text>
           </View>
         )}
@@ -181,7 +181,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.bells' as never)}
+        message={t(lang, 'win.bells')}
         onNext={reset}
         nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}

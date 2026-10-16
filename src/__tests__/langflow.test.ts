@@ -200,4 +200,23 @@ describe('language dataflow guard', () => {
     }
     expect(violations, 'loadLang() bypasses the lang prop — use the prop/context chain').toEqual([]);
   });
+
+  it('no "as never" key casts in BellsGame', () => {
+    const file = uniqueFiles.find((f) => f.endsWith('BellsGame.tsx'));
+    expect(file).toBeDefined();
+    const src = readFileSync(file!, 'utf-8');
+    const violations: string[] = [];
+    const lines = src.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (/^\s*\/\//.test(line)) continue;
+      if (/t\([^)]*as\s+never/.test(line)) {
+        violations.push(`${relative(SRC, file!)}:${i + 1}`);
+      }
+    }
+    expect(
+      violations,
+      'as never casts hide i18n key checks in BellsGame'
+    ).toEqual([]);
+  });
 });
