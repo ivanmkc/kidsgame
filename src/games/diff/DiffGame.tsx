@@ -13,6 +13,7 @@ import { t } from '../../i18n';
 import { baseImage, manifest } from '../../manifest';
 import { makeRng, sample } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
+import { diffPrompt } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -31,7 +32,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
   const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
-  useSay(scene ? 'Find all the sneaky changes!' : 'Where do you want to play?');
+  useSay(diffPrompt(lang, !!scene));
   const [found, setFound] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
