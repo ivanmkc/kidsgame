@@ -2,7 +2,25 @@
 // spot to find an item, tap the tray item to pick it up, tap the lock
 // that needs it. UI-free so vitest can prove every shipped room solvable
 // (the same trace the generator lint runs in Python before art is made).
-import { EscapeHotspot, EscapeRoom } from '../../manifest';
+import { Box, EscapeRoom } from '../../manifest';
+
+function overlaps(a: Box, b: Box): boolean {
+  return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
+}
+
+/** A hotspot is available (not covered) if no earlier overlapping hotspot remains unconsumed. */
+export function isHotspotAvailable(room: EscapeRoom, s: EscapeState, hotspotId: string): boolean {
+  const idx = room.hotspots.findIndex((h) => h.id === hotspotId);
+  if (idx < 0) return false;
+  const target = room.hotspots[idx];
+  for (let i = 0; i < idx; i++) {
+    const prev = room.hotspots[i];
+    if (!s.used.includes(prev.id) && overlaps(prev.box, target.box)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export interface EscapeState {
   used: string[];      // fully consumed hotspot ids
@@ -35,7 +53,7 @@ export function selectItem(s: EscapeState, itemId: string): EscapeState {
 
 export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): { state: EscapeState; effect: TapEffect } {
   const h = room.hotspots.find((x) => x.id === hotspotId);
-  if (!h || s.done || s.used.includes(h.id)) return { state: s, effect: { kind: 'nothing' } };
+  if (!h || s.done || s.used.includes(h.id) || !isHotspotAvailable(room, s, h.id)) return { state: s, effect: { kind: 'nothing' } };
 
   // Collecting a revealed item: the container is open, the item is
   // visible, tapping the hotspot (or the item region) collects it.
@@ -112,7 +130,7 @@ export function nextHint(room: EscapeRoom, s: EscapeState): { hotspotId: string;
     if (s.revealed.includes(h.id)) return { hotspotId: h.id };
   }
   for (const h of room.hotspots) {
-    if (s.used.includes(h.id) || s.revealed.includes(h.id)) continue;
+    if (s.used.includes(h.id) || s.revealed.includes(h.id) || !isHotspotAvailable(room, s, h.id)) continue;
     if (h.kind === 'search' && h.gives) return { hotspotId: h.id };
     if ((h.kind === 'lock' || h.kind === 'win') && h.needs && s.inventory.includes(h.needs)) {
       return { hotspotId: h.id, selectItem: s.selected === h.needs ? undefined : h.needs };

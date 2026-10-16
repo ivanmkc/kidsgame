@@ -1,6 +1,9 @@
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { EscapeRoom, manifest } from '../../manifest';
-import { applyTap, lintRoom, nextHint, selectItem, solve, startState } from '../escape/logic';
+import { EscapeGame } from '../escape/EscapeGame';
+import { applyTap, isHotspotAvailable, lintRoom, nextHint, selectItem, solve, startState } from '../escape/logic';
 
 // Fixture: the toyroom chain — pillow → key → toy chest → bone → puppy.
 const ROOM: EscapeRoom = {
@@ -124,6 +127,53 @@ describe('escape logic', () => {
     const errs = lintRoom(broken);
     expect(errs.join(' ')).toMatch(/needs 'key' but nothing gives it/);
     expect(errs.join(' ')).toMatch(/not solvable/);
+  });
+
+  it('overlapping hotspots are unavailable until earlier covering hotspot is consumed', () => {
+    const rocket = (manifest.escape ?? []).find((r) => r.id === 'rocketpad');
+    expect(rocket).toBeDefined();
+    if (!rocket) return;
+
+    const s0 = startState();
+    expect(isHotspotAvailable(rocket, s0, 'panel')).toBe(true);
+    expect(isHotspotAvailable(rocket, s0, 'slot')).toBe(false);
+
+    // Tapping slot before panel is used has no effect even with battery held.
+    const withBattery = { ...s0, inventory: ['battery'] };
+    const rBlocked = applyTap(rocket, withBattery, 'slot');
+    expect(rBlocked.effect.kind).toBe('nothing');
+    expect(rBlocked.state.done).toBe(false);
+    expect(nextHint(rocket, withBattery)?.hotspotId).not.toBe('slot');
+
+    // Unlocking panel with wrench exposes the slot
+    const withWrench = { ...s0, used: ['toolbox', 'crate'], inventory: ['wrench', 'battery'] };
+    const rUnlock = applyTap(rocket, withWrench, 'panel');
+    expect(rUnlock.effect.kind).toBe('unlocked');
+    expect(rUnlock.state.used).toContain('panel');
+    expect(isHotspotAvailable(rocket, rUnlock.state, 'slot')).toBe(true);
+    expect(nextHint(rocket, rUnlock.state)).toMatchObject({ hotspotId: 'slot', selectItem: 'battery' });
+
+    // Once panel is used, slot can be tapped with battery to win.
+    const rWin = applyTap(rocket, rUnlock.state, 'slot');
+    expect(rWin.effect.kind).toBe('win');
+    expect(rWin.state.done).toBe(true);
+  });
+});
+
+describe('EscapeGame component', () => {
+  it('does not render covered hotspot pressable until prerequisite hotspot is used', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(EscapeGame, {
+        onHome: noop,
+        sceneId: 'rocketpad',
+        onPickScene: noop,
+        onBackToPicker: noop,
+        lang: 'en',
+      }),
+    );
+    expect(html).toContain('escape-spot-panel');
+    expect(html).not.toContain('escape-spot-slot');
   });
 });
 
