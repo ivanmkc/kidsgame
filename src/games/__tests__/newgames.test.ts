@@ -3,21 +3,32 @@ import { DIFFICULTIES } from '../../difficulty';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { PlayerIx } from '../../multiplayer';
-import { DuelState, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from '../memory/logic';
+import {
+  DuelState,
+  buildBoard,
+  duelInit,
+  duelResolve,
+  duelWinner,
+  nextStarter,
+} from '../memory/logic';
 import { isSolved, makePuzzle, swap } from '../puzzle/logic';
 
 describe('memory match', () => {
-  it.each([4, 6, 8])('builds a %i-pair board with each icon exactly twice', (pairs) => {
-    for (let seed = 1; seed <= 20; seed++) {
-      const board = buildBoard(makeRng(seed), manifest.spotit.icons, pairs);
-      expect(board).toHaveLength(pairs * 2);
-      const counts = new Map<string, number>();
-      for (const c of board) counts.set(c.icon, (counts.get(c.icon) ?? 0) + 1);
-      expect(counts.size).toBe(pairs);
-      for (const n of counts.values()) expect(n).toBe(2);
-      expect(new Set(board.map((c) => c.key)).size).toBe(board.length);
-    }
-  });
+  it.each([4, 6, 8])(
+    'builds a %i-pair board with each icon exactly twice',
+    (pairs) => {
+      for (let seed = 1; seed <= 20; seed++) {
+        const board = buildBoard(makeRng(seed), manifest.spotit.icons, pairs);
+        expect(board).toHaveLength(pairs * 2);
+        const counts = new Map<string, number>();
+        for (const c of board)
+          counts.set(c.icon, (counts.get(c.icon) ?? 0) + 1);
+        expect(counts.size).toBe(pairs);
+        for (const n of counts.values()) expect(n).toBe(2);
+        expect(new Set(board.map((c) => c.key)).size).toBe(board.length);
+      }
+    },
+  );
 });
 
 describe('memory duel', () => {
@@ -71,14 +82,17 @@ describe('memory duel', () => {
 });
 
 describe('picture puzzle', () => {
-  it.each([6, 9, 12])('size %i: never starts solved, every piece once', (size) => {
-    for (let seed = 1; seed <= 30; seed++) {
-      const perm = makePuzzle(makeRng(seed), size);
-      expect(perm).toHaveLength(size);
-      expect(isSolved(perm)).toBe(false);
-      expect(new Set(perm).size).toBe(size);
-    }
-  });
+  it.each([6, 9, 12])(
+    'size %i: never starts solved, every piece once',
+    (size) => {
+      for (let seed = 1; seed <= 30; seed++) {
+        const perm = makePuzzle(makeRng(seed), size);
+        expect(perm).toHaveLength(size);
+        expect(isSolved(perm)).toBe(false);
+        expect(new Set(perm).size).toBe(size);
+      }
+    },
+  );
 
   it('swapping toward identity solves it', () => {
     let perm = makePuzzle(makeRng(7), 12);
@@ -99,8 +113,12 @@ describe('difficulty table', () => {
     expect(medium.spotitRounds).toBeLessThan(hard.spotitRounds);
     expect(easy.memoryPairs).toBeLessThan(medium.memoryPairs);
     expect(medium.memoryPairs).toBeLessThan(hard.memoryPairs);
-    expect(easy.puzzleCols * easy.puzzleRows).toBeLessThan(medium.puzzleCols * medium.puzzleRows);
-    expect(medium.puzzleCols * medium.puzzleRows).toBeLessThan(hard.puzzleCols * hard.puzzleRows);
+    expect(easy.puzzleCols * easy.puzzleRows).toBeLessThan(
+      medium.puzzleCols * medium.puzzleRows,
+    );
+    expect(medium.puzzleCols * medium.puzzleRows).toBeLessThan(
+      hard.puzzleCols * hard.puzzleRows,
+    );
     expect(easy.diffHint).toBe(true);
     expect(easy.rulesTiles).toBeLessThan(medium.rulesTiles);
     expect(medium.rulesTiles).toBeLessThan(hard.rulesTiles);
@@ -128,7 +146,11 @@ describe('shadow match', () => {
     ];
     for (let seed = 1; seed <= 40; seed++) {
       for (const d of diffs) {
-        const r = makeShadowRound(makeRng(seed * d.choices), manifest.spotit.icons, d);
+        const r = makeShadowRound(
+          makeRng(seed * d.choices),
+          manifest.spotit.icons,
+          d,
+        );
         expect(r.options).toHaveLength(d.choices);
         expect(new Set(r.options).size).toBe(d.choices);
         expect(r.options).toContain(r.answer);
@@ -154,7 +176,11 @@ describe('shadow match', () => {
     let sawTwinAnswer = false;
     for (let seed = 1; seed <= 600; seed++) {
       for (const d of diffs) {
-        const r = makeShadowRound(makeRng(seed * d.choices), manifest.spotit.icons, d);
+        const r = makeShadowRound(
+          makeRng(seed * d.choices),
+          manifest.spotit.icons,
+          d,
+        );
         expect(r.options).toHaveLength(d.choices);
         expect(r.options).toContain(r.answer);
         const twins = SHADOW_TWINS[r.answer] ?? [];
@@ -167,19 +193,22 @@ describe('shadow match', () => {
 });
 
 describe('odd one out (which does not belong)', () => {
-  it('n-1 distinct same-category items + one intruder at oddIndex', async () => {
+  it('n-1 same-category items + one intruder at oddIndex (repeats only when pool < n-1)', async () => {
     const { makeOddOneRound } = await import('../oddone/logic');
-    const { categoryOf } = await import('../iconCategories');
+    const { categoryOf, ICON_CATEGORIES } = await import('../iconCategories');
     for (let seed = 1; seed <= 40; seed++) {
       for (const n of [4, 6, 9]) {
         const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
         expect(r.items).toHaveLength(n);
-        expect(new Set(r.items).size).toBe(n); // all distinct
+        const basePool = ICON_CATEGORIES[r.baseCategory];
+        const expectedDistinct = Math.min(basePool.length, n - 1) + 1;
+        expect(new Set(r.items).size).toBe(expectedDistinct);
         expect(r.items[r.oddIndex]).toBe(r.odd);
         expect(categoryOf(r.odd)).toBe(r.oddCategory);
         expect(r.oddCategory).not.toBe(r.baseCategory);
         for (let i = 0; i < n; i++) {
-          if (i !== r.oddIndex) expect(categoryOf(r.items[i])).toBe(r.baseCategory);
+          if (i !== r.oddIndex)
+            expect(categoryOf(r.items[i])).toBe(r.baseCategory);
         }
       }
     }
@@ -198,17 +227,35 @@ describe('odd one out (which does not belong)', () => {
         const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
         const conflicts = CATEGORY_CONFLICTS[r.baseCategory] ?? [];
         if (conflicts.length) sawConflictedBase = true;
-        expect(conflicts, `${r.baseCategory} vs ${r.oddCategory}`).not.toContain(r.oddCategory);
+        expect(
+          conflicts,
+          `${r.baseCategory} vs ${r.oddCategory}`,
+        ).not.toContain(r.oddCategory);
       }
     }
     expect(sawConflictedBase).toBe(true); // the guard was actually exercised
   });
 
+  it('hard difficulty (n=9) selects diverse base categories, not just animals', async () => {
+    const { makeOddOneRound } = await import('../oddone/logic');
+    const baseCategories = new Set<string>();
+    for (let seed = 1; seed <= 100; seed++) {
+      const r = makeOddOneRound(makeRng(seed), manifest.spotit.icons, 9);
+      baseCategories.add(r.baseCategory);
+    }
+    expect(baseCategories).toEqual(
+      new Set(['animals', 'food', 'nature', 'things']),
+    );
+  });
+
   it('every category the round builder can pick has a spoken question in all four langs', async () => {
-    const { CATEGORY_TEXT, ICON_CATEGORIES } = await import('../iconCategories');
+    const { CATEGORY_TEXT, ICON_CATEGORIES } =
+      await import('../iconCategories');
     // The generic "Which one does not belong?" fallback tells a kid nothing
     // about WHICH group the board is built from, so no category may reach it.
-    expect(Object.keys(CATEGORY_TEXT).sort()).toEqual(Object.keys(ICON_CATEGORIES).sort());
+    expect(Object.keys(CATEGORY_TEXT).sort()).toEqual(
+      Object.keys(ICON_CATEGORIES).sort(),
+    );
     for (const [name, text] of Object.entries(CATEGORY_TEXT)) {
       expect(text.tap, name).toBeTruthy();
       for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
@@ -227,7 +274,14 @@ describe('rule time', () => {
       const rules = makeRules(rng, 5);
       expect(rules).toHaveLength(5);
       for (let idx = 0; idx < 5; idx++) {
-        const round = makeRulesRound(rng, manifest.spotit.icons, rules, idx, 8, idx === 3);
+        const round = makeRulesRound(
+          rng,
+          manifest.spotit.icons,
+          rules,
+          idx,
+          8,
+          idx === 3,
+        );
         expect(round.tiles).toHaveLength(8);
         const matches = round.tiles.filter((t) => t.isMatch);
         expect(matches.length).toBe(round.matchCount);
