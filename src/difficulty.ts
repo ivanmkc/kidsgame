@@ -27,8 +27,6 @@ export function difficultyOf(f: DifficultyFilter): Difficulty {
 }
 
 export interface DifficultySettings {
-  label: string;
-  emoji: string;
   spotitRounds: number;
   memoryPairs: number;
   puzzleCols: number;
@@ -46,7 +44,6 @@ export interface DifficultySettings {
 
 export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
   easy: {
-    label: 'Easy', emoji: '😊',
     spotitRounds: 10, memoryPairs: 4,
     puzzleCols: 3, puzzleRows: 2,
     diffHint: true, timer: false,
@@ -55,7 +52,6 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     duelWins: 3, duelHintSecs: 3,
   },
   medium: {
-    label: 'Medium', emoji: '🌟',
     spotitRounds: 12, memoryPairs: 6,
     puzzleCols: 3, puzzleRows: 3,
     diffHint: false, timer: true,
@@ -64,7 +60,6 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     duelWins: 5, duelHintSecs: 4,
   },
   hard: {
-    label: 'Hard', emoji: '🔥',
     spotitRounds: 14, memoryPairs: 8,
     puzzleCols: 4, puzzleRows: 3,
     diffHint: false, timer: true,
@@ -78,11 +73,11 @@ export function settingsFor(d: Difficulty | undefined): DifficultySettings {
   return DIFFICULTIES[d ?? 'medium'];
 }
 
-export const FILTERS: { id: DifficultyFilter; label: string; emoji: string }[] = [
-  { id: 'all', label: 'All', emoji: '🎨' },
-  { id: 'easy', label: 'Easy', emoji: '😊' },
-  { id: 'medium', label: 'Medium', emoji: '🌟' },
-  { id: 'hard', label: 'Hard', emoji: '🔥' },
+export const FILTERS: { id: DifficultyFilter; emoji: string }[] = [
+  { id: 'all', emoji: '🎨' },
+  { id: 'easy', emoji: '😊' },
+  { id: 'medium', emoji: '🌟' },
+  { id: 'hard', emoji: '🔥' },
 ];
 
 export function inFilter(level: Difficulty | undefined, f: DifficultyFilter): boolean {

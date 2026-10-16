@@ -4,6 +4,7 @@ import {
   byLevel,
   DIFFICULTIES,
   difficultyOf,
+  FILTERS,
   inFilter,
   loadFilter,
   nextFilter,
@@ -83,6 +84,15 @@ describe('nextFilter', () => {
   });
 });
 
+describe('FILTERS', () => {
+  it('defines an emoji and no label for each filter', () => {
+    for (const f of FILTERS) {
+      expect(f.emoji).toBeDefined();
+      expect('label' in f).toBe(false);
+    }
+  });
+});
+
 describe('inFilter', () => {
   it('always matches when filter is all', () => {
     expect(inFilter('easy', 'all')).toBe(true);
@@ -115,6 +125,15 @@ describe('settingsFor', () => {
     expect(settingsFor(undefined)).toBe(DIFFICULTIES.medium);
     expect(settingsFor('easy')).toBe(DIFFICULTIES.easy);
     expect(settingsFor('hard')).toBe(DIFFICULTIES.hard);
+  });
+});
+
+describe('DIFFICULTIES', () => {
+  it('does not expose dead label or emoji strings', () => {
+    for (const s of Object.values(DIFFICULTIES)) {
+      expect('label' in s).toBe(false);
+      expect('emoji' in s).toBe(false);
+    }
   });
 });
 
