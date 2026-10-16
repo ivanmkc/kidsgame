@@ -11,7 +11,7 @@ import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
 import { playNote, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeBellsRound, roundsToWin, checkSequence, BellsRound, Bell } from './logic';
+import { makeBellsRound, roundsToWin, checkSequence, BellsRound, canTap } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -60,7 +60,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
-    if (won || phase !== 'play') return;
+    if (!canTap(round, tapped, phase, won)) return;
     playNote(round.bells[idx].midi, 0.8);
     setGlowIdx(idx);
     setTimeout(() => setGlowIdx(null), 250);
