@@ -1,5 +1,8 @@
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
+import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
@@ -75,6 +78,20 @@ describe('melody bells', () => {
   it('roundsToWin increases with difficulty', () => {
     expect(bellRounds('easy')).toBeLessThan(bellRounds('medium'));
     expect(bellRounds('medium')).toBeLessThan(bellRounds('hard'));
+  });
+
+  it('renders BellsGame and displays localized strings', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(BellsGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'en',
+      })
+    );
+    expect(html).toContain('Melody Bells');
+    expect(html).toContain('Listen, then play the tune back!');
+    expect(html).toContain('Listen...');
   });
 });
 
