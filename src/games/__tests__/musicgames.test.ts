@@ -64,6 +64,18 @@ describe('melody bells', () => {
     }
   });
 
+  it('does not generate monotone rounds with identical repeated notes', () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      for (const d of ['easy', 'medium', 'hard'] as const) {
+        const rng = makeRng(seed);
+        for (let round = 0; round < 5; round++) {
+          const r = makeBellsRound(rng, d);
+          expect(r.sequence.some((v) => v !== r.sequence[0])).toBe(true);
+        }
+      }
+    }
+  });
+
   it('checkSequence validates correctly', () => {
     const rng = makeRng(42);
     const r = makeBellsRound(rng, 'easy');
