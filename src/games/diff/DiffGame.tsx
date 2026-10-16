@@ -1,6 +1,6 @@
 import { say, sfx, useSay } from '../../sound';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
@@ -12,7 +12,8 @@ import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { baseImage, manifest } from '../../manifest';
 import { makeRng, sample } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
+import { colors, fonts } from '../../theme';
+import { DiffHintButton } from './DiffHintButton';
 import { diffPrompt } from './logic';
 
 interface Props {
@@ -253,9 +254,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
           </View>
         ) : null}
         {settings.diffHint && hintAvailable && !won ? (
-          <Pressable onPress={showHint} testID="diff-hint" accessibilityLabel="Show a hint" accessibilityRole="button" style={({ pressed }) => [styles.hintBtn, shadows.soft, pressed && styles.pressed]}>
-            <Text style={styles.hintText}>{t(lang, 'diff.hint')}</Text>
-          </Pressable>
+          <DiffHintButton lang={lang} onPress={showHint} />
         ) : null}
       </ScrollView>
       <WinOverlay
@@ -277,13 +276,4 @@ const styles = StyleSheet.create({
   loadingWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
   sceneBlock: { alignItems: 'center' },
   label: { fontSize: 14, fontFamily: fonts.displayMed, color: colors.inkSoft, marginBottom: 2 },
-  hintBtn: {
-    marginTop: 10,
-    backgroundColor: colors.gold,
-    borderRadius: 16,
-    paddingVertical: 9,
-    paddingHorizontal: 24,
-  },
-  pressed: { opacity: 0.8, transform: [{ scale: 0.97 }] },
-  hintText: { fontFamily: fonts.display, fontSize: 16, color: colors.ink },
 });

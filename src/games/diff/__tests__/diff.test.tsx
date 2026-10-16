@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { manifest } from '../../../manifest';
 import { sfx } from '../../../sound';
 import { DiffGame } from '../DiffGame';
+import { DiffHintButton } from '../DiffHintButton';
 
 let lastTapSceneProps: { onHit: (id: string) => void } | null = null;
 
@@ -40,5 +41,17 @@ describe('DiffGame', () => {
     lastTapSceneProps?.onHit('0');
     expect(sfxSpy).toHaveBeenCalledOnce();
     sfxSpy.mockRestore();
+  });
+
+  it('renders hint button with localized accessibilityLabel following lang', () => {
+    const htmlJa = renderToString(<DiffHintButton lang="ja" onPress={noop} />);
+    expect(htmlJa).toContain('data-testid="diff-hint"');
+    expect(htmlJa).toContain('role="button"');
+    expect(htmlJa).toContain('aria-label="💡 ヒント"');
+    expect(htmlJa).not.toContain('aria-label="Show a hint"');
+
+    const htmlEn = renderToString(<DiffHintButton lang="en" onPress={noop} />);
+    expect(htmlEn).toContain('data-testid="diff-hint"');
+    expect(htmlEn).toContain('aria-label="💡 Hint"');
   });
 });
