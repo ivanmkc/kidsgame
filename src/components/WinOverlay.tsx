@@ -82,7 +82,7 @@ export function WinOverlay({ visible, message, sub, stats, onNext, onHome, nextL
               ))}
             </View>
             <View style={styles.textCol}>
-              <Text style={[styles.message, { fontSize: msgSize }]} numberOfLines={2}>{message}</Text>
+              <Text style={[styles.message, { fontSize: msgSize }]} numberOfLines={3}>{message}</Text>
               {sub ? <Text style={styles.sub} numberOfLines={1}>{sub}</Text> : null}
             </View>
           </View>
