@@ -109,3 +109,57 @@ export function speechLines(): string[] {
   });
   return [...s];
 }
+
+export interface CountState {
+  roundNo: number;
+  score: number;
+  tapped: boolean[];
+}
+
+export function initCountState(n: number): CountState {
+  return {
+    roundNo: 0,
+    score: 0,
+    tapped: Array.from({ length: n }, () => false),
+  };
+}
+
+export function tapCritterIndex(state: CountState, index: number): CountState {
+  const next = state.tapped.slice();
+  next[index] = true;
+  return { ...state, tapped: next };
+}
+
+export function scoreCorrectAnswer(state: CountState): CountState {
+  return { ...state, score: state.score + 1 };
+}
+
+export function advanceCountRound(state: CountState, nextN: number): CountState {
+  return {
+    roundNo: state.roundNo + 1,
+    score: state.score,
+    tapped: Array.from({ length: nextN }, () => false),
+  };
+}
+
+export function resetCountState(nextN: number, state?: CountState): CountState {
+  return {
+    roundNo: (state?.roundNo ?? 0) + 1,
+    score: 0,
+    tapped: Array.from({ length: nextN }, () => false),
+  };
+}
+
+/**
+ * Stable key for each critter instance. Must depend on the round sequence
+ * number and item index, NOT the player's score: keying on score causes
+ * critters to remount mid-round when the score increments on an answer,
+ * triggering a spurious burst of pops and preventing pops in subsequent rounds.
+ */
+export function critterKey(
+  state: Pick<CountState, 'roundNo'>,
+  index: number,
+): string {
+  return `${state.roundNo}-${index}`;
+}
+
