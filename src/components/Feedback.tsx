@@ -49,6 +49,9 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
                   <Pressable
                     onPress={() => { sfx.tap(); setKind('broken'); }}
                     testID="feedback-broken"
+                    accessibilityRole="button"
+                    accessibilityLabel={t(lang, 'feedback.broken')}
+                    accessibilityState={{ selected: kind === 'broken' }}
                     style={[styles.kind, kind === 'broken' && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>{t(lang, 'feedback.broken')}</Text>
@@ -56,6 +59,9 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
                   <Pressable
                     onPress={() => { sfx.tap(); setKind('idea'); }}
                     testID="feedback-idea"
+                    accessibilityRole="button"
+                    accessibilityLabel={t(lang, 'feedback.idea')}
+                    accessibilityState={{ selected: kind === 'idea' }}
                     style={[styles.kind, kind === 'idea' && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>{t(lang, 'feedback.idea')}</Text>
@@ -71,13 +77,21 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
                   style={styles.input}
                 />
                 <View style={styles.row}>
-                  <Pressable onPress={reset} testID="feedback-cancel" style={[styles.btn, styles.btnGhost]}>
+                  <Pressable
+                    onPress={reset}
+                    testID="feedback-cancel"
+                    accessibilityRole="button"
+                    accessibilityLabel={t(lang, 'feedback.cancel')}
+                    style={[styles.btn, styles.btnGhost]}
+                  >
                     <Text style={styles.btnGhostText}>{t(lang, 'feedback.cancel')}</Text>
                   </Pressable>
                   <Pressable
                     onPress={send}
                     disabled={!kind && !text.trim()}
                     testID="feedback-send"
+                    accessibilityRole="button"
+                    accessibilityLabel={t(lang, 'feedback.send')}
                     style={[styles.btn, (!kind && !text.trim()) && { opacity: 0.4 }]}
                   >
                     <Text style={styles.btnText}>{t(lang, 'feedback.send')}</Text>
@@ -133,7 +147,14 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   row: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end' },
-  btn: { backgroundColor: colors.green, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 18 },
+  btn: {
+    backgroundColor: colors.green,
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
   btnText: { fontFamily: fonts.display, fontSize: 15, color: 'white' },
   btnGhost: { backgroundColor: 'transparent' },
   btnGhostText: { fontFamily: fonts.displayMed, fontSize: 15, color: colors.inkSoft },
