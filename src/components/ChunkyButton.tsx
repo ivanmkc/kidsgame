@@ -21,6 +21,8 @@ export function ChunkyButton({
   const press = useRef(new Animated.Value(0)).current;
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
       onPressIn={() => Animated.timing(press, { toValue: 1, duration: 70, useNativeDriver: true }).start()}
       onPressOut={() => Animated.spring(press, { toValue: 0, friction: 4, useNativeDriver: true }).start()}
       onPress={() => { if (!silent) sfx.tap(); onPress(); }}
