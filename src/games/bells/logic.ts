@@ -51,6 +51,18 @@ export function checkSequence(round: BellsRound, tapped: number[]): boolean {
   return tapped.every((v, i) => v === round.sequence[i]);
 }
 
+export type BellsPhase = 'listen' | 'play';
+
+export function canTap(
+  round: BellsRound,
+  tapped: number[],
+  phase: BellsPhase,
+  won = false
+): boolean {
+  if (won || phase !== 'play') return false;
+  return tapped.length < round.sequence.length;
+}
+
 export function speechLines(): string[] {
   return [];
 }

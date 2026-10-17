@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
-import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
+import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
 import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
 import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
@@ -78,6 +78,32 @@ describe('melody bells', () => {
   it('roundsToWin increases with difficulty', () => {
     expect(bellRounds('easy')).toBeLessThan(bellRounds('medium'));
     expect(bellRounds('medium')).toBeLessThan(bellRounds('hard'));
+  });
+
+  it('canTap allows taps during active play while sequence is incomplete', () => {
+    const rng = makeRng(42);
+    const r = makeBellsRound(rng, 'medium');
+    expect(r.sequence).toHaveLength(3);
+
+    expect(canTap(r, [], 'play')).toBe(true);
+    expect(canTap(r, [0], 'play')).toBe(true);
+    expect(canTap(r, [0, 1], 'play')).toBe(true);
+  });
+
+  it('canTap blocks taps once sequence length is reached or when not in active play', () => {
+    const rng = makeRng(42);
+    const r = makeBellsRound(rng, 'medium');
+    expect(r.sequence).toHaveLength(3);
+
+    expect(canTap(r, [0, 1, 2], 'play')).toBe(false);
+    expect(canTap(r, [0, 1, 2, 0], 'play')).toBe(false);
+    expect(canTap(r, [0, 1, 2, 0, 0], 'play')).toBe(false);
+
+    expect(canTap(r, [], 'listen')).toBe(false);
+    expect(canTap(r, [0], 'listen')).toBe(false);
+
+    expect(canTap(r, [], 'play', true)).toBe(false);
+    expect(canTap(r, [0], 'play', true)).toBe(false);
   });
 
   it('renders BellsGame and displays localized strings', () => {
