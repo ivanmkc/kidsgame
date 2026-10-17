@@ -77,7 +77,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     setRound(makeSameDiffRound(rngRef.current, difficulty));
   };
 
-  const phaseLabel = phase === 'listenA' ? '1/2 🎵' : phase === 'listenB' ? '2/2 🎵' : '';
 
   const earPulse = useRef(new Animated.Value(1)).current;
   const pickGlow = useRef(new Animated.Value(0)).current;
@@ -117,7 +116,10 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         {phase !== 'pick' ? (
           <View style={[styles.listenCard, shadows.soft]}>
             <Animated.Text style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.listenText}>{phaseLabel}</Text>
+            <View style={styles.melodyDotRow}>
+              <View testID="melody-dot-0" style={[styles.melodyDot, (phase === 'listenA' || phase === 'listenB') && styles.melodyDotFilled]} />
+              <View testID="melody-dot-1" style={[styles.melodyDot, phase === 'listenB' && styles.melodyDotFilled]} />
+            </View>
           </View>
         ) : (
           <View style={styles.pickRow}>
@@ -194,7 +196,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   listenEmoji: { fontSize: 56 },
-  listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },
+  melodyDotRow: { flexDirection: 'row', gap: 12 },
+  melodyDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    backgroundColor: 'transparent',
+  },
+  melodyDotFilled: { backgroundColor: colors.gold },
   pickRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
   pickBtn: {
     borderRadius: 28,
