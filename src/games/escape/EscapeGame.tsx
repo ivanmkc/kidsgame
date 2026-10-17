@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
 import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
-import { EscapeState, applyTap, nextHint, selectItem, startState } from './logic';
+import { EscapeState, applyTap, isHotspotAvailable, nextHint, selectItem, startState } from './logic';
 
 interface SpriteAnim {
   hotspotId: string;
@@ -233,6 +233,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
             });
           })}
           {room.hotspots.map((h) => {
+            if (!isHotspotAvailable(room, state, h.id)) return null;
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
             const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
@@ -240,8 +241,9 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               <Pressable
                 key={h.id}
                 testID={`escape-spot-${h.id}`}
+                disabled={used}
                 onPress={() => onSpot(h.id)}
-                accessibilityRole="button"
+                accessibilityRole={used ? 'none' : 'button'}
                 accessibilityLabel={h.id}
                 style={{
                   position: 'absolute',
@@ -249,6 +251,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
                   top: (h.box.y - 8) * scale,
                   width: (h.box.w + 16) * scale,
                   height: (h.box.h + 16) * scale,
+                  pointerEvents: used ? 'none' : 'auto',
                 }}
               >
                 {revealed && <PulseRing strong />}
