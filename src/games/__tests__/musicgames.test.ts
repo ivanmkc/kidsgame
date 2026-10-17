@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
+import { FastSlowGame } from '../fastslow/FastSlowGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
@@ -205,15 +206,16 @@ describe('fast or slow', () => {
     }
   });
 
-  it('the answer field always agrees with the tempo played', () => {
+  it('isCorrect agrees with the tempo played, and rounds do not store answer', () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 200; seed++) {
       for (const d of ['easy', 'medium', 'hard'] as const) {
         const r = makeFastSlowRound(makeRng(seed), d);
-        expect(r.answer).toBe(getActualSpeed(r));
-        expect(fsCorrect(r, r.answer)).toBe(true);
-        expect(fsCorrect(r, r.answer === 'fast' ? 'slow' : 'fast')).toBe(false);
-        seen.add(r.answer);
+        expect('answer' in r).toBe(false);
+        const speed = getActualSpeed(r);
+        expect(fsCorrect(r, speed)).toBe(true);
+        expect(fsCorrect(r, speed === 'fast' ? 'slow' : 'fast')).toBe(false);
+        seen.add(speed);
       }
     }
     expect(seen).toEqual(new Set(['fast', 'slow']));
@@ -222,6 +224,20 @@ describe('fast or slow', () => {
   it('roundsToWin increases with difficulty', () => {
     expect(fsRounds('easy')).toBeLessThan(fsRounds('medium'));
     expect(fsRounds('medium')).toBeLessThan(fsRounds('hard'));
+  });
+
+  it('renders FastSlowGame and displays localized strings', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(FastSlowGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'en',
+      })
+    );
+    expect(html).toContain('Fast or Slow');
+    expect(html).toContain('Is the music fast or slow?');
+    expect(html).toContain('Listen...');
   });
 });
 
