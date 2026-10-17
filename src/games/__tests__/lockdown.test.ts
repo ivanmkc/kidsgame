@@ -1,5 +1,14 @@
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import { Platform } from 'react-native';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { effectiveLang, visibleCards, GATE_WORDS, randomGateWord } from '../../lockdown';
+import {
+  useLockdown,
+  effectiveLang,
+  visibleCards,
+  GATE_WORDS,
+  randomGateWord,
+} from '../../lockdown';
 
 const mockStorage = new Map<string, string>();
 
@@ -10,6 +19,11 @@ vi.stubGlobal('window', {
     removeItem: (k: string) => { mockStorage.delete(k); },
   },
 });
+
+beforeEach(() => {
+  mockStorage.clear();
+});
+
 
 describe('effectiveLang', () => {
   it('returns current lang when not hidden', () => {
@@ -74,3 +88,114 @@ describe('randomGateWord', () => {
     }
   });
 });
+
+describe('useLockdown', () => {
+  function getHook() {
+    let hook!: ReturnType<typeof useLockdown>;
+    function Harness() {
+      hook = useLockdown();
+      return null;
+    }
+    renderToString(React.createElement(Harness));
+    return hook;
+  }
+
+  it('provides initial state', () => {
+    const hook = getHook();
+    expect(hook.state).toEqual({ hiddenGames: [], hiddenLangs: [] });
+    expect(hook.isActive).toBe(false);
+    expect(hook.isGameHidden('balloon')).toBe(false);
+    expect(hook.isLangHidden('ja')).toBe(false);
+    expect(hook.allowedLangs).toHaveLength(4);
+  });
+
+  it('updates hidden games with setHiddenGames', () => {
+    const hook = getHook();
+    hook.setHiddenGames(['diff', 'story']);
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: ['diff', 'story'], hiddenLangs: [] }),
+    );
+  });
+
+  it('updates hidden langs with setHiddenLangs', () => {
+    const hook = getHook();
+    hook.setHiddenLangs(['ja', 'cmn']);
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: [], hiddenLangs: ['ja', 'cmn'] }),
+    );
+  });
+
+  it('toggles games on and off', () => {
+    const hook = getHook();
+    hook.toggleGame('story');
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: ['story'], hiddenLangs: [] }),
+    );
+    hook.toggleGame('story');
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: [], hiddenLangs: [] }),
+    );
+  });
+
+  it('toggles langs on and off and forbids hiding all langs', () => {
+    const hook = getHook();
+    expect(hook.toggleLang('ja')).toBe(true);
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: [], hiddenLangs: ['ja'] }),
+    );
+    expect(hook.toggleLang('cmn')).toBe(true);
+    expect(hook.toggleLang('yue')).toBe(true);
+    // Hiding the last remaining language should be rejected
+    expect(hook.toggleLang('en')).toBe(false);
+    // Unhiding ja should work
+    expect(hook.toggleLang('ja')).toBe(true);
+  });
+
+  it('handles corrupted JSON in storage gracefully', () => {
+    mockStorage.set('kgb.lockdown.v1', '{corrupt json');
+    const hook = getHook();
+    hook.toggleGame('story');
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: ['story'], hiddenLangs: [] }),
+    );
+  });
+
+  it('handles malformed shape in storage gracefully', () => {
+    mockStorage.set(
+      'kgb.lockdown.v1',
+      JSON.stringify({ hiddenGames: 'not-an-array', hiddenLangs: 123 }),
+    );
+    const hook = getHook();
+    hook.toggleGame('story');
+    expect(mockStorage.get('kgb.lockdown.v1')).toBe(
+      JSON.stringify({ hiddenGames: ['story'], hiddenLangs: [] }),
+    );
+  });
+
+  it('handles storage write failures silently', () => {
+    const originalSetItem = window.localStorage.setItem;
+    window.localStorage.setItem = () => {
+      throw new Error('QuotaExceeded');
+    };
+    try {
+      const hook = getHook();
+      expect(() => hook.toggleGame('story')).not.toThrow();
+    } finally {
+      window.localStorage.setItem = originalSetItem;
+    }
+  });
+
+  it('does nothing when Platform.OS is not web', () => {
+    const origOS = Platform.OS;
+    Platform.OS = 'ios';
+    try {
+      const hook = getHook();
+      hook.setHiddenGames(['diff']);
+      expect(mockStorage.get('kgb.lockdown.v1')).toBeUndefined();
+    } finally {
+      Platform.OS = origOS;
+    }
+  });
+});
+
+
