@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -9,6 +9,8 @@ import {
 } from 'react-native';
 import { Lang, LANGS } from '../lang';
 import { colors, fonts, shadows } from '../theme';
+import { LangContext } from './GameShell';
+import { buildGameSections, countHidden } from '../menuCards';
 
 interface Props {
   hiddenGames: string[];
@@ -18,59 +20,6 @@ interface Props {
   onDone: () => void;
 }
 
-interface GameEntry {
-  id: string;
-  label: string;
-}
-
-const GAME_SECTION: { title: string; games: GameEntry[] } [] = [
-  {
-    title: 'Games',
-    games: [
-      { id: 'spotit', label: 'Spot It!' },
-      { id: 'diff', label: 'Find the Difference' },
-      { id: 'hidden', label: 'Hidden Objects' },
-      { id: 'memory', label: 'Memory Match' },
-      { id: 'puzzle', label: 'Picture Puzzle' },
-      { id: 'shadow', label: 'Shadow Match' },
-      { id: 'oddone', label: 'Odd One Out' },
-      { id: 'rules', label: 'Rule Time!' },
-      { id: 'sticker', label: 'Sticker Party' },
-      { id: 'story', label: 'Story Path' },
-      { id: 'carmode', label: 'Car Mode' },
-    ],
-  },
-  {
-    title: 'Word Games',
-    games: [
-      { id: 'letters', label: 'Letter Hunt' },
-      { id: 'sounds', label: 'First Sounds' },
-      { id: 'rhyme', label: 'Rhyme Time' },
-      { id: 'spell', label: 'Word Builder' },
-    ],
-  },
-  {
-    title: 'Number Games',
-    games: [
-      { id: 'count', label: 'Count With Me' },
-      { id: 'numbers', label: 'Number Hunt' },
-      { id: 'compare', label: 'More or Less' },
-      { id: 'sums', label: 'Little Sums' },
-    ],
-  },
-  {
-    title: 'Music Games',
-    games: [
-      { id: 'highlow', label: 'High or Low' },
-      { id: 'bells', label: 'Melody Bells' },
-      { id: 'echobeat', label: 'Echo Beat' },
-      { id: 'steadybeat', label: 'Steady Beat' },
-      { id: 'fastslow', label: 'Fast or Slow' },
-      { id: 'samediff', label: 'Same or Different' },
-    ],
-  },
-];
-
 export function LockdownSettings({
   hiddenGames,
   hiddenLangs,
@@ -78,6 +27,9 @@ export function LockdownSettings({
   onToggleLang,
   onDone,
 }: Props) {
+  const langCtx = useContext(LangContext);
+  const lang = langCtx?.lang ?? 'en';
+  const sections = buildGameSections(lang);
   const [langWarning, setLangWarning] = useState(false);
 
   const handleLangToggle = (lang: Lang) => {
@@ -88,7 +40,7 @@ export function LockdownSettings({
     }
   };
 
-  const totalHidden = hiddenGames.length + hiddenLangs.length;
+  const totalHidden = countHidden(hiddenGames, hiddenLangs);
 
   return (
     <View style={styles.backdrop}>
@@ -98,7 +50,7 @@ export function LockdownSettings({
           Toggle off games or languages to hide them from your child.
         </Text>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-          {GAME_SECTION.map((section) => (
+          {sections.map((section) => (
             <View key={section.title} style={styles.section}>
               <Text style={styles.sectionTitle}>{section.title}</Text>
               {section.games.map((game) => {
