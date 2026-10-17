@@ -2,8 +2,8 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { EscapeRoom, manifest } from '../../manifest';
-import { EscapeGame } from '../escape/EscapeGame';
-import { applyTap, isHotspotAvailable, lintRoom, nextHint, selectItem, solve, startState } from '../escape/logic';
+import { EscapeGame, HotspotLayer } from '../escape/EscapeGame';
+import { EscapeState, applyTap, getPulseBox, isHotspotAvailable, lintRoom, nextHint, revealedTarget, selectItem, solve, startState } from '../escape/logic';
 
 // Fixture: the toyroom chain — pillow → key → toy chest → bone → puppy.
 const ROOM: EscapeRoom = {
@@ -160,23 +160,6 @@ describe('escape logic', () => {
   });
 });
 
-describe('EscapeGame component', () => {
-  it('does not render covered hotspot pressable until prerequisite hotspot is used', () => {
-    const noop = () => {};
-    const html = renderToString(
-      React.createElement(EscapeGame, {
-        onHome: noop,
-        sceneId: 'rocketpad',
-        onPickScene: noop,
-        onBackToPicker: noop,
-        lang: 'en',
-      }),
-    );
-    expect(html).toContain('escape-spot-panel');
-    expect(html).not.toContain('escape-spot-slot');
-  });
-});
-
 describe('sprite accumulator math', () => {
   const FPS = 12;
   const FRAME_COUNT = 48;
@@ -285,4 +268,120 @@ describe('shipped escape rooms', () => {
       }
     }
   });
+
+  it.skipIf(rooms.length === 0)('every item-giving hotspot has a distinct revealed itemBox and aligned pulseBox when revealed', () => {
+    for (const room of rooms) {
+      for (const h of room.hotspots) {
+        if (h.gives) {
+          const revealedState: EscapeState = { ...startState(), revealed: [h.id] };
+          const target = revealedTarget(h, revealedState);
+          expect(target, `${room.id}/${h.id} has no revealed item box`).toBeDefined();
+          expect(getPulseBox(h, revealedState)).toEqual(target);
+          expect(getPulseBox(h, startState())).toEqual(h.box);
+        }
+      }
+    }
+  });
+
+  it('revealedTarget returns itemBox during reveal phase, undefined before and after', () => {
+    const toyroom = rooms.find((r) => r.id === 'toyroom')!;
+    const pillow = toyroom.hotspots.find((h) => h.id === 'pillow')!;
+    expect(pillow.itemBox).toBeDefined();
+    // Zero overlap between container box and revealed itemBox
+    expect(pillow.box.x + pillow.box.w).toBeLessThanOrEqual(pillow.itemBox!.x);
+
+    let s = startState();
+    // 1. Before reveal: undefined; pulse stays on container
+    expect(revealedTarget(pillow, s)).toBeUndefined();
+    expect(getPulseBox(pillow, s)).toEqual(pillow.box);
+
+    // 2. After search reveals pillow: returns pillow.itemBox; pulse moves to revealed key
+    const revealRes = applyTap(toyroom, s, 'pillow');
+    expect(revealRes.effect.kind).toBe('revealed');
+    s = revealRes.state;
+    expect(revealedTarget(pillow, s)).toEqual(pillow.itemBox);
+    expect(getPulseBox(pillow, s)).toEqual(pillow.itemBox);
+
+    // 3. After collection: undefined; pulse reverts
+    const collectRes = applyTap(toyroom, s, 'pillow');
+    expect(collectRes.effect.kind).toBe('collected');
+    s = collectRes.state;
+    expect(revealedTarget(pillow, s)).toBeUndefined();
+    expect(getPulseBox(pillow, s)).toEqual(pillow.box);
+  });
+
+  it('falls back to container box when itemBox is absent', () => {
+    const spot = ROOM.hotspots.find((h) => h.id === 'pillow')!;
+    let s = startState();
+    expect(revealedTarget(spot, s)).toBeUndefined();
+    s = applyTap(ROOM, s, 'pillow').state;
+    expect(s.revealed).toContain('pillow');
+    expect(revealedTarget(spot, s)).toBeUndefined();
+    expect(getPulseBox(spot, s)).toEqual(spot.box);
+  });
 });
+
+describe('EscapeGame component', () => {
+  const noop = () => {};
+  const rooms = manifest.escape ?? [];
+
+  it('renders scene and initial container hotspots without revealed item target', () => {
+    const html = renderToString(
+      React.createElement(EscapeGame, {
+        onHome: noop,
+        sceneId: 'toyroom',
+        onPickScene: noop,
+        onBackToPicker: noop,
+        lang: 'en',
+      }),
+    );
+    expect(html).toContain('The Sleepy Puppy');
+    expect(html).toContain('escape-spot-pillow');
+    expect(html).toContain('escape-tray');
+    expect(html).not.toContain('escape-spot-revealed-pillow');
+  });
+
+  it('renders revealed item hit target and pulse ring when hotspot is revealed', () => {
+    const toyroom = rooms.find((r) => r.id === 'toyroom')!;
+    const pillow = toyroom.hotspots.find((h) => h.id === 'pillow')!;
+    const scale = 0.5;
+    const expectedLeft = (pillow.itemBox!.x - 8) * scale;
+    const expectedTop = (pillow.itemBox!.y - 8) * scale;
+    const containerLeft = (pillow.box.x - 8) * scale;
+
+    const html = renderToString(
+      React.createElement(HotspotLayer, {
+        room: toyroom,
+        state: { ...startState(), revealed: ['pillow'] },
+        scale,
+        hintSpot: null,
+        lang: 'en',
+        onSpot: noop,
+      }),
+    );
+    // Revealed item Pressable rendered with item testID and accessible label
+    expect(html).toContain('escape-spot-revealed-pillow');
+    expect(html).toContain('A shiny key!');
+    // Hit target position is placed at the revealed item (not container box 0)
+    expect(html).toContain(`left:${expectedLeft}px`);
+    expect(html).toContain(`top:${expectedTop}px`);
+    // Container Pressable is at distinct position
+    expect(html).toContain(`left:${containerLeft}px`);
+    expect(html).toContain('escape-spot-pillow');
+  });
+
+  it('does not render covered hotspot pressable until prerequisite hotspot is used', () => {
+    const html = renderToString(
+      React.createElement(EscapeGame, {
+        onHome: noop,
+        sceneId: 'rocketpad',
+        onPickScene: noop,
+        onBackToPicker: noop,
+        lang: 'en',
+      }),
+    );
+    expect(html).toContain('escape-spot-panel');
+    expect(html).not.toContain('escape-spot-slot');
+  });
+});
+

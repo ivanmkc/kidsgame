@@ -2,7 +2,7 @@
 // spot to find an item, tap the tray item to pick it up, tap the lock
 // that needs it. UI-free so vitest can prove every shipped room solvable
 // (the same trace the generator lint runs in Python before art is made).
-import { Box, EscapeRoom } from '../../manifest';
+import { Box, EscapeHotspot, EscapeRoom } from '../../manifest';
 
 function overlaps(a: Box, b: Box): boolean {
   return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
@@ -49,6 +49,21 @@ export const TRAY_SIZE = 3;
 export function selectItem(s: EscapeState, itemId: string): EscapeState {
   if (!s.inventory.includes(itemId)) return s;
   return { ...s, selected: s.selected === itemId ? null : itemId };
+}
+
+/**
+ * Decision function for the revealed item's hit target: returns the item's
+ * scene box when the hotspot is in the revealed phase and not yet consumed,
+ * or undefined otherwise.
+ */
+export function revealedTarget(h: EscapeHotspot, s: EscapeState): Box | undefined {
+  if (!s.revealed.includes(h.id) || s.used.includes(h.id)) return undefined;
+  return h.itemBox ?? h.sprite?.itemBbox;
+}
+
+/** Hit target used for the pulse ring: the revealed item if present, else the container. */
+export function getPulseBox(h: EscapeHotspot, s: EscapeState): Box {
+  return revealedTarget(h, s) ?? h.box;
 }
 
 export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): { state: EscapeState; effect: TapEffect } {

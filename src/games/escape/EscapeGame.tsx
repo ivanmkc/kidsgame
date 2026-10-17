@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
 import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
-import { EscapeState, applyTap, isHotspotAvailable, nextHint, selectItem, startState } from './logic';
+import { EscapeState, applyTap, getPulseBox, isHotspotAvailable, nextHint, revealedTarget, selectItem, startState } from './logic';
 
 interface SpriteAnim {
   hotspotId: string;
@@ -151,7 +151,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         sfx.good();
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
-          const box = h.itemBox ?? h.box;
+          const box = getPulseBox(h, currentState);
           const fromX = framePos.current.x + (box.x + box.w / 2) * scale;
           const fromY = framePos.current.y + (box.y + box.h / 2) * scale;
           if (h.pop && SCENE_IMAGES[h.pop]) {
@@ -232,34 +232,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
               },
             });
           })}
-          {room.hotspots.map((h) => {
-            if (!isHotspotAvailable(room, state, h.id)) return null;
-            const used = state.used.includes(h.id);
-            const revealed = state.revealed.includes(h.id);
-            const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
-            return (
-              <Pressable
-                key={h.id}
-                testID={`escape-spot-${h.id}`}
-                disabled={used}
-                onPress={() => onSpot(h.id)}
-                accessibilityRole={used ? 'none' : 'button'}
-                accessibilityLabel={h.id}
-                style={{
-                  position: 'absolute',
-                  left: (h.box.x - 8) * scale,
-                  top: (h.box.y - 8) * scale,
-                  width: (h.box.w + 16) * scale,
-                  height: (h.box.h + 16) * scale,
-                  pointerEvents: used ? 'none' : 'auto',
-                }}
-              >
-                {revealed && <PulseRing strong />}
-                {!used && !revealed && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
-                {used ? <SparkleBurst trigger="found" /> : null}
-              </Pressable>
-            );
-          })}
+          <HotspotLayer
+            room={room}
+            state={state}
+            scale={scale}
+            hintSpot={hintSpot}
+            lang={lang}
+            onSpot={onSpot}
+          />
           {popBursts.map((pb) => (
             <PopBurst
               key={pb.key}
@@ -342,6 +322,74 @@ function PulseRing({ strong, dim }: { strong?: boolean; dim?: boolean }) {
         { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: dim ? [0.06, 0.2] : [0.25, strong ? 0.95 : 0.6] }) },
       ]}
     />
+  );
+}
+
+export interface HotspotLayerProps {
+  room: EscapeRoom;
+  state: EscapeState;
+  scale: number;
+  hintSpot: string | null;
+  lang: Lang;
+  onSpot: (hotspotId: string) => void;
+}
+
+export function HotspotLayer({ room, state, scale, hintSpot, lang, onSpot }: HotspotLayerProps) {
+  return (
+    <>
+      {room.hotspots.map((h) => {
+        if (!isHotspotAvailable(room, state, h.id)) return null;
+        const used = state.used.includes(h.id);
+        const revealed = state.revealed.includes(h.id);
+        const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
+        const itemTarget = revealedTarget(h, state);
+        const item = h.gives ? room.items.find((i) => i.id === h.gives) : undefined;
+        return (
+          <React.Fragment key={h.id}>
+            <Pressable
+              testID={`escape-spot-${h.id}`}
+              disabled={used}
+              pointerEvents={used ? 'none' : 'auto'}
+              onPress={() => onSpot(h.id)}
+              accessibilityRole={used ? 'none' : 'button'}
+              accessibilityLabel={h.id}
+              style={{
+                position: 'absolute',
+                left: (h.box.x - 8) * scale,
+                top: (h.box.y - 8) * scale,
+                width: (h.box.w + 16) * scale,
+                height: (h.box.h + 16) * scale,
+                minWidth: 44,
+                minHeight: 44,
+              }}
+            >
+              {revealed && !itemTarget && <PulseRing strong />}
+              {!used && !revealed && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
+              {used ? <SparkleBurst trigger="found" /> : null}
+            </Pressable>
+            {itemTarget && (
+              <Pressable
+                testID={`escape-spot-revealed-${h.id}`}
+                onPress={() => onSpot(h.id)}
+                accessibilityRole="button"
+                accessibilityLabel={item ? itemLabel(item, lang) : h.id}
+                style={{
+                  position: 'absolute',
+                  left: (itemTarget.x - 8) * scale,
+                  top: (itemTarget.y - 8) * scale,
+                  width: (itemTarget.w + 16) * scale,
+                  height: (itemTarget.h + 16) * scale,
+                  minWidth: 44,
+                  minHeight: 44,
+                }}
+              >
+                <PulseRing strong />
+              </Pressable>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </>
   );
 }
 
