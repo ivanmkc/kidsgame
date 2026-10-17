@@ -10,9 +10,6 @@ const MELODY: SeqNote[] = [
 export interface FastSlowRound {
   notes: SeqNote[];
   bpm: number;
-  /** Derived from `bpm` — the kid answers from what the melody sounded
-   *  like, so the field must never be able to disagree with it. */
-  answer: 'fast' | 'slow';
 }
 
 /** Every bpm a round can carry sits clearly on one side of this line
@@ -34,7 +31,7 @@ export function roundsToWin(d: Difficulty): number {
 export function makeFastSlowRound(rng: Rng, d: Difficulty): FastSlowRound {
   const [slow, fast] = bpmPair(d);
   const bpm = rng() < 0.5 ? fast : slow;
-  return { notes: MELODY, bpm, answer: speedOf(bpm) };
+  return { notes: MELODY, bpm };
 }
 
 function speedOf(bpm: number): 'fast' | 'slow' {
