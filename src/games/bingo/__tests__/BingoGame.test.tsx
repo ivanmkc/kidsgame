@@ -34,6 +34,14 @@ let capturedPromptProps: {
   [key: string]: unknown;
 } | null = null;
 
+const capturedPressableMap: Record<string, {
+  disabled?: boolean;
+  onPress?: () => void;
+  accessibilityLabel?: string;
+  accessibilityRole?: string;
+  [key: string]: unknown;
+}> = {};
+
 vi.mock('react-native', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable = actual.Pressable as React.ComponentType<Record<string, unknown>>;
@@ -42,6 +50,9 @@ vi.mock('react-native', async (importOriginal) => {
     Pressable: (props: Record<string, unknown>) => {
       if (props.testID === 'bingo-prompt') {
         capturedPromptProps = props;
+      }
+      if (typeof props.testID === 'string') {
+        capturedPressableMap[props.testID] = props;
       }
       return React.createElement(ActualPressable, props);
     },
@@ -53,6 +64,9 @@ describe('BingoGame prompt', () => {
     mockWon = false;
     callCount = 0;
     capturedPromptProps = null;
+    for (const key of Object.keys(capturedPressableMap)) {
+      delete capturedPressableMap[key];
+    }
     vi.restoreAllMocks();
   });
 
@@ -89,5 +103,15 @@ describe('BingoGame prompt', () => {
     capturedPromptProps?.onPress?.();
     expect(sfxTapSpy).not.toHaveBeenCalled();
     expect(saySequenceSpy).not.toHaveBeenCalled();
+  });
+
+  it('tiles have localized spoken word accessibility labels matching language', () => {
+    renderToString(<BingoGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    const tile0 = capturedPressableMap['bingo-cell-0'];
+    expect(tile0).toBeDefined();
+    expect(tile0.accessibilityRole).toBe('button');
+    expect(tile0.accessibilityLabel).toBeDefined();
+    expect(tile0.accessibilityLabel).toMatch(/[\u3040-\u30ff\u4e00-\u9faf]/);
   });
 });

@@ -15,6 +15,7 @@ export type BingoMode = 'name' | 'phonics';
 
 export interface BingoCell {
   icon: string;
+  label: string;
 }
 
 export interface BingoCall {
@@ -55,6 +56,12 @@ function capitalize(s: string): string {
 
 function entryFor(icon: string): WordEntry | undefined {
   return WORDS.find((w) => w.icon === icon);
+}
+
+export function tileLabel(icon: string, lang: Lang): string {
+  const entry = entryFor(icon);
+  if (!entry) throw new Error(`Unknown bingo icon: ${icon}`);
+  return wordFor(entry, lang).text;
 }
 
 function namePromptLines(icon: string, lang: Lang): { prompt: string[]; display: string } {
@@ -151,7 +158,10 @@ export function makeBoard(
   }
 
   const boardIcons = shuffle(rng, selected.map((w) => w.icon));
-  const cells: BingoCell[] = boardIcons.map((icon) => ({ icon }));
+  const cells: BingoCell[] = boardIcons.map((icon) => ({
+    icon,
+    label: tileLabel(icon, lang),
+  }));
 
   const callOrder = shuffle(rng, Array.from({ length: cellCount }, (_, i) => i));
   const calls: BingoCall[] = callOrder.map((idx) => {
