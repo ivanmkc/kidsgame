@@ -3,6 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
+import { EchoBeatGame } from '../echobeat/EchoBeatGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
@@ -145,6 +146,34 @@ describe('echo beat', () => {
   it('tolerance tightens with difficulty', () => {
     expect(tolerancePct('easy')).toBeGreaterThan(tolerancePct('medium'));
     expect(tolerancePct('medium')).toBeGreaterThan(tolerancePct('hard'));
+  });
+
+  it('renders EchoBeatGame drum with accessibility role, label, and disabled state', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(EchoBeatGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'en',
+      })
+    );
+    const drumMatch = html.match(/<[^>]*data-testid="echobeat-drum"[^>]*>/);
+    expect(drumMatch).not.toBeNull();
+    const drumTag = drumMatch![0];
+    expect(drumTag).toContain('role="button"');
+    expect(drumTag).toContain('aria-label="Echo Beat"');
+    expect(drumTag).toContain('aria-disabled="true"');
+
+    const htmlJa = renderToString(
+      React.createElement(EchoBeatGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'ja',
+      })
+    );
+    const drumMatchJa = htmlJa.match(/<[^>]*data-testid="echobeat-drum"[^>]*>/);
+    expect(drumMatchJa).not.toBeNull();
+    expect(drumMatchJa![0]).toContain('aria-label="エコービート"');
   });
 });
 
