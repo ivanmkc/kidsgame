@@ -95,6 +95,42 @@ export function applyTap(tapped: boolean[], index: number): boolean[] {
   return next;
 }
 
+// --- Game state & transitions (pure reducer family) --------------------------
+
+export type CountPhase = 'count' | 'quiz' | 'celebrating' | 'won';
+
+export interface CountState {
+  score: number;
+  roundsToWin: number;
+  phase: CountPhase;
+}
+
+export function initCountState(roundsToWin: number): CountState {
+  return { score: 0, roundsToWin, phase: 'count' };
+}
+
+export function countToQuiz(s: CountState): CountState {
+  if (s.phase !== 'count') return s;
+  return { ...s, phase: 'quiz' };
+}
+
+export function onCorrectPick(s: CountState): CountState {
+  if (s.phase !== 'quiz') return s;
+  return { ...s, score: s.score + 1, phase: 'celebrating' };
+}
+
+export function finishCelebration(s: CountState): CountState {
+  if (s.phase !== 'celebrating') return s;
+  if (s.score >= s.roundsToWin) {
+    return { ...s, phase: 'won' };
+  }
+  return { ...s, phase: 'count' };
+}
+
+export function isCountWon(s: CountState): boolean {
+  return s.phase === 'won';
+}
+
 // ---------- speech (per-lang prompt + celebration) ----------
 
 export const PROMPTS: Record<Lang, string> = {
