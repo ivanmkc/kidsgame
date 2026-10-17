@@ -11,7 +11,7 @@ import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
 import { CountRound, PRAISE, PROMPTS, applyTap, countSettings, makeCountRound } from './logic';
-import { spriteLT } from '../quizround/logic';
+import { spriteLT } from '../layout';
 import { useWinLine } from '../winlines';
 
 interface Props {
