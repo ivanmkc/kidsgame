@@ -204,6 +204,24 @@ describe('odd one out (which does not belong)', () => {
     expect(sawConflictedBase).toBe(true); // the guard was actually exercised
   });
 
+  it('food rounds never draw intruders from animals', async () => {
+    // Fish, crab, and octopus are animals, but kids and parents recognize
+    // seafood as food — an animal intruder in a "Which one is NOT food?"
+    // round creates an unfair or contradictory answer.
+    const { makeOddOneRound } = await import('../oddone/logic');
+    let foodRounds = 0;
+    for (let seed = 1; seed <= 200; seed++) {
+      for (const n of [4, 6]) {
+        const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
+        if (r.baseCategory === 'food') {
+          foodRounds++;
+          expect(r.oddCategory).not.toBe('animals');
+        }
+      }
+    }
+    expect(foodRounds).toBeGreaterThan(0);
+  });
+
   it('every category the round builder can pick has a spoken question in all four langs', async () => {
     const { CATEGORY_TEXT, ICON_CATEGORIES } = await import('../iconCategories');
     // The generic "Which one does not belong?" fallback tells a kid nothing
