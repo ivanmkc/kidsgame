@@ -34,6 +34,7 @@ export const JA: Table = {
 
   'card.spotit.title': 'いっしょさがし',
   'card.spotit.blurb': 'どちらのカードにも あるものを みつけよう',
+  'game.target': 'ターゲット',
   'card.diff.title': 'ちがいさがし',
   'card.diff.blurb': 'ふたつのえで ちがうところは？',
   'card.hidden.title': 'かくれものさがし',

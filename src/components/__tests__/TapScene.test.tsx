@@ -54,3 +54,64 @@ test("TapScene hint loop stops on unmount", () => {
   cleanups.forEach((cleanup) => cleanup());
   expect(stopSpy).toHaveBeenCalled();
 });
+
+test("enforces 44px minimum touch target size on small screens and centers it", () => {
+  const mockSource = { uri: "stub.png" } as unknown as number;
+
+  // Farm white duck: w=99, h=88 in 1280x720 scene.
+  // On mobile portrait with displayWidth=366 (scale = 366 / 1280 = 0.2859375),
+  // raw size with PAD=8 was (99 + 16) * scale = 32.88px by (88 + 16) * scale = 29.74px (< 44px).
+  const html = renderToString(
+    <TapScene
+      source={mockSource}
+      sceneW={1280}
+      sceneH={720}
+      displayWidth={366}
+      boxes={[
+        {
+          id: "duck",
+          box: { x: 1105, y: 388, w: 99, h: 88 },
+        },
+      ]}
+      foundIds={[]}
+      onHit={() => {}}
+      onMiss={() => {}}
+      testIDPrefix="test"
+    />,
+  );
+
+  expect(html).toContain('data-testid="test-target-duck"');
+  expect(html).toContain("width:44px");
+  expect(html).toContain("height:44px");
+  expect(html).toContain("left:308.11");
+  expect(html).toContain("top:101.525px");
+  expect(html).toContain('role="button"');
+  expect(html).toContain('aria-label="Target"');
+});
+
+test("preserves larger hitboxes that exceed 44px", () => {
+  const mockSource = { uri: "stub.png" } as unknown as number;
+
+  const html = renderToString(
+    <TapScene
+      source={mockSource}
+      sceneW={1000}
+      sceneH={1000}
+      displayWidth={1000}
+      boxes={[{ id: "barn", box: { x: 100, y: 100, w: 400, h: 300 } }]}
+      foundIds={[]}
+      onHit={() => {}}
+      onMiss={() => {}}
+      testIDPrefix="test"
+    />,
+  );
+
+  expect(html).toContain('data-testid="test-target-barn"');
+  // (400 + 2 * 8) * 1 = 416px, (300 + 2 * 8) * 1 = 316px
+  expect(html).toContain("width:416px");
+  expect(html).toContain("height:316px");
+  expect(html).toContain("left:92px");
+  expect(html).toContain("top:92px");
+  expect(html).toContain('role="button"');
+  expect(html).toContain('aria-label="Target"');
+});

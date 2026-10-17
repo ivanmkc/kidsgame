@@ -4,6 +4,9 @@ import { Box } from '../manifest';
 import { colors, shadows } from '../theme';
 import { SparkleBurst } from './Sparkles';
 
+import { Lang } from '../lang';
+import { t } from '../i18n';
+
 interface Props {
   source: number; // require() ref
   sceneW: number; // intrinsic scene size from manifest
@@ -18,12 +21,13 @@ interface Props {
   onHit: (id: string) => void;
   onMiss: () => void;
   testIDPrefix: string;
+  lang?: Lang;
 }
 
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix, lang = 'en',
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -40,6 +44,7 @@ export function TapScene({
   };
 
   const PAD = 8; // extra forgiveness around each hitbox, in scene px
+  const MIN_TOUCH = 44; // minimum touch target in display px (Apple HIG / WCAG)
 
   return (
     <Animated.View
@@ -81,16 +86,22 @@ export function TapScene({
       />
       {boxes.map(({ id, box }) => {
         const found = foundIds.includes(id);
-        const l = (box.x - PAD) * scale;
-        const t = (box.y - PAD) * scale;
-        const w = (box.w + 2 * PAD) * scale;
-        const h = (box.h + 2 * PAD) * scale;
+        const rawW = (box.w + 2 * PAD) * scale;
+        const rawH = (box.h + 2 * PAD) * scale;
+        const w = Math.max(MIN_TOUCH, rawW);
+        const h = Math.max(MIN_TOUCH, rawH);
+        const cx = (box.x + box.w / 2) * scale;
+        const cy = (box.y + box.h / 2) * scale;
+        const left = cx - w / 2;
+        const top = cy - h / 2;
         return (
           <Pressable
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, 'game.target')}
             onPress={() => (found ? undefined : onHit(id))}
-            style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
+            style={{ position: 'absolute', left, top, width: w, height: h }}
           >
             {found ? <FoundRing color={ringColors?.[id]} /> : hintId === id ? <HintRing /> : null}
           </Pressable>

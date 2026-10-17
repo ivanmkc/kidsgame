@@ -47,6 +47,7 @@ export type UIKey =
   | 'filter.hardLevels'
   // ── Menu game cards: titles + blurbs ───────────────────────────
   | 'card.spotit.title'   | 'card.spotit.blurb'
+  | 'game.target'
   | 'card.diff.title'     | 'card.diff.blurb'
   | 'card.hidden.title'   | 'card.hidden.blurb'
   | 'card.memory.title'   | 'card.memory.blurb'
@@ -291,6 +292,7 @@ export const EN: Table = {
 
   'card.spotit.title': 'Spot It!',
   'card.spotit.blurb': 'Find the matching picture on both cards',
+  'game.target': 'Target',
   'card.diff.title': 'Find the Difference',
   'card.diff.blurb': 'What changed between the two pictures?',
   'card.hidden.title': 'Hidden Objects',
