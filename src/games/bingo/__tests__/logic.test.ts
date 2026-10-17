@@ -5,7 +5,7 @@ import { VOICE } from '../../../assets/voice';
 import { WORDS, soundsFor } from '../../language/words';
 import {
   BingoBoard, checkBingo, makeBoard, settingsForBingo, speechLines,
-  bingoShout,
+  bingoShout, tileLabel,
 } from '../logic';
 
 const icons = manifest.spotit.icons;
@@ -98,6 +98,16 @@ describe('makeBoard', () => {
         expect(call.promptLines.length).toBeGreaterThan(0);
         expect(call.displayPrompt.length).toBeGreaterThan(0);
         expect(call.confirmLines.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('assigns localized spoken labels to all cells across languages', () => {
+    for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+      const b = boardWith(10, 3, 'name', lang);
+      for (const cell of b.cells) {
+        expect(cell.label).toBe(tileLabel(cell.icon, lang));
+        expect(cell.label.length).toBeGreaterThan(0);
       }
     }
   });
@@ -218,5 +228,38 @@ describe('bingoShout', () => {
         VOICE[shout];
       expect(clip).toBeDefined();
     }
+  });
+});
+
+describe('tileLabel', () => {
+  it('returns localized spoken words matching the prompt instead of raw icon IDs', () => {
+    expect(tileLabel('blossom', 'en')).toBe('flower');
+    expect(tileLabel('blossom', 'ja')).toBe('はな');
+    expect(tileLabel('blossom', 'cmn')).toBe('花');
+    expect(tileLabel('blossom', 'yue')).toBe('花');
+
+    expect(tileLabel('soccer', 'en')).toBe('ball');
+    expect(tileLabel('soccer', 'ja')).toBe('ボール');
+    expect(tileLabel('soccer', 'cmn')).toBe('足球');
+    expect(tileLabel('soccer', 'yue')).toBe('足球');
+
+    expect(tileLabel('gift', 'en')).toBe('present');
+    expect(tileLabel('gift', 'ja')).toBe('プレゼント');
+    expect(tileLabel('gift', 'cmn')).toBe('礼物');
+    expect(tileLabel('gift', 'yue')).toBe('禮物');
+
+    expect(tileLabel('icecream', 'en')).toBe('ice cream');
+    expect(tileLabel('icecream', 'ja')).toBe('アイスクリーム');
+    expect(tileLabel('icecream', 'cmn')).toBe('冰淇淋');
+    expect(tileLabel('icecream', 'yue')).toBe('雪糕');
+
+    expect(tileLabel('dog', 'en')).toBe('dog');
+    expect(tileLabel('dog', 'ja')).toBe('いぬ');
+    expect(tileLabel('dog', 'cmn')).toBe('狗');
+    expect(tileLabel('dog', 'yue')).toBe('狗');
+  });
+
+  it('throws loudly when given an unknown icon', () => {
+    expect(() => tileLabel('unknown-asset-id', 'en')).toThrow('Unknown bingo icon: unknown-asset-id');
   });
 });

@@ -151,6 +151,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
             <BingoTile
               key={`${gameKey}-${i}`}
               icon={cell.icon}
+              label={cell.label}
               size={tileSize}
               marked={marked[i]}
               isWinLine={winLine?.includes(i) ?? false}
@@ -176,9 +177,10 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 }
 
 function BingoTile({
-  icon, size, marked, isWinLine, wobble, onPress, sparkleKey, testID,
+  icon, label, size, marked, isWinLine, wobble, onPress, sparkleKey, testID,
 }: {
   icon: string;
+  label: string;
   size: number;
   marked: boolean;
   isWinLine: boolean;
@@ -206,7 +208,7 @@ function BingoTile({
       <Pressable
         onPress={onPress}
         testID={testID}
-        accessibilityLabel={icon}
+        accessibilityLabel={label}
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.tile,
