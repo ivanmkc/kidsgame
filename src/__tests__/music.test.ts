@@ -198,12 +198,10 @@ describe('music', () => {
     music.playNote(60);
     music.playDrum();
     expect(fake.oscillators).toHaveLength(0);
+    expect(fake.bufferSources).toHaveLength(0);
     const doneSeq = vi.fn();
     music.playSequence([{ m: 60, b: 1 }], 120, undefined, doneSeq);
     expect(doneSeq).toHaveBeenCalled();
-    const doneDrum = vi.fn();
-    music.playDrumSequence([0.5], undefined, doneDrum);
-    expect(doneDrum).toHaveBeenCalled();
   });
 
   it('initializes master gain connected to destination', () => {
@@ -325,6 +323,28 @@ describe('music', () => {
     expect(onHit).toHaveBeenCalledWith(1);
     vi.advanceTimersByTime(400);
     expect(onHit).toHaveBeenCalledWith(2);
+    vi.advanceTimersByTime(300);
+    expect(onDone).toHaveBeenCalledTimes(1);
+  });
+
+  it('plays drum sequence with visual callbacks even when muted', () => {
+    vi.useFakeTimers();
+    const fake = setupWebAudio();
+    sound.setMuted(true);
+    const onHit = vi.fn();
+    const onDone = vi.fn();
+
+    music.playDrumSequence([0.2, 0.4], onHit, onDone);
+    expect(fake.bufferSources).toHaveLength(0);
+    expect(fake.oscillators).toHaveLength(0);
+
+    vi.advanceTimersByTime(50);
+    expect(onHit).toHaveBeenCalledWith(0);
+    vi.advanceTimersByTime(200);
+    expect(onHit).toHaveBeenCalledWith(1);
+    vi.advanceTimersByTime(400);
+    expect(onHit).toHaveBeenCalledWith(2);
+    expect(onDone).not.toHaveBeenCalled();
     vi.advanceTimersByTime(300);
     expect(onDone).toHaveBeenCalledTimes(1);
   });

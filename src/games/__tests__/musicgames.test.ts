@@ -1,10 +1,12 @@
 import React, { act } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Animated } from 'react-native';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import * as music from '../../music';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
+import { EchoBeatGame, animateDrumHit } from '../echobeat/EchoBeatGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
@@ -298,6 +300,33 @@ describe('echo beat', () => {
   it('tolerance tightens with difficulty', () => {
     expect(tolerancePct('easy')).toBeGreaterThan(tolerancePct('medium'));
     expect(tolerancePct('medium')).toBeGreaterThan(tolerancePct('hard'));
+  });
+
+  it('renders EchoBeatGame and displays localized strings', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(EchoBeatGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'en',
+      }),
+    );
+    expect(html).toContain('Echo Beat');
+    expect(html).toContain('Tap the rhythm you hear!');
+    expect(html).toContain('Listen');
+    expect(html).toContain('data-testid="echobeat-drum"');
+  });
+
+  it('animates drum hit with scale pulse and flash index', () => {
+    const setValue = vi.fn();
+    const fakeAnim: Partial<Animated.Value> = { setValue };
+    const setFlash = vi.fn();
+    animateDrumHit(fakeAnim, setFlash, 2);
+    expect(setFlash).toHaveBeenCalledWith(2);
+    expect(setValue).toHaveBeenCalledWith(1.25);
+
+    const realAnim = new Animated.Value(1);
+    animateDrumHit(realAnim);
   });
 });
 
