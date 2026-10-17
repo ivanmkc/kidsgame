@@ -33,6 +33,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'count' | 'quiz'>('count');
   const [wrongPick, setWrongPick] = useState<number | null>(null);
+  const [locked, setLocked] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
@@ -64,9 +65,10 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   };
 
   const pickAnswer = (v: number) => {
-    if (won || phase !== 'quiz') return;
+    if (won || phase !== 'quiz' || locked) return;
     if (v === round.answer) {
       sfx.good();
+      setLocked(true);
       const nextScore = score + 1;
       setScore(nextScore);
       sayThen([numberWord(lang, round.answer).t, PRAISE[lang]], () => {
@@ -76,6 +78,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
           setTapped(new Array(nr.n).fill(false));
           setPhase('count');
           setWrongPick(null);
+          setLocked(false);
         }
       });
     } else {
@@ -95,6 +98,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     setScore(0);
     setPhase('count');
     setWrongPick(null);
+    setLocked(false);
   };
 
   const { width, height } = useWindowDimensions();
