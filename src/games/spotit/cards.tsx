@@ -104,6 +104,7 @@ export function SymbolButton({
   disabled?: boolean;
   hinted?: boolean;
 }) {
+  const pad = Math.max(0, 44 - size) / 2;
   const scale = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (!hinted) return;
@@ -124,7 +125,7 @@ export function SymbolButton({
     onTap();
   };
   return (
-    <Pressable onPress={press} disabled={disabled} testID={testID} accessibilityLabel={iconName} accessibilityRole="button" style={{ position: 'absolute', left, top, width: size, height: size }}>
+    <Pressable onPress={press} disabled={disabled} testID={testID} hitSlop={pad} accessibilityLabel={iconName} accessibilityRole="button" style={{ position: 'absolute', left, top, width: size, height: size }}>
       <Animated.View
         style={[
           styles.symbol,
