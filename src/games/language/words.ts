@@ -10,7 +10,7 @@
 import { Lang } from '../../lang';
 
 export interface WordEntry {
-  icon: string; // key into SPOTIT_ICONS (or RHYME_ICONS for extras)
+  icon: string; // key into SPOTIT_ICONS (or RHYME_SPRITES for extras)
   en: string;
   letter: string; // uppercase initial for First Sounds / phonics
   sound: string; // spoken phoneme cue, e.g. "duh" for D
@@ -66,7 +66,7 @@ export const WORDS: WordEntry[] = [
   { icon: 'gift', en: 'present', letter: 'P', sound: 'puh', altSounds: ['guh'], /* gift */ jaRhyme: 'to', cmnRhyme: 'u', ja: 'プレゼント', jaR: 'purezento', cmn: '礼物', cmnR: 'lǐwù', yue: '禮物', yueR: 'lai-mat' },
 ];
 
-// Extra rhyme-pair icons (assets/game/rhyme/, RHYME_ICONS map) — generated
+// Extra rhyme-pair icons (assets/game/rhyme/, RHYME_SPRITES map) — generated
 // by the icon pipeline; EN-only (used by Rhyme Time and Word Builder).
 // New families requested for the EN-pool expansion (hat/bat, sock/rock/
 // clock, box, whale/snail, jar, coat/boat/goat) are declared here so the

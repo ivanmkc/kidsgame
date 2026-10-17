@@ -7,7 +7,7 @@
 import { Lang } from '../../lang';
 import { manifest } from '../../manifest';
 import { Rng, shuffle } from '../../rng';
-import { RHYME_ICONS } from '../language/rhymeAssets';
+import { RHYME_SPRITES } from '../../assets/images';
 import { RHYME_WORDS, WORDS, WordEntry, wordFor } from '../language/words';
 
 export interface RhymeEntry {
@@ -47,7 +47,7 @@ const ASK: Record<Lang, string> = {
 };
 
 function hasRhymeIcon(icon: string): boolean {
-  return Object.prototype.hasOwnProperty.call(RHYME_ICONS, icon);
+  return Object.prototype.hasOwnProperty.call(RHYME_SPRITES, icon);
 }
 
 function rhymeKeyFor(w: WordEntry, lang: Lang): string | undefined {

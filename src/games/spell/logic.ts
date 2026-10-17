@@ -7,7 +7,7 @@
 //   yue: 2-4 hanzi words (from WORDS.yue) — single-char excluded (trivial)
 // RHYME_WORDS have no translations → EN pool only.
 import { Lang } from '../../lang';
-import { RHYME_ICONS } from '../language/rhymeAssets';
+import { RHYME_SPRITES as RHYME_ICONS } from '../../assets/images';
 import { RHYME_WORDS, WORDS, WordEntry } from '../language/words';
 import { Rng, shuffle } from '../../rng';
 
