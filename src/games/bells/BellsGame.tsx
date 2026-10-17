@@ -22,6 +22,7 @@ interface Props {
 export function BellsGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const demoTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [round, setRound] = useState<BellsRound>(() => makeBellsRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'play'>('listen');
@@ -32,7 +33,13 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const won = score >= total;
   useWinLine(won, t(lang, 'win.bells'));
 
+  const clearDemo = useCallback(() => {
+    demoTimers.current.forEach(clearTimeout);
+    demoTimers.current = [];
+  }, []);
+
   const playDemo = useCallback((r: BellsRound) => {
+    clearDemo();
     stopSequence();
     setPhase('listen');
     let i = 0;
@@ -46,17 +53,25 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       setGlowIdx(bellIdx);
       playNote(r.bells[bellIdx].midi, 0.8);
       i++;
-      setTimeout(() => { setGlowIdx(null); setTimeout(step, 200); }, 500);
+      demoTimers.current.push(
+        setTimeout(() => {
+          setGlowIdx(null);
+          demoTimers.current.push(setTimeout(step, 200));
+        }, 500)
+      );
     };
-    setTimeout(step, 500);
-  }, []);
+    demoTimers.current.push(setTimeout(step, 500));
+  }, [clearDemo]);
 
   useEffect(() => {
     if (!won) {
       setTapped([]);
       playDemo(round);
     }
-    return () => stopSequence();
+    return () => {
+      clearDemo();
+      stopSequence();
+    };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
@@ -73,24 +88,25 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
         const nextScore = score + 1;
         setScore(nextScore);
         if (nextScore < total) {
-          setTimeout(() => {
+          demoTimers.current.push(setTimeout(() => {
             const nr = makeBellsRound(rngRef.current, difficulty);
             setRound(nr);
-          }, 600);
+          }, 600));
         }
       } else {
         sfx.wrong();
         setWrongFlash(true);
-        setTimeout(() => {
+        demoTimers.current.push(setTimeout(() => {
           setWrongFlash(false);
           setTapped([]);
           playDemo(round);
-        }, 800);
+        }, 800));
       }
     }
   };
 
   const reset = () => {
+    clearDemo();
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setTapped([]);
