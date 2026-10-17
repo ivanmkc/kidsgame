@@ -1,6 +1,22 @@
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
-import { CRITTER_ICONS, countSettings, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
+import { CountGame } from '../count/CountGame';
+import {
+  CRITTER_ICONS,
+  advanceCountRound,
+  countSettings,
+  critterKey,
+  initCountState,
+  makeCountChoices,
+  makeCountRound,
+  resetCountState,
+  scatterPositions,
+  scoreCorrectAnswer,
+  speechLines as countSpeechLines,
+  tapCritterIndex,
+} from '../count/logic';
 import { compareSettings, isFairPair, makeCompareRound, speechLines as compareSpeechLines } from '../compare/logic';
 import { makeSumChoices, makeSumsRound, speechLines as sumsSpeechLines, sumsSettings } from '../sums/logic';
 
@@ -75,6 +91,67 @@ describe('count with me', () => {
         expect(c).toContain(answer);
       }
     }
+  });
+
+  it('renders CountGame and displays critter stage and score', () => {
+    const html = renderToString(
+      React.createElement(CountGame, {
+        onHome: () => {},
+        difficulty: 'easy',
+        lang: 'en',
+      }),
+    );
+    expect(html).toContain('data-testid="count-stage-');
+    expect(html).toContain('data-testid="count-critter-0"');
+    expect(html).toContain('data-testid="count-score"');
+  });
+
+  it('critterKey keys on roundNo, keeping constant on score and advancing next', () => {
+    // Round 1 starts with 3 items, all untapped
+    const s0 = initCountState(3);
+    expect(s0.roundNo).toBe(0);
+    expect(s0.score).toBe(0);
+    expect(s0.tapped).toEqual([false, false, false]);
+
+    // Tap each critter in round 1
+    const s1 = tapCritterIndex(s0, 0);
+    const s2 = tapCritterIndex(s1, 1);
+    const s3 = tapCritterIndex(s2, 2);
+    expect(s3.tapped).toEqual([true, true, true]);
+
+    // Tapped critter in round 1 has key
+    const round1Key0 = critterKey(s3, 0);
+
+    // Scoring a correct answer increments score; roundNo and tapped stay
+    const scored = scoreCorrectAnswer(s3);
+    expect(scored.score).toBe(1);
+    expect(scored.roundNo).toBe(s3.roundNo);
+    expect(scored.tapped).toEqual(s3.tapped);
+
+    // CRITICAL: Critter key MUST remain identical after scoring mid-round.
+    // If keyed on score, this key changes while tapped is still all-true,
+    // causing a spurious burst of pops during praise audio.
+    expect(critterKey(scored, 0)).toBe(round1Key0);
+
+    // When the next round loads, roundNo increments and tapped resets
+    const round2 = advanceCountRound(scored, 4);
+    expect(round2.roundNo).toBe(1);
+    expect(round2.score).toBe(1);
+    expect(round2.tapped).toEqual([false, false, false, false]);
+
+    // CRITICAL: In round 2, critter 0 MUST have a different key so a fresh
+    // Critter instance mounts with its tap animation ref reset.
+    // Under the old bug (keying on score), score was still 1 so the key stayed
+    // 1-0, reusing the old instance whose wasTapped ref was stuck on true.
+    expect(critterKey(round2, 0)).not.toBe(round1Key0);
+    expect(critterKey(round2, 0)).not.toBe(critterKey(scored, 0));
+
+    // Resetting also increments roundNo and clears score and tapped
+    const afterReset = resetCountState(2, round2);
+    expect(afterReset.score).toBe(0);
+    expect(afterReset.roundNo).toBe(2);
+    expect(afterReset.tapped).toEqual([false, false]);
+    expect(critterKey(afterReset, 0)).not.toBe(critterKey(round2, 0));
   });
 });
 
