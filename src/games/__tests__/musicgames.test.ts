@@ -4,11 +4,13 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import * as music from '../../music';
 import { makeRng } from '../../rng';
+import { LANGS } from '../../lang';
+import { t } from '../../i18n';
 import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
-import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap } from '../bells/logic';
-import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
-import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
+import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap, speechLines as bellSpeechLines, bellIntroCue, bellPhaseCue, getNarrationSequence } from '../bells/logic';
+import { makeEchoBeatRound, checkEcho, tolerancePct } from '../echobeat/logic';
+import { makeSteadyBeatRound, scoreTaps, passThreshold, windowMs } from '../steadybeat/logic';
 import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
 import { makeSameDiffRound, isCorrect, roundsToWin as sdRounds } from '../samediff/logic';
 
@@ -116,7 +118,7 @@ describe('melody bells', () => {
     expect(canTap(r, [0], 'play', true)).toBe(false);
   });
 
-  it('renders BellsGame and displays localized strings', () => {
+  it('renders BellsGame localized strings', () => {
     const noop = () => {};
     const html = renderToString(
       React.createElement(BellsGame, {
@@ -125,9 +127,26 @@ describe('melody bells', () => {
         lang: 'en',
       })
     );
+    expect(html).toContain('bell-0');
     expect(html).toContain('Melody Bells');
     expect(html).toContain('Listen, then play the tune back!');
     expect(html).toContain('Listen...');
+  });
+
+  it('getNarrationSequence provides correct voice lines', () => {
+    // On mount, returns intro + listen cue
+    expect(getNarrationSequence('listen', true, 'en')).toEqual([
+      bellIntroCue('en'),
+      bellPhaseCue('listen', 'en'),
+    ]);
+    // During listen phase (if re-triggered), returns listen cue only
+    expect(getNarrationSequence('listen', false, 'en')).toEqual([
+      bellPhaseCue('listen', 'en'),
+    ]);
+    // On play phase, returns play cue only
+    expect(getNarrationSequence('play', false, 'en')).toEqual([
+      bellPhaseCue('play', 'en'),
+    ]);
   });
 
   it('unmounts during listen phase and cancels demo timers', () => {
@@ -244,6 +263,23 @@ describe('melody bells', () => {
       g.IS_REACT_ACT_ENVIRONMENT = origAct;
       playNoteSpy.mockRestore();
       vi.useRealTimers();
+    }
+  });
+  it('bellIntroCue and bellPhaseCue provide localized spoken cues', () => {
+    for (const l of LANGS) {
+      expect(bellIntroCue(l.id)).toBe(t(l.id, 'shell.bells.sub'));
+      expect(bellPhaseCue('listen', l.id)).toBe(t(l.id, 'music.listen'));
+      expect(bellPhaseCue('play', l.id)).toBe(t(l.id, 'music.yourTurn'));
+    }
+  });
+
+  it('speechLines covers subtitle and phase cues across all supported languages', () => {
+    const lines = bellSpeechLines();
+    expect(lines).toHaveLength(LANGS.length * 3);
+    for (const l of LANGS) {
+      expect(lines).toContain(bellIntroCue(l.id));
+      expect(lines).toContain(bellPhaseCue('listen', l.id));
+      expect(lines).toContain(bellPhaseCue('play', l.id));
     }
   });
 });
@@ -416,3 +452,4 @@ describe('same or different', () => {
     expect(sdRounds('medium')).toBeLessThan(sdRounds('hard'));
   });
 });
+
