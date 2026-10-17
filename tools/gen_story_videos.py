@@ -1,7 +1,7 @@
 """Veo action transitions for hotspot story books.
 
 One short clip per in-scene choice: the hero DOES the chosen action,
-conditioned on the node's scene as the first frame (veo-3.0-fast; no
+conditioned on the node's scene as the first frame (veo-3.1-fast; no
 last-frame support on this project, the app crossfades to the next
 scene). Judged by frame sampling, compressed with ffmpeg, resumable.
 
@@ -36,7 +36,7 @@ ROOT = Path(__file__).parent.parent
 SCENES = ROOT / "assets" / "game" / "story"
 OUT = ROOT / "public" / "story-video"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
-MODEL = "veo-3.0-fast-generate-001"
+MODEL = "veo-3.1-fast-generate-001"
 HEROES = {"doors": ("Luna", LUNA), "trail": ("Pip", PIP),
           "night": ("Milo", MILO), "deep": ("Mo", MO), "sky": ("Pip", PIP),
           "yokai": ("Milo", MILO), "cloud": ("Luna", LUNA),
