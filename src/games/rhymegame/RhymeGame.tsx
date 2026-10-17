@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
+import { RHYME_SPRITES as RHYME_ICONS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -8,7 +8,6 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { manifest } from '../../manifest';
-import { RHYME_ICONS } from '../language/rhymeAssets';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx } from '../../sound';

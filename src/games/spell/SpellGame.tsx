@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
+import { RHYME_SPRITES as RHYME_ICONS, SPOTIT_ICONS } from '../../assets/images';
 import { Confetti } from '../../components/Confetti';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -11,7 +11,6 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { say, sayThen, saySequence, sfx } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { RHYME_ICONS } from '../language/rhymeAssets';
 import { useWinLine } from '../winlines';
 import {
   SpellRound, SpellTile,
