@@ -37,6 +37,36 @@ export interface BingoSettings {
   mode: BingoMode;
 }
 
+export interface BingoLayout {
+  tileSize: number;
+  gap: number;
+  isLandscape: boolean;
+}
+
+export function bingoLayout(width: number, height: number, size: number): BingoLayout {
+  const isLandscape = width > height;
+  if (isLandscape) {
+    // Landscape: prompt card is placed side-by-side with the grid, freeing
+    // vertical height so tiles maintain child-accessible touch targets (>= 64px).
+    const gap = size === 4 ? 8 : 10;
+    const availH = height - 84 - 10;
+    const availW = width - 32 - 20 - 220;
+    const tileH = (availH - (size - 1) * gap) / size;
+    const tileW = (availW - (size - 1) * gap) / size;
+    const tileSize = Math.max(44, Math.floor(Math.min(tileH, tileW, 130)));
+    return { tileSize, gap, isLandscape };
+  }
+
+  // Portrait: prompt stacked vertically above the grid.
+  const gap = 10;
+  const availW = Math.min(width - 32, 520);
+  const availH = height - 84 - 140;
+  const tileW = (availW - (size - 1) * gap) / size;
+  const tileH = (availH - (size - 1) * gap) / size;
+  const tileSize = Math.max(44, Math.floor(Math.min(tileW, tileH, 130)));
+  return { tileSize, gap, isLandscape };
+}
+
 export function settingsForBingo(difficulty: 'easy' | 'medium' | 'hard', lang: Lang): BingoSettings {
   if (difficulty === 'easy') return { gridSize: 3, mode: 'name' };
   if (difficulty === 'hard') return { gridSize: 4, mode: 'name' };

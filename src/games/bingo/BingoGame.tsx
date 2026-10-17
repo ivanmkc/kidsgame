@@ -11,9 +11,9 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { saySequence, sayThen, sfx } from '../../sound';
-import { colors, darken, fonts, shadows } from '../../theme';
+import { colors, fonts, shadows } from '../../theme';
 import { useWinLine } from '../winlines';
-import { BingoBoard, checkBingo, bingoShout, makeBoard, settingsForBingo } from './logic';
+import { BingoBoard, bingoLayout, checkBingo, bingoShout, makeBoard, settingsForBingo } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -106,14 +106,8 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
+  const { tileSize, gap, isLandscape } = bingoLayout(width, height, board.size);
   const cols = board.size;
-  const rows = board.size;
-  const gap = 10;
-  const tileSize = Math.min(
-    (Math.min(width - 32, 520) - (cols - 1) * gap) / cols,
-    (height - 84 - 140 - (rows - 1) * gap) / rows,
-    130,
-  );
   const shortH = height < 480;
 
   return (
@@ -124,7 +118,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       lang={lang}
       right={<ScoreChip label={`⭐ ${markedCount}/${board.cells.length}`} testID="bingo-score" />}
     >
-      <View style={[styles.board, shortH && { gap: 8 }]} key={gameKey}>
+      <View style={[styles.board, isLandscape ? styles.boardLandscape : shortH && { gap: 8 }]} key={gameKey}>
         {call && (
           <Pressable
             disabled={won}
@@ -135,11 +129,11 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
             }}
             accessibilityLabel={call.displayPrompt}
             accessibilityRole="button"
-            style={({ pressed }) => [styles.prompt, shadows.soft, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.prompt, isLandscape && styles.promptLandscape, shadows.soft, pressed && styles.pressed]}
             testID="bingo-prompt"
           >
-            <Text style={styles.promptText}>{call.displayPrompt}</Text>
-            {shortH ? null : <Text style={styles.hearHint}>{t(lang, 'spell.hearAgain')}</Text>}
+            <Text style={[styles.promptText, isLandscape && styles.promptTextLandscape]}>{call.displayPrompt}</Text>
+            {shortH && !isLandscape ? null : <Text style={styles.hearHint}>{t(lang, 'spell.hearAgain')}</Text>}
           </Pressable>
         )}
 
@@ -245,6 +239,10 @@ const styles = StyleSheet.create({
     minHeight: 0,
     overflow: 'hidden',
   },
+  boardLandscape: {
+    flexDirection: 'row',
+    gap: 20,
+  },
   prompt: {
     backgroundColor: '#F7EDDA',
     borderRadius: 18,
@@ -255,11 +253,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     maxWidth: 520,
   },
+  promptLandscape: {
+    maxWidth: 220,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
   promptText: {
     fontFamily: fonts.display,
     fontSize: 20,
     color: colors.ink,
     textAlign: 'center',
+  },
+  promptTextLandscape: {
+    fontSize: 18,
   },
   hearHint: {
     fontFamily: fonts.bodyReg,
