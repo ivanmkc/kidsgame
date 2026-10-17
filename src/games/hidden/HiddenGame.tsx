@@ -15,6 +15,7 @@ import { makeRng, sample } from '../../rng';
 import { sfx, useSay, say } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 import { Find, coopDrawCount, countFor } from './coop';
+import { hiddenPrompt, turnPrompt } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -75,8 +76,8 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   }, [sceneId]);
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
-  useSay(coop && scene && !won ? `${MP_PLAYERS[turn].name}'s turn!` : null);
-  useSay(scene ? (coop ? null : 'Find all the hidden things!') : 'Where do you want to search?');
+  useSay(coop && scene && !won ? turnPrompt(lang, MP_PLAYERS[turn].name) : null);
+  useSay(coop && scene ? null : hiddenPrompt(lang, !!scene));
   useEffect(() => {
     if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
