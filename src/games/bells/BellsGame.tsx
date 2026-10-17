@@ -8,10 +8,10 @@ import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
+import { say, saySequence, sfx } from '../../sound';
 import { playNote, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeBellsRound, roundsToWin, checkSequence, BellsRound, canTap } from './logic';
+import { makeBellsRound, roundsToWin, checkSequence, BellsRound, canTap, getNarrationSequence } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -37,6 +37,18 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     demoTimers.current.forEach(clearTimeout);
     demoTimers.current = [];
   }, []);
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (won) return;
+    const lines = getNarrationSequence(phase, isFirstRender.current, lang);
+    isFirstRender.current = false;
+    if (lines.length > 1) {
+      saySequence(lines);
+    } else if (lines.length === 1) {
+      say(lines[0]);
+    }
+  }, [phase, lang, won]);
 
   const playDemo = useCallback((r: BellsRound) => {
     clearDemo();
@@ -240,3 +252,4 @@ const styles = StyleSheet.create({
   bellText: { textAlign: 'center' },
   pressed: { transform: [{ scale: 0.92 }] },
 });
+

@@ -1,5 +1,7 @@
 import { Rng, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
+import { Lang, LANGS } from '../../lang';
+import { t } from '../../i18n';
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
 const BELL_COLORS = ['#E8564F', '#FFC24B', '#5FBF6E', '#2FB8AC', '#9B7EDE'];
@@ -63,6 +65,32 @@ export function canTap(
   return tapped.length < round.sequence.length;
 }
 
+export function bellIntroCue(lang: Lang): string {
+  return t(lang, 'shell.bells.sub');
+}
+
+export function bellPhaseCue(phase: BellsPhase, lang: Lang): string {
+  return t(lang, phase === 'listen' ? 'music.listen' : 'music.yourTurn');
+}
+
+export function getNarrationSequence(
+  phase: BellsPhase,
+  isInitial: boolean,
+  lang: Lang
+): string[] {
+  if (isInitial) {
+    return [bellIntroCue(lang), bellPhaseCue('listen', lang)];
+  }
+  return [bellPhaseCue(phase, lang)];
+}
+
+/** Voice-clip contract: every spoken line, all langs. */
 export function speechLines(): string[] {
-  return [];
+  const out: string[] = [];
+  for (const l of LANGS) {
+    out.push(bellIntroCue(l.id));
+    out.push(bellPhaseCue('listen', l.id));
+    out.push(bellPhaseCue('play', l.id));
+  }
+  return [...new Set(out)];
 }
