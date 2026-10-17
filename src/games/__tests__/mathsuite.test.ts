@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
-import { CRITTER_ICONS, countSettings, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
+import { CRITTER_ICONS, applyTap, countSettings, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
 import { compareSettings, isFairPair, makeCompareRound, speechLines as compareSpeechLines } from '../compare/logic';
 import { makeSumChoices, makeSumsRound, speechLines as sumsSpeechLines, sumsSettings } from '../sums/logic';
 
@@ -75,6 +75,21 @@ describe('count with me', () => {
         expect(c).toContain(answer);
       }
     }
+  });
+
+  it('applyTap marks an uncounted item as tapped without mutating original', () => {
+    const initial = [false, false, false];
+    const next = applyTap(initial, 1);
+    expect(next).toEqual([false, true, false]);
+    expect(initial).toEqual([false, false, false]);
+  });
+
+  it('applyTap returns original array reference when tapping already-tapped or out of bounds', () => {
+    const tapped = [true, false, true];
+    expect(applyTap(tapped, 0)).toBe(tapped);
+    expect(applyTap(tapped, 2)).toBe(tapped);
+    expect(applyTap(tapped, -1)).toBe(tapped);
+    expect(applyTap(tapped, 3)).toBe(tapped);
   });
 });
 

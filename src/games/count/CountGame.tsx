@@ -10,7 +10,7 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
-import { CountRound, PRAISE, PROMPTS, countSettings, makeCountRound } from './logic';
+import { CountRound, PRAISE, PROMPTS, applyTap, countSettings, makeCountRound } from './logic';
 import { spriteLT } from '../quizround/logic';
 import { useWinLine } from '../winlines';
 
@@ -29,7 +29,9 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin } = countSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<CountRound>(() => makeCountRound(rngRef.current, difficulty));
-  const [tapped, setTapped] = useState<boolean[]>(() => new Array(round.n).fill(false));
+  const [tapped, setTapped] = useState<boolean[]>(() => Array.from({ length: round.n }, () => false));
+  const tappedRef = useRef(tapped);
+  tappedRef.current = tapped;
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'count' | 'quiz'>('count');
   const [wrongPick, setWrongPick] = useState<number | null>(null);
@@ -46,10 +48,11 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   }, [round, phase, lang, won]);
 
   const tapCritter = (i: number) => {
-    if (won || phase !== 'count' || tapped[i]) return;
-    const next = tapped.slice();
-    next[i] = true;
-    setTapped(next);
+    if (won || phase !== 'count') return;
+    const next = applyTap(tappedRef.current, i);
+    if (next === tappedRef.current) return;
+    tappedRef.current = next;
+    setTapped((prev) => applyTap(prev, i));
     const n = next.filter(Boolean).length;
     sfx.tap();
     const line = numberWord(lang, n).t;
@@ -73,7 +76,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         if (nextScore < roundsToWin) {
           const nr = makeCountRound(rngRef.current, difficulty);
           setRound(nr);
-          setTapped(new Array(nr.n).fill(false));
+          setTapped(Array.from({ length: nr.n }, () => false));
           setPhase('count');
           setWrongPick(null);
         }
@@ -91,7 +94,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     const nr = makeCountRound(rngRef.current, difficulty);
     setRound(nr);
-    setTapped(new Array(nr.n).fill(false));
+    setTapped(Array.from({ length: nr.n }, () => false));
     setScore(0);
     setPhase('count');
     setWrongPick(null);

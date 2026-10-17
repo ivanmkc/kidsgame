@@ -82,6 +82,19 @@ export function makeCountRound(rng: Rng, d: Difficulty): CountRound {
   return { icon, n, positions, choices, answer: n };
 }
 
+/**
+ * Mark a critter as tapped. Returns the original array untouched if the critter
+ * is already tapped or index is out of bounds, so React can skip re-rendering.
+ */
+export function applyTap(tapped: boolean[], index: number): boolean[] {
+  if (index < 0 || index >= tapped.length || tapped[index]) {
+    return tapped;
+  }
+  const next = tapped.slice();
+  next[index] = true;
+  return next;
+}
+
 // ---------- speech (per-lang prompt + celebration) ----------
 
 export const PROMPTS: Record<Lang, string> = {
