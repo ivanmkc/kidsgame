@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as music from '../../music';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
@@ -9,6 +11,14 @@ import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct }
 import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
 import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
 import { makeSameDiffRound, isCorrect, roundsToWin as sdRounds } from '../samediff/logic';
+
+let capturedReset: (() => void) | null = null;
+vi.mock('../../components/WinOverlay', () => ({
+  WinOverlay: (props: { onNext?: () => void }) => {
+    capturedReset = props.onNext ?? null;
+    return null;
+  },
+}));
 
 describe('high or low', () => {
   it('generates rounds with distinct notes', () => {
@@ -92,6 +102,123 @@ describe('melody bells', () => {
     expect(html).toContain('Melody Bells');
     expect(html).toContain('Listen, then play the tune back!');
     expect(html).toContain('Listen...');
+  });
+
+  it('unmounts during listen phase and cancels demo timers', () => {
+    vi.useFakeTimers();
+    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
+
+    type FakeNode = {
+      nodeName: string;
+      tagName: string;
+      nodeType: number;
+      setAttribute: () => void;
+      removeAttribute: () => void;
+      style: Record<string, string>;
+      appendChild: () => void;
+      removeChild: () => void;
+      insertBefore: () => void;
+      addEventListener: () => void;
+      removeEventListener: () => void;
+    };
+
+    const makeNode = (): FakeNode => ({
+      nodeName: 'DIV',
+      tagName: 'div',
+      nodeType: 1,
+      setAttribute: () => {},
+      removeAttribute: () => {},
+      style: {},
+      appendChild: () => {},
+      removeChild: () => {},
+      insertBefore: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    });
+
+    class FakeIFrame {}
+
+    const doc = {
+      nodeName: '#document',
+      tagName: '#document',
+      nodeType: 9,
+      createElement: makeNode,
+      createElementNS: makeNode,
+      createTextNode: () => ({ nodeType: 3, nodeName: '#text' }),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      defaultView: {
+        HTMLIFrameElement: FakeIFrame,
+      },
+      body: makeNode(),
+      activeElement: null,
+    };
+
+    const g = globalThis as unknown as {
+      window?: unknown;
+      document?: unknown;
+      HTMLIFrameElement?: unknown;
+      IS_REACT_ACT_ENVIRONMENT?: boolean;
+    };
+    const origWindow = g.window;
+    const origDocument = g.document;
+    const origHTMLIFrameElement = g.HTMLIFrameElement;
+    const origAct = g.IS_REACT_ACT_ENVIRONMENT;
+
+    g.window = doc.defaultView;
+    g.HTMLIFrameElement = FakeIFrame;
+    g.document = doc;
+    g.IS_REACT_ACT_ENVIRONMENT = true;
+
+    try {
+      const container = {
+        ...makeNode(),
+        ownerDocument: doc,
+      };
+
+      const root = createRoot(container as unknown as HTMLElement);
+      act(() => {
+        root.render(
+          React.createElement(BellsGame, {
+            onHome: () => {},
+            difficulty: 'hard',
+            lang: 'en',
+          })
+        );
+      });
+
+      // Calling reset invokes clearDemo and restarts round
+      act(() => {
+        capturedReset?.();
+      });
+
+      // After 1050ms, initial 500ms delay plays note 1, then at 1000ms
+      // the glow clears and step is scheduled for note 2 at 1200ms.
+      act(() => {
+        vi.advanceTimersByTime(1050);
+      });
+      expect(playNoteSpy).toHaveBeenCalledTimes(1);
+
+      // Unmount mid-demo during the listen phase (before note 2 plays at 1200ms)
+      act(() => {
+        root.unmount();
+      });
+
+      // Advance timers well beyond the remaining demo duration
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+
+      // No further notes should have played
+      expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    } finally {
+      g.window = origWindow;
+      g.document = origDocument;
+      g.HTMLIFrameElement = origHTMLIFrameElement;
+      g.IS_REACT_ACT_ENVIRONMENT = origAct;
+      playNoteSpy.mockRestore();
+      vi.useRealTimers();
+    }
   });
 });
 
