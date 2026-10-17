@@ -10,7 +10,20 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
-import { CountRound, PRAISE, PROMPTS, applyTap, countSettings, makeCountRound } from './logic';
+import {
+  CountRound,
+  CountState,
+  PRAISE,
+  PROMPTS,
+  applyTap,
+  countSettings,
+  countToQuiz,
+  finishCelebration,
+  initCountState,
+  isCountWon,
+  makeCountRound,
+  onCorrectPick,
+} from './logic';
 import { spriteLT } from '../quizround/logic';
 import { useWinLine } from '../winlines';
 
@@ -32,23 +45,22 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [tapped, setTapped] = useState<boolean[]>(() => Array.from({ length: round.n }, () => false));
   const tappedRef = useRef(tapped);
   tappedRef.current = tapped;
-  const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<'count' | 'quiz'>('count');
+  const [gameState, setGameState] = useState<CountState>(() => initCountState(roundsToWin));
+  const won = isCountWon(gameState);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
   useWinLine(won, t(lang, 'win.count'));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
     if (won) return;
-    if (phase === 'quiz') say(PROMPTS[lang]);
-  }, [round, phase, lang, won]);
+    if (gameState.phase === 'quiz') say(PROMPTS[lang]);
+  }, [round, gameState.phase, lang, won]);
 
   const tapCritter = (i: number) => {
-    if (won || phase !== 'count') return;
+    if (won || gameState.phase !== 'count') return;
     const next = applyTap(tappedRef.current, i);
     if (next === tappedRef.current) return;
     tappedRef.current = next;
@@ -60,24 +72,24 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       // Chain the phase switch on speech completion so the "How many?"
       // prompt (fired by the phase-change useEffect) doesn't cut the last
       // count word mid-syllable.
-      sayThen([line], () => setPhase('quiz'));
+      sayThen([line], () => setGameState((s) => countToQuiz(s)));
     } else {
       say(line);
     }
   };
 
   const pickAnswer = (v: number) => {
-    if (won || phase !== 'quiz') return;
+    if (won || gameState.phase !== 'quiz') return;
     if (v === round.answer) {
       sfx.good();
-      const nextScore = score + 1;
-      setScore(nextScore);
+      setGameState((s) => onCorrectPick(s));
       sayThen([numberWord(lang, round.answer).t, PRAISE[lang]], () => {
-        if (nextScore < roundsToWin) {
+        setGameState(finishCelebration);
+        if (gameState.score + 1 < roundsToWin) {
           const nr = makeCountRound(rngRef.current, difficulty);
           setRound(nr);
           setTapped(Array.from({ length: nr.n }, () => false));
-          setPhase('count');
+
           setWrongPick(null);
         }
       });
@@ -95,8 +107,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     const nr = makeCountRound(rngRef.current, difficulty);
     setRound(nr);
     setTapped(Array.from({ length: nr.n }, () => false));
-    setScore(0);
-    setPhase('count');
+    setGameState(initCountState(roundsToWin));
     setWrongPick(null);
   };
 
@@ -114,7 +125,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="count-timer" /> : null}
-          <ScoreChip label={`🔢 ${score}/${roundsToWin}`} testID="count-score" />
+          <ScoreChip label={`🔢 ${gameState.score}/${roundsToWin}`} testID="count-score" />
         </View>
       }
     >
@@ -125,7 +136,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         >
           {round.positions.map((p, i) => (
             <Critter
-              key={`${score}-${i}`}
+              key={`${gameState.score}-${i}`}
               icon={round.icon}
               tapped={tapped[i]}
               size={critterSize}
@@ -136,7 +147,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
             />
           ))}
         </View>
-        {phase === 'quiz' ? (
+        {gameState.phase !== 'count' ? (
           <View style={styles.quiz}>
             <View style={[styles.promptCard, shadows.soft]} testID="count-prompt">
               <Text style={styles.promptText}>{PROMPTS[lang]}</Text>
