@@ -33,6 +33,7 @@ export const YUE: Table = {
 
   'card.spotit.title': '搵共通',
   'card.spotit.blurb': '兩張牌都有嘅係邊個？',
+  'game.target': '目標',
   'card.diff.title': '搵唔同',
   'card.diff.blurb': '兩張圖邊度唔同？',
   'card.hidden.title': '搵匿藏物',

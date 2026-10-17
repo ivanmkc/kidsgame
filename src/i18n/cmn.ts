@@ -33,6 +33,7 @@ export const CMN: Table = {
 
   'card.spotit.title': '找共同',
   'card.spotit.blurb': '找出两张牌上都有的那张图',
+  'game.target': '目标',
   'card.diff.title': '找不同',
   'card.diff.blurb': '两张图哪里不一样？',
   'card.hidden.title': '找隐藏',
