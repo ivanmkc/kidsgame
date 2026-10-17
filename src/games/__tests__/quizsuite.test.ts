@@ -363,6 +363,46 @@ describe('rhyme: per-language families', () => {
       }
     }
   });
+
+  it('cmn: correctly separates phonetically distinct finals into distinct rhyme families', () => {
+    const entries = availableEntries('cmn', iconsList);
+    const families = playableFamilies(entries);
+
+    const getFamilyMembers = (icon: string) => {
+      for (const members of Object.values(families)) {
+        if (members.some(m => m.icon === icon)) {
+          return members.map(m => m.icon).sort();
+        }
+      }
+      return [];
+    };
+
+    const crabFam = getFamilyMembers('crab');
+    expect(crabFam).toContain('crab');
+    expect(crabFam).toContain('butterfly');
+    expect(crabFam).not.toContain('car');
+
+    const fishFam = getFamilyMembers('fish');
+    expect(fishFam).toContain('fish');
+    expect(fishFam).toContain('octopus');
+    expect(fishFam).not.toContain('pig');
+
+    const pigFam = getFamilyMembers('pig');
+    expect(pigFam).toContain('pig');
+    expect(pigFam).toContain('gift');
+    expect(pigFam).not.toContain('fish');
+
+    const lionFam = getFamilyMembers('lion');
+    expect(lionFam).toContain('lion');
+    expect(lionFam).toContain('monkey');
+    expect(lionFam).toContain('rabbit');
+    expect(lionFam).not.toContain('fox');
+
+    const foxFam = getFamilyMembers('fox');
+    expect(foxFam).toContain('fox');
+    expect(foxFam).toContain('plane');
+    expect(foxFam).not.toContain('lion');
+  });
 });
 
 describe('rhyme: settings scale with pool size', () => {
