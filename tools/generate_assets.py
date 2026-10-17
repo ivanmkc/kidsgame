@@ -1,4 +1,4 @@
-"""Generate all game assets with Nano Banana Pro (Vertex, ADC).
+"""Generate all game assets with Nano Banana 2.1 (Vertex, ADC).
 
 Resumable: existing outputs are skipped, the manifest is rebuilt from
 whatever is on disk plus what this run adds. Run from the repo root:

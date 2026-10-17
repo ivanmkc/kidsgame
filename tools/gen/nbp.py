@@ -1,4 +1,4 @@
-"""Nano Banana Pro (gemini-3-pro-image-preview) via Vertex ADC.
+"""Nano Banana 2.1 (gemini-nano-banana-2.1) via Vertex ADC.
 
 Generation + mask-constrained edit with composite-within-mask: NBP
 regenerates the whole frame on edits, so edited pixels are only accepted
@@ -20,7 +20,7 @@ from google.genai import types
 
 PROJECT = "adk-coding-agents"
 LOCATION = "global"
-NBP_MODEL = "gemini-3-pro-image-preview"
+NBP_MODEL = "gemini-nano-banana-2.1"
 
 # NBP sometimes paints the edit mask's rectangle outline into its output.
 # Composites erode the region by this many px so a painted frame can never
