@@ -4,7 +4,7 @@ import { manifest } from '../../../manifest';
 import { VOICE } from '../../../assets/voice';
 import { WORDS, soundsFor } from '../../language/words';
 import {
-  BingoBoard, checkBingo, makeBoard, settingsForBingo, speechLines,
+  BingoBoard, bingoLayout, checkBingo, makeBoard, settingsForBingo, speechLines,
   bingoShout, tileLabel,
 } from '../logic';
 
@@ -179,6 +179,29 @@ describe('settingsForBingo', () => {
   });
   it('hard is 4x4 name', () => {
     expect(settingsForBingo('hard', 'en')).toEqual({ gridSize: 4, mode: 'name' });
+  });
+});
+
+describe('bingoLayout', () => {
+  it('portrait: keeps gap 10, sets landscape false', () => {
+    const l = bingoLayout(390, 844, 4);
+    expect(l.isLandscape).toBe(false);
+    expect(l.gap).toBe(10);
+    expect(l.tileSize).toBeGreaterThan(0);
+  });
+
+  it('landscape (phone): sets landscape true, touch targets >= 64px for 4x4', () => {
+    const l = bingoLayout(844, 390, 4);
+    expect(l.isLandscape).toBe(true);
+    expect(l.gap).toBe(8);
+    expect(l.tileSize).toBeGreaterThanOrEqual(64);
+  });
+
+  it('landscape (phone): sets landscape true, touch targets >= 64px for 3x3', () => {
+    const l = bingoLayout(844, 390, 3);
+    expect(l.isLandscape).toBe(true);
+    expect(l.gap).toBe(10);
+    expect(l.tileSize).toBeGreaterThanOrEqual(64);
   });
 });
 
