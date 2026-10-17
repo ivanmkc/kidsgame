@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
 import { prefersReducedMotion } from '../motion';
 
@@ -29,6 +29,8 @@ function BurstPiece({ index, count, size }: { index: number; count: number; size
         styles.burst,
         {
           fontSize: size,
+          marginLeft: -size / 2,
+          marginTop: -size * 0.6,
           opacity: t.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 1, 0] }),
           transform: [
             { translateX: t.interpolate({ inputRange: [0, 1], outputRange: [0, Math.cos(angle) * dist] }) },
@@ -96,8 +98,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginLeft: -8,
-    marginTop: -10,
     zIndex: 5,
   },
   twinkle: { position: 'absolute', zIndex: 1 },
