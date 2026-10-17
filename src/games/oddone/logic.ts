@@ -5,17 +5,18 @@ export interface OddOneRound {
   baseCategory: string;
   oddCategory: string;
   odd: string;
-  items: string[]; // n-1 DISTINCT icons from baseCategory + the odd one
+  items: string[]; // n-1 icons from baseCategory (repeating if fewer) + the odd one
   oddIndex: number;
 }
 
-// "Which one does not belong?" — items are distinct members of one category
-// plus a single intruder from another. Difficulty = more items + the number
-// of rounds; the categorical judgement is the game.
+// "Which one does not belong?" — items are members of one category (repeating
+// if the category has fewer than n-1 members) plus a single intruder from
+// another. Difficulty = more items + the number of rounds; the categorical
+// judgement is the game.
 export function makeOddOneRound(rng: Rng, icons: string[], n: number): OddOneRound {
   const cats = Object.entries(ICON_CATEGORIES)
     .map(([name, members]) => [name, members.filter((m) => icons.includes(m))] as const)
-    .filter(([, members]) => members.length >= n - 1);
+    .filter(([, members]) => members.length > 0);
   const [baseCategory, baseMembers] = cats[Math.floor(rng() * cats.length)];
   // The intruder must come from a category the kid won't argue with. Rule
   // Time already refuses to use a conflicting category as a non-match
@@ -32,7 +33,13 @@ export function makeOddOneRound(rng: Rng, icons: string[], n: number): OddOneRou
   const otherCats = unconflicted.length ? unconflicted : eligible;
   const [oddCategory, oddMembers] = otherCats[Math.floor(rng() * otherCats.length)];
 
-  const base = shuffle(rng, [...baseMembers]).slice(0, n - 1);
+  const base: string[] = [];
+  while (base.length < n - 1) {
+    for (const m of shuffle(rng, [...baseMembers])) {
+      if (base.length >= n - 1) break;
+      base.push(m);
+    }
+  }
   const odd = oddMembers[Math.floor(rng() * oddMembers.length)];
   const items = shuffle(rng, [...base, odd]);
   return { baseCategory, oddCategory, odd, items, oddIndex: items.indexOf(odd) };
