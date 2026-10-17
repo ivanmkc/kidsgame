@@ -174,10 +174,10 @@ export function playDrumSequence(
   onHit?: (index: number) => void,
   onDone?: () => void,
 ): () => void {
-  if (isMuted() || !gaps.length) { onDone?.(); return () => {}; }
+  if (!gaps.length) { onDone?.(); return () => {}; }
   const c = getCtx();
   if (!c || !master) { onDone?.(); return () => {}; }
-  if (c.state === 'suspended') void c.resume().catch(() => { /* fine */ });
+  if (!isMuted() && c.state === 'suspended') void c.resume().catch(() => { /* fine */ });
 
   const startTime = c.currentTime + 0.05;
   let cancelled = false;
@@ -187,7 +187,7 @@ export function playDrumSequence(
   let offset = 0;
   for (let i = 0; i < hitCount; i++) {
     const hitTime = startTime + offset;
-    scheduleDrum(c, master, hitTime, 0.7);
+    if (!isMuted()) scheduleDrum(c, master, hitTime, 0.7);
     if (onHit) {
       const idx = i;
       const ms = Math.max(0, (hitTime - c.currentTime) * 1000);

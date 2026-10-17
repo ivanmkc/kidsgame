@@ -19,6 +19,18 @@ interface Props {
   lang: Lang;
 }
 
+export function animateDrumHit(
+  pulseAnim: Partial<Animated.Value>,
+  setFlash?: (index: number | null) => void,
+  index?: number,
+): void {
+  if (setFlash && index !== undefined) setFlash(index);
+  pulseAnim.setValue?.(1.25);
+  if (pulseAnim instanceof Animated.Value) {
+    Animated.spring(pulseAnim, { toValue: 1, friction: 4, useNativeDriver: true }).start();
+  }
+}
+
 export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -30,13 +42,22 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const [result, setResult] = useState<'good' | 'bad' | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [flash, setFlash] = useState<number | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, 'win.echobeat' as never));
 
   const playDemo = useCallback((r: EchoBeatRound) => {
     stopSequence();
     setPhase('listen');
-    playDrumSequence(r.gaps, undefined, () => setPhase('tap'));
+    playDrumSequence(
+      r.gaps,
+      (i) => animateDrumHit(pulseAnim, setFlash, i),
+      () => {
+        setFlash(null);
+        setPhase('tap');
+      },
+    );
   }, []);
 
   useEffect(() => {
@@ -96,7 +117,6 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     setRound(makeEchoBeatRound(rngRef.current, difficulty));
   };
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (phase === 'tap' && tapCount > 0) {
       pulseAnim.setValue(1.25);
@@ -145,7 +165,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={t(lang, 'shell.echobeat.title' as never)}
+      title={t(lang, 'shell.echobeat.title')}
       subtitle={t(lang, 'shell.echobeat.sub' as never)}
       onBack={onHome}
       lang={lang}
@@ -172,11 +192,14 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             onPress={onTap}
             testID="echobeat-drum"
             disabled={phase !== 'tap'}
+            accessibilityLabel={t(lang, 'shell.echobeat.title')}
+            accessibilityRole="button"
             style={({ pressed }) => [
               styles.drum,
               shadows.lifted,
-              phase === 'listen' && styles.drumDimmed,
-              phase === 'tap' && shadows.glowGold,
+              phase === 'listen' && flash === null && styles.drumDimmed,
+              (phase === 'tap' || flash !== null) && shadows.glowGold,
+              flash !== null && styles.drumFlashing,
               pressed && styles.drumPressed,
             ]}
           >
@@ -229,6 +252,7 @@ const styles = StyleSheet.create({
   },
   drumPressed: { transform: [{ scale: 0.92 }] },
   drumDimmed: { opacity: 0.45 },
+  drumFlashing: { borderColor: colors.gold, backgroundColor: '#F09A65' },
   drumEmoji: { fontSize: 64 },
   tapDotRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
   tapDot: {
