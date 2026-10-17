@@ -2,7 +2,10 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { LANGS, Lang } from '../lang';
-import { t, UIKey } from '../i18n';
+import { EN, t, UIKey } from '../i18n';
+import { CMN } from '../i18n/cmn';
+import { JA } from '../i18n/ja';
+import { YUE } from '../i18n/yue';
 
 // ── (a) Translation table completeness ───────────────────────────────────
 // Record<UIKey, string> is compile-enforced, but this test provides a
@@ -116,6 +119,13 @@ describe('i18n table completeness', () => {
       }
     }
     expect(broken, `Placeholder mismatch in ${lang}`).toEqual([]);
+  });
+
+  it('every language table has exactly the UIKey keys of EN', () => {
+    const enKeys = Object.keys(EN).sort();
+    expect(Object.keys(JA).sort()).toEqual(enKeys);
+    expect(Object.keys(CMN).sort()).toEqual(enKeys);
+    expect(Object.keys(YUE).sort()).toEqual(enKeys);
   });
 });
 
