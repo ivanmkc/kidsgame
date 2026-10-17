@@ -73,7 +73,7 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
-  const cols = n <= 6 ? 3 : n <= 9 ? 3 : 4;
+  const cols = n <= 4 ? 2 : 3;
   const rows = Math.ceil(n / cols);
   const gap = 12;
   const tile = Math.min(
