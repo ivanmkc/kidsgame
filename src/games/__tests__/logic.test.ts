@@ -3,7 +3,15 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
-import { SYMBOLS, buildDeck, dealDuelRound, dealRound, hintAfterMs, leaderDealDelayMs, sharedSymbol } from '../spotit/logic';
+import {
+  buildDeck,
+  dealDuelRound,
+  dealRound,
+  hintAfterMs,
+  leaderDealDelayMs,
+  sharedSymbol,
+  SYMBOLS,
+} from '../spotit/logic';
 
 const ASSETS = join(__dirname, '../../../assets/game');
 
@@ -186,6 +194,13 @@ describe('asset manifest: find the difference', () => {
 describe('asset manifest: hidden objects', () => {
   it('has at least 2 scenes', () => {
     expect(manifest.hidden.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('assigns every scene a difficulty level', () => {
+    for (const scene of manifest.hidden) {
+      expect(scene.level).toBeDefined();
+      expect(['easy', 'medium', 'hard']).toContain(scene.level);
+    }
   });
 
   it.each(manifest.hidden.map((s) => [s.id, s] as const))('%s: valid targets and files', (_id, scene) => {

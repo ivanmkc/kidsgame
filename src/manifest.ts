@@ -1,4 +1,5 @@
 import raw from './assets/manifest.json';
+import { HIDDEN_LEVELS } from './hiddenLevels';
 
 export interface Box {
   x: number;
@@ -156,7 +157,15 @@ export interface Manifest {
   escape?: EscapeRoom[];
 }
 
-export const manifest = raw as unknown as Manifest;
+const rawManifest = raw as unknown as Manifest;
+
+export const manifest: Manifest = {
+  ...rawManifest,
+  hidden: rawManifest.hidden.map((scene) => ({
+    ...scene,
+    level: scene.level ?? HIDDEN_LEVELS[scene.id],
+  })),
+};
 
 export function pickScene<T>(scenes: T[], avoidIndex?: number): { scene: T; index: number } {
   let index = Math.floor(Math.random() * scenes.length);
