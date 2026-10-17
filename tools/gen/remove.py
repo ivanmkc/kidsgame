@@ -5,6 +5,7 @@ Removes objects from escape room scenes using Gemini image editing with:
 - Native removal first, cyan-fill fallback
 - 5-criterion rubric judge gate (object, shadow, collateral, boundary, fill)
 - Thread-safe Gemini clients for parallel operation
+- Shadow-aware compositing: dilated masks capture shadow removal
 
 Replaces the deprecated Imagen 3 pipeline with Gemini 3.1 Flash Lite (image).
 
@@ -31,6 +32,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from scipy.ndimage import distance_transform_edt
 
 EDIT_MODEL = "gemini-3.1-flash-lite-image"
 JUDGE_MODEL = "gemini-3.6-flash"
@@ -297,19 +299,33 @@ def remove_all_objects(
             else:
                 print(f"  WARNING: {hotspot} removal failed all attempts")
 
-    clean = np.array(scene).copy()
+    orig_arr = np.array(scene).astype(np.float32)
+    composite = orig_arr.copy()
+    max_w = np.zeros(orig_arr.shape[:2], dtype=np.float32)
     scores_out = {}
+
     for hotspot in masks:
         if hotspot not in results:
             scores_out[hotspot] = {"error": "all attempts failed"}
             continue
         img, scores = results[hotspot]
         mask = masks[hotspot]
-        result_arr = np.array(img)
-        clean[mask] = result_arr[mask]
+        result_arr = np.array(img).astype(np.float32)
+
+        dist_outside = distance_transform_edt(~mask)
+        w = np.clip(1.0 - dist_outside / 30.0, 0, 1).astype(np.float32)
+
+        # Per-pixel blend: original * (1 - w) + inpainted * w
+        # Where multiple objects overlap, the higher weight wins
+        use = w > max_w
+        composite[use] = (
+            orig_arr[use] * (1 - w[use, None])
+            + result_arr[use] * w[use, None]
+        )
+        max_w = np.maximum(max_w, w)
         scores_out[hotspot] = scores
 
-    return Image.fromarray(clean), scores_out
+    return Image.fromarray(np.clip(composite, 0, 255).astype(np.uint8)), scores_out
 
 
 # ---- CLI ----
@@ -354,11 +370,36 @@ def main():
     parser.add_argument("hotspots", nargs="*", help="Hotspot names (all if omitted)")
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--attempts", type=int, default=3)
+    parser.add_argument("--save-plate", action="store_true",
+                        help="Save composited clean plate as <room>_clean.png")
     args = parser.parse_args()
 
     items = _load_masks(args.room, args.hotspots or None)
     if not items:
         print("No matching SAM masks found")
+        return
+
+    if args.save_plate:
+        by_room: dict[str, dict[str, np.ndarray]] = {}
+        by_room_names: dict[str, dict[str, str]] = {}
+        for room, hs, name, mask in items:
+            by_room.setdefault(room, {})[hs] = mask
+            by_room_names.setdefault(room, {})[hs] = name
+        for room in sorted(by_room):
+            scene = Image.open(SCENES / f"{room}.png").convert("RGB")
+            print(f"\n  [{room}] Removing {len(by_room[room])} objects...")
+            clean, scores = remove_all_objects(
+                scene, by_room[room], by_room_names[room],
+                max_workers=args.workers)
+            out_path = SCENES / f"{room}_clean.png"
+            clean.save(out_path)
+            for hs, sc in scores.items():
+                if "error" in sc:
+                    print(f"  {room}/{hs}: FAIL — {sc['error']}")
+                else:
+                    tag = " ".join(f"{c[:3]}={sc[c]}" for c in CRITERIA)
+                    print(f"  {room}/{hs}: {tag}")
+            print(f"  Saved {out_path}")
         return
 
     scenes_cache: dict[str, Image.Image] = {}
@@ -373,7 +414,6 @@ def main():
         return room, hs, name, result
 
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        # Pre-load scenes (sequential, fast)
         for room, _, _, _ in items:
             if room not in scenes_cache:
                 scenes_cache[room] = Image.open(
