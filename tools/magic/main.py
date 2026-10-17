@@ -8,8 +8,8 @@ overlay.
 Recipe (mirrors tools/gen/nbp.py::edit_local):
   1. Fetch scene (cap 8MB, image/* content-type).
   2. Crop ~460px padded square around the drop point (clamped).
-  3. Send the crop + reference-image prompt to Nano Banana Pro
-     (gemini-3-pro-image-preview) — no SAM here, so it's a full-crop
+  3. Send the crop + reference-image prompt to Nano Banana 2.1
+     (gemini-nano-banana-2.1) — no SAM here, so it's a full-crop
      regen with strict same-pose/same-style instructions.
   4. Judge once with gemini-2.5-flash: character clearly wearing item,
      style preserved, no artifacts/text? On reject retry NBP once, then
@@ -33,7 +33,7 @@ from PIL import Image
 
 PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "adk-coding-agents")
 LOCATION = "global"
-NBP_MODEL = "gemini-3-pro-image-preview"
+NBP_MODEL = "gemini-nano-banana-2.1"
 JUDGE_MODEL = "gemini-2.5-flash"
 
 CROP_SIZE = 460          # square side, px, in the scene's pixel space

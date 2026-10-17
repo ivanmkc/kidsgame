@@ -6,7 +6,7 @@ Removes objects from escape room scenes using Gemini image editing with:
 - 5-criterion rubric judge gate (object, shadow, collateral, boundary, fill)
 - Thread-safe Gemini clients for parallel operation
 
-Replaces the deprecated Imagen 3 pipeline with Gemini 3.1 Flash Lite (image).
+Replaces the deprecated Imagen 3 pipeline with Nano Banana 2.1 (gemini-nano-banana-2.1).
 
 Usage:
     from gen.remove import remove_object, remove_all_objects
@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-EDIT_MODEL = "gemini-3.1-flash-lite-image"
+EDIT_MODEL = "gemini-nano-banana-2.1"
 JUDGE_MODEL = "gemini-3.6-flash"
 PROJECT = "adk-coding-agents"
 LOCATION = "global"
