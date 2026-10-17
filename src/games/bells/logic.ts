@@ -1,8 +1,8 @@
-import { Rng, randInt } from '../../rng';
-import { Difficulty } from '../../difficulty';
+import { Rng, randInt } from "../../rng";
+import { Difficulty } from "../../difficulty";
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
-const BELL_COLORS = ['#E8564F', '#FFC24B', '#5FBF6E', '#2FB8AC', '#9B7EDE'];
+const BELL_COLORS = ["#E8564F", "#FFC24B", "#5FBF6E", "#2FB8AC", "#9B7EDE"];
 
 export interface Bell {
   midi: number;
@@ -11,24 +11,24 @@ export interface Bell {
 
 export interface BellsRound {
   bells: Bell[];
-  sequence: number[];  // indices into bells[]
+  sequence: number[]; // indices into bells[]
 }
 
 function bellCount(d: Difficulty): number {
-  if (d === 'easy') return 3;
-  if (d === 'medium') return 4;
+  if (d === "easy") return 3;
+  if (d === "medium") return 4;
   return 5;
 }
 
 export function seqLength(d: Difficulty): number {
-  if (d === 'easy') return 2;
-  if (d === 'medium') return 3;
+  if (d === "easy") return 2;
+  if (d === "medium") return 3;
   return 5;
 }
 
 export function roundsToWin(d: Difficulty): number {
-  if (d === 'easy') return 5;
-  if (d === 'medium') return 6;
+  if (d === "easy") return 5;
+  if (d === "medium") return 6;
   return 8;
 }
 
@@ -49,6 +49,15 @@ export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
 export function checkSequence(round: BellsRound, tapped: number[]): boolean {
   if (tapped.length !== round.sequence.length) return false;
   return tapped.every((v, i) => v === round.sequence[i]);
+}
+
+export function canReplay(
+  phase: 'listen' | 'play',
+  won: boolean,
+  tappedCount: number,
+  seqLength: number,
+): boolean {
+  return phase === 'play' && !won && tappedCount < seqLength;
 }
 
 export function speechLines(): string[] {
