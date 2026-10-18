@@ -24,7 +24,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<FastSlowRound>(() => makeFastSlowRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<'listen' | 'pick'>('listen');
+  const [phase, setPhase] = useState<'listen' | 'pick' | 'celebrate'>('listen');
   const [wrongPick, setWrongPick] = useState<'fast' | 'slow' | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
@@ -54,7 +54,10 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       setScore(next);
       setWrongPick(null);
       if (next < total) {
-        setRound(makeFastSlowRound(rngRef.current, difficulty));
+        setPhase('celebrate');
+        setTimeout(() => {
+          setRound(makeFastSlowRound(rngRef.current, difficulty));
+        }, 1000);
       }
     } else {
       sfx.wrong();
