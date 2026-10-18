@@ -1,5 +1,23 @@
+import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
 import { sameCategory } from '../iconCategories';
+
+// Spoken prompt for Shadow Match across all four languages.
+// English preserves the exact pre-rendered clip string; non-English modes
+// provide localized instructions so speech fallback does not speak English.
+export const SHADOW_PROMPTS: Record<Lang, string> = {
+  en: 'Whose shadow is that? Match it!',
+  ja: 'このかげは だれ？ あててみよう！',
+  cmn: '这是谁的影子？配一配！',
+  yue: '呢個影係邊個嘅？配一配！',
+};
+
+/**
+ * Return the spoken prompt for Shadow Match in the specified language.
+ */
+export function shadowPrompt(lang: Lang = 'en'): string {
+  return SHADOW_PROMPTS[lang] ?? SHADOW_PROMPTS.en;
+}
 
 export interface ShadowRound {
   answer: string;
