@@ -35,6 +35,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'count' | 'quiz'>('count');
   const [wrongPick, setWrongPick] = useState<number | null>(null);
+  const wrongTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
@@ -76,7 +77,15 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         sfx,
         say,
         sayThen,
-        setTimeout: globalThis.setTimeout,
+        setTimeout: (fn, ms) => {
+          const id = globalThis.setTimeout(fn, ms);
+          wrongTimeoutsRef.current.push(id);
+          return id;
+        },
+        clearTimeouts: () => {
+          wrongTimeoutsRef.current.forEach(clearTimeout);
+          wrongTimeoutsRef.current = [];
+        },
         makeNextRound: () => makeCountRound(rngRef.current, difficulty),
         setScore,
         setLocked: (l: boolean) => { lockedRef.current = l; },

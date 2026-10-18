@@ -111,6 +111,7 @@ export interface PickDeps {
   say: (text: string) => void;
   sayThen: (lines: string[], cb: () => void) => void;
   setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  clearTimeouts: () => void;
   makeNextRound: () => CountRound;
   setScore: (s: number) => void;
   setLocked: (l: boolean) => void;
@@ -142,6 +143,7 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
   } else {
     deps.sfx.wrong();
     deps.setWrongPick(v);
+    deps.clearTimeouts();
     deps.setTimeout(() => deps.setWrongPick((w) => (w === v ? null : w)), 450);
     deps.setTimeout(() => deps.say(PROMPTS[state.lang]), 500);
   }
