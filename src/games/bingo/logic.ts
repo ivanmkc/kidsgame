@@ -9,7 +9,7 @@
 // call by the same word.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../language/words';
+import { WORDS, WordEntry, soundsFor, wordFor } from '../../words';
 
 export type BingoMode = 'name' | 'phonics';
 

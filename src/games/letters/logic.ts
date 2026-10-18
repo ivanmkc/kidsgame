@@ -4,7 +4,7 @@
 // letters with UNIQUE sounds so a single prompt has one answer.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { RHYME_WORDS, WORDS } from '../language/words';
+import { RHYME_WORDS, WORDS } from '../../words';
 
 export type LetterTier = 'upper' | 'mixed' | 'sound' | 'kana';
 

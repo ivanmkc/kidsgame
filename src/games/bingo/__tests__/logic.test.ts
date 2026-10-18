@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../../rng';
 import { manifest } from '../../../manifest';
 import { VOICE } from '../../../assets/voice';
-import { WORDS, soundsFor } from '../../language/words';
+import { WORDS, soundsFor } from '../../../words';
 import {
   BingoBoard, checkBingo, makeBoard, settingsForBingo, speechLines,
   bingoShout, tileLabel,
