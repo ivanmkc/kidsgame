@@ -25,9 +25,9 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
   const midSrc = MUSICBOX_IMAGES[`${scene.id}/mid`];
   const fgSrc = MUSICBOX_IMAGES[`${scene.id}/fg`];
 
-  const bgTranslate = Animated.multiply(scrollX, -0.2);
-  const midTranslate = Animated.multiply(scrollX, -0.5);
-  const fgTranslate = Animated.multiply(scrollX, -1);
+  const bgTranslate = Animated.modulo(Animated.multiply(scrollX, -0.2), -STRIP_W);
+  const midTranslate = Animated.modulo(Animated.multiply(scrollX, -0.5), -STRIP_W);
+  const fgTranslate = Animated.modulo(Animated.multiply(scrollX, -1), -STRIP_W);
 
   return (
     <View style={styles.container} pointerEvents="none">

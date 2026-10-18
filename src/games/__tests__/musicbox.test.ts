@@ -1,4 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import React from 'react';
+import { Animated } from 'react-native';
+import { renderToString } from 'react-dom/server';
+import { ScrollingWorld } from '../musicbox/ScrollingWorld';
 import {
   startState,
   advance,
@@ -12,7 +16,9 @@ import {
   speechLines,
 } from '../musicbox/logic';
 import { SONGS, PENTATONIC } from '../musicbox/songs';
-import { SCENES, sceneById } from '../musicbox/scenes';
+import { SCENES, sceneById, SceneDef } from '../musicbox/scenes';
+
+vi.mock('../../assets/images', () => ({ MUSICBOX_IMAGES: { 'twinkle/bg': { uri: 'mock-bg' }, 'twinkle/mid': { uri: 'mock-mid' }, 'twinkle/fg': { uri: 'mock-fg' } } }));
 
 describe('musicbox v2 logic', () => {
   it('walks a song note-by-note and wraps around (no completion)', () => {
@@ -135,5 +141,20 @@ describe('musicbox v2 logic', () => {
     const lines = speechLines();
     expect(lines.length).toBeGreaterThanOrEqual(4);
     expect(new Set(lines).size).toBe(lines.length);
+  });
+});
+
+describe('ScrollingWorld UI', () => {
+  it('wraps parallax layers within STRIP_W bounds', () => {
+    const scrollX = new Animated.Value(10000);
+    const scene: Pick<SceneDef, 'id' | 'songId' | 'vehicleY' | 'objects'> = { vehicleY: 0, id: 'twinkle', songId: 'twinkle', objects: { sky: [], mid: [], ground: [] } };
+    const str = renderToString(React.createElement(ScrollingWorld, { scrollX, scene }));
+    // scrollX = 10000
+    // bg: -2000 % -1280 = -720
+    // mid: -5000 % -1280 = -1160
+    // fg: -10000 % -1280 = -1040
+    expect(str).toContain('translateX(-720px)');
+    expect(str).toContain('translateX(-1160px)');
+    expect(str).toContain('translateX(-1040px)');
   });
 });
