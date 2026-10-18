@@ -5,6 +5,7 @@
 // (kids never get a two-family game). Round = target icon + spoken ask,
 // plus 3 icon tiles: exactly ONE from the target's family, 2 distractors.
 import { Lang } from '../../lang';
+import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { Rng, shuffle } from '../../rng';
 import { RHYME_SPRITES } from '../../assets/images';
@@ -35,16 +36,6 @@ export interface RhymeRound {
   promptLines: string[];   // spoken via saySequence
   confirmLines: string[];  // spoken after a correct tap (celebration)
 }
-
-// Localised ask lines. EN builds the full sentence with the target word
-// baked in; non-EN pairs a fixed question with the target word as a
-// second spoken clip (reused from Sounds' TTS dump).
-const ASK: Record<Lang, string> = {
-  en: '',
-  ja: 'おなじ おとで おわるのは どれ？',
-  cmn: '哪个词的结尾一样？',
-  yue: '邊個字尾音一樣呀？',
-};
 
 function hasRhymeIcon(icon: string): boolean {
   return Object.prototype.hasOwnProperty.call(RHYME_SPRITES, icon);
@@ -166,13 +157,13 @@ function buildLines(lang: Lang, target: RhymeEntry, correct: RhymeEntry): {
   if (lang === 'en') {
     const tU = upperEN(target.en);
     const cU = upperEN(correct.en);
-    const line = `Which one rhymes with ${tU}?`;
+    const line = t(lang, 'rhyme.ask', { word: tU });
     return {
       promptLines: [line], displayPrompt: line,
       confirmLines: [`${tU}... ${cU}!`, 'They rhyme!'],
     };
   }
-  const ask = ASK[lang];
+  const ask = t(lang, 'rhyme.ask');
   // Two-clip prompt: fixed ask + target word (reuses per-word clips that
   // the Sounds pipeline already renders — no new TTS work per target).
   const promptLines = [ask, target.word];
