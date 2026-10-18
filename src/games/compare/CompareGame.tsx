@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
-import { spriteLT } from '../quizround/logic';
 import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
@@ -14,7 +13,7 @@ import { say, sayThen, sfx } from '../../sound';
 import { useWinLine } from '../winlines';
 import {
   CompareRound, FEWER_PROMPT, MORE_PROMPT, PRAISE, Side,
-  compareSettings, makeCompareRound,
+  compareSettings, makeCompareRound, plateCritterPos, plateCritterSize,
 } from './logic';
 
 interface Props {
@@ -145,7 +144,7 @@ interface PlateProps {
 }
 
 function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
-  const critterSize = Math.min(Math.max(28, Math.min(58, width / (data.count <= 3 ? 3.5 : data.count <= 6 ? 4.2 : 5))), Math.max(24, height * 0.4));
+  const critterSize = plateCritterSize(data.count, width, height);
   return (
     <Pressable
       onPress={onPress}
@@ -166,7 +165,7 @@ function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
           source={SPOTIT_ICONS[data.icon]}
           style={{
             position: 'absolute',
-            ...spriteLT(p.x, p.y, critterSize, width, height),
+            ...plateCritterPos(p, critterSize, width, height),
             width: critterSize,
             height: critterSize,
           }}
