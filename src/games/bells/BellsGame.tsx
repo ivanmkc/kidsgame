@@ -158,12 +158,27 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
             <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
           </View>
         ) : (
-          <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard, wrongFlash && styles.wrongCard]}>
+          <Pressable
+            testID="replay-button"
+            onPress={() => {
+              if (canTap(round, tapped, phase, won)) {
+                setTapped([]);
+                playDemo(round);
+              }
+            }}
+            style={({ pressed }) => [
+              styles.statusCard,
+              shadows.soft,
+              styles.yourTurnCard,
+              wrongFlash && styles.wrongCard,
+              pressed && styles.pressed,
+            ]}
+          >
             <Text style={styles.statusEmoji}>👆</Text>
             <Text style={styles.statusText}>
               {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
             </Text>
-          </View>
+          </Pressable>
         )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
