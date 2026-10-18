@@ -89,30 +89,33 @@ export function playSequence(
   onNote?: (index: number) => void,
   onDone?: () => void,
 ): () => void {
-  if (isMuted() || !notes.length) { onDone?.(); return () => {}; }
-  const c = getCtx();
-  if (!c || !master) { onDone?.(); return () => {}; }
-  if (c.state === 'suspended') void c.resume().catch(() => { /* fine */ });
+  if (!notes.length) { onDone?.(); return () => {}; }
+  const muted = isMuted();
+  const c = muted ? null : getCtx();
+  if (!muted && (!c || !master)) { onDone?.(); return () => {}; }
+  if (c && c.state === 'suspended') void c.resume().catch(() => { /* fine */ });
 
   const beatSec = 60 / bpm;
-  const startTime = c.currentTime + 0.05;
+  const startTime = (c ? c.currentTime : 0) + 0.05;
   let cancelled = false;
   const timers: ReturnType<typeof setTimeout>[] = [];
 
   let offset = 0;
   for (let i = 0; i < notes.length; i++) {
     const noteTime = startTime + offset;
-    scheduleNote(c, master, notes[i].m, noteTime, 0.8);
+    if (!muted && c && master) {
+      scheduleNote(c, master, notes[i].m, noteTime, 0.8);
+    }
     if (onNote) {
       const idx = i;
-      const ms = Math.max(0, (noteTime - c.currentTime) * 1000);
+      const ms = Math.max(0, (0.05 + offset) * 1000);
       timers.push(setTimeout(() => { if (!cancelled) onNote(idx); }, ms));
     }
     offset += notes[i].b * beatSec;
   }
 
   if (onDone) {
-    const endMs = Math.max(0, (startTime + offset - c.currentTime) * 1000);
+    const endMs = Math.max(0, (0.05 + offset) * 1000);
     timers.push(setTimeout(() => { if (!cancelled) onDone(); }, endMs));
   }
 
