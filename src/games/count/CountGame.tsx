@@ -1,18 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang, numberWord } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { colors, darken, fonts, shadows } from '../../theme';
-import { say, sayThen, sfx } from '../../sound';
-import { CountRound, PROMPTS, applyTap, countSettings, applyPickAnswer, makeCountRound } from './logic';
-import { spriteLT } from '../quizround/logic';
-import { useWinLine } from '../winlines';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang, numberWord } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { colors, darken, fonts, shadows } from "../../theme";
+import { say, sayThen, sfx } from "../../sound";
+import {
+  CountRound,
+  PROMPTS,
+  applyTap,
+  countSettings,
+  applyPickAnswer,
+  makeCountRound,
+} from "./logic";
+import { spriteLT } from "../quizround/logic";
+import { useWinLine } from "../winlines";
 
 interface Props {
   onHome: () => void;
@@ -28,27 +43,31 @@ interface Props {
 export function CountGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin } = countSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState<CountRound>(() => makeCountRound(rngRef.current, difficulty));
-  const [tapped, setTapped] = useState<boolean[]>(() => Array.from({ length: round.n }, () => false));
+  const [round, setRound] = useState<CountRound>(() =>
+    makeCountRound(rngRef.current, difficulty),
+  );
+  const [tapped, setTapped] = useState<boolean[]>(() =>
+    Array.from({ length: round.n }, () => false),
+  );
   const tappedRef = useRef(tapped);
   tappedRef.current = tapped;
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<'count' | 'quiz'>('count');
+  const [won, setWon] = useState(false);
+  const [phase, setPhase] = useState<"count" | "quiz">("count");
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
-  useWinLine(won, t(lang, 'win.count'));
+  useWinLine(won, t(lang, "win.count"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
     if (won) return;
-    if (phase === 'quiz') say(PROMPTS[lang]);
+    if (phase === "quiz") say(PROMPTS[lang]);
   }, [round, phase, lang, won]);
 
   const tapCritter = (i: number) => {
-    if (won || phase !== 'count') return;
+    if (won || phase !== "count") return;
     const next = applyTap(tappedRef.current, i);
     if (next === tappedRef.current) return;
     tappedRef.current = next;
@@ -60,7 +79,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       // Chain the phase switch on speech completion so the "How many?"
       // prompt (fired by the phase-change useEffect) doesn't cut the last
       // count word mid-syllable.
-      sayThen([line], () => setPhase('quiz'));
+      sayThen([line], () => setPhase("quiz"));
     } else {
       say(line);
     }
@@ -71,7 +90,15 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const pickAnswer = (v: number) => {
     applyPickAnswer(
       v,
-      { won, phase, locked: lockedRef.current, score, round, roundsToWin, lang },
+      {
+        won,
+        phase,
+        locked: lockedRef.current,
+        score,
+        round,
+        roundsToWin,
+        lang,
+      },
       {
         sfx,
         say,
@@ -79,12 +106,15 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         setTimeout: globalThis.setTimeout,
         makeNextRound: () => makeCountRound(rngRef.current, difficulty),
         setScore,
-        setLocked: (l: boolean) => { lockedRef.current = l; },
+        setWon,
+        setLocked: (l: boolean) => {
+          lockedRef.current = l;
+        },
         setRound,
         setTapped,
         setPhase,
         setWrongPick,
-      }
+      },
     );
   };
 
@@ -96,31 +126,53 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     setRound(nr);
     setTapped(Array.from({ length: nr.n }, () => false));
     setScore(0);
-    setPhase('count');
+    setWon(false);
+    setPhase("count");
     setWrongPick(null);
   };
 
   const { width, height } = useWindowDimensions();
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 180, stageW * 0.85);
-  const critterSize = Math.min(Math.max(38, Math.min(72, stageW / (round.n <= 4 ? 5 : round.n <= 7 ? 6 : 7))), Math.max(30, stageH * 0.45));
+  const critterSize = Math.min(
+    Math.max(
+      38,
+      Math.min(72, stageW / (round.n <= 4 ? 5 : round.n <= 7 ? 6 : 7)),
+    ),
+    Math.max(30, stageH * 0.45),
+  );
 
   return (
     <GameShell
-      title={t(lang, 'shell.count.title')}
-      subtitle={t(lang, 'shell.count.sub')}
+      title={t(lang, "shell.count.title")}
+      subtitle={t(lang, "shell.count.sub")}
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="count-timer" /> : null}
-          <ScoreChip label={`🔢 ${score}/${roundsToWin}`} testID="count-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="count-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🔢 ${score}/${roundsToWin}`}
+            testID="count-score"
+          />
         </View>
       }
     >
       <View style={styles.board}>
         <View
-          style={[styles.stage, shadows.soft, { width: stageW, height: stageH }]}
+          style={[
+            styles.stage,
+            shadows.soft,
+            { width: stageW, height: stageH },
+          ]}
           testID={`count-stage-${round.icon}-${round.n}`}
         >
           {round.positions.map((p, i) => (
@@ -132,13 +184,16 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               left={spriteLT(p.x, p.y, critterSize, stageW, stageH).left}
               top={spriteLT(p.x, p.y, critterSize, stageW, stageH).top}
               onTap={() => tapCritter(i)}
-              testID={`count-critter-${i}${tapped[i] ? '-tapped' : ''}`}
+              testID={`count-critter-${i}${tapped[i] ? "-tapped" : ""}`}
             />
           ))}
         </View>
-        {phase === 'quiz' ? (
+        {phase === "quiz" ? (
           <View style={styles.quiz}>
-            <View style={[styles.promptCard, shadows.soft]} testID="count-prompt">
+            <View
+              style={[styles.promptCard, shadows.soft]}
+              testID="count-prompt"
+            >
               <Text style={styles.promptText}>{PROMPTS[lang]}</Text>
             </View>
             <View style={styles.choiceRow}>
@@ -146,7 +201,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
                 <Pressable
                   key={c}
                   onPress={() => pickAnswer(c)}
-                  testID={`count-choice-${c}${c === round.answer ? '-answer' : ''}`}
+                  testID={`count-choice-${c}${c === round.answer ? "-answer" : ""}`}
                   accessibilityRole="button"
                   accessibilityLabel={String(c)}
                   style={({ pressed }) => [
@@ -169,9 +224,9 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.count')}
+        message={t(lang, "win.count")}
         onNext={reset}
-        nextLabel={t(lang, 'overlay.playAgain')}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
@@ -189,14 +244,26 @@ interface CritterProps {
   testID: string;
 }
 
-function Critter({ icon, tapped, size, left, top, onTap, testID }: CritterProps) {
+function Critter({
+  icon,
+  tapped,
+  size,
+  left,
+  top,
+  onTap,
+  testID,
+}: CritterProps) {
   const scale = useRef(new Animated.Value(1)).current;
   const wasTapped = useRef(false);
   useEffect(() => {
     if (tapped && !wasTapped.current) {
       wasTapped.current = true;
       scale.setValue(1.35);
-      Animated.spring(scale, { toValue: 1, useNativeDriver: true, friction: 4 }).start();
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 4,
+      }).start();
     }
   }, [tapped, scale]);
   return (
@@ -205,12 +272,14 @@ function Critter({ icon, tapped, size, left, top, onTap, testID }: CritterProps)
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={icon}
-      style={{ position: 'absolute', left, top, width: size, height: size }}
+      style={{ position: "absolute", left, top, width: size, height: size }}
     >
-      <Animated.View style={{ width: size, height: size, transform: [{ scale }] }}>
+      <Animated.View
+        style={{ width: size, height: size, transform: [{ scale }] }}
+      >
         <Image
           source={SPOTIT_ICONS[icon]}
-          style={{ width: '100%', height: '100%', opacity: tapped ? 0.55 : 1 }}
+          style={{ width: "100%", height: "100%", opacity: tapped ? 0.55 : 1 }}
           resizeMode="contain"
         />
         {tapped ? (
@@ -224,16 +293,22 @@ function Critter({ icon, tapped, size, left, top, onTap, testID }: CritterProps)
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 16,
+  },
   stage: {
     backgroundColor: colors.paper,
     borderRadius: 24,
     borderWidth: 3,
     borderColor: colors.blush,
-    position: 'relative',
-    overflow: 'hidden',
+    position: "relative",
+    overflow: "hidden",
   },
-  quiz: { alignItems: 'center', gap: 12 },
+  quiz: { alignItems: "center", gap: 12 },
   promptCard: {
     backgroundColor: colors.gold,
     borderRadius: 18,
@@ -242,8 +317,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 22,
   },
-  promptText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink, textAlign: 'center' },
-  choiceRow: { flexDirection: 'row', gap: 14 },
+  promptText: {
+    fontFamily: fonts.display,
+    fontSize: 22,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  choiceRow: { flexDirection: "row", gap: 14 },
   choice: {
     backgroundColor: colors.card,
     borderRadius: 20,
@@ -252,24 +332,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 26,
     paddingVertical: 14,
     minWidth: 74,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  choiceWrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.14)' },
+  choiceWrong: {
+    borderColor: colors.red,
+    backgroundColor: "rgba(232,86,79,0.14)",
+  },
   choiceText: { fontFamily: fonts.display, fontSize: 34, color: colors.ink },
   pressed: { transform: [{ scale: 0.94 }] },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14 },
   check: {
-    position: 'absolute',
+    position: "absolute",
     right: -4,
     top: -4,
     width: 22,
     height: 22,
     borderRadius: 11,
     backgroundColor: colors.green,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
     borderColor: colors.paper,
   },
-  checkText: { color: colors.paper, fontFamily: fonts.body, fontSize: 14, lineHeight: 15 },
+  checkText: {
+    color: colors.paper,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 15,
+  },
 });

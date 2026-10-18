@@ -1,16 +1,27 @@
-import { Difficulty } from '../../difficulty';
-import { Lang, numberWord } from '../../lang';
-import { Rng, randInt, shuffle } from '../../rng';
+import { Difficulty } from "../../difficulty";
+import { Lang, numberWord } from "../../lang";
+import { Rng, randInt, shuffle } from "../../rng";
 
 // Shared critter/treat pool for the math suite (Count/Compare/Sums).
 // Kept small on purpose — kids re-see the same familiar friends.
 export const CRITTER_ICONS = [
-  'dog', 'cat', 'frog', 'rabbit', 'fish',
-  'butterfly', 'apple', 'strawberry', 'star', 'balloon',
+  "dog",
+  "cat",
+  "frog",
+  "rabbit",
+  "fish",
+  "butterfly",
+  "apple",
+  "strawberry",
+  "star",
+  "balloon",
 ];
 
 /** Position on the stage, in percent (0..100) of the card's width/height. */
-export interface Position { x: number; y: number }
+export interface Position {
+  x: number;
+  y: number;
+}
 
 export interface CountRound {
   icon: string;
@@ -23,9 +34,13 @@ export interface CountRound {
 }
 
 /** Rounds/count-range per difficulty — hardcoded per the task spec. */
-export function countSettings(d: Difficulty): { rounds: number; min: number; max: number } {
-  if (d === 'hard') return { rounds: 8, min: 6, max: 10 };
-  if (d === 'medium') return { rounds: 6, min: 4, max: 8 };
+export function countSettings(d: Difficulty): {
+  rounds: number;
+  min: number;
+  max: number;
+} {
+  if (d === "hard") return { rounds: 8, min: 6, max: 10 };
+  if (d === "medium") return { rounds: 6, min: 4, max: 8 };
   return { rounds: 5, min: 1, max: 5 };
 }
 
@@ -56,7 +71,11 @@ export function scatterPositions(rng: Rng, n: number): Position[] {
 }
 
 /** Three unique choices in [1..upper], answer always included. */
-export function makeCountChoices(rng: Rng, answer: number, max: number): number[] {
+export function makeCountChoices(
+  rng: Rng,
+  answer: number,
+  max: number,
+): number[] {
   const upper = Math.max(max + 1, answer + 2, 4);
   const others = new Set<number>();
   let guard = 0;
@@ -95,7 +114,6 @@ export function applyTap(tapped: boolean[], index: number): boolean[] {
   return next;
 }
 
-
 export interface PickState {
   won: boolean;
   phase: string;
@@ -113,29 +131,35 @@ export interface PickDeps {
   setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
   makeNextRound: () => CountRound;
   setScore: (s: number) => void;
+  setWon: (w: boolean) => void;
   setLocked: (l: boolean) => void;
   setRound: (r: CountRound) => void;
   setTapped: (t: boolean[]) => void;
-  setPhase: (p: 'count' | 'quiz') => void;
-  setWrongPick: (w: number | null | ((prev: number | null) => number | null)) => void;
+  setPhase: (p: "count" | "quiz") => void;
+  setWrongPick: (
+    w: number | null | ((prev: number | null) => number | null),
+  ) => void;
 }
 
 export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
-  if (state.won || state.phase !== 'quiz' || state.locked) return;
+  if (state.won || state.phase !== "quiz" || state.locked) return;
 
   if (v === state.round.answer) {
     deps.setLocked(true);
     deps.sfx.good();
     const nextScore = state.score + 1;
     deps.setScore(nextScore);
+    const isWin = nextScore >= state.roundsToWin;
     const nw = numberWord(state.lang, state.round.answer).t;
     deps.sayThen([nw, PRAISE[state.lang]], () => {
       deps.setLocked(false);
-      if (nextScore < state.roundsToWin) {
+      if (isWin) {
+        deps.setWon(true);
+      } else {
         const nr = deps.makeNextRound();
         deps.setRound(nr);
         deps.setTapped(Array.from({ length: nr.n }, () => false));
-        deps.setPhase('count');
+        deps.setPhase("count");
         deps.setWrongPick(null);
       }
     });
@@ -147,21 +171,20 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
   }
 }
 
-
 // ---------- speech (per-lang prompt + celebration) ----------
 
 export const PROMPTS: Record<Lang, string> = {
-  en: 'How many?',
-  ja: 'いくつかな？',
-  cmn: '有几个？',
-  yue: '有幾多個呀？',
+  en: "How many?",
+  ja: "いくつかな？",
+  cmn: "有几个？",
+  yue: "有幾多個呀？",
 };
 
 export const PRAISE: Record<Lang, string> = {
-  en: 'Great counting!',
-  ja: 'すごい！',
-  cmn: '真棒！',
-  yue: '好叻呀！',
+  en: "Great counting!",
+  ja: "すごい！",
+  cmn: "真棒！",
+  yue: "好叻呀！",
 };
 
 /** Every literal string this game will pass to say/saySequence, across all
@@ -169,7 +192,7 @@ export const PRAISE: Record<Lang, string> = {
  *  Number words are shared across the suite and provided by the orchestrator. */
 export function speechLines(): string[] {
   const s = new Set<string>();
-  (['en', 'ja', 'cmn', 'yue'] as Lang[]).forEach((L) => {
+  (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
     s.add(PROMPTS[L]);
     s.add(PRAISE[L]);
   });
