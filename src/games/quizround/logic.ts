@@ -22,6 +22,9 @@ export function makeQuizRound<T>(
   confusable?: (target: T, x: T) => boolean,
   avoidTargetKey?: string,
 ): QuizRound<T> {
+  if (pool.length < tileCount) {
+    throw new Error(`pool smaller than tileCount (${pool.length} < ${tileCount})`);
+  }
   const filtered = avoidTargetKey ? pool.filter((x) => keyOf(x) !== avoidTargetKey) : pool;
   const candidates = filtered.length > 0 ? filtered : pool;
   const target = candidates[Math.floor(rng() * candidates.length)];

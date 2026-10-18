@@ -25,6 +25,12 @@ describe('makeQuizRound', () => {
 
   const keyOf = (item: Item): string => item.id;
 
+  it('throws an error if the pool is smaller than tileCount', () => {
+    const rng = makeRng(42);
+    expect(() => makeQuizRound(rng, pool.slice(0, 2), 4, toTile, keyOf))
+      .toThrow('pool smaller than tileCount (2 < 4)');
+  });
+
   it('generates a round with the requested number of unique tiles', () => {
     const rng = makeRng(42);
     const round = makeQuizRound(rng, pool, 4, toTile, keyOf);
