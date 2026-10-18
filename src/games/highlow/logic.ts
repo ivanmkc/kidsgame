@@ -4,8 +4,6 @@ import { Difficulty } from '../../difficulty';
 export interface HighLowRound {
   noteA: number;  // midi — played first
   noteB: number;  // midi — played second
-  /** 'high' when noteB is above noteA, 'low' when it is below. */
-  answer: 'high' | 'low';
 }
 
 const BASE_MIDI = 60; // middle C
@@ -31,7 +29,7 @@ export function makeHighLowRound(rng: Rng, d: Difficulty): HighLowRound {
   const secondIsHigher = rng() < 0.5;
   const noteA = secondIsHigher ? base : base + interval;
   const noteB = secondIsHigher ? base + interval : base;
-  return { noteA, noteB, answer: secondIsHigher ? 'high' : 'low' };
+  return { noteA, noteB };
 }
 
 /** Derived from the notes, so a hand-built round can't disagree with what
@@ -42,14 +40,6 @@ export function correctAnswer(round: HighLowRound): 'high' | 'low' {
 
 export function isCorrect(round: HighLowRound, picked: 'high' | 'low'): boolean {
   return picked === correctAnswer(round);
-}
-
-export function getHighNote(round: HighLowRound): number {
-  return Math.max(round.noteA, round.noteB);
-}
-
-export function getLowNote(round: HighLowRound): number {
-  return Math.min(round.noteA, round.noteB);
 }
 
 export function speechLines(): string[] {

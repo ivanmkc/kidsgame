@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as music from '../../music';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
-import { makeHighLowRound, roundsToWin as hlRounds, getHighNote, getLowNote, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
+import { makeHighLowRound, roundsToWin as hlRounds, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap } from '../bells/logic';
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
 import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
@@ -27,8 +27,8 @@ describe('high or low', () => {
         const rng = makeRng(seed);
         const r = makeHighLowRound(rng, d);
         expect(r.noteA).not.toBe(r.noteB);
-        expect(getHighNote(r)).toBeGreaterThan(getLowNote(r));
-        expect(['high', 'low']).toContain(r.answer);
+        expect(Math.abs(r.noteB - r.noteA)).toBeGreaterThan(0);
+        expect(['high', 'low']).toContain(hlAnswer(r));
       }
     }
   });
@@ -42,11 +42,11 @@ describe('high or low', () => {
       for (const d of ['easy', 'medium', 'hard'] as const) {
         const r = makeHighLowRound(makeRng(seed), d);
         const wentUp = r.noteB > r.noteA;
-        expect(r.answer).toBe(wentUp ? 'high' : 'low');
-        expect(hlAnswer(r)).toBe(r.answer);
-        expect(hlCorrect(r, r.answer)).toBe(true);
-        expect(hlCorrect(r, r.answer === 'high' ? 'low' : 'high')).toBe(false);
-        seen.add(r.answer);
+        const ans = hlAnswer(r);
+        expect(ans).toBe(wentUp ? 'high' : 'low');
+        expect(hlCorrect(r, ans)).toBe(true);
+        expect(hlCorrect(r, ans === 'high' ? 'low' : 'high')).toBe(false);
+        seen.add(ans);
       }
     }
     expect(seen).toEqual(new Set(['high', 'low']));
