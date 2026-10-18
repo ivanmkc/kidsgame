@@ -56,6 +56,16 @@ describe('makeQuizRound', () => {
     }
   });
 
+  it('falls back to pool when avoidTargetKey removes all candidates', () => {
+    const singlePool = [pool[0]];
+    const rng = makeRng(42);
+    const round = makeQuizRound(rng, singlePool, 1, toTile, keyOf, undefined, singlePool[0].id);
+    expect(round.target.id).toBe(singlePool[0].id);
+    expect(round.tiles).toHaveLength(1);
+    expect(round.tiles[0].key).toBe(singlePool[0].id);
+    expect(round.answerIdx).toBe(0);
+  });
+
   it('biases distractors towards confusables when available', () => {
     const confusable = (target: Item, candidate: Item): boolean =>
       target.group !== undefined && target.group === candidate.group;
