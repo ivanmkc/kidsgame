@@ -21,6 +21,7 @@ export type UIKey =
   | 'menu.number'
   | 'menu.grownups'
   | 'badge.beta'
+  | 'menu.play'
   | 'chip.sound'
   | 'chip.muted'
   | 'chip.twoPlayers'
@@ -268,6 +269,7 @@ export const EN: Table = {
   'menu.number': 'Number Games 🔢',
   'menu.grownups': 'For grown-ups 🧑‍🍼',
   'badge.beta': 'BETA',
+  'menu.play': 'PLAY',
   'chip.sound': '🔊 Sound',
   'chip.muted': '🔇 Muted',
   'chip.twoPlayers': '👯 2 Players',

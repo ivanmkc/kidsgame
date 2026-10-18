@@ -28,6 +28,7 @@ import { CompareGame } from './src/games/compare/CompareGame';
 import { SumsGame } from './src/games/sums/SumsGame';
 import { SpellGame } from './src/games/spell/SpellGame';
 import { FeedbackChip } from './src/components/Feedback';
+import { MenuCard } from "./src/components/MenuCard";
 import { LangContext } from './src/components/GameShell';
 import { FilterCycleChip } from './src/components/ScenePicker';
 import { TwinkleField } from './src/components/Sparkles';
@@ -57,7 +58,7 @@ import { DifficultyFilter, difficultyOf, loadFilter, nextFilter, saveFilter } fr
 import { useTwoPlayer } from './src/multiplayer';
 import { isMuted, say, setMuted, sfx, setSpeechLang, stopNarration } from './src/sound';
 import { routeParts, useRoute } from './src/nav';
-import { colors, fonts, shadows } from './src/theme';
+import { colors, fonts } from './src/theme';
 import { useLockdown, effectiveLang, visibleCards } from './src/lockdown';
 import { AdultGate } from './src/components/AdultGate';
 import { LockdownSettings } from './src/components/LockdownSettings';
@@ -375,15 +376,7 @@ function Menu({
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {visGames.map((g, i) => (
             <Reveal key={g.route} delay={120 + i * 80}>
-              <GameCard
-                color={g.color}
-                title={t(lang, `card.${g.key}.title` as const)}
-                blurb={t(lang, `card.${g.key}.blurb` as const)}
-                onPress={() => onNavigate(g.route)}
-                testID={`menu-${g.route}`}
-                preview={previewFor(g.preview)}
-                width={cardWidth}
-              />
+              <MenuCard g={g} lang={lang} cardWidth={cardWidth} onNavigate={onNavigate} preview={previewFor(g.preview)} />
             </Reveal>
           ))}
         </View>
@@ -393,7 +386,7 @@ function Menu({
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {visWords.map((g, i) => (
             <Reveal key={g.route} delay={160 + i * 80}>
-              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+              <MenuCard g={g} lang={lang} cardWidth={cardWidth} onNavigate={onNavigate} preview={previewFor(g.preview)} />
             </Reveal>
           ))}
         </View>
@@ -403,7 +396,7 @@ function Menu({
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {visNumbers.map((g, i) => (
             <Reveal key={g.route} delay={180 + i * 80}>
-              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+              <MenuCard g={g} lang={lang} cardWidth={cardWidth} onNavigate={onNavigate} preview={previewFor(g.preview)} />
             </Reveal>
           ))}
         </View>
@@ -413,7 +406,7 @@ function Menu({
         <View style={[styles.cards, { maxWidth: isLandscape ? 1100 : 460 }]}>
           {visMusic.map((g, i) => (
             <Reveal key={g.route} delay={190 + i * 80}>
-              <GameCard color={g.color} title={t(lang, `card.${g.key}.title` as const)} blurb={t(lang, `card.${g.key}.blurb` as const)} onPress={() => onNavigate(g.route)} testID={`menu-${g.route}`} preview={previewFor(g.preview)} width={cardWidth} />
+              <MenuCard g={g} lang={lang} cardWidth={cardWidth} onNavigate={onNavigate} preview={previewFor(g.preview)} />
             </Reveal>
           ))}
         </View>
@@ -678,45 +671,6 @@ function OddOnePreview() {
   );
 }
 
-function GameCard({
-  color, title, blurb, preview, onPress, testID, width, beta,
-}: {
-  color: string;
-  title: string;
-  blurb: string;
-  preview: React.ReactNode;
-  onPress: () => void;
-  testID: string;
-  width: number;
-  beta?: boolean;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityLabel={`${title} — ${blurb}`}
-      style={({ pressed }) => [styles.gameCard, shadows.sticker, { borderColor: color, width }, pressed && styles.pressed]}
-    >
-      {/* decorative preview: keep it out of the accessible name */}
-      <View style={styles.previewWrap} accessibilityElementsHidden importantForAccessibility="no-hide-descendants" aria-hidden>
-        {preview}
-      </View>
-      {beta ? (
-        <View style={styles.betaBadge} testID={`${testID}-beta`}>
-          <Text style={styles.betaBadgeText}>BETA</Text>
-        </View>
-      ) : null}
-      <View style={styles.cardBody}>
-        <Text style={[styles.gameTitle, { color }]}>{title}</Text>
-        <Text style={styles.gameBlurb}>{blurb}</Text>
-      </View>
-      <View style={[styles.playBadge, { backgroundColor: color }]}>
-        <Text style={styles.playBadgeText}>PLAY</Text>
-      </View>
-    </Pressable>
-  );
-}
 
 function Reveal({ delay, children }: { delay: number; children: React.ReactNode }) {
   const t = useRef(new Animated.Value(0)).current;
@@ -880,14 +834,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
-  gameCard: {
-    backgroundColor: colors.paper,
-    borderRadius: 26,
-    borderWidth: 4,
-    overflow: 'hidden',
-  },
-  pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
-  previewWrap: { height: 104, backgroundColor: colors.blush },
   preview: { width: '100%', height: '100%' },
   iconRow: {
     flex: 1,
@@ -941,26 +887,4 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   miniRuleText: { fontFamily: fonts.display, fontSize: 12, color: colors.ink },
-  cardBody: { paddingHorizontal: 18, paddingVertical: 12, paddingRight: 86 },
-  gameTitle: { fontSize: 22, fontFamily: fonts.display },
-  gameBlurb: { fontSize: 13, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: 1 },
-  playBadge: {
-    position: 'absolute',
-    right: 14,
-    bottom: 14,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  playBadgeText: { color: '#fff', fontFamily: fonts.display, fontSize: 15, letterSpacing: 1 },
-  betaBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(60,45,70,0.85)',
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  betaBadgeText: { color: colors.gold, fontFamily: fonts.display, fontSize: 12, letterSpacing: 1.5 },
 });
