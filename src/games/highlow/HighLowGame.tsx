@@ -1,17 +1,30 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { WinOverlay } from '../../components/WinOverlay';
-import { SparkleBurst } from '../../components/Sparkles';
-import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
-import { playNote, playSequence, stopSequence } from '../../music';
-import { useWinLine } from '../winlines';
-import { makeHighLowRound, roundsToWin, HighLowRound, correctAnswer, isCorrect } from './logic';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { WinOverlay } from "../../components/WinOverlay";
+import { SparkleBurst } from "../../components/Sparkles";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { sfx } from "../../sound";
+import { playSequence, stopSequence } from "../../music";
+import { useWinLine } from "../winlines";
+import {
+  makeHighLowRound,
+  roundsToWin,
+  HighLowRound,
+  correctAnswer,
+  isCorrect,
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -22,33 +35,46 @@ interface Props {
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState<HighLowRound>(() => makeHighLowRound(rngRef.current, difficulty));
+  const [round, setRound] = useState<HighLowRound>(() =>
+    makeHighLowRound(rngRef.current, difficulty),
+  );
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<'listen' | 'pick'>('listen');
-  const [wrongPick, setWrongPick] = useState<'high' | 'low' | null>(null);
+  const [phase, setPhase] = useState<"listen" | "pick">("listen");
+  const [listenNote, setListenNote] = useState<number | null>(null);
+  const [wrongPick, setWrongPick] = useState<"high" | "low" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
-  useWinLine(won, t(lang, 'win.highlow' as never));
+  useWinLine(won, t(lang, "win.highlow" as never));
 
   const playRound = useCallback((r: HighLowRound) => {
     stopSequence();
+    setListenNote(null);
     const notes = [
       { m: r.noteA, b: 2 },
       { m: r.noteB, b: 2 },
     ];
-    playSequence(notes, 80, undefined, () => setPhase('pick'));
+    playSequence(
+      notes,
+      80,
+      (index) => setListenNote(index),
+      () => setPhase("pick"),
+    );
   }, []);
 
   useEffect(() => {
     if (!won) {
-      setPhase('listen');
+      setPhase("listen");
+      setListenNote(null);
       const timer = setTimeout(() => playRound(round), 400);
-      return () => { clearTimeout(timer); stopSequence(); };
+      return () => {
+        clearTimeout(timer);
+        stopSequence();
+      };
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onPick = (picked: 'high' | 'low') => {
-    if (won || phase !== 'pick') return;
+  const onPick = (picked: "high" | "low") => {
+    if (won || phase !== "pick") return;
     if (isCorrect(round, picked)) {
       sfx.good();
       setSparkKey((k) => k + 1);
@@ -69,12 +95,14 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
+    setListenNote(null);
     setRound(makeHighLowRound(rngRef.current, difficulty));
   };
 
   const replay = () => {
-    if (phase === 'pick') {
-      setPhase('listen');
+    if (phase === "pick") {
+      setPhase("listen");
+      setListenNote(null);
       playRound(round);
     }
   };
@@ -82,88 +110,151 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const earPulse = useRef(new Animated.Value(1)).current;
   const pickGlow = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    if (phase === 'listen') {
+    if (phase === "listen") {
       pickGlow.setValue(0);
       Animated.loop(
         Animated.sequence([
-          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        ])
+          Animated.timing(earPulse, {
+            toValue: 1.18,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(earPulse, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
       ).start();
     } else {
       earPulse.stopAnimation();
       earPulse.setValue(1);
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pickGlow, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-          Animated.timing(pickGlow, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        ])
+          Animated.timing(pickGlow, {
+            toValue: 1,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pickGlow, {
+            toValue: 0,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
       ).start();
     }
-    return () => { earPulse.stopAnimation(); pickGlow.stopAnimation(); };
+    return () => {
+      earPulse.stopAnimation();
+      pickGlow.stopAnimation();
+    };
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const pickScale = pickGlow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+  const pickScale = pickGlow.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.04],
+  });
 
   return (
     <GameShell
-      title={t(lang, 'shell.highlow.title' as never)}
-      subtitle={t(lang, 'shell.highlow.sub' as never)}
+      title={t(lang, "shell.highlow.title" as never)}
+      subtitle={t(lang, "shell.highlow.sub" as never)}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`🎵 ${score}/${total}`} testID="highlow-score" />}
+      right={
+        <ScoreChip label={`🎵 ${score}/${total}`} testID="highlow-score" />
+      }
     >
       <View style={styles.board}>
-        {phase === 'listen' ? (
+        {phase === "listen" ? (
           <View style={[styles.listenCard, shadows.soft]}>
-            <Animated.Text style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.listenText}>{t(lang, 'music.listen' as never)}</Text>
+            <Animated.Text
+              style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
+            >
+              👂
+            </Animated.Text>
+            <View style={styles.melodyDotRow}>
+              <View
+                testID="melody-dot-0"
+                style={[
+                  styles.melodyDot,
+                  listenNote !== null &&
+                    listenNote >= 0 &&
+                    styles.melodyDotFilled,
+                ]}
+              />
+              <View
+                testID="melody-dot-1"
+                style={[
+                  styles.melodyDot,
+                  listenNote !== null &&
+                    listenNote >= 1 &&
+                    styles.melodyDotFilled,
+                ]}
+              />
+            </View>
           </View>
         ) : (
           <View style={styles.pickRow}>
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
-                onPress={() => onPick('high')}
+                onPress={() => onPick("high")}
                 testID="highlow-high"
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: '#E3EEFB', borderColor: '#5DA9E8' },
+                  { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
                   shadows.glowGold,
-                  wrongPick === 'high' && styles.wrong,
+                  wrongPick === "high" && styles.wrong,
                   pressed && styles.pressed,
                 ]}
               >
                 <Text style={styles.pickEmoji}>🐦</Text>
-                <Text style={[styles.pickLabel, { color: '#5DA9E8' }]}>
-                  {t(lang, 'music.high' as never)}
+                <Text style={[styles.pickLabel, { color: "#5DA9E8" }]}>
+                  {t(lang, "music.high" as never)}
                 </Text>
-                <SparkleBurst trigger={correctAnswer(round) === 'high' ? sparkKey : 0} count={5} size={14} />
+                <SparkleBurst
+                  trigger={correctAnswer(round) === "high" ? sparkKey : 0}
+                  count={5}
+                  size={14}
+                />
               </Pressable>
             </Animated.View>
             <Pressable
               onPress={replay}
               testID="highlow-replay"
-              style={({ pressed }) => [styles.replayBtn, shadows.soft, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.replayBtn,
+                shadows.soft,
+                pressed && styles.pressed,
+              ]}
             >
               <Text style={styles.replayText}>🔊</Text>
             </Pressable>
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
-                onPress={() => onPick('low')}
+                onPress={() => onPick("low")}
                 testID="highlow-low"
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: '#FFF0E5', borderColor: '#E8874F' },
+                  { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
                   shadows.glowGold,
-                  wrongPick === 'low' && styles.wrong,
+                  wrongPick === "low" && styles.wrong,
                   pressed && styles.pressed,
                 ]}
               >
                 <Text style={styles.pickEmoji}>🐻</Text>
-                <Text style={[styles.pickLabel, { color: '#E8874F' }]}>
-                  {t(lang, 'music.low' as never)}
+                <Text style={[styles.pickLabel, { color: "#E8874F" }]}>
+                  {t(lang, "music.low" as never)}
                 </Text>
-                <SparkleBurst trigger={correctAnswer(round) === 'low' ? sparkKey : 0} count={5} size={14} />
+                <SparkleBurst
+                  trigger={correctAnswer(round) === "low" ? sparkKey : 0}
+                  count={5}
+                  size={14}
+                />
               </Pressable>
             </Animated.View>
           </View>
@@ -171,9 +262,9 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.highlow' as never)}
+        message={t(lang, "win.highlow" as never)}
         onNext={reset}
-        nextLabel={t(lang, 'overlay.playAgain')}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
@@ -182,41 +273,55 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
   listenCard: {
-    backgroundColor: '#F7EDDA',
+    backgroundColor: "#F7EDDA",
     borderRadius: 24,
     borderWidth: 3,
     borderColor: colors.gold,
     paddingVertical: 32,
     paddingHorizontal: 40,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 12,
   },
   listenEmoji: { fontSize: 56 },
-  listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },
-  pickRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+  melodyDotRow: { flexDirection: "row", gap: 12 },
+  melodyDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    backgroundColor: "transparent",
+  },
+  melodyDotFilled: { backgroundColor: colors.gold },
+  pickRow: { flexDirection: "row", alignItems: "center", gap: 20 },
   pickBtn: {
     borderRadius: 28,
     borderWidth: 4,
     paddingVertical: 28,
     paddingHorizontal: 32,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
     minWidth: 130,
     ...shadows.soft,
   },
   pickEmoji: { fontSize: 56 },
   pickLabel: { fontFamily: fonts.display, fontSize: 22 },
-  wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.12)' },
+  wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.12)" },
   pressed: { transform: [{ scale: 0.94 }] },
   replayBtn: {
     width: 72,
     height: 72,
     borderRadius: 36,
     backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   replayText: { fontSize: 36 },
 });
