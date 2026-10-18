@@ -22,7 +22,8 @@ export function makeQuizRound<T>(
   confusable?: (target: T, x: T) => boolean,
   avoidTargetKey?: string,
 ): QuizRound<T> {
-  const candidates = avoidTargetKey ? pool.filter((x) => keyOf(x) !== avoidTargetKey) : pool;
+  const filtered = avoidTargetKey ? pool.filter((x) => keyOf(x) !== avoidTargetKey) : pool;
+  const candidates = filtered.length > 0 ? filtered : pool;
   const target = candidates[Math.floor(rng() * candidates.length)];
   const others = pool.filter((x) => keyOf(x) !== keyOf(target));
   const preferred = confusable ? others.filter((x) => confusable(target, x)) : [];
