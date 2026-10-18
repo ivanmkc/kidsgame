@@ -48,7 +48,7 @@ export function GameShell({ title, subtitle, onBack, right, children, backKind =
           {backKind === 'picker' ? <Text style={styles.backLabel}>{BACK_LEVELS[lang]}</Text> : null}
         </Pressable>
         <View style={styles.titles}>
-          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{title}</Text>
+          <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>{title}</Text>
           {subtitle ? <Text style={styles.subtitle} numberOfLines={2}>{subtitle}</Text> : null}
         </View>
         <View style={styles.right}>
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   backLabel: { fontFamily: fonts.displayMed, fontSize: 11, color: colors.inkSoft, marginTop: -2 },
   pressed: { opacity: 0.6, transform: [{ scale: 0.94 }] },
   backText: { fontSize: 26 },
-  titles: { flex: 1, minWidth: 150 },
+  titles: { flex: 1, minWidth: 220 },
   title: { fontSize: 24, fontFamily: fonts.display, color: colors.ink, flexShrink: 1 },
   subtitle: { fontSize: 14, fontFamily: fonts.bodyReg, color: colors.inkSoft, marginTop: -2 },
   right: { flexShrink: 0, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginLeft: 'auto', maxWidth: '100%' },
