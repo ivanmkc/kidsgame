@@ -3,6 +3,8 @@ import { renderToString } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as sound from '../../../sound';
 import { CountGame } from '../CountGame';
+import { applyPickAnswer, makeCountRound } from '../logic';
+import { makeRng } from '../../../rng';
 
 const capturedPressables: Record<string, { onPress?: () => void }> = {};
 
@@ -77,5 +79,99 @@ describe('CountGame', () => {
 
     // The final tap completes the count round and calls sayThen to switch to quiz
     expect(sayThenSpy).toHaveBeenCalledOnce();
+  });
+
+});
+
+describe('logic: applyPickAnswer', () => {
+  const dummyRound = makeCountRound(makeRng(1), 'easy');
+
+  it('rapid clicks on the correct answer only bump the score and queue sayThen once', () => {
+    let locked = false;
+    let score = 0;
+    const setLocked = vi.fn((l: boolean) => { locked = l; });
+    const setScore = vi.fn((s: number) => { score = s; });
+    let queuedCb: (() => void) | undefined;
+    const sayThenSpy = vi.fn((lines: string[], cb: () => void) => {
+      queuedCb = cb;
+    });
+    const sfxSpy = { good: vi.fn(), wrong: vi.fn() };
+
+    const state = {
+      won: false,
+      phase: 'quiz',
+      get locked() { return locked; },
+      get score() { return score; },
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: 'en' as const,
+    };
+
+    const deps = {
+      sfx: sfxSpy,
+      say: vi.fn(),
+      sayThen: sayThenSpy,
+      setTimeout: vi.fn((fn: () => void) => {
+        fn();
+        return setTimeout(() => {}, 0);
+      }),
+      makeNextRound: vi.fn(() => dummyRound),
+      setScore,
+      setLocked,
+      setRound: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick: vi.fn(),
+    };
+
+    // First click (valid)
+    applyPickAnswer(dummyRound.answer, state, deps);
+    expect(setLocked).toHaveBeenCalledWith(true);
+    expect(setScore).toHaveBeenCalledWith(1);
+    expect(sfxSpy.good).toHaveBeenCalledTimes(1);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+    // Second rapid click (ignored because locked is true)
+    applyPickAnswer(dummyRound.answer, state, deps);
+    expect(setScore).toHaveBeenCalledTimes(1); // Still 1
+    expect(sfxSpy.good).toHaveBeenCalledTimes(1); // Still 1
+    expect(sayThenSpy).toHaveBeenCalledTimes(1); // Still 1
+
+    // Now complete the audio playback
+    if (queuedCb) queuedCb();
+    expect(setLocked).toHaveBeenLastCalledWith(false);
+    expect(deps.setRound).toHaveBeenCalledTimes(1);
+    expect(deps.setPhase).toHaveBeenCalledWith('count');
+  });
+
+  it('handles wrong answers by playing sfx and setting wrong pick', () => {
+    const sfxSpy = { good: vi.fn(), wrong: vi.fn() };
+    const setWrongPick = vi.fn();
+    const state = {
+      won: false,
+      phase: 'quiz',
+      locked: false,
+      score: 0,
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: 'en' as const,
+    };
+    const deps = {
+      sfx: sfxSpy,
+      say: vi.fn(),
+      sayThen: vi.fn(),
+      setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
+      makeNextRound: vi.fn(),
+      setScore: vi.fn(),
+      setLocked: vi.fn(),
+      setRound: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick,
+    };
+
+    applyPickAnswer(dummyRound.answer + 1, state, deps);
+    expect(sfxSpy.wrong).toHaveBeenCalledTimes(1);
+    expect(setWrongPick).toHaveBeenCalledWith(dummyRound.answer + 1);
   });
 });

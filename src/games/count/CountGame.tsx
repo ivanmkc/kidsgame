@@ -10,7 +10,7 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, sayThen, sfx } from '../../sound';
-import { CountRound, PRAISE, PROMPTS, applyTap, countSettings, makeCountRound } from './logic';
+import { CountRound, PROMPTS, applyTap, countSettings, applyPickAnswer, makeCountRound } from './logic';
 import { spriteLT } from '../quizround/logic';
 import { useWinLine } from '../winlines';
 
@@ -66,31 +66,31 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     }
   };
 
+  const lockedRef = useRef(false);
+
   const pickAnswer = (v: number) => {
-    if (won || phase !== 'quiz') return;
-    if (v === round.answer) {
-      sfx.good();
-      const nextScore = score + 1;
-      setScore(nextScore);
-      sayThen([numberWord(lang, round.answer).t, PRAISE[lang]], () => {
-        if (nextScore < roundsToWin) {
-          const nr = makeCountRound(rngRef.current, difficulty);
-          setRound(nr);
-          setTapped(Array.from({ length: nr.n }, () => false));
-          setPhase('count');
-          setWrongPick(null);
-        }
-      });
-    } else {
-      sfx.wrong();
-      setWrongPick(v);
-      setTimeout(() => setWrongPick((w) => (w === v ? null : w)), 450);
-      setTimeout(() => say(PROMPTS[lang]), 500);
-    }
+    applyPickAnswer(
+      v,
+      { won, phase, locked: lockedRef.current, score, round, roundsToWin, lang },
+      {
+        sfx,
+        say,
+        sayThen,
+        setTimeout: globalThis.setTimeout,
+        makeNextRound: () => makeCountRound(rngRef.current, difficulty),
+        setScore,
+        setLocked: (l: boolean) => { lockedRef.current = l; },
+        setRound,
+        setTapped,
+        setPhase,
+        setWrongPick,
+      }
+    );
   };
 
   const reset = () => {
     setTimerKey((k) => k + 1);
+    lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     const nr = makeCountRound(rngRef.current, difficulty);
     setRound(nr);
