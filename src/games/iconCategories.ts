@@ -40,9 +40,11 @@ export const CATEGORY_TEXT: Record<string, { tap: string; not: Record<Lang, stri
 };
 
 // Categories a kid could reasonably confuse — icons from these must not be
-// used as "does not match" fillers against the key (animals are nature too).
+// used as "does not match" fillers against the key (animals are nature too,
+// and edible animals like fish/crab/octopus read as food).
 export const CATEGORY_CONFLICTS: Record<string, string[]> = {
   nature: ['animals'],
+  food: ['animals'],
 };
 
 export function categoryOf(icon: string): string {

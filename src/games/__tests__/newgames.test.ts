@@ -186,22 +186,36 @@ describe('odd one out (which does not belong)', () => {
   });
 
   it('the intruder never comes from a category that conflicts with the base', async () => {
-    // CATEGORY_CONFLICTS says animals read as nature too. Rule Time already
-    // honours that for its fillers; asked "which one is NOT a flower,
-    // rainbow or star?", a kid who counts the butterfly as nature has
-    // nowhere to go, so the intruder must not come from there either.
+    // CATEGORY_CONFLICTS says animals read as nature too, and edible animals
+    // read as food. Rule Time already honours that for its fillers; asked
+    // "which one is NOT a flower, rainbow or star?" or "which one is NOT
+    // food?", a kid who counts the butterfly as nature or seafood as food
+    // has nowhere to go, so the intruder must not come from there either.
     const { makeOddOneRound } = await import('../oddone/logic');
     const { CATEGORY_CONFLICTS } = await import('../iconCategories');
-    let sawConflictedBase = false;
+    const seenConflictedBases = new Set<string>();
     for (let seed = 1; seed <= 400; seed++) {
       for (const n of [4, 6, 9]) {
         const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
         const conflicts = CATEGORY_CONFLICTS[r.baseCategory] ?? [];
-        if (conflicts.length) sawConflictedBase = true;
+        if (conflicts.length) seenConflictedBases.add(r.baseCategory);
         expect(conflicts, `${r.baseCategory} vs ${r.oddCategory}`).not.toContain(r.oddCategory);
       }
     }
-    expect(sawConflictedBase).toBe(true); // the guard was actually exercised
+    expect(seenConflictedBases).toEqual(new Set(['nature', 'food']));
+  });
+
+  it('food rounds never draw an animal intruder', async () => {
+    const { makeOddOneRound } = await import('../oddone/logic');
+    let foodRounds = 0;
+    for (let seed = 1; seed <= 200; seed++) {
+      const r = makeOddOneRound(makeRng(seed), manifest.spotit.icons, 4);
+      if (r.baseCategory === 'food') {
+        foodRounds++;
+        expect(r.oddCategory).not.toBe('animals');
+      }
+    }
+    expect(foodRounds).toBeGreaterThan(0);
   });
 
   it('every category the round builder can pick has a spoken question in all four langs', async () => {
