@@ -3,7 +3,7 @@
 // and the domain-specific invariants (confusables, sound uniqueness,
 // same-family single choice, han-tier tiles).
 import { describe, expect, it } from 'vitest';
-import { Lang } from '../../lang';
+import { Lang, numberWord } from '../../lang';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import {
@@ -148,7 +148,7 @@ describe('numbers: quiz round', () => {
     expect([hard.min, hard.max]).toEqual([0, 20]);
   });
 
-  it('speechLines: non-empty, unique, contains 0..20 EN + non-EN find-words', () => {
+  it('speechLines: non-empty, unique, contains 0..20 EN + non-EN find-words and numbers 1..20', () => {
     const lines = numberSpeechLines();
     expect(lines.length).toBeGreaterThan(0);
     expect(new Set(lines).size).toBe(lines.length);
@@ -156,6 +156,22 @@ describe('numbers: quiz round', () => {
     expect(lines).toContain('さがしてね！');
     expect(lines).toContain('找一找！');
     expect(lines).toContain('搵一搵！');
+    for (const lang of ['ja', 'cmn', 'yue'] as const) {
+      for (let n = 1; n <= 20; n++) expect(lines).toContain(numberWord(lang, n).t);
+    }
+  });
+
+  it('promptLines: every round produced is enumerated in speechLines (all langs + tiers)', () => {
+    const lines = new Set(numberSpeechLines());
+    for (const lang of langs) {
+      for (const d of diffs) {
+        const s = settingsForNumbers(d, lang);
+        for (const seed of SEEDS.slice(0, 40)) {
+          const r = makeNumberRound(makeRng(seed), s, lang);
+          for (const line of r.promptLines) expect(lines.has(line)).toBe(true);
+        }
+      }
+    }
   });
 });
 

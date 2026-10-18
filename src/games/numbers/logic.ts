@@ -106,10 +106,10 @@ export function speechLines(): string[] {
   // EN: 0..20 covers the widest tier.
   for (let n = 0; n <= 20; n++) s.add(`Find the number ${n}!`);
   // Non-EN: the "find" word plus every localized number that could appear
-  // as a target (E/M go up to 9, H (han) tier up to 10).
+  // as a target (E/M go up to 9, H (han) tier up to 20).
   for (const lang of ['ja', 'cmn', 'yue'] as const) {
     s.add(FIND_WORD[lang]);
-    for (let n = 1; n <= 10; n++) s.add(numberWord(lang, n).t);
+    for (let n = 1; n <= 20; n++) s.add(numberWord(lang, n).t);
   }
   return [...s];
 }
