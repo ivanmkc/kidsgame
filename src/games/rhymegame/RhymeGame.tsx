@@ -14,7 +14,7 @@ import { sayThen, saySequence, sfx } from '../../sound';
 import { useWinLine } from '../winlines';
 import {
   RhymeRound, availableEntries, canPlay, effectiveLang, makeRhymeRound,
-  playableFamilies, settingsForRhyme,
+  playableFamilies, rhymeLayout, settingsForRhyme,
 } from './logic';
 
 interface Props {
@@ -87,14 +87,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
 
   const cols = tileCount;
   const gap = 14;
-  // Kid-thumb floor of 44px: in short (landscape) viewports the PROMPT
-  // shrinks, never the answer tiles.
-  const tile = Math.max(44, Math.min(
-    (Math.min(width - 32, 620) - (cols - 1) * gap) / cols,
-    (height - 84 - 260) / 1,
-    160,
-  ));
-  const promptIcon = Math.max(56, Math.min(110, height - 84 - tile * 1.2 - 150));
+  const { tile, promptIcon, shortH } = rhymeLayout(width, height, cols);
 
   const iconFor = (icon: string, bucket: 'spotit' | 'rhyme') =>
     bucket === 'rhyme' ? RHYME_ICONS[icon] : SPOTIT_ICONS[icon];
@@ -112,7 +105,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
         </View>
       }
     >
-      <View style={styles.board}>
+      <View style={[styles.board, shortH && styles.boardShort]}>
         {!playable ? (
           <View style={[styles.banner, shadows.soft]} testID="rhyme-empty">
             <Text style={styles.bannerText}>{t(lang, 'rhyme.comingSoon')}</Text>
@@ -126,9 +119,9 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
             ) : null}
             {round ? (
               <>
-                <View style={[styles.prompt, shadows.soft]} testID={`rhyme-prompt-${round.target.icon}`}>
-                  <Image source={iconFor(round.target.icon, round.target.bucket)} style={{ width: promptIcon, height: promptIcon }} resizeMode="contain" />
-                  <Text style={styles.promptText}>{round.displayPrompt}</Text>
+                <View style={[styles.prompt, shadows.soft, shortH && styles.promptShort]} testID={`rhyme-prompt-${round.target.icon}`}>
+                  <Image testID="rhyme-prompt-image" source={iconFor(round.target.icon, round.target.bucket)} style={{ width: promptIcon, height: promptIcon }} resizeMode="contain" />
+                  <Text style={[styles.promptText, shortH && styles.promptTextShort]}>{round.displayPrompt}</Text>
                   {round.caption ? <Text style={styles.caption}>{round.caption}</Text> : null}
                 </View>
                 <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
@@ -169,6 +162,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
 
 const styles = StyleSheet.create({
   board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  boardShort: { gap: 8 },
   prompt: {
     backgroundColor: '#F7EDDA',
     borderRadius: 20,
@@ -180,8 +174,13 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     gap: 8,
   },
-  targetIcon: { width: 110, height: 110 },
+  promptShort: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    gap: 4,
+  },
   promptText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
+  promptTextShort: { fontSize: 17 },
   caption: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.inkSoft, marginTop: 2 },
   banner: {
     backgroundColor: colors.blush,
