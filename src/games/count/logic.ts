@@ -115,6 +115,7 @@ export interface PickDeps {
   setScore: (s: number) => void;
   setLocked: (l: boolean) => void;
   setRound: (r: CountRound) => void;
+  setRoundNo: (updater: (prev: number) => number) => void;
   setTapped: (t: boolean[]) => void;
   setPhase: (p: 'count' | 'quiz') => void;
   setWrongPick: (w: number | null | ((prev: number | null) => number | null)) => void;
@@ -134,6 +135,7 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
       if (nextScore < state.roundsToWin) {
         const nr = deps.makeNextRound();
         deps.setRound(nr);
+        deps.setRoundNo((r) => r + 1);
         deps.setTapped(Array.from({ length: nr.n }, () => false));
         deps.setPhase('count');
         deps.setWrongPick(null);

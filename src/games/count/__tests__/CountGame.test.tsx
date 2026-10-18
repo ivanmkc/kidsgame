@@ -1,8 +1,9 @@
 // @vitest-environment happy-dom
 import React from 'react';
+import { Animated } from 'react-native';
 import { renderToString } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, fireEvent, screen, act } from '@testing-library/react';
+import { render, fireEvent, screen, act, cleanup } from '@testing-library/react';
 import * as sound from '../../../sound';
 import { CountGame } from '../CountGame';
 import { applyPickAnswer, makeCountRound } from '../logic';
@@ -122,6 +123,7 @@ describe('logic: applyPickAnswer', () => {
       setScore,
       setLocked,
       setRound: vi.fn(),
+      setRoundNo: vi.fn(),
       setTapped: vi.fn(),
       setPhase: vi.fn(),
       setWrongPick: vi.fn(),
@@ -144,6 +146,7 @@ describe('logic: applyPickAnswer', () => {
     if (queuedCb) queuedCb();
     expect(setLocked).toHaveBeenLastCalledWith(false);
     expect(deps.setRound).toHaveBeenCalledTimes(1);
+    expect(deps.setRoundNo).toHaveBeenCalledTimes(1);
     expect(deps.setPhase).toHaveBeenCalledWith('count');
   });
 
@@ -168,6 +171,7 @@ describe('logic: applyPickAnswer', () => {
       setScore: vi.fn(),
       setLocked: vi.fn(),
       setRound: vi.fn(),
+      setRoundNo: vi.fn(),
       setTapped: vi.fn(),
       setPhase: vi.fn(),
       setWrongPick,
@@ -183,6 +187,7 @@ describe('CountGame double-tap lock', () => {
   let sayThenDoneCallbacks: Array<() => void> = [];
 
   beforeEach(() => {
+    cleanup();
     sayThenDoneCallbacks = [];
     vi.restoreAllMocks();
     vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => {
@@ -223,5 +228,39 @@ describe('CountGame double-tap lock', () => {
     act(() => { advanceRound(); });
 
     expect(screen.getByTestId('count-progress')).toBeDefined();
+  });
+
+  it('plays pop animation on critter tap in round 1 and round 2 without popping on praise', () => {
+    const springSpy = vi.spyOn(Animated, 'spring');
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    springSpy.mockClear();
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const testId = stage.getAttribute('data-testid');
+    const n = Number(testId!.split('-').pop());
+
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+    expect(springSpy).toHaveBeenCalledTimes(n);
+
+    const finishCountSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => { finishCountSpeech(); });
+
+    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+    const answerChoice = answerChoices[answerChoices.length - 1];
+    fireEvent.click(answerChoice);
+
+    // Score changed to 1 (ScoreChip pulses once), but critters must not remount and pop during praise
+    expect(springSpy).toHaveBeenCalledTimes(n + 1);
+
+    const advanceRound = sayThenDoneCallbacks.pop()!;
+    act(() => { advanceRound(); });
+
+    // In round 2, tapping critter 0 plays its pop animation
+    fireEvent.click(screen.getByTestId('count-critter-0'));
+    expect(springSpy).toHaveBeenCalledTimes(n + 2);
   });
 });

@@ -29,6 +29,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin } = countSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<CountRound>(() => makeCountRound(rngRef.current, difficulty));
+  const [roundNo, setRoundNo] = useState(0);
   const [tapped, setTapped] = useState<boolean[]>(() => Array.from({ length: round.n }, () => false));
   const tappedRef = useRef(tapped);
   tappedRef.current = tapped;
@@ -79,6 +80,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         setTimeout: globalThis.setTimeout,
         makeNextRound: () => makeCountRound(rngRef.current, difficulty),
         setScore,
+        setRoundNo,
         setLocked: (l: boolean) => { lockedRef.current = l; },
         setRound,
         setTapped,
@@ -94,6 +96,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     const nr = makeCountRound(rngRef.current, difficulty);
     setRound(nr);
+    setRoundNo((r) => r + 1);
     setTapped(Array.from({ length: nr.n }, () => false));
     setScore(0);
     setPhase('count');
@@ -125,7 +128,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         >
           {round.positions.map((p, i) => (
             <Critter
-              key={`${score}-${i}`}
+              key={`${roundNo}-${i}`}
               icon={round.icon}
               tapped={tapped[i]}
               size={critterSize}
