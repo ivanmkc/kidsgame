@@ -7,11 +7,12 @@ export interface CarModeState {
   roundIdx: number;
   rounds: Round[];
   phase: 'prompt' | 'gap' | 'reveal' | 'done';
+  pendingTaps: number;
 }
 
 export function startState(pack: PackId, seed: number): CarModeState {
   const rounds = shuffleRounds(ALL_PACKS[pack].rounds(), seed);
-  return { pack, roundIdx: 0, rounds, phase: 'prompt' };
+  return { pack, roundIdx: 0, rounds, phase: 'prompt', pendingTaps: 0 };
 }
 
 export function currentRound(s: CarModeState): Round | null {
@@ -20,17 +21,49 @@ export function currentRound(s: CarModeState): Round | null {
 }
 
 export function toGap(s: CarModeState): CarModeState {
-  return { ...s, phase: 'gap' };
+  if (s.phase === 'gap') return s;
+  return { ...s, phase: 'gap', pendingTaps: 0 };
 }
 
 export function toReveal(s: CarModeState): CarModeState {
-  return { ...s, phase: 'reveal' };
+  if (s.phase === 'reveal') return s;
+  return { ...s, phase: 'reveal', pendingTaps: 0 };
 }
 
 export function advance(s: CarModeState): CarModeState {
   const next = s.roundIdx + 1;
-  if (next >= s.rounds.length) return { ...s, phase: 'done' };
-  return { ...s, roundIdx: next, phase: 'prompt' };
+  if (next >= s.rounds.length) return { ...s, phase: 'done', pendingTaps: 0 };
+  return { ...s, roundIdx: next, phase: 'prompt', pendingTaps: 0 };
+}
+
+export function handleTap(s: CarModeState): CarModeState {
+  if (s.phase === 'prompt' || s.phase === 'done') return s;
+  
+  const r = currentRound(s);
+  
+  if (s.phase === 'gap') {
+    if (r?.twoTapAnswer) {
+      if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
+      return toReveal(s);
+    }
+    return toReveal(s);
+  }
+  
+  if (s.phase === 'reveal') {
+    if (r?.twoTapAnswer) {
+      if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
+      return advance(s);
+    }
+    return advance(s);
+  }
+  return s;
+}
+
+export function handleTapTimeout(s: CarModeState): CarModeState {
+  if (s.pendingTaps === 0) return s;
+  if (s.phase === 'gap') return toReveal(s);
+  if (s.phase === 'reveal') return advance(s);
+  return { ...s, pendingTaps: 0 };
 }
 
 export function isComplete(s: CarModeState): boolean {

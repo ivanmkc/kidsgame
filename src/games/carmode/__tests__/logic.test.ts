@@ -9,7 +9,7 @@ import {
   speechLines,
   startState,
   toGap,
-  toReveal,
+  toReveal, handleTap, handleTapTimeout,
 } from '../logic';
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from '../packs';
 
@@ -150,5 +150,61 @@ describe('speechLines', () => {
     for (const line of speechLines()) {
       expect(line.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('handleTap pure transitions', () => {
+  it('gap phase single tap starts pending state if twoTapAnswer', () => {
+    let s = startState('silly', 42); // silly pack has twoTapAnswer
+    s = toGap(s);
+    const next = handleTap(s);
+    expect(next.pendingTaps).toBe(1);
+    expect(next.phase).toBe('gap');
+  });
+
+  it('gap phase double tap transitions immediately if twoTapAnswer', () => {
+    let s = startState('silly', 42);
+    s = toGap(s);
+    s.pendingTaps = 1; // Simulate one tap already happened
+    const next = handleTap(s);
+    expect(next.phase).toBe('reveal');
+    expect(next.pendingTaps).toBe(0);
+  });
+
+  it('reveal phase single tap starts pending state if twoTapAnswer', () => {
+    let s = startState('silly', 42);
+    s = toReveal(s);
+    const next = handleTap(s);
+    expect(next.pendingTaps).toBe(1);
+    expect(next.phase).toBe('reveal');
+  });
+
+  it('reveal phase double tap advances immediately if twoTapAnswer', () => {
+    let s = startState('silly', 42);
+    s = toReveal(s);
+    s.pendingTaps = 1;
+    const next = handleTap(s);
+    expect(next.phase).toBe('prompt');
+    expect(next.pendingTaps).toBe(0);
+  });
+});
+
+describe('handleTapTimeout pure transitions', () => {
+  it('transitions to reveal from gap on timeout', () => {
+    let s = startState('silly', 42);
+    s = toGap(s);
+    s.pendingTaps = 1;
+    const next = handleTapTimeout(s);
+    expect(next.phase).toBe('reveal');
+    expect(next.pendingTaps).toBe(0);
+  });
+
+  it('advances from reveal on timeout', () => {
+    let s = startState('silly', 42);
+    s = toReveal(s);
+    s.pendingTaps = 1;
+    const next = handleTapTimeout(s);
+    expect(next.phase).toBe('prompt');
+    expect(next.pendingTaps).toBe(0);
   });
 });
