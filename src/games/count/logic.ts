@@ -30,19 +30,28 @@ export function countSettings(d: Difficulty): { rounds: number; min: number; max
 }
 
 /**
+ * Stage grid dimensions for n items (slight bias toward wider grid so cells
+ * stay roughly square-ish).
+ */
+export function gridFor(n: number): { cols: number; rows: number } {
+  const count = Math.max(1, n);
+  const cols = Math.max(1, Math.ceil(Math.sqrt(count * 1.4)));
+  const rows = Math.max(1, Math.ceil(count / cols));
+  return { cols, rows };
+}
+
+/**
  * Place n items into a 100×100 stage via a jittered grid — guarantees the
  * distance between any two positions stays above `cellDim * 0.5`, so no
  * matter how many critters we ask for they never pile on each other.
  */
-export function scatterPositions(rng: Rng, n: number): Position[] {
+export function scatterPositions(rng: Rng, n: number, jitterFraction = 0.22): Position[] {
   if (n <= 0) return [];
-  // slight bias toward wider grid so cells stay roughly square-ish
-  const cols = Math.max(1, Math.ceil(Math.sqrt(n * 1.4)));
-  const rows = Math.max(1, Math.ceil(n / cols));
+  const { cols, rows } = gridFor(n);
   const cellW = 100 / cols;
   const cellH = 100 / rows;
-  const jitterW = cellW * 0.22;
-  const jitterH = cellH * 0.22;
+  const jitterW = cellW * jitterFraction;
+  const jitterH = cellH * jitterFraction;
   const cells: Position[] = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {

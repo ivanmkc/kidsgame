@@ -1,7 +1,8 @@
 import { Difficulty } from '../../difficulty';
 import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
-import { CRITTER_ICONS, Position, scatterPositions } from '../count/logic';
+import { CRITTER_ICONS, Position, gridFor, scatterPositions } from '../count/logic';
+import { spriteLT } from '../quizround/logic';
 
 export interface Side {
   icon: string;
@@ -68,8 +69,8 @@ export function makeCompareRound(rng: Rng, d: Difficulty): CompareRound {
     b = Math.min(hi, Math.max(lo + minGap, Math.ceil(lo * minRatio)));
   }
   const [iconA, iconB] = pickTwoIcons(rng);
-  const left: Side = { icon: iconA, count: a, positions: scatterPositions(rng, a) };
-  const right: Side = { icon: iconB, count: b, positions: scatterPositions(rng, b) };
+  const left: Side = { icon: iconA, count: a, positions: scatterPositions(rng, a, PLATE_JITTER) };
+  const right: Side = { icon: iconB, count: b, positions: scatterPositions(rng, b, PLATE_JITTER) };
   const ask: 'more' | 'fewer' = rng() < fewerFraction ? 'fewer' : 'more';
   const correctSide: 'left' | 'right' =
     ask === 'more' ? (a > b ? 'left' : 'right') : a < b ? 'left' : 'right';
@@ -79,6 +80,41 @@ export function makeCompareRound(rng: Rng, d: Difficulty): CompareRound {
 function pickTwoIcons(rng: Rng): [string, string] {
   const pool = shuffle(rng, CRITTER_ICONS);
   return [pool[0], pool[1]];
+}
+
+export const PLATE_PADDING = 12;
+export const PLATE_JITTER = 0.1;
+
+/**
+ * Critter size for a plate of `count` items: scales to fit within the usable
+ * cell dimensions (inner width / cols, inner height / rows) after inward padding.
+ * Uses 0.79× cell dimension to ensure non-overlap under PLATE_JITTER (0.1) jitter
+ * (min center distance is 0.8× cell), capped at 58px.
+ */
+export function plateCritterSize(
+  count: number,
+  width: number,
+  height: number,
+  padding = PLATE_PADDING,
+): number {
+  const innerW = Math.max(0, width - padding * 2);
+  const innerH = Math.max(0, height - padding * 2);
+  const { cols, rows } = gridFor(count);
+  return Math.min(58, (innerW / cols) * 0.79, (innerH / rows) * 0.79);
+}
+
+/** Position a critter sprite on the plate, padded away from borders and corners. */
+export function plateCritterPos(
+  pos: Position,
+  critterSize: number,
+  width: number,
+  height: number,
+  padding = PLATE_PADDING,
+): { left: number; top: number } {
+  const innerW = Math.max(0, width - padding * 2);
+  const innerH = Math.max(0, height - padding * 2);
+  const { left, top } = spriteLT(pos.x, pos.y, critterSize, innerW, innerH);
+  return { left: left + padding, top: top + padding };
 }
 
 // ---------- speech ----------

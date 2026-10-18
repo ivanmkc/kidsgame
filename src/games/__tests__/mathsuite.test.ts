@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../rng';
-import { CRITTER_ICONS, applyTap, countSettings, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
-import { compareSettings, isFairPair, makeCompareRound, speechLines as compareSpeechLines } from '../compare/logic';
+import { CRITTER_ICONS, applyTap, countSettings, gridFor, makeCountChoices, makeCountRound, scatterPositions, speechLines as countSpeechLines } from '../count/logic';
+import {
+  PLATE_PADDING, compareSettings, isFairPair, makeCompareRound,
+  plateCritterPos, plateCritterSize, speechLines as compareSpeechLines,
+} from '../compare/logic';
 import { makeSumChoices, makeSumsRound, speechLines as sumsSpeechLines, sumsSettings } from '../sums/logic';
 
 const DIFFS = ['easy', 'medium', 'hard'] as const;
@@ -166,6 +169,142 @@ describe('more or less: the hard tier stays hard without being unfair', () => {
         for (let b = a + minGap; b <= hi; b++) {
           // every pair the old gap-only rule allowed is still allowed
           expect(isFairPair(a, b, minGap, minRatio), `${d} ${a}v${b}`).toBe(true);
+        }
+      }
+    }
+  });
+});
+
+describe('more or less: plate critter sizing and placement', () => {
+  it('plateCritterSize factors vertical row height and never exceeds row height on landscape', () => {
+    // Mobile landscape (screen 844x390): plate is 300x126
+    const plateW = 300;
+    const plateH = 126;
+    expect(PLATE_PADDING).toBeGreaterThanOrEqual(10);
+    for (let count = 1; count <= 10; count++) {
+      const { rows } = gridFor(count);
+      const innerRowHeight = (plateH - 2 * PLATE_PADDING) / rows;
+      const size = plateCritterSize(count, plateW, plateH);
+      expect(size).toBeLessThan(innerRowHeight);
+    }
+
+    // On hard mode count=10 (3 rows = 42px row height), old code yielded 50.4px (exceeding row height).
+    const hardSize = plateCritterSize(10, plateW, plateH);
+    const hardRowHeight = (plateH - 2 * PLATE_PADDING) / 3;
+    expect(hardSize).toBeLessThan(hardRowHeight);
+    expect(hardSize).toBeGreaterThanOrEqual(25);
+  });
+
+  it('plateCritterSize maintains lower bounds per count on mobile portrait', () => {
+    // Mobile portrait (screen 390x844): totalW = 358, plateW = 169, plateH = 177.45
+    const plateW = (Math.min(390 - 32, 620) - 20) / 2;
+    const plateH = Math.min(844 - 84 - 180, plateW * 1.05);
+
+    // Every count maintains the sensible 28px floor, with small counts scaling up
+    for (let count = 1; count <= 2; count++) {
+      expect(plateCritterSize(count, plateW, plateH)).toBeGreaterThanOrEqual(48);
+    }
+    for (let count = 3; count <= 6; count++) {
+      expect(plateCritterSize(count, plateW, plateH)).toBeGreaterThanOrEqual(35);
+    }
+    for (let count = 7; count <= 10; count++) {
+      expect(plateCritterSize(count, plateW, plateH)).toBeGreaterThanOrEqual(28);
+    }
+  });
+
+  it('plate critters never overlap on mobile screens (1000 rounds portrait and landscape)', () => {
+    const screens = [
+      { screenW: 390, screenH: 844 },
+      { screenW: 844, screenH: 390 },
+    ];
+
+    for (const { screenW, screenH } of screens) {
+      const totalW = Math.min(screenW - 32, 620);
+      const plateW = (totalW - 20) / 2;
+      const plateH = Math.min(screenH - 84 - 180, plateW * 1.05);
+
+      let overlapCount = 0;
+      for (let seed = 1; seed <= 1000; seed++) {
+        const rng = makeRng(seed);
+        const round = makeCompareRound(rng, 'hard');
+
+        for (const side of [round.left, round.right]) {
+          const size = plateCritterSize(side.count, plateW, plateH);
+          const boxes = side.positions.map((p) => {
+            const { left, top } = plateCritterPos(p, size, plateW, plateH);
+            return { left, top, right: left + size, bottom: top + size };
+          });
+
+          for (let i = 0; i < boxes.length; i++) {
+            for (let j = i + 1; j < boxes.length; j++) {
+              const b1 = boxes[i];
+              const b2 = boxes[j];
+              const interW = Math.max(0, Math.min(b1.right, b2.right) - Math.max(b1.left, b2.left));
+              const interH = Math.max(0, Math.min(b1.bottom, b2.bottom) - Math.max(b1.top, b2.top));
+              if (interW * interH > 0) overlapCount++;
+            }
+          }
+        }
+      }
+      expect(overlapCount).toBe(0);
+    }
+  });
+
+  it('plate critters never clip into borders or rounded corners (1000 rounds)', () => {
+    const screens = [
+      { screenW: 390, screenH: 844 },
+      { screenW: 844, screenH: 390 },
+    ];
+    const border = 4;
+    const cornerRadius = 24;
+    const innerRadiusSq = (cornerRadius - border) ** 2;
+
+    for (const { screenW, screenH } of screens) {
+      const totalW = Math.min(screenW - 32, 620);
+      const plateW = (totalW - 20) / 2;
+      const plateH = Math.min(screenH - 84 - 180, plateW * 1.05);
+
+      for (let seed = 1; seed <= 1000; seed++) {
+        const rng = makeRng(seed);
+        const round = makeCompareRound(rng, 'hard');
+
+        for (const side of [round.left, round.right]) {
+          const size = plateCritterSize(side.count, plateW, plateH);
+          for (const pos of side.positions) {
+            const { left, top } = plateCritterPos(pos, size, plateW, plateH);
+            const right = left + size;
+            const bottom = top + size;
+
+            expect(left).toBeGreaterThanOrEqual(border);
+            expect(top).toBeGreaterThanOrEqual(border);
+            expect(right).toBeLessThanOrEqual(plateW - border);
+            expect(bottom).toBeLessThanOrEqual(plateH - border);
+
+            const corners = [
+              [left, top],
+              [right, top],
+              [left, bottom],
+              [right, bottom],
+            ];
+            for (const [cx, cy] of corners) {
+              if (cx < cornerRadius && cy < cornerRadius) {
+                const distSq = (cx - cornerRadius) ** 2 + (cy - cornerRadius) ** 2;
+                expect(distSq).toBeLessThanOrEqual(innerRadiusSq);
+              }
+              if (cx > plateW - cornerRadius && cy < cornerRadius) {
+                const distSq = (cx - (plateW - cornerRadius)) ** 2 + (cy - cornerRadius) ** 2;
+                expect(distSq).toBeLessThanOrEqual(innerRadiusSq);
+              }
+              if (cx < cornerRadius && cy > plateH - cornerRadius) {
+                const distSq = (cx - cornerRadius) ** 2 + (cy - (plateH - cornerRadius)) ** 2;
+                expect(distSq).toBeLessThanOrEqual(innerRadiusSq);
+              }
+              if (cx > plateW - cornerRadius && cy > plateH - cornerRadius) {
+                const distSq = (cx - (plateW - cornerRadius)) ** 2 + (cy - (plateH - cornerRadius)) ** 2;
+                expect(distSq).toBeLessThanOrEqual(innerRadiusSq);
+              }
+            }
+          }
         }
       }
     }
