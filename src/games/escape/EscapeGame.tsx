@@ -151,7 +151,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         sfx.good();
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
-          const box = h.itemBox ?? h.box;
+          const box = h.itemBox ?? h.sprite?.itemBbox ?? h.box;
           const fromX = framePos.current.x + (box.x + box.w / 2) * scale;
           const fromY = framePos.current.y + (box.y + box.h / 2) * scale;
           if (h.pop && SCENE_IMAGES[h.pop]) {
@@ -237,6 +237,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
             const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
+            const box = (revealed ? (h.itemBox ?? h.sprite?.itemBbox) : undefined) ?? h.box;
             return (
               <Pressable
                 key={h.id}
@@ -247,10 +248,10 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
                 accessibilityLabel={h.id}
                 style={{
                   position: 'absolute',
-                  left: (h.box.x - 8) * scale,
-                  top: (h.box.y - 8) * scale,
-                  width: (h.box.w + 16) * scale,
-                  height: (h.box.h + 16) * scale,
+                  left: (box.x - 8) * scale,
+                  top: (box.y - 8) * scale,
+                  width: (box.w + 16) * scale,
+                  height: (box.h + 16) * scale,
                   pointerEvents: used ? 'none' : 'auto',
                 }}
               >
