@@ -240,6 +240,8 @@ export const CMN: Table = {
   'musicbox.intro': '点、点、点！点哪里都能弹歌哦！',
   'musicbox.introFree': '魔法琴键！每点一下都有好听的音！',
   'musicbox.freeplay': '魔法琴键',
+  'musicbox.stage': '舞台',
+  'musicbox.note': '音符',
   'song.twinkle': '小星星',
   'song.mary': '玛丽有只小羊羔',
   'song.row': '划船歌',
