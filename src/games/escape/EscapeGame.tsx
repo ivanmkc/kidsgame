@@ -312,7 +312,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
           const idx = rooms.findIndex((r) => r.id === room.id);
           onPickScene(rooms[(idx + 1) % rooms.length].id);
         }}
-        onHome={onBackToPicker}
+        onHome={onHome}
         lang={lang}
       />
     </GameShell>
