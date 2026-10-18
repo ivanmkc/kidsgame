@@ -82,6 +82,7 @@ const ALL_KEYS: UIKey[] = [
   'musicbox.intro', 'musicbox.introFree', 'musicbox.freeplay',
   'song.twinkle', 'song.mary', 'song.row', 'song.london', 'song.spider', 'song.macdonald',
   'diff.pictureA', 'diff.pictureB', 'diff.hint',
+  'hidden.turn', 'hidden.prompt',
   'shadow.hint', 'shadow.hintTricky',
   'rules.memoryCheck', 'rules.ruleNumber', 'rules.doAgain', 'rules.remind', 'rules.progress',
   'puzzle.peek', 'puzzle.hint',

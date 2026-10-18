@@ -75,8 +75,8 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   }, [sceneId]);
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
-  useSay(coop && scene && !won ? `${MP_PLAYERS[turn].name}'s turn!` : null);
-  useSay(scene ? (coop ? null : 'Find all the hidden things!') : 'Where do you want to search?');
+  useSay(coop && scene && !won ? t(lang, 'hidden.turn', { name: MP_PLAYERS[turn].name }) : null);
+  useSay(scene ? (coop ? null : t(lang, 'hidden.prompt')) : t(lang, 'picker.hidden'));
   useEffect(() => {
     if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -167,7 +167,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
         </View>
       }
     >
-      {coop ? <TurnBanner turn={turn} /> : null}
+      {coop ? <TurnBanner turn={turn} lang={lang} /> : null}
       <View style={styles.checklist} testID="hidden-checklist">
         {drawn.map((t) => {
           const done = foundIds.includes(t.id);
@@ -216,23 +216,24 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   );
 }
 
-function TurnBanner({ turn }: { turn: PlayerIx }) {
+function TurnBanner({ turn, lang }: { turn: PlayerIx; lang: Lang }) {
   const p = MP_PLAYERS[turn];
-  const t = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
   const prev = useRef(turn);
   useEffect(() => {
     if (prev.current === turn) return;
     prev.current = turn;
-    t.setValue(0.9);
-    Animated.spring(t, { toValue: 1, friction: 5, useNativeDriver: true }).start();
-  }, [turn, t]);
+    scaleAnim.setValue(0.9);
+    Animated.spring(scaleAnim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+  }, [turn, scaleAnim]);
+  const turnLabel = t(lang, 'hidden.turn', { name: p.name });
   return (
     <Animated.View
       testID="hidden-turn-banner"
-      accessibilityLabel={`${p.name}'s turn`}
-      style={[styles.banner, shadows.soft, { backgroundColor: p.color, transform: [{ scale: t }] }]}
+      accessibilityLabel={turnLabel}
+      style={[styles.banner, shadows.soft, { backgroundColor: p.color, transform: [{ scale: scaleAnim }] }]}
     >
-      <Text style={styles.bannerText}>{p.emoji} {p.name}&apos;s turn!</Text>
+      <Text style={styles.bannerText}>{p.emoji} {turnLabel}</Text>
     </Animated.View>
   );
 }
