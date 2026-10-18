@@ -40,7 +40,8 @@ export function GameShell({ title, subtitle, onBack, right, children, backKind =
         <Pressable
           onPress={() => { sfx.tap(); onBack(); }}
           style={({ pressed }) => [styles.back, shadows.soft, pressed && styles.pressed]}
-          accessibilityLabel={backKind === 'picker' ? 'Back to level choices' : 'Back to menu'}
+          accessibilityRole="button"
+          accessibilityLabel={t(lang, backKind === 'picker' ? 'a11y.backPicker' : 'a11y.backMenu')}
           testID="back-button"
         >
           <Text style={styles.backText}>{backKind === 'picker' ? '⬅️' : '🏠'}</Text>
