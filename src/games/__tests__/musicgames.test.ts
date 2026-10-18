@@ -6,7 +6,8 @@ import * as music from '../../music';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
 import { makeHighLowRound, roundsToWin as hlRounds, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
-import { makeBellsRound, checkSequence, roundsToWin as bellRounds, seqLength, canTap } from '../bells/logic';
+import * as bellsLogic from '../bells/logic';
+const { makeBellsRound, checkSequence, roundsToWin: bellRounds, seqLength, canTap } = bellsLogic;
 import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
 import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
 import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
@@ -130,6 +131,20 @@ describe('melody bells', () => {
     expect(html).toContain('Listen...');
   });
 
+  it('hides status card when won', () => {
+    const roundsSpy = vi.spyOn(bellsLogic, 'roundsToWin').mockReturnValue(0);
+    const html = renderToString(
+      React.createElement(BellsGame, {
+        onHome: () => {},
+        difficulty: 'easy',
+        lang: 'en',
+      })
+    );
+    expect(html).not.toContain('Listen...');
+    expect(html).not.toContain('Your turn');
+    roundsSpy.mockRestore();
+  });
+
   it('unmounts during listen phase and cancels demo timers', () => {
     vi.useFakeTimers();
     const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
@@ -218,12 +233,15 @@ describe('melody bells', () => {
         capturedReset?.();
       });
 
+
       // After 1050ms, initial 500ms delay plays note 1, then at 1000ms
       // the glow clears and step is scheduled for note 2 at 1200ms.
       act(() => {
         vi.advanceTimersByTime(1050);
       });
+      // We played 1 note in this demo
       expect(playNoteSpy).toHaveBeenCalledTimes(1);
+
 
       // Unmount mid-demo during the listen phase (before note 2 plays at 1200ms)
       act(() => {
@@ -246,9 +264,12 @@ describe('melody bells', () => {
       vi.useRealTimers();
     }
   });
+
+
 });
 
 describe('echo beat', () => {
+
   it('generates rounds with correct hitCount', () => {
     for (let seed = 1; seed <= 30; seed++) {
       for (const d of ['easy', 'medium', 'hard'] as const) {
