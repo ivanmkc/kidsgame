@@ -76,7 +76,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
   useSay(coop && scene && !won ? `${MP_PLAYERS[turn].name}'s turn!` : null);
-  useSay(scene ? (coop ? null : 'Find all the hidden things!') : 'Where do you want to search?');
+  useSay(scene ? (coop ? null : 'Find all the hidden things!') : t(lang, 'picker.hidden'));
   useEffect(() => {
     if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
