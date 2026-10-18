@@ -25,19 +25,37 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<EchoBeatRound>(() => makeEchoBeatRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'tap' | 'result'>('listen');
+  const [flash, setFlash] = useState<number | null>(null);
   const [tapTimes, setTapTimes] = useState<number[]>([]);
   const [tapCount, setTapCount] = useState(0);
   const [result, setResult] = useState<'good' | 'bad' | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, 'win.echobeat' as never));
 
   const playDemo = useCallback((r: EchoBeatRound) => {
     stopSequence();
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlash(null);
     setPhase('listen');
-    playDrumSequence(r.gaps, undefined, () => setPhase('tap'));
-  }, []);
+    playDrumSequence(
+      r.gaps,
+      (i) => {
+        setFlash(i);
+        pulseAnim.setValue(1.25);
+        Animated.spring(pulseAnim, { toValue: 1, friction: 4, useNativeDriver: true }).start();
+        if (flashTimer.current) clearTimeout(flashTimer.current);
+        flashTimer.current = setTimeout(() => setFlash(null), 180);
+      },
+      () => {
+        setFlash(null);
+        setPhase('tap');
+      },
+    );
+  }, [pulseAnim]);
 
   useEffect(() => {
     if (!won) {
@@ -46,7 +64,10 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       setResult(null);
       playDemo(round);
     }
-    return () => stopSequence();
+    return () => {
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      stopSequence();
+    };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -88,6 +109,8 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setTapTimes([]);
@@ -96,7 +119,6 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     setRound(makeEchoBeatRound(rngRef.current, difficulty));
   };
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (phase === 'tap' && tapCount > 0) {
       pulseAnim.setValue(1.25);
@@ -175,7 +197,9 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             style={({ pressed }) => [
               styles.drum,
               shadows.lifted,
-              phase === 'listen' && styles.drumDimmed,
+              phase === 'listen' && flash === null && styles.drumDimmed,
+              flash !== null && styles.drumFlash,
+              flash !== null && shadows.glowGold,
               phase === 'tap' && shadows.glowGold,
               pressed && styles.drumPressed,
             ]}
@@ -229,6 +253,10 @@ const styles = StyleSheet.create({
   },
   drumPressed: { transform: [{ scale: 0.92 }] },
   drumDimmed: { opacity: 0.45 },
+  drumFlash: {
+    borderColor: colors.gold,
+    backgroundColor: '#FFA25B',
+  },
   drumEmoji: { fontSize: 64 },
   tapDotRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
   tapDot: {
