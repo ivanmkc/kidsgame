@@ -8,6 +8,7 @@ export const JA: Table = {
   'menu.number': 'すうじあそび 🔢',
   'menu.grownups': 'おうちのかたへ 🧑‍🍼',
   'badge.beta': 'ベータ',
+  'menu.play': 'PLAY',
   'chip.sound': '🔊 おと',
   'chip.muted': '🔇 むおん',
   'chip.twoPlayers': '👯 ふたりで',

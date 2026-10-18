@@ -7,6 +7,7 @@ export const CMN: Table = {
   'menu.number': '数字游戏 🔢',
   'menu.grownups': '大人专区 🧑‍🍼',
   'badge.beta': '测试版',
+  'menu.play': 'PLAY',
   'chip.sound': '🔊 声音',
   'chip.muted': '🔇 静音',
   'chip.twoPlayers': '👯 双人',
