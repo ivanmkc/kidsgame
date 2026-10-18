@@ -145,6 +145,15 @@ if (Platform.OS === 'web' && typeof window !== 'undefined') {
 // identity to tell a sequence continuation from a superseding call — we
 // tag each call and skip stale continuations.
 let currentToken = 0;
+let activeSayThen: (() => void) | null = null;
+
+function cancelPendingSayThen(): void {
+  if (activeSayThen) {
+    const fn = activeSayThen;
+    activeSayThen = null;
+    fn();
+  }
+}
 
 function fadeStop(a: HTMLAudioElement): void {
   if (fadeTimer) { clearTimeout(fadeTimer); fadeTimer = null; }
@@ -165,6 +174,7 @@ function fadeStop(a: HTMLAudioElement): void {
  *  in-flight sequence continuation stops chaining. */
 export function stopNarration(): void {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  cancelPendingSayThen();
   currentToken++;
   try { window.speechSynthesis?.cancel(); } catch { /* ok */ }
   const a = narration;
@@ -215,6 +225,7 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
 /** Speak several lines in order (story text, then the spoken choice menu).
  *  Any new say()/saySequence()/stopNarration() supersedes the queue. */
 export function saySequence(texts: string[], onDone?: () => void): void {
+  cancelPendingSayThen();
   const rest = texts.filter(Boolean);
   if (!rest.length) { onDone?.(); return; }
   currentToken++;
@@ -223,7 +234,7 @@ export function saySequence(texts: string[], onDone?: () => void): void {
     pendingNarration = rest.slice();
   }
   const step = (i: number) => {
-    if (myToken !== currentToken) return; // superseded — no onDone (caller's cap handles it)
+    if (myToken !== currentToken) return;
     if (i >= rest.length) { onDone?.(); return; }
     playClip(rest[i], myToken, () => step(i + 1));
   };
@@ -237,13 +248,26 @@ export function saySequence(texts: string[], onDone?: () => void): void {
  *  stalls or the sequence is superseded mid-way. */
 export function sayThen(texts: string[], done: () => void, capMs = 9000): void {
   let fired = false;
-  const fire = () => { if (!fired) { fired = true; done(); } };
+  let cap: ReturnType<typeof setTimeout> | undefined;
+  const fire = () => {
+    if (!fired) {
+      fired = true;
+      if (cap !== undefined) clearTimeout(cap);
+      activeSayThen = null;
+      done();
+    }
+  };
+  cancelPendingSayThen();
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined') {
-    setTimeout(fire, 600);
+    cap = setTimeout(fire, 600);
+    activeSayThen = fire;
     return;
   }
-  const cap = setTimeout(fire, capMs);
-  saySequence(texts, () => { clearTimeout(cap); fire(); });
+  cap = setTimeout(fire, capMs);
+  saySequence(texts, fire);
+  if (!fired) {
+    activeSayThen = fire;
+  }
 }
 
 /** Read instructions aloud for pre-readers. Pre-rendered SoTA clips
@@ -251,6 +275,7 @@ export function sayThen(texts: string[], done: () => void, capMs = 9000): void {
  *  covers strings that slipped the generator. */
 export function say(text: string, sequence?: string[]): void {
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined') return;
+  cancelPendingSayThen();
   currentToken++;
   if (!audioUnlocked) pendingNarration = sequence ?? [text];
   playClip(text, currentToken);
