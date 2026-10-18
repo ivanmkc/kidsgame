@@ -14,7 +14,7 @@ import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { saySequence, sayThen, sfx, stopNarration } from '../../sound';
 import { playNote, primeMusic } from '../../music';
-import { colors, fonts, shadows } from '../../theme';
+import { fonts, shadows } from '../../theme';
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from './packs';
 import {
   CarModeState,
@@ -81,13 +81,14 @@ export function CarModeGame({ onHome, lang }: Props) {
       playBoops(r.noteCount);
       const boopsDuration = (r.noteCount - 1) * 400 + 800;
       setTimeout(() => {
-        saySequence(r.prompt, () => {
-          setState((s) => toGap(s));
+        if (stateRef.current.phase !== 'prompt' || currentRound(stateRef.current) !== r) return;
+        sayThen(r.prompt, () => {
+          setState((s) => s.phase === 'prompt' && currentRound(s) === r ? toGap(s) : s);
         });
       }, boopsDuration);
     } else {
-      saySequence(r.prompt, () => {
-        setState((s) => toGap(s));
+      sayThen(r.prompt, () => {
+        setState((s) => s.phase === 'prompt' && currentRound(s) === r ? toGap(s) : s);
       });
     }
   }, [playBoops]);
@@ -136,7 +137,11 @@ export function CarModeGame({ onHome, lang }: Props) {
 
     if (isComplete(stateRef.current)) return;
 
-    if (stateRef.current.phase === 'prompt') return;
+    if (stateRef.current.phase === 'prompt') {
+      stopNarration();
+      setState((s) => s.phase === 'prompt' ? toGap(s) : s);
+      return;
+    }
 
     if (stateRef.current.phase === 'gap') {
       if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }

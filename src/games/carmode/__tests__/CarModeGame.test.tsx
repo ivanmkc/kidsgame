@@ -66,7 +66,7 @@ describe('CarModeGame', () => {
     expect(tapBtn.accessibilityRole).toBe('button');
     expect(tapBtn.accessibilityLabel).toBe('Tap to continue');
 
-    // Tapping during prompt phase plays sound and primes music, but returns early without advancing.
+    // Tapping during prompt phase plays sound and primes music, but advances to the gap phase.
     tapBtn.onPress?.();
     expect(sfxTapSpy).toHaveBeenCalledOnce();
     expect(primeMusicSpy).toHaveBeenCalledOnce();
@@ -247,4 +247,5 @@ describe('CarModeGame', () => {
     expect(primeMusicSpy).toHaveBeenCalledOnce();
     expect(advanceSpy).not.toHaveBeenCalled();
   });
+
 });
