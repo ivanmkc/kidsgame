@@ -2,12 +2,15 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, fonts } from '../theme';
 
+import { Lang } from '../lang';
+import { t } from '../i18n';
+
 // Header BETA pill — parents should know a game is new. Pair with the
 // menu card's `beta` badge (App.tsx CardDef.beta).
-export function BetaPill({ testID = 'beta-pill' }: { testID?: string }) {
+export function BetaPill({ testID = 'beta-pill', lang }: { testID?: string; lang: Lang }) {
   return (
     <View style={styles.pill} testID={testID}>
-      <Text style={styles.text}>BETA</Text>
+      <Text style={styles.text}>{t(lang, 'badge.beta')}</Text>
     </View>
   );
 }

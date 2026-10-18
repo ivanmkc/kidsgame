@@ -6,6 +6,7 @@ export const YUE: Table = {
   'menu.word': '文字遊戲 🔤',
   'menu.number': '數字遊戲 🔢',
   'menu.grownups': '大人專區 🧑‍🍼',
+  'badge.beta': '測試版',
   'chip.sound': '🔊 有聲',
   'chip.muted': '🔇 靜音',
   'chip.twoPlayers': '👯 兩個人',

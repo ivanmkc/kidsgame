@@ -117,7 +117,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
 
   if (!sceneId || !room) {
     return (
-      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" />}>
+      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" lang={lang} />}>
         <ScenePicker
           title={t(lang, 'picker.escape')}
           options={rooms.map((r) => ({ id: r.id, name: r.nameT?.[lang] ?? r.name, image: r.image, level: r.level }))}
@@ -204,7 +204,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
-      right={<BetaPill testID="escape-beta" />}
+      right={<BetaPill testID="escape-beta" lang={lang} />}
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View
