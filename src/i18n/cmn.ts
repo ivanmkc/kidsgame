@@ -283,4 +283,13 @@ export const CMN: Table = {
   'feedback.cancel': '取消',
   'feedback.send': '发送 📨',
   'feedback.thanks': '谢谢你！💛',
+  'gate.title': '家长控制',
+  'gate.holdPrompt': '长按下方按钮 3 秒以继续。',
+  'gate.holdA11y': '长按 3 秒以进入家长控制',
+  'gate.holdButton': '长按这里',
+  'gate.cancel': '取消',
+  'gate.wordTitle': '还有一步',
+  'gate.wordPrompt': '请输入以下单词以继续',
+  'gate.wordPlaceholder': '在此输入单词',
+  'gate.continue': '继续',
 };

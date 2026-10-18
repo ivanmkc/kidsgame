@@ -284,4 +284,13 @@ export const JA: Table = {
   'feedback.cancel': 'キャンセル',
   'feedback.send': 'おくる 📨',
   'feedback.thanks': 'ありがとう！ 💛',
+  'gate.title': '保護者用設定',
+  'gate.holdPrompt': 'つづけるには、下のボタンを3秒間長押ししてください。',
+  'gate.holdA11y': '保護者用設定にアクセスするには3秒間長押し',
+  'gate.holdButton': '長押し',
+  'gate.cancel': 'キャンセル',
+  'gate.wordTitle': 'あと一歩',
+  'gate.wordPrompt': 'つづけるには、次の単語を入力してください',
+  'gate.wordPlaceholder': '単語を入力',
+  'gate.continue': 'つづける',
 };
