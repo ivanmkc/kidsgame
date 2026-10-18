@@ -303,7 +303,9 @@ describe('human review page', () => {
 
     expect(html).toContain('ledger-clean');
     expect(html).toContain('[10, 20, 100, 200]');
-    expect(html).toContain('crop1.png');
+    document.body.innerHTML = html;
+    expect(document.querySelector('img.finding-evidence-thumb[src="crop1.png"]')).toBeTruthy();
+    expect(document.querySelector('img.finding-evidence-thumb[src="crop_dir.png"]')).toBeTruthy();
     expect(html).toContain('Directory Findings (1)');
     expect(html).toContain('assets/game/musicbox/twinkle/');
     expect(html).toContain('Unmatched findings: 1');
@@ -362,6 +364,8 @@ describe('human review page', () => {
       expect(html).toContain('fixture_v.mp4');
       expect(html).toContain('0.4% diff pixels');
       expect(html).toContain('href="../../../crop_a.png"');
+      document.body.innerHTML = html;
+      expect(document.querySelector('img.finding-evidence-thumb[src="../../../crop_a.png"]')).toBeTruthy();
       expect(html).toContain('review_decisions.json');
       // Relative asset href from tools/audit_out/review
       expect(html).toContain('../../../assets/game/diff/fixture_a.png');
@@ -395,6 +399,8 @@ describe('human review page', () => {
       const html = fs.readFileSync(outPath, 'utf-8');
       expect(html).toContain('top-left: slight seam in toyroom');
       expect(html).toContain('href="../../../shots/shot_0.png"');
+      document.body.innerHTML = html;
+      expect(document.querySelector('img.finding-evidence-thumb[src="../../../shots/shot_0.png"]')).toBeTruthy();
       expect(html).toContain('assets/game/escape/toyroom/');
     } finally {
       fs.rmSync(tempRoot, { recursive: true, force: true });

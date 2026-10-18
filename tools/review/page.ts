@@ -58,7 +58,7 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
               ${target ? `<code>${escapeHtml(target)}</code>` : ''}
               <span class="finding-note">${escapeHtml(f.note)}</span>
               ${rectText ? `<span class="finding-rect">${escapeHtml(rectText)}</span>` : ''}
-              ${f.evidence ? `<a class="finding-evidence" href="${escapeHtml(opts.assetHref(f.evidence))}" target="_blank" rel="noopener">evidence</a>` : ''}
+              ${f.evidence ? `<a class="finding-evidence" href="${escapeHtml(opts.assetHref(f.evidence))}" target="_blank" rel="noopener"><img class="finding-evidence-thumb" loading="lazy" src="${escapeHtml(opts.assetHref(f.evidence))}" alt="evidence" /></a>` : ''}
             </div>`;
             })
             .join('')}
@@ -96,7 +96,7 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
               <span class="badge category">${escapeHtml(f.category)}</span>
               <span class="finding-note">${escapeHtml(f.note)}</span>
               ${rectText ? `<span class="finding-rect">${escapeHtml(rectText)}</span>` : ''}
-              ${f.evidence ? `<a class="finding-evidence" href="${escapeHtml(opts.assetHref(f.evidence))}" target="_blank" rel="noopener">evidence</a>` : ''}
+              ${f.evidence ? `<a class="finding-evidence" href="${escapeHtml(opts.assetHref(f.evidence))}" target="_blank" rel="noopener"><img class="finding-evidence-thumb" loading="lazy" src="${escapeHtml(opts.assetHref(f.evidence))}" alt="evidence" /></a>` : ''}
             </div>`;
             })
             .join('')}
@@ -162,6 +162,7 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
     .entry-path { word-break: break-all; font-family: monospace; font-size: 12px; }
     .findings-list { display: flex; flex-direction: column; gap: 8px; background: #fef2f2; padding: 8px; border-radius: 6px; }
     .finding { font-size: 13px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .finding-evidence-thumb { max-height: 48px; border-radius: 4px; vertical-align: middle; }
     .verdict-group { border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; display: flex; gap: 16px; }
     .verdict-group legend { font-size: 12px; font-weight: 600; padding: 0 4px; }
     .verdict-option { display: flex; align-items: center; gap: 4px; cursor: pointer; text-transform: capitalize; }
