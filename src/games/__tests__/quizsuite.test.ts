@@ -163,6 +163,18 @@ describe('sounds: quiz round', () => {
   const langs: Lang[] = ['en', 'ja', 'cmn', 'yue'];
   const diffs = ['easy', 'medium', 'hard'] as const;
 
+  it('common synonyms are protected from showing up as wrong distractors', () => {
+    const plane = WORDS.find((w) => w.icon === 'plane')!;
+    const ladybug = WORDS.find((w) => w.icon === 'ladybug')!;
+    const koala = WORDS.find((w) => w.icon === 'koala')!;
+    const panda = WORDS.find((w) => w.icon === 'panda')!;
+    
+    expect(soundsFor(plane)).toContain('ah');
+    expect(soundsFor(ladybug)).toContain('buh');
+    expect(soundsFor(koala)).toContain('buh');
+    expect(soundsFor(panda)).toContain('buh');
+  });
+
   it.each(langs.flatMap((l) => diffs.map((d) => [l, d] as const)))(
     '%s/%s: tiles distinct, exactly-one answer, no two share a sound',
     (lang, d) => {
