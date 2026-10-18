@@ -120,6 +120,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const earPulse = useRef(new Animated.Value(1)).current;
   const bellBounce = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    if (won) return;
     if (phase === 'listen') {
       bellBounce.setValue(0);
       Animated.loop(
@@ -139,7 +140,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       ).start();
     }
     return () => { earPulse.stopAnimation(); bellBounce.stopAnimation(); };
-  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const bellScale = bellBounce.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] });
 
@@ -152,33 +153,35 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       right={<ScoreChip label={`🔔 ${score}/${total}`} testID="bells-score" />}
     >
       <View style={styles.board}>
-        {phase === 'listen' ? (
-          <View style={[styles.statusCard, shadows.soft]}>
-            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
-          </View>
-        ) : (
-          <Pressable
-            testID="replay-button"
-            onPress={() => {
-              if (canTap(round, tapped, phase, won)) {
-                setTapped([]);
-                playDemo(round);
-              }
-            }}
-            style={({ pressed }) => [
-              styles.statusCard,
-              shadows.soft,
-              styles.yourTurnCard,
-              wrongFlash && styles.wrongCard,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={styles.statusEmoji}>👆</Text>
-            <Text style={styles.statusText}>
-              {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
-            </Text>
-          </Pressable>
+        {!won && (
+          phase === 'listen' ? (
+            <View style={[styles.statusCard, shadows.soft]}>
+              <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
+              <Text style={styles.statusText}>{t(lang, 'music.listen')}</Text>
+            </View>
+          ) : (
+            <Pressable
+              testID="replay-button"
+              onPress={() => {
+                if (canTap(round, tapped, phase, won)) {
+                  setTapped([]);
+                  playDemo(round);
+                }
+              }}
+              style={({ pressed }) => [
+                styles.statusCard,
+                shadows.soft,
+                styles.yourTurnCard,
+                wrongFlash && styles.wrongCard,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.statusEmoji}>👆</Text>
+              <Text style={styles.statusText}>
+                {t(lang, 'music.yourTurn')} ({tapped.length}/{round.sequence.length})
+              </Text>
+            </Pressable>
+          )
         )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
