@@ -94,6 +94,7 @@ export type UIKey =
   | 'shell.numbers.title'
   | 'shell.numbers.titleHan'
   | 'shell.numbers.sub'
+  | 'button.switchScript'
   | 'shell.sounds.titleEn'
   | 'shell.sounds.titleWords'
   | 'shell.sounds.subEn'
@@ -369,6 +370,7 @@ export const EN: Table = {
   'shell.numbers.title': 'Number Hunt',
   'shell.numbers.titleHan': 'Number Hunt (漢数字)',
   'shell.numbers.sub': 'Tap the number you hear',
+  'button.switchScript': 'Switch numeral script',
   'shell.sounds.titleEn': 'First Sounds',
   'shell.sounds.titleWords': 'First Words',
   'shell.sounds.subEn': 'Tap the picture that starts with the sound',

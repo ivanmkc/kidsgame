@@ -108,6 +108,7 @@ export const JA: Table = {
   'shell.numbers.title': 'すうじさがし',
   'shell.numbers.titleHan': 'すうじさがし（漢数字）',
   'shell.numbers.sub': 'きこえた すうじを タップ',
+  'button.switchScript': 'すうじの ひょうきを きりかえる',
   'shell.sounds.titleEn': 'はじめのおと',
   'shell.sounds.titleWords': 'ことばさがし',
   'shell.sounds.subEn': 'このおとで はじまる えを タップ',

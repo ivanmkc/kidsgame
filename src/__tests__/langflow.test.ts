@@ -53,7 +53,7 @@ const ALL_KEYS: UIKey[] = [
   'card.musicbox.title', 'card.musicbox.blurb',
   'picker.surprise', 'picker.diff', 'picker.hidden', 'picker.story', 'picker.sticker', 'picker.puzzle',
   'shell.letters.title', 'shell.letters.titleKana', 'shell.letters.subTap', 'shell.letters.subSound',
-  'shell.numbers.title', 'shell.numbers.titleHan', 'shell.numbers.sub',
+  'shell.numbers.title', 'shell.numbers.titleHan', 'shell.numbers.sub', 'button.switchScript',
   'shell.sounds.titleEn', 'shell.sounds.titleWords', 'shell.sounds.subEn', 'shell.sounds.subWord',
   'shell.rhyme.title', 'shell.rhyme.sub',
   'shell.spell.title', 'shell.spell.sub', 'spell.hearAgain',
