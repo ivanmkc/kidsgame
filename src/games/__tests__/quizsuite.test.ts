@@ -11,7 +11,7 @@ import {
   makeLetterRound, speechLines as letterSpeechLines,
 } from '../letters/logic';
 import {
-  makeNumberRound, settingsForNumbers, speechLines as numberSpeechLines,
+  hanNumeral, makeNumberRound, reskinNumberRound, settingsForNumbers, speechLines as numberSpeechLines,
 } from '../numbers/logic';
 import {
   makeSoundsRound, settingsForSounds, speechLines as soundsSpeechLines,
@@ -156,6 +156,43 @@ describe('numbers: quiz round', () => {
     expect(lines).toContain('さがしてね！');
     expect(lines).toContain('找一找！');
     expect(lines).toContain('搵一搵！');
+  });
+
+  it('reskinNumberRound preserves targetN, tile numbers and order while toggling script', () => {
+    const s = settingsForNumbers('medium', 'ja', 'arabic');
+    const round = makeNumberRound(makeRng(12345), s, 'ja');
+    expect(round.useHan).toBe(false);
+
+    const hanRound = reskinNumberRound(round, true);
+    expect(hanRound.useHan).toBe(true);
+    expect(hanRound.targetN).toBe(round.targetN);
+    expect(hanRound.targetKey).toBe(`h-${round.targetN}`);
+    expect(hanRound.displayText).toBe(hanNumeral(round.targetN));
+    expect(hanRound.answerIdx).toBe(round.answerIdx);
+    expect(hanRound.promptLines).toEqual(round.promptLines);
+    expect(hanRound.tiles.length).toBe(round.tiles.length);
+
+    for (let i = 0; i < round.tiles.length; i++) {
+      expect(hanRound.tiles[i].n).toBe(round.tiles[i].n);
+      expect(hanRound.tiles[i].isAnswer).toBe(round.tiles[i].isAnswer);
+      expect(hanRound.tiles[i].key).toBe(`h-${round.tiles[i].n}`);
+      expect(hanRound.tiles[i].label).toBe(hanNumeral(round.tiles[i].n));
+    }
+
+    const arabicRound = reskinNumberRound(hanRound, false);
+    expect(arabicRound.useHan).toBe(false);
+    expect(arabicRound.targetN).toBe(round.targetN);
+    expect(arabicRound.targetKey).toBe(`n-${round.targetN}`);
+    expect(arabicRound.displayText).toBe(String(round.targetN));
+    expect(arabicRound.answerIdx).toBe(round.answerIdx);
+    for (let i = 0; i < round.tiles.length; i++) {
+      expect(arabicRound.tiles[i].n).toBe(round.tiles[i].n);
+      expect(arabicRound.tiles[i].isAnswer).toBe(round.tiles[i].isAnswer);
+      expect(arabicRound.tiles[i].key).toBe(`n-${round.tiles[i].n}`);
+      expect(arabicRound.tiles[i].label).toBe(String(round.tiles[i].n));
+    }
+
+    expect(reskinNumberRound(arabicRound, false)).toBe(arabicRound);
   });
 });
 

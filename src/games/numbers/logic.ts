@@ -68,6 +68,19 @@ function tileFor(n: number, useHan: boolean, isAnswer: boolean): NumberTile {
   return { key: `${useHan ? 'h' : 'n'}-${n}`, label: label(n, useHan), n, isAnswer };
 }
 
+export function reskinNumberRound(round: NumberRound, useHan: boolean): NumberRound {
+  if (round.useHan === useHan) return round;
+  const tiles = round.tiles.map((t) => tileFor(t.n, useHan, t.isAnswer));
+  const targetTile = tiles.find((t) => t.isAnswer);
+  return {
+    ...round,
+    useHan,
+    targetKey: targetTile?.key ?? `${useHan ? 'h' : 'n'}-${round.targetN}`,
+    displayText: label(round.targetN, useHan),
+    tiles,
+  };
+}
+
 export function makeNumberRound(
   rng: Rng, settings: NumberSettings, lang: Lang, avoidN?: number,
 ): NumberRound {
