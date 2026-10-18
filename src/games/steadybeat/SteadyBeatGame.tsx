@@ -1,17 +1,30 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { WinOverlay } from '../../components/WinOverlay';
-import { SparkleBurst } from '../../components/Sparkles';
-import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
-import { playDrum } from '../../music';
-import { useWinLine } from '../winlines';
-import { makeSteadyBeatRound, roundsToWin, scoreTaps, passThreshold, SteadyBeatRound } from './logic';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { WinOverlay } from "../../components/WinOverlay";
+import { SparkleBurst } from "../../components/Sparkles";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { sfx } from "../../sound";
+import { playDrum } from "../../music";
+import { useWinLine } from "../winlines";
+import {
+  makeSteadyBeatRound,
+  roundsToWin,
+  scoreTaps,
+  passThreshold,
+  SteadyBeatRound,
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -22,62 +35,72 @@ interface Props {
 export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState<SteadyBeatRound>(() => makeSteadyBeatRound(rngRef.current, difficulty));
+  const [round, setRound] = useState<SteadyBeatRound>(() =>
+    makeSteadyBeatRound(rngRef.current, difficulty),
+  );
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<'listen' | 'tap' | 'result'>('listen');
+  const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
+  const tapTimesRef = useRef(tapTimesMs);
+  tapTimesRef.current = tapTimesMs;
   const [startMs, setStartMs] = useState(0);
   const [hits, setHits] = useState(0);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
-  useWinLine(won, t(lang, 'win.steadybeat' as never));
+  useWinLine(won, t(lang, "win.steadybeat" as never));
 
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
-  const startMetronome = useCallback((r: SteadyBeatRound) => {
-    setPhase('listen');
-    const beatMs = 60000 / r.bpm;
-    let count = 0;
-    const interval = setInterval(() => {
-      playDrum(0.5);
-      count++;
-      if (count >= 4) {
-        clearInterval(interval);
-        setPhase('tap');
-        setStartMs(performance.now());
-        const tapBeatMs = 60000 / r.bpm;
-        pulseAnim.setValue(0);
-        Animated.loop(
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: tapBeatMs,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          })
-        ).start();
-      }
-    }, beatMs);
-    return () => clearInterval(interval);
-  }, [pulseAnim]);
+  const startMetronome = useCallback(
+    (r: SteadyBeatRound) => {
+      setPhase("listen");
+      const beatMs = 60000 / r.bpm;
+      let count = 0;
+      const interval = setInterval(() => {
+        playDrum(0.5);
+        count++;
+        if (count >= 4) {
+          clearInterval(interval);
+          setPhase("tap");
+          setStartMs(performance.now());
+          const tapBeatMs = 60000 / r.bpm;
+          pulseAnim.setValue(0);
+          Animated.loop(
+            Animated.timing(pulseAnim, {
+              toValue: 1,
+              duration: tapBeatMs,
+              easing: Easing.linear,
+              useNativeDriver: true,
+            }),
+          ).start();
+        }
+      }, beatMs);
+      return () => clearInterval(interval);
+    },
+    [pulseAnim],
+  );
 
   useEffect(() => {
     if (!won) {
       setTapTimesMs([]);
       setHits(0);
       const cleanup = startMetronome(round);
-      return () => { cleanup(); pulseAnim.stopAnimation(); };
+      return () => {
+        cleanup();
+        pulseAnim.stopAnimation();
+      };
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (phase !== 'tap') return;
+    if (phase !== "tap") return;
     const beatMs = 60000 / round.bpm;
     const totalTime = round.beatsPerRound * beatMs + 500;
     const timer = setTimeout(() => {
       pulseAnim.stopAnimation();
-      const result = scoreTaps(round, tapTimesMs, startMs, difficulty);
+      const result = scoreTaps(round, tapTimesRef.current, startMs, difficulty);
       setHits(result.hits);
-      setPhase('result');
+      setPhase("result");
       const threshold = passThreshold(difficulty);
       if (result.hits / result.total >= threshold) {
         sfx.good();
@@ -85,18 +108,24 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         const nextScore = score + 1;
         setScore(nextScore);
         if (nextScore < total) {
-          setTimeout(() => setRound(makeSteadyBeatRound(rngRef.current, difficulty)), 1200);
+          setTimeout(
+            () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
+            1200,
+          );
         }
       } else {
         sfx.wrong();
-        setTimeout(() => setRound(makeSteadyBeatRound(rngRef.current, difficulty)), 1200);
+        setTimeout(
+          () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
+          1200,
+        );
       }
     }, totalTime);
     return () => clearTimeout(timer);
   }, [phase, startMs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = () => {
-    if (won || phase !== 'tap') return;
+    if (won || phase !== "tap") return;
     playDrum();
     setTapTimesMs((prev) => [...prev, performance.now()]);
   };
@@ -116,12 +145,22 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
 
   const earPulse = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    if (phase === 'listen') {
+    if (phase === "listen") {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(earPulse, { toValue: 1.18, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-          Animated.timing(earPulse, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-        ])
+          Animated.timing(earPulse, {
+            toValue: 1.18,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(earPulse, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
       ).start();
     } else {
       earPulse.stopAnimation();
@@ -131,69 +170,84 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resultStars = [];
-  if (phase === 'result') {
+  if (phase === "result") {
     for (let i = 0; i < round.beatsPerRound; i++) {
       resultStars.push(
-        <Text key={i} style={styles.resultStar}>{i < hits ? '⭐' : '☆'}</Text>
+        <Text key={i} style={styles.resultStar}>
+          {i < hits ? "⭐" : "☆"}
+        </Text>,
       );
     }
   }
 
   return (
     <GameShell
-      title={t(lang, 'shell.steadybeat.title' as never)}
-      subtitle={t(lang, 'shell.steadybeat.sub' as never)}
+      title={t(lang, "shell.steadybeat.title" as never)}
+      subtitle={t(lang, "shell.steadybeat.sub" as never)}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`💓 ${score}/${total}`} testID="steadybeat-score" />}
+      right={
+        <ScoreChip label={`💓 ${score}/${total}`} testID="steadybeat-score" />
+      }
     >
       <View style={styles.board}>
-        {phase === 'listen' ? (
+        {phase === "listen" ? (
           <View style={[styles.statusCard, shadows.soft]}>
-            <Animated.Text style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <Text style={styles.statusText}>{t(lang, 'music.listen' as never)}</Text>
+            <Animated.Text
+              style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}
+            >
+              👂
+            </Animated.Text>
+            <Text style={styles.statusText}>
+              {t(lang, "music.listen" as never)}
+            </Text>
           </View>
-        ) : phase === 'result' ? (
+        ) : phase === "result" ? (
           <View style={[styles.statusCard, shadows.soft]}>
             <View style={styles.resultRow}>{resultStars}</View>
           </View>
         ) : (
           <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard]}>
             <Text style={styles.statusEmoji}>👆</Text>
-            <Text style={styles.statusText}>{t(lang, 'music.yourTurn' as never)}</Text>
+            <Text style={styles.statusText}>
+              {t(lang, "music.yourTurn" as never)}
+            </Text>
           </View>
         )}
         <Pressable
           onPress={onTap}
           testID="steadybeat-circle"
-          disabled={phase !== 'tap'}
+          disabled={phase !== "tap"}
           style={({ pressed }) => [
             styles.circle,
             shadows.lifted,
-            phase === 'listen' && styles.circleDimmed,
-            phase === 'tap' && shadows.glowGold,
+            phase === "listen" && styles.circleDimmed,
+            phase === "tap" && shadows.glowGold,
             pressed && styles.circlePressed,
           ]}
         >
           <Animated.View
             style={[
               styles.pulse,
-              phase === 'tap' && { transform: [{ scale: pulseScale }] },
+              phase === "tap" && { transform: [{ scale: pulseScale }] },
             ]}
           >
             <Text style={styles.circleEmoji}>💓</Text>
           </Animated.View>
           <SparkleBurst trigger={sparkKey} count={6} size={14} />
         </Pressable>
-        {phase === 'tap' && (
-          <ProgressDots beatsPerRound={round.beatsPerRound} completedTaps={tapTimesMs.length} />
+        {phase === "tap" && (
+          <ProgressDots
+            beatsPerRound={round.beatsPerRound}
+            completedTaps={tapTimesMs.length}
+          />
         )}
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.steadybeat' as never)}
+        message={t(lang, "win.steadybeat" as never)}
         onNext={reset}
-        nextLabel={t(lang, 'overlay.playAgain')}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
@@ -201,17 +255,24 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   );
 }
 
-function ProgressDots({ beatsPerRound, completedTaps }: { beatsPerRound: number; completedTaps: number }) {
+function ProgressDots({
+  beatsPerRound,
+  completedTaps,
+}: {
+  beatsPerRound: number;
+  completedTaps: number;
+}) {
   return (
     <View style={styles.dotsRow}>
       {Array.from({ length: beatsPerRound }).map((_, i) => (
         <View
           key={i}
-          style={[
-            styles.dot,
-            i < completedTaps && styles.dotFilled,
-          ]}
-          testID={i < completedTaps ? 'steadybeat-tap-dot-filled' : 'steadybeat-tap-dot-empty'}
+          style={[styles.dot, i < completedTaps && styles.dotFilled]}
+          testID={
+            i < completedTaps
+              ? "steadybeat-tap-dot-filled"
+              : "steadybeat-tap-dot-empty"
+          }
         />
       ))}
     </View>
@@ -219,47 +280,58 @@ function ProgressDots({ beatsPerRound, completedTaps }: { beatsPerRound: number;
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 28, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 28,
+    paddingHorizontal: 16,
+  },
   statusCard: {
-    backgroundColor: '#F7EDDA',
+    backgroundColor: "#F7EDDA",
     borderRadius: 18,
     borderWidth: 3,
     borderColor: colors.gold,
     paddingVertical: 10,
     paddingHorizontal: 22,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
-  yourTurnCard: { borderColor: colors.green, backgroundColor: '#E8F5E9' },
+  yourTurnCard: { borderColor: colors.green, backgroundColor: "#E8F5E9" },
   statusEmoji: { fontSize: 30 },
-  statusText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
-  resultRow: { flexDirection: 'row', gap: 4 },
+  statusText: {
+    fontFamily: fonts.display,
+    fontSize: 20,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  resultRow: { flexDirection: "row", gap: 4 },
   resultStar: { fontSize: 22 },
   circle: {
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: '#9B7EDE',
+    backgroundColor: "#9B7EDE",
     borderWidth: 6,
-    borderColor: '#7A5BBF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#7A5BBF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   circlePressed: { transform: [{ scale: 0.92 }] },
   circleDimmed: { opacity: 0.45 },
-  pulse: { alignItems: 'center', justifyContent: 'center' },
+  pulse: { alignItems: "center", justifyContent: "center" },
   circleEmoji: { fontSize: 56 },
-  dotsRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  dotsRow: { flexDirection: "row", gap: 12, marginTop: 8 },
   dot: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 3,
-    borderColor: '#7A5BBF',
-    backgroundColor: 'transparent',
+    borderColor: "#7A5BBF",
+    backgroundColor: "transparent",
   },
   dotFilled: {
-    backgroundColor: '#9B7EDE',
+    backgroundColor: "#9B7EDE",
   },
 });
