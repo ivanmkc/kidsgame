@@ -155,14 +155,14 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 testID="samediff-diff"
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: '#FCE4EC', borderColor: '#E8564F' },
+                  { backgroundColor: '#FEF3E8', borderColor: '#E89B4F' },
                   shadows.glowGold,
                   wrongPick === 'different' && styles.wrong,
                   pressed && styles.pressed,
                 ]}
               >
                 <Text style={styles.pickEmoji}>🙅</Text>
-                <Text style={[styles.pickLabel, { color: '#E8564F' }]}>
+                <Text style={[styles.pickLabel, { color: '#E89B4F' }]}>
                   {t(lang, 'music.different' as never)}
                 </Text>
                 <SparkleBurst trigger={round.answer === 'different' ? sparkKey : 0} count={5} size={14} />
