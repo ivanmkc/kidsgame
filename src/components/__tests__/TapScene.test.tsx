@@ -165,3 +165,48 @@ describe("TapScene hitSlop minimum touch size", () => {
     expect(target.hitSlop).toEqual({ top: 8, bottom: 8, left: 8, right: 8 });
   });
 });
+
+describe("TapScene accessibilityLabel localization", () => {
+  beforeEach(() => {
+    for (const k in capturedPressableMap) {
+      delete capturedPressableMap[k];
+    }
+  });
+
+  const mockSource = { uri: "stub.png" } as unknown as number;
+
+  it("defaults backdrop accessibilityLabel to English 'scene'", () => {
+    renderToString(
+      <TapScene
+        source={mockSource}
+        sceneW={100}
+        sceneH={100}
+        displayWidth={100}
+        boxes={[]}
+        foundIds={[]}
+        onHit={() => {}}
+        onMiss={() => {}}
+        testIDPrefix="test"
+      />,
+    );
+    expect(capturedPressableMap["test-backdrop"]?.accessibilityLabel).toBe("scene");
+  });
+
+  it("localizes backdrop accessibilityLabel with Japanese 'ばめん'", () => {
+    renderToString(
+      <TapScene
+        source={mockSource}
+        sceneW={100}
+        sceneH={100}
+        displayWidth={100}
+        boxes={[]}
+        foundIds={[]}
+        onHit={() => {}}
+        onMiss={() => {}}
+        testIDPrefix="test"
+        lang="ja"
+      />,
+    );
+    expect(capturedPressableMap["test-backdrop"]?.accessibilityLabel).toBe("ばめん");
+  });
+});

@@ -96,4 +96,20 @@ describe('HiddenGame render with the 2P toggle OFF', () => {
     expect(html).toContain('hidden-checklist');
     expect(html).toContain('hidden-timer'); // medium shows the solo timer
   });
+
+  it('passes lang to TapScene for localized backdrop accessibilityLabel', () => {
+    const htmlJa = renderToString(
+      React.createElement(HiddenGame, {
+        onHome: noop,
+        difficulty: 'medium',
+        twoPlayerEnabled: false,
+        sceneId: manifest.hidden[0].id,
+        onPickScene: noop,
+        onBackToPicker: noop,
+        lang: 'ja',
+      })
+    );
+    expect(htmlJa).toContain('aria-label="ばめん"');
+    expect(htmlJa).not.toContain('aria-label="scene"');
+  });
 });

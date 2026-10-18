@@ -20,6 +20,7 @@ export const JA: Table = {
   'a11y.twoPlayer': 'ふたりであそぶ',
   'a11y.backMenu': 'メニューにもどる',
   'a11y.backPicker': 'レベルえらびにもどる',
+  'a11y.scene': 'ばめん',
   'grownups.install': '📲 ホームがめんに ついか',
   'grownups.share': '📤 ほかのかたにおしえる',
   'grownups.copied': '✅ リンクをコピーしました！',

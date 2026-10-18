@@ -1,15 +1,16 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
+import { Lang } from '../../../lang';
 import { manifest } from '../../../manifest';
 import { sfx } from '../../../sound';
 import { DiffGame } from '../DiffGame';
 import { DiffHintButton } from '../DiffHintButton';
 
-let lastTapSceneProps: { onHit: (id: string) => void } | null = null;
+let lastTapSceneProps: { onHit: (id: string) => void; lang?: Lang } | null = null;
 
 vi.mock('../../../components/TapScene', () => ({
-  TapScene: (props: { onHit: (id: string) => void }) => {
+  TapScene: (props: { onHit: (id: string) => void; lang?: Lang }) => {
     lastTapSceneProps = props;
     return null;
   },
@@ -53,5 +54,19 @@ describe('DiffGame', () => {
     const htmlEn = renderToString(<DiffHintButton lang="en" onPress={noop} />);
     expect(htmlEn).toContain('data-testid="diff-hint"');
     expect(htmlEn).toContain('aria-label="💡 Hint"');
+  });
+
+  it('passes lang to TapScene', () => {
+    renderToString(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={manifest.diff[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(lastTapSceneProps?.lang).toBe('ja');
   });
 });
