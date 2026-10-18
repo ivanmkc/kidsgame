@@ -9,7 +9,7 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
-import { playDrum, stopSequence } from '../../music';
+import { playDrum } from '../../music';
 import { useWinLine } from '../winlines';
 import { makeSteadyBeatRound, roundsToWin, scoreTaps, passThreshold, SteadyBeatRound } from './logic';
 
@@ -185,6 +185,9 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           </Animated.View>
           <SparkleBurst trigger={sparkKey} count={6} size={14} />
         </Pressable>
+        {phase === 'tap' && (
+          <ProgressDots beatsPerRound={round.beatsPerRound} completedTaps={tapTimesMs.length} />
+        )}
       </View>
       <WinOverlay
         visible={won}
@@ -195,6 +198,23 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         lang={lang}
       />
     </GameShell>
+  );
+}
+
+function ProgressDots({ beatsPerRound, completedTaps }: { beatsPerRound: number; completedTaps: number }) {
+  return (
+    <View style={styles.dotsRow}>
+      {Array.from({ length: beatsPerRound }).map((_, i) => (
+        <View
+          key={i}
+          style={[
+            styles.dot,
+            i < completedTaps && styles.dotFilled,
+          ]}
+          testID={i < completedTaps ? 'steadybeat-tap-dot-filled' : 'steadybeat-tap-dot-empty'}
+        />
+      ))}
+    </View>
   );
 }
 
@@ -230,4 +250,16 @@ const styles = StyleSheet.create({
   circleDimmed: { opacity: 0.45 },
   pulse: { alignItems: 'center', justifyContent: 'center' },
   circleEmoji: { fontSize: 56 },
+  dotsRow: { flexDirection: 'row', gap: 12, marginTop: 8 },
+  dot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#7A5BBF',
+    backgroundColor: 'transparent',
+  },
+  dotFilled: {
+    backgroundColor: '#9B7EDE',
+  },
 });
