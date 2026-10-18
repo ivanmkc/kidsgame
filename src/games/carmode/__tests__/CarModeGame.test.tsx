@@ -116,7 +116,7 @@ describe('CarModeGame', () => {
     expect(primeMusicSpy).toHaveBeenCalledOnce();
   });
 
-  it('renders reveal phase and stops narration on single tap for standard packs', () => {
+  it('renders reveal phase and transitions to prompt on single tap for standard packs', () => {
     const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
     const primeMusicSpy = vi.spyOn(music, 'primeMusic').mockReturnValue();
     const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
@@ -141,14 +141,13 @@ describe('CarModeGame', () => {
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
-  it('handles twoTapAnswer rounds by stopping narration after window timeout on single tap', () => {
-    vi.useFakeTimers();
+  it('handles twoTapAnswer rounds by advancing synchronously on second rapid tap', () => {
     const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
-
     const actual = logic.startState('silly', 42);
     vi.spyOn(logic, 'startState').mockReturnValue({
       ...actual,
       phase: 'reveal',
+      pendingTaps: 0,
     });
 
     renderToString(<CarModeGame onHome={noop} lang="en" />);
@@ -156,24 +155,21 @@ describe('CarModeGame', () => {
     const tapBtn = capturedPressables['carmode-tap'];
     expect(tapBtn).toBeDefined();
 
-    // First tap sets tapTimerRef
     tapBtn.onPress?.();
     expect(stopNarrationSpy).not.toHaveBeenCalled();
 
-    // Fast-forward through TAP_WINDOW_MS (600ms)
-    vi.advanceTimersByTime(600);
-
+    tapBtn.onPress?.();
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
-  it('handles twoTapAnswer rounds by stopping narration immediately on second tap within window', () => {
+  it('handles single tap in a twoTapAnswer round by advancing after timeout', () => {
     vi.useFakeTimers();
     const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
-
     const actual = logic.startState('silly', 42);
     vi.spyOn(logic, 'startState').mockReturnValue({
       ...actual,
       phase: 'reveal',
+      pendingTaps: 0,
     });
 
     renderToString(<CarModeGame onHome={noop} lang="en" />);
@@ -181,12 +177,10 @@ describe('CarModeGame', () => {
     const tapBtn = capturedPressables['carmode-tap'];
     expect(tapBtn).toBeDefined();
 
-    // First tap starts window
-    tapBtn.onPress?.();
+    tapBtn.onPress?.(); // first tap
     expect(stopNarrationSpy).not.toHaveBeenCalled();
 
-    // Second tap triggers immediate advance and clears timer
-    tapBtn.onPress?.();
+    vi.advanceTimersByTime(600); // TAP_WINDOW_MS
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 

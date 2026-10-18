@@ -24,6 +24,8 @@ import {
   startState,
   toGap,
   toReveal,
+  handleTap,
+  handleTapTimeout,
 } from './logic';
 
 interface Props {
@@ -50,13 +52,10 @@ export function CarModeGame({ onHome, lang }: Props) {
   const [celebrate, setCelebrate] = useState(0);
   const [gameKey, setGameKey] = useState(0);
 
-  const phaseRef = useRef(state.phase);
-  phaseRef.current = state.phase;
   const stateRef = useRef(state);
   stateRef.current = state;
 
   const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const round = currentRound(state);
@@ -65,6 +64,36 @@ export function CarModeGame({ onHome, lang }: Props) {
     if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
     if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
   }, []);
+
+  const applyStateTransition = useCallback((next: CarModeState) => {
+    const current = stateRef.current;
+    
+    if (current.phase === 'reveal' && (next.phase === 'prompt' || next.phase === 'done')) {
+      clearTimers();
+      stopNarration();
+      if (next.phase === 'done') {
+        setCelebrate((c) => c + 1);
+      }
+    }
+
+    if (current.phase === 'gap' && next.phase === 'reveal') {
+      if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
+    }
+
+    if (current.pendingTaps === 0 && next.pendingTaps === 1) {
+      if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
+      tapTimerRef.current = setTimeout(() => {
+        tapTimerRef.current = null;
+        const timeoutNext = handleTapTimeout(stateRef.current);
+        applyStateTransition(timeoutNext);
+      }, TAP_WINDOW_MS);
+    } else if (current.pendingTaps > 0 && next.pendingTaps === 0) {
+      if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
+    }
+
+    stateRef.current = next;
+    setState(next);
+  }, [clearTimers]);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
@@ -83,15 +112,19 @@ export function CarModeGame({ onHome, lang }: Props) {
       setTimeout(() => {
         if (stateRef.current.phase !== 'prompt' || currentRound(stateRef.current) !== r) return;
         sayThen(r.prompt, () => {
-          setState((s) => s.phase === 'prompt' && currentRound(s) === r ? toGap(s) : s);
+          if (stateRef.current.phase === 'prompt' && currentRound(stateRef.current) === r) {
+            applyStateTransition(toGap(stateRef.current));
+          }
         });
       }, boopsDuration);
     } else {
       sayThen(r.prompt, () => {
-        setState((s) => s.phase === 'prompt' && currentRound(s) === r ? toGap(s) : s);
+        if (stateRef.current.phase === 'prompt' && currentRound(stateRef.current) === r) {
+          applyStateTransition(toGap(stateRef.current));
+        }
       });
     }
-  }, [playBoops]);
+  }, [playBoops, applyStateTransition]);
 
   useEffect(() => {
     if (state.phase === 'prompt' && round) {
@@ -102,7 +135,8 @@ export function CarModeGame({ onHome, lang }: Props) {
   useEffect(() => {
     if (state.phase === 'gap' && round) {
       gapTimerRef.current = setTimeout(() => {
-        setState((s) => toReveal(s));
+        if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
+        applyStateTransition(toReveal(stateRef.current));
       }, round.gapMs);
     }
     return () => {
@@ -118,66 +152,30 @@ export function CarModeGame({ onHome, lang }: Props) {
     }
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const doAdvance = useCallback(() => {
-    clearTimers();
-    tapCountRef.current = 0;
-    stopNarration();
-    setState((s) => {
-      const next = advance(s);
-      if (isComplete(next)) {
-        setCelebrate((c) => c + 1);
-      }
-      return next;
-    });
-  }, [clearTimers]);
-
   const onTap = useCallback(() => {
     sfx.tap();
     primeMusic();
 
-    if (isComplete(stateRef.current)) return;
+    const current = stateRef.current;
+    if (isComplete(current)) return;
 
-    if (stateRef.current.phase === 'prompt') {
+    if (current.phase === 'prompt') {
       stopNarration();
-      setState((s) => s.phase === 'prompt' ? toGap(s) : s);
+      applyStateTransition(toGap(current));
       return;
     }
 
-    if (stateRef.current.phase === 'gap') {
-      if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
-      setState((s) => toReveal(s));
-      return;
-    }
-
-    if (stateRef.current.phase === 'reveal') {
-      const r = currentRound(stateRef.current);
-      if (r?.twoTapAnswer) {
-        tapCountRef.current++;
-        if (tapCountRef.current === 1) {
-          if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-          tapTimerRef.current = setTimeout(() => {
-            tapCountRef.current = 0;
-            doAdvance();
-          }, TAP_WINDOW_MS);
-          return;
-        }
-        if (tapCountRef.current >= 2) {
-          if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
-          tapCountRef.current = 0;
-          doAdvance();
-          return;
-        }
-      }
-      doAdvance();
-    }
-  }, [doAdvance]);
+    const next = handleTap(current);
+    applyStateTransition(next);
+  }, [applyStateTransition]);
 
   const switchPack = useCallback((id: PackId) => {
     clearTimers();
-    tapCountRef.current = 0;
     stopNarration();
     setPackId(id);
-    setState(startState(id, Math.floor(Math.random() * 1e9)));
+    const next = startState(id, Math.floor(Math.random() * 1e9));
+    stateRef.current = next;
+    setState(next);
     setGameKey((k) => k + 1);
   }, [clearTimers]);
 
