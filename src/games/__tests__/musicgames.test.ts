@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as music from '../../music';
 import { makeRng } from '../../rng';
 import { BellsGame } from '../bells/BellsGame';
+import { EchoBeatGame } from '../echobeat/EchoBeatGame';
 import { makeHighLowRound, roundsToWin as hlRounds, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
 import * as bellsLogic from '../bells/logic';
 const { makeBellsRound, checkSequence, roundsToWin: bellRounds, seqLength, canTap } = bellsLogic;
@@ -269,6 +270,18 @@ describe('melody bells', () => {
 });
 
 describe('echo beat', () => {
+  it('renders EchoBeatGame and displays localized strings', () => {
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(EchoBeatGame, {
+        onHome: noop,
+        difficulty: 'easy',
+        lang: 'en',
+      })
+    );
+    expect(html).toContain('Echo Beat');
+    expect(html).toContain('Tap the rhythm you hear!');
+  });
 
   it('generates rounds with correct hitCount', () => {
     for (let seed = 1; seed <= 30; seed++) {
@@ -320,6 +333,11 @@ describe('echo beat', () => {
     expect(tolerancePct('easy')).toBeGreaterThan(tolerancePct('medium'));
     expect(tolerancePct('medium')).toBeGreaterThan(tolerancePct('hard'));
   });
+
+  it('roundsToWin increases with difficulty', () => {
+    expect(echoRounds('easy')).toBeLessThan(echoRounds('medium'));
+    expect(echoRounds('medium')).toBeLessThan(echoRounds('hard'));
+  });
 });
 
 describe('steady beat', () => {
@@ -361,6 +379,11 @@ describe('steady beat', () => {
   it('threshold increases with difficulty', () => {
     expect(passThreshold('easy')).toBeLessThan(passThreshold('medium'));
     expect(passThreshold('medium')).toBeLessThan(passThreshold('hard'));
+  });
+
+  it('roundsToWin increases with difficulty', () => {
+    expect(steadyRounds('easy')).toBeLessThan(steadyRounds('medium'));
+    expect(steadyRounds('medium')).toBeLessThan(steadyRounds('hard'));
   });
 });
 
