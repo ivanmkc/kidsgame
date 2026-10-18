@@ -70,9 +70,16 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
     .map((entry, i) => {
       const entryPath = entry.asset.path;
       const isVideo = entry.asset.kind === 'video';
-      const mediaHtml = isVideo
+      let mediaHtml = isVideo
         ? `<video preload="none" controls src="${escapeHtml(opts.assetHref(entryPath))}"></video>`
         : `<img loading="lazy" src="${escapeHtml(opts.assetHref(entryPath))}" alt="${escapeHtml(entryPath)}" />`;
+
+      if (entry.candidatePath) {
+        const candHtml = isVideo
+          ? `<video preload="none" controls src="${escapeHtml(opts.assetHref(entry.candidatePath))}"></video>`
+          : `<img loading="lazy" src="${escapeHtml(opts.assetHref(entry.candidatePath))}" alt="${escapeHtml(entry.candidatePath)}" />`;
+        mediaHtml += candHtml;
+      }
 
       const isFlagged = entry.maxSeverity > 0;
       const cleanBadge = entry.asset.ledgerClean ? '<span class="badge ledger-clean">ledger-clean</span>' : '';
@@ -96,7 +103,8 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
         </div>`
           : '';
 
-      const radiosHtml = VERDICTS.map((v) => {
+      const verdicts = entry.candidatePath ? ['accept', 'reject', 'unsure'] : VERDICTS;
+      const radiosHtml = verdicts.map((v) => {
         const radioId = `verdict-${i}-${v}`;
         return `<div class="verdict-option">
         <input type="radio" id="${radioId}" name="verdict-${i}" value="${v}" aria-label="${v}" data-path="${escapeHtml(entryPath)}" />
@@ -147,8 +155,8 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
     .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
     .card.flagged { border-top: 4px solid #ef4444; }
-    .card-media { background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 200px; max-height: 280px; }
-    .card-media img, .card-media video { max-width: 100%; max-height: 280px; object-fit: contain; }
+    .card-media { background: #0f172a; display: flex; align-items: center; justify-content: center; min-height: 200px; max-height: 280px; gap: 8px; }
+    .card-media img, .card-media video { max-width: 100%; max-height: 280px; object-fit: contain; min-width: 0; }
     .card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
     .card-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; }
     .entry-path { word-break: break-all; font-family: monospace; font-size: 12px; }
