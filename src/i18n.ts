@@ -92,6 +92,7 @@ export type UIKey =
   | 'mp.solo'
   | 'mp.duo'
   // ── GameShell titles + subtitles ───────────────────────────────
+  | 'shell.levels'
   | 'shell.letters.title'
   | 'shell.letters.titleKana'
   | 'shell.letters.subTap'
@@ -389,6 +390,7 @@ export const EN: Table = {
   'mp.duo': '2 Players 👧👧',
 
   'shell.letters.title': 'Letter Hunt',
+  'shell.levels': 'Levels',
   'shell.letters.titleKana': 'Kana Hunt',
   'shell.letters.subTap': 'Tap the letter you hear',
   'shell.letters.subSound': 'Which letter makes that sound?',

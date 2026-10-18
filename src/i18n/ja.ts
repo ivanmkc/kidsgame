@@ -107,6 +107,7 @@ export const JA: Table = {
   'mp.duo': 'ふたり 👧👧',
 
   'shell.letters.title': 'もじさがし',
+  'shell.levels': 'レベル',
   'shell.letters.titleKana': 'かなさがし',
   'shell.letters.subTap': 'きこえた もじを タップ',
   'shell.letters.subSound': 'このおとの もじは どれ？',

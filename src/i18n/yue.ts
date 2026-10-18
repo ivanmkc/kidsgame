@@ -106,6 +106,7 @@ export const YUE: Table = {
   'mp.duo': '兩個人 👧👧',
 
   'shell.letters.title': '搵英文字母',
+  'shell.levels': '關卡',
   'shell.letters.titleKana': '搵假名',
   'shell.letters.subTap': '聽到英文字母就撳佢',
   'shell.letters.subSound': '邊個英文字母發呢個音？',

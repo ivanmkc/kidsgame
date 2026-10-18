@@ -6,15 +6,6 @@ import { Lang, LANGS } from '../lang';
 import { t } from '../i18n';
 import { colors, fonts, shadows } from '../theme';
 
-// "Levels" back-affordance label per language. Kept inline (rather than
-// pulled through i18n.ts) because it's tightly bound to the ⬅️ chip only
-// this component renders.
-const BACK_LEVELS: Record<Lang, string> = {
-  en: 'Levels',
-  ja: 'レベル',
-  cmn: '关卡',
-  yue: '關卡',
-};
 
 // App wraps the game-routing layer in a provider; GameShell consumes.
 // Context (not prop-drilling) so 19 games don't have to relay a callback
@@ -45,7 +36,7 @@ export function GameShell({ title, subtitle, onBack, right, children, backKind =
           testID="back-button"
         >
           <Text style={styles.backText}>{backKind === 'picker' ? '⬅️' : '🏠'}</Text>
-          {backKind === 'picker' ? <Text style={styles.backLabel}>{BACK_LEVELS[lang]}</Text> : null}
+          {backKind === 'picker' ? <Text style={styles.backLabel}>{t(lang, 'shell.levels')}</Text> : null}
         </Pressable>
         <View style={styles.titles}>
           <Text style={styles.title} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>{title}</Text>
