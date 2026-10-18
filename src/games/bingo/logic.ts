@@ -38,9 +38,14 @@ export interface BingoSettings {
 }
 
 export function settingsForBingo(difficulty: 'easy' | 'medium' | 'hard', lang: Lang): BingoSettings {
+  if (lang === 'en') {
+    if (difficulty === 'easy') return { gridSize: 3, mode: 'name' };
+    if (difficulty === 'hard') return { gridSize: 4, mode: 'name' };
+    return { gridSize: 3, mode: 'phonics' };
+  }
   if (difficulty === 'easy') return { gridSize: 3, mode: 'name' };
-  if (difficulty === 'hard') return { gridSize: 4, mode: 'name' };
-  return { gridSize: 3, mode: lang === 'en' ? 'phonics' : 'name' };
+  if (difficulty === 'hard') return { gridSize: 5, mode: 'name' };
+  return { gridSize: 4, mode: 'name' };
 }
 
 const NAME_ASK: Record<Lang, string> = {
