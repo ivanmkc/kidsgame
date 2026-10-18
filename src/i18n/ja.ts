@@ -7,6 +7,7 @@ export const JA: Table = {
   'menu.word': 'ことばあそび 🔤',
   'menu.number': 'すうじあそび 🔢',
   'menu.grownups': 'おうちのかたへ 🧑‍🍼',
+  'badge.beta': 'ベータ',
   'chip.sound': '🔊 おと',
   'chip.muted': '🔇 むおん',
   'chip.twoPlayers': '👯 ふたりで',
