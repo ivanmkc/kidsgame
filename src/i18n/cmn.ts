@@ -16,6 +16,8 @@ export const CMN: Table = {
   'a11y.soundOn': '打开声音',
   'a11y.soundOff': '关闭声音',
   'a11y.twoPlayer': '双人模式',
+  'a11y.backMenu': '返回菜单',
+  'a11y.backPicker': '返回关卡选择',
   'grownups.install': '📲 添加到主屏幕',
   'grownups.share': '📤 分享给家长',
   'grownups.copied': '✅ 已复制链接！',

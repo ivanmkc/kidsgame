@@ -30,6 +30,8 @@ export type UIKey =
   | 'a11y.soundOn'
   | 'a11y.soundOff'
   | 'a11y.twoPlayer'
+  | 'a11y.backMenu'
+  | 'a11y.backPicker'
   | 'grownups.install'
   | 'grownups.share'
   | 'grownups.copied'
@@ -275,6 +277,8 @@ export const EN: Table = {
   'a11y.soundOn': 'Turn sound on',
   'a11y.soundOff': 'Turn sound off',
   'a11y.twoPlayer': 'Two player mode',
+  'a11y.backMenu': 'Back to menu',
+  'a11y.backPicker': 'Back to level choices',
   'grownups.install': '📲 Add to Home Screen',
   'grownups.share': '📤 Share with Parents',
   'grownups.copied': '✅ Link copied!',

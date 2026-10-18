@@ -17,6 +17,8 @@ export const JA: Table = {
   'a11y.soundOn': 'おとを つける',
   'a11y.soundOff': 'おとを けす',
   'a11y.twoPlayer': 'ふたりであそぶ',
+  'a11y.backMenu': 'メニューにもどる',
+  'a11y.backPicker': 'レベルえらびにもどる',
   'grownups.install': '📲 ホームがめんに ついか',
   'grownups.share': '📤 ほかのかたにおしえる',
   'grownups.copied': '✅ リンクをコピーしました！',
