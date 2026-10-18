@@ -161,6 +161,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
             </View>
           ) : (
             <Pressable
+              accessibilityRole="button"
               testID="replay-button"
               onPress={() => {
                 if (canTap(round, tapped, phase, won)) {
