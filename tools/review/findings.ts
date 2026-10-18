@@ -16,6 +16,7 @@ export interface ReviewEntry {
   asset: MediaAsset;
   findings: ReviewFinding[];
   maxSeverity: 0 | 1 | 2 | 3;
+  candidatePath?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

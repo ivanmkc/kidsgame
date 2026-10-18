@@ -61,6 +61,13 @@ export function main(argv: string[] = process.argv.slice(2), root: string = proc
 
   const { entries, dirFindings, unmatched } = attachFindings(inventory, findings);
 
+  for (const entry of entries) {
+    const candidateFullPath = path.join(root, 'tmp', 'candidates', entry.asset.path);
+    if (fs.existsSync(candidateFullPath)) {
+      entry.candidatePath = path.join('tmp', 'candidates', entry.asset.path).replace(/\\/g, '/');
+    }
+  }
+
   if (totalRejected > 0) {
     console.error(`Rejected ${totalRejected} malformed finding(s)`);
   }

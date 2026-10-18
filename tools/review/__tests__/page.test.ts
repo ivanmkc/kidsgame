@@ -446,4 +446,59 @@ describe('human review page', () => {
       fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
+
+  it('renders candidate and accept/reject/unsure radios when candidatePath is present', () => {
+    const html = renderReviewPage(
+      {
+        entries: [
+          {
+            asset: {
+              path: 'assets/game/diff/foo.png',
+              kind: 'image',
+              game: 'diff',
+              group: 'foo',
+              ledgerClean: false,
+            },
+            findings: [],
+            maxSeverity: 0,
+            candidatePath: 'tmp/candidates/assets/game/diff/foo.png',
+          },
+        ],
+        dirFindings: [],
+      },
+      { assetHref: (p) => p },
+    );
+    expect(html).toContain('tmp/candidates/assets/game/diff/foo.png');
+    expect(html).toContain('value="accept"');
+    expect(html).toContain('value="reject"');
+    expect(html).not.toContain('value="keep"');
+    expect(html).not.toContain('value="regenerate"');
+    expect(html).toContain('value="unsure"');
+  });
+
+  it('main() attaches candidatePath if file exists', () => {
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'review-candidate-'));
+    try {
+      const assetDir = path.join(tempRoot, 'assets', 'game', 'diff');
+      fs.mkdirSync(assetDir, { recursive: true });
+      fs.writeFileSync(path.join(assetDir, 'foo.png'), 'fake-img');
+
+      const candDir = path.join(tempRoot, 'tmp', 'candidates', 'assets', 'game', 'diff');
+      fs.mkdirSync(candDir, { recursive: true });
+      fs.writeFileSync(path.join(candDir, 'foo.png'), 'fake-candidate');
+
+      const toolsDir = path.join(tempRoot, 'tools');
+      fs.mkdirSync(toolsDir, { recursive: true });
+      fs.writeFileSync(path.join(toolsDir, 'quality_ledger.json'), JSON.stringify({ clean: [] }));
+
+      const outPath = main([], tempRoot);
+      const html = fs.readFileSync(outPath, 'utf-8');
+      
+      expect(html).toContain('tmp/candidates/assets/game/diff/foo.png');
+      expect(html).toContain('value="accept"');
+      expect(html).toContain('value="reject"');
+    } finally {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
+    }
+  });
 });
