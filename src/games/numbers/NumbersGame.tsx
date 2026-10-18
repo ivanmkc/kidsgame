@@ -9,7 +9,7 @@ import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows  } from '../../theme';
 import { saySequence, sfx } from '../../sound';
-import { NumberRound, makeNumberRound, settingsForNumbers } from './logic';
+import { NumberRound, makeNumberRound, reskinNumberRound, settingsForNumbers } from './logic';
 import { useWinLine } from '../winlines';
 
 interface Props {
@@ -30,8 +30,8 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<NumberRound>(() => makeNumberRound(rngRef.current, numSettings, lang));
   // script toggle must re-skin the CURRENT round's tiles, not wait a round
   useEffect(() => {
-    setRound(makeNumberRound(rngRef.current, numSettings, lang));
-  }, [script]); // eslint-disable-line react-hooks/exhaustive-deps
+    setRound((cur) => reskinNumberRound(cur, numSettings.useHan));
+  }, [numSettings.useHan]);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
