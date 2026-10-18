@@ -1,7 +1,7 @@
 import type { MediaAsset } from './inventory';
 
 export interface ReviewFinding {
-  source: 'scan' | 'loop';
+  source: 'scan' | 'loop' | 'video';
   category: string;
   severity: 1 | 2 | 3;
   assetPath: string | null;
