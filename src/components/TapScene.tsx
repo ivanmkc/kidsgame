@@ -85,11 +85,18 @@ export function TapScene({
         const t = (box.y - PAD) * scale;
         const w = (box.w + 2 * PAD) * scale;
         const h = (box.h + 2 * PAD) * scale;
+        const hitSlop = {
+          top: Math.max(0, (44 - h) / 2),
+          bottom: Math.max(0, (44 - h) / 2),
+          left: Math.max(0, (44 - w) / 2),
+          right: Math.max(0, (44 - w) / 2),
+        };
         return (
           <Pressable
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
             onPress={() => (found ? undefined : onHit(id))}
+            hitSlop={hitSlop}
             style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
           >
             {found ? <FoundRing color={ringColors?.[id]} /> : hintId === id ? <HintRing /> : null}
