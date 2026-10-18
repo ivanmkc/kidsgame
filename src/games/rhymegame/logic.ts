@@ -127,6 +127,37 @@ export function settingsForRhyme(
   return { rounds: 10, tiles: 3 };
 }
 
+export interface RhymeLayout {
+  tile: number;
+  promptIcon: number;
+  shortH: boolean;
+}
+
+/** Sizing rules for Rhyme Time: on short (mobile landscape) viewports,
+ *  prioritize answer tiles (80-100px) so picture art remains recognizable,
+ *  while shrinking prompt card padding and icon. */
+export function rhymeLayout(
+  width: number,
+  height: number,
+  tileCount = 3,
+): RhymeLayout {
+  const shortH = height < 480;
+  const cols = tileCount;
+  const gap = 14;
+  const maxTileByWidth = (Math.min(width - 32, 620) - (cols - 1) * gap) / cols;
+
+  if (shortH) {
+    const maxLandscape = Math.min(100, Math.max(80, Math.floor((height - 84) * 0.3)));
+    const tile = Math.max(44, Math.min(maxTileByWidth, maxLandscape));
+    const promptIcon = Math.max(48, Math.min(68, height - 84 - tile - 136));
+    return { tile, promptIcon, shortH };
+  }
+
+  const tile = Math.max(44, Math.min(maxTileByWidth, height - 84 - 260, 160));
+  const promptIcon = Math.max(56, Math.min(110, height - 84 - tile * 1.2 - 150));
+  return { tile, promptIcon, shortH };
+}
+
 function upperEN(s: string): string { return s.toUpperCase(); }
 
 function buildLines(lang: Lang, target: RhymeEntry, correct: RhymeEntry): {
