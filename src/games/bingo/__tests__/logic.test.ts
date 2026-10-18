@@ -77,7 +77,7 @@ describe('makeBoard', () => {
 
   it('name board: never shows two icons a kid calls by the same word', () => {
     // "Find the flower!" fits the blossom and the sunflower equally.
-    for (const size of [3, 4] as const) {
+    for (const size of [3, 4, 5] as const) {
       for (let seed = 1; seed <= 200; seed++) {
         const b = boardWith(seed, size, 'name');
         expect(b.cells).toHaveLength(size * size);
@@ -148,12 +148,18 @@ describe('checkBingo', () => {
     m[0] = m[5] = m[10] = m[15] = true;
     expect(checkBingo(m, 4)).toEqual([0, 5, 10, 15]);
   });
+
+  it('works for 5x5', () => {
+    const m = Array(25).fill(false);
+    m[0] = m[6] = m[12] = m[18] = m[24] = true;
+    expect(checkBingo(m, 5)).toEqual([0, 6, 12, 18, 24]);
+  });
 });
 
 describe('full game playthrough', () => {
   it('always reaches bingo within N^2 calls', () => {
     for (let seed = 0; seed < 20; seed++) {
-      for (const size of [3, 4]) {
+      for (const size of [3, 4, 5]) {
         const b = boardWith(seed, size, 'name');
         const marked = Array(b.cells.length).fill(false);
         let foundBingo = false;
@@ -168,17 +174,39 @@ describe('full game playthrough', () => {
 });
 
 describe('settingsForBingo', () => {
-  it('easy is 3x3 name', () => {
+  it('easy is 3x3 name in all languages', () => {
     expect(settingsForBingo('easy', 'en')).toEqual({ gridSize: 3, mode: 'name' });
+    expect(settingsForBingo('easy', 'ja')).toEqual({ gridSize: 3, mode: 'name' });
+    expect(settingsForBingo('easy', 'cmn')).toEqual({ gridSize: 3, mode: 'name' });
+    expect(settingsForBingo('easy', 'yue')).toEqual({ gridSize: 3, mode: 'name' });
   });
+
   it('medium EN is 3x3 phonics', () => {
     expect(settingsForBingo('medium', 'en')).toEqual({ gridSize: 3, mode: 'phonics' });
   });
-  it('medium JA falls back to name', () => {
-    expect(settingsForBingo('medium', 'ja')).toEqual({ gridSize: 3, mode: 'name' });
+
+  it('medium non-EN differentiates from easy with a 4x4 board', () => {
+    expect(settingsForBingo('medium', 'ja')).toEqual({ gridSize: 4, mode: 'name' });
+    expect(settingsForBingo('medium', 'cmn')).toEqual({ gridSize: 4, mode: 'name' });
+    expect(settingsForBingo('medium', 'yue')).toEqual({ gridSize: 4, mode: 'name' });
   });
-  it('hard is 4x4 name', () => {
+
+  it('hard is 4x4 name in EN and 5x5 name in non-EN', () => {
     expect(settingsForBingo('hard', 'en')).toEqual({ gridSize: 4, mode: 'name' });
+    expect(settingsForBingo('hard', 'ja')).toEqual({ gridSize: 5, mode: 'name' });
+    expect(settingsForBingo('hard', 'cmn')).toEqual({ gridSize: 5, mode: 'name' });
+    expect(settingsForBingo('hard', 'yue')).toEqual({ gridSize: 5, mode: 'name' });
+  });
+
+  it('difficulty levels are strictly distinct across all languages', () => {
+    for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+      const easy = settingsForBingo('easy', lang);
+      const medium = settingsForBingo('medium', lang);
+      const hard = settingsForBingo('hard', lang);
+      expect(easy).not.toEqual(medium);
+      expect(medium).not.toEqual(hard);
+      expect(easy).not.toEqual(hard);
+    }
   });
 });
 
