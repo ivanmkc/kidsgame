@@ -1,6 +1,8 @@
+// @vitest-environment happy-dom
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, fireEvent, screen, act } from '@testing-library/react';
 import * as sound from '../../../sound';
 import { CountGame } from '../CountGame';
 import { applyPickAnswer, makeCountRound } from '../logic';
@@ -20,6 +22,7 @@ vi.mock('react-native', async (importOriginal) => {
       }
       return React.createElement(ActualPressable, props);
     },
+    Modal: (props: Record<string, unknown>) => React.createElement('div', { 'data-testid': 'mock-modal' }, props.children as React.ReactNode),
   };
 });
 
@@ -173,5 +176,52 @@ describe('logic: applyPickAnswer', () => {
     applyPickAnswer(dummyRound.answer + 1, state, deps);
     expect(sfxSpy.wrong).toHaveBeenCalledTimes(1);
     expect(setWrongPick).toHaveBeenCalledWith(dummyRound.answer + 1);
+  });
+});
+
+describe('CountGame double-tap lock', () => {
+  let sayThenDoneCallbacks: Array<() => void> = [];
+
+  beforeEach(() => {
+    sayThenDoneCallbacks = [];
+    vi.restoreAllMocks();
+    vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => {
+      if (done) sayThenDoneCallbacks.push(done);
+    });
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
+  });
+
+  it('double-tap on correct answer only scores once and does not skip round', () => {
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(screen.getByTestId('count-score').textContent).toBe('🔢 0/5');
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const testId = stage.getAttribute('data-testid');
+    const n = Number(testId!.split('-').pop());
+
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    const finishCountSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => { finishCountSpeech(); });
+
+    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+    const answerChoice = answerChoices[answerChoices.length - 1];
+    fireEvent.click(answerChoice);
+
+    expect(screen.getByTestId('count-score').textContent).toBe('🔢 1/5');
+
+    fireEvent.click(answerChoice);
+    expect(screen.getByTestId('count-score').textContent).toBe('🔢 1/5');
+
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+    const advanceRound = sayThenDoneCallbacks.pop()!;
+    act(() => { advanceRound(); });
+
+    expect(screen.getByTestId('count-progress')).toBeDefined();
   });
 });
