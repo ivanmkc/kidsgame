@@ -27,6 +27,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<LetterRound>(() => makeLetterRound(rngRef.current, tier, tileCount));
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
+  const lockRef = useRef(false);
+
+  useEffect(() => {
+    lockRef.current = false;
+  });
+
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, tier === 'kana' ? 'win.lettersKana' : 'win.letters'));
@@ -40,7 +46,8 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won) return;
+    if (won || lockRef.current || wrongIdx !== null) return;
+    lockRef.current = true;
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
