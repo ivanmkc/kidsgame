@@ -1,0 +1,239 @@
+// @vitest-environment happy-dom
+import React from 'react';
+import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import * as sound from '../../../sound';
+import { sfx } from '../../../sound';
+import { buildGameSections, WORD_CARDS } from '../../../menuCards';
+import { ListenChooseGame } from '../ListenChooseGame';
+import { LEVEL_1_WORDS, Word } from '../data';
+
+describe('ListenChooseGame', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, 'sayThen').mockImplementation((_text, cb) => {
+      if (cb) cb();
+    });
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+    vi.spyOn(sfx, 'good').mockImplementation(() => {});
+    vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(sfx, 'tap').mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  function getRoundChoices(): {
+    targetBtn: HTMLElement;
+    distractorBtn: HTMLElement;
+    targetWord: Word;
+    distractorWord: Word;
+  } {
+    const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    const targetWord = LEVEL_1_WORDS.find((w) => w.en === targetText)!;
+    const visibleWords = LEVEL_1_WORDS.filter((w) => screen.queryByTestId(`choice-${w.icon}`));
+    const distractorWord = visibleWords.find((w) => w.icon !== targetWord.icon)!;
+    return {
+      targetBtn: screen.getByTestId(`choice-${targetWord.icon}`),
+      distractorBtn: screen.getByTestId(`choice-${distractorWord.icon}`),
+      targetWord,
+      distractorWord,
+    };
+  }
+
+  it('appears in the Word Games section of the main menu catalogue', () => {
+    const card = WORD_CARDS.find((c) => c.route === 'listenchoose');
+    expect(card).toBeDefined();
+    expect(card?.key).toBe('listenchoose');
+
+    const sections = buildGameSections('en');
+    const wordSection = sections.find((s) => s.title === 'Word Games');
+    expect(wordSection).toBeDefined();
+    const gameEntry = wordSection?.games.find((g) => g.id === 'listenchoose');
+    expect(gameEntry).toBeDefined();
+    expect(gameEntry?.label).toBe('Listen and Choose');
+  });
+
+  it('renders start screen initially and starts round 1 on Play', () => {
+    const onHome = vi.fn();
+    render(<ListenChooseGame onHome={onHome} lang="en" />);
+
+    // Start Screen with title and Play button
+    expect(screen.getAllByText('Listen and Choose').length).toBeGreaterThanOrEqual(1);
+    const playBtn = screen.getByTestId('play-button');
+    expect(playBtn).toBeTruthy();
+    expect(screen.getByText('Play')).toBeTruthy();
+
+    // Round screen elements should not be visible yet
+    expect(screen.queryByTestId('speaker-button')).toBeNull();
+
+    // Tap Play button
+    fireEvent.click(playBtn);
+
+    // Audio triggers with the target word
+    expect(sound.sayThen).toHaveBeenCalled();
+    const targetText = vi.mocked(sound.sayThen).mock.calls[0][0][0];
+    expect(typeof targetText).toBe('string');
+
+    // Round screen elements are now visible
+    expect(screen.getByTestId('speaker-button')).toBeTruthy();
+    const { targetBtn, distractorBtn, targetWord, distractorWord } = getRoundChoices();
+    expect(targetBtn).toBeTruthy();
+    expect(distractorBtn).toBeTruthy();
+    expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(distractorWord.en)).toBeTruthy();
+  });
+
+  it('replays target word when Big Speaker button is tapped', () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const spokenTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    vi.mocked(sound.sayThen).mockClear();
+
+    const speakerBtn = screen.getByTestId('speaker-button');
+    fireEvent.click(speakerBtn);
+
+    expect(sound.sayThen).toHaveBeenCalledWith([spokenTarget], expect.any(Function));
+  });
+
+  it('handles wrong picks by wobbling, replaying without penalty, and highlighting after 2 misses', () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const { targetBtn, distractorBtn, targetWord } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    // First wrong pick
+    fireEvent.click(distractorBtn);
+
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledWith([targetWord.en], expect.any(Function));
+    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 0');
+    expect(targetBtn.getAttribute('aria-selected')).toBe('false');
+
+    // Advance timer past wobble duration
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Second wrong pick
+    fireEvent.click(distractorBtn);
+
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+    expect(targetBtn.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('handles correct pick by playing good sfx, celebrating, incrementing streak, and advancing', () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const { targetBtn, targetWord } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 0');
+
+    // Click correct answer
+    fireEvent.click(targetBtn);
+
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('celebration')).toBeTruthy();
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    // Advance past celebration animation (800ms)
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 1');
+
+    // Next round loaded: sayThen is called with the next target word
+    expect(sound.sayThen).toHaveBeenCalled();
+    const newTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(newTarget).not.toBe(targetWord.en);
+  });
+
+  it('ignores rapid repeat taps during celebration animation', () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
+
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+
+    // Rapid second tap while celebrate is true
+    fireEvent.click(targetBtn);
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores rapid repeat taps during wobble animation', () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const { distractorBtn } = getRoundChoices();
+    fireEvent.click(distractorBtn);
+
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Rapid second tap while wobble is active
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+  });
+
+  it('cleans up celebration timer on unmount without speaking next word', () => {
+    const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId('play-button'));
+
+    const { targetBtn } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    fireEvent.click(targetBtn);
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+
+    // Unmount while celebration timer is still pending
+    unmount();
+
+    // Advance timers past 800ms
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Next round audio should not be spoken after unmount
+    expect(sound.sayThen).not.toHaveBeenCalled();
+  });
+
+  it('supports captions toggle, defaults to ON for sound-off play, and translates ON/OFF', () => {
+    const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+
+    const captionsToggle = screen.getByTestId('captions-toggle');
+    // Captions are ON by default for R3 sound-off accessibility
+    expect(captionsToggle.textContent).toContain('ON');
+
+    fireEvent.click(captionsToggle);
+    expect(captionsToggle.textContent).toContain('OFF');
+
+    fireEvent.click(screen.getByTestId('play-button'));
+    expect(screen.queryByTestId('listenchoose-caption')).toBeNull();
+
+    // Toggle back ON during gameplay
+    const gameToggle = screen.getByTestId('captions-toggle');
+    fireEvent.click(gameToggle);
+    const spokenTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(screen.getByTestId('listenchoose-caption').textContent).toBe(spokenTarget);
+    unmount();
+
+    // Verify non-English (Japanese) localization of toggle
+    render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
+    const jaToggle = screen.getByTestId('captions-toggle');
+    expect(jaToggle.textContent).toContain('オン');
+    fireEvent.click(jaToggle);
+    expect(jaToggle.textContent).toContain('オフ');
+  });
+});

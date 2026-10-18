@@ -12,6 +12,7 @@ export type CardKey =
   | 'sounds'
   | 'rhyme'
   | 'spell'
+  | 'listenchoose'
   | 'count'
   | 'numbers'
   | 'compare'
@@ -50,6 +51,7 @@ export const WORD_CARDS: CardDef[] = [
   { route: 'sounds', color: '#5DA9E8', key: 'sounds', preview: 'icons8' },
   { route: 'rhyme', color: '#9C6FD6', key: 'rhyme', preview: 'icons13' },
   { route: 'spell', color: '#4FB06D', key: 'spell', preview: 'icons20' },
+  { route: 'listenchoose', color: '#E8874F', key: 'listenchoose', preview: 'icons0' },
 ];
 
 export const NUMBER_CARDS: CardDef[] = [

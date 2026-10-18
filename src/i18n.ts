@@ -65,6 +65,7 @@ export type UIKey =
   | 'card.sounds.title'   | 'card.sounds.blurb'
   | 'card.rhyme.title'    | 'card.rhyme.blurb'
   | 'card.spell.title'    | 'card.spell.blurb'
+  | 'card.listenchoose.title' | 'card.listenchoose.blurb'
   | 'card.count.title'    | 'card.count.blurb'
   | 'card.numbers.title'  | 'card.numbers.blurb'
   | 'card.compare.title'  | 'card.compare.blurb'
@@ -103,6 +104,12 @@ export type UIKey =
   | 'shell.spell.title'
   | 'shell.spell.sub'
   | 'spell.hearAgain'
+  | 'shell.listenchoose.title'
+  | 'shell.listenchoose.sub'
+  | 'listenchoose.play'
+  | 'listenchoose.captions'
+  | 'listenchoose.on'
+  | 'listenchoose.off'
   | 'shell.count.title'
   | 'shell.count.sub'
   | 'shell.compare.title'
@@ -326,6 +333,8 @@ export const EN: Table = {
   'card.rhyme.blurb': 'Frog... dog! Find what rhymes!',
   'card.spell.title': 'Word Builder',
   'card.spell.blurb': 'Tap the letters to build the word!',
+  'card.listenchoose.title': 'Listen and Choose',
+  'card.listenchoose.blurb': 'Hear a word and tap the matching picture',
   'card.count.title': 'Count With Me',
   'card.count.blurb': 'Tap and count every little critter!',
   'card.numbers.title': 'Number Hunt',
@@ -378,6 +387,12 @@ export const EN: Table = {
   'shell.spell.title': 'Word Builder',
   'spell.hearAgain': '🔊 Tap to hear again',
   'shell.spell.sub': 'Tap the letters in order to spell the word',
+  'shell.listenchoose.title': 'Listen and Choose',
+  'shell.listenchoose.sub': 'Hear the word, tap the picture',
+  'listenchoose.play': 'Play',
+  'listenchoose.captions': 'Captions',
+  'listenchoose.on': 'ON',
+  'listenchoose.off': 'OFF',
   'shell.count.title': 'Count With Me',
   'shell.count.sub': 'Tap every friend, then tell me how many',
   'shell.compare.title': 'More or Less',
