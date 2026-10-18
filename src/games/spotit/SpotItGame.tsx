@@ -33,7 +33,7 @@ export function SpotItGame({ onHome, difficulty, seed, twoPlayerEnabled, lang = 
       ) : (
         <SpotItSolo onHome={onHome} difficulty={difficulty} seed={seed} locked={mode === null} lang={lang} />
       )}
-      {mode === null ? <ModePicker onPick={setMode} /> : null}
+      {mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
     </>
   );
 }

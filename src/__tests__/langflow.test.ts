@@ -52,6 +52,7 @@ const ALL_KEYS: UIKey[] = [
   'card.sums.title', 'card.sums.blurb',
   'card.musicbox.title', 'card.musicbox.blurb',
   'picker.surprise', 'picker.diff', 'picker.hidden', 'picker.story', 'picker.sticker', 'picker.puzzle',
+  'mp.title', 'mp.solo', 'mp.duo',
   'shell.letters.title', 'shell.letters.titleKana', 'shell.letters.subTap', 'shell.letters.subSound',
   'shell.numbers.title', 'shell.numbers.titleHan', 'shell.numbers.sub',
   'shell.sounds.titleEn', 'shell.sounds.titleWords', 'shell.sounds.subEn', 'shell.sounds.subWord',

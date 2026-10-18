@@ -87,6 +87,10 @@ export type UIKey =
   | 'picker.story'
   | 'picker.sticker'
   | 'picker.puzzle'
+  // ── ModePicker ─────────────────────────────────────────────────
+  | 'mp.title'
+  | 'mp.solo'
+  | 'mp.duo'
   // ── GameShell titles + subtitles ───────────────────────────────
   | 'shell.letters.title'
   | 'shell.letters.titleKana'
@@ -380,6 +384,9 @@ export const EN: Table = {
   'picker.story': 'Which story shall we read?',
   'picker.sticker': "Where's the party?",
   'picker.puzzle': 'Which picture do you want to solve?',
+  'mp.title': 'How many players?',
+  'mp.solo': '1 Player 🧒',
+  'mp.duo': '2 Players 👧👧',
 
   'shell.letters.title': 'Letter Hunt',
   'shell.letters.titleKana': 'Kana Hunt',

@@ -110,7 +110,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
           onSurprise={() => { if (mode !== null) onPickScene(visible[Math.floor(Math.random() * visible.length)].id); }}
           filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
         />
-        {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
+        {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
       </GameShell>
     );
   }
@@ -211,7 +211,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
         onHome={onHome}
         lang={lang}
       />
-      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
+      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
     </GameShell>
   );
 }

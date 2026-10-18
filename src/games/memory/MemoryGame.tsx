@@ -243,7 +243,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
         onNext={reset} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
         onHome={onHome}
       />
-      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} /> : null}
+      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
     </GameShell>
   );
 }
