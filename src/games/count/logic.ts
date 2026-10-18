@@ -1,5 +1,5 @@
 import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
+import { Lang, numberWord } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
 
 // Shared critter/treat pool for the math suite (Count/Compare/Sums).
@@ -94,6 +94,59 @@ export function applyTap(tapped: boolean[], index: number): boolean[] {
   next[index] = true;
   return next;
 }
+
+
+export interface PickState {
+  won: boolean;
+  phase: string;
+  locked: boolean;
+  score: number;
+  round: CountRound;
+  roundsToWin: number;
+  lang: Lang;
+}
+
+export interface PickDeps {
+  sfx: { good: () => void; wrong: () => void; tap?: () => void };
+  say: (text: string) => void;
+  sayThen: (lines: string[], cb: () => void) => void;
+  setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  makeNextRound: () => CountRound;
+  setScore: (s: number) => void;
+  setLocked: (l: boolean) => void;
+  setRound: (r: CountRound) => void;
+  setTapped: (t: boolean[]) => void;
+  setPhase: (p: 'count' | 'quiz') => void;
+  setWrongPick: (w: number | null | ((prev: number | null) => number | null)) => void;
+}
+
+export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
+  if (state.won || state.phase !== 'quiz' || state.locked) return;
+
+  if (v === state.round.answer) {
+    deps.setLocked(true);
+    deps.sfx.good();
+    const nextScore = state.score + 1;
+    deps.setScore(nextScore);
+    const nw = numberWord(state.lang, state.round.answer).t;
+    deps.sayThen([nw, PRAISE[state.lang]], () => {
+      deps.setLocked(false);
+      if (nextScore < state.roundsToWin) {
+        const nr = deps.makeNextRound();
+        deps.setRound(nr);
+        deps.setTapped(Array.from({ length: nr.n }, () => false));
+        deps.setPhase('count');
+        deps.setWrongPick(null);
+      }
+    });
+  } else {
+    deps.sfx.wrong();
+    deps.setWrongPick(v);
+    deps.setTimeout(() => deps.setWrongPick((w) => (w === v ? null : w)), 450);
+    deps.setTimeout(() => deps.say(PROMPTS[state.lang]), 500);
+  }
+}
+
 
 // ---------- speech (per-lang prompt + celebration) ----------
 
