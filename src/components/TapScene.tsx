@@ -3,7 +3,6 @@ import { Animated, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Box } from '../manifest';
 import { colors, shadows } from '../theme';
 import { SparkleBurst } from './Sparkles';
-
 interface Props {
   source: number; // require() ref
   sceneW: number; // intrinsic scene size from manifest
@@ -40,6 +39,7 @@ export function TapScene({
   };
 
   const PAD = 8; // extra forgiveness around each hitbox, in scene px
+  const MIN_TOUCH = 44; // minimum touch target in display px (Apple HIG / WCAG)
 
   return (
     <Animated.View
@@ -81,25 +81,31 @@ export function TapScene({
       />
       {boxes.map(({ id, box }) => {
         const found = foundIds.includes(id);
-        const l = (box.x - PAD) * scale;
-        const t = (box.y - PAD) * scale;
-        const w = (box.w + 2 * PAD) * scale;
-        const h = (box.h + 2 * PAD) * scale;
-        const hitSlop = {
-          top: Math.max(0, (44 - h) / 2),
-          bottom: Math.max(0, (44 - h) / 2),
-          left: Math.max(0, (44 - w) / 2),
-          right: Math.max(0, (44 - w) / 2),
-        };
+        const rawW = (box.w + 2 * PAD) * scale;
+        const rawH = (box.h + 2 * PAD) * scale;
+        const w = Math.max(MIN_TOUCH, rawW);
+        const h = Math.max(MIN_TOUCH, rawH);
+        const cx = (box.x + box.w / 2) * scale;
+        const cy = (box.y + box.h / 2) * scale;
+        const left = cx - w / 2;
+        const top = cy - h / 2;
         return (
           <Pressable
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
+            accessibilityRole="button"
             onPress={() => (found ? undefined : onHit(id))}
-            hitSlop={hitSlop}
-            style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
+            style={{ position: 'absolute', left, top, width: w, height: h, alignItems: 'center', justifyContent: 'center' }}
           >
-            {found ? <FoundRing color={ringColors?.[id]} /> : hintId === id ? <HintRing /> : null}
+            {found ? (
+              <View pointerEvents="none" style={{ width: rawW, height: rawH }}>
+                <FoundRing color={ringColors?.[id]} />
+              </View>
+            ) : hintId === id ? (
+              <View pointerEvents="none" style={{ width: rawW, height: rawH }}>
+                <HintRing />
+              </View>
+            ) : null}
           </Pressable>
         );
       })}
