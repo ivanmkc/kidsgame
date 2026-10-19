@@ -7,9 +7,31 @@ import { sfx } from '../../../sound';
 import { buildGameSections, WORD_CARDS } from '../../../menuCards';
 import { ListenChooseGame } from '../ListenChooseGame';
 import { LEVEL_1_WORDS, Word } from '../data';
+import { PressableProps } from 'react-native';
+
+type FakePressableProps = Partial<PressableProps>;
+const capturedPressableMap: Record<string, FakePressableProps[]> = {};
+
+vi.mock('react-native', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const ActualPressable = actual.Pressable as React.ComponentType<FakePressableProps>;
+  return {
+    ...actual,
+    Pressable: (props: FakePressableProps) => {
+      if (typeof props.testID === 'string') {
+        if (!capturedPressableMap[props.testID]) capturedPressableMap[props.testID] = [];
+        capturedPressableMap[props.testID].push(props);
+      }
+      return React.createElement(ActualPressable, props);
+    },
+  };
+});
 
 describe('ListenChooseGame', () => {
   beforeEach(() => {
+    for (const key in capturedPressableMap) {
+      delete capturedPressableMap[key];
+    }
     vi.restoreAllMocks();
     vi.spyOn(sound, 'sayThen').mockImplementation((_text, cb) => {
       if (cb) cb();
@@ -235,5 +257,12 @@ describe('ListenChooseGame', () => {
     expect(jaToggle.textContent).toContain('オン');
     fireEvent.click(jaToggle);
     expect(jaToggle.textContent).toContain('オフ');
+
+    // Verify hitSlop is applied to the toggles
+    const captures = capturedPressableMap['captions-toggle'];
+    expect(captures).toBeDefined();
+    captures.forEach(props => {
+      expect(props.hitSlop).toBe(12);
+    });
   });
 });
