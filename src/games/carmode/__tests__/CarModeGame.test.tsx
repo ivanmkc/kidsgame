@@ -56,7 +56,7 @@ describe('CarModeGame', () => {
     const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
 
     expect(html).toContain('Car Mode');
-    expect(html).toContain(ALL_PACKS.boops.name);
+    expect(html).toContain('Listen, answer, and tap!');
     expect(html).toContain('1/10');
     expect(html).toContain('👂');
     expect(html).toContain('Listen...');
@@ -86,15 +86,35 @@ describe('CarModeGame', () => {
     expect(onHomeSpy).toHaveBeenCalledOnce();
   });
 
-  it('renders localized shell titles in supported languages', () => {
+  it('renders localized shell titles, subtitles, and instructions in supported languages', () => {
     const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
     expect(htmlJa).toContain('くるまモード');
+    expect(htmlJa).toContain('きいて こたえて タップ！');
+    expect(htmlJa).toContain('きいてね…');
 
     const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
     expect(htmlCmn).toContain('车载模式');
+    expect(htmlCmn).toContain('听，回答，点一点！');
+    expect(htmlCmn).toContain('听一听…');
 
     const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
     expect(htmlYue).toContain('車載模式');
+    expect(htmlYue).toContain('聽，答，撳一撳！');
+    expect(htmlYue).toContain('聽下…');
+  });
+
+  it('renders localized phase instructions during gap phase across languages', () => {
+    const actual = logic.startState('boops', 42);
+    vi.spyOn(logic, 'startState').mockReturnValue({ ...actual, phase: 'gap' });
+
+    const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
+    expect(htmlJa).toContain('きみの ばん！');
+
+    const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
+    expect(htmlCmn).toContain('轮到你了！');
+
+    const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
+    expect(htmlYue).toContain('到你喇！');
   });
 
   it('renders gap phase and plays sounds when tapped', () => {

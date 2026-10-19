@@ -112,4 +112,15 @@ describe('CarModeGame interactions', () => {
     expect(screen.queryByText('All done!')).toBeNull();
     expect(screen.queryAllByText('🎉')).toHaveLength(0);
   });
+
+  it('displays localized phase text in Japanese when advancing from prompt to gap', () => {
+    render(<CarModeGame onHome={noop} lang="ja" />);
+
+    expect(screen.getByText('きいてね…')).toBeDefined();
+
+    const tapBtn = screen.getByTestId('carmode-tap');
+    fireEvent.click(tapBtn);
+
+    expect(screen.getByText('きみの ばん！')).toBeDefined();
+  });
 });
