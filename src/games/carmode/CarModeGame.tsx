@@ -18,7 +18,6 @@ import { fonts, shadows } from '../../theme';
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from './packs';
 import {
   CarModeState,
-  advance,
   currentRound,
   isComplete,
   startState,
@@ -200,14 +199,13 @@ export function CarModeGame({ onHome, lang }: Props) {
     pulseAnim.setValue(1);
   }, [state.phase, pulseAnim]);
 
-  const packName = ALL_PACKS[packId].name;
   const roundNum = state.roundIdx + 1;
   const totalRounds = state.rounds.length;
 
   return (
     <GameShell
-      title={t(lang, 'shell.carmode.title' as never)}
-      subtitle={packName}
+      title={t(lang, 'shell.carmode.title')}
+      subtitle={t(lang, 'shell.carmode.sub')}
       onBack={onHome}
       lang={lang}
       right={<ScoreChip label={`${roundNum}/${totalRounds}`} testID="carmode-score" />}
@@ -237,9 +235,9 @@ export function CarModeGame({ onHome, lang }: Props) {
               </Text>
               <Text style={styles.phaseText}>
                 {state.phase === 'prompt'
-                  ? 'Listen...'
+                  ? t(lang, 'music.listen')
                   : state.phase === 'gap'
-                    ? 'Your turn!'
+                    ? t(lang, 'music.yourTurn')
                     : 'Tap!'}
               </Text>
             </Animated.View>
