@@ -20,6 +20,20 @@ interface Props {
   lang?: Lang;
 }
 
+const HOT_LEADS: Record<Lang, string> = {
+  en: 'Tap where you want to go!',
+  ja: 'いきたい ほうを タップ！',
+  cmn: '想去哪就点哪！',
+  yue: '想去邊就撳邊！',
+};
+
+const NEXT_LEADS: Record<Lang, string> = {
+  en: 'What should happen next?',
+  ja: 'つぎは どうなる？',
+  cmn: '接下来会怎样？',
+  yue: '跟住會點樣呢？',
+};
+
 // A narrated picture story where the kid steers: every node is spoken
 // aloud (pre-readers), two big choices branch the tale, four endings per
 // story make replays genuinely different.
@@ -90,11 +104,12 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     if (!node) return;
     if (!node.choices?.length && node.bad) sfx.boing();
     const cs = node.choices ?? [];
-    const menu = cs.map((c) => c.label);
+    const menu = cs.map((c) => (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label);
     const hots = cs.length > 0 && cs.every((c) => c.hot);
-    const lead = hots ? 'Tap where you want to go!' : 'What should happen next?';
-    saySequence(menu.length ? [node.text, lead, ...menu] : [node.text]);
-  }, [node]);
+    const lead = hots ? HOT_LEADS[lang] : NEXT_LEADS[lang];
+    const nodeText = (lang !== 'en' ? node.t?.[lang] : undefined) ?? node.text;
+    saySequence(menu.length ? [nodeText, lead, ...menu] : [nodeText]);
+  }, [node, lang]);
 
   useSay(story ? null : 'Which story shall we read?');
   const { width, height } = useWindowDimensions();
@@ -118,7 +133,11 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
         <ScenePicker
           title={t(lang, 'picker.story')}
           lang={lang}
-          options={stories.map((s) => ({ id: s.id, name: s.title, image: s.nodes.start.image }))}
+          options={stories.map((s) => ({
+            id: s.id,
+            name: (lang !== 'en' ? s.titleT?.[lang] : undefined) ?? s.title,
+            image: s.nodes.start.image,
+          }))}
           onPick={onPickScene}
           onSurprise={() => stories.length && onPickScene(stories[Math.floor(Math.random() * stories.length)].id)}
         />
@@ -126,6 +145,9 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     );
   }
   if (!node) return null;
+
+  const title = (lang !== 'en' ? story.titleT?.[lang] : undefined) ?? story.title;
+  const nodeText = (lang !== 'en' ? node.t?.[lang] : undefined) ?? node.text;
 
   const ar = SCENE_AR;
   const isEnd = !node.choices || node.choices.length === 0;
@@ -163,7 +185,8 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     if (animating.current || !c.hot) return;
     animating.current = true;
     sfx.tap();
-    say(c.label);
+    const choiceLabel = (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label;
+    say(choiceLabel);
     // Veo clip of the hero doing the action, when one exists; zoom otherwise
     if (c.video && Platform.OS === 'web') {
       setClip({ src: c.video, next: c.next });
@@ -189,7 +212,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const ty = zoomTarget ? (imgH / 2 - zoomTarget.cy) * ZOOM : 0;
 
   return (
-    <GameShell title={t(lang, 'shell.story.title')} subtitle={story.title} onBack={onBackToPicker}
+    <GameShell title={t(lang, 'shell.story.title')} subtitle={title} onBack={onBackToPicker}
       backKind="picker" lang={lang}>
       <ScrollView contentContainerStyle={styles.wrap}>
         <View style={[styles.frame, shadows.sticker]}>
@@ -220,14 +243,24 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 })}
               </View>
             ) : null}
-            {node.scare ? <ScareSpot key={nodeId} scare={node.scare} scale={imgW / 1280} /> : null}
+            {node.scare ? (
+              <ScareSpot
+                key={nodeId}
+                scare={node.scare}
+                reveal={(lang !== 'en' ? node.scare.t?.[lang] : undefined) ?? node.scare.reveal}
+                scale={imgW / 1280}
+              />
+            ) : null}
             {(node.fx ?? []).map((f, i) => (
               <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} />
             ))}
             {hasHots && !clip
-              ? node.choices!.map((c, i) => (
-                  <ChoiceSpot key={c.next} choice={c} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
-                ))
+              ? node.choices!.map((c, i) => {
+                  const choiceLabel = (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label;
+                  return (
+                    <ChoiceSpot key={c.next} choice={c} label={choiceLabel} index={i} scale={imgW / 1280} onPick={() => diveInto(c)} />
+                  );
+                })
               : null}
           </Animated.View>
           {clip && Platform.OS === 'web' ? (
@@ -247,7 +280,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               Arrow keys remain as a desktop/dev affordance. */}
           {isEnd && !node.bad ? <Confetti /> : null}
         </View>
-        <Text style={styles.text} testID={`story-text-${nodeId}`}>{node.text}</Text>
+        <Text style={styles.text} testID={`story-text-${nodeId}`}>{nodeText}</Text>
         {isEnd ? (
           <View style={styles.choices}>
             {node.bad ? (
@@ -279,33 +312,36 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
           </View>
         ) : hasHots ? null : (
           <View style={styles.choices}>
-            {node.choices!.map((c, i) => c.icon ? (
-              <Pressable
-                key={c.next}
-                onPress={() => { sfx.tap(); say(c.label); hist.current.push(nodeId); setNodeId(c.next); }}
-                testID={`story-choice-${c.next}`}
-                accessibilityLabel={c.label}
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.pickTile, shadows.sticker,
-                  { borderColor: i === 0 ? colors.teal : colors.gold },
-                  pressed && { transform: [{ scale: 0.95 }] },
-                ]}
-              >
-                <Image source={SCENE_IMAGES[c.icon]} style={styles.pickImg} resizeMode="contain" />
-                <Text style={styles.pickCaption} numberOfLines={2}>{c.label}</Text>
-              </Pressable>
-            ) : (
-              <ChunkyButton
-                key={c.next}
-                label={`${c.label}`}
-                color={i === 0 ? colors.teal : colors.gold}
-                darkColor={darken(i === 0 ? colors.teal : colors.gold)}
-                onPress={() => { sfx.tap(); say(c.label); hist.current.push(nodeId); setNodeId(c.next); }}
-                testID={`story-choice-${c.next}`}
-                minWidth={230}
-              />
-            ))}
+            {node.choices!.map((c, i) => {
+              const choiceLabel = (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label;
+              return c.icon ? (
+                <Pressable
+                  key={c.next}
+                  onPress={() => { sfx.tap(); say(choiceLabel); hist.current.push(nodeId); setNodeId(c.next); }}
+                  testID={`story-choice-${c.next}`}
+                  accessibilityLabel={choiceLabel}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.pickTile, shadows.sticker,
+                    { borderColor: i === 0 ? colors.teal : colors.gold },
+                    pressed && { transform: [{ scale: 0.95 }] },
+                  ]}
+                >
+                  <Image source={SCENE_IMAGES[c.icon]} style={styles.pickImg} resizeMode="contain" />
+                  <Text style={styles.pickCaption} numberOfLines={2}>{choiceLabel}</Text>
+                </Pressable>
+              ) : (
+                <ChunkyButton
+                  key={c.next}
+                  label={`${choiceLabel}`}
+                  color={i === 0 ? colors.teal : colors.gold}
+                  darkColor={darken(i === 0 ? colors.teal : colors.gold)}
+                  onPress={() => { sfx.tap(); say(choiceLabel); hist.current.push(nodeId); setNodeId(c.next); }}
+                  testID={`story-choice-${c.next}`}
+                  minWidth={230}
+                />
+              );
+            })}
           </View>
         )}
       </ScrollView>
@@ -316,8 +352,8 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
 // An in-scene choice: the door/slide/boat itself glows gently and the kid
 // taps it directly — no buttons off the picture. The glow breathes so
 // pre-readers spot both options without any text.
-function ChoiceSpot({ choice, index, scale, onPick }: {
-  choice: StoryChoice; index: number; scale: number; onPick: () => void;
+function ChoiceSpot({ choice, label, index, scale, onPick }: {
+  choice: StoryChoice; label?: string; index: number; scale: number; onPick: () => void;
 }) {
   const pulse = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -334,7 +370,7 @@ function ChoiceSpot({ choice, index, scale, onPick }: {
     <Pressable
       onPress={onPick}
       testID={`story-choice-${choice.next}`}
-      accessibilityLabel={choice.label}
+      accessibilityLabel={label ?? choice.label}
       accessibilityRole="button"
       style={{ position: 'absolute', left: h.x * scale, top: h.y * scale, width: h.w * scale, height: h.h * scale }}
     >
@@ -403,7 +439,7 @@ function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
 // The dare-spot: a soft shimmer marks the region; tapping it makes the
 // surprise SPRING out with a sting, then (after the story's beat) the
 // spoken reveal lands. Re-tappable forever — that's the toy.
-function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
+function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: string; scale: number }) {
   const [popped, setPopped] = useState(false);
   const spring = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
@@ -425,7 +461,7 @@ function ScareSpot({ scare, scale }: { scare: StoryScare; scale: number }) {
     spring.setValue(0);
     Animated.spring(spring, { toValue: 1, friction: 3.2, tension: 160, useNativeDriver: true }).start();
     if (revealTimer.current) clearTimeout(revealTimer.current);
-    revealTimer.current = setTimeout(() => say(scare.reveal), scare.delay);
+    revealTimer.current = setTimeout(() => say(reveal ?? scare.reveal), scare.delay);
   };
 
   const l = scare.x * scale;
