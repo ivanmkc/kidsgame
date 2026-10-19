@@ -1,16 +1,28 @@
 // @vitest-environment happy-dom
 import React from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render } from "@testing-library/react";
-import { OddOneGame } from "../OddOneGame";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import * as difficultyModule from "../../../difficulty";
 import * as logic from "../logic";
 import { sfx } from "../../../sound";
+import { OddOneGame } from "../OddOneGame";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
+    tap: vi.fn(),
+    win: vi.fn(),
+    flip: vi.fn(),
+    boing: vi.fn(),
+    thunder: vi.fn(),
   },
 }));
 
@@ -158,6 +170,43 @@ describe("OddOneGame", () => {
       expect(
         container.querySelector('[data-testid="oddone-score"]')?.textContent,
       ).toContain("1/10");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("resets and unlocks when starting a new round after winning", () => {
+    vi.useFakeTimers();
+    try {
+      const fakeSettings: Partial<difficultyModule.DifficultySettings> = {
+        spotitRounds: 1,
+        timer: false,
+      };
+      vi.spyOn(difficultyModule, "settingsFor").mockReturnValue(
+        fakeSettings as difficultyModule.DifficultySettings,
+      );
+
+      render(<OddOneGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      const oddTile = screen.getByTestId(/-odd$/);
+      fireEvent.click(oddTile);
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // Let win overlay animation arm the buttons
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      const playAgainBtn = screen.getByTestId("play-again");
+      fireEvent.click(playAgainBtn);
+
+      // Should be back in game with score reset
+      expect(screen.getByTestId("oddone-score").textContent).toContain("0/1");
+
+      // Should be unlocked and responsive to taps
+      const nextOddTile = screen.getByTestId(/-odd$/);
+      fireEvent.click(nextOddTile);
+      expect(sfx.good).toHaveBeenCalledTimes(2);
     } finally {
       vi.useRealTimers();
     }
