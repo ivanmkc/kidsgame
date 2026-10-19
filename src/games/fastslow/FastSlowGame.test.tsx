@@ -1,48 +1,55 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { render, fireEvent, act, screen, cleanup } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { FastSlowGame } from './FastSlowGame';
-import { playSequence } from '../../music';
-import { sfx } from '../../sound';
+import React from "react";
+import {
+  render,
+  fireEvent,
+  act,
+  screen,
+  cleanup,
+  within,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { FastSlowGame } from "./FastSlowGame";
+import { playSequence } from "../../music";
+import { sfx } from "../../sound";
 
-vi.mock('../../sound', () => ({
+vi.mock("../../sound", () => ({
   sfx: { good: vi.fn(), wrong: vi.fn(), win: vi.fn(), tap: vi.fn() },
   say: vi.fn(),
 }));
 
-vi.mock('../../music', () => ({
+vi.mock("../../music", () => ({
   playSequence: vi.fn((notes, bpm, cb, onEnd) => {
     if (onEnd) onEnd();
   }),
   stopSequence: vi.fn(),
 }));
 
-describe('FastSlowGame UI interaction', () => {
+describe("FastSlowGame UI interaction", () => {
   afterEach(() => {
     cleanup();
   });
-  it('tracks history and prevents streaks of 3 identical speeds', () => {
+  it("tracks history and prevents streaks of 3 identical speeds", () => {
     vi.useFakeTimers();
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.12345);
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.12345);
     render(<FastSlowGame onHome={() => {}} difficulty="hard" lang="en" />);
 
     act(() => {
       vi.advanceTimersByTime(450);
     });
 
-    const playedSpeeds: ('fast' | 'slow')[] = [];
+    const playedSpeeds: ("fast" | "slow")[] = [];
 
     // Play 12 rounds (hard difficulty win condition) to check for streaks
     for (let i = 0; i < 12; i++) {
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
-      const speed = bpm >= 140 ? 'fast' : 'slow';
+      const speed = bpm >= 140 ? "fast" : "slow";
       playedSpeeds.push(speed);
 
-      const fastBtn = screen.getByTestId('fastslow-fast');
-      const slowBtn = screen.getByTestId('fastslow-slow');
-      const btn = speed === 'fast' ? fastBtn : slowBtn;
+      const fastBtn = screen.getByTestId("fastslow-fast");
+      const slowBtn = screen.getByTestId("fastslow-slow");
+      const btn = speed === "fast" ? fastBtn : slowBtn;
       fireEvent.click(btn);
 
       // wait for celebrate and next round
@@ -56,7 +63,9 @@ describe('FastSlowGame UI interaction', () => {
 
     // Assert that there are no streaks of 3
     for (let i = 2; i < playedSpeeds.length; i++) {
-      const streak = playedSpeeds[i] === playedSpeeds[i - 1] && playedSpeeds[i] === playedSpeeds[i - 2];
+      const streak =
+        playedSpeeds[i] === playedSpeeds[i - 1] &&
+        playedSpeeds[i] === playedSpeeds[i - 2];
       expect(streak).toBe(false);
     }
 
@@ -64,7 +73,7 @@ describe('FastSlowGame UI interaction', () => {
     vi.useRealTimers();
   });
 
-  it('prevents fast-tap hammering from queueing multiple round transitions', () => {
+  it("prevents fast-tap hammering from queueing multiple round transitions", () => {
     vi.useFakeTimers();
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -74,8 +83,10 @@ describe('FastSlowGame UI interaction', () => {
 
     const calls = vi.mocked(playSequence).mock.calls;
     const bpm = calls[calls.length - 1][1] as number;
-    const speed = bpm >= 140 ? 'fast' : 'slow';
-    const correctBtn = screen.getByTestId(speed === 'fast' ? 'fastslow-fast' : 'fastslow-slow');
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
 
     const playSeqCallsBefore = vi.mocked(playSequence).mock.calls.length;
     vi.mocked(sfx.good).mockClear();
@@ -98,19 +109,23 @@ describe('FastSlowGame UI interaction', () => {
     });
 
     // Only one round transition should occur
-    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqCallsBefore + 1);
-    expect(screen.getByTestId('fastslow-score').textContent).toBe('🎵 1/8');
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(
+      playSeqCallsBefore + 1,
+    );
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
 
     // Extra time: ensure no trailing timeouts fire to skip rounds
     act(() => {
       vi.advanceTimersByTime(2000);
     });
-    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqCallsBefore + 1);
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(
+      playSeqCallsBefore + 1,
+    );
 
     vi.useRealTimers();
   });
 
-  it('unlocks picks after resetting the game on win', () => {
+  it("unlocks picks after resetting the game on win", () => {
     vi.useFakeTimers();
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -121,15 +136,17 @@ describe('FastSlowGame UI interaction', () => {
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
-      const speed = bpm >= 140 ? 'fast' : 'slow';
-      const btn = screen.getByTestId(speed === 'fast' ? 'fastslow-fast' : 'fastslow-slow');
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const btn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
       fireEvent.click(btn);
       act(() => {
         vi.advanceTimersByTime(1100);
       });
     }
 
-    expect(screen.getByTestId('fastslow-score').textContent).toBe('🎵 8/8');
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 8/8");
 
     // WinOverlay arms after 600ms
     act(() => {
@@ -137,7 +154,7 @@ describe('FastSlowGame UI interaction', () => {
     });
 
     // Click play again
-    const playAgainBtn = screen.getByTestId('play-again');
+    const playAgainBtn = screen.getByTestId("play-again");
     fireEvent.click(playAgainBtn);
 
     // Initial listen phase of new game
@@ -145,16 +162,69 @@ describe('FastSlowGame UI interaction', () => {
       vi.advanceTimersByTime(450);
     });
 
-    expect(screen.getByTestId('fastslow-score').textContent).toBe('🎵 0/8');
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
 
     // Can pick in the new game
     const calls = vi.mocked(playSequence).mock.calls;
     const bpm = calls[calls.length - 1][1] as number;
-    const speed = bpm >= 140 ? 'fast' : 'slow';
-    const btn = screen.getByTestId(speed === 'fast' ? 'fastslow-fast' : 'fastslow-slow');
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const btn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
     fireEvent.click(btn);
 
-    expect(screen.getByTestId('fastslow-score').textContent).toBe('🎵 1/8');
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
+
+    vi.useRealTimers();
+  });
+
+  it("does not show celebration sparkles before a pick or on wrong buttons across rounds", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance through the initial listen phase so pick buttons appear
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const fastBtn = screen.getByTestId("fastslow-fast");
+    const slowBtn = screen.getByTestId("fastslow-slow");
+
+    // Before any user tap, neither button should contain celebration sparkles
+    expect(within(fastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(slowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const correctBtn = speed === "fast" ? fastBtn : slowBtn;
+    const wrongBtn = speed === "fast" ? slowBtn : fastBtn;
+
+    // Tap the wrong button first: still no celebration sparkles
+    fireEvent.click(wrongBtn);
+    expect(within(fastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(slowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    // Tap the correct button: only the correct button shows celebration sparkles
+    fireEvent.click(correctBtn);
+    expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(
+      0,
+    );
+    expect(within(wrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    // Advance through celebration (1000ms) and next round listen phase (450ms)
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    // In round 2 before any tap, neither button should show celebration sparkles
+    const round2FastBtn = screen.getByTestId("fastslow-fast");
+    const round2SlowBtn = screen.getByTestId("fastslow-slow");
+    expect(within(round2FastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(round2SlowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
     vi.useRealTimers();
   });
