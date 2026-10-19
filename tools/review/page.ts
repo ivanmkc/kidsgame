@@ -35,6 +35,7 @@ export function renderReviewPage(result: ReviewPageResult, opts: { assetHref: (r
   const games = Array.from(new Set(result.entries.map((e) => e.asset.game))).sort();
 
   const notes: string[] = [];
+  notes.push(`Coverage: ${result.entries.length} assets`);
   if (result.unmatched && result.unmatched.length > 0) {
     notes.push(`Unmatched findings: ${result.unmatched.length}`);
   }
