@@ -3,6 +3,7 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as music from '../../music';
+import * as logic from './logic';
 import { HighLowGame } from './HighLowGame';
 
 describe('HighLowGame UI', () => {
@@ -106,6 +107,46 @@ describe('HighLowGame UI', () => {
     act(() => {
       vi.advanceTimersByTime(500);
     });
+
+    vi.useRealTimers();
+  });
+
+  it('calling onPick multiple times synchronously on a correct answer only advances the game by one round', () => {
+    vi.useFakeTimers();
+    vi.spyOn(music, 'playSequence').mockImplementation((_notes, _tempo, _onNote, cb) => {
+      cb?.();
+      return () => {};
+    });
+
+    render(<HighLowGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Trigger timer to run playRound and setPhase('pick')
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    const highBtn = screen.getByTestId('highlow-high');
+    const lowBtn = screen.getByTestId('highlow-low');
+
+    expect(highBtn).toBeDefined();
+    expect(lowBtn).toBeDefined();
+
+    // Spy on makeHighLowRound to verify how many times it's called
+    const makeRoundSpy = vi.spyOn(logic, 'makeHighLowRound');
+
+    // Make isCorrect return true to test correct answer handling
+    vi.spyOn(logic, 'isCorrect').mockReturnValue(true);
+
+    act(() => {
+      fireEvent.click(highBtn);
+      fireEvent.click(highBtn);
+      fireEvent.click(highBtn);
+      fireEvent.click(highBtn);
+    });
+
+    // makeHighLowRound was called on mount, and then should only be
+    // called once when advancing the round.
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
 
     vi.useRealTimers();
   });
