@@ -1,0 +1,47 @@
+import { describe, expect, it } from 'vitest';
+import { RHYME_WORDS, WORDS, soundsFor, wordFor } from '../words';
+
+describe('RHYME_WORDS', () => {
+  it('contains Level 2 minimal pairs with correct phonics and rhymeKeys', () => {
+    const level2Words = [
+      { icon: 'cap', en: 'cap', letter: 'C', sound: 'kuh', rhymeKey: 'ap' },
+      { icon: 'cup', en: 'cup', letter: 'C', sound: 'kuh', rhymeKey: 'up' },
+      { icon: 'pan', en: 'pan', letter: 'P', sound: 'puh', rhymeKey: 'an' },
+      { icon: 'pen', en: 'pen', letter: 'P', sound: 'puh', rhymeKey: 'en' },
+      { icon: 'pin', en: 'pin', letter: 'P', sound: 'puh', rhymeKey: 'in' },
+    ];
+
+    for (const expected of level2Words) {
+      const match = RHYME_WORDS.find((w) => w.icon === expected.icon);
+      expect(match).toEqual(expected);
+    }
+  });
+
+  it('has consistent letter, sound, and rhymeKey on all entries', () => {
+    for (const entry of RHYME_WORDS) {
+      expect(entry.icon).toBeTruthy();
+      expect(entry.en).toBeTruthy();
+      expect(entry.letter).toMatch(/^[A-Z]$/);
+      expect(entry.sound).toBeTruthy();
+      expect(entry.rhymeKey).toBeTruthy();
+    }
+  });
+});
+
+describe('words helpers', () => {
+  it('wordFor returns localized word and romanization', () => {
+    const cat = WORDS.find((w) => w.icon === 'cat')!;
+    expect(wordFor(cat, 'en')).toEqual({ text: 'cat', roman: '' });
+    expect(wordFor(cat, 'ja')).toEqual({ text: cat.ja, roman: cat.jaR });
+    expect(wordFor(cat, 'cmn')).toEqual({ text: cat.cmn, roman: cat.cmnR });
+    expect(wordFor(cat, 'yue')).toEqual({ text: cat.yue, roman: cat.yueR });
+  });
+
+  it('soundsFor returns sound and any alternate sounds', () => {
+    const gift = WORDS.find((w) => w.icon === 'gift')!;
+    expect(soundsFor(gift)).toEqual(['puh', 'guh']);
+
+    const cat = WORDS.find((w) => w.icon === 'cat')!;
+    expect(soundsFor(cat)).toEqual(['kuh']);
+  });
+});
