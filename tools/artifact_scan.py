@@ -6,27 +6,23 @@ Layer 2 (judged): overlapping tiles of every scene image go through an
 inverted artifact-hunt question ("answer YES if you see ANY editing
 mistake"), threaded for speed. Flags are saved as crops for human review.
 
-Output: tmp/artifact_report.json + flagged crop PNGs.
+Output: tools/audit_out/artifact_scan/artifact_report.json + flagged crop PNGs.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import numpy as np
-from PIL import Image
-
 sys.path.insert(0, str(Path(__file__).parent))
 
-from gen.judge import ask_yes_no  # noqa: E402
-
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets" / "game"
 MANIFEST = ROOT / "src" / "assets" / "manifest.json"
-OUT = Path.home() / ".claude/jobs/c60063e9/tmp/artifacts"
+OUT = ROOT / "tools" / "audit_out" / "artifact_scan"
 
 ARTIFACT_Q = (
     "You are inspecting one region of a children's book illustration for "
@@ -51,6 +47,9 @@ def tiles(w: int, h: int, cols: int = 3, rows: int = 2, overlap: float = 0.25):
 
 def check_pair_identity(entry: dict) -> list[dict]:
     """Outside the diff rects (+6px feather margin), A and B must match."""
+    import numpy as np
+    from PIL import Image
+
     a = np.asarray(Image.open(ASSETS / entry["imageA"]).convert("RGB"), np.int16)
     b = np.asarray(Image.open(ASSETS / entry["imageB"]).convert("RGB"), np.int16)
     mask = np.zeros(a.shape[:2], bool)
@@ -68,6 +67,9 @@ def check_pair_identity(entry: dict) -> list[dict]:
 
 
 def judge_tile(args) -> dict | None:
+    from PIL import Image
+    from gen.judge import ask_yes_no
+
     path, rect, tag = args
     img = Image.open(ASSETS / path).convert("RGB")
     crop = img.crop(rect)
@@ -80,7 +82,24 @@ def judge_tile(args) -> dict | None:
     return None
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    global OUT
+
+    parser = argparse.ArgumentParser(
+        description="Sweep shipped scenes for editing artifacts."
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=OUT,
+        metavar="DIR",
+        help="output directory (default: %(default)s)",
+    )
+    args = parser.parse_args(argv)
+    OUT = args.out
+
+    from PIL import Image
+
     m = json.loads(MANIFEST.read_text())
     findings: list[dict] = []
 
@@ -110,8 +129,13 @@ def main() -> None:
                 print(f"  FLAG {res['asset']} tile {res.get('rect')}")
 
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "artifact_report.json").write_text(json.dumps(findings, indent=2))
-    print(f"\n{len(findings)} findings -> {OUT / 'artifact_report.json'}")
+    report_path = OUT / "artifact_report.json"
+    report_path.write_text(json.dumps(findings, indent=2))
+    try:
+        report_display = report_path.resolve().relative_to(ROOT.resolve())
+    except ValueError:
+        report_display = report_path
+    print(f"\n{len(findings)} findings -> {report_display}")
 
 
 if __name__ == "__main__":
