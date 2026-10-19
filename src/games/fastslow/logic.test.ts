@@ -18,28 +18,74 @@ describe('fast or slow', () => {
     }
   });
 
-  it('transposes melody pitches', () => {
+  it('transposes melody pitches and varies melodies', () => {
     let transposed = false;
-    for (let i = 0; i < 20; i++) {
+    const melodySignatures = new Set<string>();
+    for (let i = 0; i < 50; i++) {
       const rng = makeRng(i);
       const r = makeFastSlowRound(rng, 'easy');
       if (r.notes[0].m !== 60) transposed = true;
+      melodySignatures.add(r.notes.map((n) => n.m - r.notes[0].m).join(','));
     }
     expect(transposed).toBe(true);
+    expect(melodySignatures.size).toBeGreaterThan(1);
   });
 
-  it('generates rounds with valid speed', () => {
-    for (let seed = 1; seed <= 50; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+  it('generates rounds with valid speed and varying BPMs within difficulty bounds', () => {
+    for (const d of ['easy', 'medium', 'hard'] as const) {
+      const fastBpms = new Set<number>();
+      const slowBpms = new Set<number>();
+      for (let seed = 1; seed <= 50; seed++) {
         const rng = makeRng(seed);
         const r = makeFastSlowRound(rng, d);
-        expect(r.bpm).toBeGreaterThanOrEqual(60);
-        expect(r.bpm).toBeLessThanOrEqual(200);
-        expect(r.notes.length).toBeGreaterThan(0);
         const speed = getActualSpeed(r);
-        expect(['fast', 'slow']).toContain(speed);
+        if (speed === 'fast') {
+          fastBpms.add(r.bpm);
+          if (d === 'easy') {
+            expect(r.bpm).toBeGreaterThanOrEqual(150);
+            expect(r.bpm).toBeLessThanOrEqual(170);
+          } else if (d === 'medium') {
+            expect(r.bpm).toBeGreaterThanOrEqual(145);
+            expect(r.bpm).toBeLessThanOrEqual(165);
+          } else {
+            expect(r.bpm).toBeGreaterThanOrEqual(140);
+            expect(r.bpm).toBeLessThanOrEqual(160);
+          }
+        } else {
+          slowBpms.add(r.bpm);
+          if (d === 'easy') {
+            expect(r.bpm).toBeGreaterThanOrEqual(70);
+            expect(r.bpm).toBeLessThanOrEqual(90);
+          } else if (d === 'medium') {
+            expect(r.bpm).toBeGreaterThanOrEqual(75);
+            expect(r.bpm).toBeLessThanOrEqual(95);
+          } else {
+            expect(r.bpm).toBeGreaterThanOrEqual(80);
+            expect(r.bpm).toBeLessThanOrEqual(100);
+          }
+        }
       }
+      expect(fastBpms.size).toBeGreaterThan(2);
+      expect(slowBpms.size).toBeGreaterThan(2);
     }
+  });
+
+  it('uses history-weighted probability when history length is >= 1', () => {
+    let fastFollowedBySlow = 0;
+    let slowFollowedByFast = 0;
+    const trials = 200;
+    for (let i = 1; i <= trials; i++) {
+      const rng = makeRng(i);
+      const r1 = makeFastSlowRound(rng, 'easy', ['fast']);
+      if (getActualSpeed(r1) === 'slow') fastFollowedBySlow++;
+
+      const rng2 = makeRng(i);
+      const r2 = makeFastSlowRound(rng2, 'easy', ['slow']);
+      if (getActualSpeed(r2) === 'fast') slowFollowedByFast++;
+    }
+    // Weighted probabilities are configured to favor switching (70% chance of opposite speed)
+    expect(fastFollowedBySlow / trials).toBeGreaterThan(0.5);
+    expect(slowFollowedByFast / trials).toBeGreaterThan(0.5);
   });
 
   it('isCorrect agrees with the tempo played, and rounds do not store answer', () => {
