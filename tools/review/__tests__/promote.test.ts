@@ -305,6 +305,7 @@ describe('promoteAssets copy logic and pipeline execution', () => {
     expect(calls).toEqual([
       'python3 tools/compress_assets.py',
       'node tools/gen_images_ts.mjs',
+      'npx tsx tools/artifact_review/make_scan_plan.ts',
       'python3 tools/artifact_scan.py --out tools/audit_out/artifact_scan',
       'npx tsc --noEmit',
       'npx vitest run',

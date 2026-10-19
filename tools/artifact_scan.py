@@ -1,10 +1,9 @@
 """Artifact detection phase: sweep every shipped scene for editing artifacts.
 
-Layer 1 (deterministic): a diff pair must be pixel-identical outside its
-difference rects (+feather margin) — any violation is a pipeline bug.
-Layer 2 (judged): overlapping tiles of every scene image go through an
-inverted artifact-hunt question ("answer YES if you see ANY editing
-mistake"), threaded for speed. Flags are saved as crops for human review.
+Reads scan jobs from tools/audit_out/scan_plan.json. Overlapping tiles of every
+scene image go through an inverted artifact-hunt question ("answer YES if you
+see ANY editing mistake"), threaded for speed. Flags are saved as crops for
+human review.
 
 Output: tools/audit_out/artifact_scan/artifact_report.json + flagged crop PNGs.
 """
@@ -21,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets" / "game"
-MANIFEST = ROOT / "src" / "assets" / "manifest.json"
+DEFAULT_PLAN = ROOT / "tools" / "audit_out" / "scan_plan.json"
 OUT = ROOT / "tools" / "audit_out" / "artifact_scan"
 
 ARTIFACT_Q = (
@@ -33,53 +32,73 @@ ARTIFACT_Q = (
 )
 
 
-def tiles(w: int, h: int, cols: int = 3, rows: int = 2, overlap: float = 0.25):
-    tw, th = w // cols, h // rows
-    ox, oy = int(tw * overlap), int(th * overlap)
-    for r in range(rows):
-        for c in range(cols):
-            x0 = max(0, c * tw - ox)
-            y0 = max(0, r * th - oy)
-            x1 = min(w, (c + 1) * tw + ox)
-            y1 = min(h, (r + 1) * th + oy)
-            yield (x0, y0, x1, y1)
+def _resolve_image_path(path: str | Path) -> Path:
+    p = Path(path)
+    if p.is_absolute():
+        return p
+    return ROOT / p
 
 
-def check_pair_identity(entry: dict) -> list[dict]:
-    """Outside the diff rects (+6px feather margin), A and B must match."""
-    import numpy as np
-    from PIL import Image
 
-    a = np.asarray(Image.open(ASSETS / entry["imageA"]).convert("RGB"), np.int16)
-    b = np.asarray(Image.open(ASSETS / entry["imageB"]).convert("RGB"), np.int16)
-    mask = np.zeros(a.shape[:2], bool)
-    for d in entry["diffs"]:
-        y0, y1 = max(0, d["y"] - 6), min(a.shape[0], d["y"] + d["h"] + 6)
-        x0, x1 = max(0, d["x"] - 6), min(a.shape[1], d["x"] + d["w"] + 6)
-        mask[y0:y1, x0:x1] = True
-    outside = np.abs(a - b).sum(-1) > 60  # JPEG noise tolerance
-    outside[mask] = False
-    frac = float(outside.mean())
-    if frac > 0.002:
-        return [{"asset": entry["imageB"], "kind": "pair-identity",
-                 "detail": f"{frac:.3%} of out-of-rect pixels differ"}]
-    return []
+def load_scan_jobs(plan_path: Path = DEFAULT_PLAN) -> list[dict]:
+    """Load and flatten batch lists of ScanJob dicts from scan_plan.json."""
+    if not plan_path.exists():
+        raise FileNotFoundError(f"Scan plan not found: {plan_path}")
+    batches = json.loads(plan_path.read_text())
+    jobs: list[dict] = []
+    for batch in batches:
+        if isinstance(batch, list):
+            jobs.extend(batch)
+        elif isinstance(batch, dict):
+            jobs.append(batch)
+    return jobs
 
 
-def judge_tile(args) -> dict | None:
-    from PIL import Image
+def judge_tile(job: dict) -> dict | None:
     from gen.judge import ask_yes_no
+    from PIL import Image
 
-    path, rect, tag = args
-    img = Image.open(ASSETS / path).convert("RGB")
+    asset = job["asset"]
+    path = asset["path"]
+    rect = tuple(job["rect"])
+    tag = job["tag"]
+
+    img_path = _resolve_image_path(path)
+    img = Image.open(img_path).convert("RGB")
     crop = img.crop(rect)
     if ask_yes_no(ARTIFACT_Q, [crop]):
         OUT.mkdir(parents=True, exist_ok=True)
         crop_name = f"{tag}.png"
         crop.save(OUT / crop_name)
-        return {"asset": path, "kind": "judged-artifact",
-                "rect": list(rect), "crop": crop_name}
+        return {
+            "asset": path,
+            "kind": "judged-artifact",
+            "rect": list(rect),
+            "crop": crop_name,
+        }
     return None
+
+
+def scan_artifacts(
+    jobs: list[dict],
+    out_dir: Path = OUT,
+    max_workers: int = 8,
+) -> list[dict]:
+    global OUT
+    OUT = out_dir
+
+    findings: list[dict] = []
+    print(f"judging {len(jobs)} tiles...")
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for res in pool.map(judge_tile, jobs):
+            if res:
+                findings.append(res)
+                print(f"  FLAG {res['asset']} tile {res.get('rect')}")
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report_path = out_dir / "artifact_report.json"
+    report_path.write_text(json.dumps(findings, indent=2))
+    return findings
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -89,48 +108,32 @@ def main(argv: list[str] | None = None) -> None:
         description="Sweep shipped scenes for editing artifacts."
     )
     parser.add_argument(
+        "--plan",
+        type=Path,
+        default=DEFAULT_PLAN,
+        metavar="FILE",
+        help="scan plan path (default: %(default)s)",
+    )
+    parser.add_argument(
         "--out",
         type=Path,
         default=OUT,
         metavar="DIR",
         help="output directory (default: %(default)s)",
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=8,
+        help="number of parallel workers (default: %(default)s)",
+    )
     args = parser.parse_args(argv)
     OUT = args.out
 
-    from PIL import Image
+    jobs = load_scan_jobs(args.plan)
+    findings = scan_artifacts(jobs, out_dir=OUT, max_workers=args.workers)
 
-    m = json.loads(MANIFEST.read_text())
-    findings: list[dict] = []
-
-    for entry in m["diff"]:
-        findings.extend(check_pair_identity(entry))
-
-    jobs = []
-    for entry in m["diff"]:
-        for img_key in ("imageA", "imageB"):
-            path = entry[img_key]
-            with Image.open(ASSETS / path) as im:
-                w, h = im.size
-            for i, rect in enumerate(tiles(w, h)):
-                jobs.append((path, rect, f"{entry['id']}_{img_key}_{i}"))
-    for entry in m["hidden"]:
-        path = entry["image"]
-        with Image.open(ASSETS / path) as im:
-            w, h = im.size
-        for i, rect in enumerate(tiles(w, h)):
-            jobs.append((path, rect, f"{entry['id']}_hidden_{i}"))
-
-    print(f"deterministic pair checks done ({len(findings)} flags); judging {len(jobs)} tiles...")
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        for res in pool.map(judge_tile, jobs):
-            if res:
-                findings.append(res)
-                print(f"  FLAG {res['asset']} tile {res.get('rect')}")
-
-    OUT.mkdir(parents=True, exist_ok=True)
     report_path = OUT / "artifact_report.json"
-    report_path.write_text(json.dumps(findings, indent=2))
     try:
         report_display = report_path.resolve().relative_to(ROOT.resolve())
     except ValueError:

@@ -151,6 +151,7 @@ export function promoteAssets(options: PromoteOptions = {}): PromoteResult {
 
   runStep('python3', ['tools/compress_assets.py'], rootDir);
   runStep('node', ['tools/gen_images_ts.mjs'], rootDir);
+  runStep('npx', ['tsx', 'tools/artifact_review/make_scan_plan.ts'], rootDir);
   const scanOutDir = 'tools/audit_out/artifact_scan';
   runStep('python3', ['tools/artifact_scan.py', '--out', scanOutDir], rootDir);
 
