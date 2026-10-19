@@ -1,6 +1,12 @@
 import { Lang } from "../../lang";
-import { Rng } from "../../rng";
-import { LEVEL_1_WORDS, Word } from "./data";
+import { Rng, shuffle, sample } from "../../rng";
+import {
+  LEVEL_1_WORDS,
+  LEVEL_2_WORDS,
+  LEVEL_3_WORDS,
+  Word,
+  getLevelConfig,
+} from "./data";
 
 /**
  * Return the localized spoken text for a word, falling back to English.
@@ -16,7 +22,11 @@ export function getWordText(word: Word, lang: Lang): string {
  * Return all speech lines that can be spoken in Listen and Choose.
  * Pre-rendered by the offline TTS pipeline.
  */
-export function speechLines(words: Word[] = LEVEL_1_WORDS): string[] {
+export function speechLines(
+  words: Word[] = Array.from(
+    new Set([...LEVEL_1_WORDS, ...LEVEL_2_WORDS, ...LEVEL_3_WORDS]),
+  ),
+): string[] {
   const lines = new Set<string>();
   for (const w of words) {
     for (const lang of ["en", "ja", "cmn", "yue"] as const) {
@@ -47,36 +57,70 @@ export interface GameState {
 export function generateRound(
   rng: Rng = Math.random,
   words: Word[] = LEVEL_1_WORDS,
+  numChoices: number = 2,
   avoidIcon?: string,
+  prioritizeRhymes: boolean = false,
 ): Round {
   if (words.length < 2) {
     throw new Error("words pool must have at least 2 words");
   }
+
   const targetPool =
-    avoidIcon && words.length > 2
+    avoidIcon && words.length > numChoices
       ? words.filter((w) => w.icon !== avoidIcon)
       : words;
   const target = targetPool[Math.floor(rng() * targetPool.length)];
-  const distractors = words.filter(
-    (w) => w.icon !== target.icon && !target.nameTwins?.includes(w.icon),
+
+  const allDistractors = words.filter(
+    (w) =>
+      w.icon !== target.icon &&
+      !target.nameTwins?.includes(w.icon) &&
+      !w.nameTwins?.includes(target.icon),
   );
-  if (distractors.length === 0) {
-    throw new Error("no valid distractor found for target");
+
+  let distractors: Word[] = [];
+
+  if (prioritizeRhymes) {
+    const priorityDistractors = allDistractors.filter(
+      (w) => target.rhymeKey && w.rhymeKey === target.rhymeKey,
+    );
+    const regularDistractors = allDistractors.filter(
+      (w) => !priorityDistractors.includes(w),
+    );
+
+    const shuffledPriority = shuffle(rng, priorityDistractors);
+    const shuffledRegular = shuffle(rng, regularDistractors);
+
+    const combined = [...shuffledPriority, ...shuffledRegular];
+    if (combined.length < numChoices - 1) {
+      throw new Error("no valid distractor found for target");
+    }
+    distractors = combined.slice(0, numChoices - 1);
+  } else {
+    if (allDistractors.length < numChoices - 1) {
+      throw new Error("no valid distractor found for target");
+    }
+    distractors = sample(rng, allDistractors, numChoices - 1);
   }
-  const distractor = distractors[Math.floor(rng() * distractors.length)];
-  const choices = rng() < 0.5 ? [target, distractor] : [distractor, target];
-  return { target, distractor, choices };
+
+  const choices = shuffle(rng, [target, ...distractors]);
+
+  return { target, distractor: distractors[0], choices };
 }
 
 /**
  * Initialize game state with a valid round from Level 1.
  */
-export function initGameState(
-  rng: Rng = Math.random,
-  words: Word[] = LEVEL_1_WORDS,
-): GameState {
+export function initGameState(rng: Rng = Math.random): GameState {
+  const config = getLevelConfig(1);
   return {
-    currentRound: generateRound(rng, words),
+    currentRound: generateRound(
+      rng,
+      config.words,
+      config.numChoices,
+      undefined,
+      config.prioritizeRhymes,
+    ),
     streak: 0,
     wrongGuesses: 0,
     highlightCorrect: false,
@@ -100,16 +144,32 @@ export function updateGameState(
   state: GameState,
   guessIcon: string,
   rng: Rng = Math.random,
-  words: Word[] = LEVEL_1_WORDS,
 ): GameState {
   const isCorrect = evaluateGuess(state.currentRound, guessIcon);
   if (isCorrect) {
+    const nextStreak = state.streak + 1;
+    let nextLevel = 1;
+    if (nextStreak >= 20) {
+      nextLevel = 3;
+    } else if (nextStreak >= 10) {
+      nextLevel = 2;
+    }
+
+    const config = getLevelConfig(nextLevel);
+
     return {
       ...state,
-      streak: state.streak + 1,
+      streak: nextStreak,
       wrongGuesses: 0,
       highlightCorrect: false,
-      currentRound: generateRound(rng, words, state.currentRound.target.icon),
+      level: nextLevel,
+      currentRound: generateRound(
+        rng,
+        config.words,
+        config.numChoices,
+        state.currentRound.target.icon,
+        config.prioritizeRhymes,
+      ),
     };
   }
   const nextWrong = state.wrongGuesses + 1;
