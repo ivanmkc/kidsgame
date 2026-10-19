@@ -1,5 +1,5 @@
-import { Rng, randInt } from '../../rng';
-import { Difficulty } from '../../difficulty';
+import { Rng, randInt } from "../../rng";
+import { Difficulty } from "../../difficulty";
 
 export interface SteadyBeatRound {
   bpm: number;
@@ -7,20 +7,20 @@ export interface SteadyBeatRound {
 }
 
 function bpmRange(d: Difficulty): [number, number] {
-  if (d === 'easy') return [80, 100];
-  if (d === 'medium') return [70, 110];
+  if (d === "easy") return [80, 100];
+  if (d === "medium") return [70, 110];
   return [60, 120];
 }
 
 export function windowMs(d: Difficulty): number {
-  if (d === 'easy') return 250;
-  if (d === 'medium') return 180;
+  if (d === "easy") return 250;
+  if (d === "medium") return 180;
   return 120;
 }
 
 export function roundsToWin(d: Difficulty): number {
-  if (d === 'easy') return 4;
-  if (d === 'medium') return 5;
+  if (d === "easy") return 4;
+  if (d === "medium") return 5;
   return 6;
 }
 
@@ -41,7 +41,7 @@ export function scoreTaps(
   let hits = 0;
   const beatTimes: number[] = [];
   for (let i = 0; i < round.beatsPerRound; i++) {
-    beatTimes.push(startMs + i * beatMs);
+    beatTimes.push(startMs + (i + 1) * beatMs);
   }
   const used = new Set<number>();
   for (const tap of tapTimesMs) {
@@ -58,8 +58,8 @@ export function scoreTaps(
 }
 
 export function passThreshold(d: Difficulty): number {
-  if (d === 'easy') return 0.5;
-  if (d === 'medium') return 0.625;
+  if (d === "easy") return 0.5;
+  if (d === "medium") return 0.625;
   return 0.75;
 }
 
