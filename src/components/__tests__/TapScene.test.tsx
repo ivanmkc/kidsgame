@@ -1,7 +1,7 @@
 import * as React from "react";
 import { renderToString } from "react-dom/server";
-import { beforeEach, describe, expect, it, test, vi } from "vitest";
-import { Animated, type PressableProps } from "react-native";
+import { describe, expect, it, test, vi } from "vitest";
+import { Animated } from "react-native";
 import { TapScene } from "../TapScene";
 
 const effects: React.EffectCallback[] = [];
@@ -14,24 +14,6 @@ vi.mock("react", async (importOriginal) => {
     default: {
       ...actual,
       useEffect: mockEffect,
-    },
-  };
-});
-
-type FakePressableProps = Partial<PressableProps>;
-const capturedPressableMap: Record<string, FakePressableProps> = {};
-
-vi.mock("react-native", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  const ActualPressable =
-    actual.Pressable as React.ComponentType<FakePressableProps>;
-  return {
-    ...actual,
-    Pressable: (props: FakePressableProps) => {
-      if (typeof props.testID === "string") {
-        capturedPressableMap[props.testID] = props;
-      }
-      return React.createElement(ActualPressable, props);
     },
   };
 });
@@ -73,58 +55,67 @@ test("TapScene hint loop stops on unmount", () => {
   expect(stopSpy).toHaveBeenCalled();
 });
 
-describe("TapScene hitSlop minimum touch size", () => {
-  beforeEach(() => {
-    for (const k in capturedPressableMap) {
-      delete capturedPressableMap[k];
-    }
-  });
+describe("TapScene minimum touch target size", () => {
 
   const mockSource = { uri: "stub.png" } as unknown as number;
 
-  it("applies computed hitSlop to small target Pressable so touch area is at least 44x44px", () => {
-    renderToString(
+  it("enforces 44px minimum touch target size on small screens and centers it", () => {
+    // Farm white duck: w=99, h=88 in 1280x720 scene.
+    // On mobile portrait with displayWidth=366 (scale = 366 / 1280 = 0.2859375),
+    // raw size with PAD=8 was (99 + 16) * scale = 32.88px by (88 + 16) * scale = 29.74px (< 44px).
+    const html = renderToString(
       <TapScene
         source={mockSource}
-        sceneW={100}
-        sceneH={100}
-        displayWidth={100}
-        boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+        sceneW={1280}
+        sceneH={720}
+        displayWidth={366}
+        boxes={[
+          {
+            id: "duck",
+            box: { x: 1105, y: 388, w: 99, h: 88 },
+          },
+        ]}
         foundIds={[]}
         onHit={() => {}}
         onMiss={() => {}}
-        testIDPrefix="left"
+        testIDPrefix="test"
       />,
     );
 
-    const target = capturedPressableMap["left-target-small"];
-    expect(target).toBeDefined();
-    // PAD = 8. At scale 1, w = 26, h = 26.
-    expect(target.hitSlop).toEqual({ top: 9, bottom: 9, left: 9, right: 9 });
+    expect(html).toContain('data-testid="test-target-duck"');
+    expect(html).toContain("width:44px");
+    expect(html).toContain("height:44px");
+    expect(html).toContain("left:308.11");
+    expect(html).toContain("top:101.525px");
+    expect(html).toContain('role="button"');
   });
 
-  it("applies 0 hitSlop for target Pressable already larger than 44px", () => {
-    renderToString(
+  it("preserves larger hitboxes that exceed 44px", () => {
+    const html = renderToString(
       <TapScene
         source={mockSource}
-        sceneW={100}
-        sceneH={100}
-        displayWidth={100}
-        boxes={[{ id: "large", box: { x: 10, y: 10, w: 50, h: 50 } }]}
+        sceneW={1000}
+        sceneH={1000}
+        displayWidth={1000}
+        boxes={[{ id: "barn", box: { x: 100, y: 100, w: 400, h: 300 } }]}
         foundIds={[]}
         onHit={() => {}}
         onMiss={() => {}}
-        testIDPrefix="right"
+        testIDPrefix="test"
       />,
     );
 
-    const target = capturedPressableMap["right-target-large"];
-    expect(target).toBeDefined();
-    expect(target.hitSlop).toEqual({ top: 0, bottom: 0, left: 0, right: 0 });
+    expect(html).toContain('data-testid="test-target-barn"');
+    // (400 + 2 * 8) * 1 = 416px, (300 + 2 * 8) * 1 = 316px
+    expect(html).toContain("width:416px");
+    expect(html).toContain("height:316px");
+    expect(html).toContain("left:92px");
+    expect(html).toContain("top:92px");
+    expect(html).toContain('role="button"');
   });
 
   it("pads only the sub-44 dimension on asymmetric targets", () => {
-    renderToString(
+    const html = renderToString(
       <TapScene
         source={mockSource}
         sceneW={100}
@@ -138,14 +129,16 @@ describe("TapScene hitSlop minimum touch size", () => {
       />,
     );
 
-    const target = capturedPressableMap["diff-target-asym"];
-    expect(target).toBeDefined();
-    // w = 26 (needs 9+9), h = 66 (needs 0)
-    expect(target.hitSlop).toEqual({ top: 0, bottom: 0, left: 9, right: 9 });
+    // rawW = (10 + 16) * 1 = 26px -> min 44px. cx = 15. left = 15 - 22 = -7px.
+    // rawH = (50 + 16) * 1 = 66px -> unchanged 66px. cy = 35. top = 35 - 33 = 2px.
+    expect(html).toContain("width:44px");
+    expect(html).toContain("height:66px");
+    expect(html).toContain("left:-7px");
+    expect(html).toContain("top:2px");
   });
 
   it("guarantees at least 44px touch targets when scaled down on smaller screens", () => {
-    renderToString(
+    const html = renderToString(
       <TapScene
         source={mockSource}
         sceneW={800}
@@ -159,9 +152,54 @@ describe("TapScene hitSlop minimum touch size", () => {
       />,
     );
 
-    const target = capturedPressableMap["hidden-target-scaled"];
-    expect(target).toBeDefined();
-    // scale = 0.5. w = (40 + 16) * 0.5 = 28. (44 - 28) / 2 = 8.
-    expect(target.hitSlop).toEqual({ top: 8, bottom: 8, left: 8, right: 8 });
+    // scale = 0.5. rawW = (40 + 16) * 0.5 = 28 -> min 44px.
+    // rawH = (40 + 16) * 0.5 = 28 -> min 44px.
+    // cx = (100 + 20) * 0.5 = 60. left = 60 - 22 = 38px.
+    // cy = (100 + 20) * 0.5 = 60. top = 60 - 22 = 38px.
+    expect(html).toContain("width:44px");
+    expect(html).toContain("height:44px");
+    expect(html).toContain("left:38px");
+    expect(html).toContain("top:38px");
+  });
+
+  it("provides accessibilityRole button", () => {
+    const html = renderToString(
+      <TapScene
+        source={mockSource}
+        sceneW={100}
+        sceneH={100}
+        displayWidth={100}
+        boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+        foundIds={[]}
+        onHit={() => {}}
+        onMiss={() => {}}
+        testIDPrefix="left"
+      />,
+    );
+
+    expect(html).toContain('role="button"');
+  });
+
+  it("sizes the visual ring to raw dimensions rather than stretching to the enlarged touch target", () => {
+    // rawW = (10 + 16) * 1 = 26px, rawH = (10 + 16) * 1 = 26px.
+    // Touch target is enlarged to 44x44px.
+    const html = renderToString(
+      <TapScene
+        source={mockSource}
+        sceneW={100}
+        sceneH={100}
+        displayWidth={100}
+        boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+        foundIds={["small"]}
+        onHit={() => {}}
+        onMiss={() => {}}
+        testIDPrefix="left"
+      />,
+    );
+
+    // Touch target Pressable expands to minimum 44x44px
+    expect(html).toContain("width:44px;height:44px");
+    // Inner visual ring container retains exact raw dimensions (26x26px)
+    expect(html).toContain("width:26px;height:26px");
   });
 });
