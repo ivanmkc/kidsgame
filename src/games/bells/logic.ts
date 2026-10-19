@@ -40,9 +40,12 @@ export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
     bells.push({ midi: PENTATONIC[i], color: BELL_COLORS[i] });
   }
   const sequence: number[] = [];
-  for (let i = 0; i < len; i++) {
-    sequence.push(randInt(rng, n));
-  }
+  do {
+    sequence.length = 0;
+    for (let i = 0; i < len; i++) {
+      sequence.push(randInt(rng, n));
+    }
+  } while (len > 1 && sequence.every((v) => v === sequence[0]));
   return { bells, sequence };
 }
 

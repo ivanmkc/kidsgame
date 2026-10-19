@@ -23,7 +23,7 @@ describe('BellsGame', () => {
 
   it("replay button restarts demo and clears taps", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0]
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [1, 0]
     const playNoteSpy = vi
       .spyOn(music, "playNote")
       .mockImplementation(() => {});
@@ -39,8 +39,9 @@ describe('BellsGame', () => {
     expect(screen.getByText("Your turn! (0/2)", { exact: false })).toBeTruthy();
 
     // Tap the first correct bell
-    const bell0 = screen.getByTestId("bell-0");
-    fireEvent.click(bell0);
+    const round = makeBellsRound(makeRng(0), "easy");
+    const bellFirst = screen.getByTestId(`bell-${round.sequence[0]}`);
+    fireEvent.click(bellFirst);
 
     // Tap count should be 1
     expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
@@ -115,11 +116,12 @@ describe('BellsGame', () => {
     });
     playNoteSpy.mockClear();
 
-    const bell0 = screen.getByTestId("bell-0");
-    // Rapidly tap bell-0 twice in the same tick / render cycle
+    const round = makeBellsRound(makeRng(0), "easy");
+    // Rapidly tap the correct sequence in the same tick / render cycle
     act(() => {
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
+      for (const idx of round.sequence) {
+        fireEvent.click(screen.getByTestId(`bell-${idx}`));
+      }
     });
 
     expect(screen.getByTestId("bells-score").textContent).toContain("1/5");
@@ -143,14 +145,15 @@ describe('BellsGame', () => {
     });
     playNoteSpy.mockClear();
 
-    const bell0 = screen.getByTestId("bell-0");
+    const round = makeBellsRound(makeRng(0), "easy");
     // Rapidly hammer 5 times when sequence length is 2
     act(() => {
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
+      for (const idx of round.sequence) {
+        fireEvent.click(screen.getByTestId(`bell-${idx}`));
+      }
+      fireEvent.click(screen.getByTestId(`bell-${round.sequence[0]}`));
+      fireEvent.click(screen.getByTestId(`bell-${round.sequence[0]}`));
+      fireEvent.click(screen.getByTestId(`bell-${round.sequence[0]}`));
     });
 
     expect(screen.getByTestId("bells-score").textContent).toContain("1/5");
@@ -324,7 +327,7 @@ describe('BellsGame', () => {
 
   it('correct sequence triggers success sound and advances round', () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [0, 0] for easy
+    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [1, 0] for easy
     const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
     const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
 
@@ -335,9 +338,10 @@ describe('BellsGame', () => {
     });
     playNoteSpy.mockClear();
 
-    const bell0 = screen.getByTestId('bell-0');
-    fireEvent.click(bell0);
-    fireEvent.click(bell0);
+    const round = makeBellsRound(makeRng(0), 'easy');
+    for (const idx of round.sequence) {
+      fireEvent.click(screen.getByTestId(`bell-${idx}`));
+    }
 
     expect(goodSpy).toHaveBeenCalledTimes(1);
 

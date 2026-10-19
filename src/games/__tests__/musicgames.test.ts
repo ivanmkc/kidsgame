@@ -102,15 +102,32 @@ describe("melody bells", () => {
     }
   });
 
+  it("never generates monotone sequences where all notes are identical", () => {
+    const rngRepro = makeRng(12345);
+    for (let round = 0; round < 5; round++) {
+      const r = makeBellsRound(rngRepro, "easy");
+      expect(r.sequence.every((v) => v === r.sequence[0])).toBe(false);
+    }
+
+    for (let seed = 1; seed <= 100; seed++) {
+      for (const d of ["easy", "medium", "hard"] as const) {
+        const rng = makeRng(seed);
+        const r = makeBellsRound(rng, d);
+        expect(r.sequence.every((v) => v === r.sequence[0])).toBe(false);
+      }
+    }
+  });
+
   it("judgeTap validates prefix and completion correctly", () => {
     const rng = makeRng(42);
     const r = makeBellsRound(rng, "easy");
     const [first, second] = r.sequence;
     const wrongFirst = (first + 1) % r.bells.length;
+    const wrongSecond = (second + 1) % r.bells.length;
     expect(judgeTap(r, [], wrongFirst)).toBe("wrong");
     expect(judgeTap(r, [], first)).toBe("continue");
     expect(judgeTap(r, [first], second)).toBe("complete");
-    expect(judgeTap(r, [first], wrongFirst)).toBe("wrong");
+    expect(judgeTap(r, [first], wrongSecond)).toBe("wrong");
   });
 
   it("roundsToWin increases with difficulty", () => {
