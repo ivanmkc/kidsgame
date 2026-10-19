@@ -1,4 +1,5 @@
 import { Difficulty } from "../../difficulty";
+import { t } from "../../i18n";
 import { Lang, numberWord } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
 
@@ -209,6 +210,7 @@ export const PRAISE: Record<Lang, string> = {
 export function speechLines(): string[] {
   const s = new Set<string>();
   (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
+    s.add(t(L, "shell.count.sub"));
     s.add(PROMPTS[L]);
     s.add(PRAISE[L]);
   });

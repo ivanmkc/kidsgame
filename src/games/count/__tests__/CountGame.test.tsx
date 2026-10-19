@@ -105,6 +105,65 @@ describe("CountGame", () => {
     // The final tap completes the count round and calls sayThen to switch to quiz
     expect(sayThenSpy).toHaveBeenCalledOnce();
   });
+
+  it("speaks instructional prompt upon round start in count phase", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+
+    render(<CountGame onHome={noop} difficulty="easy" lang="en" />);
+
+    expect(saySpy).toHaveBeenCalledWith(
+      "Tap every friend, then tell me how many",
+    );
+  });
+
+  it("speaks localized instructional prompt upon round start in other languages", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+
+    render(<CountGame onHome={noop} difficulty="easy" lang="ja" />);
+
+    expect(saySpy).toHaveBeenCalledWith(
+      "みんなを タップして いくつか おしえて",
+    );
+  });
+
+  it("speaks instructional prompt again upon advancing to next round", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    let sayThenDone: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      sayThenDone = done;
+    });
+
+    render(<CountGame onHome={noop} difficulty="easy" lang="en" />);
+
+    expect(saySpy).toHaveBeenCalledWith(
+      "Tap every friend, then tell me how many",
+    );
+    saySpy.mockClear();
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(saySpy).toHaveBeenCalledWith("How many?");
+    saySpy.mockClear();
+
+    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+    fireEvent.click(answerChoices[answerChoices.length - 1]);
+
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(saySpy).toHaveBeenCalledWith(
+      "Tap every friend, then tell me how many",
+    );
+  });
 });
 
 describe("logic: applyPickAnswer", () => {
