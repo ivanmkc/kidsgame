@@ -10,9 +10,6 @@ const MELODY: SeqNote[] = [
 export interface FastSlowRound {
   notes: SeqNote[];
   bpm: number;
-  /** Derived from `bpm` — the kid answers from what the melody sounded
-   *  like, so the field must never be able to disagree with it. */
-  answer: 'fast' | 'slow';
 }
 
 /** Every bpm a round can carry sits clearly on one side of this line
@@ -37,7 +34,6 @@ export function makeFastSlowRound(
   history: ('fast' | 'slow')[] = []
 ): FastSlowRound {
   const [slow, fast] = bpmPair(d);
-  
   let useFast: boolean;
   const len = history.length;
   if (len >= 2 && history[len - 1] === history[len - 2]) {
@@ -50,7 +46,7 @@ export function makeFastSlowRound(
   const transpose = Math.floor(rng() * 13) - 6;
   const notes = MELODY.map((n) => ({ ...n, m: n.m + transpose }));
   
-  return { notes, bpm, answer: speedOf(bpm) };
+  return { notes, bpm };
 }
 
 function speedOf(bpm: number): 'fast' | 'slow' {

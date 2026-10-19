@@ -11,7 +11,7 @@ import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
 import { playSequence, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeFastSlowRound, roundsToWin, getActualSpeed, FastSlowRound } from './logic';
+import { makeFastSlowRound, roundsToWin, getActualSpeed, isCorrect, FastSlowRound } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -23,7 +23,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [history, setHistory] = useState<('fast' | 'slow')[]>([]);
-  const [round, setRound] = useState<FastSlowRound>(() => makeFastSlowRound(rngRef.current, difficulty, []));
+  const [round, setRound] = useState<FastSlowRound>(
+    () => makeFastSlowRound(rngRef.current, difficulty, [])
+  );
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'pick' | 'celebrate'>('listen');
   const [wrongPick, setWrongPick] = useState<'fast' | 'slow' | null>(null);
@@ -47,14 +49,13 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: 'fast' | 'slow') => {
     if (won || phase !== 'pick') return;
-    const actual = getActualSpeed(round);
-    if (picked === actual) {
+    if (isCorrect(round, picked)) {
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
       setScore(next);
       setWrongPick(null);
-      const nextHistory = [...history, actual];
+      const nextHistory = [...history, picked];
       setHistory(nextHistory);
       if (next < total) {
         setPhase('celebrate');
