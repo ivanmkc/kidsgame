@@ -44,6 +44,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<"listen" | "play">("listen");
   const [glowIdx, setGlowIdx] = useState<number | null>(null);
   const [tapped, setTapped] = useState<number[]>([]);
+  const tappedRef = useRef<number[]>([]);
   const [wrongFlash, setWrongFlash] = useState(false);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
@@ -84,6 +85,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!won) {
+      tappedRef.current = [];
       setTapped([]);
       playDemo(round);
     }
@@ -94,11 +96,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
-    if (!canTap(round, tapped, phase, won)) return;
+    if (!canTap(round, tappedRef.current, phase, won)) return;
     playNote(round.bells[idx].midi, 0.8);
     setGlowIdx(idx);
     setTimeout(() => setGlowIdx(null), 250);
-    const next = [...tapped, idx];
+    const next = [...tappedRef.current, idx];
+    tappedRef.current = next;
     setTapped(next);
     if (next.length === round.sequence.length) {
       if (checkSequence(round, next)) {
@@ -120,6 +123,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
         demoTimers.current.push(
           setTimeout(() => {
             setWrongFlash(false);
+            tappedRef.current = [];
             setTapped([]);
             playDemo(round);
           }, 800),
@@ -129,7 +133,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const replay = () => {
-    if (!canTap(round, tapped, phase, won)) return;
+    if (!canTap(round, tappedRef.current, phase, won)) return;
+    tappedRef.current = [];
     setTapped([]);
     playDemo(round);
   };
@@ -138,6 +143,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     clearDemo();
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    tappedRef.current = [];
     setTapped([]);
     setWrongFlash(false);
     setRound(makeBellsRound(rngRef.current, difficulty));
