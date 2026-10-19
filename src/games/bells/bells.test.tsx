@@ -36,14 +36,20 @@ describe('BellsGame', () => {
     playNoteSpy.mockClear();
 
     // Tap count is initially 0
-    expect(screen.getByText("Your turn! (0/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    const dot0 = screen.getByTestId("tap-dot-0");
+    const dot1 = screen.getByTestId("tap-dot-1");
+    const emptyClass = dot0.className;
+    expect(dot1.className).toBe(emptyClass);
 
     // Tap the first correct bell
     const bell0 = screen.getByTestId("bell-0");
     fireEvent.click(bell0);
 
     // Tap count should be 1
-    expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(dot0.className).not.toBe(emptyClass);
+    expect(dot1.className).toBe(emptyClass);
     // Verify replay button accessibility attributes and icon
     const replayBtn = screen.getByTestId("replay-button");
     expect(replayBtn.getAttribute("role")).toBe("button");
@@ -55,10 +61,11 @@ describe('BellsGame', () => {
     // Press replay button
     fireEvent.click(replayBtn);
 
-    expect(screen.queryByText("Your turn!", { exact: false })).toBeNull();
+    expect(screen.queryByText("Your turn!")).toBeNull();
 
     // It should go back to listen phase
     expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(screen.queryByTestId("tap-dot-row")).toBeNull();
 
     // Fast-forward through demo again
     act(() => {
@@ -66,7 +73,9 @@ describe('BellsGame', () => {
     });
 
     // Tap count should be back to 0
-    expect(screen.getByText("Your turn! (0/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-0").className).toBe(emptyClass);
+    expect(screen.getByTestId("tap-dot-1").className).toBe(emptyClass);
 
     vi.useRealTimers();
   });
@@ -84,8 +93,11 @@ describe('BellsGame', () => {
 
     // Tap the first correct bell
     const bell0 = screen.getByTestId("bell-0");
+    const dot0 = screen.getByTestId("tap-dot-0");
+    const emptyClass = dot0.className;
     fireEvent.click(bell0);
-    expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(dot0.className).not.toBe(emptyClass);
 
     // The status card should not be a button
     const statusCard = screen.getByTestId("bells-status");
@@ -94,7 +106,8 @@ describe('BellsGame', () => {
 
     // Tapping the status card should not discard taps or restart demo
     fireEvent.click(statusCard);
-    expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(dot0.className).not.toBe(emptyClass);
     expect(screen.queryByText("Listen...")).toBeNull();
 
     vi.useRealTimers();
@@ -232,7 +245,7 @@ describe('BellsGame', () => {
     });
 
     // Back in play phase with 0 taps
-    expect(screen.getByText("Your turn! (0/2)", { exact: false })).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
 
     vi.useRealTimers();
   });
@@ -318,7 +331,7 @@ describe('BellsGame', () => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(screen.getByText('Your turn! (0/3)', { exact: false })).toBeTruthy();
+    expect(screen.getByText('Your turn!')).toBeTruthy();
     vi.useRealTimers();
   });
 
@@ -374,6 +387,69 @@ describe('BellsGame', () => {
     expect(wrongSpy).toHaveBeenCalledTimes(1);
     expect(goodSpy).not.toHaveBeenCalled();
     expect(screen.getByTestId('bells-score').textContent).toContain('0/6');
+
+    vi.useRealTimers();
+  });
+
+  it('renders tapDots that fill in visually and removes text fractions', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence [0, 0] for easy
+    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In listen phase, no tap dots are rendered
+    expect(screen.queryByTestId('tap-dot-row')).toBeNull();
+    expect(screen.queryByTestId('tap-dot-0')).toBeNull();
+
+    // Advance through demo into play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // Renders a tapDot for each required tap in the sequence (2 for easy)
+    const dotRow = screen.getByTestId('tap-dot-row');
+    expect(dotRow).toBeTruthy();
+    const dot0 = screen.getByTestId('tap-dot-0');
+    const dot1 = screen.getByTestId('tap-dot-1');
+    expect(screen.queryByTestId('tap-dot-2')).toBeNull();
+
+    // Both dots start empty
+    const emptyClass = dot0.className;
+    expect(dot1.className).toBe(emptyClass);
+
+    // Text fractions are completely removed from status
+    const statusCard = screen.getByTestId('bells-status');
+    expect(statusCard.textContent).toBe('👆Your turn!');
+    expect(statusCard.textContent).not.toMatch(/\d+\/\d+/);
+
+    // Tap first bell: first dot fills visually, second stays empty
+    const bell0 = screen.getByTestId('bell-0');
+    fireEvent.click(bell0);
+
+    expect(dot0.className).not.toBe(emptyClass);
+    expect(dot1.className).toBe(emptyClass);
+    expect(statusCard.textContent).toBe('👆Your turn!');
+
+    vi.useRealTimers();
+  });
+
+  it('renders tapDot count matching sequence length for medium difficulty', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // Medium sequence length is 3
+    expect(screen.getByTestId('tap-dot-0')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-1')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-2')).toBeTruthy();
+    expect(screen.queryByTestId('tap-dot-3')).toBeNull();
 
     vi.useRealTimers();
   });
