@@ -1,5 +1,30 @@
-import { Rng } from '../../rng';
-import { LEVEL_1_WORDS, Word } from './data';
+import { Lang } from "../../lang";
+import { Rng } from "../../rng";
+import { LEVEL_1_WORDS, Word } from "./data";
+
+/**
+ * Return the localized spoken text for a word, falling back to English.
+ */
+export function getWordText(word: Word, lang: Lang): string {
+  if (lang === "ja" && word.ja) return word.ja;
+  if (lang === "cmn" && word.cmn) return word.cmn;
+  if (lang === "yue" && word.yue) return word.yue;
+  return word.en;
+}
+
+/**
+ * Return all speech lines that can be spoken in Listen and Choose.
+ * Pre-rendered by the offline TTS pipeline.
+ */
+export function speechLines(words: Word[] = LEVEL_1_WORDS): string[] {
+  const lines = new Set<string>();
+  for (const w of words) {
+    for (const lang of ["en", "ja", "cmn", "yue"] as const) {
+      lines.add(getWordText(w, lang));
+    }
+  }
+  return [...lines];
+}
 
 export interface Round {
   target: Word;
@@ -19,15 +44,24 @@ export interface GameState {
  * Generate a round with one target and one distractor chosen from Level 1 words.
  * The choices array contains both words in randomized order.
  */
-export function generateRound(rng: Rng = Math.random, words: Word[] = LEVEL_1_WORDS, avoidIcon?: string): Round {
+export function generateRound(
+  rng: Rng = Math.random,
+  words: Word[] = LEVEL_1_WORDS,
+  avoidIcon?: string,
+): Round {
   if (words.length < 2) {
-    throw new Error('words pool must have at least 2 words');
+    throw new Error("words pool must have at least 2 words");
   }
-  const targetPool = avoidIcon && words.length > 2 ? words.filter((w) => w.icon !== avoidIcon) : words;
+  const targetPool =
+    avoidIcon && words.length > 2
+      ? words.filter((w) => w.icon !== avoidIcon)
+      : words;
   const target = targetPool[Math.floor(rng() * targetPool.length)];
-  const distractors = words.filter((w) => w.icon !== target.icon && !target.nameTwins?.includes(w.icon));
+  const distractors = words.filter(
+    (w) => w.icon !== target.icon && !target.nameTwins?.includes(w.icon),
+  );
   if (distractors.length === 0) {
-    throw new Error('no valid distractor found for target');
+    throw new Error("no valid distractor found for target");
   }
   const distractor = distractors[Math.floor(rng() * distractors.length)];
   const choices = rng() < 0.5 ? [target, distractor] : [distractor, target];
@@ -37,7 +71,10 @@ export function generateRound(rng: Rng = Math.random, words: Word[] = LEVEL_1_WO
 /**
  * Initialize game state with a valid round from Level 1.
  */
-export function initGameState(rng: Rng = Math.random, words: Word[] = LEVEL_1_WORDS): GameState {
+export function initGameState(
+  rng: Rng = Math.random,
+  words: Word[] = LEVEL_1_WORDS,
+): GameState {
   return {
     currentRound: generateRound(rng, words),
     streak: 0,

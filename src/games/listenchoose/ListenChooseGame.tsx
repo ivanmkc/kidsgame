@@ -1,16 +1,29 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SPOTIT_ICONS, RHYME_SPRITES } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { SparkleBurst } from '../../components/Sparkles';
-import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { sayThen, sfx } from '../../sound';
-import { colors, fonts, shadows } from '../../theme';
-import { Word } from './data';
-import { GameState, initGameState, updateGameState } from './logic';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SPOTIT_ICONS, RHYME_SPRITES } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { SparkleBurst } from "../../components/Sparkles";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { sayThen, sfx } from "../../sound";
+import { colors, fonts, shadows } from "../../theme";
+import { Word } from "./data";
+import {
+  GameState,
+  getWordText,
+  initGameState,
+  updateGameState,
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -22,18 +35,13 @@ function wordImage(icon: string) {
   return SPOTIT_ICONS[icon] ?? RHYME_SPRITES[icon];
 }
 
-function getWordText(word: Word, lang: Lang): string {
-  if (lang === 'ja' && word.ja) return word.ja;
-  if (lang === 'cmn' && word.cmn) return word.cmn;
-  if (lang === 'yue' && word.yue) return word.yue;
-  return word.en;
-}
-
-export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
+export function ListenChooseGame({ onHome, lang = "en" }: Props) {
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(true);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [state, setGameState] = useState<GameState>(() => initGameState(rngRef.current));
+  const [state, setGameState] = useState<GameState>(() =>
+    initGameState(rngRef.current),
+  );
   const [wobbleIcon, setWobbleIcon] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -76,7 +84,10 @@ export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
       sfx.wrong();
       setWobbleIcon(choice.icon);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
-      wobbleTimerRef.current = setTimeout(() => setWobbleIcon((w) => (w === choice.icon ? null : w)), 450);
+      wobbleTimerRef.current = setTimeout(
+        () => setWobbleIcon((w) => (w === choice.icon ? null : w)),
+        450,
+      );
       const next = updateGameState(state, choice.icon, rngRef.current);
       setGameState(next);
       const targetWord = getWordText(state.currentRound.target, lang);
@@ -86,41 +97,60 @@ export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
 
   return (
     <GameShell
-      title={t(lang, 'shell.listenchoose.title')}
-      subtitle={t(lang, 'shell.listenchoose.sub')}
+      title={t(lang, "shell.listenchoose.title")}
+      subtitle={t(lang, "shell.listenchoose.sub")}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />}
+      right={
+        <ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />
+      }
     >
       <View style={styles.board}>
         {!started ? (
           <View style={styles.startScreen}>
-            <Text style={styles.startTitle}>{t(lang, 'shell.listenchoose.title')}</Text>
-            <Text style={styles.startBlurb}>{t(lang, 'card.listenchoose.blurb')}</Text>
+            <Text style={styles.startTitle}>
+              {t(lang, "shell.listenchoose.title")}
+            </Text>
+            <Text style={styles.startBlurb}>
+              {t(lang, "card.listenchoose.blurb")}
+            </Text>
             <Pressable
               onPress={onPlay}
               testID="play-button"
               accessibilityRole="button"
-              accessibilityLabel={t(lang, 'listenchoose.play')}
-              style={({ pressed }) => [styles.playButton, shadows.soft, pressed && styles.pressed]}
+              accessibilityLabel={t(lang, "listenchoose.play")}
+              style={({ pressed }) => [
+                styles.playButton,
+                shadows.soft,
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.playButtonText}>{t(lang, 'listenchoose.play')}</Text>
+              <Text style={styles.playButtonText}>
+                {t(lang, "listenchoose.play")}
+              </Text>
             </Pressable>
             <Pressable
               onPress={() => setCaptions((c) => !c)}
               testID="captions-toggle"
               accessibilityRole="button"
-              style={({ pressed }) => [styles.captionsToggle, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.captionsToggle,
+                pressed && styles.pressed,
+              ]}
             >
               <Text style={styles.captionsToggleText}>
-                💬 {t(lang, 'listenchoose.captions')}: {t(lang, captions ? 'listenchoose.on' : 'listenchoose.off')}
+                💬 {t(lang, "listenchoose.captions")}:{" "}
+                {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
               </Text>
             </Pressable>
           </View>
         ) : (
           <>
             {celebrate && (
-              <View testID="celebration" style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}>
+              <View
+                testID="celebration"
+                style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
+              >
                 <SparkleBurst trigger={state.streak} count={8} size={28} />
               </View>
             )}
@@ -129,8 +159,12 @@ export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
                 onPress={onReplay}
                 testID="speaker-button"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'spell.hearAgain')}
-                style={({ pressed }) => [styles.speakerButton, shadows.soft, pressed && styles.pressed]}
+                accessibilityLabel={t(lang, "spell.hearAgain")}
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  shadows.soft,
+                  pressed && styles.pressed,
+                ]}
               >
                 <Text style={styles.speakerIcon}>🔊</Text>
               </Pressable>
@@ -143,10 +177,14 @@ export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
                 onPress={() => setCaptions((c) => !c)}
                 testID="captions-toggle"
                 accessibilityRole="button"
-                style={({ pressed }) => [styles.captionsToggleMini, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.captionsToggleMini,
+                  pressed && styles.pressed,
+                ]}
               >
                 <Text style={styles.captionsToggleMiniText}>
-                  💬 {t(lang, 'listenchoose.captions')}: {t(lang, captions ? 'listenchoose.on' : 'listenchoose.off')}
+                  💬 {t(lang, "listenchoose.captions")}:{" "}
+                  {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
                 </Text>
               </Pressable>
             </View>
@@ -157,7 +195,10 @@ export function ListenChooseGame({ onHome, lang = 'en' }: Props) {
                   choice={choice}
                   index={i}
                   lang={lang}
-                  highlight={state.highlightCorrect && choice.icon === state.currentRound.target.icon}
+                  highlight={
+                    state.highlightCorrect &&
+                    choice.icon === state.currentRound.target.icon
+                  }
                   wobble={wobbleIcon === choice.icon}
                   onPress={() => onPick(choice)}
                 />
@@ -191,18 +232,44 @@ function ChoiceCard({
     if (!wobble) return;
     shake.setValue(0);
     Animated.sequence([
-      Animated.timing(shake, { toValue: 1, duration: 60, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: -1, duration: 80, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 1, duration: 80, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 0, duration: 60, easing: Easing.linear, useNativeDriver: true }),
+      Animated.timing(shake, {
+        toValue: 1,
+        duration: 60,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: -1,
+        duration: 80,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 1,
+        duration: 80,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 0,
+        duration: 60,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, [wobble, shake]);
 
-  const rotate = shake.interpolate({ inputRange: [-1, 1], outputRange: ['-9deg', '9deg'] });
+  const rotate = shake.interpolate({
+    inputRange: [-1, 1],
+    outputRange: ["-9deg", "9deg"],
+  });
   const label = getWordText(choice, lang);
 
   return (
-    <Animated.View testID={`choice-${index}`} style={{ transform: [{ rotate }] }}>
+    <Animated.View
+      testID={`choice-${index}`}
+      style={{ transform: [{ rotate }] }}
+    >
       <Pressable
         onPress={onPress}
         testID={`choice-${choice.icon}`}
@@ -218,7 +285,11 @@ function ChoiceCard({
           pressed && styles.pressed,
         ]}
       >
-        <Image source={wordImage(choice.icon)} style={styles.choiceImage} resizeMode="contain" />
+        <Image
+          source={wordImage(choice.icon)}
+          style={styles.choiceImage}
+          resizeMode="contain"
+        />
         <Text style={styles.choiceLabel}>{label}</Text>
       </Pressable>
     </Animated.View>
@@ -228,14 +299,14 @@ function ChoiceCard({
 const styles = StyleSheet.create({
   board: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 20,
     paddingHorizontal: 16,
   },
   startScreen: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 16,
     maxWidth: 420,
     padding: 24,
@@ -244,27 +315,27 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     fontSize: 28,
     color: colors.ink,
-    textAlign: 'center',
+    textAlign: "center",
   },
   startBlurb: {
     fontFamily: fonts.bodyReg,
     fontSize: 16,
     color: colors.inkSoft,
-    textAlign: 'center',
+    textAlign: "center",
   },
   playButton: {
     backgroundColor: colors.teal,
     borderRadius: 24,
     paddingVertical: 14,
     paddingHorizontal: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     minWidth: 160,
   },
   playButtonText: {
     fontFamily: fonts.display,
     fontSize: 22,
-    color: '#FFF',
+    color: "#FFF",
   },
   captionsToggle: {
     backgroundColor: colors.paper,
@@ -294,7 +365,7 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
   },
   speakerArea: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 8,
   },
   speakerButton: {
@@ -304,8 +375,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderWidth: 3,
     borderColor: colors.gold,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   speakerIcon: {
     fontSize: 42,
@@ -316,9 +387,9 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
   },
   choicesContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
     gap: 20,
   },
   choiceCard: {
@@ -328,8 +399,8 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     borderWidth: 3,
     borderColor: colors.blush,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 12,
     gap: 8,
   },
@@ -341,16 +412,16 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     fontSize: 20,
     color: colors.ink,
-    textAlign: 'center',
+    textAlign: "center",
   },
   highlightChoice: {
     borderColor: colors.green,
     borderWidth: 4,
-    backgroundColor: '#F0FFF4',
+    backgroundColor: "#F0FFF4",
   },
   wrongChoice: {
     borderColor: colors.red,
-    backgroundColor: 'rgba(232,86,79,0.15)',
+    backgroundColor: "rgba(232,86,79,0.15)",
   },
   pressed: {
     transform: [{ scale: 0.94 }],
