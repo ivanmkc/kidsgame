@@ -59,6 +59,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
   const [winLine, setWinLine] = useState<number[] | null>(null);
+  const lockedRef = useRef(false);
 
   const won = winLine !== null;
   const markedCount = marked.filter(Boolean).length;
@@ -82,6 +83,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCallIdx(0);
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
+    lockedRef.current = false;
     setGameKey((k) => k + 1);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -100,9 +102,10 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   );
 
   const onTile = (cellIdx: number) => {
-    if (won || !call || marked[call.answerIdx]) return;
+    if (lockedRef.current || won || !call || marked[call.answerIdx]) return;
     if (marked[cellIdx]) return;
     if (cellIdx === call.answerIdx) {
+      lockedRef.current = true;
       sfx.good();
       const next = [...marked];
       next[cellIdx] = true;
@@ -112,10 +115,12 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       const line = checkBingo(next, board.size);
       if (line) {
         sayThen([bingoShout(lang), ...call.confirmLines], () => {
+          lockedRef.current = false;
           setWinLine(line);
         });
       } else {
         sayThen(call.confirmLines, () => {
+          lockedRef.current = false;
           setCallIdx((i) => i + 1);
         });
       }
@@ -145,6 +150,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
     setWrongIdx(null);
+    lockedRef.current = false;
     setGameKey((k) => k + 1);
   };
 
@@ -176,7 +182,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
           <Pressable
             disabled={won}
             onPress={() => {
-              if (won) return;
+              if (won || lockedRef.current) return;
               sfx.tap();
               saySequence(call.promptLines);
             }}

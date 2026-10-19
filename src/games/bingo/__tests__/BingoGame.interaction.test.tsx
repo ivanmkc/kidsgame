@@ -2,6 +2,7 @@
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import React from 'react';
 import { vi, test, expect, afterEach } from 'vitest';
+import * as sound from '../../../sound';
 import { BingoGame } from '../BingoGame';
 
 vi.useFakeTimers();
@@ -54,6 +55,44 @@ test('tapping an incorrect tile after a correct one does not cancel the round ad
 
   prompt = screen.getByTestId('bingo-prompt');
   expect(prompt.textContent).not.toBe(initialPrompt);
+});
+
+test('rapid double-tap on correct tile only scores once and does not double-advance', async () => {
+  const sayThenSpy = vi.spyOn(sound, 'sayThen');
+  const onHome = vi.fn();
+  render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  const prompt = screen.getByTestId('bingo-prompt');
+  const initialPrompt = prompt.textContent!;
+  const icon = initialPrompt.replace('Find the ', '').replace('!', '');
+
+  const cells = screen.queryAllByTestId(/bingo-cell-/);
+  const correctCell = cells.find((c) => c.getAttribute('aria-label') === icon);
+  expect(correctCell).toBeDefined();
+
+  sayThenSpy.mockClear();
+
+  // Rapidly tap the correct tile twice synchronously
+  await act(async () => {
+    fireEvent.click(correctCell!);
+    fireEvent.click(correctCell!);
+  });
+
+  // Locked during confirmation: sayThen must only be queued once
+  expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past confirmation duration
+  await act(async () => {
+    vi.advanceTimersByTime(9000);
+  });
+
+  // Exactly 1 tile should be marked
+  const score = screen.getByTestId('bingo-score');
+  expect(score.textContent).toBe('⭐ 1/9');
 });
 
 test('changes language', async () => {
