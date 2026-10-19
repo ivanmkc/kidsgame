@@ -177,12 +177,18 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
         />
       }
     >
-      <View style={[styles.board, isLandscape ? styles.boardLandscape : shortH && { gap: 8 }]} key={gameKey}>
+      <View
+        style={[
+          styles.board,
+          isLandscape ? styles.boardLandscape : shortH && { gap: 8 },
+        ]}
+        key={gameKey}
+      >
         {call && (
           <Pressable
-            disabled={won}
+            disabled={won || marked[call.answerIdx]}
             onPress={() => {
-              if (won || lockedRef.current) return;
+              if (won || lockedRef.current || marked[call.answerIdx]) return;
               sfx.tap();
               saySequence(call.promptLines);
             }}
@@ -347,7 +353,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   boardLandscape: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 20,
   },
   prompt: {
