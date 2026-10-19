@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -7,25 +7,25 @@ import {
   Text,
   View,
   useWindowDimensions,
-} from 'react-native';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { WinOverlay } from '../../components/WinOverlay';
-import { SparkleBurst } from '../../components/Sparkles';
-import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { sfx } from '../../sound';
-import { playNote, stopSequence } from '../../music';
-import { useWinLine } from '../winlines';
+} from "react-native";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { WinOverlay } from "../../components/WinOverlay";
+import { SparkleBurst } from "../../components/Sparkles";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { sfx } from "../../sound";
+import { playNote, stopSequence } from "../../music";
+import { useWinLine } from "../winlines";
 import {
   makeBellsRound,
   roundsToWin,
   BellsRound,
   canTap,
   judgeTap,
-} from './logic';
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -98,7 +98,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
-    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current)) return;
+    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current))
+      return;
     playNote(round.bells[idx].midi, 0.8);
     setGlowIdx(idx);
     setTimeout(() => setGlowIdx(null), 250);
@@ -107,7 +108,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     tappedRef.current = next;
     setTapped(next);
     const result = judgeTap(round, prev, idx);
-    if (result === 'wrong') {
+    if (result === "wrong") {
       flashingRef.current = true;
       sfx.wrong();
       setWrongFlash(true);
@@ -120,16 +121,22 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
           playDemo(round);
         }, 800),
       );
-    } else if (result === 'complete') {
+    } else if (result === "complete") {
       sfx.good();
       setSparkKey((k) => k + 1);
       const nextScore = score + 1;
-      setScore(nextScore);
       if (nextScore < total) {
+        setScore(nextScore);
         demoTimers.current.push(
           setTimeout(() => {
             const nr = makeBellsRound(rngRef.current, difficulty);
             setRound(nr);
+          }, 600),
+        );
+      } else {
+        demoTimers.current.push(
+          setTimeout(() => {
+            setScore(nextScore);
           }, 600),
         );
       }
@@ -137,7 +144,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const replay = () => {
-    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current)) return;
+    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current))
+      return;
     tappedRef.current = [];
     setTapped([]);
     playDemo(round);
@@ -252,14 +260,14 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
               >
                 <Text style={styles.statusEmoji}>👆</Text>
                 <Text style={styles.statusText}>
-                  {t(lang, 'music.yourTurn')} ({tapped.length}/
+                  {t(lang, "music.yourTurn")} ({tapped.length}/
                   {round.sequence.length})
                 </Text>
               </View>
               <Pressable
                 testID="replay-button"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'spell.hearAgain')}
+                accessibilityLabel={t(lang, "spell.hearAgain")}
                 onPress={replay}
                 style={({ pressed }) => [
                   styles.replayBtn,
@@ -270,8 +278,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={styles.replayText}>🔊</Text>
               </Pressable>
             </View>
-          )
-        )}
+          ))}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
             <Animated.View
