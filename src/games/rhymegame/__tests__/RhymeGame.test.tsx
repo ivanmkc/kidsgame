@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { manifest } from '../../../manifest';
 import * as sound from '../../../sound';
 import { RhymeGame } from '../RhymeGame';
+import { availableEntries } from '../logic';
 
 vi.mock('../../assets/images', () => {
   const p = new Proxy({}, { get: () => ({ uri: 'stub.png' }) });
@@ -84,5 +86,50 @@ describe('RhymeGame', () => {
 
     fireEvent.click(screen.getByTestId('rhyme-tile-0'));
     expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBeGreaterThan(0);
+  });
+
+  it('tapping a correct tile twice only triggers sfx.good once', () => {
+    let sayThenDone: (() => void) | undefined;
+    const sayThenSpy = vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => {
+      sayThenDone = cb;
+    });
+
+    render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    const entries = availableEntries('en', manifest.spotit.icons);
+    const rhymeKeys = new Map(entries.map((e) => [e.icon, e.rhymeKey]));
+    const promptEl = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute('data-testid') !== 'rhyme-prompt-image')!;
+    const testId = promptEl.getAttribute('data-testid') || '';
+    const targetIcon = testId.replace('rhyme-prompt-', '');
+    const targetRhyme = rhymeKeys.get(targetIcon);
+
+    const tiles = [0, 1, 2].map((i) => screen.getByTestId(`rhyme-tile-${i}`));
+    const correctTile = tiles.find(
+      (t) => rhymeKeys.get(t.getAttribute('aria-label') || '') === targetRhyme,
+    )!;
+    expect(correctTile).toBeDefined();
+
+    // First click: triggers confirmation speech and sfx.good
+    fireEvent.click(correctTile);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+    // Second rapid click while confirmation is queued/playing: ignored by lockedRef
+    fireEvent.click(correctTile);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+    // Confirmation speech finishes, advancing round and unlocking input
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 1/8');
+
+    // Input is unlocked for the new round
+    const round2Tile = screen.getByTestId('rhyme-tile-0');
+    fireEvent.click(round2Tile);
+    expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
   });
 });
