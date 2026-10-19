@@ -285,11 +285,11 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                     width: bellSize,
                     height: bellSize * 1.2,
                     backgroundColor: bell.color,
-                    borderColor: glowIdx === i ? colors.gold : bell.color,
+                    borderColor: glowIdx === i ? colors.paper : bell.color,
                     opacity: phase === "listen" && glowIdx !== i ? 0.5 : 1,
                   },
-                  glowIdx === i && styles.bellGlow,
                   phase === "play" && shadows.glowGold,
+                  glowIdx === i && styles.bellGlow,
                   pressed && styles.pressed,
                 ]}
               >
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   bellGlow: {
-    shadowColor: "#FFC24B",
+    shadowColor: colors.paper,
     shadowOpacity: 0.6,
     shadowRadius: 16,
   },

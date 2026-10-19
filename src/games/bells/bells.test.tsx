@@ -252,4 +252,31 @@ describe("BellsGame replay", () => {
 
     vi.useRealTimers();
   });
+
+  it("Bell 1 active border contrasts with its base color", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell1 = screen.getByTestId('bell-1');
+    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+
+    fireEvent.click(bell1);
+    // Active border must contrast with Bell 1 base color (#FFC24B)
+    expect(bell1.style.borderColor).toBe('rgba(255, 253, 247, 1.00)');
+    expect(bell1.style.borderColor).not.toBe('rgba(255, 194, 75, 1.00)');
+
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+
+    vi.useRealTimers();
+  });
 });
