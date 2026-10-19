@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native';
 import { ChunkyButton } from './components/ChunkyButton';
+import { t } from './i18n';
+import { Lang } from './lang';
 import { useSay } from './sound';
 import { colors, darken, fonts, shadows } from './theme';
 
@@ -59,14 +61,14 @@ export function nextTurn(t: PlayerIx): PlayerIx {
 // early return before hooks (production-crash precedent).
 // ---------------------------------------------------------------------------
 
-export function ModePicker({ onPick }: { onPick: (mode: 'solo' | '2p') => void }) {
-  useSay('How many players?');
+export function ModePicker({ onPick, lang }: { onPick: (mode: 'solo' | '2p') => void; lang: Lang }) {
+  useSay(t(lang, 'mp.title'));
   return (
     <View style={styles.backdrop} testID="mode-picker">
       <View style={[styles.pickerCard, shadows.lifted]}>
-        <Text style={styles.pickerTitle}>How many players?</Text>
+        <Text style={styles.pickerTitle}>{t(lang, 'mp.title')}</Text>
         <ChunkyButton
-          label="1 Player 🧒"
+          label={t(lang, 'mp.solo')}
           color={colors.green}
           darkColor={darken(colors.green)}
           onPress={() => onPick('solo')}
@@ -76,7 +78,7 @@ export function ModePicker({ onPick }: { onPick: (mode: 'solo' | '2p') => void }
           paddingVertical={19}
         />
         <ChunkyButton
-          label="2 Players 👧👧"
+          label={t(lang, 'mp.duo')}
           color={colors.purple}
           darkColor={darken(colors.purple)}
           onPress={() => onPick('2p')}

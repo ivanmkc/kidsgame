@@ -101,6 +101,9 @@ export const YUE: Table = {
   'picker.story': '睇邊個故事？',
   'picker.sticker': '派對喺邊？',
   'picker.puzzle': '想砌邊張圖？',
+  'mp.title': '幾多個人玩？',
+  'mp.solo': '一個人 🧒',
+  'mp.duo': '兩個人 👧👧',
 
   'shell.letters.title': '搵英文字母',
   'shell.letters.titleKana': '搵假名',

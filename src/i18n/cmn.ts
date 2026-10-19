@@ -101,6 +101,9 @@ export const CMN: Table = {
   'picker.story': '读哪个故事？',
   'picker.sticker': '派对在哪？',
   'picker.puzzle': '想拼哪张图？',
+  'mp.title': '几个人玩？',
+  'mp.solo': '一个人 🧒',
+  'mp.duo': '两个人 👧👧',
 
   'shell.letters.title': '找英文字母',
   'shell.letters.titleKana': '找假名',

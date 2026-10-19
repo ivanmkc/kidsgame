@@ -102,6 +102,9 @@ export const JA: Table = {
   'picker.story': 'どの おはなし よもうか？',
   'picker.sticker': 'パーティは どこ？',
   'picker.puzzle': 'どの えを ときたい？',
+  'mp.title': 'なんにんで あそぶ？',
+  'mp.solo': 'ひとり 🧒',
+  'mp.duo': 'ふたり 👧👧',
 
   'shell.letters.title': 'もじさがし',
   'shell.letters.titleKana': 'かなさがし',
