@@ -1,69 +1,100 @@
-import React, { act } from 'react';
-import { createRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
-import * as music from '../../music';
-import { makeRng } from '../../rng';
-import { BellsGame } from '../bells/BellsGame';
-import { EchoBeatGame } from '../echobeat/EchoBeatGame';
-import { makeHighLowRound, roundsToWin as hlRounds, correctAnswer as hlAnswer, isCorrect as hlCorrect } from '../highlow/logic';
-import * as bellsLogic from '../bells/logic';
-const { makeBellsRound, checkSequence, roundsToWin: bellRounds, seqLength, canTap } = bellsLogic;
-import { makeEchoBeatRound, checkEcho, roundsToWin as echoRounds, tolerancePct } from '../echobeat/logic';
-import { makeSteadyBeatRound, scoreTaps, roundsToWin as steadyRounds, passThreshold, windowMs } from '../steadybeat/logic';
-import { makeFastSlowRound, getActualSpeed, isCorrect as fsCorrect, roundsToWin as fsRounds } from '../fastslow/logic';
-import { makeSameDiffRound, isCorrect, roundsToWin as sdRounds } from '../samediff/logic';
+import React, { act } from "react";
+import { createRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
+import * as music from "../../music";
+import { makeRng } from "../../rng";
+import { BellsGame } from "../bells/BellsGame";
+import { EchoBeatGame } from "../echobeat/EchoBeatGame";
+import {
+  makeHighLowRound,
+  roundsToWin as hlRounds,
+  correctAnswer as hlAnswer,
+  isCorrect as hlCorrect,
+} from "../highlow/logic";
+import * as bellsLogic from "../bells/logic";
+const {
+  makeBellsRound,
+  checkSequence,
+  roundsToWin: bellRounds,
+  seqLength,
+  canTap,
+} = bellsLogic;
+import {
+  makeEchoBeatRound,
+  checkEcho,
+  roundsToWin as echoRounds,
+  tolerancePct,
+} from "../echobeat/logic";
+import {
+  makeSteadyBeatRound,
+  scoreTaps,
+  roundsToWin as steadyRounds,
+  passThreshold,
+  windowMs,
+} from "../steadybeat/logic";
+import {
+  makeFastSlowRound,
+  getActualSpeed,
+  isCorrect as fsCorrect,
+  roundsToWin as fsRounds,
+} from "../fastslow/logic";
+import {
+  makeSameDiffRound,
+  isCorrect,
+  roundsToWin as sdRounds,
+} from "../samediff/logic";
 
 let capturedReset: (() => void) | null = null;
-vi.mock('../../components/WinOverlay', () => ({
+vi.mock("../../components/WinOverlay", () => ({
   WinOverlay: (props: { onNext?: () => void }) => {
     capturedReset = props.onNext ?? null;
     return null;
   },
 }));
 
-describe('high or low', () => {
-  it('generates rounds with distinct notes', () => {
+describe("high or low", () => {
+  it("generates rounds with distinct notes", () => {
     for (let seed = 1; seed <= 30; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
         const r = makeHighLowRound(rng, d);
         expect(r.noteA).not.toBe(r.noteB);
         expect(Math.abs(r.noteB - r.noteA)).toBeGreaterThan(0);
-        expect(['high', 'low']).toContain(hlAnswer(r));
+        expect(["high", "low"]).toContain(hlAnswer(r));
       }
     }
   });
 
-  it('the answer is what the ears heard, never a coin flip', () => {
+  it("the answer is what the ears heard, never a coin flip", () => {
     // The kid hears note A then note B and taps HIGH or LOW for where the
     // second one landed — so the answer has to follow the notes. When it
     // was drawn independently the round was pure 50/50 luck.
     const seen = new Set<string>();
     for (let seed = 1; seed <= 200; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const r = makeHighLowRound(makeRng(seed), d);
         const wentUp = r.noteB > r.noteA;
         const ans = hlAnswer(r);
-        expect(ans).toBe(wentUp ? 'high' : 'low');
+        expect(ans).toBe(wentUp ? "high" : "low");
         expect(hlCorrect(r, ans)).toBe(true);
-        expect(hlCorrect(r, ans === 'high' ? 'low' : 'high')).toBe(false);
+        expect(hlCorrect(r, ans === "high" ? "low" : "high")).toBe(false);
         seen.add(ans);
       }
     }
-    expect(seen).toEqual(new Set(['high', 'low']));
+    expect(seen).toEqual(new Set(["high", "low"]));
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(hlRounds('easy')).toBeLessThan(hlRounds('medium'));
-    expect(hlRounds('medium')).toBeLessThan(hlRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(hlRounds("easy")).toBeLessThan(hlRounds("medium"));
+    expect(hlRounds("medium")).toBeLessThan(hlRounds("hard"));
   });
 });
 
-describe('melody bells', () => {
-  it('generates valid sequences within bell count', () => {
+describe("melody bells", () => {
+  it("generates valid sequences within bell count", () => {
     for (let seed = 1; seed <= 30; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
         const r = makeBellsRound(rng, d);
         expect(r.sequence).toHaveLength(seqLength(d));
@@ -76,9 +107,9 @@ describe('melody bells', () => {
     }
   });
 
-  it('checkSequence validates correctly', () => {
+  it("checkSequence validates correctly", () => {
     const rng = makeRng(42);
-    const r = makeBellsRound(rng, 'easy');
+    const r = makeBellsRound(rng, "easy");
     expect(checkSequence(r, r.sequence)).toBe(true);
     expect(checkSequence(r, [])).toBe(false);
     const wrong = r.sequence.map((v) => (v + 1) % r.bells.length);
@@ -87,68 +118,70 @@ describe('melody bells', () => {
     }
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(bellRounds('easy')).toBeLessThan(bellRounds('medium'));
-    expect(bellRounds('medium')).toBeLessThan(bellRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(bellRounds("easy")).toBeLessThan(bellRounds("medium"));
+    expect(bellRounds("medium")).toBeLessThan(bellRounds("hard"));
   });
 
-  it('canTap allows taps during active play while sequence is incomplete', () => {
+  it("canTap allows taps during active play while sequence is incomplete", () => {
     const rng = makeRng(42);
-    const r = makeBellsRound(rng, 'medium');
+    const r = makeBellsRound(rng, "medium");
     expect(r.sequence).toHaveLength(3);
 
-    expect(canTap(r, [], 'play')).toBe(true);
-    expect(canTap(r, [0], 'play')).toBe(true);
-    expect(canTap(r, [0, 1], 'play')).toBe(true);
+    expect(canTap(r, [], "play")).toBe(true);
+    expect(canTap(r, [0], "play")).toBe(true);
+    expect(canTap(r, [0, 1], "play")).toBe(true);
   });
 
-  it('canTap blocks taps once sequence length is reached or when not in active play', () => {
+  it("canTap blocks taps once sequence length is reached or when not in active play", () => {
     const rng = makeRng(42);
-    const r = makeBellsRound(rng, 'medium');
+    const r = makeBellsRound(rng, "medium");
     expect(r.sequence).toHaveLength(3);
 
-    expect(canTap(r, [0, 1, 2], 'play')).toBe(false);
-    expect(canTap(r, [0, 1, 2, 0], 'play')).toBe(false);
-    expect(canTap(r, [0, 1, 2, 0, 0], 'play')).toBe(false);
+    expect(canTap(r, [0, 1, 2], "play")).toBe(false);
+    expect(canTap(r, [0, 1, 2, 0], "play")).toBe(false);
+    expect(canTap(r, [0, 1, 2, 0, 0], "play")).toBe(false);
 
-    expect(canTap(r, [], 'listen')).toBe(false);
-    expect(canTap(r, [0], 'listen')).toBe(false);
+    expect(canTap(r, [], "listen")).toBe(false);
+    expect(canTap(r, [0], "listen")).toBe(false);
 
-    expect(canTap(r, [], 'play', true)).toBe(false);
-    expect(canTap(r, [0], 'play', true)).toBe(false);
+    expect(canTap(r, [], "play", true)).toBe(false);
+    expect(canTap(r, [0], "play", true)).toBe(false);
   });
 
-  it('renders BellsGame and displays localized strings', () => {
+  it("renders BellsGame and displays localized strings", () => {
     const noop = () => {};
     const html = renderToString(
       React.createElement(BellsGame, {
         onHome: noop,
-        difficulty: 'easy',
-        lang: 'en',
-      })
+        difficulty: "easy",
+        lang: "en",
+      }),
     );
-    expect(html).toContain('Melody Bells');
-    expect(html).toContain('Listen, then play the tune back!');
-    expect(html).toContain('Listen...');
+    expect(html).toContain("Melody Bells");
+    expect(html).toContain("Listen, then play the tune back!");
+    expect(html).toContain("Listen...");
   });
 
-  it('hides status card when won', () => {
-    const roundsSpy = vi.spyOn(bellsLogic, 'roundsToWin').mockReturnValue(0);
+  it("hides status card when won", () => {
+    const roundsSpy = vi.spyOn(bellsLogic, "roundsToWin").mockReturnValue(0);
     const html = renderToString(
       React.createElement(BellsGame, {
         onHome: () => {},
-        difficulty: 'easy',
-        lang: 'en',
-      })
+        difficulty: "easy",
+        lang: "en",
+      }),
     );
-    expect(html).not.toContain('Listen...');
-    expect(html).not.toContain('Your turn');
+    expect(html).not.toContain("Listen...");
+    expect(html).not.toContain("Your turn");
     roundsSpy.mockRestore();
   });
 
-  it('unmounts during listen phase and cancels demo timers', () => {
+  it("unmounts during listen phase and cancels demo timers", () => {
     vi.useFakeTimers();
-    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation(() => {});
 
     type FakeNode = {
       nodeName: string;
@@ -165,8 +198,8 @@ describe('melody bells', () => {
     };
 
     const makeNode = (): FakeNode => ({
-      nodeName: 'DIV',
-      tagName: 'div',
+      nodeName: "DIV",
+      tagName: "div",
       nodeType: 1,
       setAttribute: () => {},
       removeAttribute: () => {},
@@ -181,12 +214,12 @@ describe('melody bells', () => {
     class FakeIFrame {}
 
     const doc = {
-      nodeName: '#document',
-      tagName: '#document',
+      nodeName: "#document",
+      tagName: "#document",
       nodeType: 9,
       createElement: makeNode,
       createElementNS: makeNode,
-      createTextNode: () => ({ nodeType: 3, nodeName: '#text' }),
+      createTextNode: () => ({ nodeType: 3, nodeName: "#text" }),
       addEventListener: () => {},
       removeEventListener: () => {},
       defaultView: {
@@ -223,9 +256,9 @@ describe('melody bells', () => {
         root.render(
           React.createElement(BellsGame, {
             onHome: () => {},
-            difficulty: 'hard',
-            lang: 'en',
-          })
+            difficulty: "hard",
+            lang: "en",
+          }),
         );
       });
 
@@ -234,7 +267,6 @@ describe('melody bells', () => {
         capturedReset?.();
       });
 
-
       // After 1050ms, initial 500ms delay plays note 1, then at 1000ms
       // the glow clears and step is scheduled for note 2 at 1200ms.
       act(() => {
@@ -242,7 +274,6 @@ describe('melody bells', () => {
       });
       // We played 1 note in this demo
       expect(playNoteSpy).toHaveBeenCalledTimes(1);
-
 
       // Unmount mid-demo during the listen phase (before note 2 plays at 1200ms)
       act(() => {
@@ -265,27 +296,25 @@ describe('melody bells', () => {
       vi.useRealTimers();
     }
   });
-
-
 });
 
-describe('echo beat', () => {
-  it('renders EchoBeatGame and displays localized strings', () => {
+describe("echo beat", () => {
+  it("renders EchoBeatGame and displays localized strings", () => {
     const noop = () => {};
     const html = renderToString(
       React.createElement(EchoBeatGame, {
         onHome: noop,
-        difficulty: 'easy',
-        lang: 'en',
-      })
+        difficulty: "easy",
+        lang: "en",
+      }),
     );
-    expect(html).toContain('Echo Beat');
-    expect(html).toContain('Tap the rhythm you hear!');
+    expect(html).toContain("Echo Beat");
+    expect(html).toContain("Tap the rhythm you hear!");
   });
 
-  it('generates rounds with correct hitCount', () => {
+  it("generates rounds with correct hitCount", () => {
     for (let seed = 1; seed <= 30; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
         const r = makeEchoBeatRound(rng, d);
         expect(r.hitCount).toBe(r.gaps.length + 1);
@@ -298,52 +327,52 @@ describe('echo beat', () => {
     }
   });
 
-  it('perfect echo passes on easy (count only)', () => {
+  it("perfect echo passes on easy (count only)", () => {
     const rng = makeRng(42);
-    const r = makeEchoBeatRound(rng, 'easy');
+    const r = makeEchoBeatRound(rng, "easy");
     const taps = Array.from({ length: r.hitCount }, (_, i) => i * 500);
-    const result = checkEcho(r, taps, 'easy');
+    const result = checkEcho(r, taps, "easy");
     expect(result.countCorrect).toBe(true);
     expect(result.timingCorrect).toBe(true);
   });
 
-  it('wrong count fails', () => {
+  it("wrong count fails", () => {
     const rng = makeRng(42);
-    const r = makeEchoBeatRound(rng, 'medium');
+    const r = makeEchoBeatRound(rng, "medium");
     const taps = Array.from({ length: r.hitCount + 1 }, (_, i) => i * 500);
-    const result = checkEcho(r, taps, 'medium');
+    const result = checkEcho(r, taps, "medium");
     expect(result.countCorrect).toBe(false);
   });
 
-  it('matching timing passes on medium', () => {
+  it("matching timing passes on medium", () => {
     const rng = makeRng(42);
-    const r = makeEchoBeatRound(rng, 'medium');
+    const r = makeEchoBeatRound(rng, "medium");
     let t = 0;
     const taps = [t];
     for (const g of r.gaps) {
       t += g * 1000;
       taps.push(t);
     }
-    const result = checkEcho(r, taps, 'medium');
+    const result = checkEcho(r, taps, "medium");
     expect(result.countCorrect).toBe(true);
     expect(result.timingCorrect).toBe(true);
   });
 
-  it('tolerance tightens with difficulty', () => {
-    expect(tolerancePct('easy')).toBeGreaterThan(tolerancePct('medium'));
-    expect(tolerancePct('medium')).toBeGreaterThan(tolerancePct('hard'));
+  it("tolerance tightens with difficulty", () => {
+    expect(tolerancePct("easy")).toBeGreaterThan(tolerancePct("medium"));
+    expect(tolerancePct("medium")).toBeGreaterThan(tolerancePct("hard"));
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(echoRounds('easy')).toBeLessThan(echoRounds('medium'));
-    expect(echoRounds('medium')).toBeLessThan(echoRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(echoRounds("easy")).toBeLessThan(echoRounds("medium"));
+    expect(echoRounds("medium")).toBeLessThan(echoRounds("hard"));
   });
 });
 
-describe('steady beat', () => {
-  it('generates rounds with valid bpm', () => {
+describe("steady beat", () => {
+  it("generates rounds with valid bpm", () => {
     for (let seed = 1; seed <= 30; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
         const r = makeSteadyBeatRound(rng, d);
         expect(r.bpm).toBeGreaterThanOrEqual(60);
@@ -353,110 +382,132 @@ describe('steady beat', () => {
     }
   });
 
-  it('perfect taps score full marks', () => {
+  it("perfect taps score full marks", () => {
     const rng = makeRng(42);
-    const r = makeSteadyBeatRound(rng, 'easy');
+    const r = makeSteadyBeatRound(rng, "easy");
     const beatMs = 60000 / r.bpm;
     const start = 1000;
-    const taps = Array.from({ length: 8 }, (_, i) => start + i * beatMs);
-    const result = scoreTaps(r, taps, start, 'easy');
+    const taps = Array.from({ length: 8 }, (_, i) => start + (i + 1) * beatMs);
+    const result = scoreTaps(r, taps, start, "easy");
     expect(result.hits).toBe(8);
     expect(result.total).toBe(8);
   });
 
-  it('no taps score zero', () => {
+  it("expects first tap one beat after count-in ends, not at startMs", () => {
     const rng = makeRng(42);
-    const r = makeSteadyBeatRound(rng, 'easy');
-    const result = scoreTaps(r, [], 1000, 'easy');
+    const r = makeSteadyBeatRound(rng, "hard");
+    const beatMs = 60000 / r.bpm;
+    const start = 1000;
+    // Tapping at startMs (count-in beat 4) misses beat 1 and loses the 8th tap
+    const prematureTaps = Array.from(
+      { length: 8 },
+      (_, i) => start + i * beatMs,
+    );
+    const simResult = scoreTaps(r, prematureTaps, start, "hard");
+    expect(simResult.hits).toBe(7);
+
+    // Natural taps starting 1 beat period after startMs score full marks
+    const naturalTaps = Array.from(
+      { length: 8 },
+      (_, i) => start + (i + 1) * beatMs,
+    );
+    const naturalResult = scoreTaps(r, naturalTaps, start, "hard");
+    expect(naturalResult.hits).toBe(8);
+  });
+
+  it("no taps score zero", () => {
+    const rng = makeRng(42);
+    const r = makeSteadyBeatRound(rng, "easy");
+    const result = scoreTaps(r, [], 1000, "easy");
     expect(result.hits).toBe(0);
   });
 
-  it('window tightens with difficulty', () => {
-    expect(windowMs('easy')).toBeGreaterThan(windowMs('medium'));
-    expect(windowMs('medium')).toBeGreaterThan(windowMs('hard'));
+  it("window tightens with difficulty", () => {
+    expect(windowMs("easy")).toBeGreaterThan(windowMs("medium"));
+    expect(windowMs("medium")).toBeGreaterThan(windowMs("hard"));
   });
 
-  it('threshold increases with difficulty', () => {
-    expect(passThreshold('easy')).toBeLessThan(passThreshold('medium'));
-    expect(passThreshold('medium')).toBeLessThan(passThreshold('hard'));
+  it("threshold increases with difficulty", () => {
+    expect(passThreshold("easy")).toBeLessThan(passThreshold("medium"));
+    expect(passThreshold("medium")).toBeLessThan(passThreshold("hard"));
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(steadyRounds('easy')).toBeLessThan(steadyRounds('medium'));
-    expect(steadyRounds('medium')).toBeLessThan(steadyRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(steadyRounds("easy")).toBeLessThan(steadyRounds("medium"));
+    expect(steadyRounds("medium")).toBeLessThan(steadyRounds("hard"));
   });
 });
 
-describe('fast or slow', () => {
-  it('generates rounds with valid speed', () => {
+describe("fast or slow", () => {
+  it("generates rounds with valid speed", () => {
     for (let seed = 1; seed <= 50; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
         const r = makeFastSlowRound(rng, d);
         expect(r.bpm).toBeGreaterThanOrEqual(60);
         expect(r.bpm).toBeLessThanOrEqual(200);
         expect(r.notes.length).toBeGreaterThan(0);
         const speed = getActualSpeed(r);
-        expect(['fast', 'slow']).toContain(speed);
+        expect(["fast", "slow"]).toContain(speed);
       }
     }
   });
 
-  it('the answer field always agrees with the tempo played', () => {
+  it("the answer field always agrees with the tempo played", () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 200; seed++) {
-      for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (const d of ["easy", "medium", "hard"] as const) {
         const r = makeFastSlowRound(makeRng(seed), d);
         expect(r.answer).toBe(getActualSpeed(r));
         expect(fsCorrect(r, r.answer)).toBe(true);
-        expect(fsCorrect(r, r.answer === 'fast' ? 'slow' : 'fast')).toBe(false);
+        expect(fsCorrect(r, r.answer === "fast" ? "slow" : "fast")).toBe(false);
         seen.add(r.answer);
       }
     }
-    expect(seen).toEqual(new Set(['fast', 'slow']));
+    expect(seen).toEqual(new Set(["fast", "slow"]));
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(fsRounds('easy')).toBeLessThan(fsRounds('medium'));
-    expect(fsRounds('medium')).toBeLessThan(fsRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(fsRounds("easy")).toBeLessThan(fsRounds("medium"));
+    expect(fsRounds("medium")).toBeLessThan(fsRounds("hard"));
   });
 });
 
-describe('same or different', () => {
-  it('same rounds have identical phrases', () => {
+describe("same or different", () => {
+  it("same rounds have identical phrases", () => {
     let sawSame = false;
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
-      const r = makeSameDiffRound(rng, 'easy');
-      if (r.answer === 'same') {
+      const r = makeSameDiffRound(rng, "easy");
+      if (r.answer === "same") {
         sawSame = true;
         expect(r.phraseA.map((n) => n.m)).toEqual(r.phraseB.map((n) => n.m));
-        expect(isCorrect(r, 'same')).toBe(true);
-        expect(isCorrect(r, 'different')).toBe(false);
+        expect(isCorrect(r, "same")).toBe(true);
+        expect(isCorrect(r, "different")).toBe(false);
       }
     }
     expect(sawSame).toBe(true);
   });
 
-  it('different rounds have at least one changed note', () => {
+  it("different rounds have at least one changed note", () => {
     let sawDiff = false;
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
-      const r = makeSameDiffRound(rng, 'hard');
-      if (r.answer === 'different') {
+      const r = makeSameDiffRound(rng, "hard");
+      if (r.answer === "different") {
         sawDiff = true;
         const aMidi = r.phraseA.map((n) => n.m);
         const bMidi = r.phraseB.map((n) => n.m);
         expect(aMidi).not.toEqual(bMidi);
-        expect(isCorrect(r, 'different')).toBe(true);
-        expect(isCorrect(r, 'same')).toBe(false);
+        expect(isCorrect(r, "different")).toBe(true);
+        expect(isCorrect(r, "same")).toBe(false);
       }
     }
     expect(sawDiff).toBe(true);
   });
 
-  it('roundsToWin increases with difficulty', () => {
-    expect(sdRounds('easy')).toBeLessThan(sdRounds('medium'));
-    expect(sdRounds('medium')).toBeLessThan(sdRounds('hard'));
+  it("roundsToWin increases with difficulty", () => {
+    expect(sdRounds("easy")).toBeLessThan(sdRounds("medium"));
+    expect(sdRounds("medium")).toBeLessThan(sdRounds("hard"));
   });
 });

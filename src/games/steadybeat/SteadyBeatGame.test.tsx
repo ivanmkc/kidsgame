@@ -63,21 +63,19 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Tap 8 times on each beat (every 600ms)
+  // Tap 8 times on each beat (every 600ms, starting one beat after the count-in)
   for (let i = 0; i < 8; i++) {
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
     act(() => {
       fireEvent.click(circle);
     });
-    if (i < 7) {
-      act(() => {
-        vi.advanceTimersByTime(600);
-      });
-    }
   }
 
-  // Advance time past totalTime (8 * 600 + 500 = 5300ms; currently elapsed in tap phase is 7 * 600 = 4200ms)
+  // Advance time past totalTime (8 * 600 + 500 = 5300ms; currently elapsed in tap phase is 8 * 600 = 4800ms)
   act(() => {
-    vi.advanceTimersByTime(1200);
+    vi.advanceTimersByTime(600);
   });
 
   // After evaluation, round is won and score is incremented
