@@ -2,7 +2,7 @@
 import React from 'react';
 import { Animated } from 'react-native';
 import { renderToString } from 'react-dom/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, fireEvent, screen, act, cleanup } from '@testing-library/react';
 import * as sound from '../../../sound';
 import { CountGame } from '../CountGame';
@@ -25,6 +25,10 @@ vi.mock('react-native', async (importOriginal) => {
     },
     Modal: (props: Record<string, unknown>) => React.createElement('div', { 'data-testid': 'mock-modal' }, props.children as React.ReactNode),
   };
+});
+
+afterEach(() => {
+  cleanup();
 });
 
 describe('CountGame', () => {
