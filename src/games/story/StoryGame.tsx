@@ -11,6 +11,7 @@ import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
 import { say, saySequence, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
+import { filterStoriesByLang } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -128,18 +129,19 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   }, []);
 
   if (!story) {
+    const availableStories = filterStoriesByLang(stories, lang);
     return (
       <GameShell title={t(lang, 'shell.story.title')} subtitle={t(lang, 'shell.story.subPicker')} onBack={onHome} lang={lang}>
         <ScenePicker
           title={t(lang, 'picker.story')}
           lang={lang}
-          options={stories.map((s) => ({
+          options={availableStories.map((s) => ({
             id: s.id,
             name: (lang !== 'en' ? s.titleT?.[lang] : undefined) ?? s.title,
             image: s.nodes.start.image,
           }))}
           onPick={onPickScene}
-          onSurprise={() => stories.length && onPickScene(stories[Math.floor(Math.random() * stories.length)].id)}
+          onSurprise={() => availableStories.length && onPickScene(availableStories[Math.floor(Math.random() * availableStories.length)].id)}
         />
       </GameShell>
     );
