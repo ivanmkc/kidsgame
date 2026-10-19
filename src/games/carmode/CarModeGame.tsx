@@ -173,6 +173,7 @@ export function CarModeGame({ onHome, lang }: Props) {
     clearTimers();
     stopNarration();
     setPackId(id);
+    setCelebrate(0);
     const next = startState(id, Math.floor(Math.random() * 1e9));
     stateRef.current = next;
     setState(next);
