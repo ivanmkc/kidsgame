@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  CarModeState,
   advance,
   currentRound,
   isComplete,
@@ -9,9 +8,11 @@ import {
   speechLines,
   startState,
   toGap,
-  toReveal, handleTap, handleTapTimeout,
+  toReveal,
+  handleTap,
+  handleTapTimeout,
 } from '../logic';
-import { ALL_PACKS, PACK_ORDER, PackId, Round } from '../packs';
+import { ALL_PACKS, PACK_ORDER, PackId } from '../packs';
 
 describe('round engine', () => {
   it('starts at round 0 in prompt phase', () => {
@@ -171,21 +172,13 @@ describe('handleTap pure transitions', () => {
     expect(next.pendingTaps).toBe(0);
   });
 
-  it('reveal phase single tap starts pending state if twoTapAnswer', () => {
+  it('reveal phase single tap advances immediately even if twoTapAnswer', () => {
     let s = startState('silly', 42);
     s = toReveal(s);
-    const next = handleTap(s);
-    expect(next.pendingTaps).toBe(1);
-    expect(next.phase).toBe('reveal');
-  });
-
-  it('reveal phase double tap advances immediately if twoTapAnswer', () => {
-    let s = startState('silly', 42);
-    s = toReveal(s);
-    s.pendingTaps = 1;
     const next = handleTap(s);
     expect(next.phase).toBe('prompt');
     expect(next.pendingTaps).toBe(0);
+    expect(next.roundIdx).toBe(1);
   });
 });
 
