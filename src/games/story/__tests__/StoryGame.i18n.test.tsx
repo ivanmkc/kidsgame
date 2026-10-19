@@ -38,6 +38,73 @@ describe('StoryGame i18n', () => {
     expect(screen.getByText('ルナの たのしい いちにち')).toBeTruthy();
   });
 
+  it('omits untranslated stories from ScenePicker options in non-English languages', () => {
+    const untranslatedMockStory: Story = {
+      id: 'mock-untranslated-story',
+      title: 'Mock Untranslated Title',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Start',
+        },
+      },
+    };
+    manifest.stories?.push(untranslatedMockStory);
+
+    render(<StoryGame onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />);
+
+    expect(screen.queryByTestId('scene-pick-mock-untranslated-story')).toBeNull();
+    expect(screen.getByTestId('scene-pick-luna')).toBeTruthy();
+  });
+
+  it('includes untranslated stories in ScenePicker options in English mode', () => {
+    const untranslatedMockStory: Story = {
+      id: 'mock-untranslated-story',
+      title: 'Mock Untranslated Title',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Start',
+        },
+      },
+    };
+    manifest.stories?.push(untranslatedMockStory);
+
+    render(<StoryGame onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />);
+
+    expect(screen.getByTestId('scene-pick-mock-untranslated-story')).toBeTruthy();
+    expect(screen.getByTestId('scene-pick-luna')).toBeTruthy();
+  });
+
+  it('picks only from available translated stories on surprise in non-English mode', () => {
+    const untranslatedMockStory: Story = {
+      id: 'mock-untranslated-story',
+      title: 'Mock Untranslated Title',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Start',
+        },
+      },
+    };
+    manifest.stories?.push(untranslatedMockStory);
+
+    // Pin Math.random near 1.0 so that drawing from the unfiltered manifest would
+    // select the last story (the untranslated mock story).
+    vi.spyOn(Math, 'random').mockReturnValue(0.999);
+    const onPickSpy = vi.fn();
+    render(<StoryGame onHome={noop} onPickScene={onPickSpy} onBackToPicker={noop} lang="ja" />);
+
+    const surpriseBtn = screen.getByTestId('scene-surprise');
+    fireEvent.click(surpriseBtn);
+
+    expect(onPickSpy).toHaveBeenCalledOnce();
+    const pickedId = onPickSpy.mock.calls[0][0];
+    expect(pickedId).not.toBe('mock-untranslated-story');
+    const pickedStory = manifest.stories?.find((s) => s.id === pickedId);
+    expect(pickedStory?.titleT?.ja).toBeTruthy();
+  });
+
   it('renders localized subtitle, story text, and speaks localized sequence for Japanese', () => {
     const saySeqSpy = vi.spyOn(sound, 'saySequence');
 
