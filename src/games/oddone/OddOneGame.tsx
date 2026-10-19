@@ -1,19 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { say, sfx } from '../../sound';
-import { CATEGORY_TEXT } from '../iconCategories';
-import { makeOddOneRound } from './logic';
-import { useWinLine } from '../winlines';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { say, sfx } from "../../sound";
+import { CATEGORY_TEXT } from "../iconCategories";
+import { makeOddOneRound } from "./logic";
+import { useWinLine } from "../winlines";
 
 interface Props {
   onHome: () => void;
@@ -23,32 +30,44 @@ interface Props {
 
 function oddSettings(d: Difficulty): { n: number } {
   // "which one does not belong?" — always categorical; harder = more items
-  if (d === 'hard') return { n: 9 };
-  if (d === 'medium') return { n: 6 };
+  if (d === "hard") return { n: 9 };
+  if (d === "medium") return { n: 6 };
   return { n: 4 };
 }
 
-export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
+export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const { n } = oddSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState(() => makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
+  const [round, setRound] = useState(() =>
+    makeOddOneRound(rngRef.current, manifest.spotit.icons, n),
+  );
   const [score, setScore] = useState(0);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
-  useWinLine(won, t(lang, 'win.oddone'));
+  useWinLine(won, t(lang, "win.oddone"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+  const roundClosedRef = useRef(false);
+
+  useEffect(() => {
+    roundClosedRef.current = false;
+  }, [round]);
 
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated category still gets read aloud (kids play entirely by ear).
   useEffect(() => {
-    if (!won) say(CATEGORY_TEXT[round.baseCategory]?.not[lang] ?? 'Which one does not belong?');
+    if (!won)
+      say(
+        CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
+          "Which one does not belong?",
+      );
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (idx: number) => {
-    if (won) return;
+    if (won || roundClosedRef.current) return;
+    roundClosedRef.current = true;
     if (idx === round.oddIndex) {
       sfx.good();
       const next = score + 1;
@@ -60,12 +79,16 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
     } else {
       sfx.wrong();
       setWrongIdx(idx);
-      setTimeout(() => setWrongIdx((w) => (w === idx ? null : w)), 450);
+      setTimeout(() => {
+        roundClosedRef.current = false;
+        setWrongIdx((w) => (w === idx ? null : w));
+      }, 450);
     }
   };
 
   const reset = () => {
     setTimerKey((k) => k + 1);
+    roundClosedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongIdx(null);
@@ -79,34 +102,53 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
   const tile = Math.min(
     (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
     (height - 84 - 90 - (rows - 1) * gap) / rows,
-    150
+    150,
   );
 
-  const subtitle = t(lang, 'shell.oddone.sub');
+  const subtitle = t(lang, "shell.oddone.sub");
 
   return (
     <GameShell
-      title={t(lang, 'shell.oddone.title')}
+      title={t(lang, "shell.oddone.title")}
       subtitle={subtitle}
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="oddone-timer" /> : null}
-          <ScoreChip label={`🔍 ${score}/${roundsToWin}`} testID="oddone-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="oddone-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🔍 ${score}/${roundsToWin}`}
+            testID="oddone-score"
+          />
         </View>
       }
     >
       <View style={styles.board}>
-        <View style={[styles.question, shadows.soft]} testID={`oddone-question-${round.baseCategory}`}>
-          <Text style={styles.questionText}>{CATEGORY_TEXT[round.baseCategory]?.not[lang] ?? 'Which one does not belong?'}</Text>
+        <View
+          style={[styles.question, shadows.soft]}
+          testID={`oddone-question-${round.baseCategory}`}
+        >
+          <Text style={styles.questionText}>
+            {CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
+              "Which one does not belong?"}
+          </Text>
         </View>
-        <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
+        <View
+          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+        >
           {round.items.map((icon, i) => (
             <Pressable
               key={`${score}-${i}`}
               onPress={() => onPick(i)}
-              testID={`oddone-item-${i}-${icon}${i === round.oddIndex ? '-odd' : ''}`}
+              testID={`oddone-item-${i}-${icon}${i === round.oddIndex ? "-odd" : ""}`}
               accessibilityLabel={icon}
               accessibilityRole="button"
               style={({ pressed }) => [
@@ -117,15 +159,20 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
                 pressed && styles.pressed,
               ]}
             >
-              <Image source={SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+              <Image
+                source={SPOTIT_ICONS[icon]}
+                style={{ width: "80%", height: "80%" }}
+                resizeMode="contain"
+              />
             </Pressable>
           ))}
         </View>
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.oddone')}
-        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
+        message={t(lang, "win.oddone")}
+        onNext={reset}
+        nextLabel={t(lang, "overlay.nextRound")}
         onHome={onHome}
         lang={lang}
       />
@@ -134,9 +181,15 @@ export function OddOneGame({ onHome, difficulty, lang = 'en' }: Props) {
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 16,
+  },
   question: {
-    backgroundColor: '#F7EDDA',
+    backgroundColor: "#F7EDDA",
     borderRadius: 18,
     borderWidth: 3,
     borderColor: colors.gold,
@@ -144,16 +197,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     maxWidth: 520,
   },
-  questionText: { fontFamily: fonts.display, fontSize: 19, color: colors.ink, textAlign: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  questionText: {
+    fontFamily: fonts.display,
+    fontSize: 19,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   tile: {
     backgroundColor: colors.card,
     borderRadius: 22,
     borderWidth: 3,
     borderColor: colors.blush,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
+  wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
 });
