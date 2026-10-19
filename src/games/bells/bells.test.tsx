@@ -41,7 +41,6 @@ describe("BellsGame replay", () => {
 
     // Tap count should be 1
     expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
-
     // Verify replay button accessibility attributes and icon
     const replayBtn = screen.getByTestId("replay-button");
     expect(replayBtn.getAttribute("role")).toBe("button");
@@ -94,6 +93,143 @@ describe("BellsGame replay", () => {
     fireEvent.click(statusCard);
     expect(screen.getByText("Your turn! (1/2)", { exact: false })).toBeTruthy();
     expect(screen.queryByText("Listen...")).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it("rapid double taps accumulate correctly and increment score", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward through demo
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    playNoteSpy.mockClear();
+
+    const bell0 = screen.getByTestId("bell-0");
+    // Rapidly tap bell-0 twice in the same tick / render cycle
+    act(() => {
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+    });
+
+    expect(screen.getByTestId("bells-score").textContent).toContain("1/5");
+    // Only two notes should have played for the two taps
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
+
+  it("hammering extra taps beyond sequence length is ignored and does not corrupt state", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    playNoteSpy.mockClear();
+
+    const bell0 = screen.getByTestId("bell-0");
+    // Rapidly hammer 5 times when sequence length is 2
+    act(() => {
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+    });
+
+    expect(screen.getByTestId("bells-score").textContent).toContain("1/5");
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
+
+  it("rapid triple taps accumulate correctly and score in medium difficulty", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const playedMidis: number[] = [];
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation((midi) => {
+        playedMidis.push(midi);
+      });
+
+    render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    // Fast-forward through demo to capture demo notes
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // PENTATONIC = [60, 62, 64, 67, 69]
+    // Bell indices for the played demo notes:
+    const midiToBellIndex: Record<number, number> = {
+      60: 0,
+      62: 1,
+      64: 2,
+      67: 3,
+      69: 4,
+    };
+    const seqBellIndices = playedMidis.map((m) => midiToBellIndex[m]);
+    expect(seqBellIndices).toHaveLength(3);
+
+    playNoteSpy.mockClear();
+
+    // Rapidly tap all 3 bells in the sequence in a single act
+    act(() => {
+      for (const idx of seqBellIndices) {
+        fireEvent.click(screen.getByTestId(`bell-${idx}`));
+      }
+    });
+
+    expect(screen.getByTestId("bells-score").textContent).toContain("1/6");
+    expect(playNoteSpy).toHaveBeenCalledTimes(3);
+
+    vi.useRealTimers();
+  });
+
+  it("rapid wrong sequence plays wrong sfx and resets taps after delay", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence is [0, 0]
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
+
+    // Rapid wrong taps: [0, 1] instead of [0, 0]
+    act(() => {
+      fireEvent.click(bell0);
+      fireEvent.click(bell1);
+    });
+
+    // Score should not increment
+    expect(screen.getByTestId("bells-score").textContent).toContain("0/5");
+
+    // Advance through the wrong flash delay (800ms) and replay demo (5000ms)
+    act(() => {
+      vi.advanceTimersByTime(6000);
+    });
+
+    // Back in play phase with 0 taps
+    expect(screen.getByText("Your turn! (0/2)", { exact: false })).toBeTruthy();
 
     vi.useRealTimers();
   });
