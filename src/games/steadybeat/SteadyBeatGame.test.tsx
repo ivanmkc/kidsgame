@@ -8,6 +8,7 @@ import {
   act,
   cleanup,
 } from "@testing-library/react";
+import * as sound from "../../sound";
 import { SteadyBeatGame } from "./SteadyBeatGame";
 import * as logic from "./logic";
 
@@ -15,7 +16,6 @@ afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
-
 it("renders progress dots correctly during the tap phase", () => {
   vi.useFakeTimers();
 
@@ -112,5 +112,28 @@ it("evaluates to 0 hits and does not increment score when no taps are made", () 
   expect(screen.getAllByText("☆")).toHaveLength(8);
 
   roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("speaks instruction line on mount", () => {
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+  expect(saySpy).toHaveBeenCalledWith("Tap along with the beat!");
+  saySpy.mockRestore();
+});
+
+it("speaks when entering tap phase", () => {
+  vi.useFakeTimers();
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+  expect(saySpy).toHaveBeenCalledWith("Tap along with the beat!");
+  saySpy.mockClear();
+
+  act(() => {
+    vi.advanceTimersByTime(5000);
+  });
+
+  expect(saySpy).toHaveBeenCalledWith("Your turn!");
+  saySpy.mockRestore();
   vi.useRealTimers();
 });

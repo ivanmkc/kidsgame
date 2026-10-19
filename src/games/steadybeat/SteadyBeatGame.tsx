@@ -15,7 +15,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
+import { say, sfx } from "../../sound";
 import { playDrum } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -48,6 +48,11 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
   useWinLine(won, t(lang, "win.steadybeat" as never));
+  useEffect(() => {
+    if (!won) {
+      say(t(lang, "shell.steadybeat.sub"));
+    }
+  }, [lang, won]);
 
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
@@ -62,6 +67,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         if (count >= 4) {
           clearInterval(interval);
           setPhase("tap");
+          say(t(lang, "music.yourTurn" as never));
           setStartMs(performance.now());
           const tapBeatMs = 60000 / r.bpm;
           pulseAnim.setValue(0);
@@ -77,7 +83,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       }, beatMs);
       return () => clearInterval(interval);
     },
-    [pulseAnim],
+    [lang, pulseAnim],
   );
 
   useEffect(() => {
