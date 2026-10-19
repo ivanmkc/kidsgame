@@ -62,4 +62,28 @@ describe('CarModeGame interactions', () => {
 
     expect(screen.getByText('Your turn!')).toBeDefined();
   });
+
+  it('advances round immediately on single tap during reveal phase for twoTapAnswer pack', () => {
+    vi.spyOn(sound, 'saySequence').mockReturnValue();
+    vi.spyOn(sound, 'sayThen').mockReturnValue();
+    vi.spyOn(sound, 'stopNarration').mockReturnValue();
+
+    const actual = logic.startState('silly', 42);
+    vi.spyOn(logic, 'startState').mockReturnValue({
+      ...actual,
+      phase: 'reveal',
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    expect(screen.getByText('Tap!')).toBeDefined();
+    expect(screen.getByTestId('carmode-score').textContent).toContain('1/24');
+
+    const tapBtn = screen.getByTestId('carmode-tap');
+    fireEvent.click(tapBtn);
+
+    expect(screen.getByText('Listen...')).toBeDefined();
+    expect(screen.getByTestId('carmode-score').textContent).toContain('2/24');
+  });
 });

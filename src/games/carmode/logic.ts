@@ -50,10 +50,6 @@ export function handleTap(s: CarModeState): CarModeState {
   }
   
   if (s.phase === 'reveal') {
-    if (r?.twoTapAnswer) {
-      if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
-      return advance(s);
-    }
     return advance(s);
   }
   return s;
