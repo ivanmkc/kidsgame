@@ -106,6 +106,7 @@ export const CMN: Table = {
   'mp.duo': '两个人 👧👧',
 
   'shell.letters.title': '找英文字母',
+  'shell.levels': '关卡',
   'shell.letters.titleKana': '找假名',
   'shell.letters.subTap': '听到英文字母就点它',
   'shell.letters.subSound': '哪个英文字母发这个音？',
