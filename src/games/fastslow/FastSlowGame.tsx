@@ -22,10 +22,9 @@ interface Props {
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const lockedRef = useRef(false);
   const [history, setHistory] = useState<('fast' | 'slow')[]>([]);
-  const [round, setRound] = useState<FastSlowRound>(
-    () => makeFastSlowRound(rngRef.current, difficulty, [])
-  );
+  const [round, setRound] = useState<FastSlowRound>(() => makeFastSlowRound(rngRef.current, difficulty, []));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'pick' | 'celebrate'>('listen');
   const [wrongPick, setWrongPick] = useState<'fast' | 'slow' | null>(null);
@@ -48,8 +47,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: 'fast' | 'slow') => {
-    if (won || phase !== 'pick') return;
+    if (won || phase !== 'pick' || lockedRef.current) return;
     if (isCorrect(round, picked)) {
+      lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
@@ -60,6 +60,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       if (next < total) {
         setPhase('celebrate');
         setTimeout(() => {
+          lockedRef.current = false;
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
       }
@@ -78,6 +79,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
