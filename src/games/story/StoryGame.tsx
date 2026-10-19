@@ -444,6 +444,7 @@ function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: strin
   const spring = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animating = useRef(false);
 
   useEffect(() => {
     Animated.loop(
@@ -456,12 +457,18 @@ function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: strin
   }, [pulse]);
 
   const trigger = () => {
+    if (animating.current || revealTimer.current) return;
     if (scare.sting === 'thunder') sfx.thunder(); else sfx.boing();
     setPopped(true);
+    animating.current = true;
     spring.setValue(0);
-    Animated.spring(spring, { toValue: 1, friction: 3.2, tension: 160, useNativeDriver: true }).start();
-    if (revealTimer.current) clearTimeout(revealTimer.current);
-    revealTimer.current = setTimeout(() => say(reveal ?? scare.reveal), scare.delay);
+    Animated.spring(spring, { toValue: 1, friction: 3.2, tension: 160, useNativeDriver: true }).start(() => {
+      animating.current = false;
+    });
+    revealTimer.current = setTimeout(() => {
+      say(reveal ?? scare.reveal);
+      revealTimer.current = null;
+    }, scare.delay);
   };
 
   const l = scare.x * scale;

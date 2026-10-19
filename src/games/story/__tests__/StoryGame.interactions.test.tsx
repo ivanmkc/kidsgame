@@ -1,0 +1,156 @@
+// @vitest-environment happy-dom
+import React from 'react';
+import { Animated } from 'react-native';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as sound from '../../../sound';
+import { sfx } from '../../../sound';
+import { manifest, Story } from '../../../manifest';
+import { StoryGame } from '../StoryGame';
+
+describe('StoryGame ScareSpot interactions', () => {
+  const initialStoryCount = manifest.stories?.length ?? 0;
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+    vi.spyOn(sound, 'saySequence').mockImplementation(() => {});
+    vi.spyOn(sfx, 'tap').mockImplementation(() => {});
+    vi.spyOn(sfx, 'boing').mockImplementation(() => {});
+    vi.spyOn(sfx, 'thunder').mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+    if (manifest.stories && manifest.stories.length > initialStoryCount) {
+      manifest.stories.splice(initialStoryCount);
+    }
+  });
+
+  it('rapid taps on ScareSpot only trigger sound and voice once', () => {
+    const sfxThunderSpy = vi.spyOn(sfx, 'thunder');
+    const saySpy = vi.spyOn(sound, 'say');
+
+    const scareStory: Story = {
+      id: 'test-scare-hammer',
+      title: 'Scare Story Hammer',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Look closely...',
+          scare: {
+            x: 10,
+            y: 20,
+            w: 80,
+            h: 90,
+            pop: 'story/luna_start_c0.png',
+            sting: 'thunder',
+            reveal: 'It is a friendly ghost!',
+            delay: 300,
+          },
+        },
+      },
+    };
+    manifest.stories?.push(scareStory);
+
+    render(<StoryGame sceneId="test-scare-hammer" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />);
+
+    const scareSpot = screen.getByTestId('story-scare');
+    expect(scareSpot).toBeDefined();
+
+    // Rapidly tap the scare spot three times
+    fireEvent.click(scareSpot);
+    fireEvent.click(scareSpot);
+    fireEvent.click(scareSpot);
+
+    // Sound effect should only fire once
+    expect(sfxThunderSpy).toHaveBeenCalledOnce();
+
+    // Advance timers through reveal delay
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    // Voice should be queued once
+    expect(saySpy).toHaveBeenCalledWith('It is a friendly ghost!');
+
+    // Advance any remaining animation frames
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // After animation and reveal finish, tapping again triggers it
+    fireEvent.click(scareSpot);
+    expect(sfxThunderSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores taps while spring animation is running even if delay is 0', () => {
+    let finishSpring: (() => void) | null = null;
+    vi.spyOn(Animated, 'spring').mockImplementation(() => ({
+      start: (cb) => {
+        finishSpring = () => cb?.({ finished: true });
+      },
+      stop: () => {},
+      reset: () => {},
+    }));
+
+    const sfxBoingSpy = vi.spyOn(sfx, 'boing');
+    const saySpy = vi.spyOn(sound, 'say');
+
+    const zeroDelayStory: Story = {
+      id: 'test-scare-zero-delay',
+      title: 'Zero Delay Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Look closely...',
+          scare: {
+            x: 10,
+            y: 20,
+            w: 80,
+            h: 90,
+            pop: 'story/luna_start_c0.png',
+            sting: 'boing',
+            reveal: 'Instant reveal!',
+            delay: 0,
+          },
+        },
+      },
+    };
+    manifest.stories?.push(zeroDelayStory);
+
+    render(
+      <StoryGame sceneId="test-scare-zero-delay" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />,
+    );
+
+    const scareSpot = screen.getByTestId('story-scare');
+
+    fireEvent.click(scareSpot);
+    expect(sfxBoingSpy).toHaveBeenCalledOnce();
+
+    // Fire timer for delay 0 so revealTimer is cleared
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(saySpy).toHaveBeenCalledWith('Instant reveal!');
+
+    // Tap while spring animation is still running: should be ignored
+    fireEvent.click(scareSpot);
+    expect(sfxBoingSpy).toHaveBeenCalledOnce();
+
+    // Now complete the spring animation
+    act(() => {
+      finishSpring?.();
+    });
+
+    // Re-tapping now works
+    fireEvent.click(scareSpot);
+    expect(sfxBoingSpy).toHaveBeenCalledTimes(2);
+  });
+});
