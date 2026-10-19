@@ -42,15 +42,16 @@ describe('fast or slow', () => {
     }
   });
 
-  it('the answer field always agrees with the tempo played', () => {
+  it('isCorrect agrees with the tempo played, and rounds do not store answer', () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 200; seed++) {
       for (const d of ['easy', 'medium', 'hard'] as const) {
         const r = makeFastSlowRound(makeRng(seed), d);
-        expect(r.answer).toBe(getActualSpeed(r));
-        expect(fsCorrect(r, r.answer)).toBe(true);
-        expect(fsCorrect(r, r.answer === 'fast' ? 'slow' : 'fast')).toBe(false);
-        seen.add(r.answer);
+        expect('answer' in r).toBe(false);
+        const speed = getActualSpeed(r);
+        expect(fsCorrect(r, speed)).toBe(true);
+        expect(fsCorrect(r, speed === 'fast' ? 'slow' : 'fast')).toBe(false);
+        seen.add(speed);
       }
     }
     expect(seen).toEqual(new Set(['fast', 'slow']));
