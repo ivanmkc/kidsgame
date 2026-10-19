@@ -35,6 +35,7 @@ interface Props {
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const processingRef = useRef(false);
   const [round, setRound] = useState<HighLowRound>(() =>
     makeHighLowRound(rngRef.current, difficulty),
   );
@@ -65,6 +66,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     if (!won) {
       setPhase("listen");
       setListenNote(null);
+      processingRef.current = false;
       const timer = setTimeout(() => playRound(round), 400);
       return () => {
         clearTimeout(timer);
@@ -74,8 +76,9 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "high" | "low") => {
-    if (won || phase !== "pick") return;
+    if (won || phase !== "pick" || processingRef.current) return;
     if (isCorrect(round, picked)) {
+      processingRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
