@@ -55,6 +55,8 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   const [marked, setMarked] = useState<boolean[]>(() =>
     Array(boardRef.current.cells.length).fill(false),
   );
+  const markedRef = useRef(marked);
+  markedRef.current = marked;
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
@@ -80,7 +82,9 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       lang,
     );
     setCallIdx(0);
-    setMarked(Array(boardRef.current.cells.length).fill(false));
+    const initial = Array(boardRef.current.cells.length).fill(false);
+    markedRef.current = initial;
+    setMarked(initial);
     setWinLine(null);
     setGameKey((k) => k + 1);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -100,12 +104,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   );
 
   const onTile = (cellIdx: number) => {
-    if (won || !call || marked[call.answerIdx]) return;
-    if (marked[cellIdx]) return;
+    if (won || !call || markedRef.current[call.answerIdx]) return;
+    if (markedRef.current[cellIdx]) return;
     if (cellIdx === call.answerIdx) {
       sfx.good();
-      const next = [...marked];
+      const next = [...markedRef.current];
       next[cellIdx] = true;
+      markedRef.current = next;
       setMarked(next);
       setCelebrate((c) => c + 1);
 
@@ -142,7 +147,9 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       lang,
     );
     setCallIdx(0);
-    setMarked(Array(boardRef.current.cells.length).fill(false));
+    const initial = Array(boardRef.current.cells.length).fill(false);
+    markedRef.current = initial;
+    setMarked(initial);
     setWinLine(null);
     setWrongIdx(null);
     setGameKey((k) => k + 1);

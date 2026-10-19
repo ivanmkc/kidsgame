@@ -2,6 +2,7 @@
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import React from 'react';
 import { vi, test, expect, afterEach } from 'vitest';
+import { sfx } from '../../../sound';
 import { BingoGame } from '../BingoGame';
 
 vi.useFakeTimers();
@@ -144,3 +145,65 @@ test('plays through to win and resets', async () => {
   // Should have restarted
   expect(screen.getByTestId('bingo-prompt')).toBeDefined();
 });
+
+test('rapid double-tap on correct tile marks once and advances exactly one round', async () => {
+  vi.spyOn(Math, 'random').mockReturnValue(0.12345);
+  const goodSpy = vi.spyOn(sfx, 'good');
+  const onHome = vi.fn();
+  const { unmount } = render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  const prompt = screen.getByTestId('bingo-prompt');
+  const initialPrompt = prompt.textContent!;
+  const icon = initialPrompt.replace('Find the ', '').replace('!', '');
+
+  const cells = screen.queryAllByTestId(/bingo-cell-/);
+  const correctCell = cells.find((c) => c.getAttribute('aria-label') === icon);
+  expect(correctCell).toBeDefined();
+
+  // Single-tap baseline in a fresh instance with the same seed
+  unmount();
+  render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+  const singleCells = screen.queryAllByTestId(/bingo-cell-/);
+  const singleCorrect = singleCells.find((c) => c.getAttribute('aria-label') === icon);
+  await act(async () => {
+    fireEvent.click(singleCorrect!);
+  });
+  await act(async () => {
+    vi.advanceTimersByTime(9000);
+  });
+  const expectedNextPrompt = screen.getByTestId('bingo-prompt').textContent!;
+  expect(expectedNextPrompt).not.toBe(initialPrompt);
+
+  // Now test rapid double-tap on fresh instance with same seed
+  cleanup();
+  render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+  const doubleCells = screen.queryAllByTestId(/bingo-cell-/);
+  const doubleCorrect = doubleCells.find((c) => c.getAttribute('aria-label') === icon);
+  goodSpy.mockClear();
+
+  await act(async () => {
+    fireEvent.click(doubleCorrect!);
+    fireEvent.click(doubleCorrect!);
+  });
+
+  expect(goodSpy).toHaveBeenCalledTimes(1);
+
+  await act(async () => {
+    vi.advanceTimersByTime(9000);
+  });
+
+  const doubleNextPrompt = screen.getByTestId('bingo-prompt').textContent!;
+  expect(doubleNextPrompt).toBe(expectedNextPrompt);
+  expect(screen.getByTestId('bingo-score').textContent).toBe('⭐ 1/9');
+});
+
