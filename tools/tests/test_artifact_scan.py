@@ -46,44 +46,59 @@ def test_tiles():
         (38, 38, 100, 100),
     ]
 
+
+def test_main_missing_scan_plan(tmp_path):
+    missing_plan = tmp_path / "scan_plan.json"
+    with patch("artifact_scan.SCAN_PLAN", missing_plan):
+        with pytest.raises(SystemExit) as exc_info:
+            artifact_scan.main([])
+    assert "not found; run tools/artifact_review/make_scan_plan.ts first" in str(exc_info.value)
+
+
 def test_main(tmp_path):
     assets_dir = tmp_path / "assets"
     assets_dir.mkdir()
     out_dir = tmp_path / "out"
-    manifest_file = tmp_path / "manifest.json"
+    scan_plan_file = tmp_path / "scan_plan.json"
 
     # Create dummy images
     img_a_path = assets_dir / "a.png"
     img_b_path = assets_dir / "b.png"
-    img_hidden_path = assets_dir / "h.png"
 
-    # Make them solid colors so check_pair_identity doesn't flag them outside diffs
     img_a = Image.new("RGB", (100, 100), color=(255, 0, 0))
-    # Draw a single blue pixel at (10, 10), which is inside the diff rect (so check_pair_identity ignores it),
-    # but it will be picked up by the tile (0, 0, 41, 62) during judge_tile.
+    # Draw a single blue pixel at (10, 10), which will be picked up by the tile [0, 0, 50, 50]
     img_a.putpixel((10, 10), (0, 0, 255))
     img_a.save(img_a_path)
-    
-    Image.new("RGB", (100, 100), color=(255, 0, 0)).save(img_b_path)
-    Image.new("RGB", (100, 100), color=(0, 255, 0)).save(img_hidden_path)
 
-    manifest_data = {
-        "diff": [
+    Image.new("RGB", (100, 100), color=(255, 0, 0)).save(img_b_path)
+
+    scan_plan_data = [
+        [
             {
-                "id": "diff1",
-                "imageA": "a.png",
-                "imageB": "b.png",
-                "diffs": [{"x": 10, "y": 10, "w": 20, "h": 20}]
-            }
+                "asset": {
+                    "path": "assets/a.png",
+                    "kind": "image",
+                    "width": 100,
+                    "height": 100,
+                },
+                "rect": [0, 0, 50, 50],
+                "tag": "assets_a_png_0",
+            },
         ],
-        "hidden": [
+        [
             {
-                "id": "hid1",
-                "image": "h.png"
-            }
-        ]
-    }
-    manifest_file.write_text(json.dumps(manifest_data))
+                "asset": {
+                    "path": "assets/b.png",
+                    "kind": "image",
+                    "width": 100,
+                    "height": 100,
+                },
+                "rect": [0, 0, 50, 50],
+                "tag": "assets_b_png_0",
+            },
+        ],
+    ]
+    scan_plan_file.write_text(json.dumps(scan_plan_data))
 
     def mock_ask_yes_no(q, crops, attempts=3):
         # crops[0] is the PIL Image of the crop
@@ -95,25 +110,23 @@ def test_main(tmp_path):
                     return True
         return False
 
-    with patch("artifact_scan.MANIFEST", manifest_file), \
-         patch("artifact_scan.ASSETS", assets_dir), \
+    with patch("artifact_scan.SCAN_PLAN", scan_plan_file), \
+         patch("artifact_scan.ROOT", tmp_path), \
          patch("gen.judge.ask_yes_no", side_effect=mock_ask_yes_no):
-        
+
         artifact_scan.main(["--out", str(out_dir)])
 
     report_path = out_dir / "artifact_report.json"
     assert report_path.exists()
     findings = json.loads(report_path.read_text())
-    
+
     assert len(findings) == 1
     finding = findings[0]
-    assert finding["asset"] == "a.png"
+    assert finding["asset"] == "assets/a.png"
     assert finding["kind"] == "judged-artifact"
-    assert isinstance(finding["rect"], list)
-    assert len(finding["rect"]) == 4
-    assert isinstance(finding["crop"], str)
-    assert finding["crop"].endswith(".png")
-    
+    assert finding["rect"] == [0, 0, 50, 50]
+    assert finding["crop"] == "assets_a_png_0.png"
+
     # Check if the crop was saved
     crop_path = out_dir / finding["crop"]
     assert crop_path.exists()
