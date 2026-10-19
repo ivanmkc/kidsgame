@@ -32,6 +32,7 @@ import {
   roundsToWin as steadyRounds,
   passThreshold,
   windowMs,
+  speechLines as steadySpeechLines,
 } from "../steadybeat/logic";
 import {
   makeSameDiffRound,
@@ -408,7 +409,6 @@ describe("steady beat", () => {
     const naturalResult = scoreTaps(r, naturalTaps, start, "hard");
     expect(naturalResult.hits).toBe(8);
   });
-
   it("no taps score zero", () => {
     const rng = makeRng(42);
     const r = makeSteadyBeatRound(rng, "easy");
@@ -429,6 +429,12 @@ describe("steady beat", () => {
   it("roundsToWin increases with difficulty", () => {
     expect(steadyRounds("easy")).toBeLessThan(steadyRounds("medium"));
     expect(steadyRounds("medium")).toBeLessThan(steadyRounds("hard"));
+  });
+
+  it("speechLines covers at least 4 langs, no duplicates", () => {
+    const lines = steadySpeechLines();
+    expect(lines.length).toBeGreaterThanOrEqual(8);
+    expect(new Set(lines).size).toBe(lines.length);
   });
 });
 

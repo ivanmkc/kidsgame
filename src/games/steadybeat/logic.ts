@@ -1,5 +1,7 @@
 import { Rng, randInt } from "../../rng";
 import { Difficulty } from "../../difficulty";
+import { LANGS } from "../../lang";
+import { t } from "../../i18n";
 
 export interface SteadyBeatRound {
   bpm: number;
@@ -63,6 +65,12 @@ export function passThreshold(d: Difficulty): number {
   return 0.75;
 }
 
+/** Voice-clip contract: every spoken line, all langs. */
 export function speechLines(): string[] {
-  return [];
+  const out: string[] = [];
+  for (const l of LANGS) {
+    out.push(t(l.id, "shell.steadybeat.sub"));
+    out.push(t(l.id, "music.yourTurn"));
+  }
+  return [...new Set(out)];
 }
