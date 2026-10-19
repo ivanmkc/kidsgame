@@ -537,6 +537,10 @@ export const RHYME_WORDS: {
   { icon: "pan", en: "pan", letter: "P", sound: "puh", rhymeKey: "an" },
   { icon: "pen", en: "pen", letter: "P", sound: "puh", rhymeKey: "en" },
   { icon: "pin", en: "pin", letter: "P", sound: "puh", rhymeKey: "in" },
+  { icon: "wig", en: "wig", letter: "W", sound: "wuh", rhymeKey: "ig" },
+  { icon: "dig", en: "dig", letter: "D", sound: "duh", rhymeKey: "ig" },
+  { icon: "big", en: "big", letter: "B", sound: "buh", rhymeKey: "ig" },
+  { icon: "block", en: "block", letter: "B", sound: "buh", rhymeKey: "ock" },
 ];
 
 export function wordFor(

@@ -17,6 +17,20 @@ describe('RHYME_WORDS', () => {
     }
   });
 
+  it('contains Level 3 words with correct phonics and rhymeKeys', () => {
+    const level3Words = [
+      { icon: 'wig', en: 'wig', letter: 'W', sound: 'wuh', rhymeKey: 'ig' },
+      { icon: 'dig', en: 'dig', letter: 'D', sound: 'duh', rhymeKey: 'ig' },
+      { icon: 'big', en: 'big', letter: 'B', sound: 'buh', rhymeKey: 'ig' },
+      { icon: 'block', en: 'block', letter: 'B', sound: 'buh', rhymeKey: 'ock' },
+    ];
+
+    for (const expected of level3Words) {
+      const match = RHYME_WORDS.find((w) => w.icon === expected.icon);
+      expect(match).toEqual(expected);
+    }
+  });
+
   it('has consistent letter, sound, and rhymeKey on all entries', () => {
     for (const entry of RHYME_WORDS) {
       expect(entry.icon).toBeTruthy();
