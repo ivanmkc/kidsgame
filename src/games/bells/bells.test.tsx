@@ -267,18 +267,72 @@ describe('BellsGame', () => {
       vi.advanceTimersByTime(5000);
     });
 
-    const bell1 = screen.getByTestId('bell-1');
-    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+    const bell1 = screen.getByTestId("bell-1");
+    expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
 
     fireEvent.click(bell1);
     // Active border must contrast with Bell 1 base color (#FFC24B)
-    expect(bell1.style.borderColor).toBe('rgba(255, 253, 247, 1.00)');
-    expect(bell1.style.borderColor).not.toBe('rgba(255, 194, 75, 1.00)');
+    expect(bell1.style.borderColor).toBe("rgba(255, 253, 247, 1.00)");
+    expect(bell1.style.borderColor).not.toBe("rgba(255, 194, 75, 1.00)");
 
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+    expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
+
+    vi.useRealTimers();
+  });
+
+  it("plays sparkles only on sequence completion and retains them past 250ms", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0]
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+
+    // First tap does not complete sequence: no sparkles should render
+    fireEvent.click(bell0);
+    expect(screen.queryAllByText("✨")).toHaveLength(0);
+
+    // Second tap completes sequence: sparkles render
+    fireEvent.click(bell0);
+    expect(screen.queryAllByText("✨").length).toBeGreaterThan(0);
+
+    // Fast-forward past 250ms (glowIdx clears after 250ms)
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    // Sparkles must remain mounted to finish the 650ms animation
+    expect(screen.queryAllByText("✨").length).toBeGreaterThan(0);
+
+    vi.useRealTimers();
+  });
+
+  it("does not play sparkles on wrong sequence", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0]
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
+
+    fireEvent.click(bell0);
+    fireEvent.click(bell1);
+
+    expect(screen.queryAllByText("✨")).toHaveLength(0);
 
     vi.useRealTimers();
   });

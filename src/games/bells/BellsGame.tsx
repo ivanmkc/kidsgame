@@ -43,6 +43,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "play">("listen");
   const [glowIdx, setGlowIdx] = useState<number | null>(null);
+  const [sparkBell, setSparkBell] = useState<number | null>(null);
   const [tapped, setTapped] = useState<number[]>([]);
   const tappedRef = useRef<number[]>([]);
   const [wrongFlash, setWrongFlash] = useState(false);
@@ -122,6 +123,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       );
     } else if (result === 'complete') {
       sfx.good();
+      setSparkBell(idx);
       setSparkKey((k) => k + 1);
       const nextScore = score + 1;
       setScore(nextScore);
@@ -151,6 +153,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     tappedRef.current = [];
     setTapped([]);
     setWrongFlash(false);
+    setSparkBell(null);
     setRound(makeBellsRound(rngRef.current, difficulty));
   };
 
@@ -302,8 +305,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.bellText, { fontSize: bellSize * 0.4 }]}>
                   🔔
                 </Text>
-                {glowIdx === i && (
-                  <SparkleBurst trigger={sparkKey + i} count={4} size={12} />
+                {sparkBell === i && (
+                  <SparkleBurst trigger={sparkKey} count={4} size={12} />
                 )}
               </Pressable>
             </Animated.View>
