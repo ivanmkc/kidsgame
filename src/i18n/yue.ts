@@ -283,4 +283,13 @@ export const YUE: Table = {
   'feedback.cancel': '取消',
   'feedback.send': '傳送 📨',
   'feedback.thanks': '多謝！💛',
+  'gate.title': '家長控制',
+  'gate.holdPrompt': '長按下面個掣 3 秒嚟繼續。',
+  'gate.holdA11y': '長按 3 秒進入家長控制',
+  'gate.holdButton': '長按呢度',
+  'gate.cancel': '取消',
+  'gate.wordTitle': '仲有一步',
+  'gate.wordPrompt': '請輸入以下單字以繼續',
+  'gate.wordPlaceholder': '喺度輸入單字',
+  'gate.continue': '繼續',
 };

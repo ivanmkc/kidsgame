@@ -263,7 +263,17 @@ export type UIKey =
   | 'feedback.placeholder'
   | 'feedback.cancel'
   | 'feedback.send'
-  | 'feedback.thanks';
+  | 'feedback.thanks'
+  // ── Adult gate ─────────────────────────────────────────────────
+  | 'gate.title'
+  | 'gate.holdPrompt'
+  | 'gate.holdA11y'
+  | 'gate.holdButton'
+  | 'gate.cancel'
+  | 'gate.wordTitle'
+  | 'gate.wordPrompt'
+  | 'gate.wordPlaceholder'
+  | 'gate.continue';
 
 export type Table = Record<UIKey, string>;
 
@@ -552,6 +562,15 @@ export const EN: Table = {
   'feedback.cancel': 'Cancel',
   'feedback.send': 'Send 📨',
   'feedback.thanks': 'Thank you! 💛',
+  'gate.title': 'Parental Controls',
+  'gate.holdPrompt': 'Press and hold the button below for 3 seconds to continue.',
+  'gate.holdA11y': 'Hold for 3 seconds to access parental controls',
+  'gate.holdButton': 'Hold here',
+  'gate.cancel': 'Cancel',
+  'gate.wordTitle': 'One more step',
+  'gate.wordPrompt': 'To continue, type the word',
+  'gate.wordPlaceholder': 'Type the word here',
+  'gate.continue': 'Continue',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };

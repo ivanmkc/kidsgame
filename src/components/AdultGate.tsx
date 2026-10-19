@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Pressable,
@@ -7,12 +7,16 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { Lang } from '../lang';
+import { t } from '../i18n';
+import { LangContext } from './GameShell';
 import { randomGateWord } from '../lockdown';
 import { colors, fonts } from '../theme';
 
 interface Props {
   onPass: () => void;
   onCancel: () => void;
+  lang?: Lang;
 }
 
 type Phase = 'hold' | 'word';
@@ -20,7 +24,9 @@ type Phase = 'hold' | 'word';
 const HOLD_MS = 3000;
 const IDLE_TIMEOUT_MS = 30000;
 
-export function AdultGate({ onPass, onCancel }: Props) {
+export function AdultGate({ onPass, onCancel, lang: propLang }: Props) {
+  const langCtx = useContext(LangContext);
+  const lang = propLang ?? langCtx?.lang ?? 'en';
   const [phase, setPhase] = useState<Phase>('hold');
   const [holdProgress, setHoldProgress] = useState(0);
   const [word, setWord] = useState(() => randomGateWord());
@@ -91,43 +97,43 @@ export function AdultGate({ onPass, onCancel }: Props) {
       <View style={styles.card}>
         {phase === 'hold' ? (
           <>
-            <Text style={styles.title}>Parental Controls</Text>
+            <Text style={styles.title}>{t(lang, 'gate.title')}</Text>
             <Text style={styles.body}>
-              Press and hold the button below for 3 seconds to continue.
+              {t(lang, 'gate.holdPrompt')}
             </Text>
             <Pressable
               onPressIn={onHoldStart}
               onPressOut={onHoldEnd}
               style={styles.holdBtn}
-              accessibilityLabel="Hold for 3 seconds to access parental controls"
+              accessibilityLabel={t(lang, 'gate.holdA11y')}
             >
               <View style={styles.holdTrack}>
                 <View style={[styles.holdFill, { width: `${holdProgress * 100}%` }]} />
               </View>
               <Text style={styles.holdText}>
-                {holdProgress > 0 ? `${Math.round(holdProgress * 100)}%` : 'Hold here'}
+                {holdProgress > 0 ? `${Math.round(holdProgress * 100)}%` : t(lang, 'gate.holdButton')}
               </Text>
             </Pressable>
             <Pressable onPress={onCancel} style={styles.cancelBtn}>
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText}>{t(lang, 'gate.cancel')}</Text>
             </Pressable>
           </>
         ) : (
           <>
-            <Text style={styles.title}>One more step</Text>
+            <Text style={styles.title}>{t(lang, 'gate.wordTitle')}</Text>
             <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
               <Text style={styles.body}>
-                To continue, type the word{' '}
+                {t(lang, 'gate.wordPrompt')}{' '}
                 <Text style={styles.wordHighlight}>{word}</Text>
               </Text>
               <TextInput
                 value={typed}
-                onChangeText={(t) => { setTyped(t); resetIdle(); }}
+                onChangeText={(text) => { setTyped(text); resetIdle(); }}
                 autoCapitalize="none"
                 autoCorrect={false}
                 autoFocus
                 style={styles.input}
-                placeholder="Type the word here"
+                placeholder={t(lang, 'gate.wordPlaceholder')}
                 placeholderTextColor={colors.inkSoft}
                 testID="gate-input"
                 onSubmitEditing={onSubmit}
@@ -136,7 +142,7 @@ export function AdultGate({ onPass, onCancel }: Props) {
             </Animated.View>
             <View style={styles.btnRow}>
               <Pressable onPress={onCancel} style={styles.cancelBtn}>
-                <Text style={styles.cancelText}>Cancel</Text>
+                <Text style={styles.cancelText}>{t(lang, 'gate.cancel')}</Text>
               </Pressable>
               <Pressable
                 onPress={onSubmit}
@@ -144,7 +150,7 @@ export function AdultGate({ onPass, onCancel }: Props) {
                 disabled={!typed.trim()}
                 testID="gate-submit"
               >
-                <Text style={styles.submitText}>Continue</Text>
+                <Text style={styles.submitText}>{t(lang, 'gate.continue')}</Text>
               </Pressable>
             </View>
           </>
