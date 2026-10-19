@@ -22,7 +22,8 @@ interface Props {
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
-  const [round, setRound] = useState<FastSlowRound>(() => makeFastSlowRound(rngRef.current, difficulty));
+  const [history, setHistory] = useState<('fast' | 'slow')[]>([]);
+  const [round, setRound] = useState<FastSlowRound>(() => makeFastSlowRound(rngRef.current, difficulty, []));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listen' | 'pick' | 'celebrate'>('listen');
   const [wrongPick, setWrongPick] = useState<'fast' | 'slow' | null>(null);
@@ -53,10 +54,12 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       const next = score + 1;
       setScore(next);
       setWrongPick(null);
+      const nextHistory = [...history, actual];
+      setHistory(nextHistory);
       if (next < total) {
         setPhase('celebrate');
         setTimeout(() => {
-          setRound(makeFastSlowRound(rngRef.current, difficulty));
+          setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
       }
     } else {
@@ -77,7 +80,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
-    setRound(makeFastSlowRound(rngRef.current, difficulty));
+    setHistory([]);
+    setRound(makeFastSlowRound(rngRef.current, difficulty, []));
   };
 
   const earPulse = useRef(new Animated.Value(1)).current;

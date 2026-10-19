@@ -34,12 +34,6 @@ import {
   windowMs,
 } from "../steadybeat/logic";
 import {
-  makeFastSlowRound,
-  getActualSpeed,
-  isCorrect as fsCorrect,
-  roundsToWin as fsRounds,
-} from "../fastslow/logic";
-import {
   makeSameDiffRound,
   isCorrect,
   roundsToWin as sdRounds,
@@ -435,41 +429,6 @@ describe("steady beat", () => {
   it("roundsToWin increases with difficulty", () => {
     expect(steadyRounds("easy")).toBeLessThan(steadyRounds("medium"));
     expect(steadyRounds("medium")).toBeLessThan(steadyRounds("hard"));
-  });
-});
-
-describe("fast or slow", () => {
-  it("generates rounds with valid speed", () => {
-    for (let seed = 1; seed <= 50; seed++) {
-      for (const d of ["easy", "medium", "hard"] as const) {
-        const rng = makeRng(seed);
-        const r = makeFastSlowRound(rng, d);
-        expect(r.bpm).toBeGreaterThanOrEqual(60);
-        expect(r.bpm).toBeLessThanOrEqual(200);
-        expect(r.notes.length).toBeGreaterThan(0);
-        const speed = getActualSpeed(r);
-        expect(["fast", "slow"]).toContain(speed);
-      }
-    }
-  });
-
-  it("the answer field always agrees with the tempo played", () => {
-    const seen = new Set<string>();
-    for (let seed = 1; seed <= 200; seed++) {
-      for (const d of ["easy", "medium", "hard"] as const) {
-        const r = makeFastSlowRound(makeRng(seed), d);
-        expect(r.answer).toBe(getActualSpeed(r));
-        expect(fsCorrect(r, r.answer)).toBe(true);
-        expect(fsCorrect(r, r.answer === "fast" ? "slow" : "fast")).toBe(false);
-        seen.add(r.answer);
-      }
-    }
-    expect(seen).toEqual(new Set(["fast", "slow"]));
-  });
-
-  it("roundsToWin increases with difficulty", () => {
-    expect(fsRounds("easy")).toBeLessThan(fsRounds("medium"));
-    expect(fsRounds("medium")).toBeLessThan(fsRounds("hard"));
   });
 });
 

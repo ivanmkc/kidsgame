@@ -31,10 +31,26 @@ export function roundsToWin(d: Difficulty): number {
   return 12;
 }
 
-export function makeFastSlowRound(rng: Rng, d: Difficulty): FastSlowRound {
+export function makeFastSlowRound(
+  rng: Rng,
+  d: Difficulty,
+  history: ('fast' | 'slow')[] = []
+): FastSlowRound {
   const [slow, fast] = bpmPair(d);
-  const bpm = rng() < 0.5 ? fast : slow;
-  return { notes: MELODY, bpm, answer: speedOf(bpm) };
+  
+  let useFast: boolean;
+  const len = history.length;
+  if (len >= 2 && history[len - 1] === history[len - 2]) {
+    useFast = history[len - 1] === 'slow';
+  } else {
+    useFast = rng() < 0.5;
+  }
+  
+  const bpm = useFast ? fast : slow;
+  const transpose = Math.floor(rng() * 13) - 6;
+  const notes = MELODY.map((n) => ({ ...n, m: n.m + transpose }));
+  
+  return { notes, bpm, answer: speedOf(bpm) };
 }
 
 function speedOf(bpm: number): 'fast' | 'slow' {
