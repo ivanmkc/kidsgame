@@ -40,6 +40,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const showComingSoonBanner = familyCount < 3;
 
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const lockedRef = useRef(false);
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RhymeRound | null>(
     () => (playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null),
@@ -49,7 +50,10 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = playable && roundIdx >= roundsToWin;
   useWinLine(won, t(lang, 'win.rhyme'));
-  useEffect(() => { setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null); }, [gameLang]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    lockedRef.current = false;
+    setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null);
+  }, [gameLang]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && playable, timerKey);
   const { width, height } = useWindowDimensions();
 
@@ -58,12 +62,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won || !round) return;
+    if (won || !round || lockedRef.current) return;
     if (round.tiles[i].isAnswer) {
+      lockedRef.current = true;
       sfx.good();
       setWrongIdx(null);
       const nextIdx = roundIdx + 1;
       sayThen(round.confirmLines, () => {
+        lockedRef.current = false;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(makeRhymeRound(rngRef.current, entries, tileCount, gameLang, round.target.icon));
@@ -78,6 +84,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
