@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import {
   render,
   screen,
@@ -10,12 +10,18 @@ import {
 } from '@testing-library/react';
 import { BellsGame } from './BellsGame';
 import * as music from '../../music';
+import * as sound from '../../sound';
 import { sfx } from '../../sound';
 import { t } from '../../i18n';
 import { makeBellsRound } from './logic';
 import { makeRng } from '../../rng';
 
 describe('BellsGame', () => {
+  beforeEach(() => {
+    vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => {
+      done();
+    });
+  });
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();

@@ -1,18 +1,26 @@
 // @vitest-environment happy-dom
-import React from "react";
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
-import { Animated } from "react-native";
-import { sfx } from "../../../sound";
-import { BellsGame } from "../BellsGame";
-import * as bellsLogic from "../logic";
+import React from 'react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import { Animated } from 'react-native';
+import { BellsGame } from '../BellsGame';
+import * as bellsLogic from '../logic';
+import * as music from '../../../music';
+import * as sound from '../../../sound';
+import { sfx } from '../../../sound';
 
-describe("BellsGame", () => {
+describe('BellsGame', () => {
+  beforeEach(() => {
+    vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => {
+      done();
+    });
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("halts animations when won", () => {
+  it('halts animations when won', () => {
     let rounds = 5;
     const roundsSpy = vi
       .spyOn(bellsLogic, "roundsToWin")
@@ -82,5 +90,48 @@ describe("BellsGame", () => {
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
 
     vi.useRealTimers();
+  });
+
+  it('speaks instructions on game start', () => {
+    const sayThenSpy = vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => done && done());
+    const { unmount } = render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(sayThenSpy).toHaveBeenCalledWith(['Listen, then play the tune back!'], expect.any(Function));
+    sayThenSpy.mockRestore();
+    unmount();
+  });
+
+  it('speaks instructions in selected language on start', () => {
+    const sayThenSpy = vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => done && done());
+    const { unmount } = render(<BellsGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    expect(sayThenSpy).toHaveBeenCalledWith(['きいて、おなじように ならそう！'], expect.any(Function));
+    sayThenSpy.mockRestore();
+    unmount();
+  });
+
+  it('delays melody demo until spoken instruction completes', () => {
+    vi.useFakeTimers();
+    let demoDone: (() => void) | null = null;
+    const sayThenSpy = vi.spyOn(sound, 'sayThen').mockImplementation((_texts, done) => {
+      demoDone = done;
+    });
+    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
+
+    const { unmount } = render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+    expect(playNoteSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      demoDone?.();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(playNoteSpy).toHaveBeenCalled();
+
+    sayThenSpy.mockRestore();
+    playNoteSpy.mockRestore();
+    vi.useRealTimers();
+    unmount();
   });
 });

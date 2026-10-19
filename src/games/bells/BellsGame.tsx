@@ -16,7 +16,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
+import { sayThen, sfx } from "../../sound";
 import { playNote, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -89,7 +89,11 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       flashingRef.current = false;
       tappedRef.current = [];
       setTapped([]);
-      playDemo(round);
+      if (score === 0) {
+        sayThen([t(lang, 'shell.bells.sub')], () => playDemo(round));
+      } else {
+        playDemo(round);
+      }
     }
     return () => {
       clearDemo();

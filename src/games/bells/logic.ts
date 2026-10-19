@@ -1,5 +1,7 @@
 import { Rng, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
+import { LANGS } from '../../lang';
+import { t } from '../../i18n';
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
 const BELL_COLORS = ['#E8564F', '#FFC24B', '#5FBF6E', '#2FB8AC', '#9B7EDE'];
@@ -77,5 +79,9 @@ export function canTap(
 }
 
 export function speechLines(): string[] {
-  return [];
+  const out: string[] = [];
+  for (const l of LANGS) {
+    out.push(t(l.id, 'shell.bells.sub'));
+  }
+  return [...new Set(out)];
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../../rng';
-import { canTap, judgeTap, makeBellsRound, BellsRound } from '../logic';
+import { canTap, judgeTap, makeBellsRound, BellsRound, speechLines } from '../logic';
 
 describe('judgeTap', () => {
   const round: BellsRound = {
@@ -69,5 +69,17 @@ describe('canTap', () => {
   it('allows taps during active play when not flashing and incomplete', () => {
     expect(canTap(round, [], 'play', false, false)).toBe(true);
     expect(canTap(round, [0], 'play', false, false)).toBe(true);
+  });
+});
+
+describe('speechLines', () => {
+  it('covers all supported languages with unique subtitle lines', () => {
+    const lines = speechLines();
+    expect(lines).toHaveLength(4);
+    expect(new Set(lines).size).toBe(4);
+    expect(lines).toContain('Listen, then play the tune back!');
+    expect(lines).toContain('きいて、おなじように ならそう！');
+    expect(lines).toContain('听完旋律，按顺序敲响！');
+    expect(lines).toContain('聽完旋律，跟住撳返！');
   });
 });
