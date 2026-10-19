@@ -22,7 +22,7 @@ export interface PromoteResult {
   skipped: string[];
 }
 
-function runStep(
+export function runStep(
   cmd: string,
   args: readonly string[],
   cwd: string,
@@ -90,7 +90,7 @@ export function resolvePromotionPaths(
   return { targetRelPath: normTarget, candidateRelPath: normCand };
 }
 
-function stripExt(filePath: string): string {
+export function stripExt(filePath: string): string {
   const ext = path.posix.extname(filePath);
   return ext ? filePath.slice(0, -ext.length) : filePath;
 }
@@ -105,11 +105,12 @@ export function detectScanFindings(promoted: readonly string[], scanFindings: re
   }
 
   for (const f of scanFindings) {
-    if (f.assetPath) {
-      const clean = f.assetPath.replace(/\\/g, '/').replace(/^\.\//, '');
+    const p = f.assetPath ?? f.dirPath;
+    if (p) {
+      const clean = p.replace(/\\/g, '/').replace(/^\.\//, '');
       const stripped = stripExt(clean);
       if (normPromoted.has(clean) || normPromoted.has(stripped)) {
-        issues.push(`${f.assetPath}: [${f.category}] ${f.note || 'artifact detected'}`);
+        issues.push(`${p}: [${f.category}] ${f.note || 'artifact detected'}`);
       }
     }
   }
