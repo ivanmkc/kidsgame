@@ -133,6 +133,7 @@ export function ListenChooseGame({ onHome, lang = "en" }: Props) {
               onPress={() => setCaptions((c) => !c)}
               testID="captions-toggle"
               accessibilityRole="button"
+              hitSlop={12}
               style={({ pressed }) => [
                 styles.captionsToggle,
                 pressed && styles.pressed,
@@ -177,6 +178,7 @@ export function ListenChooseGame({ onHome, lang = "en" }: Props) {
                 onPress={() => setCaptions((c) => !c)}
                 testID="captions-toggle"
                 accessibilityRole="button"
+                hitSlop={12}
                 style={({ pressed }) => [
                   styles.captionsToggleMini,
                   pressed && styles.pressed,
