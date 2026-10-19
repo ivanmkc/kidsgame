@@ -12,7 +12,7 @@ import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, saySequence, sfx } from '../../sound';
-import { RulesRound, makeRules, makeRulesRound } from './logic';
+import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from './logic';
 import { useWinLine } from '../winlines';
 
 interface Props {
@@ -33,10 +33,9 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const buildRound = (idx: number): RulesRound => {
     // A recall round REPEATS an earlier rule without restating it — it only
     // makes sense once that rule has already been shown.
-    const recall = idx >= recallFrom && idx % 3 === 2;
-    const ruleIdx = recall ? idx % recallFrom : idx;
+    const { ruleIdx, isRecall } = pickRuleIndex(rngRef.current, idx, recallFrom);
     return makeRulesRound(
-      rngRef.current, manifest.spotit.icons, rulesRef.current, ruleIdx, tileCount, recall,
+      rngRef.current, manifest.spotit.icons, rulesRef.current, ruleIdx, tileCount, isRecall,
     );
   };
 

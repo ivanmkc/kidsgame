@@ -45,3 +45,22 @@ export function makeRulesRound(
   ]);
   return { ruleNumber: ruleIndex + 1, rule, isRecall, tiles, matchCount };
 }
+
+function isRecallRound(idx: number, recallFrom: number): boolean {
+  return idx >= recallFrom && idx % 3 === 2;
+}
+
+export function pickRuleIndex(
+  rng: Rng,
+  idx: number,
+  recallFrom: number,
+): { ruleIdx: number; isRecall: boolean } {
+  const isRecall = isRecallRound(idx, recallFrom);
+  let recallCount = 0;
+  for (let k = 0; k < idx; k++) {
+    if (isRecallRound(k, recallFrom)) recallCount++;
+  }
+  const introduced = idx - recallCount;
+  const ruleIdx = isRecall ? Math.floor(rng() * introduced) : introduced;
+  return { ruleIdx, isRecall };
+}
