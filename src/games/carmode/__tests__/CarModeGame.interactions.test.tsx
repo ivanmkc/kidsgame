@@ -86,4 +86,30 @@ describe('CarModeGame interactions', () => {
     expect(screen.getByText('Listen...')).toBeDefined();
     expect(screen.getByTestId('carmode-score').textContent).toContain('2/24');
   });
+
+  it('resets celebratory confetti when switching packs after completion', () => {
+    const initial = logic.startState('boops', 42);
+    const lastRoundState: logic.CarModeState = {
+      ...initial,
+      roundIdx: initial.rounds.length - 1,
+      phase: 'reveal',
+    };
+    vi.spyOn(logic, 'startState').mockReturnValueOnce(lastRoundState);
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    expect(screen.queryAllByText('🎉')).toHaveLength(0);
+
+    const tapBtn = screen.getByTestId('carmode-tap');
+    fireEvent.click(tapBtn);
+
+    expect(screen.getByText('All done!')).toBeDefined();
+    expect(screen.queryAllByText('🎉').length).toBeGreaterThan(0);
+
+    const rhymeBtn = screen.getByTestId('carmode-pack-rhyme');
+    fireEvent.click(rhymeBtn);
+
+    expect(screen.queryByText('All done!')).toBeNull();
+    expect(screen.queryAllByText('🎉')).toHaveLength(0);
+  });
 });
