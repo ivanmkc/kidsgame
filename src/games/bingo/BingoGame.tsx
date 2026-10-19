@@ -26,7 +26,6 @@ import {
   BingoBoard,
   bingoLayout,
   checkBingo,
-  bingoShout,
   makeBoard,
   settingsForBingo,
 } from "./logic";
@@ -114,7 +113,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
       const line = checkBingo(next, board.size);
       if (line) {
-        sayThen([bingoShout(lang), ...call.confirmLines], () => {
+        sayThen(call.confirmLines, () => {
           lockedRef.current = false;
           setWinLine(line);
         });
@@ -177,7 +176,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
         />
       }
     >
-      <View style={[styles.board, isLandscape ? styles.boardLandscape : shortH && { gap: 8 }]} key={gameKey}>
+      <View
+        style={[
+          styles.board,
+          isLandscape ? styles.boardLandscape : shortH && { gap: 8 },
+        ]}
+        key={gameKey}
+      >
         {call && (
           <Pressable
             disabled={won}
@@ -347,7 +352,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   boardLandscape: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 20,
   },
   prompt: {
