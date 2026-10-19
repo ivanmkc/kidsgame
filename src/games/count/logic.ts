@@ -23,6 +23,26 @@ export interface Position {
   x: number;
   y: number;
 }
+export const STAGE_PADDING = 16;
+
+/**
+ * Critter size for n items on a stage of width x height: scales to fit within
+ * usable dimensions after STAGE_PADDING, so two rows never vertically overlap.
+ */
+export function stageCritterSize(
+  n: number,
+  stageW: number,
+  stageH: number,
+  padding = STAGE_PADDING,
+): number {
+  const innerW = Math.max(0, stageW - padding * 2);
+  const innerH = Math.max(0, stageH - padding * 2);
+  const colsFactor = n <= 4 ? 5 : n <= 7 ? 6 : 7;
+  return Math.min(
+    Math.max(38, Math.min(72, innerW / colsFactor)),
+    Math.max(30, innerH * 0.45),
+  );
+}
 
 export interface CountRound {
   icon: string;

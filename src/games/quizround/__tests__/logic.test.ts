@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { makeRng } from '../../../rng';
-import { QuizTile, makeQuizRound, spriteLT } from '../logic';
+import { describe, expect, it } from "vitest";
+import { makeRng } from "../../../rng";
+import { QuizTile, makeQuizRound, spriteLT } from "../logic";
 
-describe('makeQuizRound', () => {
+describe("makeQuizRound", () => {
   interface Item {
     id: string;
     label: string;
@@ -10,12 +10,12 @@ describe('makeQuizRound', () => {
   }
 
   const pool: Item[] = [
-    { id: 'a', label: 'Apple', group: 'fruit' },
-    { id: 'b', label: 'Banana', group: 'fruit' },
-    { id: 'c', label: 'Cherry', group: 'fruit' },
-    { id: 'd', label: 'Dog', group: 'animal' },
-    { id: 'e', label: 'Elephant', group: 'animal' },
-    { id: 'f', label: 'Fox', group: 'animal' },
+    { id: "a", label: "Apple", group: "fruit" },
+    { id: "b", label: "Banana", group: "fruit" },
+    { id: "c", label: "Cherry", group: "fruit" },
+    { id: "d", label: "Dog", group: "animal" },
+    { id: "e", label: "Elephant", group: "animal" },
+    { id: "f", label: "Fox", group: "animal" },
   ];
 
   const toTile = (item: Item): QuizTile => ({
@@ -25,13 +25,14 @@ describe('makeQuizRound', () => {
 
   const keyOf = (item: Item): string => item.id;
 
-  it('throws an error if the pool is smaller than tileCount', () => {
+  it("throws an error if the pool is smaller than tileCount", () => {
     const rng = makeRng(42);
-    expect(() => makeQuizRound(rng, pool.slice(0, 2), 4, toTile, keyOf))
-      .toThrow('pool smaller than tileCount (2 < 4)');
+    expect(() =>
+      makeQuizRound(rng, pool.slice(0, 2), 4, toTile, keyOf),
+    ).toThrow("pool smaller than tileCount (2 < 4)");
   });
 
-  it('generates a round with the requested number of unique tiles', () => {
+  it("generates a round with the requested number of unique tiles", () => {
     const rng = makeRng(42);
     const round = makeQuizRound(rng, pool, 4, toTile, keyOf);
 
@@ -40,7 +41,7 @@ describe('makeQuizRound', () => {
     expect(new Set(keys).size).toBe(4);
   });
 
-  it('places target in tiles and points answerIdx to it', () => {
+  it("places target in tiles and points answerIdx to it", () => {
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
       const round = makeQuizRound(rng, pool, 3, toTile, keyOf);
@@ -52,27 +53,43 @@ describe('makeQuizRound', () => {
     }
   });
 
-  it('respects avoidTargetKey by never picking the avoided key as target', () => {
-    const avoid = 'a';
+  it("respects avoidTargetKey by never picking the avoided key as target", () => {
+    const avoid = "a";
     for (let seed = 1; seed <= 100; seed++) {
       const rng = makeRng(seed);
-      const round = makeQuizRound(rng, pool, 3, toTile, keyOf, undefined, avoid);
+      const round = makeQuizRound(
+        rng,
+        pool,
+        3,
+        toTile,
+        keyOf,
+        undefined,
+        avoid,
+      );
       expect(round.target.id).not.toBe(avoid);
       expect(keyOf(round.target)).not.toBe(avoid);
     }
   });
 
-  it('falls back to pool when avoidTargetKey removes all candidates', () => {
+  it("falls back to pool when avoidTargetKey removes all candidates", () => {
     const singlePool = [pool[0]];
     const rng = makeRng(42);
-    const round = makeQuizRound(rng, singlePool, 1, toTile, keyOf, undefined, singlePool[0].id);
+    const round = makeQuizRound(
+      rng,
+      singlePool,
+      1,
+      toTile,
+      keyOf,
+      undefined,
+      singlePool[0].id,
+    );
     expect(round.target.id).toBe(singlePool[0].id);
     expect(round.tiles).toHaveLength(1);
     expect(round.tiles[0].key).toBe(singlePool[0].id);
     expect(round.answerIdx).toBe(0);
   });
 
-  it('biases distractors towards confusables when available', () => {
+  it("biases distractors towards confusables when available", () => {
     const confusable = (target: Item, candidate: Item): boolean =>
       target.group !== undefined && target.group === candidate.group;
 
@@ -80,7 +97,9 @@ describe('makeQuizRound', () => {
       const rng = makeRng(seed);
       const round = makeQuizRound(rng, pool, 3, toTile, keyOf, confusable);
       const targetGroup = round.target.group;
-      const distractorKeys = round.tiles.filter((_, idx) => idx !== round.answerIdx).map((t) => t.key);
+      const distractorKeys = round.tiles
+        .filter((_, idx) => idx !== round.answerIdx)
+        .map((t) => t.key);
 
       for (const key of distractorKeys) {
         const item = pool.find((p) => p.id === key);
@@ -89,16 +108,24 @@ describe('makeQuizRound', () => {
     }
   });
 
-  it('falls back to rest of pool when preferred confusables are fewer than needed', () => {
-    const confusable = (_target: Item, candidate: Item): boolean => candidate.id === 'f';
+  it("falls back to rest of pool when preferred confusables are fewer than needed", () => {
+    const confusable = (_target: Item, candidate: Item): boolean =>
+      candidate.id === "f";
     const rng = makeRng(123);
-    const round = makeQuizRound(rng, pool.slice(0, 5), 4, toTile, keyOf, confusable);
+    const round = makeQuizRound(
+      rng,
+      pool.slice(0, 5),
+      4,
+      toTile,
+      keyOf,
+      confusable,
+    );
 
     expect(round.tiles).toHaveLength(4);
     expect(new Set(round.tiles.map((t) => t.key)).size).toBe(4);
   });
 
-  it('distributes answerIdx across positions uniformly over different seeds', () => {
+  it("distributes answerIdx across positions uniformly over different seeds", () => {
     const counts = [0, 0, 0, 0];
     const totalRuns = 200;
     for (let seed = 1; seed <= totalRuns; seed++) {
@@ -113,13 +140,13 @@ describe('makeQuizRound', () => {
   });
 });
 
-describe('spriteLT', () => {
-  it('positions sprite center at given stage percentages when away from edges', () => {
+describe("spriteLT", () => {
+  it("positions sprite center at given stage percentages when away from edges", () => {
     const pos = spriteLT(50, 50, 100, 1000, 800);
     expect(pos).toEqual({ left: 450, top: 350 });
   });
 
-  it('clamps sprite inside stage boundaries near top and left edges', () => {
+  it("clamps sprite inside stage boundaries near top and left edges", () => {
     const atOrigin = spriteLT(0, 0, 100, 1000, 800);
     expect(atOrigin).toEqual({ left: 0, top: 0 });
 
@@ -130,7 +157,7 @@ describe('spriteLT', () => {
     expect(nearLeft.left).toBe(0);
   });
 
-  it('clamps sprite inside stage boundaries near bottom and right edges', () => {
+  it("clamps sprite inside stage boundaries near bottom and right edges", () => {
     const atFarEdge = spriteLT(100, 100, 100, 1000, 800);
     expect(atFarEdge).toEqual({ left: 900, top: 700 });
 
@@ -138,8 +165,19 @@ describe('spriteLT', () => {
     expect(pastFarEdge).toEqual({ left: 900, top: 700 });
   });
 
-  it('handles small stages where size exceeds stage dimensions', () => {
+  it("handles small stages where size exceeds stage dimensions", () => {
     const pos = spriteLT(50, 50, 100, 60, 40);
     expect(pos).toEqual({ left: 0, top: 0 });
+  });
+
+  it("clamps sprite inside inset boundary when inset is provided", () => {
+    const pos = spriteLT(100, 0, 40, 500, 300, 16);
+    expect(pos).toEqual({ left: 500 - 16 - 40, top: 16 });
+
+    const origin = spriteLT(0, 0, 40, 500, 300, 16);
+    expect(origin).toEqual({ left: 16, top: 16 });
+
+    const far = spriteLT(100, 100, 40, 500, 300, 16);
+    expect(far).toEqual({ left: 500 - 16 - 40, top: 300 - 16 - 40 });
   });
 });

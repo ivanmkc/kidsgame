@@ -13,7 +13,12 @@ import {
 import * as sound from "../../../sound";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
-import { applyPickAnswer, makeCountRound } from "../logic";
+import {
+  STAGE_PADDING,
+  applyPickAnswer,
+  makeCountRound,
+  stageCritterSize,
+} from "../logic";
 import { makeRng } from "../../../rng";
 
 const capturedPressables: Record<string, { onPress?: () => void }> = {};
@@ -465,5 +470,76 @@ describe("CountGame double-tap lock", () => {
       expect.stringContaining("Amazing counter"),
     );
     expect(screen.getByTestId("count-score").textContent).toBe("🔢 1/1");
+  });
+});
+
+describe("stageCritterSize", () => {
+  it("sizes critters from the inner padded area so two rows never vertically overlap", () => {
+    // Landscape stage (844x390 viewport => stageW=560, stageH=126)
+    const stageW = 560;
+    const stageH = 126;
+    const innerH = stageH - 2 * STAGE_PADDING; // 94px
+    const size = stageCritterSize(4, stageW, stageH);
+
+    // Two rows of critters must fit within the inner usable height
+    expect(2 * size).toBeLessThanOrEqual(innerH);
+    expect(size).toBeGreaterThanOrEqual(30);
+    expect(size).toBeLessThanOrEqual(72);
+  });
+});
+
+describe("CountGame stage critter positioning", () => {
+  it("renders corner critters with stage padding so sprites and check badges stay inside stage bounds", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 844,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 390,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    vi.spyOn(countLogic, "makeCountRound").mockReturnValue({
+      icon: "star",
+      n: 1,
+      positions: [{ x: 100, y: 0 }],
+      choices: [1, 2, 3],
+      answer: 1,
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const stage = screen.getByTestId("count-stage-star-1");
+    const stageW = parseFloat(stage.style.width);
+
+    const critter = screen.getByTestId("count-critter-0");
+    const left = parseFloat(critter.style.left);
+    const top = parseFloat(critter.style.top);
+    const size = parseFloat(critter.style.width);
+
+    // Corner sprite must be padded away from the stage card top and right edges
+    expect(top).toBe(STAGE_PADDING);
+    expect(left).toBe(stageW - STAGE_PADDING - size);
+
+    // Tapping renders the checkmark badge at top: -4, right: -4
+    fireEvent.click(critter);
+    const checkBadgeTop = top - 4;
+    const checkBadgeRight = left + size + 4;
+
+    // Both edges must stay inside the stage card boundaries
+    expect(checkBadgeTop).toBeGreaterThanOrEqual(0);
+    expect(checkBadgeRight).toBeLessThanOrEqual(stageW);
+
+    // Badge circle (diameter 22) must remain inside 24px corner arc (center at stageW - 24, 24)
+    const cornerRadius = 24;
+    const badgeCenterX = checkBadgeRight - 11;
+    const badgeCenterY = checkBadgeTop + 11;
+    const badgeMaxDist =
+      Math.hypot(
+        badgeCenterX - (stageW - cornerRadius),
+        badgeCenterY - cornerRadius,
+      ) + 11;
+    expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
   });
 });

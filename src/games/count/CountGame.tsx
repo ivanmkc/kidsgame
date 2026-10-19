@@ -25,6 +25,8 @@ import {
   countSettings,
   applyPickAnswer,
   makeCountRound,
+  STAGE_PADDING,
+  stageCritterSize,
 } from "./logic";
 import { spriteLT } from "../quizround/logic";
 import { useWinLine } from "../winlines";
@@ -139,13 +141,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const { width, height } = useWindowDimensions();
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 180, stageW * 0.85);
-  const critterSize = Math.min(
-    Math.max(
-      38,
-      Math.min(72, stageW / (round.n <= 4 ? 5 : round.n <= 7 ? 6 : 7)),
-    ),
-    Math.max(30, stageH * 0.45),
-  );
+  const critterSize = stageCritterSize(round.n, stageW, stageH);
 
   return (
     <GameShell
@@ -180,18 +176,28 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
           ]}
           testID={`count-stage-${round.icon}-${round.n}`}
         >
-          {round.positions.map((p, i) => (
-            <Critter
-              key={`${roundNo}-${i}`}
-              icon={round.icon}
-              tapped={tapped[i]}
-              size={critterSize}
-              left={spriteLT(p.x, p.y, critterSize, stageW, stageH).left}
-              top={spriteLT(p.x, p.y, critterSize, stageW, stageH).top}
-              onTap={() => tapCritter(i)}
-              testID={`count-critter-${i}${tapped[i] ? "-tapped" : ""}`}
-            />
-          ))}
+          {round.positions.map((p, i) => {
+            const { left, top } = spriteLT(
+              p.x,
+              p.y,
+              critterSize,
+              stageW,
+              stageH,
+              STAGE_PADDING,
+            );
+            return (
+              <Critter
+                key={`${roundNo}-${i}`}
+                icon={round.icon}
+                tapped={tapped[i]}
+                size={critterSize}
+                left={left}
+                top={top}
+                onTap={() => tapCritter(i)}
+                testID={`count-critter-${i}${tapped[i] ? "-tapped" : ""}`}
+              />
+            );
+          })}
         </View>
         {phase === "quiz" ? (
           <View style={styles.quiz}>
