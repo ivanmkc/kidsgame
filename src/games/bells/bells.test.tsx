@@ -34,6 +34,7 @@ describe('BellsGame replay', () => {
 
     // Press replay button
     const replayBtn = screen.getByTestId('replay-button');
+    expect(replayBtn.getAttribute('role')).toBe('button');
     fireEvent.click(replayBtn);
 
     expect(screen.queryByText('Your turn!', { exact: false })).toBeNull();
