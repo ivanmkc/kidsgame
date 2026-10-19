@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { makeRng } from "../../rng";
 import { WORDS } from "../../words";
-import { LEVEL_1_WORDS, LEVEL_1_WORD_IDS, Word } from "./data";
+import { LEVEL_1_WORDS, LEVEL_1_WORD_IDS, Word, getLevelConfig } from "./data";
 import {
   GameState,
   Round,
@@ -18,7 +18,6 @@ describe("Level 1 data", () => {
     expect(LEVEL_1_WORD_IDS).toHaveLength(20);
     expect(new Set(LEVEL_1_WORD_IDS).size).toBe(20);
 
-    // Starter animals from WORDS
     expect(LEVEL_1_WORD_IDS).toContain("cat");
     expect(LEVEL_1_WORD_IDS).toContain("dog");
     expect(LEVEL_1_WORD_IDS).toContain("fox");
@@ -27,7 +26,6 @@ describe("Level 1 data", () => {
     expect(LEVEL_1_WORD_IDS).toContain("panda");
     expect(LEVEL_1_WORD_IDS).toContain("rabbit");
 
-    // Distinct rhyme words from RHYME_WORDS
     expect(LEVEL_1_WORD_IDS).toContain("bat");
     expect(LEVEL_1_WORD_IDS).toContain("bear");
     expect(LEVEL_1_WORD_IDS).toContain("bee");
@@ -95,7 +93,7 @@ describe("generateRound", () => {
     const avoid = "cat";
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
-      const round = generateRound(rng, LEVEL_1_WORDS, avoid);
+      const round = generateRound(rng, LEVEL_1_WORDS, 2, avoid);
       expect(round.target.icon).not.toBe(avoid);
     }
   });
@@ -121,7 +119,7 @@ describe("generateRound", () => {
     for (let seed = 1; seed <= 20; seed++) {
       const rng = makeRng(seed);
       // Avoid dog so target must be blossom or sunflower
-      const round = generateRound(rng, pool, "dog");
+      const round = generateRound(rng, pool, 2, "dog");
       expect(round.distractor.icon).toBe("dog");
       const icons = round.choices.map((c) => c.icon);
       expect(icons).not.toContain(
@@ -141,6 +139,52 @@ describe("generateRound", () => {
     expect(() => generateRound(rng, [blossom, sunflower])).toThrow(
       "no valid distractor found for target",
     );
+  });
+
+  it("returns 3 choices for level 2 and 4 choices for level 3", () => {
+    const rng = makeRng(1);
+
+    const config2 = getLevelConfig(2);
+    const round2 = generateRound(rng, config2.words, config2.numChoices);
+    expect(round2.choices).toHaveLength(3);
+
+    const config3 = getLevelConfig(3);
+    const round3 = generateRound(
+      rng,
+      config3.words,
+      config3.numChoices,
+      undefined,
+      config3.prioritizeRhymes,
+    );
+    expect(round3.choices).toHaveLength(4);
+  });
+
+  it("prioritizes minimal pairs as distractors in level 3", () => {
+    let checked = false;
+    for (let i = 0; i < 50; i++) {
+      const rng = makeRng(i);
+      const config = getLevelConfig(3);
+      const r = generateRound(
+        rng,
+        config.words,
+        config.numChoices,
+        undefined,
+        config.prioritizeRhymes,
+      );
+
+      // Level 3 words have hat, bat, cat (rhymeKey: at)
+      if (["hat", "bat", "cat"].includes(r.target.icon)) {
+        const dists = r.choices
+          .filter((c) => c.icon !== r.target.icon)
+          .map((c) => c.icon);
+        const expected = ["hat", "bat", "cat"].filter(
+          (icon) => icon !== r.target.icon,
+        );
+        expect(dists).toEqual(expect.arrayContaining(expected));
+        checked = true;
+      }
+    }
+    expect(checked).toBe(true);
   });
 });
 
@@ -179,6 +223,42 @@ describe("updateGameState", () => {
     expect(nextState.wrongGuesses).toBe(0);
     expect(nextState.highlightCorrect).toBe(false);
     expect(nextState.currentRound.target.icon).not.toBe(targetIcon);
+  });
+
+  it("resets level to 1 after completing a round where streak was broken", () => {
+    const rng = makeRng(100);
+    let state = initGameState(rng);
+    for (let i = 1; i <= 10; i++) {
+      state = updateGameState(state, state.currentRound.target.icon, rng);
+    }
+    expect(state.level).toBe(2);
+    state = updateGameState(state, state.currentRound.distractor.icon, rng);
+    expect(state.streak).toBe(0);
+    state = updateGameState(state, state.currentRound.target.icon, rng);
+    expect(state.level).toBe(1);
+  });
+
+  it("advances level to 2 at streak 10 and to 3 at streak 20", () => {
+    const rng = makeRng(100);
+    let state = initGameState(rng);
+
+    for (let i = 1; i <= 9; i++) {
+      state = updateGameState(state, state.currentRound.target.icon, rng);
+      expect(state.level).toBe(1);
+    }
+
+    state = updateGameState(state, state.currentRound.target.icon, rng);
+    expect(state.streak).toBe(10);
+    expect(state.level).toBe(2);
+
+    for (let i = 11; i <= 19; i++) {
+      state = updateGameState(state, state.currentRound.target.icon, rng);
+      expect(state.level).toBe(2);
+    }
+
+    state = updateGameState(state, state.currentRound.target.icon, rng);
+    expect(state.streak).toBe(20);
+    expect(state.level).toBe(3);
   });
 
   it("accumulates streak across consecutive correct guesses", () => {
