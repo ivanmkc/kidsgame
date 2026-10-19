@@ -86,9 +86,10 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
   const board = boardRef.current;
   const call = board.calls[callIdx];
+  const isAdvancing = call ? marked[call.answerIdx] : false;
 
   useEffect(() => {
-    if (!won && call) saySequence(call.promptLines);
+    if (!won && call && !isAdvancing) saySequence(call.promptLines);
   }, [callIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(
@@ -99,7 +100,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   );
 
   const onTile = (cellIdx: number) => {
-    if (won || !call || marked[call.answerIdx]) return;
+    if (won || !call || isAdvancing) return;
     if (marked[cellIdx]) return;
     if (cellIdx === call.answerIdx) {
       sfx.good();
@@ -179,9 +180,9 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       <View style={[styles.board, shortH && { gap: 8 }]} key={gameKey}>
         {call && (
           <Pressable
-            disabled={won}
+            disabled={won || isAdvancing}
             onPress={() => {
-              if (won) return;
+              if (won || isAdvancing) return;
               sfx.tap();
               saySequence(call.promptLines);
             }}
