@@ -1,10 +1,14 @@
+// @vitest-environment happy-dom
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+import { render, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Animated, GestureResponderEvent, PressableProps } from 'react-native';
 import type { GameShell } from '../../../components/GameShell';
 import type { ScenePicker } from '../../../components/ScenePicker';
 import { manifest, Story, StoryNode } from '../../../manifest';
+import { t } from '../../../i18n';
+import { VOICE } from '../../../assets/voice';
 import * as sound from '../../../sound';
 import { sfx } from '../../../sound';
 import { colors } from '../../../theme';
@@ -103,6 +107,7 @@ describe('StoryGame', () => {
   });
 
   afterEach(() => {
+    cleanup();
     if (manifest.stories && manifest.stories.length > initialStoryCount) {
       manifest.stories.splice(initialStoryCount);
     }
@@ -593,5 +598,165 @@ describe('StoryGame', () => {
     // Trigger boing fx
     fxPressables[2]?.onPress?.();
     expect(sfxBoingSpy).toHaveBeenCalledOnce();
+  });
+
+  it('speaks localized picker prompt for ja, cmn, yue, and en', () => {
+    let lastPlayedSrc = '';
+    const playSpy = vi
+      .spyOn(window.HTMLMediaElement.prototype, 'play')
+      .mockImplementation(function (this: HTMLMediaElement) {
+        lastPlayedSrc = this.src;
+        return Promise.resolve();
+      });
+
+    const speakSpy = vi.fn();
+    class FakeUtterance {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const origSpeechSynthesis = window.speechSynthesis;
+    const origUtterance = window.SpeechSynthesisUtterance;
+    window.speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    } as unknown as SpeechSynthesis;
+    window.SpeechSynthesisUtterance = FakeUtterance as unknown as typeof SpeechSynthesisUtterance;
+
+    try {
+      const langs = ['en', 'ja', 'cmn', 'yue'] as const;
+      for (const l of langs) {
+        sound.setSpeechLang(l);
+        lastPlayedSrc = '';
+        speakSpy.mockClear();
+
+        const { unmount } = render(
+          <StoryGame onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={l} />
+        );
+
+        const expectedText = t(l, 'picker.story');
+        const clipKey = l === 'en' ? expectedText : `${l}|${expectedText}`;
+        if (VOICE[clipKey]) {
+          expect(lastPlayedSrc).toContain(`voice/${VOICE[clipKey]}`);
+        } else {
+          expect(speakSpy).toHaveBeenCalledWith(
+            expect.objectContaining({ text: expectedText })
+          );
+        }
+        if (l !== 'en') {
+          expect(lastPlayedSrc).not.toContain(VOICE['Which story shall we read?']);
+        }
+        unmount();
+      }
+    } finally {
+      sound.setSpeechLang('en');
+      playSpy.mockRestore();
+      window.speechSynthesis = origSpeechSynthesis;
+      window.SpeechSynthesisUtterance = origUtterance;
+    }
+  });
+
+  it('speaks localized hotspot lead prompt before choices in each language', () => {
+    const saySeqSpy = vi.spyOn(sound, 'saySequence').mockReturnValue();
+
+    const expectedHotLeads: Record<string, string> = {
+      en: 'Tap where you want to go!',
+      ja: 'いきたい ほうを タップ！',
+      cmn: '想去哪就点哪！',
+      yue: '想去邊就撳邊！',
+    };
+
+    for (const [l, expectedLead] of Object.entries(expectedHotLeads)) {
+      saySeqSpy.mockClear();
+      const { unmount } = render(
+        <StoryGame
+          sceneId="luna"
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang={l as 'en' | 'ja' | 'cmn' | 'yue'}
+        />
+      );
+      expect(saySeqSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([expectedLead])
+      );
+      unmount();
+    }
+  });
+
+  it('speaks localized non-hotspot lead prompt before choices in each language', () => {
+    const saySeqSpy = vi.spyOn(sound, 'saySequence').mockReturnValue();
+
+    const buttonStory: Story = {
+      id: 'test-leads-btn-story',
+      title: 'Button Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'What next?',
+          choices: [
+            { label: 'Option A', next: 'a' },
+            { label: 'Option B', next: 'b' },
+          ],
+        },
+      },
+    };
+    manifest.stories?.push(buttonStory);
+
+    const expectedNextLeads: Record<string, string> = {
+      en: 'What should happen next?',
+      ja: 'つぎは どうなる？',
+      cmn: '接下来会怎样？',
+      yue: '跟住會點樣呢？',
+    };
+
+    for (const [l, expectedLead] of Object.entries(expectedNextLeads)) {
+      saySeqSpy.mockClear();
+      const { unmount } = render(
+        <StoryGame
+          sceneId="test-leads-btn-story"
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang={l as 'en' | 'ja' | 'cmn' | 'yue'}
+        />
+      );
+      expect(saySeqSpy).toHaveBeenCalledWith(
+        expect.arrayContaining([expectedLead])
+      );
+      unmount();
+    }
+  });
+
+  it('updates spoken transition lead when lang prop changes', () => {
+    const saySeqSpy = vi.spyOn(sound, 'saySequence').mockReturnValue();
+
+    const { rerender } = render(
+      <StoryGame
+        sceneId="luna"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />
+    );
+    expect(saySeqSpy).toHaveBeenLastCalledWith(
+      expect.arrayContaining(['Tap where you want to go!'])
+    );
+
+    saySeqSpy.mockClear();
+    rerender(
+      <StoryGame
+        sceneId="luna"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />
+    );
+    expect(saySeqSpy).toHaveBeenLastCalledWith(
+      expect.arrayContaining(['いきたい ほうを タップ！'])
+    );
   });
 });

@@ -33,7 +33,6 @@ const NEXT_LEADS: Record<Lang, string> = {
   cmn: '接下来会怎样？',
   yue: '跟住會點樣呢？',
 };
-
 // A narrated picture story where the kid steers: every node is spoken
 // aloud (pre-readers), two big choices branch the tale, four endings per
 // story make replays genuinely different.
@@ -111,7 +110,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     saySequence(menu.length ? [nodeText, lead, ...menu] : [nodeText]);
   }, [node, lang]);
 
-  useSay(story ? null : 'Which story shall we read?');
+  useSay(story ? null : t(lang, 'picker.story'));
   const { width, height } = useWindowDimensions();
 
   // Arrow keys page through the story like a book: left = back, right =
