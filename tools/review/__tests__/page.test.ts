@@ -312,6 +312,44 @@ describe('human review page', () => {
     expect(html).toContain('Rejected findings: 2');
   });
 
+  it('displays total asset coverage count in the page header notes', () => {
+    const html = renderReviewPage(
+      {
+        entries: [
+          {
+            asset: {
+              path: 'assets/game/diff/farm.png',
+              kind: 'image',
+              game: 'diff',
+              group: 'farm',
+              ledgerClean: true,
+            },
+            findings: [],
+            maxSeverity: 0,
+          },
+          {
+            asset: {
+              path: 'assets/game/diff/city.png',
+              kind: 'image',
+              game: 'diff',
+              group: 'city',
+              ledgerClean: true,
+            },
+            findings: [],
+            maxSeverity: 0,
+          },
+        ],
+        dirFindings: [],
+      },
+      { assetHref: (p) => p },
+    );
+
+    document.body.innerHTML = html;
+    const statusNote = document.querySelector('.status-note');
+    expect(statusNote).toBeTruthy();
+    expect(statusNote?.textContent).toContain('Coverage: 2 assets');
+  });
+
   it('escapeHtml escapes all HTML sensitive characters', () => {
     expect(escapeHtml(null)).toBe('');
     expect(escapeHtml(undefined)).toBe('');
