@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -7,25 +7,25 @@ import {
   Text,
   View,
   useWindowDimensions,
-} from "react-native";
-import { GameShell, ScoreChip } from "../../components/GameShell";
-import { WinOverlay } from "../../components/WinOverlay";
-import { SparkleBurst } from "../../components/Sparkles";
-import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
-import { t } from "../../i18n";
-import { makeRng } from "../../rng";
-import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
-import { playNote, stopSequence } from "../../music";
-import { useWinLine } from "../winlines";
+} from 'react-native';
+import { GameShell, ScoreChip } from '../../components/GameShell';
+import { WinOverlay } from '../../components/WinOverlay';
+import { SparkleBurst } from '../../components/Sparkles';
+import { Difficulty } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
+import { makeRng } from '../../rng';
+import { colors, fonts, shadows } from '../../theme';
+import { sfx } from '../../sound';
+import { playNote, stopSequence } from '../../music';
+import { useWinLine } from '../winlines';
 import {
   makeBellsRound,
   roundsToWin,
-  checkSequence,
   BellsRound,
   canTap,
-} from "./logic";
+  judgeTap,
+} from './logic';
 
 interface Props {
   onHome: () => void;
@@ -46,6 +46,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const [tapped, setTapped] = useState<number[]>([]);
   const tappedRef = useRef<number[]>([]);
   const [wrongFlash, setWrongFlash] = useState(false);
+  const flashingRef = useRef(false);
   const [sparkKey, setSparkKey] = useState(0);
   const won = score >= total;
   useWinLine(won, t(lang, "win.bells"));
@@ -85,6 +86,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!won) {
+      flashingRef.current = false;
       tappedRef.current = [];
       setTapped([]);
       playDemo(round);
@@ -96,44 +98,46 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
-    if (!canTap(round, tappedRef.current, phase, won)) return;
+    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current)) return;
     playNote(round.bells[idx].midi, 0.8);
     setGlowIdx(idx);
     setTimeout(() => setGlowIdx(null), 250);
-    const next = [...tappedRef.current, idx];
+    const prev = tappedRef.current;
+    const next = [...prev, idx];
     tappedRef.current = next;
     setTapped(next);
-    if (next.length === round.sequence.length) {
-      if (checkSequence(round, next)) {
-        sfx.good();
-        setSparkKey((k) => k + 1);
-        const nextScore = score + 1;
-        setScore(nextScore);
-        if (nextScore < total) {
-          demoTimers.current.push(
-            setTimeout(() => {
-              const nr = makeBellsRound(rngRef.current, difficulty);
-              setRound(nr);
-            }, 600),
-          );
-        }
-      } else {
-        sfx.wrong();
-        setWrongFlash(true);
+    const result = judgeTap(round, prev, idx);
+    if (result === 'wrong') {
+      flashingRef.current = true;
+      sfx.wrong();
+      setWrongFlash(true);
+      demoTimers.current.push(
+        setTimeout(() => {
+          flashingRef.current = false;
+          setWrongFlash(false);
+          tappedRef.current = [];
+          setTapped([]);
+          playDemo(round);
+        }, 800),
+      );
+    } else if (result === 'complete') {
+      sfx.good();
+      setSparkKey((k) => k + 1);
+      const nextScore = score + 1;
+      setScore(nextScore);
+      if (nextScore < total) {
         demoTimers.current.push(
           setTimeout(() => {
-            setWrongFlash(false);
-            tappedRef.current = [];
-            setTapped([]);
-            playDemo(round);
-          }, 800),
+            const nr = makeBellsRound(rngRef.current, difficulty);
+            setRound(nr);
+          }, 600),
         );
       }
     }
   };
 
   const replay = () => {
-    if (!canTap(round, tappedRef.current, phase, won)) return;
+    if (!canTap(round, tappedRef.current, phase, won, flashingRef.current)) return;
     tappedRef.current = [];
     setTapped([]);
     playDemo(round);
@@ -143,6 +147,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     clearDemo();
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    flashingRef.current = false;
     tappedRef.current = [];
     setTapped([]);
     setWrongFlash(false);
@@ -247,14 +252,14 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
               >
                 <Text style={styles.statusEmoji}>👆</Text>
                 <Text style={styles.statusText}>
-                  {t(lang, "music.yourTurn")} ({tapped.length}/
+                  {t(lang, 'music.yourTurn')} ({tapped.length}/
                   {round.sequence.length})
                 </Text>
               </View>
               <Pressable
                 testID="replay-button"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, "spell.hearAgain")}
+                accessibilityLabel={t(lang, 'spell.hearAgain')}
                 onPress={replay}
                 style={({ pressed }) => [
                   styles.replayBtn,
@@ -265,7 +270,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={styles.replayText}>🔊</Text>
               </Pressable>
             </View>
-          ))}
+          )
+        )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
             <Animated.View

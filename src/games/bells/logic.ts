@@ -46,9 +46,21 @@ export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
   return { bells, sequence };
 }
 
-export function checkSequence(round: BellsRound, tapped: number[]): boolean {
-  if (tapped.length !== round.sequence.length) return false;
-  return tapped.every((v, i) => v === round.sequence[i]);
+export type TapResult = 'continue' | 'complete' | 'wrong';
+
+export function judgeTap(
+  round: BellsRound,
+  tapped: number[],
+  bell: number
+): TapResult {
+  const step = tapped.length;
+  if (step >= round.sequence.length || round.sequence[step] !== bell) {
+    return 'wrong';
+  }
+  if (step + 1 === round.sequence.length) {
+    return 'complete';
+  }
+  return 'continue';
 }
 
 export type BellsPhase = 'listen' | 'play';
@@ -57,9 +69,10 @@ export function canTap(
   round: BellsRound,
   tapped: number[],
   phase: BellsPhase,
-  won = false
+  won = false,
+  flashing = false
 ): boolean {
-  if (won || phase !== 'play') return false;
+  if (won || flashing || phase !== 'play') return false;
   return tapped.length < round.sequence.length;
 }
 
