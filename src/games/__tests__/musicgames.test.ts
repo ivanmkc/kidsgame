@@ -15,7 +15,7 @@ import {
 import * as bellsLogic from "../bells/logic";
 const {
   makeBellsRound,
-  checkSequence,
+  judgeTap,
   roundsToWin: bellRounds,
   seqLength,
   canTap,
@@ -102,15 +102,15 @@ describe("melody bells", () => {
     }
   });
 
-  it("checkSequence validates correctly", () => {
+  it("judgeTap validates prefix and completion correctly", () => {
     const rng = makeRng(42);
     const r = makeBellsRound(rng, "easy");
-    expect(checkSequence(r, r.sequence)).toBe(true);
-    expect(checkSequence(r, [])).toBe(false);
-    const wrong = r.sequence.map((v) => (v + 1) % r.bells.length);
-    if (wrong.some((v, i) => v !== r.sequence[i])) {
-      expect(checkSequence(r, wrong)).toBe(false);
-    }
+    const [first, second] = r.sequence;
+    const wrongFirst = (first + 1) % r.bells.length;
+    expect(judgeTap(r, [], wrongFirst)).toBe("wrong");
+    expect(judgeTap(r, [], first)).toBe("continue");
+    expect(judgeTap(r, [first], second)).toBe("complete");
+    expect(judgeTap(r, [first], wrongFirst)).toBe("wrong");
   });
 
   it("roundsToWin increases with difficulty", () => {

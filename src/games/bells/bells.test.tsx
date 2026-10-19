@@ -1,18 +1,21 @@
 // @vitest-environment happy-dom
-import React from "react";
-import { describe, expect, it, vi, afterEach } from "vitest";
+import React from 'react';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import {
   render,
   screen,
   fireEvent,
   act,
   cleanup,
-} from "@testing-library/react";
-import { BellsGame } from "./BellsGame";
-import * as music from "../../music";
-import { t } from "../../i18n";
+} from '@testing-library/react';
+import { BellsGame } from './BellsGame';
+import * as music from '../../music';
+import { sfx } from '../../sound';
+import { t } from '../../i18n';
+import { makeBellsRound } from './logic';
+import { makeRng } from '../../rng';
 
-describe("BellsGame replay", () => {
+describe('BellsGame', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -276,6 +279,101 @@ describe("BellsGame replay", () => {
       vi.advanceTimersByTime(300);
     });
     expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+
+    vi.useRealTimers();
+  });
+
+  it('wrong tap immediately triggers wrong feedback without waiting for sequence end', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [0, 0, 0] for medium
+    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    const wrongSpy = vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    playNoteSpy.mockClear();
+
+    // Tap wrong bell on the very first move of a 3-bell sequence
+    const round = makeBellsRound(makeRng(0), 'medium');
+    const wrongIdx = (round.sequence[0] + 1) % round.bells.length;
+    const bellWrong = screen.getByTestId(`bell-${wrongIdx}`);
+    fireEvent.click(bellWrong);
+
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // Tapping during wrong flash is ignored
+    fireEvent.click(bellWrong);
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // After 800ms, wrong flash ends and demo restarts
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    // Advance through the replayed demo
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByText('Your turn! (0/3)', { exact: false })).toBeTruthy();
+    vi.useRealTimers();
+  });
+
+  it('correct sequence triggers success sound and advances round', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [0, 0] for easy
+    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    playNoteSpy.mockClear();
+
+    const bell0 = screen.getByTestId('bell-0');
+    fireEvent.click(bell0);
+    fireEvent.click(bell0);
+
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    vi.useRealTimers();
+  });
+
+  it('rapid taps following a wrong tap in the same tick are blocked by flashingRef', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(66 / 1e9); // Sequence will be [0, 0, 0] for medium
+    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
+    const wrongSpy = vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId('bell-0');
+    const bell1 = screen.getByTestId('bell-1');
+
+    // Click 1, 0, 0 in a single act() — wrong first tap must block subsequent taps
+    act(() => {
+      fireEvent.click(bell1);
+      fireEvent.click(bell0);
+      fireEvent.click(bell0);
+    });
+
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('bells-score').textContent).toContain('0/6');
 
     vi.useRealTimers();
   });
