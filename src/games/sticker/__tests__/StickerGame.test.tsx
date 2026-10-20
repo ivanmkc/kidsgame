@@ -85,6 +85,8 @@ const capturedViewProps: Record<
   }
 > = {};
 
+let mockDimensions: { width: number; height: number } | null = null;
+
 vi.mock('react-native', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable = actual.Pressable as React.ComponentType<Record<string, unknown>>;
@@ -92,6 +94,8 @@ vi.mock('react-native', async (importOriginal) => {
 
   return {
     ...actual,
+    useWindowDimensions: () =>
+      mockDimensions ?? (actual.useWindowDimensions as () => { width: number; height: number })(),
     Pressable: (props: Record<string, unknown>) => {
       const testID = typeof props.testID === 'string' ? props.testID : undefined;
       if (testID) {
@@ -119,6 +123,7 @@ vi.mock('react-native', async (importOriginal) => {
 
 describe('StickerGame', () => {
   beforeEach(() => {
+    mockDimensions = null;
     capturedPickerProps = null;
     capturedGameShellProps = null;
     for (const key of Object.keys(capturedPressableProps)) {
@@ -299,4 +304,24 @@ describe('StickerGame', () => {
 
     panSpy.mockRestore();
   });
+
+  it('renders a large, playable stage in mobile landscape viewports without collapsing', () => {
+    mockDimensions = { width: 844, height: 390 };
+    const html = renderToString(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />,
+    );
+
+    expect(html).toContain('data-testid="sticker-stage"');
+    const stageProps = capturedViewProps['sticker-stage'];
+    expect(stageProps).toBeDefined();
+
+    const stylesList = Array.isArray(stageProps?.style) ? stageProps?.style : [stageProps?.style];
+    const sizeStyle = stylesList.find(
+      (s: unknown) => typeof s === 'object' && s !== null && 'width' in s && 'height' in s,
+    ) as { width: number; height: number } | undefined;
+
+    expect(sizeStyle?.width).toBeGreaterThanOrEqual(450);
+    expect(sizeStyle?.height).toBeGreaterThanOrEqual(180);
+  });
 });
+

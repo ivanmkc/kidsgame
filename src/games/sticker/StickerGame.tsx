@@ -6,8 +6,8 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
-import { SCENE_AR } from '../../manifest';
 import { manifest } from '../../manifest';
+import { stickerLayout } from './logic';
 import { allSceneOptions } from '../sceneOptions';
 import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
@@ -201,13 +201,8 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     );
   }
 
-  const ar = SCENE_AR;
+  const { isLandscape, stageW, stageH } = stickerLayout(width, height);
   const trayItems: string[] = tab === 'dressup' ? (manifest.dressup ?? []) : (ICON_CATEGORIES[tab] ?? []);
-  const itemsPerRow = Math.max(6, Math.floor(Math.min(width - 24, 1100) / 74));
-  const trayRows = Math.max(1, Math.ceil(trayItems.length / itemsPerRow));
-  const trayH = 46 + trayRows * 72;
-  const stageW = Math.min(width - 24, (height - 84 - trayH - 40) * ar, 1100);
-  const stageH = stageW / ar;
 
   const addSticker = (icon: string, at?: { x: number; y: number }) => {
     sfx.tap();
@@ -244,7 +239,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         </Pressable>
       }
     >
-      <View style={styles.wrap}>
+      <View style={[styles.wrap, isLandscape && styles.wrapLandscape]}>
         <View
           ref={stageRef}
           style={[styles.stage, shadows.sticker, { width: stageW, height: stageH }]}
@@ -298,42 +293,48 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
             </View>
           ) : null}
         </View>
-        <View style={styles.tabRow}>
-          {TRAY_TABS.map((tt) => {
-            const name = t(lang, tt.nameKey);
-            return (
-              <Pressable
-                key={tt.id}
-                onPress={() => { sfx.tap(); setTab(tt.id); }}
-                testID={`sticker-tab-${tt.id}`}
-                accessibilityLabel={`${name} stickers`}
-                accessibilityRole="button"
-                style={[styles.tabChip, shadows.soft, tab === tt.id && styles.tabChipOn]}
-              >
-                <Text style={styles.tabEmoji}>{tt.emoji}</Text>
-                <Text style={[styles.tabLabel, tab === tt.id && styles.tabLabelOn]}>{name}</Text>
-              </Pressable>
-            );
-          })}
+        <View style={[styles.trayPanel, isLandscape && [styles.trayPanelLandscape, { height: stageH }]]}>
+          <View style={[styles.tabRow, isLandscape && styles.tabRowLandscape]}>
+            {TRAY_TABS.map((tt) => {
+              const name = t(lang, tt.nameKey);
+              return (
+                <Pressable
+                  key={tt.id}
+                  onPress={() => { sfx.tap(); setTab(tt.id); }}
+                  testID={`sticker-tab-${tt.id}`}
+                  accessibilityLabel={`${name} stickers`}
+                  accessibilityRole="button"
+                  style={[styles.tabChip, isLandscape && styles.tabChipLandscape, shadows.soft, tab === tt.id && styles.tabChipOn]}
+                >
+                  <Text style={styles.tabEmoji}>{tt.emoji}</Text>
+                  <Text style={[styles.tabLabel, tab === tt.id && styles.tabLabelOn]}>{name}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          <ScrollView
+            style={styles.trayScroll}
+            contentContainerStyle={styles.tray}
+            showsVerticalScrollIndicator={false}
+          >
+            {trayItems.map((icon) => (
+              <TrayItem
+                key={icon}
+                icon={icon}
+                onTap={() => addSticker(icon)}
+                onDragMove={(px, py) => setGhost({ icon, x: px, y: py })}
+                onDrop={(px, py) => {
+                  setGhost(null);
+                  const f = stageFrame.current;
+                  if (px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h) {
+                    addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 });
+                  }
+                }}
+              />
+            ))}
+          </ScrollView>
+          <Text style={styles.hint}>{t(lang, 'sticker.hint')}</Text>
         </View>
-        <View style={styles.tray}>
-          {trayItems.map((icon) => (
-            <TrayItem
-              key={icon}
-              icon={icon}
-              onTap={() => addSticker(icon)}
-              onDragMove={(px, py) => setGhost({ icon, x: px, y: py })}
-              onDrop={(px, py) => {
-                setGhost(null);
-                const f = stageFrame.current;
-                if (px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h) {
-                  addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 });
-                }
-              }}
-            />
-          ))}
-        </View>
-        <Text style={styles.hint}>{t(lang, 'sticker.hint')}</Text>
       </View>
       {ghost ? (
         <View pointerEvents="none" style={{ position: 'absolute', left: ghost.x - 36, top: ghost.y - 36, width: 72, height: 72, zIndex: 50 }}>
@@ -534,9 +535,14 @@ function MagicButton({ stickerKey, pending, disabled, onPress }: {
 
 const styles = StyleSheet.create({
   wrap: { flex: 1, alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingBottom: 8 },
+  wrapLandscape: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
   stage: { borderRadius: 22, overflow: 'hidden', backgroundColor: colors.card, borderWidth: 5, borderColor: colors.card },
+  trayPanel: { alignItems: 'center', gap: 8, flex: 1, width: '100%', minHeight: 0 },
+  trayPanelLandscape: { flex: 1, minWidth: 160, maxWidth: 360, alignItems: 'center', justifyContent: 'space-between', gap: 6 },
+  trayScroll: { flex: 1, width: '100%', minHeight: 0 },
   tray: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center', maxWidth: 1100 },
   tabRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  tabRowLandscape: { gap: 6 },
   tabChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -547,6 +553,10 @@ const styles = StyleSheet.create({
     borderColor: colors.blush,
     paddingVertical: 5,
     paddingHorizontal: 12,
+  },
+  tabChipLandscape: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
   tabChipOn: { backgroundColor: colors.gold, borderColor: colors.gold },
   tabEmoji: { fontSize: 18 },
