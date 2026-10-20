@@ -3,15 +3,16 @@ import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, Vie
 import { SCENE_IMAGES, SCENE_THUMBS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { BetaPill } from '../../components/BetaPill';
-import { ScenePicker } from '../../components/ScenePicker';
+import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
+import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId } from '../../difficulty';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
 import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
 import { colors, fonts, shadows } from '../../theme';
-import { EscapeState, applyTap, isHotspotAvailable, nextHint, selectItem, startState } from './logic';
+import { EscapeState, applyTap, escapeHintMs, isHotspotAvailable, nextHint, selectItem, startState } from './logic';
 
 interface SpriteAnim {
   hotspotId: string;
@@ -22,18 +23,19 @@ interface SpriteAnim {
 
 // Kid escape room: search the picture, collect up to three items in the
 // tray, tap an item then tap the thing it opens. Chains are 2-4 steps and
-// generator-linted solvable; a 12s idle hint glows the next right spot so
+// generator-linted solvable; an idle hint glows the next right spot so
 // nobody ever wedges. Tap-select-tap only — no drag-drop at age three.
 
 interface Props {
   onHome: () => void;
+  difficulty?: Difficulty;
+  filter?: DifficultyFilter;
+  onFilter?: (f: DifficultyFilter) => void;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
   lang: Lang;
 }
-
-const HINT_MS = 12000;
 
 function roomText(room: EscapeRoom, field: 'intro' | 'winText', lang: Lang): string {
   return room.t?.[lang]?.[field] ?? room[field];
@@ -49,9 +51,22 @@ function itemLabel(item: { label: string; t?: Record<string, string> }, lang: La
   return item.t?.[lang] ?? item.label;
 }
 
-export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang }: Props) {
+export function EscapeGame({
+  onHome,
+  difficulty = 'medium',
+  filter = 'all',
+  onFilter,
+  sceneId,
+  onPickScene,
+  onBackToPicker,
+  lang,
+}: Props) {
   const rooms = manifest.escape ?? [];
   const room = rooms.find((r) => r.id === sceneId);
+  const visible = rooms.filter((r) => inFilter(r.level, filter));
+  const surprisePool = visible.length > 0 ? visible : rooms;
+  const effDifficulty = (filter === 'all' && room?.level) ? room.level : difficulty;
+  const hintMs = escapeHintMs(effDifficulty);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [spriteAnims, setSpriteAnims] = useState<SpriteAnim[]>([]);
@@ -82,19 +97,19 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     if (room) say(roomText(room, 'intro', lang));
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Idle hint: after 12s without progress, glow the next actionable spot
+  // Idle hint: after hintMs without progress, glow the next actionable spot
   // (and auto-select the needed tray item so the glow is honest).
   useEffect(() => {
     if (!room || state.done) return;
     const iv = setInterval(() => {
-      if (Date.now() - lastAction.current < HINT_MS) return;
+      if (Date.now() - lastAction.current < hintMs) return;
       const hint = nextHint(room, state);
       if (!hint) return;
       if (hint.selectItem) setState((s) => selectItem(s, hint.selectItem!));
       setHintSpot(hint.hotspotId);
     }, 1000);
     return () => clearInterval(iv);
-  }, [room, state]);
+  }, [room, state, hintMs]);
 
   const displayWidth = Math.min(width - 24, 980);
   const scale = displayWidth / 1280;
@@ -120,9 +135,16 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" lang={lang} />}>
         <ScenePicker
           title={t(lang, 'picker.escape')}
-          options={rooms.map((r) => ({ id: r.id, name: r.nameT?.[lang] ?? r.name, image: r.image, level: r.level }))}
+          options={rooms.map((r) => ({
+            id: r.id,
+            name: r.nameT?.[lang] ?? r.name,
+            image: r.image,
+            level: r.level,
+            dimmed: !inFilter(r.level, filter),
+          }))}
           onPick={onPickScene}
-          onSurprise={() => rooms.length && onPickScene(rooms[Math.floor(Math.random() * rooms.length)].id)}
+          onSurprise={() => surprisePool.length && onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id)}
+          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
           lang={lang}
         />
       </GameShell>
@@ -337,8 +359,7 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
         visible={state.done}
         message={roomText(room, 'winText', lang)}
         onNext={() => {
-          const idx = rooms.findIndex((r) => r.id === room.id);
-          onPickScene(rooms[(idx + 1) % rooms.length].id);
+          onPickScene(nextSceneId(rooms, visible, room.id));
         }}
         onHome={onHome}
         lang={lang}

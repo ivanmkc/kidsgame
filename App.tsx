@@ -224,6 +224,9 @@ export default function App() {
       {screen === 'escape' && (
         <EscapeGame
           onHome={goHome}
+          difficulty={difficulty}
+          filter={filter}
+          onFilter={pickFilter}
           sceneId={param}
           onPickScene={(id) => navigate(`escape/${id}`)}
           onBackToPicker={() => navigate('escape')}
@@ -258,7 +261,6 @@ export default function App() {
     </SafeAreaView>
   );
 }
-
 
 function Menu({
   filter, onPickFilter, onNavigate, twoPlayer, onToggleTwoPlayer, lang, onCycleLang, lockdown,
