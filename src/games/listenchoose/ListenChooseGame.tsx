@@ -53,6 +53,7 @@ export function ListenChooseGame({
   const [celebrate, setCelebrate] = useState(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wobbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockedRef = useRef(false);
 
   useWinLine(state.won, t(lang, "win.soundsWords"));
 
@@ -64,6 +65,7 @@ export function ListenChooseGame({
   }, []);
 
   const onPlay = () => {
+    lockedRef.current = false;
     setStarted(true);
     const targetWord = getWordText(state.currentRound.target, lang);
     sayThen([targetWord], () => {});
@@ -74,8 +76,14 @@ export function ListenChooseGame({
     sayThen([targetWord], () => {});
   };
 
+  const handleHome = () => {
+    lockedRef.current = false;
+    onHome();
+  };
+
   const onPick = (choice: Word) => {
-    if (celebrate || wobbleIcon === choice.icon) return;
+    if (lockedRef.current) return;
+    lockedRef.current = true;
     const isCorrect = choice.icon === state.currentRound.target.icon;
     if (isCorrect) {
       sfx.good();
@@ -83,6 +91,7 @@ export function ListenChooseGame({
       setCelebrate(true);
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
+        lockedRef.current = false;
         setCelebrate(false);
         const next = updateGameState(
           state,
@@ -100,10 +109,10 @@ export function ListenChooseGame({
     } else {
       setWobbleIcon(choice.icon);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
-      wobbleTimerRef.current = setTimeout(
-        () => setWobbleIcon((w) => (w === choice.icon ? null : w)),
-        450,
-      );
+      wobbleTimerRef.current = setTimeout(() => {
+        lockedRef.current = false;
+        setWobbleIcon((w) => (w === choice.icon ? null : w));
+      }, 450);
       const next = updateGameState(
         state,
         choice.icon,
@@ -121,7 +130,7 @@ export function ListenChooseGame({
     <GameShell
       title={t(lang, "shell.listenchoose.title")}
       subtitle={t(lang, "shell.listenchoose.sub")}
-      onBack={onHome}
+      onBack={handleHome}
       lang={lang}
       right={
         <ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />
@@ -239,11 +248,12 @@ export function ListenChooseGame({
         visible={state.won}
         message={t(lang, "win.soundsWords")}
         onNext={() => {
+          lockedRef.current = false;
           const next = initGameState(rngRef.current, difficulty, lang);
           setGameState(next);
           sayThen([getWordText(next.currentRound.target, lang)], () => {});
         }}
-        onHome={onHome}
+        onHome={handleHome}
         lang={lang}
       />
     </GameShell>

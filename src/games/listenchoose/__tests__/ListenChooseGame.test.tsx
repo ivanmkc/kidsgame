@@ -241,6 +241,50 @@ describe("ListenChooseGame", () => {
     expect(newTarget).not.toBe(targetWord.en);
   });
 
+  it("rapidly tapping the correct choice 3 times fires the correct logic and sound once", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    // Fast repeated tapping in the same event turn before state update commits
+    act(() => {
+      fireEvent.click(targetBtn);
+      fireEvent.click(targetBtn);
+      fireEvent.click(targetBtn);
+    });
+
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+
+    // Advance past celebration animation (800ms)
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+    // Exactly one round transition and speech happened
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+  });
+
+  it("rapidly tapping an incorrect choice triggers the wobble animation state change once", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { distractorBtn } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    // Rapid tapping on wrong choice in the same event turn
+    act(() => {
+      fireEvent.click(distractorBtn);
+      fireEvent.click(distractorBtn);
+      fireEvent.click(distractorBtn);
+    });
+
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
+  });
+
   it("ignores rapid repeat taps during celebration animation", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
@@ -272,7 +316,7 @@ describe("ListenChooseGame", () => {
     expect(sfx.wrong).not.toHaveBeenCalled();
   });
 
-  it("allows tapping correct choice while wrong choice is wobbling", () => {
+  it("ignores taps on choices while wrong choice is wobbling, and allows tapping after wobble completes", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
@@ -282,7 +326,17 @@ describe("ListenChooseGame", () => {
     fireEvent.click(distractorBtn);
     expect(sfx.wrong).not.toHaveBeenCalled();
 
-    // Immediately tap correct choice while wrong is still wobbling
+    // Immediately tap correct choice while wrong is still wobbling: ignored by lockedRef
+    fireEvent.click(targetBtn);
+    expect(sfx.good).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("celebration")).toBeNull();
+
+    // Advance timer past wobble duration (450ms)
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    // Now tap correct choice: works
     fireEvent.click(targetBtn);
     expect(sfx.good).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("celebration")).toBeTruthy();
