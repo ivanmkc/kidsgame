@@ -35,15 +35,18 @@ interface Props {
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const lockedRef = useRef(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [round, setRound] = useState<HighLowRound>(() =>
     makeHighLowRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<"listen" | "pick">("listen");
+  const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [listenNote, setListenNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<"high" | "low" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
-  const won = score >= total;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.highlow" as never));
 
   const playRound = useCallback((r: HighLowRound) => {
@@ -62,6 +65,13 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!won) {
       setPhase("listen");
       setListenNote(null);
@@ -74,33 +84,47 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "high" | "low") => {
-    if (won || phase !== "pick") return;
+    if (won || phase !== "pick" || lockedRef.current) return;
     if (isCorrect(round, picked)) {
+      lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
       setScore(next);
       setWrongPick(null);
+      setPhase("celebrate");
       if (next < total) {
-        setRound(makeHighLowRound(rngRef.current, difficulty));
+        advanceTimerRef.current = setTimeout(() => {
+          lockedRef.current = false;
+          setRound(makeHighLowRound(rngRef.current, difficulty));
+        }, 1000);
+      } else {
+        advanceTimerRef.current = setTimeout(() => {
+          setWon(true);
+        }, 1000);
       }
     } else {
       sfx.wrong();
       setWrongPick(picked);
-      setTimeout(() => setWrongPick(null), 500);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = setTimeout(() => setWrongPick(null), 500);
     }
   };
 
   const reset = () => {
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     setWrongPick(null);
     setListenNote(null);
     setRound(makeHighLowRound(rngRef.current, difficulty));
   };
 
   const replay = () => {
-    if (phase === "pick") {
+    if (phase === "pick" && !lockedRef.current) {
       setPhase("listen");
       setListenNote(null);
       playRound(round);
@@ -216,11 +240,11 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.pickLabel, { color: "#5DA9E8" }]}>
                   {t(lang, "music.high" as never)}
                 </Text>
-                <SparkleBurst
-                  trigger={correctAnswer(round) === "high" ? sparkKey : 0}
-                  count={5}
-                  size={14}
-                />
+                {phase === "celebrate" &&
+                correctAnswer(round) === "high" &&
+                sparkKey > 0 ? (
+                  <SparkleBurst trigger={sparkKey} count={5} size={14} />
+                ) : null}
               </Pressable>
             </Animated.View>
             <Pressable
@@ -250,11 +274,11 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.pickLabel, { color: "#E8874F" }]}>
                   {t(lang, "music.low" as never)}
                 </Text>
-                <SparkleBurst
-                  trigger={correctAnswer(round) === "low" ? sparkKey : 0}
-                  count={5}
-                  size={14}
-                />
+                {phase === "celebrate" &&
+                correctAnswer(round) === "low" &&
+                sparkKey > 0 ? (
+                  <SparkleBurst trigger={sparkKey} count={5} size={14} />
+                ) : null}
               </Pressable>
             </Animated.View>
           </View>
