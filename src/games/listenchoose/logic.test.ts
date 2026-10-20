@@ -417,6 +417,22 @@ describe("updateGameState", () => {
     expect(state.highlightCorrect).toBe(false);
     expect(state.currentRound).not.toEqual(initialRound);
   });
+
+  it("sets won to true at streak 30 and maintains currentRound", () => {
+    const rng = makeRng(100);
+    let state = initGameState(rng);
+
+    for (let i = 1; i < 30; i++) {
+      state = updateGameState(state, state.currentRound.target.icon, rng);
+      expect(state.won).toBe(false);
+    }
+
+    const roundBeforeWin = state.currentRound;
+    state = updateGameState(state, state.currentRound.target.icon, rng);
+    expect(state.streak).toBe(30);
+    expect(state.won).toBe(true);
+    expect(state.currentRound).toEqual(roundBeforeWin);
+  });
 });
 
 describe("getWordText", () => {

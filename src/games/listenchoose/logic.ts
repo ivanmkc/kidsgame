@@ -49,6 +49,7 @@ export interface GameState {
   wrongGuesses: number;
   highlightCorrect: boolean;
   level: number;
+  won: boolean;
 }
 
 /**
@@ -131,6 +132,7 @@ export function initGameState(
     wrongGuesses: 0,
     highlightCorrect: false,
     level: baseLevel,
+    won: false,
   };
 }
 
@@ -163,6 +165,7 @@ export function updateGameState(
       nextLevel = Math.max(nextLevel, 2);
     }
 
+    const won = nextStreak >= 30;
     const config = getLevelConfig(nextLevel, lang);
 
     return {
@@ -171,13 +174,16 @@ export function updateGameState(
       wrongGuesses: 0,
       highlightCorrect: false,
       level: nextLevel,
-      currentRound: generateRound(
-        rng,
-        config.words,
-        config.numChoices,
-        state.currentRound.target.icon,
-        config.prioritizeRhymes,
-      ),
+      won,
+      currentRound: won
+        ? state.currentRound
+        : generateRound(
+            rng,
+            config.words,
+            config.numChoices,
+            state.currentRound.target.icon,
+            config.prioritizeRhymes,
+          ),
     };
   }
   const nextWrong = state.wrongGuesses + 1;
