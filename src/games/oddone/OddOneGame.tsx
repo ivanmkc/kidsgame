@@ -51,6 +51,10 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const roundClosedRef = useRef(false);
 
+  const prompt =
+    CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
+    "Which one does not belong?";
+
   useEffect(() => {
     roundClosedRef.current = false;
   }, [round]);
@@ -58,11 +62,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated category still gets read aloud (kids play entirely by ear).
   useEffect(() => {
-    if (!won)
-      say(
-        CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
-          "Which one does not belong?",
-      );
+    if (!won) say(prompt);
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (idx: number) => {
@@ -132,15 +132,24 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
       }
     >
       <View style={styles.board}>
-        <View
-          style={[styles.question, shadows.soft]}
+        <Pressable
+          disabled={won}
+          onPress={() => {
+            if (won) return;
+            sfx.tap();
+            say(prompt);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={prompt}
+          style={({ pressed }) => [
+            styles.question,
+            shadows.soft,
+            pressed && styles.pressed,
+          ]}
           testID={`oddone-question-${round.baseCategory}`}
         >
-          <Text style={styles.questionText}>
-            {CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
-              "Which one does not belong?"}
-          </Text>
-        </View>
+          <Text style={styles.questionText}>{prompt}</Text>
+        </Pressable>
         <View
           style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
         >
