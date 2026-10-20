@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   render,
   screen,
@@ -8,6 +8,8 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { SpellGame } from "../SpellGame";
@@ -29,6 +31,7 @@ describe("SpellGame", () => {
     act(() => {
       vi.runOnlyPendingTimers();
     });
+    vi.clearAllTimers();
     vi.useRealTimers();
     cleanup();
   });
@@ -224,5 +227,200 @@ describe("SpellGame", () => {
 
     unmount();
     expect(clearTimeoutSpy).toHaveBeenCalledWith(secondTimerId);
+  });
+
+  it("drops pending sayThen callback on language switch and does not advance word index or revert round", () => {
+    let pendingSayThen: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      pendingSayThen = cb ?? null;
+    });
+
+    const enWords: logic.SpellWord[] = [
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "dog",
+        lang: "en",
+        text: "DOG",
+        chars: ["D", "O", "G"],
+        roman: "",
+        source: "spotit",
+      },
+    ];
+
+    const jaWords: logic.SpellWord[] = [
+      {
+        icon: "inu",
+        lang: "ja",
+        text: "INU",
+        chars: ["I", "N", "U"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "neko",
+        lang: "ja",
+        text: "NEKO",
+        chars: ["N", "E", "K", "O"],
+        roman: "",
+        source: "spotit",
+      },
+    ];
+
+    const pickSpy = vi.spyOn(logic, "pickGameWords").mockReturnValue(enWords);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: word.chars.map((char, index) => ({ id: index + 1, char })),
+      }),
+    );
+
+    const onHome = vi.fn();
+    const { rerender } = render(
+      <SpellGame onHome={onHome} difficulty="easy" lang="en" />,
+    );
+
+    // Initial word is CAT (word index 0)
+    expect(screen.getByTestId("spell-word-cat")).toBeTruthy();
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+
+    // Complete spelling CAT
+    fireEvent.click(screen.getByTestId("spell-tile-1")); // 'C'
+    fireEvent.click(screen.getByTestId("spell-tile-2")); // 'A'
+    fireEvent.click(screen.getByTestId("spell-tile-3")); // 'T'
+
+    // sayThen callback is pending
+    expect(pendingSayThen).not.toBeNull();
+    // Word index has not advanced yet
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+
+    // Switch lang prop to Japanese mid-round while sayThen is pending
+    pickSpy.mockReturnValue(jaWords);
+    rerender(<SpellGame onHome={onHome} difficulty="easy" lang="ja" />);
+
+    // Round was rebuilt for Japanese (INU at word index 0)
+    expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+
+    // Fire the stale sayThen callback from the previous language's round
+    act(() => {
+      pendingSayThen!();
+    });
+
+    // Stale callback dropped by !isValid(): word index remains 0, round remains INU
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+    expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+    expect(screen.queryByTestId("spell-word-dog")).toBeNull();
+    expect(screen.queryByTestId("spell-word-neko")).toBeNull();
+  });
+
+  it("drops pending sayThen callback when language is switched mid-round via in-game cycle button", () => {
+    let pendingSayThen: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      pendingSayThen = cb ?? null;
+    });
+
+    const enWords: logic.SpellWord[] = [
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "dog",
+        lang: "en",
+        text: "DOG",
+        chars: ["D", "O", "G"],
+        roman: "",
+        source: "spotit",
+      },
+    ];
+
+    const jaWords: logic.SpellWord[] = [
+      {
+        icon: "inu",
+        lang: "ja",
+        text: "INU",
+        chars: ["I", "N", "U"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "neko",
+        lang: "ja",
+        text: "NEKO",
+        chars: ["N", "E", "K", "O"],
+        roman: "",
+        source: "spotit",
+      },
+    ];
+
+    vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, pool) => {
+      if (pool[0]?.lang === "ja") return jaWords;
+      return enWords;
+    });
+
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: word.chars.map((char, index) => ({ id: index + 1, char })),
+      }),
+    );
+
+    function Harness() {
+      const [lang, setLang] = useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <SpellGame onHome={() => {}} difficulty="easy" lang={lang} />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    expect(screen.getByTestId("spell-word-cat")).toBeTruthy();
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+
+    // Complete CAT
+    fireEvent.click(screen.getByTestId("spell-tile-1")); // 'C'
+    fireEvent.click(screen.getByTestId("spell-tile-2")); // 'A'
+    fireEvent.click(screen.getByTestId("spell-tile-3")); // 'T'
+
+    expect(pendingSayThen).not.toBeNull();
+
+    // Tap in-game language cycle button
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // Fresh Japanese round loads
+    expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+
+    // Fire stale callback
+    act(() => {
+      pendingSayThen!();
+    });
+
+    expect(screen.getByTestId("spell-score").textContent).toContain("0/2");
+    expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+    expect(screen.queryByTestId("spell-word-dog")).toBeNull();
+    expect(screen.queryByTestId("spell-word-neko")).toBeNull();
   });
 });

@@ -6,7 +6,7 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
+import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { say, sayThen, saySequence, sfx } from '../../sound';
@@ -30,6 +30,7 @@ function iconFor(icon: string): number | undefined {
 }
 
 export function SpellGame({ onHome, difficulty, lang }: Props) {
+  const { isValid } = useLangEpoch(lang);
   // All hooks unconditionally at the top — no early returns.
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const pool = useMemo(() => wordPool(lang, SPOTIT_ICONS, RHYME_ICONS), [lang]);
@@ -89,6 +90,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
         setCelebrate((c) => c + 1);
         const { done } = linesForWord(round.word);
         sayThen([done], () => {
+          if (!isValid()) return;
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
             setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
