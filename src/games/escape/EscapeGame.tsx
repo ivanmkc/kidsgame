@@ -216,6 +216,8 @@ export function EscapeGame({
   const onTray = (itemId: string) => {
     lastAction.current = Date.now();
     sfx.tap();
+    const item = room.items.find((i) => i.id === itemId);
+    if (item) say(itemLabel(item, lang));
     setState((s) => selectItem(s, itemId));
   };
 

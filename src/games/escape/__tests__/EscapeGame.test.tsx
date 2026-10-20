@@ -192,7 +192,7 @@ describe("EscapeGame", () => {
     expect(sfx.tap).not.toHaveBeenCalled();
   });
 
-  it('renders FilterCycleChip and cycles difficulty filter on press', () => {
+  it("renders FilterCycleChip and cycles difficulty filter on press", () => {
     const onFilter = vi.fn();
     render(
       <EscapeGame
@@ -204,13 +204,13 @@ describe("EscapeGame", () => {
         onFilter={onFilter}
       />,
     );
-    const cycleBtn = screen.getByTestId('difficulty-cycle');
+    const cycleBtn = screen.getByTestId("difficulty-cycle");
     expect(cycleBtn).toBeTruthy();
     fireEvent.click(cycleBtn);
-    expect(onFilter).toHaveBeenCalledWith('medium');
+    expect(onFilter).toHaveBeenCalledWith("medium");
   });
 
-  it('dims rooms that do not match the active difficulty filter', () => {
+  it("dims rooms that do not match the active difficulty filter", () => {
     const { unmount } = render(
       <EscapeGame
         onHome={noop}
@@ -220,12 +220,13 @@ describe("EscapeGame", () => {
         filter="easy"
       />,
     );
-    const easyToy = screen.getByTestId('scene-pick-toyroom');
-    const easyPirate = screen.getByTestId('scene-pick-piratecove');
-    expect(window.getComputedStyle(easyToy).opacity).not.toBe('0.32');
-    expect(window.getComputedStyle(easyPirate).opacity).toBe('0.32');
+    const easyToy = screen.getByTestId("scene-pick-toyroom");
+    const easyPirate = screen.getByTestId("scene-pick-piratecove");
+    expect(window.getComputedStyle(easyToy).opacity).not.toBe("0.32");
+    expect(window.getComputedStyle(easyPirate).opacity).toBe("0.32");
 
     unmount();
+
     render(
       <EscapeGame
         onHome={noop}
@@ -235,14 +236,14 @@ describe("EscapeGame", () => {
         filter="hard"
       />,
     );
-    const hardToy = screen.getByTestId('scene-pick-toyroom');
-    const hardPirate = screen.getByTestId('scene-pick-piratecove');
-    expect(window.getComputedStyle(hardToy).opacity).toBe('0.32');
-    expect(window.getComputedStyle(hardPirate).opacity).toBe('0.32');
+    const hardToy = screen.getByTestId("scene-pick-toyroom");
+    const hardPirate = screen.getByTestId("scene-pick-piratecove");
+    expect(window.getComputedStyle(hardToy).opacity).toBe("0.32");
+    expect(window.getComputedStyle(hardPirate).opacity).toBe("0.32");
   });
 
-  it('surprise button picks from rooms matching active filter', () => {
-    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+  it("surprise button picks from rooms matching active filter", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.99);
     const onPickScene = vi.fn();
     render(
       <EscapeGame
@@ -253,11 +254,11 @@ describe("EscapeGame", () => {
         filter="easy"
       />,
     );
-    fireEvent.click(screen.getByTestId('scene-surprise'));
-    expect(onPickScene).toHaveBeenCalledWith('dragoncave');
+    fireEvent.click(screen.getByTestId("scene-surprise"));
+    expect(onPickScene).toHaveBeenCalledWith("dragoncave");
   });
 
-  it('tapping Next on WinOverlay cycles to next room in the difficulty pool', () => {
+  it("tapping Next on WinOverlay cycles to next room in the difficulty pool", () => {
     const onPickScene = vi.fn();
     render(
       <EscapeGame
@@ -272,30 +273,30 @@ describe("EscapeGame", () => {
 
     // Solve dragoncave:
     // 1. Search haystack to reveal egg
-    fireEvent.click(screen.getByTestId('escape-spot-haystack'));
+    fireEvent.click(screen.getByTestId("escape-spot-haystack"));
     // 2. Tap haystack to collect egg
-    fireEvent.click(screen.getByTestId('escape-spot-haystack'));
+    fireEvent.click(screen.getByTestId("escape-spot-haystack"));
     // 3. Unlock stove with egg to cook pancake
-    fireEvent.click(screen.getByTestId('escape-spot-stove'));
+    fireEvent.click(screen.getByTestId("escape-spot-stove"));
     // 4. Tap stove to collect pancake
-    fireEvent.click(screen.getByTestId('escape-spot-stove'));
+    fireEvent.click(screen.getByTestId("escape-spot-stove"));
     // 5. Feed pancake to dragon -> triggers win state!
-    fireEvent.click(screen.getByTestId('escape-spot-dragon'));
+    fireEvent.click(screen.getByTestId("escape-spot-dragon"));
 
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    const nextBtn = screen.getByTestId('play-again');
+    const nextBtn = screen.getByTestId("play-again");
     expect(nextBtn).toBeTruthy();
     fireEvent.click(nextBtn);
 
     // In easy pool (toyroom, dragoncave), Next wraps around to toyroom.
     // Unfiltered index progression would have stepped to piratecove.
-    expect(onPickScene).toHaveBeenCalledWith('toyroom');
+    expect(onPickScene).toHaveBeenCalledWith("toyroom");
   });
 
-  it('idle hint delay scales with difficulty (easy 8s vs medium 12s)', () => {
+  it("idle hint delay scales with difficulty (easy 8s vs medium 12s)", () => {
     const { unmount } = render(
       <EscapeGame
         onHome={noop}
@@ -308,7 +309,7 @@ describe("EscapeGame", () => {
       />,
     );
 
-    const pillow = screen.getByTestId('escape-spot-pillow');
+    const pillow = screen.getByTestId("escape-spot-pillow");
     expect(pillow.children.length).toBe(0);
 
     // After 7s, hint has not triggered
@@ -338,7 +339,7 @@ describe("EscapeGame", () => {
       />,
     );
 
-    const medPillow = screen.getByTestId('escape-spot-pillow');
+    const medPillow = screen.getByTestId("escape-spot-pillow");
     expect(medPillow.children.length).toBe(0);
 
     act(() => {
@@ -350,5 +351,66 @@ describe("EscapeGame", () => {
       vi.advanceTimersByTime(4000);
     });
     expect(medPillow.children.length).toBeGreaterThan(0);
+  });
+
+  it("speaks item label when item in inventory tray is tapped", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+    const keyItem = room.items.find((i) => i.id === "key")!;
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="en"
+      />,
+    );
+
+    // Reveal and collect key
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+
+    const trayKey = screen.getByTestId("escape-item-key");
+    expect(trayKey).toBeTruthy();
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+
+    fireEvent.click(trayKey);
+    expect(sfx.tap).toHaveBeenCalledOnce();
+    expect(sound.say).toHaveBeenCalledWith(keyItem.label);
+  });
+
+  it("speaks localized item label when item in inventory tray is tapped in non-English language", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+    const keyItem = room.items.find((i) => i.id === "key")!;
+    const jaLabel = keyItem.t?.ja ?? keyItem.label;
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="ja"
+      />,
+    );
+
+    // Reveal and collect key
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+
+    const trayKey = screen.getByTestId("escape-item-key");
+    expect(trayKey).toBeTruthy();
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+
+    fireEvent.click(trayKey);
+    expect(sfx.tap).toHaveBeenCalledOnce();
+    expect(sound.say).toHaveBeenCalledWith(jaLabel);
   });
 });
