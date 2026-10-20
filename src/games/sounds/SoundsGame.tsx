@@ -31,6 +31,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     () => makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [locked, setLocked] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
@@ -46,14 +47,16 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won) return;
+    if (won || locked) return;
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
+      setLocked(true);
       // Wait for the confirmation chime to finish before advancing — otherwise
       // the next round's prompt say() cancels the celebration mid-word.
       const nextIdx = roundIdx + 1;
       sayThen(prompts.confirmLines, () => {
+        setLocked(false);
         if (!isValid()) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
@@ -74,6 +77,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     setRoundIdx(0);
     setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount));
     setWrongIdx(null);
+    setLocked(false);
   };
 
   const cols = tileCount <= 3 ? 3 : tileCount === 4 ? 2 : 3;
