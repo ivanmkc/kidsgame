@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LettersGame } from '../LettersGame';
 import * as logic from '../logic';
-import { sfx } from '../../../sound';
+import { sfx, say } from '../../../sound';
 
 vi.mock('../../../sound', () => ({
   say: vi.fn(),
@@ -34,6 +34,10 @@ describe('LettersGame', () => {
     });
 
     render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    
+    act(() => {
+      fireEvent.click(screen.getByTestId('play-button'));
+    });
 
     expect(makeRoundSpy).toHaveBeenCalledTimes(1);
     expect(sfx.good).not.toHaveBeenCalled();
@@ -65,6 +69,9 @@ describe('LettersGame', () => {
       });
 
       render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      act(() => {
+        fireEvent.click(screen.getByTestId('play-button'));
+      });
 
       const round1 = generatedRounds[0];
       const wrongTile = round1.tiles.find((t) => !t.isAnswer)!;
@@ -114,6 +121,9 @@ describe('LettersGame', () => {
     });
 
     render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    act(() => {
+      fireEvent.click(screen.getByTestId('play-button'));
+    });
 
     // Round 1
     const round1Answer = generatedRounds[0].tiles[generatedRounds[0].answerIdx];
@@ -133,5 +143,123 @@ describe('LettersGame', () => {
 
     expect(sfx.good).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId('letters-score').textContent).toContain('2/8');
+  });
+
+  it('hides glyph by default, speaks from speaker button, and reveals after second miss', () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, 'makeLetterRound').mockImplementation((rng, tier, tileCount, avoidKey) => {
+        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+        generatedRounds.push(res);
+        return res;
+      });
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      
+      act(() => {
+        fireEvent.click(screen.getByTestId('play-button'));
+      });
+      
+      const round1 = generatedRounds[0];
+      
+      // The glyph should NOT be visible.
+      expect(screen.queryByTestId('letters-glyph')).toBeNull();
+
+      vi.mocked(say).mockClear();
+
+      // Tap speaker button speaks the target
+      act(() => {
+        fireEvent.click(screen.getByTestId('speaker-button'));
+      });
+      expect(say).toHaveBeenCalledWith(round1.promptLine);
+      
+      // Tap wrong tile twice
+      const wrongTile = round1.tiles.find((t) => !t.isAnswer)!;
+      const wrongBtn = screen.getByLabelText(wrongTile.label);
+
+      act(() => {
+        fireEvent.click(wrongBtn);
+      });
+      expect(screen.queryByTestId('letters-glyph')).toBeNull();
+
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+
+      act(() => {
+        fireEvent.click(wrongBtn);
+      });
+      
+      // Now the glyph should appear
+      expect(screen.getByTestId('letters-glyph').textContent).toBe(round1.targetDisplay);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('safely switches language mid-round, updating tier and labels immediately (PR 249)', () => {
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, 'makeLetterRound').mockImplementation((rng, tier, tileCount, avoidKey) => {
+      const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+      generatedRounds.push(res);
+      return res;
+    });
+
+    const { rerender } = render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    
+    act(() => {
+      fireEvent.click(screen.getByTestId('play-button'));
+    });
+    
+    vi.mocked(say).mockClear();
+
+    act(() => {
+      // Switch from EN (upper tier) to JA (kana tier)
+      rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    });
+    
+    // Board should now be kana hunt (title should change, emoji in score)
+    expect(screen.getByText('かなさがし')).toBeTruthy(); // t('ja', 'shell.letters.titleKana')
+    expect(screen.getByTestId('letters-score').textContent).toContain('🈶');
+
+    expect(generatedRounds).toHaveLength(2);
+    const round2 = generatedRounds[1];
+    expect(round2.tier).toBe('kana');
+    expect(screen.getByTestId(`letters-prompt-${round2.targetKey}`)).toBeTruthy();
+    expect(screen.getByLabelText(round2.tiles[0].label)).toBeTruthy();
+    expect(say).toHaveBeenCalledWith(round2.promptLine);
+    expect(screen.queryByTestId('letters-glyph')).toBeNull();
+  });
+
+  it('shows glyph immediately when captions toggle is turned ON', () => {
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, 'makeLetterRound').mockImplementation((rng, tier, tileCount, avoidKey) => {
+      const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+      generatedRounds.push(res);
+      return res;
+    });
+
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    
+    // Toggle captions ON
+    const captionsToggle = screen.getByTestId('captions-toggle');
+    act(() => {
+      fireEvent.click(captionsToggle);
+    });
+    
+    // Check that it shows ON
+    expect(captionsToggle.textContent).toContain('ON');
+    
+    act(() => {
+      fireEvent.click(screen.getByTestId('play-button'));
+    });
+    
+    // The glyph should be immediately visible because captions are ON
+    const round1 = generatedRounds[0];
+    expect(screen.getByTestId('letters-glyph').textContent).toBe(round1.targetDisplay);
   });
 });

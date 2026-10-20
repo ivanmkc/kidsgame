@@ -197,3 +197,7 @@ export function speechLines(): string[] {
   for (const k of KANA_POOL) lines.add(`「${k.kana}」をさがして！`);
   return [...lines];
 }
+
+export function shouldShowGlyph(misses: number, forceShow: boolean): boolean {
+  return forceShow || misses >= 2;
+}
