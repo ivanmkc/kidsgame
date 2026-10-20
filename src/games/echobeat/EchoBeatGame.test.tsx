@@ -260,14 +260,94 @@ describe("EchoBeatGame", () => {
     expect(saySpy).toHaveBeenCalledWith("きこえた リズムを タップ！");
   });
 
-  it("speechLines exports localized subtitles for all languages", () => {
+  it("speechLines exports localized prompts and subtitles for all languages", () => {
     const lines = speechLines();
-    expect(lines.length).toBeGreaterThanOrEqual(4);
+    expect(lines.length).toBe(12);
     expect(new Set(lines).size).toBe(lines.length);
     expect(lines).toContain("Tap the rhythm you hear!");
+    expect(lines).toContain("Listen...");
+    expect(lines).toContain("Your turn!");
     expect(lines).toContain("きこえた リズムを タップ！");
+    expect(lines).toContain("きいてね…");
+    expect(lines).toContain("きみの ばん！");
     expect(lines).toContain("拍出你听到的节拍！");
+    expect(lines).toContain("听一听…");
+    expect(lines).toContain("轮到你了！");
     expect(lines).toContain("撳出你聽到嘅節拍！");
+    expect(lines).toContain("聽下…");
+    expect(lines).toContain("到你喇！");
+  });
+
+  it("speaks 'Listen...' and 'Your turn!' upon entering phases", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(saySpy).toHaveBeenCalledWith("Listen...");
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(saySpy).toHaveBeenCalledWith("Your turn!");
+    vi.useRealTimers();
+  });
+
+  it("renders replay button during tap phase and replays demo on click", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+    const playDrumSequenceSpy = vi.spyOn(music, "playDrumSequence");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In listen phase: replay button should not be present
+    expect(screen.queryByTestId("echobeat-replay")).toBeNull();
+
+    // Advance to tap phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const replayBtn = screen.getByTestId("echobeat-replay");
+    expect(replayBtn).toBeTruthy();
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("🔊 Tap to hear again");
+
+    // Tap drum once
+    const drum = screen.getByTestId("echobeat-drum");
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    saySpy.mockClear();
+    playDrumSequenceSpy.mockClear();
+
+    // Click replay button
+    act(() => {
+      fireEvent.click(replayBtn);
+    });
+
+    // Should switch to listen phase and replay demo
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(saySpy).toHaveBeenCalledWith("Listen...");
+    expect(playDrumSequenceSpy).toHaveBeenCalledTimes(1);
+
+    // Drum should be disabled during replay
+    expect(drum.getAttribute("aria-disabled")).toBe("true");
+
+    // Advance past demo replay
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(saySpy).toHaveBeenCalledWith("Your turn!");
+
+    vi.useRealTimers();
   });
 });
 

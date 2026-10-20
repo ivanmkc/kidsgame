@@ -116,6 +116,8 @@ export function speechLines(): string[] {
   const out: string[] = [];
   for (const l of LANGS) {
     out.push(t(l.id, "shell.echobeat.sub"));
+    out.push(t(l.id, "music.listen"));
+    out.push(t(l.id, "music.yourTurn"));
   }
   return [...new Set(out)];
 }

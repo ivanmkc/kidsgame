@@ -72,6 +72,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       if (flashTimer.current) clearTimeout(flashTimer.current);
       setFlash(null);
       setPhase("listen");
+      say(t(lang, "music.listen" as never));
       playDrumSequence(
         r.gaps,
         (i) => {
@@ -88,10 +89,11 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         () => {
           setFlash(null);
           setPhase("tap");
+          say(t(lang, "music.yourTurn" as never));
         },
       );
     },
-    [pulseAnim],
+    [lang, pulseAnim],
   );
 
   useEffect(() => {
@@ -158,6 +160,15 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         evaluate(tapTimesRef.current);
       }, delay);
     }
+  };
+
+  const replay = () => {
+    if (won || phase !== "tap" || result !== null) return;
+    if (resultTimer.current) clearTimeout(resultTimer.current);
+    setTapTimes([]);
+    setTapCount(0);
+    setResult(null);
+    playDemo(round);
   };
 
   const reset = () => {
@@ -283,27 +294,51 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             </Text>
           </View>
         ) : (
-          <View
-            style={[
-              styles.statusCard,
-              shadows.soft,
-              styles.yourTurnCard,
-              result === "bad" && styles.wrongCard,
-              shortH && styles.statusCardShort,
-            ]}
-          >
-            <Text
-              style={[styles.statusEmoji, shortH && styles.statusEmojiShort]}
+          <View style={styles.statusRow}>
+            <View
+              style={[
+                styles.statusCard,
+                shadows.soft,
+                styles.yourTurnCard,
+                result === "bad" && styles.wrongCard,
+                shortH && styles.statusCardShort,
+              ]}
             >
-              {result === "good" ? "🎉" : result === "bad" ? "🔄" : "👆"}
-            </Text>
-            <Text style={[styles.statusText, shortH && styles.statusTextShort]}>
-              {result === "good"
-                ? "🎉"
-                : result === "bad"
-                  ? "🔄"
-                  : t(lang, "music.yourTurn" as never)}
-            </Text>
+              <Text
+                style={[styles.statusEmoji, shortH && styles.statusEmojiShort]}
+              >
+                {result === "good" ? "🎉" : result === "bad" ? "🔄" : "👆"}
+              </Text>
+              <Text
+                style={[styles.statusText, shortH && styles.statusTextShort]}
+              >
+                {result === "good"
+                  ? "🎉"
+                  : result === "bad"
+                    ? "🔄"
+                    : t(lang, "music.yourTurn" as never)}
+              </Text>
+            </View>
+            {result === null && (
+              <Pressable
+                testID="echobeat-replay"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, "spell.hearAgain")}
+                onPress={replay}
+                style={({ pressed }) => [
+                  styles.replayBtn,
+                  shadows.soft,
+                  shortH && styles.replayBtnShort,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text
+                  style={[styles.replayText, shortH && styles.replayTextShort]}
+                >
+                  🔊
+                </Text>
+              </Pressable>
+            )}
           </View>
         )}
         <Animated.View
@@ -362,6 +397,11 @@ const styles = StyleSheet.create({
     gap: 28,
     paddingHorizontal: 16,
   },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   statusCard: {
     backgroundColor: "#F7EDDA",
     borderRadius: 18,
@@ -392,6 +432,24 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   statusTextShort: { fontSize: 15 },
+  replayBtn: {
+    backgroundColor: "#F7EDDA",
+    borderRadius: 18,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  replayBtnShort: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+  },
+  replayText: { fontSize: 30 },
+  replayTextShort: { fontSize: 24 },
+  pressed: { transform: [{ scale: 0.95 }] },
   drum: {
     width: 180,
     height: 180,
