@@ -224,6 +224,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick('same')}
                 testID="samediff-same"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, 'music.same')}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: '#E8F5E9', borderColor: '#5FBF6E' },
@@ -242,6 +244,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
             <Pressable
               onPress={replay}
               testID="samediff-replay"
+              accessibilityRole="button"
+              accessibilityLabel={t(lang, 'spell.hearAgain')}
               style={({ pressed }) => [styles.replayBtn, shadows.soft, pressed && styles.pressed]}
             >
               <Text style={styles.replayText}>🔊</Text>
@@ -250,6 +254,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick('different')}
                 testID="samediff-diff"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, 'music.different')}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: '#FEF3E8', borderColor: '#E89B4F' },

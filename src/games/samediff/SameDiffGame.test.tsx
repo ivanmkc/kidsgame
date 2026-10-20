@@ -8,6 +8,7 @@ import { phrasePitchRatios, SameDiffRound } from './logic';
 describe('SameDiffGame UI', () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   it('renders dots during listen phases', () => {
@@ -17,20 +18,22 @@ describe('SameDiffGame UI', () => {
     expect(screen.getByTestId('melody-dot-1')).toBeTruthy();
   });
 
-  it('Different card renders with a warm orange border and text', () => {
+  it("Different card renders with a warm orange border and text", () => {
     vi.useFakeTimers();
     render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
-    
+
     act(() => {
       vi.advanceTimersByTime(2000);
     });
 
-    const diffButton = screen.getByTestId('samediff-diff');
-    expect(diffButton.style.backgroundColor).toMatch(/rgba?\(254,\s*243,\s*232/);
+    const diffButton = screen.getByTestId("samediff-diff");
+    expect(diffButton.style.backgroundColor).toMatch(
+      /rgba?\(254,\s*243,\s*232/,
+    );
     expect(diffButton.style.borderTopColor).toMatch(/rgba?\(232,\s*155,\s*79/);
-    
+
     // The text element is a child
-    const diffText = screen.getByText('Different');
+    const diffText = screen.getByText("Different");
     expect(diffText.style.color).toMatch(/rgba?\(232,\s*155,\s*79/);
 
     vi.useRealTimers();
@@ -139,6 +142,50 @@ describe('SameDiffGame UI', () => {
       sound.setMuted(false);
       vi.useRealTimers();
     }
+  });
+
+  it('renders pick and replay buttons with accessibilityRole="button" and localized labels', () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const sameBtn = screen.getByTestId("samediff-same");
+    expect(sameBtn.getAttribute("role")).toBe("button");
+    expect(sameBtn.getAttribute("aria-label")).toBe("Same");
+
+    const diffBtn = screen.getByTestId("samediff-diff");
+    expect(diffBtn.getAttribute("role")).toBe("button");
+    expect(diffBtn.getAttribute("aria-label")).toBe("Different");
+
+    const replayBtn = screen.getByTestId("samediff-replay");
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("🔊 Tap to hear again");
+
+    vi.useRealTimers();
+  });
+
+  it("localizes accessibility labels when lang is ja", () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByTestId("samediff-same").getAttribute("aria-label")).toBe(
+      "おなじ",
+    );
+    expect(screen.getByTestId("samediff-diff").getAttribute("aria-label")).toBe(
+      "ちがう",
+    );
+    expect(
+      screen.getByTestId("samediff-replay").getAttribute("aria-label"),
+    ).toBe("🔊 タップでもういちど聞く");
+
+    vi.useRealTimers();
   });
 });
 
