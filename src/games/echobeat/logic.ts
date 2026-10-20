@@ -72,6 +72,26 @@ export function checkEcho(
   return { countCorrect, timingCorrect };
 }
 
+export type EchoBeatPhase = "listen" | "tap" | "result";
+
+export function canTap(
+  round: EchoBeatRound,
+  tapCount: number,
+  phase: EchoBeatPhase,
+  won = false,
+  result: "good" | "bad" | null = null,
+): boolean {
+  if (won || phase !== "tap" || result !== null) return false;
+  return tapCount < round.hitCount;
+}
+
+export function evaluationDelayMs(
+  round: EchoBeatRound,
+  tapCount: number,
+): number {
+  return tapCount >= round.hitCount ? 0 : 1200;
+}
+
 export interface EchoBeatLayout {
   drumSize: number;
   drumEmojiSize: number;

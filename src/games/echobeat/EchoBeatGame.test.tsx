@@ -135,12 +135,7 @@ describe("EchoBeatGame", () => {
     });
     expect(playDrumSpy).toHaveBeenCalledTimes(2);
 
-    // Wait for evaluation timer (1200ms)
-    act(() => {
-      vi.advanceTimersByTime(1200);
-    });
-
-    // Celebration phase active
+    // Celebration phase active immediately upon completing required taps
     expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
     expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
 
@@ -190,6 +185,47 @@ describe("EchoBeatGame", () => {
       vi.advanceTimersByTime(1000);
     });
     expect(screen.getByText("Listen...")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it("evaluates immediately upon final tap and ignores extra tap after all dots filled", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4, 0.4],
+      hitCount: 3,
+    }));
+    const playDrumSpy = vi.spyOn(music, "playDrum");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Wait for demo rhythm to finish playing
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Enter all 3 required taps to fill all dots
+    act(() => {
+      fireEvent.click(drum);
+      fireEvent.click(drum);
+      fireEvent.click(drum);
+    });
+    expect(playDrumSpy).toHaveBeenCalledTimes(3);
+
+    // Round evaluates immediately without 1.2s delay
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
+
+    // Extra tap after all dots filled is ignored and does not fail the round
+    act(() => {
+      fireEvent.click(drum);
+    });
+    expect(playDrumSpy).toHaveBeenCalledTimes(3);
+    expect(screen.queryByText("🔄")).toBeNull();
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
 
     vi.useRealTimers();
   });
