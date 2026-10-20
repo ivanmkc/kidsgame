@@ -1,13 +1,13 @@
-import React, { useEffect } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { GameShell } from '../../components/GameShell';
-import { Lang } from '../../lang';
-import { t, UIKey } from '../../i18n';
-import { say } from '../../sound';
-import { MUSICBOX_IMAGES } from '../../assets/images';
-import { colors, fonts, shadows } from '../../theme';
-import { SCENES, sceneById } from './scenes';
-import { JourneyScene } from './JourneyScene';
+import React, { useEffect } from "react";
+import { Image, Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { GameShell } from "../../components/GameShell";
+import { Lang } from "../../lang";
+import { t, UIKey } from "../../i18n";
+import { say } from "../../sound";
+import { MUSICBOX_IMAGES } from "../../assets/images";
+import { colors, fonts, shadows } from "../../theme";
+import { SCENES, sceneById } from "./scenes";
+import { JourneyScene } from "./JourneyScene";
 
 // Sago-Mini-style music box v2: a horizontally-scrolling journey where every
 // tap plays the next melody note, scrolls the world, and spawns a visual
@@ -22,22 +22,32 @@ interface Props {
   lang: Lang;
 }
 
-export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lang }: Props) {
+export function MusicBoxGame({
+  onHome,
+  sceneId,
+  onPickScene,
+  onBackToPicker,
+  lang,
+}: Props) {
   const scene = sceneId ? sceneById(sceneId) : undefined;
 
   useEffect(() => {
-    if (scene) say(t(lang, 'musicbox.intro'));
+    if (scene) say(t(lang, "musicbox.intro"));
   }, [scene?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!scene) {
     return (
       <GameShell
-        title={t(lang, 'shell.musicbox.title')}
-        subtitle={t(lang, 'shell.musicbox.subPicker')}
+        title={t(lang, "shell.musicbox.title")}
+        subtitle={t(lang, "shell.musicbox.subPicker")}
         onBack={onHome}
         lang={lang}
       >
-        <View style={styles.pickerWrap}>
+        <ScrollView
+          testID="musicbox-picker-scroll"
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.pickerWrap}
+        >
           {SCENES.map((s) => {
             const pickerSrc = MUSICBOX_IMAGES[`${s.id}/picker`];
             return (
@@ -47,16 +57,23 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
                 testID={`scene-pick-${s.id}`}
                 accessibilityRole="button"
                 accessibilityLabel={t(lang, `song.${s.songId}` as UIKey)}
-                style={({ pressed }) => [styles.charCard, pressed && styles.charPressed]}
+                style={({ pressed }) => [
+                  styles.charCard,
+                  pressed && styles.charPressed,
+                ]}
               >
-                <Image source={pickerSrc} style={styles.charPortrait} resizeMode="contain" />
+                <Image
+                  source={pickerSrc}
+                  style={styles.charPortrait}
+                  resizeMode="contain"
+                />
                 <Text style={styles.charLabel}>
                   {t(lang, `song.${s.songId}` as UIKey)}
                 </Text>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </GameShell>
     );
   }
@@ -64,7 +81,7 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
   return (
     <GameShell
       title={t(lang, `song.${scene.songId}` as UIKey)}
-      subtitle={t(lang, 'shell.musicbox.subPlay')}
+      subtitle={t(lang, "shell.musicbox.subPlay")}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
@@ -76,13 +93,13 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
 
 const styles = StyleSheet.create({
   pickerWrap: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexGrow: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: 24,
     padding: 24,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   charCard: {
     width: 200,
@@ -91,8 +108,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderWidth: 3,
     borderColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
     ...shadows.lifted,
   },
@@ -108,6 +125,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.displayMed,
     fontSize: 15,
     color: colors.inkSoft,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
