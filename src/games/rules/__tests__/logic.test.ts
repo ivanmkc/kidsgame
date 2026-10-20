@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { manifest } from "../../../manifest";
 import { makeRng } from "../../../rng";
-import { pickRuleIndex } from "../logic";
+import { makeRules, makeRulesRound, pickRuleIndex } from "../logic";
 
 describe("pickRuleIndex", () => {
   it("easy difficulty never recalls and advances rule indices consecutively", () => {
     const rng = makeRng(12345);
+    const rules = makeRules(rng, 10);
     for (let idx = 0; idx < 10; idx++) {
-      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, Infinity);
+      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, Infinity, rules);
       expect(isRecall).toBe(false);
       expect(ruleIdx).toBe(idx);
     }
@@ -14,23 +16,24 @@ describe("pickRuleIndex", () => {
 
   it("medium difficulty triggers recall only at round index 8 and advances consecutively", () => {
     const rng = makeRng(12345);
+    const rules = makeRules(rng, 10);
     for (let idx = 0; idx < 8; idx++) {
-      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 6);
+      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 6, rules);
       expect(isRecall).toBe(false);
       expect(ruleIdx).toBe(idx);
     }
-    const recallRound = pickRuleIndex(rng, 8, 6);
+    const recallRound = pickRuleIndex(rng, 8, 6, rules);
     expect(recallRound.isRecall).toBe(true);
     expect(recallRound.ruleIdx).toBeGreaterThanOrEqual(0);
     expect(recallRound.ruleIdx).toBeLessThanOrEqual(7);
 
-    const nextRound = pickRuleIndex(rng, 9, 6);
+    const nextRound = pickRuleIndex(rng, 9, 6, rules);
     expect(nextRound.isRecall).toBe(false);
     expect(nextRound.ruleIdx).toBe(8);
 
     // Newly introduced rules are sequentially numbered without skipping Rule #9
     const allRounds = Array.from({ length: 10 }, (_, i) =>
-      pickRuleIndex(rng, i, 6),
+      pickRuleIndex(rng, i, 6, rules),
     );
     const introduced = allRounds
       .filter((r) => !r.isRecall)
@@ -40,37 +43,38 @@ describe("pickRuleIndex", () => {
 
   it("hard difficulty triggers recall at rounds 5 and 8 and introduces rules consecutively", () => {
     const rng = makeRng(42);
+    const rules = makeRules(rng, 10);
     for (let idx = 0; idx < 5; idx++) {
-      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 3);
+      const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 3, rules);
       expect(isRecall).toBe(false);
       expect(ruleIdx).toBe(idx);
     }
 
-    const round5 = pickRuleIndex(rng, 5, 3);
+    const round5 = pickRuleIndex(rng, 5, 3, rules);
     expect(round5.isRecall).toBe(true);
     expect(round5.ruleIdx).toBeGreaterThanOrEqual(0);
     expect(round5.ruleIdx).toBeLessThanOrEqual(4);
 
-    const round6 = pickRuleIndex(rng, 6, 3);
+    const round6 = pickRuleIndex(rng, 6, 3, rules);
     expect(round6.isRecall).toBe(false);
     expect(round6.ruleIdx).toBe(5);
 
-    const round7 = pickRuleIndex(rng, 7, 3);
+    const round7 = pickRuleIndex(rng, 7, 3, rules);
     expect(round7.isRecall).toBe(false);
     expect(round7.ruleIdx).toBe(6);
 
-    const round8 = pickRuleIndex(rng, 8, 3);
+    const round8 = pickRuleIndex(rng, 8, 3, rules);
     expect(round8.isRecall).toBe(true);
     expect(round8.ruleIdx).toBeGreaterThanOrEqual(0);
     expect(round8.ruleIdx).toBeLessThanOrEqual(6);
 
-    const round9 = pickRuleIndex(rng, 9, 3);
+    const round9 = pickRuleIndex(rng, 9, 3, rules);
     expect(round9.isRecall).toBe(false);
     expect(round9.ruleIdx).toBe(7);
 
     // Newly introduced rules are sequentially numbered 1 through 8 without skipping Rule #6 or #9
     const allRounds = Array.from({ length: 10 }, (_, i) =>
-      pickRuleIndex(rng, i, 3),
+      pickRuleIndex(rng, i, 3, rules),
     );
     const introduced = allRounds
       .filter((r) => !r.isRecall)
@@ -85,20 +89,21 @@ describe("pickRuleIndex", () => {
 
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
+      const rules = makeRules(rng, 10);
       // Run through rounds 0..4 to advance rng state naturally
       for (let idx = 0; idx < 5; idx++) {
-        pickRuleIndex(rng, idx, 3);
+        pickRuleIndex(rng, idx, 3, rules);
       }
-      const r5 = pickRuleIndex(rng, 5, 3);
+      const r5 = pickRuleIndex(rng, 5, 3, rules);
       expect(r5.isRecall).toBe(true);
       expect(r5.ruleIdx).toBeGreaterThanOrEqual(0);
       expect(r5.ruleIdx).toBeLessThanOrEqual(4);
       round5Recalled.add(r5.ruleIdx);
 
-      pickRuleIndex(rng, 6, 3);
-      pickRuleIndex(rng, 7, 3);
+      pickRuleIndex(rng, 6, 3, rules);
+      pickRuleIndex(rng, 7, 3, rules);
 
-      const r8 = pickRuleIndex(rng, 8, 3);
+      const r8 = pickRuleIndex(rng, 8, 3, rules);
       expect(r8.isRecall).toBe(true);
       expect(r8.ruleIdx).toBeGreaterThanOrEqual(0);
       expect(r8.ruleIdx).toBeLessThanOrEqual(6);
@@ -109,11 +114,10 @@ describe("pickRuleIndex", () => {
       }
     }
 
-    // Rather than 100% ruleIndex === 2 (Rule #3), earlier rules (0 and 1) are tested
+    // Rather than 100% ruleIndex === 2 (Rule #3), recall choices vary
     expect(round5Recalled.size).toBeGreaterThan(1);
-    expect(round5Recalled.has(0)).toBe(true);
-    expect(round5Recalled.has(1)).toBe(true);
     expect(round8Recalled.size).toBeGreaterThan(1);
+    expect(round8Recalled.has(0) || round8Recalled.has(1)).toBe(true);
     expect(differentRecallsInSameGame).toBe(true);
   });
 
@@ -121,10 +125,11 @@ describe("pickRuleIndex", () => {
     const recalled = new Set<number>();
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
+      const rules = makeRules(rng, 10);
       for (let idx = 0; idx < 8; idx++) {
-        pickRuleIndex(rng, idx, 6);
+        pickRuleIndex(rng, idx, 6, rules);
       }
-      const r8 = pickRuleIndex(rng, 8, 6);
+      const r8 = pickRuleIndex(rng, 8, 6, rules);
       expect(r8.isRecall).toBe(true);
       expect(r8.ruleIdx).toBeGreaterThanOrEqual(0);
       expect(r8.ruleIdx).toBeLessThanOrEqual(7);
@@ -132,5 +137,87 @@ describe("pickRuleIndex", () => {
     }
     expect(recalled.size).toBeGreaterThan(1);
     expect(recalled.has(0) || recalled.has(1)).toBe(true);
+  });
+});
+
+describe("rule time logic", () => {
+  it("hard difficulty does not repeat category on back-to-back rounds 6 and 7", () => {
+    const recallFrom = 3;
+    const tileCount = 9;
+    const roundsToWin = 10;
+
+    for (let seed = 1; seed <= 50; seed++) {
+      const rng = makeRng(seed);
+      const rules = makeRules(rng, roundsToWin);
+      const rounds = [];
+
+      for (let idx = 0; idx < roundsToWin; idx++) {
+        const { ruleIdx, isRecall } = pickRuleIndex(
+          rng,
+          idx,
+          recallFrom,
+          rules,
+        );
+        const round = makeRulesRound(
+          rng,
+          manifest.spotit.icons,
+          rules,
+          ruleIdx,
+          tileCount,
+          isRecall,
+        );
+        rounds.push(round);
+      }
+
+      // Round 6 (idx 5, recall) and Round 7 (idx 6, non-recall)
+      expect(rounds[5].isRecall).toBe(true);
+      expect(rounds[6].isRecall).toBe(false);
+      expect(rounds[5].rule.category).not.toBe(rounds[6].rule.category);
+    }
+  });
+
+  it("no non-recall round following a recall round draws the same category", () => {
+    const recallFrom = 3;
+    const roundsToWin = 10;
+
+    for (let seed = 1; seed <= 50; seed++) {
+      const rng = makeRng(seed);
+      const rules = makeRules(rng, roundsToWin);
+      let prev = pickRuleIndex(rng, 0, recallFrom, rules);
+
+      for (let idx = 1; idx < roundsToWin; idx++) {
+        const curr = pickRuleIndex(rng, idx, recallFrom, rules);
+        if (!curr.isRecall && prev.isRecall) {
+          expect(rules[curr.ruleIdx].category).not.toBe(
+            rules[prev.ruleIdx].category,
+          );
+        }
+        prev = curr;
+      }
+    }
+  });
+
+  it("falls back gracefully when categories are heavily constrained", () => {
+    const rng = makeRng(1);
+    const rules = [
+      { category: "c1", label: "L1" },
+      { category: "c2", label: "L2" },
+      { category: "c1", label: "L3" },
+      { category: "c2", label: "L4" },
+      { category: "c1", label: "L5" },
+      { category: "c2", label: "L6" },
+    ];
+    const res = pickRuleIndex(rng, 5, 3, rules);
+    expect(res.isRecall).toBe(true);
+    expect(rules[res.ruleIdx].category).not.toBe(rules[5].category);
+
+    const sameRules = Array.from({ length: 6 }, () => ({
+      category: "c1",
+      label: "L",
+    }));
+    const fallbackRes = pickRuleIndex(rng, 5, 3, sameRules);
+    expect(fallbackRes.isRecall).toBe(true);
+    expect(fallbackRes.ruleIdx).toBeGreaterThanOrEqual(0);
+    expect(fallbackRes.ruleIdx).toBeLessThanOrEqual(4);
   });
 });

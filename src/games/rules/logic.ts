@@ -61,6 +61,7 @@ export function pickRuleIndex(
   rng: Rng,
   idx: number,
   recallFrom: number,
+  rules: Rule[],
 ): { ruleIdx: number; isRecall: boolean } {
   const isRecall = isRecallRound(idx, recallFrom);
   let recallCount = 0;
@@ -68,6 +69,23 @@ export function pickRuleIndex(
     if (isRecallRound(k, recallFrom)) recallCount++;
   }
   const introduced = idx - recallCount;
-  const ruleIdx = isRecall ? Math.floor(rng() * introduced) : introduced;
-  return { ruleIdx, isRecall };
+  if (!isRecall) {
+    return { ruleIdx: introduced, isRecall: false };
+  }
+
+  const pool = Array.from({ length: introduced }, (_, i) => i);
+  const nextCat = rules[introduced]?.category;
+  const prevCat = introduced > 0 ? rules[introduced - 1]?.category : undefined;
+  const filtered = pool.filter(
+    (i) => rules[i].category !== nextCat && rules[i].category !== prevCat,
+  );
+  const validPool =
+    filtered.length > 0
+      ? filtered
+      : pool.filter((i) => rules[i].category !== nextCat);
+  const ruleIdx =
+    validPool.length > 0
+      ? validPool[Math.floor(rng() * validPool.length)]
+      : Math.floor(rng() * introduced);
+  return { ruleIdx, isRecall: true };
 }
