@@ -197,6 +197,14 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
     setState((s) => selectItem(s, itemId));
   };
 
+  const onReplay = () => {
+    if (state.done) return;
+    lastAction.current = Date.now();
+    setHintSpot(null);
+    sfx.tap();
+    say(roomText(room, 'intro', lang));
+  };
+
   return (
     <GameShell
       title={room.nameT?.[lang] ?? room.name}
@@ -204,7 +212,26 @@ export function EscapeGame({ onHome, sceneId, onPickScene, onBackToPicker, lang 
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
-      right={<BetaPill testID="escape-beta" lang={lang} />}
+      right={
+        <View style={styles.headerRight}>
+          <Pressable
+            testID="escape-replay"
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, 'spell.hearAgain')}
+            disabled={state.done}
+            onPress={onReplay}
+            style={({ pressed }) => [
+              styles.replayBtn,
+              shadows.soft,
+              state.done && styles.replayBtnDisabled,
+              pressed && !state.done && styles.pressed,
+            ]}
+          >
+            <Text style={styles.replayText}>🔊</Text>
+          </Pressable>
+          <BetaPill testID="escape-beta" lang={lang} />
+        </View>
+      }
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View
@@ -666,6 +693,18 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
 // BETA pill now shared — see src/components/BetaPill.tsx.
 
 const styles = StyleSheet.create({
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  replayBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  replayBtnDisabled: { opacity: 0.4 },
+  replayText: { fontSize: 22 },
+  pressed: { opacity: 0.7, transform: [{ scale: 0.94 }] },
   wrap: { alignItems: 'center', paddingBottom: 20, gap: 12 },
   frame: {
     borderRadius: 22,
