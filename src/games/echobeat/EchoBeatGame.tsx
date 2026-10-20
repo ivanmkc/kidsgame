@@ -24,7 +24,10 @@ import {
   roundsToWin,
   checkEcho,
   EchoBeatRound,
+  EchoBeatPhase,
   echoBeatLayout,
+  canTap,
+  evaluationDelayMs,
 } from "./logic";
 
 interface Props {
@@ -45,12 +48,13 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     makeEchoBeatRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
+  const [phase, setPhase] = useState<EchoBeatPhase>("listen");
   const [flash, setFlash] = useState<number | null>(null);
-  const [tapTimes, setTapTimes] = useState<number[]>([]);
   const [tapCount, setTapCount] = useState(0);
   const [result, setResult] = useState<"good" | "bad" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
+  const tapTimesRef = useRef<number[]>([]);
+  const tapCountRef = useRef(0);
   const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -92,7 +96,8 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!won) {
-      setTapTimes([]);
+      tapTimesRef.current = [];
+      tapCountRef.current = 0;
       setTapCount(0);
       setResult(null);
       playDemo(round);
@@ -104,11 +109,9 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (phase !== "tap" || tapCount === 0) return;
-    if (resultTimer.current) clearTimeout(resultTimer.current);
-    resultTimer.current = setTimeout(() => {
-      const res = checkEcho(round, tapTimes, difficulty);
+  const evaluate = useCallback(
+    (times: number[]) => {
+      const res = checkEcho(round, times, difficulty);
       if (res.countCorrect && res.timingCorrect) {
         sfx.good();
         setSparkKey((k) => k + 1);
@@ -124,24 +127,37 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         sfx.wrong();
         setResult("bad");
         resultTimer.current = setTimeout(() => {
-          setTapTimes([]);
+          tapTimesRef.current = [];
+          tapCountRef.current = 0;
           setTapCount(0);
           setResult(null);
           playDemo(round);
         }, 1000);
       }
-    }, 1200);
-    return () => {
-      if (resultTimer.current) clearTimeout(resultTimer.current);
-    };
-  }, [tapCount]); // eslint-disable-line react-hooks/exhaustive-deps
+    },
+    [difficulty, playDemo, round, score, total],
+  );
 
   const onTap = () => {
-    if (won || phase !== "tap" || result !== null) return;
+    if (!canTap(round, tapCountRef.current, phase, won, result)) return;
     playDrum();
     const now = performance.now();
-    setTapTimes((prev) => [...prev, now]);
-    setTapCount((c) => c + 1);
+    tapTimesRef.current.push(now);
+    tapCountRef.current += 1;
+    const nextTimes = [...tapTimesRef.current];
+    const nextCount = tapCountRef.current;
+    setTapCount(nextCount);
+
+    if (resultTimer.current) clearTimeout(resultTimer.current);
+
+    const delay = evaluationDelayMs(round, nextCount);
+    if (delay === 0) {
+      evaluate(nextTimes);
+    } else {
+      resultTimer.current = setTimeout(() => {
+        evaluate(tapTimesRef.current);
+      }, delay);
+    }
   };
 
   const reset = () => {
@@ -150,7 +166,8 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
-    setTapTimes([]);
+    tapTimesRef.current = [];
+    tapCountRef.current = 0;
     setTapCount(0);
     setResult(null);
     setRound(makeEchoBeatRound(rngRef.current, difficulty));
@@ -221,6 +238,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1, 1.06],
   });
 
+  const canTapDrum = canTap(round, tapCount, phase, won, result);
   const tapDots = [];
   const expectedHits = round.gaps.length + 1;
   for (let i = 0; i < expectedHits; i++) {
@@ -290,13 +308,15 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         )}
         <Animated.View
           style={
-            phase === "tap" ? { transform: [{ scale: drumScale }] } : undefined
+            phase === "tap" && canTapDrum
+              ? { transform: [{ scale: drumScale }] }
+              : undefined
           }
         >
           <Pressable
             onPress={onTap}
             testID="echobeat-drum"
-            disabled={phase !== "tap" || result !== null}
+            disabled={!canTapDrum}
             style={({ pressed }) => [
               styles.drum,
               { width: drumSize, height: drumSize, borderRadius: drumSize / 2 },
@@ -304,7 +324,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
               phase === "listen" && flash === null && styles.drumDimmed,
               flash !== null && styles.drumFlash,
               flash !== null && shadows.glowGold,
-              phase === "tap" && shadows.glowGold,
+              canTapDrum && shadows.glowGold,
               pressed && styles.drumPressed,
             ]}
           >
