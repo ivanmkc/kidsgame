@@ -8,7 +8,7 @@ import { stopNarration } from './sound';
 
 const isWeb = Platform.OS === 'web' && typeof window !== 'undefined';
 
-function readHash(): string {
+export function readHash(): string {
   if (!isWeb) return 'players';
   const h = window.location.hash.replace(/^#\/?/, '');
   return h || 'players';
