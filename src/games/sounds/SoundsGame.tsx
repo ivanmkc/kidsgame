@@ -5,13 +5,13 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
+import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sayThen, saySequence, sfx } from '../../sound';
-import { SoundsRound, makeSoundsRound, settingsForSounds } from './logic';
+import { SoundsRound, makeSoundsRound, resolveSoundsPrompts, settingsForSounds } from './logic';
 import { useWinLine } from '../winlines';
 
 interface Props {
@@ -35,18 +35,15 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, lang === 'en' ? 'win.sounds' : 'win.soundsWords'));
-  // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
-  const langMounted = useRef(false);
-  useEffect(() => {
-    if (!langMounted.current) { langMounted.current = true; return; }
-    setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount));
-  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  const { isValid } = useLangEpoch(lang);
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
 
+  const prompts = resolveSoundsPrompts(round.target, lang);
+
   useEffect(() => {
-    if (!won) saySequence(round.promptLines);
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!won) saySequence(prompts.promptLines);
+  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
     if (won) return;
@@ -56,7 +53,8 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       // Wait for the confirmation chime to finish before advancing — otherwise
       // the next round's prompt say() cancels the celebration mid-word.
       const nextIdx = roundIdx + 1;
-      sayThen(round.confirmLines, () => {
+      sayThen(prompts.confirmLines, () => {
+        if (!isValid()) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount, round.tiles[i].icon));
@@ -66,7 +64,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       sfx.wrong();
       setWrongIdx(i);
       setTimeout(() => setWrongIdx((w) => (w === i ? null : w)), 450);
-      saySequence(round.promptLines);
+      saySequence(prompts.promptLines);
     }
   };
 
@@ -102,8 +100,8 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     >
       <View style={styles.board}>
         <View style={[styles.prompt, shadows.soft]} testID={`sounds-prompt-${round.targetIdx}`}>
-          <Text style={styles.promptText}>{round.displayPrompt}</Text>
-          {round.caption ? <Text style={styles.caption}>{round.caption}</Text> : null}
+          <Text style={styles.promptText}>{prompts.displayPrompt}</Text>
+          {prompts.caption ? <Text style={styles.caption}>{prompts.caption}</Text> : null}
         </View>
         <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
           {round.tiles.map((t, i) => (

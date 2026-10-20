@@ -13,14 +13,11 @@ export interface SoundsTile {
 }
 
 export interface SoundsRound {
+  target: WordEntry;
   targetIdx: number;
   lang: Lang;
   tiles: SoundsTile[];
   answerIdx: number;
-  promptLines: string[];   // spoken via saySequence
-  displayPrompt: string;   // shown on the prompt card
-  caption?: string;        // romanization for parents (non-EN)
-  confirmLines: string[];  // spoken after a correct tap
 }
 
 export interface SoundsSettings {
@@ -43,6 +40,34 @@ const ASK: Record<Lang, string> = {
 
 function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
+}
+
+export interface SoundsPrompts {
+  promptLines: string[];
+  displayPrompt: string;
+  caption?: string;
+  confirmLines: string[];
+}
+
+export function resolveSoundsPrompts(target: WordEntry, lang: Lang): SoundsPrompts {
+  if (lang === 'en') {
+    const promptLines = [`Which one starts with ${target.sound}?`];
+    return {
+      promptLines,
+      displayPrompt: promptLines[0],
+      confirmLines: [
+        `${capitalize(target.en)}!`,
+        `${capitalize(target.en)} starts with ${target.sound}!`,
+      ],
+    };
+  }
+  const w = wordFor(target, lang);
+  return {
+    promptLines: [ASK[lang], w.text],
+    displayPrompt: `${ASK[lang]} ${w.text}`,
+    confirmLines: [`${w.text}！`, `${capitalize(target.en)}!`],
+    caption: w.roman,
+  };
 }
 
 // Filter the master WORDS list to entries whose icon is actually shipped —
@@ -94,28 +119,12 @@ export function makeSoundsRound(
     isAnswer: w.icon === target.icon,
   }));
 
-  let promptLines: string[];
-  let displayPrompt: string;
-  let confirmLines: string[];
-  let caption: string | undefined;
-  if (lang === 'en') {
-    promptLines = [`Which one starts with ${target.sound}?`];
-    displayPrompt = promptLines[0];
-    confirmLines = [
-      `${capitalize(target.en)}!`,
-      `${capitalize(target.en)} starts with ${target.sound}!`,
-    ];
-  } else {
-    const w = wordFor(target, lang);
-    promptLines = [ASK[lang], w.text];
-    displayPrompt = `${ASK[lang]} ${w.text}`;
-    confirmLines = [`${w.text}！`, `${capitalize(target.en)}!`];
-    caption = w.roman;
-  }
   return {
-    targetIdx: pool.indexOf(target), lang, tiles,
+    target,
+    targetIdx: pool.indexOf(target),
+    lang,
+    tiles,
     answerIdx: tiles.findIndex((t) => t.isAnswer),
-    promptLines, displayPrompt, caption, confirmLines,
   };
 }
 
