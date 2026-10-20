@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { HAN_NUMERALS, LANGS, type Lang, loadLang, nextLang, numberWord, saveLang } from '../lang';
-
 type FakePlatform = Partial<typeof Platform>;
 type FakeStorage = Pick<Storage, 'getItem' | 'setItem'>;
 type FakeWindow = Omit<Partial<Window>, 'localStorage'> & {
@@ -142,3 +141,4 @@ describe('lang', () => {
     });
   });
 });
+
