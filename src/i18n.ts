@@ -243,6 +243,7 @@ export type UIKey =
   | 'rules.remind'
   | 'rules.progress'
   | 'puzzle.peek'
+  | 'puzzle.peek.a11y'
   | 'puzzle.hint'
   | 'sticker.clear'
   | 'sticker.hint'
@@ -548,6 +549,7 @@ export const EN: Table = {
   'rules.remind': '💡 Remind me!',
   'rules.progress': 'Found {found} of {total}',
   'puzzle.peek': '🖼️ Peek',
+  'puzzle.peek.a11y': 'Peek at the finished picture',
   'puzzle.hint': 'Tap one piece, then tap another to swap them!',
   'sticker.clear': '🧹 Clear',
   'sticker.hint': 'Drag a sticker in · tap it to wiggle · use +/− to resize · double-tap to pop!',
