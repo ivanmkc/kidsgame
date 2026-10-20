@@ -111,8 +111,11 @@ export function generateRound(
 /**
  * Initialize game state with a valid round from Level 1.
  */
-export function initGameState(rng: Rng = Math.random): GameState {
-  const config = getLevelConfig(1);
+export function initGameState(
+  rng: Rng = Math.random,
+  lang: Lang = "en",
+): GameState {
+  const config = getLevelConfig(1, lang);
   return {
     currentRound: generateRound(
       rng,
@@ -144,6 +147,7 @@ export function updateGameState(
   state: GameState,
   guessIcon: string,
   rng: Rng = Math.random,
+  lang: Lang = "en",
 ): GameState {
   const isCorrect = evaluateGuess(state.currentRound, guessIcon);
   if (isCorrect) {
@@ -155,7 +159,7 @@ export function updateGameState(
       nextLevel = 2;
     }
 
-    const config = getLevelConfig(nextLevel);
+    const config = getLevelConfig(nextLevel, lang);
 
     return {
       ...state,

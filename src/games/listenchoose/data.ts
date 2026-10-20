@@ -1,6 +1,6 @@
+import { Lang } from "../../lang";
 import { RHYME_WORDS, WORDS } from "../../words";
 import levels from "./levels.json";
-
 export interface Word {
   icon: string;
   en: string;
@@ -45,24 +45,37 @@ export interface LevelConfig {
   prioritizeRhymes: boolean;
 }
 
-export function getLevelConfig(level: number): LevelConfig {
+export function getLevelConfig(level: number, lang: Lang = "en"): LevelConfig {
+  let pool: Word[];
+  if (level >= 3) {
+    pool = Array.from(
+      new Set([...LEVEL_1_WORDS, ...LEVEL_2_WORDS, ...LEVEL_3_WORDS]),
+    );
+  } else if (level === 2) {
+    pool = Array.from(new Set([...LEVEL_1_WORDS, ...LEVEL_2_WORDS]));
+  } else {
+    pool = LEVEL_1_WORDS;
+  }
+
+  if (lang !== "en") {
+    pool = pool.filter((w) => !!w[lang as keyof Word]);
+  }
+
   if (level >= 3) {
     return {
-      words: Array.from(
-        new Set([...LEVEL_1_WORDS, ...LEVEL_2_WORDS, ...LEVEL_3_WORDS]),
-      ),
+      words: pool,
       numChoices: 4,
-      prioritizeRhymes: true,
+      prioritizeRhymes: lang === "en",
     };
   } else if (level === 2) {
     return {
-      words: Array.from(new Set([...LEVEL_1_WORDS, ...LEVEL_2_WORDS])),
+      words: pool,
       numChoices: 3,
       prioritizeRhymes: false,
     };
   }
   return {
-    words: LEVEL_1_WORDS,
+    words: pool,
     numChoices: 2,
     prioritizeRhymes: false,
   };
