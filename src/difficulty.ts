@@ -63,7 +63,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     spotitRounds: 14, memoryPairs: 8,
     puzzleCols: 4, puzzleRows: 3,
     diffHint: false, timer: true,
-    diffDraw: 4, hiddenDraw: 6,
+    diffDraw: 4, hiddenDraw: 8,
     rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
     duelWins: 7, duelHintSecs: 5,
   },
