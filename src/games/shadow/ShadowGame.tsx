@@ -44,10 +44,16 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   useSay(shadowPrompt(lang));
   useEffect(() => { if (won) say(t(lang, 'win.shadow')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
+  const roundClosedRef = useRef(false);
+
+  useEffect(() => {
+    roundClosedRef.current = false;
+  }, [round]);
 
   const onPick = (icon: string) => {
-    if (won) return;
+    if (won || roundClosedRef.current) return;
     if (icon === round.answer) {
+      roundClosedRef.current = true;
       sfx.good();
       setCelebrate((c) => c + 1);
       const next = score + 1;
@@ -65,6 +71,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
 
   const reset = () => {
     setTimerKey((k) => k + 1);
+    roundClosedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrong(null);
