@@ -1,21 +1,21 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import React from "react";
+import { describe, expect, it, vi, afterEach } from "vitest";
 import {
   render,
   screen,
   fireEvent,
   act,
   cleanup,
-} from '@testing-library/react';
-import { BellsGame } from './BellsGame';
-import * as music from '../../music';
-import { sfx } from '../../sound';
-import { t } from '../../i18n';
-import { makeBellsRound } from './logic';
-import { makeRng } from '../../rng';
+} from "@testing-library/react";
+import { BellsGame } from "./BellsGame";
+import * as music from "../../music";
+import { sfx } from "../../sound";
+import { t } from "../../i18n";
+import { makeBellsRound } from "./logic";
+import { makeRng } from "../../rng";
 
-describe('BellsGame', () => {
+describe("BellsGame", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
@@ -280,27 +280,29 @@ describe('BellsGame', () => {
       vi.advanceTimersByTime(5000);
     });
 
-    const bell1 = screen.getByTestId('bell-1');
-    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+    const bell1 = screen.getByTestId("bell-1");
+    expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
 
     fireEvent.click(bell1);
     // Active border must contrast with Bell 1 base color (#FFC24B)
-    expect(bell1.style.borderColor).toBe('rgba(255, 253, 247, 1.00)');
-    expect(bell1.style.borderColor).not.toBe('rgba(255, 194, 75, 1.00)');
+    expect(bell1.style.borderColor).toBe("rgba(255, 253, 247, 1.00)");
+    expect(bell1.style.borderColor).not.toBe("rgba(255, 194, 75, 1.00)");
 
     act(() => {
       vi.advanceTimersByTime(300);
     });
-    expect(bell1.style.borderColor).toBe('rgba(255, 194, 75, 1.00)');
+    expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
 
     vi.useRealTimers();
   });
 
-  it('wrong tap immediately triggers wrong feedback without waiting for sequence end', () => {
+  it("wrong tap immediately triggers wrong feedback without waiting for sequence end", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [0, 0, 0] for medium
-    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
-    const wrongSpy = vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0, 0] for medium
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation(() => {});
+    const wrongSpy = vi.spyOn(sfx, "wrong").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
 
@@ -310,7 +312,7 @@ describe('BellsGame', () => {
     playNoteSpy.mockClear();
 
     // Tap wrong bell on the very first move of a 3-bell sequence
-    const round = makeBellsRound(makeRng(0), 'medium');
+    const round = makeBellsRound(makeRng(0), "medium");
     const wrongIdx = (round.sequence[0] + 1) % round.bells.length;
     const bellWrong = screen.getByTestId(`bell-${wrongIdx}`);
     fireEvent.click(bellWrong);
@@ -331,15 +333,17 @@ describe('BellsGame', () => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(screen.getByText('Your turn!')).toBeTruthy();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
     vi.useRealTimers();
   });
 
-  it('correct sequence triggers success sound and advances round', () => {
+  it("correct sequence triggers success sound and advances round", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence will be [0, 0] for easy
-    const playNoteSpy = vi.spyOn(music, 'playNote').mockImplementation(() => {});
-    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0] for easy
+    const playNoteSpy = vi
+      .spyOn(music, "playNote")
+      .mockImplementation(() => {});
+    const goodSpy = vi.spyOn(sfx, "good").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -348,7 +352,7 @@ describe('BellsGame', () => {
     });
     playNoteSpy.mockClear();
 
-    const bell0 = screen.getByTestId('bell-0');
+    const bell0 = screen.getByTestId("bell-0");
     fireEvent.click(bell0);
     fireEvent.click(bell0);
 
@@ -361,12 +365,12 @@ describe('BellsGame', () => {
     vi.useRealTimers();
   });
 
-  it('rapid taps following a wrong tap in the same tick are blocked by flashingRef', () => {
+  it("rapid taps following a wrong tap in the same tick are blocked by flashingRef", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(66 / 1e9); // Sequence will be [0, 0, 0] for medium
-    vi.spyOn(music, 'playNote').mockImplementation(() => {});
-    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
-    const wrongSpy = vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(66 / 1e9); // Sequence will be [0, 0, 0] for medium
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+    const goodSpy = vi.spyOn(sfx, "good").mockImplementation(() => {});
+    const wrongSpy = vi.spyOn(sfx, "wrong").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
 
@@ -374,8 +378,8 @@ describe('BellsGame', () => {
       vi.advanceTimersByTime(5000);
     });
 
-    const bell0 = screen.getByTestId('bell-0');
-    const bell1 = screen.getByTestId('bell-1');
+    const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
 
     // Click 1, 0, 0 in a single act() — wrong first tap must block subsequent taps
     act(() => {
@@ -386,21 +390,68 @@ describe('BellsGame', () => {
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
     expect(goodSpy).not.toHaveBeenCalled();
-    expect(screen.getByTestId('bells-score').textContent).toContain('0/6');
+    expect(screen.getByTestId("bells-score").textContent).toContain("0/6");
 
     vi.useRealTimers();
   });
 
-  it('renders tapDots that fill in visually and removes text fractions', () => {
+  it("rapid taps keep the most recent bell glowing for a full 250ms", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0); // Sequence [0, 0] for easy
-    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
+
+    act(() => {
+      fireEvent.click(bell0);
+    });
+    expect(bell0.style.borderColor).toBe("rgba(255, 253, 247, 1.00)");
+
+    // Tap bell 1 150ms later (< 250ms)
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    act(() => {
+      fireEvent.click(bell1);
+    });
+    expect(bell1.style.borderColor).toBe("rgba(255, 253, 247, 1.00)");
+
+    // Advance 100ms: 250ms from first tap, 100ms from second tap
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    // Bell 1 must still be glowing; earlier timeout must not have prematurely cleared it
+    expect(bell1.style.borderColor).toBe("rgba(255, 253, 247, 1.00)");
+
+    // Advance another 150ms: now 250ms from second tap
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+
+    // Now bell 1 glow has expired and reverted to its base color
+    expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
+
+    vi.useRealTimers();
+  });
+
+  it("renders tapDots that fill in visually and removes text fractions", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence [0, 0] for easy
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     // In listen phase, no tap dots are rendered
-    expect(screen.queryByTestId('tap-dot-row')).toBeNull();
-    expect(screen.queryByTestId('tap-dot-0')).toBeNull();
+    expect(screen.queryByTestId("tap-dot-row")).toBeNull();
+    expect(screen.queryByTestId("tap-dot-0")).toBeNull();
 
     // Advance through demo into play phase
     act(() => {
@@ -408,36 +459,36 @@ describe('BellsGame', () => {
     });
 
     // Renders a tapDot for each required tap in the sequence (2 for easy)
-    const dotRow = screen.getByTestId('tap-dot-row');
+    const dotRow = screen.getByTestId("tap-dot-row");
     expect(dotRow).toBeTruthy();
-    const dot0 = screen.getByTestId('tap-dot-0');
-    const dot1 = screen.getByTestId('tap-dot-1');
-    expect(screen.queryByTestId('tap-dot-2')).toBeNull();
+    const dot0 = screen.getByTestId("tap-dot-0");
+    const dot1 = screen.getByTestId("tap-dot-1");
+    expect(screen.queryByTestId("tap-dot-2")).toBeNull();
 
     // Both dots start empty
     const emptyClass = dot0.className;
     expect(dot1.className).toBe(emptyClass);
 
     // Text fractions are completely removed from status
-    const statusCard = screen.getByTestId('bells-status');
-    expect(statusCard.textContent).toBe('👆Your turn!');
+    const statusCard = screen.getByTestId("bells-status");
+    expect(statusCard.textContent).toBe("👆Your turn!");
     expect(statusCard.textContent).not.toMatch(/\d+\/\d+/);
 
     // Tap first bell: first dot fills visually, second stays empty
-    const bell0 = screen.getByTestId('bell-0');
+    const bell0 = screen.getByTestId("bell-0");
     fireEvent.click(bell0);
 
     expect(dot0.className).not.toBe(emptyClass);
     expect(dot1.className).toBe(emptyClass);
-    expect(statusCard.textContent).toBe('👆Your turn!');
+    expect(statusCard.textContent).toBe("👆Your turn!");
 
     vi.useRealTimers();
   });
 
-  it('renders tapDot count matching sequence length for medium difficulty', () => {
+  it("renders tapDot count matching sequence length for medium difficulty", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0);
-    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
 
@@ -446,10 +497,10 @@ describe('BellsGame', () => {
     });
 
     // Medium sequence length is 3
-    expect(screen.getByTestId('tap-dot-0')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-1')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-2')).toBeTruthy();
-    expect(screen.queryByTestId('tap-dot-3')).toBeNull();
+    expect(screen.getByTestId("tap-dot-0")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-1")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-2")).toBeTruthy();
+    expect(screen.queryByTestId("tap-dot-3")).toBeNull();
 
     vi.useRealTimers();
   });
