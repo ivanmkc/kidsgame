@@ -228,4 +228,64 @@ describe("FastSlowGame UI interaction", () => {
 
     vi.useRealTimers();
   });
+
+  it("delays WinOverlay mount on final winning round by 1000ms celebration", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Play 7 rounds to reach the final round (easy requires 8 rounds)
+    for (let i = 0; i < 7; i++) {
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      const calls = vi.mocked(playSequence).mock.calls;
+      const bpm = calls[calls.length - 1][1] as number;
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const btn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
+      fireEvent.click(btn);
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+    }
+
+    // Round 8: listen phase finishes, buttons ready
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const winningBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+
+    vi.mocked(sfx.good).mockClear();
+    vi.mocked(sfx.win).mockClear();
+
+    // Tap winning answer
+    fireEvent.click(winningBtn);
+
+    // Immediate tick: sfx.good fires, celebration is active, but WinOverlay is deferred
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(sfx.win).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 999ms: WinOverlay is still not mounted
+    act(() => {
+      vi.advanceTimersByTime(999);
+    });
+    expect(sfx.win).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 1000ms: WinOverlay mounts and sfx.win fires
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(sfx.win).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
 });
