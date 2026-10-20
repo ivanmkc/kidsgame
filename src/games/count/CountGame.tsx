@@ -13,7 +13,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord } from "../../lang";
+import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
@@ -58,10 +58,31 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<"count" | "quiz">("count");
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
+  const lockedRef = useRef(false);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   useWinLine(won, t(lang, "win.count"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  const { isValid } = useLangEpoch(lang);
+
+  // Lang switch: rebuild the live round so prompt/speech re-skin immediately.
+  const langMounted = useRef(false);
+  useEffect(() => {
+    if (!langMounted.current) {
+      langMounted.current = true;
+      return;
+    }
+    lockedRef.current = false;
+    const nr = makeCountRound(rngRef.current, difficulty);
+    const nextTapped = Array.from({ length: nr.n }, () => false);
+    tappedRef.current = nextTapped;
+    setRound(nr);
+    setRoundNo((r) => r + 1);
+    setTapped(nextTapped);
+    setPhase("count");
+    setWrongPick(null);
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
@@ -71,7 +92,19 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     } else if (phase === "count") {
       say(t(lang, "shell.count.sub"));
     }
-  }, [round, phase, lang, won]);
+  }, [round, phase, won]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const guardedSayThen = (lines: string[], cb: () => void) => {
+    sayThen(lines, () => {
+      if (isValid()) cb();
+    });
+  };
+
+  const guardedTimeout = (fn: () => void, ms: number) => {
+    return globalThis.setTimeout(() => {
+      if (isValid()) fn();
+    }, ms);
+  };
 
   const tapCritter = (i: number) => {
     if (won || phase !== "count") return;
@@ -86,13 +119,11 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       // Chain the phase switch on speech completion so the "How many?"
       // prompt (fired by the phase-change useEffect) doesn't cut the last
       // count word mid-syllable.
-      sayThen([line], () => setPhase("quiz"));
+      guardedSayThen([line], () => setPhase("quiz"));
     } else {
       say(line);
     }
   };
-
-  const lockedRef = useRef(false);
 
   const pickAnswer = (v: number) => {
     applyPickAnswer(
@@ -109,8 +140,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       {
         sfx,
         say,
-        sayThen,
-        setTimeout: globalThis.setTimeout,
+        sayThen: guardedSayThen,
+        setTimeout: guardedTimeout,
         makeNextRound: () => makeCountRound(rngRef.current, difficulty),
         setScore,
         setRoundNo,
