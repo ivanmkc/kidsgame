@@ -11,6 +11,7 @@ import {
 import { SPOTIT_ICONS, RHYME_SPRITES } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { SparkleBurst } from "../../components/Sparkles";
+import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
 import { t } from "../../i18n";
@@ -24,6 +25,7 @@ import {
   initGameState,
   updateGameState,
 } from "./logic";
+import { useWinLine } from "../winlines";
 
 interface Props {
   onHome: () => void;
@@ -50,6 +52,8 @@ export function ListenChooseGame({
   const [celebrate, setCelebrate] = useState(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wobbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useWinLine(state.won, t(lang, "win.soundsWords"));
 
   useEffect(() => {
     return () => {
@@ -87,8 +91,10 @@ export function ListenChooseGame({
           lang,
         );
         setGameState(next);
-        const nextWord = getWordText(next.currentRound.target, lang);
-        sayThen([nextWord], () => {});
+        if (!next.won) {
+          const nextWord = getWordText(next.currentRound.target, lang);
+          sayThen([nextWord], () => {});
+        }
       }, 800);
     } else {
       sfx.wrong();
@@ -225,6 +231,17 @@ export function ListenChooseGame({
           </>
         )}
       </View>
+      <WinOverlay
+        visible={state.won}
+        message={t(lang, "win.soundsWords")}
+        onNext={() => {
+          const next = initGameState(rngRef.current, difficulty, lang);
+          setGameState(next);
+          sayThen([getWordText(next.currentRound.target, lang)], () => {});
+        }}
+        onHome={onHome}
+        lang={lang}
+      />
     </GameShell>
   );
 }

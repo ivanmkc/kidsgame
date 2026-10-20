@@ -12,7 +12,12 @@ import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { buildGameSections, WORD_CARDS } from "../../../menuCards";
 import { ListenChooseGame } from "../ListenChooseGame";
-import { LEVEL_1_WORDS, Word } from "../data";
+import {
+  LEVEL_1_WORDS,
+  LEVEL_2_WORDS,
+  LEVEL_3_WORDS,
+  Word,
+} from "../data";
 import { PressableProps } from "react-native";
 
 type FakePressableProps = Partial<PressableProps>;
@@ -75,8 +80,9 @@ describe("ListenChooseGame", () => {
     distractorWord: Word;
   } {
     const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
-    const targetWord = LEVEL_1_WORDS.find((w) => w.en === targetText)!;
-    const visibleWords = LEVEL_1_WORDS.filter((w) =>
+    const allWords = [...LEVEL_1_WORDS, ...LEVEL_2_WORDS, ...LEVEL_3_WORDS];
+    const targetWord = allWords.find((w) => w.en === targetText)!;
+    const visibleWords = allWords.filter((w) =>
       screen.queryByTestId(`choice-${w.icon}`),
     );
     const distractorWord = visibleWords.find(
@@ -345,5 +351,53 @@ describe("ListenChooseGame", () => {
         vi.advanceTimersByTime(800);
       });
     }
+  });
+
+  it("wins the game and shows WinOverlay when streak reaches 30", () => {
+    vi.useFakeTimers();
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    for (let i = 0; i < 30; i++) {
+      const { targetBtn } = getRoundChoices();
+      fireEvent.click(targetBtn);
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+  });
+
+  it("resets and speaks next word in chosen language when Play Again is tapped", () => {
+    vi.useFakeTimers();
+    render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // Complete 30 rounds
+    for (let i = 0; i < 30; i++) {
+      const caption = screen.getByTestId("listenchoose-caption");
+      const targetText = caption.textContent;
+      const correctBtn = screen.getByRole("button", { name: targetText! });
+      fireEvent.click(correctBtn);
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+
+    // Arm WinOverlay buttons (600ms)
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    vi.mocked(sound.sayThen).mockClear();
+    fireEvent.click(screen.getByTestId("play-again"));
+
+    // Spoke new target word in Japanese
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
   });
 });
