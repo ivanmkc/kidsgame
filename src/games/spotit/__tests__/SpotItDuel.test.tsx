@@ -170,4 +170,29 @@ describe('SpotItDuel', () => {
     expect(htmlYue).toContain('搵共通 對戰');
     expect(htmlYue).toContain('各自搵你嗰張牌同中間牌一樣嗰個圖！');
   });
+
+  it('provides localized duel countdown prompts for all languages', () => {
+    expect(spotitLogic.duelCountdownPrompt('en')).toBe('Ready... Spot!');
+    expect(spotitLogic.duelCountdownPrompt('ja')).toBe('ようい... いっしょさがし！');
+    expect(spotitLogic.duelCountdownPrompt('cmn')).toBe('准备... 找共同！');
+    expect(spotitLogic.duelCountdownPrompt('yue')).toBe('準備... 搵共通！');
+  });
+
+  it('formats localized match recaps for all languages', () => {
+    expect(spotitLogic.duelRecapLine('en', 'Foxy', 'Bunny', 1)).toBe(
+      'Foxy wins! Bunny spotted 1 star. Great eyes, both of you!'
+    );
+    expect(spotitLogic.duelRecapLine('en', 'Foxy', 'Bunny', 2)).toBe(
+      'Foxy wins! Bunny spotted 2 stars. Great eyes, both of you!'
+    );
+    expect(spotitLogic.duelRecapLine('ja', 'Foxy', 'Bunny', 2)).toBe(
+      'Foxyのかち！ Bunnyは ほし2こ。ふたりとも よくみたね！'
+    );
+    expect(spotitLogic.duelRecapLine('cmn', 'Foxy', 'Bunny', 2)).toBe(
+      'Foxy赢啦！Bunny找到 2 颗星。你们眼力都真棒！'
+    );
+    expect(spotitLogic.duelRecapLine('yue', 'Foxy', 'Bunny', 2)).toBe(
+      'Foxy贏咗！Bunny搵到 2 粒星。兩個眼力都好勁！'
+    );
+  });
 });

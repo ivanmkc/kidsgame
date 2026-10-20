@@ -1,3 +1,4 @@
+import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
@@ -104,4 +105,38 @@ export function hintAfterMs(myScore: number, otherScore: number, baseSecs: numbe
   const deficit = otherScore - myScore;
   if (deficit < 2) return Infinity;
   return baseSecs * 1000;
+}
+
+/**
+ * Game-internal spoken narration prompts for Spot It Duel.
+ * Per src/i18n.ts lines 6-10 and docs/lang-audit.md, audio-only strings passed to
+ * say() belong in per-game logic modules rather than the UI translation table.
+ */
+export const DUEL_COUNTDOWN: Record<Lang, string> = {
+  en: 'Ready... Spot!',
+  ja: 'ようい... いっしょさがし！',
+  cmn: '准备... 找共同！',
+  yue: '準備... 搵共通！',
+};
+
+export function duelCountdownPrompt(lang: Lang): string {
+  return DUEL_COUNTDOWN[lang];
+}
+
+export function duelRecapLine(
+  lang: Lang,
+  winnerName: string,
+  loserName: string,
+  loserScore: number,
+): string {
+  if (lang === 'ja') {
+    return `${winnerName}のかち！ ${loserName}は ほし${loserScore}こ。ふたりとも よくみたね！`;
+  }
+  if (lang === 'cmn') {
+    return `${winnerName}赢啦！${loserName}找到 ${loserScore} 颗星。你们眼力都真棒！`;
+  }
+  if (lang === 'yue') {
+    return `${winnerName}贏咗！${loserName}搵到 ${loserScore} 粒星。兩個眼力都好勁！`;
+  }
+  return `${winnerName} wins! ${loserName} spotted ${loserScore} ${loserScore === 1 ? 'star' : 'stars'}. Great eyes, both of you!`;
 }

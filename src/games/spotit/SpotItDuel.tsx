@@ -10,7 +10,15 @@ import { makeRng } from '../../rng';
 import { say, sfx } from '../../sound';
 import { colors, fonts } from '../../theme';
 import { DealIn, Slot, SpotCard, layoutSlots } from './cards';
-import { DuelRound, buildDeck, dealDuelRound, hintAfterMs, leaderDealDelayMs } from './logic';
+import {
+  DuelRound,
+  buildDeck,
+  dealDuelRound,
+  duelCountdownPrompt,
+  duelRecapLine,
+  hintAfterMs,
+  leaderDealDelayMs,
+} from './logic';
 
 interface Props {
   onHome: () => void;
@@ -69,11 +77,11 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   // READY: 3-2-1 countdown, taps ignored until play.
   useEffect(() => {
     if (phase !== 'ready') return;
-    say('Ready... Spot!');
+    say(duelCountdownPrompt(lang));
     setCount(3);
     const iv = setInterval(() => setCount((c) => Math.max(0, c - 1)), 800);
     return () => clearInterval(iv);
-  }, [phase]);
+  }, [phase, lang]);
   useEffect(() => {
     if (phase === 'ready' && count === 0) {
       roundClosedRef.current = false;
@@ -102,7 +110,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
     const w = scores.a > scores.b ? MP_PLAYERS[0] : MP_PLAYERS[1];
     const l = scores.a > scores.b ? MP_PLAYERS[1] : MP_PLAYERS[0];
     const lScore = Math.min(scores.a, scores.b);
-    say(`${w.name} wins! ${l.name} spotted ${lScore} ${lScore === 1 ? 'star' : 'stars'}. Great eyes, both of you!`);
+    say(duelRecapLine(lang, w.name, l.name, lScore));
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redeal = () => {
@@ -249,7 +257,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
 
 function Zone({
   z, rotated, phase, count, card, center, ownSlots, sharedSlots, cardSize, roundKey,
-  onTap, wrongFlash, frozen, hintSymbol, won, score, total, landscape,
+  onTap, wrongFlash, frozen, hintSymbol, won, score, total, landscape: _landscape,
 }: {
   z: ZoneId;
   rotated: boolean;
@@ -327,7 +335,10 @@ function Zone({
       <StarPips player={ZONE_PLAYER[z]} score={score} total={total} testID={`duel-score-${z}`} />
       {phase === 'ready' ? (
         <View style={styles.countWrap} pointerEvents="none">
-          <Text style={styles.count} testID={z === 'a' ? 'duel-countdown' : undefined}>
+          <Text
+            style={styles.count}
+            testID={z === 'a' ? 'duel-countdown' : undefined}
+          >
             {count > 0 ? count : 'Spot!'}
           </Text>
         </View>
