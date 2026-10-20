@@ -57,11 +57,19 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"count" | "quiz">("count");
   const [wrongPick, setWrongPick] = useState<number | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   useWinLine(won, t(lang, "win.count"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  useEffect(
+    () => () => {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    },
+    [],
+  );
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
@@ -111,6 +119,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         say,
         sayThen,
         setTimeout: globalThis.setTimeout,
+        clearTimeout: globalThis.clearTimeout,
         makeNextRound: () => makeCountRound(rngRef.current, difficulty),
         setScore,
         setRoundNo,
@@ -121,11 +130,13 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         setTapped,
         setPhase,
         setWrongPick,
+        wrongTimer,
       },
     );
   };
 
   const reset = () => {
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
     setTimerKey((k) => k + 1);
     lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));

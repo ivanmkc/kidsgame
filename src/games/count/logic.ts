@@ -163,6 +163,7 @@ export interface PickDeps {
   say: (text: string) => void;
   sayThen: (lines: string[], cb: () => void) => void;
   setTimeout: (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
+  clearTimeout?: (id: ReturnType<typeof setTimeout>) => void;
   makeNextRound: () => CountRound;
   setScore: (s: number) => void;
   setLocked: (l: boolean) => void;
@@ -173,12 +174,17 @@ export interface PickDeps {
   setWrongPick: (
     w: number | null | ((prev: number | null) => number | null),
   ) => void;
+  wrongTimer?: { current: ReturnType<typeof setTimeout> | null };
 }
 
 export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
   if (state.won || state.phase !== "quiz" || state.locked) return;
 
   if (v === state.round.answer) {
+    if (deps.wrongTimer?.current) {
+      (deps.clearTimeout ?? globalThis.clearTimeout)(deps.wrongTimer.current);
+      deps.wrongTimer.current = null;
+    }
     deps.setLocked(true);
     deps.sfx.good();
     const nextScore = state.score + 1;
@@ -204,7 +210,13 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
     deps.sfx.wrong();
     deps.setWrongPick(v);
     deps.setTimeout(() => deps.setWrongPick((w) => (w === v ? null : w)), 450);
-    deps.setTimeout(() => deps.say(PROMPTS[state.lang]), 500);
+    if (deps.wrongTimer?.current) {
+      (deps.clearTimeout ?? globalThis.clearTimeout)(deps.wrongTimer.current);
+    }
+    const timer = deps.setTimeout(() => deps.say(PROMPTS[state.lang]), 500);
+    if (deps.wrongTimer) {
+      deps.wrongTimer.current = timer;
+    }
   }
 }
 

@@ -48,6 +48,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrongSide, setWrongSide] = useState<"left" | "right" | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -63,9 +64,17 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
     if (!won) say(promptFor(round));
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(
+    () => () => {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    },
+    [],
+  );
+
   const pickSide = (side: "left" | "right") => {
     if (won || lockedRef.current || wrongSide !== null) return;
     if (side === round.correctSide) {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
       lockedRef.current = true;
       sfx.good();
       const winningSide =
@@ -87,11 +96,13 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
         setWrongSide((s) => (s === side ? null : s));
         lockedRef.current = false;
       }, 450);
-      setTimeout(() => say(promptFor(round)), 500);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => say(promptFor(round)), 500);
     }
   };
 
   const reset = () => {
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
     lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));

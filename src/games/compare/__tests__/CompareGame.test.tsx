@@ -381,3 +381,233 @@ describe("CompareGame prompt replay", () => {
     });
   });
 });
+
+describe("CompareGame wrong answer timer", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sfx, "wrong").mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  function getPlates() {
+    const correctPlate = screen.getByTestId(/-correct$/);
+    const wrongPlate = screen
+      .getAllByTestId(/^compare-plate-/)
+      .find((el) => !el.getAttribute("data-testid")?.endsWith("-correct"))!;
+    return { correctPlate, wrongPlate };
+  }
+
+  it("cancels the wrong-answer repeat prompt timer when the player taps the correct plate", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Initial mount speaks the round prompt once.
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    const { correctPlate, wrongPlate } = getPlates();
+
+    // Tap wrong plate: schedules a 500ms repeat prompt.
+    act(() => {
+      fireEvent.click(wrongPlate);
+    });
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // After 450ms wrong feedback lock releases, player taps the correct plate at 460ms.
+    act(() => {
+      vi.advanceTimersByTime(460);
+    });
+    act(() => {
+      fireEvent.click(correctPlate);
+    });
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+
+    // Advance past the 500ms mark from the initial wrong tap.
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    // The repeat prompt timer was cleared, so `say` was NOT called again.
+    expect(saySpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not speak repeat prompt over victory celebration when wrong plate is tapped before winning plate", () => {
+    const spokenLines: string[] = [];
+    vi.spyOn(sound, "say").mockImplementation((line) => {
+      spokenLines.push(line);
+    });
+    let capturedDone: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, done) => {
+      capturedDone = done;
+    });
+
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Complete 5 rounds cleanly
+    for (let i = 0; i < 5; i++) {
+      const { correctPlate } = getPlates();
+      act(() => {
+        fireEvent.click(correctPlate);
+      });
+      act(() => {
+        capturedDone?.();
+      });
+    }
+
+    spokenLines.length = 0;
+
+    // On final round (round 6): tap wrong plate
+    const { correctPlate: finalCorrect, wrongPlate: finalWrong } = getPlates();
+    act(() => {
+      fireEvent.click(finalWrong);
+    });
+
+    // After 450ms wrong feedback lock releases, tap correct plate at 460ms
+    act(() => {
+      vi.advanceTimersByTime(460);
+    });
+    act(() => {
+      fireEvent.click(finalCorrect);
+    });
+
+    // Win line is spoken
+    expect(spokenLines).toContain("Sharp eyes! You compared like a champ!");
+
+    // Advance past 500ms from the wrong tap
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    // The repeat prompt must NOT be spoken after the win line
+    expect(spokenLines).toEqual(["Sharp eyes! You compared like a champ!"]);
+  });
+
+  it("cancels the wrong-answer repeat prompt timer on unmount", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    const { unmount } = render(
+      <CompareGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    const { wrongPlate } = getPlates();
+    act(() => {
+      fireEvent.click(wrongPlate);
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+
+    unmount();
+
+    // Advance past the 500ms mark.
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // The repeat prompt should not speak after navigating away / unmounting.
+    expect(saySpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("speaks repeat prompt after 500ms if no correct plate was tapped", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    const { wrongPlate } = getPlates();
+    act(() => {
+      fireEvent.click(wrongPlate);
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Repeat prompt fires at 500ms.
+    expect(saySpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("resets the timer when tapping wrong plate again after lock releases", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    const { wrongPlate } = getPlates();
+    act(() => {
+      fireEvent.click(wrongPlate);
+    });
+
+    // At 460ms (after the 450ms wrong feedback lock releases, but before 500ms prompt timer):
+    act(() => {
+      vi.advanceTimersByTime(460);
+    });
+    act(() => {
+      fireEvent.click(wrongPlate);
+    });
+
+    // At 500ms from first tap (40ms from second tap), first timer was cancelled and should not fire.
+    act(() => {
+      vi.advanceTimersByTime(40);
+    });
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    // At 500ms from the second tap (460ms more), the second timer fires.
+    act(() => {
+      vi.advanceTimersByTime(460);
+    });
+    expect(saySpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("cancels the wrong-answer repeat prompt timer on reset", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    let capturedDone: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, done) => {
+      capturedDone = done;
+    });
+
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Complete 6 rounds to win
+    for (let i = 0; i < 6; i++) {
+      const { correctPlate } = getPlates();
+      act(() => {
+        fireEvent.click(correctPlate);
+      });
+      act(() => {
+        capturedDone?.();
+      });
+    }
+
+    // Win overlay animations need to finish so buttons become armed
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // WinOverlay is now visible. Tap "Play Again".
+    const playAgainBtn = screen.getByTestId("play-again");
+    saySpy.mockClear();
+
+    act(() => {
+      fireEvent.click(playAgainBtn);
+    });
+    // After reset, a new round's prompt is spoken on mount/round change.
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    // Advance past 500ms, ensure no leaked timer from previous round.
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(saySpy).toHaveBeenCalledTimes(1);
+  });
+});

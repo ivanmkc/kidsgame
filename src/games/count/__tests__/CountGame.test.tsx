@@ -331,6 +331,80 @@ describe("logic: applyPickAnswer", () => {
     expect(setLocked).toHaveBeenLastCalledWith(false);
     expect(deps.setRound).not.toHaveBeenCalled();
   });
+
+  it("cancels wrongTimer and sets it to null when correct answer is picked", () => {
+    const wrongTimer = {
+      current: 123 as unknown as ReturnType<typeof setTimeout>,
+    };
+    const clearTimeoutSpy = vi.fn();
+    const state = {
+      won: false,
+      phase: "quiz",
+      locked: false,
+      score: 0,
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: "en" as const,
+    };
+    const deps = {
+      sfx: { good: vi.fn(), wrong: vi.fn() },
+      say: vi.fn(),
+      sayThen: vi.fn(),
+      setTimeout: vi.fn(),
+      clearTimeout: clearTimeoutSpy,
+      makeNextRound: vi.fn(() => dummyRound),
+      setScore: vi.fn(),
+      setLocked: vi.fn(),
+      setRound: vi.fn(),
+      setRoundNo: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick: vi.fn(),
+      wrongTimer,
+    };
+
+    applyPickAnswer(dummyRound.answer, state, deps);
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(123);
+    expect(wrongTimer.current).toBeNull();
+  });
+
+  it("schedules wrongTimer and clears previous wrongTimer on successive wrong picks", () => {
+    const wrongTimer = {
+      current: 111 as unknown as ReturnType<typeof setTimeout>,
+    };
+    const clearTimeoutSpy = vi.fn();
+    const fakeTimerId = 222 as unknown as ReturnType<typeof setTimeout>;
+    const setTimeoutSpy = vi.fn(() => fakeTimerId);
+    const state = {
+      won: false,
+      phase: "quiz",
+      locked: false,
+      score: 0,
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: "en" as const,
+    };
+    const deps = {
+      sfx: { good: vi.fn(), wrong: vi.fn() },
+      say: vi.fn(),
+      sayThen: vi.fn(),
+      setTimeout: setTimeoutSpy,
+      clearTimeout: clearTimeoutSpy,
+      makeNextRound: vi.fn(),
+      setScore: vi.fn(),
+      setLocked: vi.fn(),
+      setRound: vi.fn(),
+      setRoundNo: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick: vi.fn(),
+      wrongTimer,
+    };
+
+    applyPickAnswer(dummyRound.answer + 1, state, deps);
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(111);
+    expect(wrongTimer.current).toBe(fakeTimerId);
+  });
 });
 
 describe("CountGame double-tap lock", () => {
@@ -541,5 +615,164 @@ describe("CountGame stage critter positioning", () => {
         badgeCenterY - cornerRadius,
       ) + 11;
     expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
+  });
+});
+
+describe("CountGame wrong answer timer", () => {
+  let sayThenDoneCallbacks: Array<() => void> = [];
+
+  beforeEach(() => {
+    cleanup();
+    sayThenDoneCallbacks = [];
+    vi.restoreAllMocks();
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      if (done) sayThenDoneCallbacks.push(done);
+    });
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  function completeCountPhase() {
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+    const finishCountSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishCountSpeech();
+    });
+  }
+
+  it("cancels wrong-answer repeat prompt timer when player taps correct answer choice", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+    completeCountPhase();
+
+    // In quiz phase, prompt "How many?" is spoken
+    expect(saySpy).toHaveBeenCalledWith("How many?");
+    saySpy.mockClear();
+
+    // Find wrong and correct choices
+    const answerChoices = screen.getAllByTestId(/count-choice-/);
+    const correctChoice = answerChoices.find((c) =>
+      c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+    const wrongChoice = answerChoices.find(
+      (c) => !c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    // Tap wrong choice: schedules 500ms prompt timer
+    fireEvent.click(wrongChoice);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Player quickly taps the correct answer after 150ms
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    fireEvent.click(correctChoice);
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(2);
+
+    // Advance past 500ms from the initial wrong tap
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // The repeat prompt timer was cancelled, so `say("How many?")` was NOT called again
+    expect(saySpy).not.toHaveBeenCalledWith("How many?");
+  });
+
+  it("cancels wrong-answer repeat prompt timer on unmount", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    const { unmount } = render(
+      <CountGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    completeCountPhase();
+    saySpy.mockClear();
+
+    const answerChoices = screen.getAllByTestId(/count-choice-/);
+    const wrongChoice = answerChoices.find(
+      (c) => !c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    fireEvent.click(wrongChoice);
+
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+
+    unmount();
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    expect(saySpy).not.toHaveBeenCalledWith("How many?");
+  });
+
+  it("speaks repeat prompt after 500ms if no correct answer is picked", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+    completeCountPhase();
+    saySpy.mockClear();
+
+    const answerChoices = screen.getAllByTestId(/count-choice-/);
+    const wrongChoice = answerChoices.find(
+      (c) => !c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    fireEvent.click(wrongChoice);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(saySpy).toHaveBeenCalledWith("How many?");
+  });
+
+  it("cancels wrong-answer repeat prompt timer on reset", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+    completeCountPhase();
+
+    const answerChoices = screen.getAllByTestId(/count-choice-/);
+    const correctChoice = answerChoices.find((c) =>
+      c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+    const wrongChoice = answerChoices.find(
+      (c) => !c.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    // Pick wrong then correct
+    fireEvent.click(wrongChoice);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(correctChoice);
+
+    const finishPraise = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishPraise();
+    });
+
+    saySpy.mockClear();
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(saySpy).not.toHaveBeenCalledWith("How many?");
   });
 });
