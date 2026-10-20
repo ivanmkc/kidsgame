@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makeRng } from '../../../rng';
-import { pickRuleIndex } from '../logic';
+import { introPrompt, pickRuleIndex, recallPrompt, speechLines } from '../logic';
 
 describe('pickRuleIndex', () => {
   it('easy difficulty never recalls and advances rule indices consecutively', () => {
@@ -116,3 +116,41 @@ describe('pickRuleIndex', () => {
     expect(recalled.has(0) || recalled.has(1)).toBe(true);
   });
 });
+
+describe('introPrompt and recallPrompt', () => {
+  it('returns localized intro prompt across languages', () => {
+    expect(introPrompt('en')).toBe('Rule Time! Do what the rule says as fast as you can.');
+    expect(introPrompt('ja')).toBe('ルールタイム！ ルールどおりに はやく タップ！');
+    expect(introPrompt('cmn')).toBe('规则时间！按规则尽快点对的图！');
+    expect(introPrompt('yue')).toBe('規則時間！跟住規則盡快撳啱嘅圖！');
+  });
+
+  it('returns localized recall prompt with interpolated rule number across languages', () => {
+    expect(recallPrompt('en', 3)).toBe('Memory check! Do rule number 3 again. Do you remember it?');
+    expect(recallPrompt('ja', 2)).toBe('きおくクイズ！ ルール 2ばん を もういちど。 おぼえてる？');
+    expect(recallPrompt('cmn', 5)).toBe('记忆挑战！再做一次第5条规则。还记得吗？');
+    expect(recallPrompt('yue', 1)).toBe('記憶挑戰！再做一次第1條規則。仲記得嗎？');
+  });
+});
+
+describe('speechLines', () => {
+  it('is non-empty and unique', () => {
+    const lines = speechLines();
+    expect(lines.length).toBeGreaterThan(0);
+    expect(new Set(lines).size).toBe(lines.length);
+  });
+
+  it('contains the four intro prompts and a recall prompt per lang', () => {
+    const lines = speechLines();
+    expect(lines).toContain('Rule Time! Do what the rule says as fast as you can.');
+    expect(lines).toContain('ルールタイム！ ルールどおりに はやく タップ！');
+    expect(lines).toContain('规则时间！按规则尽快点对的图！');
+    expect(lines).toContain('規則時間！跟住規則盡快撳啱嘅圖！');
+    expect(lines).toContain(recallPrompt('en', 1));
+    expect(lines).toContain(recallPrompt('ja', 1));
+    expect(lines).toContain(recallPrompt('cmn', 1));
+    expect(lines).toContain(recallPrompt('yue', 1));
+  });
+});
+
+

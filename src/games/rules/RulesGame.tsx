@@ -12,7 +12,7 @@ import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { say, saySequence, sfx } from '../../sound';
-import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from './logic';
+import { RulesRound, introPrompt, makeRules, makeRulesRound, pickRuleIndex, recallPrompt } from './logic';
 import { useWinLine } from '../winlines';
 
 interface Props {
@@ -65,12 +65,12 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   useEffect(() => {
     if (won) return;
     const line = round.isRecall
-      ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
+      ? recallPrompt(lang, round.ruleNumber)
       : round.rule.label;
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
-      saySequence(['Rule Time! Do what the rule says as fast as you can.', line]);
+      saySequence([introPrompt(lang), line]);
     } else {
       say(line);
     }

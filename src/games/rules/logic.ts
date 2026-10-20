@@ -1,5 +1,43 @@
+import { LANGS, Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
 import { CATEGORY_CONFLICTS, CATEGORY_TEXT, ICON_CATEGORIES } from '../iconCategories';
+
+export const INTRO_PROMPTS: Record<Lang, string> = {
+  en: 'Rule Time! Do what the rule says as fast as you can.',
+  ja: 'ルールタイム！ ルールどおりに はやく タップ！',
+  cmn: '规则时间！按规则尽快点对的图！',
+  yue: '規則時間！跟住規則盡快撳啱嘅圖！',
+};
+
+export function introPrompt(lang: Lang): string {
+  return INTRO_PROMPTS[lang] ?? INTRO_PROMPTS.en;
+}
+
+export function recallPrompt(lang: Lang, ruleNumber: number): string {
+  switch (lang) {
+    case 'ja':
+      return `きおくクイズ！ ルール ${ruleNumber}ばん を もういちど。 おぼえてる？`;
+    case 'cmn':
+      return `记忆挑战！再做一次第${ruleNumber}条规则。还记得吗？`;
+    case 'yue':
+      return `記憶挑戰！再做一次第${ruleNumber}條規則。仲記得嗎？`;
+    case 'en':
+    default:
+      return `Memory check! Do rule number ${ruleNumber} again. Do you remember it?`;
+  }
+}
+
+/** Voice-clip contract: every spoken line across all supported languages. */
+export function speechLines(): string[] {
+  const lines: string[] = [];
+  for (const l of LANGS) {
+    lines.push(introPrompt(l.id));
+    for (let n = 1; n <= 10; n++) {
+      lines.push(recallPrompt(l.id, n));
+    }
+  }
+  return [...new Set(lines)];
+}
 
 export interface Rule {
   category: string;
