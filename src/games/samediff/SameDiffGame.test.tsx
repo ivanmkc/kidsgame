@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, act, cleanup } from '@testing-library/react';
+import { render, screen, act, cleanup, fireEvent } from '@testing-library/react';
 import { SameDiffGame } from './SameDiffGame';
 import { phrasePitchRatios, SameDiffRound } from './logic';
 
@@ -225,6 +225,42 @@ describe('SameDiffGame UI', () => {
     expect(screen.getByTestId("samediff-same")).toBeTruthy();
     expect(screen.getByTestId("samediff-diff")).toBeTruthy();
 
+    vi.useRealTimers();
+  });
+
+  it("ignores rapid redundant taps (fast-tap hammering bug)", async () => {
+    vi.useFakeTimers();
+    const sound = await import('../../sound');
+    const goodSpy = vi.spyOn(sound.sfx, 'good');
+    const wrongSpy = vi.spyOn(sound.sfx, 'wrong');
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const sameBtn = screen.getByTestId("samediff-same");
+    const diffBtn = screen.getByTestId("samediff-diff");
+
+    fireEvent.click(sameBtn);
+    fireEvent.click(sameBtn);
+    fireEvent.click(sameBtn);
+
+    if (goodSpy.mock.calls.length > 0) {
+      expect(goodSpy).toHaveBeenCalledTimes(1);
+      expect(wrongSpy).toHaveBeenCalledTimes(0);
+    } else {
+      expect(wrongSpy).toHaveBeenCalledTimes(1);
+      
+      fireEvent.click(diffBtn);
+      fireEvent.click(diffBtn);
+      
+      expect(goodSpy).toHaveBeenCalledTimes(1);
+    }
+
+    goodSpy.mockRestore();
+    wrongSpy.mockRestore();
     vi.useRealTimers();
   });
 });

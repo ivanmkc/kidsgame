@@ -22,6 +22,7 @@ interface Props {
 export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const lockedRef = useRef(false);
   const [round, setRound] = useState<SameDiffRound>(() => makeSameDiffRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listenA' | 'listenB' | 'pick'>('listenA');
@@ -52,6 +53,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
             () => {
               setActiveNote(null);
               setPhase('pick');
+              lockedRef.current = false;
             },
           );
         }, 600);
@@ -71,8 +73,9 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: 'same' | 'different') => {
-    if (won || phase !== 'pick') return;
+    if (won || phase !== 'pick' || lockedRef.current) return;
     if (isCorrect(round, picked)) {
+      lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = score + 1;
@@ -82,6 +85,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         setRound(makeSameDiffRound(rngRef.current, difficulty));
       }
     } else {
+      if (wrongPick === picked) return;
       sfx.wrong();
       setWrongPick(picked);
       setTimeout(() => setWrongPick(null), 500);
@@ -89,7 +93,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   };
 
   const replay = () => {
-    if (phase === 'pick') playRound(round);
+    if (phase === 'pick' && !lockedRef.current) playRound(round);
   };
 
   const reset = () => {
