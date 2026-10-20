@@ -3,6 +3,7 @@ import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { EchoBeatGame } from './EchoBeatGame';
+import * as logic from './logic';
 import * as sound from '../../sound';
 
 function mockAudioContext() {
@@ -95,6 +96,35 @@ describe('EchoBeatGame', () => {
     });
 
     expect(screen.getByText('Your turn!')).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it('ignores taps during celebration so they do not leak into the next round', () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound.sfx, 'wrong');
+    vi.spyOn(sound.sfx, 'good');
+
+    vi.spyOn(logic, 'checkEcho').mockReturnValueOnce({ countCorrect: true, timingCorrect: true });
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => { vi.advanceTimersByTime(3000); });
+    const drum = screen.getByTestId('echobeat-drum');
+
+    act(() => { fireEvent.click(drum); });
+    act(() => { vi.advanceTimersByTime(1200); });
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+    // After the correct tap and evaluation, 1 dot is filled
+    expect(screen.getAllByTestId('tap-dot-filled')).toHaveLength(1);
+
+    // Tap during celebration (800ms)
+    act(() => { fireEvent.click(drum); });
+
+    // The stray tap during celebration should be ignored, so the filled dot count remains 1.
+    // If the bug is present, it will increment to 2.
+    expect(screen.getAllByTestId('tap-dot-filled')).toHaveLength(1);
 
     vi.useRealTimers();
   });

@@ -66,6 +66,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     }
     return () => {
       if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (resultTimer.current) clearTimeout(resultTimer.current);
       stopSequence();
     };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -101,7 +102,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   }, [tapCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = () => {
-    if (won || phase !== 'tap') return;
+    if (won || phase !== 'tap' || result !== null) return;
     playDrum();
     const now = performance.now();
     setTapTimes((prev) => [...prev, now]);
@@ -160,6 +161,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     tapDots.push(
       <View
         key={i}
+        testID={`tap-dot-${i < tapCount ? 'filled' : 'empty'}`}
         style={[styles.tapDot, i < tapCount && styles.tapDotFilled]}
       />
     );
@@ -193,7 +195,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
           <Pressable
             onPress={onTap}
             testID="echobeat-drum"
-            disabled={phase !== 'tap'}
+            disabled={phase !== 'tap' || result !== null}
             style={({ pressed }) => [
               styles.drum,
               shadows.lifted,
