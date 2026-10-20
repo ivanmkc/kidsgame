@@ -40,6 +40,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
+  const [listenBeat, setListenBeat] = useState<number | null>(0);
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
   const tapTimesRef = useRef(tapTimesMs);
   tapTimesRef.current = tapTimesMs;
@@ -59,13 +60,19 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const startMetronome = useCallback(
     (r: SteadyBeatRound) => {
       setPhase("listen");
+      playDrum(0.5);
+      setListenBeat(0);
       const beatMs = 60000 / r.bpm;
-      let count = 0;
+      let count = 1;
       const interval = setInterval(() => {
-        playDrum(0.5);
-        count++;
-        if (count >= 4) {
+        if (count < 4) {
+          playDrum(0.5);
+          setListenBeat(count);
+          count++;
+        } else {
           clearInterval(interval);
+          playDrum(0.5);
+          setListenBeat(null);
           setPhase("tap");
           say(t(lang, "music.yourTurn" as never));
           setStartMs(performance.now());
@@ -141,6 +148,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
     setScore(0);
     setTapTimesMs([]);
     setHits(0);
+    setListenBeat(0);
     setRound(makeSteadyBeatRound(rngRef.current, difficulty));
   };
 
@@ -207,6 +215,24 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
             <Text style={styles.statusText}>
               {t(lang, "music.listen" as never)}
             </Text>
+            <View style={styles.listenDotsRow}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <View
+                  key={i}
+                  testID={
+                    listenBeat !== null && i <= listenBeat
+                      ? "steadybeat-listen-dot-filled"
+                      : "steadybeat-listen-dot-empty"
+                  }
+                  style={[
+                    styles.listenDot,
+                    listenBeat !== null &&
+                      i <= listenBeat &&
+                      styles.listenDotFilled,
+                  ]}
+                />
+              ))}
+            </View>
           </View>
         ) : phase === "result" ? (
           <View style={[styles.statusCard, shadows.soft]}>
@@ -339,5 +365,17 @@ const styles = StyleSheet.create({
   },
   dotFilled: {
     backgroundColor: "#9B7EDE",
+  },
+  listenDotsRow: { flexDirection: "row", gap: 8, marginLeft: 4 },
+  listenDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2.5,
+    borderColor: colors.gold,
+    backgroundColor: "transparent",
+  },
+  listenDotFilled: {
+    backgroundColor: colors.gold,
   },
 });
