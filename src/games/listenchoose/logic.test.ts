@@ -53,8 +53,6 @@ describe("Level data", () => {
   });
 });
 
-
-
 describe("generateRound", () => {
   it("generates a round with distinct target and distractor and two choices", () => {
     const rng = makeRng(12345);
@@ -237,6 +235,21 @@ describe("initGameState", () => {
     expect(state.level).toBe(1);
     expect(state.currentRound.choices).toHaveLength(2);
   });
+  it("initializes game state with level 2 and 3 choices for medium difficulty", () => {
+    const rng = makeRng(42);
+    const state: GameState = initGameState(rng, "medium");
+
+    expect(state.level).toBe(2);
+    expect(state.currentRound.choices).toHaveLength(3);
+  });
+
+  it("initializes game state with level 3 and 4 choices for hard difficulty", () => {
+    const rng = makeRng(42);
+    const state: GameState = initGameState(rng, "hard");
+
+    expect(state.level).toBe(3);
+    expect(state.currentRound.choices).toHaveLength(4);
+  });
 });
 
 describe("evaluateGuess", () => {
@@ -261,6 +274,63 @@ describe("updateGameState", () => {
     expect(nextState.wrongGuesses).toBe(0);
     expect(nextState.highlightCorrect).toBe(false);
     expect(nextState.currentRound.target.icon).not.toBe(targetIcon);
+  });
+
+  it("keeps base level 3 across rounds for hard difficulty", () => {
+    const rng = makeRng(100);
+    let state = initGameState(rng, "hard");
+    expect(state.level).toBe(3);
+
+    state = updateGameState(state, state.currentRound.target.icon, rng, "hard");
+    expect(state.level).toBe(3);
+
+    state = updateGameState(
+      state,
+      state.currentRound.distractor.icon,
+      rng,
+      "hard",
+    );
+    state = updateGameState(state, state.currentRound.target.icon, rng, "hard");
+    expect(state.level).toBe(3);
+  });
+
+  it("keeps base level 2 across rounds for medium difficulty", () => {
+    const rng = makeRng(100);
+    let state = initGameState(rng, "medium");
+    expect(state.level).toBe(2);
+
+    state = updateGameState(
+      state,
+      state.currentRound.target.icon,
+      rng,
+      "medium",
+    );
+    expect(state.level).toBe(2);
+
+    state = updateGameState(
+      state,
+      state.currentRound.distractor.icon,
+      rng,
+      "medium",
+    );
+    state = updateGameState(
+      state,
+      state.currentRound.target.icon,
+      rng,
+      "medium",
+    );
+    expect(state.level).toBe(2);
+
+    for (let i = 1; i <= 19; i++) {
+      state = updateGameState(
+        state,
+        state.currentRound.target.icon,
+        rng,
+        "medium",
+      );
+    }
+    expect(state.streak).toBe(20);
+    expect(state.level).toBe(3);
   });
 
   it("resets level to 1 after completing a round where streak was broken", () => {
@@ -424,7 +494,7 @@ describe("game state with non-English languages", () => {
     const langs = ["ja", "cmn", "yue"] as const;
     for (const lang of langs) {
       const rng = makeRng(1234);
-      let state = initGameState(rng, lang);
+      let state = initGameState(rng, "easy", lang);
 
       for (let i = 0; i < 25; i++) {
         // Assert current level properties
@@ -443,6 +513,7 @@ describe("game state with non-English languages", () => {
           state,
           state.currentRound.target.icon,
           rng,
+          "easy",
           lang,
         );
       }

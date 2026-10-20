@@ -35,12 +35,16 @@ function wordImage(icon: string) {
   return SPOTIT_ICONS[icon] ?? RHYME_SPRITES[icon];
 }
 
-export function ListenChooseGame({ onHome, lang = "en" }: Props) {
+export function ListenChooseGame({
+  onHome,
+  difficulty = "easy",
+  lang = "en",
+}: Props) {
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(true);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [state, setGameState] = useState<GameState>(() =>
-    initGameState(rngRef.current, lang),
+    initGameState(rngRef.current, difficulty, lang),
   );
   const [wobbleIcon, setWobbleIcon] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(false);
@@ -75,7 +79,13 @@ export function ListenChooseGame({ onHome, lang = "en" }: Props) {
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
         setCelebrate(false);
-        const next = updateGameState(state, choice.icon, rngRef.current, lang);
+        const next = updateGameState(
+          state,
+          choice.icon,
+          rngRef.current,
+          difficulty,
+          lang,
+        );
         setGameState(next);
         const nextWord = getWordText(next.currentRound.target, lang);
         sayThen([nextWord], () => {});
@@ -88,7 +98,13 @@ export function ListenChooseGame({ onHome, lang = "en" }: Props) {
         () => setWobbleIcon((w) => (w === choice.icon ? null : w)),
         450,
       );
-      const next = updateGameState(state, choice.icon, rngRef.current, lang);
+      const next = updateGameState(
+        state,
+        choice.icon,
+        rngRef.current,
+        difficulty,
+        lang,
+      );
       setGameState(next);
       const targetWord = getWordText(state.currentRound.target, lang);
       sayThen([targetWord], () => {});

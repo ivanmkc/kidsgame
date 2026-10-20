@@ -36,6 +36,15 @@ vi.mock("react-native", async (importOriginal) => {
 });
 
 describe("ListenChooseGame", () => {
+  it("starts with 4 choices when difficulty is hard", () => {
+    const onHome = vi.fn();
+    render(<ListenChooseGame onHome={onHome} difficulty="hard" />);
+    fireEvent.click(screen.getByText("Play"));
+
+    // Level 3 should have 4 choices
+    const choicesContainer = screen.getByTestId("choice-0").parentElement!;
+    expect(choicesContainer.children.length).toBe(4);
+  });
   beforeEach(() => {
     for (const key in capturedPressableMap) {
       delete capturedPressableMap[key];
