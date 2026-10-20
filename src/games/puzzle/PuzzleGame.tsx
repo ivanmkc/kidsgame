@@ -80,11 +80,7 @@ export function PuzzleGame({
     };
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useSay(
-    picked
-      ? "Tap one piece, then tap another to swap them!"
-      : "Which picture do you want to solve?",
-  );
+  useSay(picked ? t(lang, "puzzle.hint") : t(lang, "picker.puzzle"));
   const won = perm.length === size && isSolved(perm);
   const showTimer = settings.timer;
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
