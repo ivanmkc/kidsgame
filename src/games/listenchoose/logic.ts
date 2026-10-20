@@ -1,3 +1,4 @@
+import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
 import { Rng, shuffle, sample } from "../../rng";
 import {
@@ -113,9 +114,11 @@ export function generateRound(
  */
 export function initGameState(
   rng: Rng = Math.random,
+  difficulty: Difficulty = "easy",
   lang: Lang = "en",
 ): GameState {
-  const config = getLevelConfig(1, lang);
+  const baseLevel = difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1;
+  const config = getLevelConfig(baseLevel, lang);
   return {
     currentRound: generateRound(
       rng,
@@ -127,7 +130,7 @@ export function initGameState(
     streak: 0,
     wrongGuesses: 0,
     highlightCorrect: false,
-    level: 1,
+    level: baseLevel,
   };
 }
 
@@ -147,16 +150,17 @@ export function updateGameState(
   state: GameState,
   guessIcon: string,
   rng: Rng = Math.random,
+  difficulty: Difficulty = "easy",
   lang: Lang = "en",
 ): GameState {
   const isCorrect = evaluateGuess(state.currentRound, guessIcon);
   if (isCorrect) {
     const nextStreak = state.streak + 1;
-    let nextLevel = 1;
+    let nextLevel = difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1;
     if (nextStreak >= 20) {
       nextLevel = 3;
     } else if (nextStreak >= 10) {
-      nextLevel = 2;
+      nextLevel = Math.max(nextLevel, 2);
     }
 
     const config = getLevelConfig(nextLevel, lang);
