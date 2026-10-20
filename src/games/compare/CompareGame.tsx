@@ -134,16 +134,26 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       }
     >
       <View style={styles.board}>
-        <View
-          style={[
+        <Pressable
+          disabled={won}
+          onPress={() => {
+            if (won || lockedRef.current) return;
+            sfx.tap();
+            say(promptFor(round));
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={promptFor(round)}
+          style={({ pressed }) => [
             styles.promptCard,
             shadows.soft,
             round.ask === "fewer" && styles.promptCardFewer,
+            pressed && styles.pressed,
           ]}
           testID={`compare-prompt-${round.ask}`}
         >
           <Text style={styles.promptText}>{promptFor(round)}</Text>
-        </View>
+          <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
+        </Pressable>
         <View style={[styles.plates, { width: totalW }]}>
           <Plate
             data={round.left}
@@ -232,6 +242,7 @@ const styles = StyleSheet.create({
     borderColor: darken(colors.gold, 0.15),
     paddingVertical: 10,
     paddingHorizontal: 22,
+    alignItems: "center",
     maxWidth: 560,
   },
   promptCardFewer: {
@@ -243,6 +254,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.ink,
     textAlign: "center",
+  },
+  hearHint: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 12,
+    color: colors.inkSoft,
   },
   plates: { flexDirection: "row", justifyContent: "space-between" },
   plate: {
