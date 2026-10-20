@@ -276,6 +276,7 @@ export const CMN: Table = {
   'sticker.size.large': '大',
   'sticker.charactersEmpty': '角色马上就来！ ✨',
   'memory.moves': '步数：{n}',
+  'memory.cardFaceDown': '盖着的卡片',
   'rhyme.ask': '哪个词的结尾一样？',
   'rhyme.comingSoon': '更多押韵马上就来！🎶',
   'story.tryAgain': '哎呀！换一条路 ↩️',
