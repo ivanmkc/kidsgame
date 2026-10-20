@@ -44,7 +44,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [wrongPick, setWrongPick] = useState<"fast" | "slow" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
-  const won = score >= total;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.fastslow" as never));
 
   const playRound = useCallback((r: FastSlowRound) => {
@@ -75,11 +75,15 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       setWrongPick(null);
       const nextHistory = [...history, picked];
       setHistory(nextHistory);
+      setPhase("celebrate");
       if (next < total) {
-        setPhase("celebrate");
         setTimeout(() => {
           lockedRef.current = false;
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          setWon(true);
         }, 1000);
       }
     } else {
@@ -100,6 +104,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     setWrongPick(null);
     setHistory([]);
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));
