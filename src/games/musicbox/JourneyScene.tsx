@@ -148,7 +148,6 @@ export function JourneyScene({ scene, lang }: Props) {
       onResponderRelease={onPressOut}
       onResponderTerminate={onPressOut}
       testID="musicbox-stage"
-      accessibilityRole="button"
       accessibilityLabel={t(lang, 'musicbox.stage')}
     >
       <ScrollingWorld scrollX={scrollX} scene={scene} />

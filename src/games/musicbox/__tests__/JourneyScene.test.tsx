@@ -27,19 +27,20 @@ describe('JourneyScene accessibility', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders stage with button role and accessibility label', () => {
+  it('renders stage as a container with accessibility label and not a button', () => {
     const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
-    const stage = screen.getByRole('button', { name: 'Stage' });
+    const stage = screen.getByLabelText('Stage');
 
     expect(stage).toBeDefined();
+    expect(screen.queryByRole('button', { name: 'Stage' })).toBeNull();
     unmount();
   });
 
   it('spawns an object on tap, which receives the lang prop', () => {
     const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="ja" />);
 
-    const stageBtn = screen.getByRole('button', { name: 'ステージ' });
-    fireEvent.touchStart(stageBtn, {
+    const stage = screen.getByLabelText('ステージ');
+    fireEvent.touchStart(stage, {
       changedTouches: [
         {
           locationX: 100,
