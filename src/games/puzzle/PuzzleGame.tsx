@@ -41,7 +41,7 @@ export function PuzzleGame({
     ...o,
     dimmed: !options.some((v) => v.id === o.id),
   }));
-  const picked = options.find((o) => o.id === sceneId) ?? null;
+  const picked = allOptions.find((o) => o.id === sceneId) ?? null;
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
   const effDifficulty =
