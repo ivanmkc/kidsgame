@@ -552,7 +552,7 @@ export const EN: Table = {
   'puzzle.peek.a11y': 'Peek at the finished picture',
   'puzzle.hint': 'Tap one piece, then tap another to swap them!',
   'sticker.clear': '🧹 Clear',
-  'sticker.hint': 'Drag a sticker in · tap it to wiggle · use +/− to resize · double-tap to pop!',
+  'sticker.hint': 'Drag to place · pinch to resize & turn · double-tap to pop!',
   'sticker.tab.dressup': 'Dress-Up',
   'sticker.tab.characters': 'Characters',
   'sticker.tab.animals': 'Animals',

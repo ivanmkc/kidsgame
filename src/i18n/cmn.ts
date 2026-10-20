@@ -264,7 +264,7 @@ export const CMN: Table = {
   'puzzle.peek.a11y': '看完整的图',
   'puzzle.hint': '点一块，再点另一块，就能交换！',
   'sticker.clear': '🧹 清除',
-  'sticker.hint': '把贴纸拖进画里 · 点一下会动 · +/− 调大小 · 双击去掉！',
+  'sticker.hint': '把贴纸拖进画里 · 双指缩放和旋转 · 双击去掉！',
   'sticker.tab.dressup': '换装',
   'sticker.tab.characters': '角色',
   'sticker.tab.animals': '动物',
