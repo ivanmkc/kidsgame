@@ -97,7 +97,6 @@ export function ListenChooseGame({
         }
       }, 800);
     } else {
-      sfx.wrong();
       setWobbleIcon(choice.icon);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
       wobbleTimerRef.current = setTimeout(

@@ -313,15 +313,17 @@ describe("updateGameState", () => {
       rng,
       "medium",
     );
+    expect(state.streak).toBe(1);
     state = updateGameState(
       state,
       state.currentRound.target.icon,
       rng,
       "medium",
     );
+    expect(state.streak).toBe(2);
     expect(state.level).toBe(2);
 
-    for (let i = 1; i <= 19; i++) {
+    for (let i = 1; i <= 18; i++) {
       state = updateGameState(
         state,
         state.currentRound.target.icon,
@@ -333,17 +335,20 @@ describe("updateGameState", () => {
     expect(state.level).toBe(3);
   });
 
-  it("resets level to 1 after completing a round where streak was broken", () => {
+  it("maintains streak and level on wrong guess", () => {
     const rng = makeRng(100);
     let state = initGameState(rng);
     for (let i = 1; i <= 10; i++) {
       state = updateGameState(state, state.currentRound.target.icon, rng);
     }
+    expect(state.streak).toBe(10);
     expect(state.level).toBe(2);
     state = updateGameState(state, state.currentRound.distractor.icon, rng);
-    expect(state.streak).toBe(0);
+    expect(state.streak).toBe(10);
+    expect(state.level).toBe(2);
     state = updateGameState(state, state.currentRound.target.icon, rng);
-    expect(state.level).toBe(1);
+    expect(state.streak).toBe(11);
+    expect(state.level).toBe(2);
   });
 
   it("advances level to 2 at streak 10 and to 3 at streak 20", () => {
@@ -380,7 +385,7 @@ describe("updateGameState", () => {
     }
   });
 
-  it("resets streak and increments wrongGuesses on first incorrect guess without highlight", () => {
+  it("maintains streak and increments wrongGuesses on first incorrect guess without highlight", () => {
     const rng = makeRng(300);
     let state = initGameState(rng);
     state = updateGameState(state, state.currentRound.target.icon, rng);
@@ -390,7 +395,7 @@ describe("updateGameState", () => {
     const roundBeforeWrong = state.currentRound;
 
     state = updateGameState(state, distractorIcon, rng);
-    expect(state.streak).toBe(0);
+    expect(state.streak).toBe(1);
     expect(state.wrongGuesses).toBe(1);
     expect(state.highlightCorrect).toBe(false);
     expect(state.currentRound).toEqual(roundBeforeWrong);

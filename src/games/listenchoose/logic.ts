@@ -146,7 +146,7 @@ export function evaluateGuess(round: Round, guessIcon: string): boolean {
 /**
  * Return updated game state after evaluating a guess.
  * - Correct: increments streak, resets wrongGuesses and highlightCorrect, advances to a new round.
- * - Incorrect: resets streak, increments wrongGuesses, sets highlightCorrect if wrongGuesses >= 2, keeps round.
+ * - Incorrect: keeps streak, increments wrongGuesses, sets highlightCorrect if wrongGuesses >= 2, keeps round.
  */
 export function updateGameState(
   state: GameState,
@@ -189,7 +189,6 @@ export function updateGameState(
   const nextWrong = state.wrongGuesses + 1;
   return {
     ...state,
-    streak: 0,
     wrongGuesses: nextWrong,
     highlightCorrect: nextWrong >= 2,
   };

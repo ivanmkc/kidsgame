@@ -168,7 +168,7 @@ describe("ListenChooseGame", () => {
     // First wrong pick
     fireEvent.click(distractorBtn);
 
-    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sfx.wrong).not.toHaveBeenCalled();
     expect(sound.sayThen).toHaveBeenCalledWith(
       [targetWord.en],
       expect.any(Function),
@@ -184,8 +184,28 @@ describe("ListenChooseGame", () => {
     // Second wrong pick
     fireEvent.click(distractorBtn);
 
-    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+    expect(sfx.wrong).not.toHaveBeenCalled();
     expect(targetBtn.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("maintains streak on wrong guess without playing wrong sound effect", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+
+    const nextChoices = getRoundChoices();
+    fireEvent.click(nextChoices.distractorBtn);
+
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
   });
 
   it("handles correct pick by playing good sfx, celebrating, incrementing streak, and advancing", () => {
@@ -236,13 +256,16 @@ describe("ListenChooseGame", () => {
     fireEvent.click(screen.getByTestId("play-button"));
 
     const { distractorBtn } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
     fireEvent.click(distractorBtn);
 
-    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    expect(sfx.wrong).not.toHaveBeenCalled();
 
     // Rapid second tap while wobble is active
     fireEvent.click(distractorBtn);
-    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    expect(sfx.wrong).not.toHaveBeenCalled();
   });
 
   it("allows tapping correct choice while wrong choice is wobbling", () => {
@@ -253,7 +276,7 @@ describe("ListenChooseGame", () => {
 
     // Tap wrong choice
     fireEvent.click(distractorBtn);
-    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sfx.wrong).not.toHaveBeenCalled();
 
     // Immediately tap correct choice while wrong is still wobbling
     fireEvent.click(targetBtn);
