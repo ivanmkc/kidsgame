@@ -18,6 +18,7 @@ export interface RhymeEntry {
   roman: string;        // parent romanization ('' for EN)
   rhymeKey: string;
   bucket: 'spotit' | 'rhyme'; // which sprite atlas holds the icon
+  nameTwins?: string[];
 }
 
 export interface RhymeTile {
@@ -63,6 +64,7 @@ export function availableEntries(lang: Lang, spotitIcons: string[]): RhymeEntry[
       word: lang === 'en' ? w.en : loc.text,
       roman: lang === 'en' ? '' : loc.roman,
       rhymeKey: key, bucket: 'spotit',
+      nameTwins: w.nameTwins,
     });
   }
   if (lang === 'en') {
@@ -202,20 +204,28 @@ export function makeRhymeRound(
   const otherFamilyKeys = shuffle(rng, familyKeys.filter((k) => k !== targetFamily));
   const distractors: RhymeEntry[] = [];
   const takenIcons = new Set<string>([target.icon, correct.icon]);
+  for (const t of target.nameTwins ?? []) takenIcons.add(t);
+  for (const t of correct.nameTwins ?? []) takenIcons.add(t);
+
   for (const k of otherFamilyKeys) {
     if (distractors.length >= needed) break;
-    const pool = shuffle(rng, families[k]).filter((e) => !takenIcons.has(e.icon));
+    const pool = shuffle(rng, families[k]).filter(
+      (e) => !takenIcons.has(e.icon) && !(e.nameTwins ?? []).some((t) => takenIcons.has(t))
+    );
     if (!pool.length) continue;
-    distractors.push(pool[0]);
-    takenIcons.add(pool[0].icon);
+    const chosen = pool[0];
+    distractors.push(chosen);
+    takenIcons.add(chosen.icon);
+    for (const t of chosen.nameTwins ?? []) takenIcons.add(t);
   }
   if (distractors.length < needed) {
     const backfill = shuffle(rng, otherFamilyKeys.flatMap((k) => families[k]))
-      .filter((e) => !takenIcons.has(e.icon));
+      .filter((e) => !takenIcons.has(e.icon) && !(e.nameTwins ?? []).some((t) => takenIcons.has(t)));
     for (const e of backfill) {
       if (distractors.length >= needed) break;
       distractors.push(e);
       takenIcons.add(e.icon);
+      for (const t of e.nameTwins ?? []) takenIcons.add(t);
     }
   }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rhymeLayout } from '../logic';
+import { rhymeLayout, makeRhymeRound } from '../logic';
 
 describe('rhymeLayout', () => {
   it('prioritizes answer tiles on mobile landscape viewports (844x390, 667x375)', () => {
@@ -60,5 +60,28 @@ describe('rhymeLayout', () => {
     expect(tiny.shortH).toBe(true);
     expect(tiny.tile).toBeGreaterThanOrEqual(44);
     expect(tiny.promptIcon).toBeGreaterThanOrEqual(48);
+  });
+});
+
+describe('makeRhymeRound', () => {
+  it('filters out distractors that share a nameTwin with target or correct answer', () => {
+    const entries: import('../logic').RhymeEntry[] = [
+      { icon: 'blossom', en: 'blossom', word: 'blossom', roman: '', rhymeKey: 'A', bucket: 'spotit', nameTwins: ['sunflower'] },
+      { icon: 'possum', en: 'possum', word: 'possum', roman: '', rhymeKey: 'A', bucket: 'spotit' },
+      { icon: 'tower', en: 'tower', word: 'tower', roman: '', rhymeKey: 'B', bucket: 'spotit' },
+      { icon: 'sunflower', en: 'sunflower', word: 'sunflower', roman: '', rhymeKey: 'B', bucket: 'spotit', nameTwins: ['blossom'] },
+      { icon: 'frog', en: 'frog', word: 'frog', roman: '', rhymeKey: 'C', bucket: 'spotit' },
+      { icon: 'dog', en: 'dog', word: 'dog', roman: '', rhymeKey: 'C', bucket: 'spotit' },
+    ];
+    const rng = () => 0; // Picks Family A, 'blossom'
+    const round = makeRhymeRound(rng, entries, 3, 'en');
+    
+    expect(round.target.icon).toBe('blossom');
+    const answer = round.tiles.find(t => t.isAnswer);
+    expect(answer?.icon).toBe('possum');
+    const distractorIcons = round.tiles.filter(t => !t.isAnswer).map(t => t.icon);
+    expect(distractorIcons).not.toContain('sunflower');
+    expect(distractorIcons).toContain('tower');
+    expect(distractorIcons).toHaveLength(2);
   });
 });
