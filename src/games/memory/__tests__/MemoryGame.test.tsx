@@ -2,6 +2,7 @@
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import * as sound from '../../../sound';
 import { MemoryGame } from '../MemoryGame';
 
 vi.mock('../../../sound', async (importOriginal) => {
@@ -154,5 +155,61 @@ describe('MemoryGame', () => {
     for (const card of resetCards) {
       expect(card.getAttribute('aria-label')).toBe('face-down card');
     }
+  });
+
+  it('cancels mismatch timer and suppresses ghost turn narration on unmount', () => {
+    const saySpy = vi.spyOn(sound, 'say').mockImplementation(() => {});
+    const onHome = vi.fn();
+
+    const { unmount } = render(
+      <MemoryGame onHome={onHome} difficulty="easy" twoPlayerEnabled={true} lang="en" />
+    );
+
+    // Pick 2-Player mode
+    const p2Btn = screen.getByTestId('mp-choose-2p');
+    fireEvent.click(p2Btn);
+
+    // Find all cards
+    const cards = screen.getAllByTestId(/^memory-card-/);
+    expect(cards.length).toBeGreaterThanOrEqual(2);
+
+    // Pick two non-matching cards
+    const firstCard = cards[0];
+    const firstTestId = firstCard.getAttribute('data-testid')!;
+    // format is memory-card-{key}-{icon}
+    const firstParts = firstTestId.split('-');
+    const firstIcon = firstParts.slice(3).join('-');
+
+    const mismatchCard = cards.find((c) => {
+      const parts = c.getAttribute('data-testid')!.split('-');
+      const icon = parts.slice(3).join('-');
+      return icon !== firstIcon;
+    });
+    expect(mismatchCard).toBeDefined();
+
+    // Clear any speech from entering the game
+    saySpy.mockClear();
+
+    // Tap first card then second non-matching card
+    act(() => {
+      fireEvent.click(firstCard);
+    });
+    act(() => {
+      fireEvent.click(mismatchCard!);
+    });
+
+    // Say should not have spoken the next player's turn yet (750ms timeout pending)
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // Simulate navigating home before 750ms elapses
+    unmount();
+
+    // Advance past the 750ms mismatch duration
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Should NOT announce next player's turn on unmounted component
+    expect(saySpy).not.toHaveBeenCalled();
   });
 });
