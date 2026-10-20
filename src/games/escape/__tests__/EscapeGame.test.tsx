@@ -16,9 +16,22 @@ import { EscapeGame } from "../EscapeGame";
 
 describe("EscapeGame", () => {
   const noop = () => {};
+  let drawImageMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    drawImageMock = vi.fn();
+    const fakeContext: Partial<CanvasRenderingContext2D> = {
+      setTransform: vi.fn(),
+      clearRect: vi.fn(),
+      scale: vi.fn(),
+      drawImage: drawImageMock as CanvasRenderingContext2D["drawImage"],
+    };
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(fakeContext as RenderingContext);
+
+    // Mock Image to act as immediately loaded so we can test drawStatic's drawImage calls
+    Object.defineProperty(window.HTMLImageElement.prototype, 'naturalWidth', { get: () => 100, configurable: true });
+    Object.defineProperty(window.HTMLImageElement.prototype, 'naturalHeight', { get: () => 100, configurable: true });
     vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => cb && cb());
     vi.spyOn(sound, "say").mockImplementation(() => {});
     vi.spyOn(sfx, "tap").mockImplementation(() => {});
@@ -412,5 +425,37 @@ describe("EscapeGame", () => {
     fireEvent.click(trayKey);
     expect(sfx.tap).toHaveBeenCalledOnce();
     expect(sound.say).toHaveBeenCalledWith(jaLabel);
+  });
+
+  it("does not draw rest layers for unavailable hotspots", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "rocketpad") ?? rooms[0];
+
+    // Clear previous calls
+    drawImageMock.mockClear();
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="en"
+      />,
+    );
+
+    // EscapeGame calls drawStatic on mount.
+    // In rocketpad, the 'slot' hotspot is physically covered by the 'panel' hotspot.
+    // Therefore 'slot' is unavailable initially, while 'panel' is available.
+    const calls = drawImageMock.mock.calls as [HTMLImageElement, number, number, number, number][];
+    
+    const slotCalls = calls.filter((call) => call[0]?.src && call[0].src.includes('slot_rest'));
+    const panelCalls = calls.filter((call) => call[0]?.src && call[0].src.includes('panel_rest'));
+
+    // The slot rest layer should NOT be drawn because it's unavailable
+    expect(slotCalls.length).toBe(0);
+    
+    // The panel rest layer should be drawn because it is available
+    expect(panelCalls.length).toBeGreaterThan(0);
   });
 });

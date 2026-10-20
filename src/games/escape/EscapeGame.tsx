@@ -552,6 +552,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
     ctx.scale(dpr, dpr);
 
     for (const h of rm.hotspots) {
+      if (!isHotspotAvailable(rm, st, h.id)) continue;
       if (!h.sprite) continue;
       const sp = h.sprite;
       const isUsed = st.used.includes(h.id);
