@@ -277,6 +277,7 @@ export const JA: Table = {
   'sticker.size.large': 'おおきい',
   'sticker.charactersEmpty': 'キャラクター もうすぐ！ ✨',
   'memory.moves': 'てすう: {n}',
+  'memory.cardFaceDown': 'うらがえしのカード',
   'rhyme.ask': 'おなじ おとで おわるのは どれ？',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
   'story.tryAgain': 'あちゃ！ べつのみち ↩️',

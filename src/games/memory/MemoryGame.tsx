@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Animated, Image, StyleSheet, Text, View } from 'react-native';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { GameShell, ScoreChip } from '../../components/GameShell';
+import { FlipCard, MemoryBoard } from '../../components/MemoryBoard';
 import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
@@ -12,7 +12,7 @@ import { manifest } from '../../manifest';
 import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { say, sfx, useSay } from '../../sound';
-import { colors, fonts, shadows } from '../../theme';
+import { colors, fonts } from '../../theme';
 import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from './logic';
 
 interface Props {
@@ -141,38 +141,39 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
   };
 
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-  const count = board.length;
-  // Choose a grid that fills the viewport without scrolling.
-  const cols = isLandscape ? Math.ceil(count / 2) : count <= 8 ? 2 : count <= 12 ? 3 : 4;
-  const rows = Math.ceil(count / cols);
-  const gap = 12;
-  const availW = Math.min(width - 32, 1100) - (duel ? 26 : 0); // halo padding
-  const availH = height - 84 - (duel ? 92 : 64); // header + chips/moves line
-  const cardW = Math.min(
-    (availW - (cols - 1) * gap) / cols,
-    (availH - (rows - 1) * gap) / rows / 1.15,
-    150
-  );
-
   const turnPlayer = MP_PLAYERS[duelState.turn];
   const winner = duelWinner(duelState);
 
   const boardView = (
-    <View style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }]}>
-      {board.map((card) => (
-        <FlipCard
-          key={card.key}
-          card={card}
-          size={cardW}
-          up={faceUp.includes(card.key) || matched.includes(card.icon)}
-          matched={matched.includes(card.icon)}
-          ownerColor={matchedBy[card.icon] !== undefined ? MP_PLAYERS[matchedBy[card.icon]].color : undefined}
-          onFlip={() => onFlip(card)}
-        />
-      ))}
-    </View>
+    <MemoryBoard
+      cardCount={board.length}
+      extraPaddingW={duel ? 26 : 0}
+      extraPaddingH={duel ? 92 : 64}
+    >
+      {(cardW) =>
+        board.map((card) => {
+          const isUp = faceUp.includes(card.key) || matched.includes(card.icon);
+          const isMatched = matched.includes(card.icon);
+          const owner = matchedBy[card.icon];
+          return (
+            <FlipCard
+              key={card.key}
+              size={cardW}
+              up={isUp}
+              matched={isMatched}
+              ownerColor={owner !== undefined ? MP_PLAYERS[owner].color : undefined}
+              onFlip={() => onFlip(card)}
+              accessibilityLabel={isUp ? card.icon : t(lang, 'memory.cardFaceDown')}
+              testID={`memory-card-${card.key}-${card.icon}`}
+              sparkleTrigger={card.icon}
+              renderCardFace={() => (
+                <Image source={SPOTIT_ICONS[card.icon]} style={styles.cardImage} resizeMode="contain" />
+              )}
+            />
+          );
+        })
+      }
+    </MemoryBoard>
   );
 
   return (
@@ -248,74 +249,8 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   );
 }
 
-function tint(hex: string, alpha: number): string {
-  const n = parseInt(hex.slice(1), 16);
-  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
-}
-
-function FlipCard({
-  card, size, up, matched, ownerColor, onFlip,
-}: {
-  card: MemoryCard;
-  size: number;
-  up: boolean;
-  matched: boolean;
-  ownerColor?: string;
-  onFlip: () => void;
-}) {
-  const t = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.spring(t, { toValue: up ? 1 : 0, useNativeDriver: true, friction: 7 }).start();
-  }, [up, t]);
-
-  const frontRot = t.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
-  const backRot = t.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '360deg'] });
-
-  return (
-    <Pressable
-      onPress={onFlip}
-      testID={`memory-card-${card.key}-${card.icon}`}
-      accessibilityLabel={up ? card.icon : 'face-down card'}
-      accessibilityRole="button"
-      style={{ width: size, height: size * 1.15 }}
-    >
-      <Animated.View
-        style={[styles.face, styles.faceDown, shadows.soft, { transform: [{ perspective: 700 }, { rotateY: frontRot }] }]}
-      >
-        <View style={styles.backRim}>
-          <View style={styles.backBadge}>
-            <Text style={{ fontSize: size * 0.3 }}>❓</Text>
-          </View>
-          <View style={[styles.backDot, { top: 7, left: 7 }]} />
-          <View style={[styles.backDot, { top: 7, right: 7 }]} />
-          <View style={[styles.backDot, { bottom: 7, left: 7 }]} />
-          <View style={[styles.backDot, { bottom: 7, right: 7 }]} />
-        </View>
-      </Animated.View>
-      <Animated.View
-        style={[
-          styles.face,
-          styles.faceUp,
-          shadows.soft,
-          matched && styles.faceMatched,
-          matched && ownerColor ? { borderColor: ownerColor, backgroundColor: tint(ownerColor, 0.12) } : null,
-          { transform: [{ perspective: 700 }, { rotateY: backRot }] },
-        ]}
-      >
-        <Image source={SPOTIT_ICONS[card.icon]} style={{ width: '78%', height: '78%' }} resizeMode="contain" />
-        {matched ? <SparkleBurst trigger={card.icon} count={5} size={13} /> : null}
-      </Animated.View>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   boardWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  board: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-  },
   halo: {
     position: 'absolute',
     top: 0,
@@ -339,44 +274,7 @@ const styles = StyleSheet.create({
   winStats: { flexDirection: 'row', gap: 22, alignItems: 'flex-end', justifyContent: 'center' },
   winStatCol: { alignItems: 'center', gap: 4 },
   crown: { fontSize: 24, height: 30 },
-  face: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backfaceVisibility: 'hidden',
-  },
-  faceDown: { backgroundColor: colors.teal, padding: 5 },
-  backRim: {
-    flex: 1,
-    alignSelf: 'stretch',
-    borderRadius: 13,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backBadge: {
-    width: '58%',
-    aspectRatio: 1,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.28)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  backDot: {
-    position: 'absolute',
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-  },
-  faceUp: { backgroundColor: colors.card, borderWidth: 3, borderColor: colors.teal },
-  faceMatched: { borderColor: colors.green, backgroundColor: 'rgba(95,191,110,0.12)' },
+  cardImage: { width: '78%', height: '78%' },
   moves: {
     textAlign: 'center',
     fontFamily: fonts.bodyReg,
