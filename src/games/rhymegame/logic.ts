@@ -176,20 +176,29 @@ function buildLines(lang: Lang, target: RhymeEntry, correct: RhymeEntry): {
 }
 
 export function makeRhymeRound(
-  rng: Rng, entries: RhymeEntry[], tileCount: number, lang: Lang, avoidIcon?: string,
+  rng: Rng, entries: RhymeEntry[], tileCount: number, lang: Lang, usedFamilies: string[] = [],
 ): RhymeRound {
   const families = playableFamilies(entries);
   const familyKeys = Object.keys(families);
   if (familyKeys.length < 2) {
     throw new Error('Not enough rhyme families to build a round');
   }
-  // Pick a family, then a target from it (avoiding the previous target).
-  const targetFamily = familyKeys[Math.floor(rng() * familyKeys.length)];
+
+  let availableKeys = familyKeys.filter((k) => !usedFamilies.includes(k));
+  if (availableKeys.length === 0) {
+    const lastUsed = usedFamilies[usedFamilies.length - 1];
+    usedFamilies.length = 0; // Clear so history tracks a fresh pass
+    if (lastUsed) {
+      availableKeys = familyKeys.filter((k) => k !== lastUsed);
+      usedFamilies.push(lastUsed);
+    }
+    if (availableKeys.length === 0) availableKeys = familyKeys;
+  }
+
+  // Pick a family, then a target from it.
+  const targetFamily = availableKeys[Math.floor(rng() * availableKeys.length)];
   const familyMembers = families[targetFamily];
-  const targetCandidates = familyMembers.filter((e) => e.icon !== avoidIcon);
-  const target = (targetCandidates.length ? targetCandidates : familyMembers)[
-    Math.floor(rng() * (targetCandidates.length || familyMembers.length))
-  ];
+  const target = familyMembers[Math.floor(rng() * familyMembers.length)];
 
   // Correct: any DIFFERENT icon in the same family.
   const sameFamily = shuffle(rng, familyMembers.filter((e) => e.icon !== target.icon));

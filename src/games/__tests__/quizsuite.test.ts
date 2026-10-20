@@ -345,6 +345,33 @@ describe('rhyme: quiz round', () => {
     expect(arr.some((l) => l.endsWith('！押韵！'))).toBe(true);
     expect(arr.some((l) => l.endsWith('！好啱音！'))).toBe(true);
   });
+
+  it('does not repeat target families until pool is exhausted', () => {
+    const entries = availableEntries('en', iconsList);
+    const rng = makeRng(12345);
+    const usedFamilies: string[] = [];
+    const families = playableFamilies(entries);
+    const poolSize = Object.keys(families).length;
+
+    const seen = new Set<string>();
+    for (let i = 0; i < poolSize; i++) {
+      const r = makeRhymeRound(rng, entries, 3, 'en', usedFamilies);
+      expect(seen.has(r.target.rhymeKey)).toBe(false);
+      seen.add(r.target.rhymeKey);
+      usedFamilies.push(r.target.rhymeKey);
+    }
+
+    // Next rounds should reset and pick from the remaining pool again without repeating.
+    // Since 1 element is carried over as 'lastUsed' to avoid immediate repetition,
+    // the next pass will only have poolSize - 1 available families before resetting again.
+    seen.clear();
+    for (let i = 0; i < poolSize - 1; i++) {
+      const r = makeRhymeRound(rng, entries, 3, 'en', usedFamilies);
+      expect(seen.has(r.target.rhymeKey)).toBe(false);
+      seen.add(r.target.rhymeKey);
+      usedFamilies.push(r.target.rhymeKey);
+    }
+  });
 });
 
 describe('rhyme: per-language families', () => {

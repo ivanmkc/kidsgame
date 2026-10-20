@@ -41,10 +41,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
 
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  const historyRef = useRef<string[]>([]);
   const [roundIdx, setRoundIdx] = useState(0);
-  const [round, setRound] = useState<RhymeRound | null>(
-    () => (playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null),
-  );
+  const [round, setRound] = useState<RhymeRound | null>(() => {
+    if (!playable) return null;
+    const r = makeRhymeRound(rngRef.current, entries, tileCount, gameLang, []);
+    historyRef.current = [r.target.rhymeKey];
+    return r;
+  });
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -52,7 +56,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   useWinLine(won, t(lang, 'win.rhyme'));
   useEffect(() => {
     lockedRef.current = false;
-    setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null);
+    historyRef.current = [];
+    if (playable) {
+      const r = makeRhymeRound(rngRef.current, entries, tileCount, gameLang, historyRef.current);
+      historyRef.current.push(r.target.rhymeKey);
+      setRound(r);
+    } else {
+      setRound(null);
+    }
   }, [gameLang]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && playable, timerKey);
   const { width, height } = useWindowDimensions();
@@ -72,7 +83,9 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
         lockedRef.current = false;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
-          setRound(makeRhymeRound(rngRef.current, entries, tileCount, gameLang, round.target.icon));
+          const r = makeRhymeRound(rngRef.current, entries, tileCount, gameLang, historyRef.current);
+          historyRef.current.push(r.target.rhymeKey);
+          setRound(r);
         }
       });
     } else {
@@ -88,7 +101,14 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
-    setRound(playable ? makeRhymeRound(rngRef.current, entries, tileCount, gameLang) : null);
+    historyRef.current = [];
+    if (playable) {
+      const r = makeRhymeRound(rngRef.current, entries, tileCount, gameLang, historyRef.current);
+      historyRef.current.push(r.target.rhymeKey);
+      setRound(r);
+    } else {
+      setRound(null);
+    }
     setWrongIdx(null);
   };
 
