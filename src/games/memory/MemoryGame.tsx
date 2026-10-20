@@ -13,7 +13,9 @@ import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../mu
 import { makeRng } from '../../rng';
 import { say, sfx, useSay } from '../../sound';
 import { colors, fonts } from '../../theme';
-import { DuelState, MemoryCard, buildBoard, duelInit, duelResolve, duelWinner, nextStarter } from './logic';
+import { duelWinner } from '../../components/memoryLogic';
+import { useMemoryLogic } from '../../components/useMemoryLogic';
+import { MemoryCard, buildBoard } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -32,15 +34,38 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   const [board, setBoard] = useState<MemoryCard[]>(() =>
     buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs)
   );
-  const [faceUp, setFaceUp] = useState<number[]>([]);
-  const [matched, setMatched] = useState<string[]>([]);
-  const [matchedBy, setMatchedBy] = useState<Record<string, PlayerIx>>({});
-  const [duelState, setDuelState] = useState<DuelState>(() => duelInit(Math.random() < 0.5 ? 0 : 1));
-  const [moves, setMoves] = useState(0);
-  const lockRef = useRef(false);
+  const {
+    faceUp,
+    matched,
+    matchedBy,
+    duelState,
+    moves,
+    onFlip,
+    reset,
+    won,
+    matchedPairs,
+  } = useMemoryLogic({
+    board,
+    isMatch: (a, b) => a.icon === b.icon,
+    duel,
+    disabled: mode === null,
+    onMatch: (_a, _b, scorer, isLastPair) => {
+      sfx.good();
+      if (duel && scorer !== undefined && !isLastPair) {
+        say(`${MP_PLAYERS[scorer].name} found a pair! Go again!`);
+      }
+    },
+    onMismatch: () => {
+      if (duel) sfx.wrong();
+    },
+    onTurnChange: (next) => {
+      if (duel) {
+        say(`${MP_PLAYERS[next].name}'s turn!`);
+      }
+    },
+  });
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer && mode !== '2p';
-  const won = matched.length * 2 === board.length;
   useSay(duel ? null : 'Flip the cards and find the pairs!');
   useEffect(() => { if (won && !duel) say(t(lang, 'win.memory')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
@@ -67,13 +92,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     if (prevPairs.current === pairs) return;
     prevPairs.current = pairs;
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
-    setFaceUp([]);
-    setMatched([]);
-    setMoves(0);
-    // scores must not leak across boards
-    setMatchedBy({});
-    const starter = nextStarter(duelState);
-    setDuelState(duelInit(starter));
+    const starter = reset();
     if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
   }, [pairs]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -89,55 +108,10 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     }
   }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onFlip = (card: MemoryCard) => {
-    if (mode === null) return; // inert while the 1P/2P picker is up
-    if (lockRef.current || won) return;
-    if (faceUp.length >= 2) return; // multi-touch hardening
-    if (faceUp.includes(card.key) || matched.includes(card.icon)) return;
-    const next = [...faceUp, card.key];
-    setFaceUp(next);
-    if (next.length === 2) {
-      setMoves((m) => m + 1);
-      const [a, b] = next.map((k) => board.find((c) => c.key === k)!);
-      if (a.icon === b.icon) {
-        setMatched((m) => [...m, a.icon]);
-        setFaceUp([]);
-        sfx.good();
-        if (duel) {
-          const scorer = duelState.turn;
-          setMatchedBy((mb) => ({ ...mb, [a.icon]: scorer }));
-          setDuelState((d) => duelResolve(d, true));
-          const lastPair = (matched.length + 1) * 2 === board.length;
-          // ONE combined utterance — say() cancels prior speech.
-          if (!lastPair) say(`${MP_PLAYERS[scorer].name} found a pair! Go again!`);
-        }
-      } else {
-        if (duel) sfx.wrong();
-        lockRef.current = true;
-        setTimeout(() => {
-          setFaceUp([]);
-          lockRef.current = false;
-          if (duel) {
-            // turn signal lands exactly when input unlocks
-            setDuelState((d) => duelResolve(d, false));
-            say(`${MP_PLAYERS[nextTurn(duelState.turn)].name}'s turn!`);
-          }
-        }, 750);
-      }
-    }
-  };
-
-  const reset = () => {
+  const resetGame = () => {
     setTimerKey((k) => k + 1);
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
-    setFaceUp([]);
-    setMatched([]);
-    setMoves(0);
-    lockRef.current = false;
-    // scores must not leak across boards; the non-winner starts the rematch
-    setMatchedBy({});
-    const starter = nextStarter(duelState);
-    setDuelState(duelInit(starter));
+    const starter = reset();
     if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
   };
 
@@ -152,9 +126,9 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     >
       {(cardW) =>
         board.map((card) => {
-          const isUp = faceUp.includes(card.key) || matched.includes(card.icon);
-          const isMatched = matched.includes(card.icon);
-          const owner = matchedBy[card.icon];
+          const isUp = faceUp.includes(card.key) || matched.includes(card.key);
+          const isMatched = matched.includes(card.key);
+          const owner = matchedBy[card.key];
           return (
             <FlipCard
               key={card.key}
@@ -185,7 +159,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
       right={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="memory-timer" /> : null}
-          <ScoreChip label={`🧠 ${matched.length}/${pairs}`} testID="memory-score" />
+          <ScoreChip label={`🧠 ${matchedPairs}/${pairs}`} testID="memory-score" />
         </View>
       }
     >
@@ -241,7 +215,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
             </View>
           ) : undefined
         }
-        onNext={reset} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
+        onNext={resetGame} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
         onHome={onHome}
       />
       {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
