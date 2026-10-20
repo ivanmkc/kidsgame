@@ -222,6 +222,17 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1, 1.06],
   });
 
+  const tapDots = [];
+  for (let i = 0; i < round.sequence.length; i++) {
+    tapDots.push(
+      <View
+        key={i}
+        testID={`tap-dot-${i}`}
+        style={[styles.tapDot, i < tapped.length && styles.tapDotFilled]}
+      />,
+    );
+  }
+
   return (
     <GameShell
       title={t(lang, "shell.bells.title")}
@@ -260,8 +271,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
               >
                 <Text style={styles.statusEmoji}>👆</Text>
                 <Text style={styles.statusText}>
-                  {t(lang, "music.yourTurn")} ({tapped.length}/
-                  {round.sequence.length})
+                  {t(lang, "music.yourTurn")}
                 </Text>
               </View>
               <Pressable
@@ -278,7 +288,13 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={styles.replayText}>🔊</Text>
               </Pressable>
             </View>
-          ))}
+          )
+        )}
+        {phase === "play" && !won && (
+          <View testID="tap-dot-row" style={styles.tapDotRow}>
+            {tapDots}
+          </View>
+        )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
             <Animated.View
@@ -380,4 +396,16 @@ const styles = StyleSheet.create({
   },
   bellText: { textAlign: "center" },
   pressed: { transform: [{ scale: 0.92 }] },
+  tapDotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+  tapDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#C5693A",
+    backgroundColor: "transparent",
+  },
+  tapDotFilled: {
+    backgroundColor: "#E8874F",
+  },
 });
