@@ -10,6 +10,7 @@ import {
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
+import { t } from "../../../i18n";
 import { SpellGame } from "../SpellGame";
 import * as logic from "../logic";
 
@@ -224,5 +225,86 @@ describe("SpellGame", () => {
 
     unmount();
     expect(clearTimeoutSpy).toHaveBeenCalledWith(secondTimerId);
+  });
+
+  it("localizes speaker button and tile accessibilityLabels according to lang", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    const { rerender } = render(
+      <SpellGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    const enSpeaker = screen.getByTestId("spell-word-cat");
+    expect(enSpeaker.getAttribute("aria-label")).toBe(
+      t("en", "spell.hearAgain"),
+    );
+    const enTile = screen.getByTestId("spell-tile-1");
+    expect(enTile.getAttribute("aria-label")).toBe("C");
+
+    // In Japanese, verify localized speaker label and kana tile label without English
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+      chars: ["ね", "こ"],
+      decoys: [],
+      tiles: [
+        { id: 10, char: "ね" },
+        { id: 20, char: "こ" },
+      ],
+    });
+
+    rerender(<SpellGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    const jaSpeaker = screen.getByTestId("spell-word-cat");
+    expect(jaSpeaker.getAttribute("aria-label")).toBe(
+      t("ja", "spell.hearAgain"),
+    );
+    expect(jaSpeaker.getAttribute("aria-label")).not.toContain("Hear the word");
+
+    const jaTile = screen.getByTestId("spell-tile-10");
+    expect(jaTile.getAttribute("aria-label")).toBe("ね");
+    expect(jaTile.getAttribute("aria-label")).not.toContain("Letter");
   });
 });

@@ -141,7 +141,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       <View style={[styles.board, shortH && { gap: 10 }]} key={gameKey}>
         <Pressable
           onPress={() => { sfx.tap(); saySequence([linesForWord(round.word).ask, linesForWord(round.word).spell]); }}
-          accessibilityLabel={`Hear the word ${round.word.text}`}
+          accessibilityLabel={t(lang, 'spell.hearAgain')}
           accessibilityRole="button"
           style={({ pressed }) => [styles.iconCard, shadows.soft, pressed && styles.pressed]}
           testID={`spell-word-${round.word.icon}`}
@@ -237,7 +237,7 @@ function LetterTile({
       <Pressable
         onPress={onPress}
         testID={`spell-tile-${tile.id}`}
-        accessibilityLabel={`Letter ${tile.char}`}
+        accessibilityLabel={tile.char}
         accessibilityRole="button"
         style={({ pressed }) => [
           styles.tile,
