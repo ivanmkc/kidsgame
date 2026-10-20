@@ -12,7 +12,7 @@ import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import { colors, fonts, shadows } from '../../theme';
 import { sfx, say, useSay } from '../../sound';
-import { ShadowDifficulty, makeShadowRound } from './logic';
+import { ShadowDifficulty, makeShadowRound, shadowPrompt } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -41,7 +41,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
-  useSay('Whose shadow is that? Match it!');
+  useSay(shadowPrompt(lang));
   useEffect(() => { if (won) say(t(lang, 'win.shadow')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
