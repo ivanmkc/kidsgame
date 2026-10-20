@@ -16,7 +16,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
+import { say, sfx } from "../../sound";
 import { playDrum, playDrumSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -56,6 +56,11 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, "win.echobeat" as never));
+  useEffect(() => {
+    if (!won) {
+      say(t(lang, "shell.echobeat.sub"));
+    }
+  }, [lang, won]);
 
   const playDemo = useCallback(
     (r: EchoBeatRound) => {
