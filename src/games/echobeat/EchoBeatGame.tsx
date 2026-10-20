@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
@@ -23,6 +24,7 @@ import {
   roundsToWin,
   checkEcho,
   EchoBeatRound,
+  echoBeatLayout,
 } from "./logic";
 
 interface Props {
@@ -32,6 +34,11 @@ interface Props {
 }
 
 export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
+  const { width, height } = useWindowDimensions();
+  const { drumSize, drumEmojiSize, gap, shortH } = echoBeatLayout(
+    width,
+    height,
+  );
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<EchoBeatRound>(() =>
@@ -87,6 +94,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     }
     return () => {
       if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (resultTimer.current) clearTimeout(resultTimer.current);
       stopSequence();
     };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -95,7 +103,6 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     if (phase !== "tap" || tapCount === 0) return;
     if (resultTimer.current) clearTimeout(resultTimer.current);
     resultTimer.current = setTimeout(() => {
-      setPhase("result");
       const res = checkEcho(round, tapTimes, difficulty);
       if (res.countCorrect && res.timingCorrect) {
         sfx.good();
@@ -125,7 +132,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   }, [tapCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = () => {
-    if (won || phase !== "tap") return;
+    if (won || phase !== "tap" || result !== null) return;
     playDrum();
     const now = performance.now();
     setTapTimes((prev) => [...prev, now]);
@@ -230,15 +237,25 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         <ScoreChip label={`🥁 ${score}/${total}`} testID="echobeat-score" />
       }
     >
-      <View style={styles.board}>
+      <View style={[styles.board, { gap }]}>
         {phase === "listen" ? (
-          <View style={[styles.statusCard, shadows.soft]}>
+          <View
+            style={[
+              styles.statusCard,
+              shadows.soft,
+              shortH && styles.statusCardShort,
+            ]}
+          >
             <Animated.Text
-              style={[styles.statusEmoji, { transform: [{ scale: earPulse }] }]}
+              style={[
+                styles.statusEmoji,
+                shortH && styles.statusEmojiShort,
+                { transform: [{ scale: earPulse }] },
+              ]}
             >
               👂
             </Animated.Text>
-            <Text style={styles.statusText}>
+            <Text style={[styles.statusText, shortH && styles.statusTextShort]}>
               {t(lang, "music.listen" as never)}
             </Text>
           </View>
@@ -249,12 +266,15 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
               shadows.soft,
               styles.yourTurnCard,
               result === "bad" && styles.wrongCard,
+              shortH && styles.statusCardShort,
             ]}
           >
-            <Text style={styles.statusEmoji}>
+            <Text
+              style={[styles.statusEmoji, shortH && styles.statusEmojiShort]}
+            >
               {result === "good" ? "🎉" : result === "bad" ? "🔄" : "👆"}
             </Text>
-            <Text style={styles.statusText}>
+            <Text style={[styles.statusText, shortH && styles.statusTextShort]}>
               {result === "good"
                 ? "🎉"
                 : result === "bad"
@@ -271,9 +291,10 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
           <Pressable
             onPress={onTap}
             testID="echobeat-drum"
-            disabled={phase !== "tap"}
+            disabled={phase !== "tap" || result !== null}
             style={({ pressed }) => [
               styles.drum,
+              { width: drumSize, height: drumSize, borderRadius: drumSize / 2 },
               shadows.lifted,
               phase === "listen" && flash === null && styles.drumDimmed,
               flash !== null && styles.drumFlash,
@@ -283,12 +304,18 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             ]}
           >
             <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-              <Text style={styles.drumEmoji}>🥁</Text>
+              <Text style={[styles.drumEmoji, { fontSize: drumEmojiSize }]}>
+                🥁
+              </Text>
             </Animated.View>
             <SparkleBurst trigger={sparkKey} count={6} size={14} />
           </Pressable>
         </Animated.View>
-        {phase === "tap" && <View style={styles.tapDotRow}>{tapDots}</View>}
+        {phase === "tap" && (
+          <View style={[styles.tapDotRow, shortH && styles.tapDotRowShort]}>
+            {tapDots}
+          </View>
+        )}
       </View>
       <WinOverlay
         visible={won}
@@ -321,18 +348,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
+  statusCardShort: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+  },
   yourTurnCard: { borderColor: colors.green, backgroundColor: "#E8F5E9" },
   wrongCard: {
     borderColor: colors.red,
     backgroundColor: "rgba(232,86,79,0.12)",
   },
   statusEmoji: { fontSize: 30 },
+  statusEmojiShort: { fontSize: 24 },
   statusText: {
     fontFamily: fonts.display,
     fontSize: 18,
     color: colors.ink,
     textAlign: "center",
   },
+  statusTextShort: { fontSize: 15 },
   drum: {
     width: 180,
     height: 180,
@@ -351,6 +385,7 @@ const styles = StyleSheet.create({
   },
   drumEmoji: { fontSize: 64 },
   tapDotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+  tapDotRowShort: { marginTop: 0 },
   tapDot: {
     width: 16,
     height: 16,

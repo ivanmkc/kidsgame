@@ -192,4 +192,44 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("renders scaled drum in mobile landscape orientation (667x375)", () => {
+    setViewport(667, 375);
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const drum = screen.getByTestId("echobeat-drum");
+    expect(drum.style.width).toBe("142px");
+    expect(drum.style.height).toBe("142px");
+  });
+
+  it("renders compact drum in 568x320 landscape orientation", () => {
+    setViewport(568, 320);
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const drum = screen.getByTestId("echobeat-drum");
+    expect(drum.style.width).toBe("121px");
+    expect(drum.style.height).toBe("121px");
+  });
 });
+
+function setViewport(width: number, height: number) {
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  if (window.visualViewport) {
+    Object.defineProperty(window.visualViewport, "width", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window.visualViewport, "height", {
+      value: height,
+      configurable: true,
+    });
+  }
+  window.dispatchEvent(new Event("resize"));
+}
