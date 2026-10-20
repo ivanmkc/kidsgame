@@ -1,11 +1,20 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { MemoryGame } from '../MemoryGame';
+import React from "react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as sound from "../../../sound";
+import { t } from "../../../i18n";
+import { MemoryGame } from "../MemoryGame";
+import { memoryPrompt } from "../logic";
 
-vi.mock('../../../sound', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../sound')>();
+vi.mock("../../../sound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../sound")>();
   return {
     ...actual,
     say: vi.fn(),
@@ -19,26 +28,26 @@ vi.mock('../../../sound', async (importOriginal) => {
 });
 
 function setViewport(width: number, height: number) {
-  Object.defineProperty(window, 'innerWidth', {
+  Object.defineProperty(window, "innerWidth", {
     value: width,
     configurable: true,
   });
-  Object.defineProperty(window, 'innerHeight', {
+  Object.defineProperty(window, "innerHeight", {
     value: height,
     configurable: true,
   });
-  Object.defineProperty(document.documentElement, 'clientWidth', {
+  Object.defineProperty(document.documentElement, "clientWidth", {
     value: width,
     configurable: true,
   });
-  Object.defineProperty(document.documentElement, 'clientHeight', {
+  Object.defineProperty(document.documentElement, "clientHeight", {
     value: height,
     configurable: true,
   });
-  window.dispatchEvent(new Event('resize'));
+  window.dispatchEvent(new Event("resize"));
 }
 
-describe('MemoryGame', () => {
+describe("MemoryGame", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     setViewport(800, 600);
@@ -50,26 +59,28 @@ describe('MemoryGame', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders memory cards on board and tracks moves on card flips', async () => {
+  it("renders memory cards on board and tracks moves on card flips", async () => {
     const onHome = vi.fn();
     render(<MemoryGame onHome={onHome} difficulty="easy" lang="en" />);
 
     const cards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
     // Easy mode memory has 4 pairs = 8 cards
     expect(cards).toHaveLength(8);
 
     // Initial state: all cards face down
     for (const card of cards) {
-      expect(card.getAttribute('aria-label')).toBe('face-down card');
+      expect(card.getAttribute("aria-label")).toBe("face-down card");
     }
 
     // Flip first card
     await act(async () => {
       fireEvent.click(cards[0]);
     });
-    expect(cards[0].getAttribute('aria-label')).not.toBe('face-down card');
+    expect(cards[0].getAttribute("aria-label")).not.toBe("face-down card");
 
     // Flip second card
     await act(async () => {
@@ -77,47 +88,58 @@ describe('MemoryGame', () => {
     });
 
     // Score / moves should be updated
-    const movesText = screen.getByTestId('memory-moves');
-    expect(movesText.textContent).toContain('1');
+    const movesText = screen.getByTestId("memory-moves");
+    expect(movesText.textContent).toContain("1");
   });
 
-  it('localizes face-down card accessibility labels via i18n in non-English mode', () => {
+  it("localizes face-down card accessibility labels via i18n in non-English mode", () => {
     const onHome = vi.fn();
     render(<MemoryGame onHome={onHome} difficulty="easy" lang="ja" />);
 
     const cards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
 
     for (const card of cards) {
-      expect(card.getAttribute('aria-label')).toBe('うらがえしのカード');
+      expect(card.getAttribute("aria-label")).toBe("うらがえしのカード");
     }
   });
 
-  it('plays in 2P duel mode, updates player scores on matches, and allows rematch', async () => {
+  it("plays in 2P duel mode, updates player scores on matches, and allows rematch", async () => {
     const onHome = vi.fn();
-    render(<MemoryGame onHome={onHome} difficulty="easy" twoPlayerEnabled lang="en" />);
+    render(
+      <MemoryGame
+        onHome={onHome}
+        difficulty="easy"
+        twoPlayerEnabled
+        lang="en"
+      />,
+    );
 
     // In 2P enabled mode, ModePicker is shown first
-    const twoPlayerBtn = screen.getByTestId('mp-choose-2p');
+    const twoPlayerBtn = screen.getByTestId("mp-choose-2p");
     await act(async () => {
       fireEvent.click(twoPlayerBtn);
     });
 
     // Board and duel chips are now visible
-    expect(screen.getByTestId('memory-duel-chip-0')).toBeDefined();
-    expect(screen.getByTestId('memory-duel-chip-1')).toBeDefined();
+    expect(screen.getByTestId("memory-duel-chip-0")).toBeDefined();
+    expect(screen.getByTestId("memory-duel-chip-1")).toBeDefined();
 
     const cards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
     expect(cards).toHaveLength(8);
 
     // Group cards by icon
     const iconPairs = new Map<string, HTMLElement[]>();
     for (const card of cards) {
-      const parts = card.getAttribute('data-testid')!.split('-');
-      const icon = parts.slice(3).join('-');
+      const parts = card.getAttribute("data-testid")!.split("-");
+      const icon = parts.slice(3).join("-");
       const list = iconPairs.get(icon) ?? [];
       list.push(card);
       iconPairs.set(icon, list);
@@ -139,7 +161,7 @@ describe('MemoryGame', () => {
     });
 
     // WinOverlay appears with rematch button
-    const rematchBtn = screen.getByTestId('play-again');
+    const rematchBtn = screen.getByTestId("play-again");
     expect(rematchBtn).toBeDefined();
 
     // Clicking Rematch resets board
@@ -148,11 +170,105 @@ describe('MemoryGame', () => {
     });
 
     const resetCards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
     expect(resetCards).toHaveLength(8);
     for (const card of resetCards) {
-      expect(card.getAttribute('aria-label')).toBe('face-down card');
+      expect(card.getAttribute("aria-label")).toBe("face-down card");
     }
+  });
+});
+
+describe("MemoryGame opening speech", () => {
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  it("speaks localized opening narration in solo mode when lang is Japanese", () => {
+    const useSaySpy = vi.spyOn(sound, "useSay");
+    render(<MemoryGame onHome={noop} difficulty="easy" lang="ja" />);
+    expect(useSaySpy).toHaveBeenCalledWith(memoryPrompt("ja"));
+    expect(useSaySpy).not.toHaveBeenCalledWith(
+      "Flip the cards and find the pairs!",
+    );
+  });
+
+  it("speaks localized opening narration in solo mode when lang is English", () => {
+    const useSaySpy = vi.spyOn(sound, "useSay");
+    render(<MemoryGame onHome={noop} difficulty="easy" lang="en" />);
+    expect(useSaySpy).toHaveBeenCalledWith(
+      "Flip the cards and find the pairs!",
+    );
+  });
+
+  it("does not speak solo blurb while ModePicker is shown", () => {
+    const useSaySpy = vi.spyOn(sound, "useSay");
+    render(
+      <MemoryGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+    expect(useSaySpy).toHaveBeenCalledWith(t("ja", "mp.title"));
+    expect(useSaySpy).not.toHaveBeenCalledWith(memoryPrompt("ja"));
+    expect(useSaySpy).not.toHaveBeenCalledWith(
+      "Flip the cards and find the pairs!",
+    );
+  });
+
+  it("speaks localized narration after choosing 1P mode from ModePicker", () => {
+    const useSaySpy = vi.spyOn(sound, "useSay");
+    render(
+      <MemoryGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+    expect(useSaySpy).toHaveBeenCalledWith(t("ja", "mp.title"));
+    useSaySpy.mockClear();
+
+    fireEvent.click(screen.getByTestId("mp-choose-1p"));
+
+    expect(useSaySpy).toHaveBeenCalledWith(memoryPrompt("ja"));
+    expect(useSaySpy).not.toHaveBeenCalledWith(
+      "Flip the cards and find the pairs!",
+    );
+  });
+
+  it("does not speak solo blurb after choosing 2P mode from ModePicker", () => {
+    const useSaySpy = vi.spyOn(sound, "useSay");
+    render(
+      <MemoryGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+    useSaySpy.mockClear();
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    expect(useSaySpy).not.toHaveBeenCalledWith(memoryPrompt("ja"));
+    expect(useSaySpy).not.toHaveBeenCalledWith(
+      "Flip the cards and find the pairs!",
+    );
   });
 });
