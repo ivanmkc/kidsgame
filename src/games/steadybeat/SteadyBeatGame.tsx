@@ -47,6 +47,9 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const [startMs, setStartMs] = useState(0);
   const [hits, setHits] = useState(0);
   const [sparkKey, setSparkKey] = useState(0);
+  const [flash, setFlash] = useState(false);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listenPulse = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, "win.steadybeat" as never));
   useEffect(() => {
@@ -60,17 +63,36 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const startMetronome = useCallback(
     (r: SteadyBeatRound) => {
       setPhase("listen");
+      const beatMs = 60000 / r.bpm;
+      const triggerBeatVisual = () => {
+        setFlash(true);
+        listenPulse.setValue(1.25);
+        Animated.spring(listenPulse, {
+          toValue: 1,
+          friction: 4,
+          useNativeDriver: true,
+        }).start();
+        if (flashTimer.current) clearTimeout(flashTimer.current);
+        flashTimer.current = setTimeout(
+          () => setFlash(false),
+          Math.min(180, beatMs / 2),
+        );
+      };
+
       playDrum(0.5);
       setListenBeat(0);
-      const beatMs = 60000 / r.bpm;
+      triggerBeatVisual();
       let count = 1;
       const interval = setInterval(() => {
         if (count < 4) {
           playDrum(0.5);
           setListenBeat(count);
           count++;
+          triggerBeatVisual();
         } else {
           clearInterval(interval);
+          if (flashTimer.current) clearTimeout(flashTimer.current);
+          setFlash(false);
           playDrum(0.5);
           setListenBeat(null);
           setPhase("tap");
@@ -88,15 +110,21 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           ).start();
         }
       }, beatMs);
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+        if (flashTimer.current) clearTimeout(flashTimer.current);
+        listenPulse.stopAnimation();
+        listenPulse.setValue(1);
+      };
     },
-    [lang, pulseAnim],
+    [lang, listenPulse, pulseAnim],
   );
 
   useEffect(() => {
     if (!won) {
       setTapTimesMs([]);
       setHits(0);
+      setFlash(false);
       const cleanup = startMetronome(round);
       return () => {
         cleanup();
@@ -144,6 +172,8 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    setFlash(false);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setTapTimesMs([]);
@@ -253,15 +283,29 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           style={({ pressed }) => [
             styles.circle,
             shadows.lifted,
-            phase === "listen" && styles.circleDimmed,
+            phase === "listen" && !flash && styles.circleDimmed,
+            phase === "listen" && flash && styles.circleFlash,
+            phase === "listen" && flash && shadows.glowGold,
             phase === "tap" && shadows.glowGold,
             pressed && styles.circlePressed,
           ]}
         >
           <Animated.View
+            testID={flash ? "steadybeat-beat-flash" : undefined}
             style={[
               styles.pulse,
-              phase === "tap" && { transform: [{ scale: pulseScale }] },
+              {
+                transform: [
+                  {
+                    scale:
+                      phase === "tap"
+                        ? pulseScale
+                        : phase === "listen"
+                          ? listenPulse
+                          : 1,
+                  },
+                ],
+              },
             ]}
           >
             <Text style={styles.circleEmoji}>💓</Text>
@@ -352,6 +396,10 @@ const styles = StyleSheet.create({
   },
   circlePressed: { transform: [{ scale: 0.92 }] },
   circleDimmed: { opacity: 0.45 },
+  circleFlash: {
+    borderColor: colors.gold,
+    backgroundColor: "#B89FED",
+  },
   pulse: { alignItems: "center", justifyContent: "center" },
   circleEmoji: { fontSize: 56 },
   dotsRow: { flexDirection: "row", gap: 12, marginTop: 8 },
