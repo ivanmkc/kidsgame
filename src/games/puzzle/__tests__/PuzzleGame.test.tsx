@@ -108,4 +108,21 @@ describe('PuzzleGame', () => {
     fireEvent.click(screen.getByTestId('puzzle-peek'));
     expect(screen.getByTestId('puzzle-peek-overlay')).toBeTruthy();
   });
+
+  it('translates the peek button accessibility label', () => {
+    // Render in Japanese
+    render(
+      <PuzzleGame
+        onHome={() => {}}
+        difficulty="easy"
+        sceneId="d-beach"
+        onPickScene={() => {}}
+        onBackToPicker={() => {}}
+        lang="ja"
+      />,
+    );
+    const peekBtn = screen.getByTestId('puzzle-peek');
+    // For Japanese, 'puzzle.peek.a11y' is 'かんせいした えを みる'
+    expect(peekBtn.getAttribute('aria-label')).toBe('かんせいした えを みる');
+  });
 });

@@ -1,31 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
-import { SCENE_IMAGES } from "../../assets/images";
-import { GameShell, ScoreChip } from "../../components/GameShell";
-import { TimerRing, useElapsed } from "../../components/TimerRing";
-import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
-import { allSceneOptions } from "../sceneOptions";
-import { WinOverlay } from "../../components/WinOverlay";
-import {
-  Difficulty,
-  DifficultyFilter,
-  settingsFor,
-  nextFilter,
-} from "../../difficulty";
-import { Lang } from "../../lang";
-import { t } from "../../i18n";
-import { manifest } from "../../manifest";
-import { makeRng } from "../../rng";
-import { colors, fonts, shadows } from "../../theme";
-import { say, sfx, useSay } from "../../sound";
-import { isSolved, makePuzzle, swap } from "./logic";
+import React, { useEffect, useRef, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SCENE_IMAGES } from '../../assets/images';
+import { GameShell, ScoreChip } from '../../components/GameShell';
+import { TimerRing, useElapsed } from '../../components/TimerRing';
+import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
+import { allSceneOptions } from '../sceneOptions';
+import { WinOverlay } from '../../components/WinOverlay';
+import { Difficulty, DifficultyFilter, settingsFor, nextFilter } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
+import { manifest } from '../../manifest';
+import { makeRng } from '../../rng';
+import { colors, fonts, shadows } from '../../theme';
+import { say, sfx, useSay } from '../../sound';
+import { isSolved, makePuzzle, swap } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -180,7 +168,7 @@ export function PuzzleGame({
           <Pressable
             onPress={showPeek}
             testID="puzzle-peek"
-            accessibilityLabel="Peek at the finished picture"
+            accessibilityLabel={t(lang, 'puzzle.peek.a11y')}
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.peekBtn,
