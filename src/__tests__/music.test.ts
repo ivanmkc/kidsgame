@@ -199,9 +199,32 @@ describe('music', () => {
     music.playDrum();
     expect(fake.oscillators).toHaveLength(0);
     expect(fake.bufferSources).toHaveLength(0);
-    const doneSeq = vi.fn();
-    music.playSequence([{ m: 60, b: 1 }], 120, undefined, doneSeq);
-    expect(doneSeq).toHaveBeenCalled();
+  });
+
+  it('plays note sequence across beats when muted without scheduling audio', () => {
+    vi.useFakeTimers();
+    const fake = setupWebAudio();
+    sound.setMuted(true);
+    const onNote = vi.fn();
+    const onDone = vi.fn();
+
+    music.playSequence(
+      [
+        { m: 60, b: 1 },
+        { m: 64, b: 1 },
+      ],
+      120,
+      onNote,
+      onDone,
+    );
+    expect(fake.oscillators).toHaveLength(0);
+
+    vi.advanceTimersByTime(50);
+    expect(onNote).toHaveBeenCalledWith(0);
+    vi.advanceTimersByTime(500);
+    expect(onNote).toHaveBeenCalledWith(1);
+    vi.advanceTimersByTime(500);
+    expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('plays drum sequence across gaps when muted without scheduling audio', () => {

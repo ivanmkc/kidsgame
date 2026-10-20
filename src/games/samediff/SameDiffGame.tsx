@@ -11,7 +11,7 @@ import { colors, fonts, shadows } from '../../theme';
 import { sfx } from '../../sound';
 import { playSequence, stopSequence } from '../../music';
 import { useWinLine } from '../winlines';
-import { makeSameDiffRound, roundsToWin, isCorrect, SameDiffRound } from './logic';
+import { makeSameDiffRound, roundsToWin, isCorrect, SameDiffRound, phrasePitchRatios } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -25,26 +25,48 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<SameDiffRound>(() => makeSameDiffRound(rngRef.current, difficulty));
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listenA' | 'listenB' | 'pick'>('listenA');
+  const [activeNote, setActiveNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<'same' | 'different' | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
+  const gapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const won = score >= total;
   useWinLine(won, t(lang, 'win.samediff' as never));
 
   const playRound = useCallback((r: SameDiffRound) => {
     stopSequence();
+    if (gapTimer.current) clearTimeout(gapTimer.current);
+    setActiveNote(null);
     setPhase('listenA');
-    playSequence(r.phraseA, 120, undefined, () => {
-      setPhase('listenB');
-      setTimeout(() => {
-        playSequence(r.phraseB, 120, undefined, () => setPhase('pick'));
-      }, 600);
-    });
+    playSequence(
+      r.phraseA,
+      120,
+      (idx) => setActiveNote(idx),
+      () => {
+        setActiveNote(null);
+        setPhase('listenB');
+        gapTimer.current = setTimeout(() => {
+          playSequence(
+            r.phraseB,
+            120,
+            (idx) => setActiveNote(idx),
+            () => {
+              setActiveNote(null);
+              setPhase('pick');
+            },
+          );
+        }, 600);
+      },
+    );
   }, []);
 
   useEffect(() => {
     if (!won) {
       const timer = setTimeout(() => playRound(round), 400);
-      return () => { clearTimeout(timer); stopSequence(); };
+      return () => {
+        clearTimeout(timer);
+        if (gapTimer.current) clearTimeout(gapTimer.current);
+        stopSequence();
+      };
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -74,6 +96,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
+    setActiveNote(null);
     setRound(makeSameDiffRound(rngRef.current, difficulty));
   };
 
@@ -103,6 +126,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickScale = pickGlow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.04] });
+  const ratiosA = phrasePitchRatios(round, round.phraseA);
+  const ratiosB = phrasePitchRatios(round, round.phraseB);
 
   return (
     <GameShell
@@ -116,9 +141,81 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         {phase !== 'pick' ? (
           <View style={[styles.listenCard, shadows.soft]}>
             <Animated.Text style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}>👂</Animated.Text>
-            <View style={styles.melodyDotRow}>
-              <View testID="melody-dot-0" style={[styles.melodyDot, (phase === 'listenA' || phase === 'listenB') && styles.melodyDotFilled]} />
-              <View testID="melody-dot-1" style={[styles.melodyDot, phase === 'listenB' && styles.melodyDotFilled]} />
+            <View style={styles.melodyRows}>
+              <View style={styles.melodyRow} testID="melody-row-0">
+                <View testID="melody-dot-0" style={[styles.melodyDot, (phase === 'listenA' || phase === 'listenB') && styles.melodyDotFilled]} />
+                <View testID="melody-notes-0" style={styles.phraseNotesTrack}>
+                  {ratiosA.map((ratio, i) => {
+                    const isNoteActive = phase === 'listenA' && activeNote === i;
+                    const stemHeight = Math.round(6 + ratio * 20);
+                    return (
+                      <View
+                        key={i}
+                        testID={`melody-0-note-${i}`}
+                        aria-selected={isNoteActive}
+                        style={styles.noteCueCol}
+                      >
+                        <View
+                          testID={`melody-0-dot-${i}${isNoteActive ? '-active' : ''}`}
+                          style={[
+                            styles.noteDot,
+                            isNoteActive && styles.noteDotActive,
+                          ]}
+                        />
+                        <View
+                          testID={`melody-0-stem-${i}`}
+                          style={[
+                            styles.noteStem,
+                            { height: stemHeight },
+                            isNoteActive && styles.noteStemActive,
+                          ]}
+                        />
+                      </View>
+                    );
+                  })}
+                </View>
+              </View>
+              <View style={styles.melodyRow} testID="melody-row-1">
+                <View testID="melody-dot-1" style={[styles.melodyDot, phase === 'listenB' && styles.melodyDotFilled]} />
+                <View testID="melody-notes-1" style={styles.phraseNotesTrack}>
+                  {phase === 'listenB' ? (
+                    ratiosB.map((ratio, i) => {
+                      const isNoteActive = phase === 'listenB' && activeNote === i;
+                      const stemHeight = Math.round(6 + ratio * 20);
+                      return (
+                        <View
+                          key={i}
+                          testID={`melody-1-note-${i}`}
+                          aria-selected={isNoteActive}
+                          style={styles.noteCueCol}
+                        >
+                          <View
+                            testID={`melody-1-dot-${i}${isNoteActive ? '-active' : ''}`}
+                            style={[
+                              styles.noteDot,
+                              isNoteActive && styles.noteDotActive,
+                            ]}
+                          />
+                          <View
+                            testID={`melody-1-stem-${i}`}
+                            style={[
+                              styles.noteStem,
+                              { height: stemHeight },
+                              isNoteActive && styles.noteStemActive,
+                            ]}
+                          />
+                        </View>
+                      );
+                    })
+                  ) : (
+                    [0, 1, 2].map((i) => (
+                      <View key={i} testID={`melody-1-placeholder-${i}`} style={styles.noteCueCol}>
+                        <View style={styles.notePlaceholder} />
+                      </View>
+                    ))
+                  )}
+                </View>
+              </View>
             </View>
           </View>
         ) : (
@@ -190,12 +287,14 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 3,
     borderColor: colors.gold,
-    paddingVertical: 32,
-    paddingHorizontal: 40,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
     alignItems: 'center',
     gap: 12,
   },
   listenEmoji: { fontSize: 56 },
+  melodyRows: { flexDirection: 'column', gap: 10, alignItems: 'center' },
+  melodyRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   melodyDotRow: { flexDirection: 'row', gap: 12 },
   melodyDot: {
     width: 16,
@@ -206,6 +305,55 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   melodyDotFilled: { backgroundColor: colors.gold },
+  phraseNotesTrack: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 44,
+    gap: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.45)',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E8DBC5',
+  },
+  noteCueCol: {
+    width: 26,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  noteDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.gold,
+    borderWidth: 2,
+    borderColor: colors.ink,
+  },
+  noteDotActive: {
+    backgroundColor: colors.green,
+    borderColor: colors.ink,
+    transform: [{ scale: 1.25 }],
+  },
+  noteStem: {
+    width: 4,
+    borderRadius: 2,
+    backgroundColor: colors.inkSoft,
+  },
+  noteStemActive: {
+    backgroundColor: colors.green,
+    width: 5,
+  },
+  notePlaceholder: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 2,
+    borderColor: '#CBBFA8',
+    borderStyle: 'dashed',
+    marginBottom: 12,
+  },
   pickRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
   pickBtn: {
     borderRadius: 28,
