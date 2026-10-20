@@ -1,19 +1,21 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as sound from '../../../sound';
-import { sfx } from '../../../sound';
+import { manifest } from '../../../manifest';
 import { PuzzleGame } from '../PuzzleGame';
+import * as logic from '../logic';
 
 describe('PuzzleGame', () => {
   const noop = () => {};
+  const sceneId = `d-${manifest.diff[0].id}`;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(sound, 'say').mockImplementation(() => {});
-    vi.spyOn(sfx, 'tap').mockImplementation(() => {});
-    vi.spyOn(sfx, 'win').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'win').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -156,5 +158,121 @@ describe('PuzzleGame', () => {
     const peekBtn = screen.getByTestId('puzzle-peek');
     // For Japanese, 'puzzle.peek.a11y' is 'かんせいした えを みる'
     expect(peekBtn.getAttribute('aria-label')).toBe('かんせいした えを みる');
+  });
+
+  it('swaps tiles when tapped in rapid succession before re-render', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 2, 3, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const tile0 = screen.getByTestId('puzzle-tile-0-piece-1');
+    const tile1 = screen.getByTestId('puzzle-tile-1-piece-0');
+
+    // Rapid successive taps inside the same execution frame / batch
+    act(() => {
+      fireEvent.click(tile0);
+      fireEvent.click(tile1);
+    });
+
+    // Both tiles should have swapped positions
+    expect(screen.queryByTestId('puzzle-tile-0-piece-0')).not.toBeNull();
+    expect(screen.queryByTestId('puzzle-tile-1-piece-1')).not.toBeNull();
+    expect(screen.getByTestId('puzzle-moves').textContent).toContain('1');
+  });
+
+  it('deselects tile when same tile is tapped rapidly before re-render', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 2, 3, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const tile0 = screen.getByTestId('puzzle-tile-0-piece-1');
+
+    // Rapid double-tap on the same tile deselects it
+    act(() => {
+      fireEvent.click(tile0);
+      fireEvent.click(tile0);
+    });
+
+    // No swap occurred and moves stayed 0
+    expect(screen.queryByTestId('puzzle-tile-0-piece-1')).not.toBeNull();
+    expect(screen.getByTestId('puzzle-moves').textContent).toContain('0');
+
+    // Subsequent tap on tile 1 selects tile 1 rather than swapping with tile 0
+    const tile1 = screen.getByTestId('puzzle-tile-1-piece-0');
+    fireEvent.click(tile1);
+    expect(screen.getByTestId('puzzle-moves').textContent).toContain('0');
+  });
+
+  it('handles multiple rapid swaps in sequence', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 3, 2, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const tile0 = screen.getByTestId('puzzle-tile-0-piece-1');
+    const tile1 = screen.getByTestId('puzzle-tile-1-piece-0');
+    const tile2 = screen.getByTestId('puzzle-tile-2-piece-3');
+    const tile3 = screen.getByTestId('puzzle-tile-3-piece-2');
+
+    act(() => {
+      fireEvent.click(tile0);
+      fireEvent.click(tile1);
+      fireEvent.click(tile2);
+      fireEvent.click(tile3);
+    });
+
+    expect(screen.queryByTestId('puzzle-tile-0-piece-0')).not.toBeNull();
+    expect(screen.queryByTestId('puzzle-tile-1-piece-1')).not.toBeNull();
+    expect(screen.queryByTestId('puzzle-tile-2-piece-2')).not.toBeNull();
+    expect(screen.queryByTestId('puzzle-tile-3-piece-3')).not.toBeNull();
+    expect(screen.getByTestId('puzzle-moves').textContent).toContain('2');
+  });
+
+  it('swaps tiles on standard spaced taps', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 2, 3, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('puzzle-tile-0-piece-1'));
+    fireEvent.click(screen.getByTestId('puzzle-tile-1-piece-0'));
+
+    expect(screen.queryByTestId('puzzle-tile-0-piece-0')).not.toBeNull();
+    expect(screen.queryByTestId('puzzle-tile-1-piece-1')).not.toBeNull();
+    expect(screen.getByTestId('puzzle-moves').textContent).toContain('1');
   });
 });

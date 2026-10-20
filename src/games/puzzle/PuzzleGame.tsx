@@ -53,6 +53,7 @@ export function PuzzleGame({
 
   const [perm, setPerm] = useState<number[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
+  const selectedRef = useRef<number | null>(null);
   const [moves, setMoves] = useState(0);
   // Peek: flash the finished picture over the board for a few seconds
   const [peek, setPeek] = useState(false);
@@ -70,6 +71,7 @@ export function PuzzleGame({
         makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), cols * rows),
       );
       setSelected(null);
+      selectedRef.current = null;
       setMoves(0);
       setPeek(false);
     }
@@ -135,12 +137,16 @@ export function PuzzleGame({
 
   const onTile = (pos: number) => {
     if (won || perm.length === 0) return;
-    if (selected === null) {
+    const current = selectedRef.current;
+    if (current === null) {
+      selectedRef.current = pos;
       setSelected(pos);
-    } else if (selected === pos) {
+    } else if (current === pos) {
+      selectedRef.current = null;
       setSelected(null);
     } else {
-      setPerm((p) => swap(p, selected, pos));
+      setPerm((p) => swap(p, current, pos));
+      selectedRef.current = null;
       setSelected(null);
       setMoves((m) => m + 1);
     }
