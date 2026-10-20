@@ -32,6 +32,19 @@ describe("makeQuizRound", () => {
     ).toThrow("pool smaller than tileCount (2 < 4)");
   });
 
+  it("throws an error if pool unique keys are fewer than tileCount", () => {
+    const rng = makeRng(42);
+    const poolWithDuplicateKeys: Item[] = [
+      { id: "a", label: "Apple 1" },
+      { id: "a", label: "Apple 2" },
+      { id: "b", label: "Banana" },
+      { id: "c", label: "Cherry" },
+    ];
+    expect(() =>
+      makeQuizRound(rng, poolWithDuplicateKeys, 4, toTile, keyOf),
+    ).toThrow("pool smaller than tileCount (3 < 4)");
+  });
+
   it("generates a round with the requested number of unique tiles", () => {
     const rng = makeRng(42);
     const round = makeQuizRound(rng, pool, 4, toTile, keyOf);
