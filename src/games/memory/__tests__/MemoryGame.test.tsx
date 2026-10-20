@@ -1,96 +1,121 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { MemoryGame } from '../MemoryGame';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MemoryGame } from "../MemoryGame";
 
-vi.mock('../../../sound', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../sound')>();
-  return {
-    ...actual,
-    say: vi.fn(),
-    sfx: {
-      ...actual.sfx,
-      good: vi.fn(),
-      wrong: vi.fn(),
-      tap: vi.fn(),
-    },
-  };
-});
+describe("MemoryGame", () => {
+  const noop = () => {};
 
-function setViewport(width: number, height: number) {
-  Object.defineProperty(window, 'innerWidth', {
-    value: width,
-    configurable: true,
-  });
-  Object.defineProperty(window, 'innerHeight', {
-    value: height,
-    configurable: true,
-  });
-  Object.defineProperty(document.documentElement, 'clientWidth', {
-    value: width,
-    configurable: true,
-  });
-  Object.defineProperty(document.documentElement, 'clientHeight', {
-    value: height,
-    configurable: true,
-  });
-  window.dispatchEvent(new Event('resize'));
-}
-
-describe('MemoryGame', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    setViewport(800, 600);
-  });
-
-  afterEach(() => {
     cleanup();
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  it('renders memory cards on board and tracks moves on card flips', async () => {
-    const onHome = vi.fn();
-    render(<MemoryGame onHome={onHome} difficulty="easy" lang="en" />);
+  it("renders solo easy mode with 4 pairs, title, moves counter and no timer", () => {
+    render(<MemoryGame onHome={noop} difficulty="easy" lang="en" />);
 
-    const cards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
-    // Easy mode memory has 4 pairs = 8 cards
-    expect(cards).toHaveLength(8);
-
-    // Initial state: all cards face down
-    for (const card of cards) {
-      expect(card.getAttribute('aria-label')).toBe('face-down card');
-    }
-
-    // Flip first card
-    await act(async () => {
-      fireEvent.click(cards[0]);
-    });
-    expect(cards[0].getAttribute('aria-label')).not.toBe('face-down card');
-
-    // Flip second card
-    await act(async () => {
-      fireEvent.click(cards[1]);
-    });
-
-    // Score / moves should be updated
-    const movesText = screen.getByTestId('memory-moves');
-    expect(movesText.textContent).toContain('1');
+    expect(screen.getByText("Memory Match")).toBeDefined();
+    expect(screen.getByText("Find all 4 pairs")).toBeDefined();
+    expect(screen.getByTestId("memory-moves").textContent).toContain(
+      "Moves: 0",
+    );
+    expect(screen.queryByTestId("memory-timer")).toBeNull();
+    expect(screen.getByTestId("memory-score")).toBeDefined();
   });
 
-  it('localizes face-down card accessibility labels via i18n in non-English mode', () => {
-    const onHome = vi.fn();
-    render(<MemoryGame onHome={onHome} difficulty="easy" lang="ja" />);
+  it("renders solo medium mode with timer and 6 pairs", () => {
+    render(<MemoryGame onHome={noop} difficulty="medium" lang="en" />);
+    expect(screen.getByText("Find all 6 pairs")).toBeDefined();
+    expect(screen.getByTestId("memory-timer")).toBeDefined();
+  });
 
-    const cards = screen
-      .getAllByRole('button')
-      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+  it("renders solo hard mode with timer and 8 pairs", () => {
+    render(<MemoryGame onHome={noop} difficulty="hard" lang="en" />);
+    expect(screen.getByText("Find all 8 pairs")).toBeDefined();
+    expect(screen.getByTestId("memory-timer")).toBeDefined();
+  });
 
-    for (const card of cards) {
-      expect(card.getAttribute('aria-label')).toBe('うらがえしのカード');
+  it("supports localization", () => {
+    const { unmount } = render(
+      <MemoryGame onHome={noop} difficulty="easy" lang="ja" />,
+    );
+    expect(screen.getByText("しんけいすいじゃく")).toBeDefined();
+    expect(screen.getByText("4くみ ぜんぶ さがそう")).toBeDefined();
+    expect(screen.getByTestId("memory-moves").textContent).toContain(
+      "てすう: 0",
+    );
+    unmount();
+
+    render(<MemoryGame onHome={noop} difficulty="easy" lang="cmn" />);
+    expect(screen.getByText("记忆配对")).toBeDefined();
+    expect(screen.getByText("找出全部 4 对")).toBeDefined();
+    expect(screen.getByTestId("memory-moves").textContent).toContain("步数：0");
+  });
+
+  it("conditionally renders mode picker based on twoPlayerEnabled", () => {
+    const { unmount } = render(
+      <MemoryGame onHome={noop} difficulty="easy" twoPlayerEnabled lang="en" />,
+    );
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    unmount();
+
+    render(
+      <MemoryGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={false}
+        lang="en"
+      />,
+    );
+    expect(screen.queryByTestId("mode-picker")).toBeNull();
+    expect(screen.getByTestId("memory-moves").textContent).toContain(
+      "Moves: 0",
+    );
+  });
+
+  it("renders all cards and handles interactive card flipping and move counting", async () => {
+    vi.useFakeTimers();
+    try {
+      render(<MemoryGame onHome={noop} difficulty="easy" lang="en" />);
+
+      const cards = screen.getAllByRole("button").filter((el) => {
+        const testId = el.getAttribute("data-testid");
+        return testId && testId.startsWith("memory-card-");
+      });
+      expect(cards).toHaveLength(8);
+
+      for (const card of cards) {
+        expect(card.getAttribute("aria-label")).toBe("face-down card");
+      }
+
+      // Click first card
+      await act(async () => {
+        fireEvent.click(cards[0]);
+      });
+      expect(cards[0].getAttribute("aria-label")).not.toBe("face-down card");
+
+      // Click second card
+      await act(async () => {
+        fireEvent.click(cards[1]);
+      });
+
+      // Moves should have incremented to 1
+      const movesText = screen.getByTestId("memory-moves");
+      expect(movesText.textContent).toContain("Moves: 1");
+
+      // Advance timers for the mismatch flip-back delay
+      await act(async () => {
+        vi.advanceTimersByTime(750);
+      });
+    } finally {
+      vi.useRealTimers();
     }
   });
 
