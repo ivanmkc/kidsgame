@@ -3,6 +3,7 @@
 // that needs it. UI-free so vitest can prove every shipped room solvable
 // (the same trace the generator lint runs in Python before art is made).
 import { Box, EscapeRoom } from '../../manifest';
+import { Difficulty } from '../../difficulty';
 
 function overlaps(a: Box, b: Box): boolean {
   return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
@@ -184,3 +185,14 @@ export function lintRoom(room: EscapeRoom): string[] {
   // because the generator chains them and the runtime shows the latest state.
   return errs;
 }
+
+export const ESCAPE_HINT_MS: Record<Difficulty, number> = {
+  easy: 8000,
+  medium: 12000,
+  hard: 18000,
+};
+
+export function escapeHintMs(difficulty: Difficulty): number {
+  return ESCAPE_HINT_MS[difficulty];
+}
+

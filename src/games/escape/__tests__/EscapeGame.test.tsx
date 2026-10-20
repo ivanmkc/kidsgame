@@ -191,4 +191,164 @@ describe("EscapeGame", () => {
     expect(sound.say).not.toHaveBeenCalled();
     expect(sfx.tap).not.toHaveBeenCalled();
   });
+
+  it('renders FilterCycleChip and cycles difficulty filter on press', () => {
+    const onFilter = vi.fn();
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+        filter="easy"
+        onFilter={onFilter}
+      />,
+    );
+    const cycleBtn = screen.getByTestId('difficulty-cycle');
+    expect(cycleBtn).toBeTruthy();
+    fireEvent.click(cycleBtn);
+    expect(onFilter).toHaveBeenCalledWith('medium');
+  });
+
+  it('dims rooms that do not match the active difficulty filter', () => {
+    const { unmount } = render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+        filter="easy"
+      />,
+    );
+    const easyToy = screen.getByTestId('scene-pick-toyroom');
+    const easyPirate = screen.getByTestId('scene-pick-piratecove');
+    expect(window.getComputedStyle(easyToy).opacity).not.toBe('0.32');
+    expect(window.getComputedStyle(easyPirate).opacity).toBe('0.32');
+
+    unmount();
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+        filter="hard"
+      />,
+    );
+    const hardToy = screen.getByTestId('scene-pick-toyroom');
+    const hardPirate = screen.getByTestId('scene-pick-piratecove');
+    expect(window.getComputedStyle(hardToy).opacity).toBe('0.32');
+    expect(window.getComputedStyle(hardPirate).opacity).toBe('0.32');
+  });
+
+  it('surprise button picks from rooms matching active filter', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const onPickScene = vi.fn();
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+        lang="en"
+        filter="easy"
+      />,
+    );
+    fireEvent.click(screen.getByTestId('scene-surprise'));
+    expect(onPickScene).toHaveBeenCalledWith('dragoncave');
+  });
+
+  it('tapping Next on WinOverlay cycles to next room in the difficulty pool', () => {
+    const onPickScene = vi.fn();
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+        sceneId="dragoncave"
+        filter="easy"
+        lang="en"
+      />,
+    );
+
+    // Solve dragoncave:
+    // 1. Search haystack to reveal egg
+    fireEvent.click(screen.getByTestId('escape-spot-haystack'));
+    // 2. Tap haystack to collect egg
+    fireEvent.click(screen.getByTestId('escape-spot-haystack'));
+    // 3. Unlock stove with egg to cook pancake
+    fireEvent.click(screen.getByTestId('escape-spot-stove'));
+    // 4. Tap stove to collect pancake
+    fireEvent.click(screen.getByTestId('escape-spot-stove'));
+    // 5. Feed pancake to dragon -> triggers win state!
+    fireEvent.click(screen.getByTestId('escape-spot-dragon'));
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    const nextBtn = screen.getByTestId('play-again');
+    expect(nextBtn).toBeTruthy();
+    fireEvent.click(nextBtn);
+
+    // In easy pool (toyroom, dragoncave), Next wraps around to toyroom.
+    // Unfiltered index progression would have stepped to piratecove.
+    expect(onPickScene).toHaveBeenCalledWith('toyroom');
+  });
+
+  it('idle hint delay scales with difficulty (easy 8s vs medium 12s)', () => {
+    const { unmount } = render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId="toyroom"
+        difficulty="easy"
+        filter="easy"
+        lang="en"
+      />,
+    );
+
+    const pillow = screen.getByTestId('escape-spot-pillow');
+    expect(pillow.children.length).toBe(0);
+
+    // After 7s, hint has not triggered
+    act(() => {
+      vi.advanceTimersByTime(7000);
+    });
+    expect(pillow.children.length).toBe(0);
+
+    // After 8.5s total, hint has triggered on easy
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(pillow.children.length).toBeGreaterThan(0);
+
+    unmount();
+
+    // Medium mode: does not trigger at 8.5s, triggers at 12.5s
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId="toyroom"
+        difficulty="medium"
+        filter="medium"
+        lang="en"
+      />,
+    );
+
+    const medPillow = screen.getByTestId('escape-spot-pillow');
+    expect(medPillow.children.length).toBe(0);
+
+    act(() => {
+      vi.advanceTimersByTime(8500);
+    });
+    expect(medPillow.children.length).toBe(0);
+
+    act(() => {
+      vi.advanceTimersByTime(4000);
+    });
+    expect(medPillow.children.length).toBeGreaterThan(0);
+  });
 });

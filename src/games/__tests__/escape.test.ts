@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { EscapeRoom, manifest } from '../../manifest';
 import { EscapeGame } from '../escape/EscapeGame';
-import { applyTap, isHotspotAvailable, lintRoom, nextHint, selectItem, solve, startState } from '../escape/logic';
+import { applyTap, escapeHintMs, isHotspotAvailable, lintRoom, nextHint, selectItem, solve, startState } from '../escape/logic';
 
 // Fixture: the toyroom chain — pillow → key → toy chest → bone → puppy.
 const ROOM: EscapeRoom = {
@@ -285,4 +285,14 @@ describe('shipped escape rooms', () => {
       }
     }
   });
+
+  describe('escapeHintMs', () => {
+    it('scales hint delay across easy, medium, and hard difficulty', () => {
+      expect(escapeHintMs('easy')).toBe(8000);
+      expect(escapeHintMs('medium')).toBe(12000);
+      expect(escapeHintMs('hard')).toBe(18000);
+    });
+  });
 });
+
+
