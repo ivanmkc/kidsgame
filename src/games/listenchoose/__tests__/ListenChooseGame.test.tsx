@@ -12,13 +12,9 @@ import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { buildGameSections, WORD_CARDS } from "../../../menuCards";
 import { ListenChooseGame } from "../ListenChooseGame";
-import {
-  LEVEL_1_WORDS,
-  LEVEL_2_WORDS,
-  LEVEL_3_WORDS,
-  Word,
-} from "../data";
-import { PressableProps, ScrollViewProps } from "react-native";
+import { LEVEL_1_WORDS, LEVEL_2_WORDS, LEVEL_3_WORDS, Word } from "../data";
+import { PressableProps, ScrollViewProps, StyleSheet } from "react-native";
+import { colors } from "../../../theme";
 
 type FakePressableProps = Partial<PressableProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
@@ -349,6 +345,7 @@ describe("ListenChooseGame", () => {
       expect(props.hitSlop).toBe(12);
     });
   });
+
   it("filters out untranslated words in non-English play", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
     fireEvent.click(screen.getByTestId("play-button"));
@@ -431,7 +428,6 @@ describe("ListenChooseGame", () => {
     const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     expect(spokenWord).not.toMatch(/^[a-z]+$/i);
   });
-
   it("renders a ScrollView for the board to allow scrolling on compact viewports", () => {
     render(<ListenChooseGame onHome={vi.fn()} />);
     const props = capturedScrollViewProps.find(
@@ -441,5 +437,23 @@ describe("ListenChooseGame", () => {
     expect(props!.style).toEqual({ flex: 1 });
     expect(props!.contentContainerStyle).toHaveProperty("flexGrow", 1);
   });
-});
 
+  it("renders choice cards with high-contrast dark borders and 4px width", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetWord, distractorWord } = getRoundChoices();
+    for (const icon of [targetWord.icon, distractorWord.icon]) {
+      const captures = capturedPressableMap[`choice-${icon}`];
+      expect(captures).toBeDefined();
+      const styleProp = captures[0]?.style;
+      const rawStyle =
+        typeof styleProp === "function"
+          ? styleProp({ pressed: false })
+          : styleProp;
+      const resolved = StyleSheet.flatten(rawStyle);
+      expect(resolved.borderColor).toBe(colors.ink);
+      expect(resolved.borderWidth).toBe(4);
+    }
+  });
+});

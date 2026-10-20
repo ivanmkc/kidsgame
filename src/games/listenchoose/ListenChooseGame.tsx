@@ -127,7 +127,11 @@ export function ListenChooseGame({
         <ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />
       }
     >
-      <ScrollView testID="listenchoose-scrollview" style={{ flex: 1 }} contentContainerStyle={styles.board}>
+      <ScrollView
+        testID="listenchoose-scrollview"
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.board}
+      >
         {!started ? (
           <View style={styles.startScreen}>
             <Text style={styles.startTitle}>
@@ -432,8 +436,8 @@ const styles = StyleSheet.create({
     height: 170,
     backgroundColor: colors.card,
     borderRadius: 22,
-    borderWidth: 3,
-    borderColor: colors.blush,
+    borderWidth: 4,
+    borderColor: colors.ink,
     alignItems: "center",
     justifyContent: "center",
     padding: 12,
