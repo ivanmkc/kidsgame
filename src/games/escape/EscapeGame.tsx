@@ -503,6 +503,7 @@ function SpriteCanvas({ room, state, anims, setAnims, scale }: {
 
     for (const h of rm.hotspots) {
       if (!h.sprite) continue;
+      if (!isHotspotAvailable(rm, st, h.id)) continue;
       const sp = h.sprite;
       const isUsed = st.used.includes(h.id);
       const isRevealed = st.revealed.includes(h.id);
