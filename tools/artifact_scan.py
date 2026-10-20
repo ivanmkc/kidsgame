@@ -2,9 +2,9 @@
 
 Layer 1 (deterministic): a diff pair must be pixel-identical outside its
 difference rects (+feather margin) — any violation is a pipeline bug.
-Layer 2 (judged): overlapping tiles of every scene image go through an
-inverted artifact-hunt question ("answer YES if you see ANY editing
-mistake"), threaded for speed. Flags are saved as crops for human review.
+Layer 2 (judged): overlapping tiles of every scene image from scan_plan.json
+go through an inverted artifact-hunt question ("answer YES if you see ANY
+editing mistake"), threaded for speed. Flags are saved as crops for human review.
 
 Output: tools/audit_out/artifact_scan/artifact_report.json + flagged crop PNGs.
 """
@@ -33,18 +33,6 @@ ARTIFACT_Q = (
 )
 
 
-def tiles(w: int, h: int, cols: int = 3, rows: int = 2, overlap: float = 0.25):
-    tw, th = w // cols, h // rows
-    ox, oy = int(tw * overlap), int(th * overlap)
-    for r in range(rows):
-        for c in range(cols):
-            x0 = max(0, c * tw - ox)
-            y0 = max(0, r * th - oy)
-            x1 = min(w, (c + 1) * tw + ox)
-            y1 = min(h, (r + 1) * th + oy)
-            yield (x0, y0, x1, y1)
-
-
 def check_pair_identity(entry: dict) -> list[dict]:
     """Outside the diff rects (+6px feather margin), A and B must match."""
     import numpy as np
@@ -66,12 +54,17 @@ def check_pair_identity(entry: dict) -> list[dict]:
     return []
 
 
-def judge_tile(args) -> dict | None:
+def judge_tile(job: dict) -> dict | None:
     from PIL import Image
     from gen.judge import ask_yes_no
 
-    path, rect, tag = args
-    img = Image.open(ASSETS / path).convert("RGB")
+    asset = job["asset"]
+    path = asset["path"] if isinstance(asset, dict) else str(asset)
+    rect = job["rect"]
+    tag = job["tag"]
+
+    img_path = ROOT / path
+    img = Image.open(img_path).convert("RGB")
     crop = img.crop(rect)
     if ask_yes_no(ARTIFACT_Q, [crop]):
         OUT.mkdir(parents=True, exist_ok=True)
@@ -98,35 +91,24 @@ def main(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
     OUT = args.out
 
-    from PIL import Image
-
     m = json.loads(MANIFEST.read_text())
     findings: list[dict] = []
 
     for entry in m["diff"]:
         findings.extend(check_pair_identity(entry))
 
-    jobs = []
-    for entry in m["diff"]:
-        for img_key in ("imageA", "imageB"):
-            path = entry[img_key]
-            with Image.open(ASSETS / path) as im:
-                w, h = im.size
-            for i, rect in enumerate(tiles(w, h)):
-                jobs.append((path, rect, f"{entry['id']}_{img_key}_{i}"))
-    for entry in m["hidden"]:
-        path = entry["image"]
-        with Image.open(ASSETS / path) as im:
-            w, h = im.size
-        for i, rect in enumerate(tiles(w, h)):
-            jobs.append((path, rect, f"{entry['id']}_hidden_{i}"))
+    plan_path = OUT.parent / "scan_plan.json"
+    plan = json.loads(plan_path.read_text())
 
-    print(f"deterministic pair checks done ({len(findings)} flags); judging {len(jobs)} tiles...")
+    total_jobs = sum(len(b) if isinstance(b, list) else 1 for b in plan)
+    print(f"pair checks done ({len(findings)} flags); judging {total_jobs} tiles across {len(plan)} batches...")
     with ThreadPoolExecutor(max_workers=8) as pool:
-        for res in pool.map(judge_tile, jobs):
-            if res:
-                findings.append(res)
-                print(f"  FLAG {res['asset']} tile {res.get('rect')}")
+        for batch in plan:
+            batch_jobs = batch if isinstance(batch, list) else [batch]
+            for res in pool.map(judge_tile, batch_jobs):
+                if res:
+                    findings.append(res)
+                    print(f"  FLAG {res['asset']} tile {res.get('rect')}")
 
     OUT.mkdir(parents=True, exist_ok=True)
     report_path = OUT / "artifact_report.json"
