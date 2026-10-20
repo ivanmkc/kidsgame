@@ -63,6 +63,11 @@ export const LEVEL_2_WORD_IDS = [
   "sun",
   "tree",
   "whale",
+  "cap",
+  "cup",
+  "pan",
+  "pen",
+  "pin",
 ] as const;
 
 export const LEVEL_2_WORDS: Word[] = LEVEL_2_WORD_IDS.map((id) => {
@@ -86,6 +91,11 @@ export const LEVEL_3_WORD_IDS = [
   "clock",
   "bear",
   "pear",
+  "pig",
+  "wig",
+  "dig",
+  "big",
+  "block",
 ] as const;
 
 export const LEVEL_3_WORDS: Word[] = LEVEL_3_WORD_IDS.map((id) => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { makeRng } from "../../rng";
 import { WORDS } from "../../words";
-import { LEVEL_1_WORDS, LEVEL_1_WORD_IDS, Word, getLevelConfig } from "./data";
+import { LEVEL_1_WORDS, LEVEL_1_WORD_IDS, LEVEL_2_WORD_IDS, LEVEL_3_WORD_IDS, Word, getLevelConfig } from "./data";
 import {
   GameState,
   Round,
@@ -54,6 +54,38 @@ describe("Level 1 data", () => {
     expect(cat?.ja).toBeTruthy();
     expect(cat?.cmn).toBeTruthy();
     expect(cat?.yue).toBeTruthy();
+  });
+});
+
+describe("Level 2 data", () => {
+  it("exports Level 2 word IDs matching the approved design spec", () => {
+    expect(LEVEL_2_WORD_IDS).toHaveLength(16);
+    expect(new Set(LEVEL_2_WORD_IDS).size).toBe(16);
+
+    const expected = [
+      "moon", "mouse", "pear", "rock", "snail", "snake",
+      "sock", "spoon", "sun", "tree", "whale",
+      "cap", "cup", "pan", "pen", "pin"
+    ];
+    for (const w of expected) {
+      expect(LEVEL_2_WORD_IDS).toContain(w);
+    }
+  });
+});
+
+describe("Level 3 data", () => {
+  it("exports Level 3 word IDs matching the approved design spec", () => {
+    expect(LEVEL_3_WORD_IDS).toHaveLength(17);
+    expect(new Set(LEVEL_3_WORD_IDS).size).toBe(17);
+
+    const expected = [
+      "hat", "bat", "cat", "house", "mouse", "boat", "coat",
+      "rock", "sock", "clock", "bear", "pear",
+      "pig", "wig", "dig", "big", "block"
+    ];
+    for (const w of expected) {
+      expect(LEVEL_3_WORD_IDS).toContain(w);
+    }
   });
 });
 
@@ -160,8 +192,10 @@ describe("generateRound", () => {
   });
 
   it("prioritizes minimal pairs as distractors in level 3", () => {
-    let checked = false;
-    for (let i = 0; i < 50; i++) {
+    let checkedAt = false;
+    let checkedIg = false;
+    let checkedOck = false;
+    for (let i = 0; i < 200; i++) {
       const rng = makeRng(i);
       const config = getLevelConfig(3);
       const r = generateRound(
@@ -181,10 +215,42 @@ describe("generateRound", () => {
           (icon) => icon !== r.target.icon,
         );
         expect(dists).toEqual(expect.arrayContaining(expected));
-        checked = true;
+        checkedAt = true;
+      }
+
+      // Level 3 words have pig, wig, dig, big (rhymeKey: ig)
+      // Excluding 'pig' from the trigger condition until PR #278 merges
+      // which adds the rhymeKey to 'pig'.
+      if (["wig", "dig", "big"].includes(r.target.icon)) {
+        const dists = r.choices
+          .filter((c) => c.icon !== r.target.icon)
+          .map((c) => c.icon);
+        
+        const igGroup = ["pig", "wig", "dig", "big"].filter(
+          (icon) => icon !== r.target.icon,
+        );
+        const found = dists.filter(d => igGroup.includes(d));
+        expect(found.length).toBeGreaterThan(0);
+        checkedIg = true;
+      }
+
+      // Level 3 words have rock, sock, clock, block (rhymeKey: ock)
+      if (["rock", "sock", "clock", "block"].includes(r.target.icon)) {
+        const dists = r.choices
+          .filter((c) => c.icon !== r.target.icon)
+          .map((c) => c.icon);
+        
+        const ockGroup = ["rock", "sock", "clock", "block"].filter(
+          (icon) => icon !== r.target.icon,
+        );
+        const found = dists.filter(d => ockGroup.includes(d));
+        expect(found.length).toBeGreaterThan(0);
+        checkedOck = true;
       }
     }
-    expect(checked).toBe(true);
+    expect(checkedAt).toBe(true);
+    expect(checkedIg).toBe(true);
+    expect(checkedOck).toBe(true);
   });
 });
 
