@@ -70,6 +70,25 @@ export function checkEcho(
   return { countCorrect, timingCorrect };
 }
 
+export interface EchoBeatLayout {
+  drumSize: number;
+  drumEmojiSize: number;
+  gap: number;
+  isLandscape: boolean;
+  shortH: boolean;
+}
+
+export function echoBeatLayout(width: number, height: number): EchoBeatLayout {
+  const isLandscape = width > height;
+  const shortH = isLandscape && height < 500;
+  const drumSize = shortH
+    ? Math.min(180, Math.max(90, Math.floor(height * 0.38)))
+    : 180;
+  const gap = shortH ? (height < 360 ? 8 : 12) : 28;
+  const drumEmojiSize = Math.round(drumSize * (64 / 180));
+  return { drumSize, drumEmojiSize, gap, isLandscape, shortH };
+}
+
 export function speechLines(): string[] {
   return [];
 }
