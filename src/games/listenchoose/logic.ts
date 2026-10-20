@@ -111,7 +111,7 @@ export function generateRound(
 }
 
 /**
- * Initialize game state with a valid round from Level 1.
+ * Initialize game state with a valid round from Level 1, or higher based on difficulty.
  */
 export function initGameState(
   rng: Rng = Math.random,
