@@ -1,19 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { FilterCycleChip, ScenePicker, SceneOption } from '../../components/ScenePicker';
-import { allSceneOptions } from '../sceneOptions';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, settingsFor, nextFilter } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { say, sfx, useSay } from '../../sound';
-import { isSolved, makePuzzle, swap } from './logic';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SCENE_IMAGES } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
+import { allSceneOptions } from "../sceneOptions";
+import { WinOverlay } from "../../components/WinOverlay";
+import {
+  Difficulty,
+  DifficultyFilter,
+  settingsFor,
+  nextFilter,
+} from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { say, sfx, useSay } from "../../sound";
+import { isSolved, makePuzzle, swap } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -26,13 +38,27 @@ interface Props {
   lang?: Lang;
 }
 
-
-
-export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
+export function PuzzleGame({
+  onHome,
+  difficulty,
+  filter = "all",
+  onFilter,
+  sceneId,
+  onPickScene,
+  onBackToPicker,
+  lang = "en",
+}: Props) {
   const options = allSceneOptions(filter);
-  const allOptions = allSceneOptions('all').map((o) => ({ ...o, dimmed: !options.some((v) => v.id === o.id) }));
+  const allOptions = allSceneOptions("all").map((o) => ({
+    ...o,
+    dimmed: !options.some((v) => v.id === o.id),
+  }));
   const picked = options.find((o) => o.id === sceneId) ?? null;
-  const settings = settingsFor(difficulty);
+  // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
+  // flattening to medium hid the easy-mode hint/no-timer design entirely.
+  const effDifficulty =
+    filter === "all" && picked?.level ? picked.level : difficulty;
+  const settings = settingsFor(effDifficulty);
   const cols = settings.puzzleCols;
   const rows = settings.puzzleRows;
   const size = cols * rows;
@@ -52,34 +78,56 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
 
   useEffect(() => {
     if (picked) {
-      setPerm(makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), cols * rows));
+      setPerm(
+        makePuzzle(makeRng(Math.floor(Math.random() * 1e9)), cols * rows),
+      );
       setSelected(null);
       setMoves(0);
       setPeek(false);
     }
-    return () => { if (peekTimer.current) clearTimeout(peekTimer.current); };
+    return () => {
+      if (peekTimer.current) clearTimeout(peekTimer.current);
+    };
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useSay(picked ? 'Tap one piece, then tap another to swap them!' : 'Which picture do you want to solve?');
+  useSay(
+    picked
+      ? "Tap one piece, then tap another to swap them!"
+      : "Which picture do you want to solve?",
+  );
   const won = perm.length === size && isSolved(perm);
-  const showTimer = settingsFor(difficulty).timer;
+  const showTimer = settings.timer;
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
   useEffect(() => {
-    if (won) say(t(lang, 'win.puzzle'));
+    if (won) say(t(lang, "win.puzzle"));
   }, [won]);
   const { width, height } = useWindowDimensions();
 
   if (!picked) {
     return (
-      <GameShell title={t(lang, 'shell.puzzle.title')} subtitle={t(lang, 'shell.puzzle.subPicker')} onBack={onHome} lang={lang}>
+      <GameShell
+        title={t(lang, "shell.puzzle.title")}
+        subtitle={t(lang, "shell.puzzle.subPicker")}
+        onBack={onHome}
+        lang={lang}
+      >
         <ScenePicker
-          title={t(lang, 'picker.puzzle')}
+          title={t(lang, "picker.puzzle")}
           lang={lang}
           options={allOptions}
           onPick={onPickScene}
-          onSurprise={() => onPickScene(options[Math.floor(Math.random() * options.length)].id)}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} /> : undefined}
+          onSurprise={() =>
+            onPickScene(options[Math.floor(Math.random() * options.length)].id)
+          }
+          filterChip={
+            onFilter ? (
+              <FilterCycleChip
+                filter={filter}
+                onCycle={() => onFilter(nextFilter(filter))}
+              />
+            ) : undefined
+          }
         />
       </GameShell>
     );
@@ -112,29 +160,47 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
 
   return (
     <GameShell
-      title={t(lang, 'shell.puzzle.title')}
-      subtitle={t(lang, 'shell.puzzle.subPlay', { name: picked.name })}
+      title={t(lang, "shell.puzzle.title")}
+      subtitle={t(lang, "shell.puzzle.subPlay", { name: picked.name })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="puzzle-timer" /> : null}
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="puzzle-timer"
+            />
+          ) : null}
           <ScoreChip label={`🧩 ${moves}`} testID="puzzle-moves" />
           <Pressable
             onPress={showPeek}
             testID="puzzle-peek"
             accessibilityLabel="Peek at the finished picture"
             accessibilityRole="button"
-            style={({ pressed }) => [styles.peekBtn, shadows.soft, pressed && { opacity: 0.8 }]}
+            style={({ pressed }) => [
+              styles.peekBtn,
+              shadows.soft,
+              pressed && { opacity: 0.8 },
+            ]}
           >
-            <Text style={styles.peekText}>{t(lang, 'puzzle.peek')}</Text>
+            <Text style={styles.peekText}>{t(lang, "puzzle.peek")}</Text>
           </Pressable>
         </View>
       }
     >
       <View style={styles.center}>
-        <View style={[styles.board, shadows.sticker, { width: boardW, height: boardH }]}>
+        <View
+          style={[
+            styles.board,
+            shadows.sticker,
+            { width: boardW, height: boardH },
+          ]}
+        >
           {perm.map((piece, pos) => {
             const col = pos % cols;
             const row = Math.floor(pos / cols);
@@ -147,7 +213,12 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
                 onPress={() => onTile(pos)}
                 style={[
                   styles.tile,
-                  { left: col * tileW, top: row * tileH, width: tileW, height: tileH },
+                  {
+                    left: col * tileW,
+                    top: row * tileH,
+                    width: tileW,
+                    height: tileH,
+                  },
                   selected === pos && styles.selected,
                 ]}
               >
@@ -166,16 +237,19 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
           {peek ? (
             <Image
               source={SCENE_IMAGES[picked.image]}
-              style={[StyleSheet.absoluteFill as object, { width: boardW, height: boardH }]}
+              style={[
+                StyleSheet.absoluteFill as object,
+                { width: boardW, height: boardH },
+              ]}
               testID="puzzle-peek-overlay"
             />
           ) : null}
         </View>
-        <Text style={styles.hint}>{t(lang, 'puzzle.hint')}</Text>
+        <Text style={styles.hint}>{t(lang, "puzzle.hint")}</Text>
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.puzzle')}
+        message={t(lang, "win.puzzle")}
         onNext={() => {
           const ids = options.map((o) => o.id);
           onPickScene(ids[(ids.indexOf(picked.id) + 1) % ids.length]);
@@ -188,17 +262,34 @@ export function PuzzleGame({ onHome, difficulty, filter = 'all', onFilter, scene
 }
 
 const styles = StyleSheet.create({
-  peekBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 11, paddingHorizontal: 12, minHeight: 44, justifyContent: 'center' },
+  peekBtn: {
+    backgroundColor: colors.gold,
+    borderRadius: 14,
+    paddingVertical: 11,
+    paddingHorizontal: 12,
+    minHeight: 44,
+    justifyContent: "center",
+  },
   peekText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 14 },
-  board: { borderRadius: 18, overflow: 'hidden', backgroundColor: colors.card },
-  tile: { position: 'absolute', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+  },
+  board: { borderRadius: 18, overflow: "hidden", backgroundColor: colors.card },
+  tile: {
+    position: "absolute",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
+  },
   selected: { borderWidth: 4, borderColor: colors.gold, zIndex: 2 },
   hint: {
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
     fontSize: 13,
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
