@@ -1,13 +1,13 @@
 // Pure music-box logic: which note a tap plays, octave offset from vertical
 // position, and multi-finger harmony. Kept UI-free so vitest covers the note
 // walk without a DOM. v2: no win state — melody loops seamlessly.
-import { LANGS } from '../../lang';
-import { t } from '../../i18n';
-import { PENTATONIC, SONGS, Song } from './songs';
+import { LANGS } from "../../lang";
+import { t } from "../../i18n";
+import { PENTATONIC, SONGS, Song } from "./songs";
 
 export interface BoxState {
   song: Song | null; // null = free play
-  idx: number;       // cumulative tap count (wraps via modulo)
+  idx: number; // cumulative tap count (wraps via modulo)
 }
 
 export function startState(song: Song | null): BoxState {
@@ -52,18 +52,18 @@ export function harmonyOffsets(fingerCount: number): number[] {
 
 /** Vertical zone determines which object pool to draw from.
  *  yFrac 0 = top, 1 = bottom. */
-export type SpawnZone = 'sky' | 'mid' | 'ground';
+export type SpawnZone = "sky" | "mid" | "ground";
 export function spawnZone(yFrac: number): SpawnZone {
-  if (yFrac < 0.35) return 'sky';
-  if (yFrac > 0.65) return 'ground';
-  return 'mid';
+  if (yFrac < 0.35) return "sky";
+  if (yFrac > 0.65) return "ground";
+  return "mid";
 }
 
 const UNIQUE_SPRITES = new Set([
-  'obj_sky_sun_rays',
-  'obj_sky_moon_crescent',
-  'obj_sky_rocket',
-  'obj_mid_rainbow',
+  "obj_sky_sun_rays",
+  "obj_sky_moon_crescent",
+  "obj_sky_rocket",
+  "obj_mid_rainbow",
 ]);
 
 /** Pick a spawn sprite, skipping unique sprites already on screen. */
@@ -77,7 +77,8 @@ export function pickSpawnSprite(
   if (!UNIQUE_SPRITES.has(first) || !active.has(first)) return first;
   for (let i = 1; i < pool.length; i++) {
     const candidate = pool[(tapIndex + i) % pool.length];
-    if (!UNIQUE_SPRITES.has(candidate) || !active.has(candidate)) return candidate;
+    if (!UNIQUE_SPRITES.has(candidate) || !active.has(candidate))
+      return candidate;
   }
   return first;
 }
@@ -90,7 +91,8 @@ export function songById(id: string | undefined): Song | null {
 export function speechLines(): string[] {
   const out: string[] = [];
   for (const l of LANGS) {
-    out.push(t(l.id, 'musicbox.intro'));
+    out.push(t(l.id, "musicbox.intro"));
+    out.push(t(l.id, "shell.musicbox.subPicker"));
   }
   return [...new Set(out)];
 }

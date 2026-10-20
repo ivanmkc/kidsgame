@@ -32,7 +32,11 @@ export function MusicBoxGame({
   const scene = sceneId ? sceneById(sceneId) : undefined;
 
   useEffect(() => {
-    if (scene) say(t(lang, "musicbox.intro"));
+    if (scene) {
+      say(t(lang, "musicbox.intro"));
+    } else {
+      say(t(lang, "shell.musicbox.subPicker"));
+    }
   }, [scene?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!scene) {
