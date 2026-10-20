@@ -1,10 +1,13 @@
-import { Rng, shuffle } from '../../rng';
+import { Rng, shuffle } from "../../rng";
 
 // perm[position] = which piece sits at that position. Solved = identity.
 export function makePuzzle(rng: Rng, size: number): number[] {
   let perm: number[];
   do {
-    perm = shuffle(rng, Array.from({ length: size }, (_, i) => i));
+    perm = shuffle(
+      rng,
+      Array.from({ length: size }, (_, i) => i),
+    );
   } while (isSolved(perm));
   return perm;
 }
