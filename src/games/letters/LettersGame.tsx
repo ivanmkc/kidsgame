@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -15,7 +16,7 @@ import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, sfx } from "../../sound";
-import { LetterRound, makeLetterRound, settingsForLetters } from "./logic";
+import { LetterRound, makeLetterRound, settingsForLetters, shouldShowGlyph } from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -34,6 +35,11 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   } = settingsForLetters(difficulty, lang);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  
+  const [started, setStarted] = useState(false);
+  const [captions, setCaptions] = useState(false);
+  const [misses, setMisses] = useState(0);
+
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<LetterRound>(() =>
     makeLetterRound(rngRef.current, tier, tileCount),
@@ -43,8 +49,31 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"));
-  const elapsed = useElapsed(showTimer && !won, timerKey);
+  const elapsed = useElapsed(showTimer && !won && started, timerKey);
   const { width, height } = useWindowDimensions();
+
+  // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
+  const langMounted = useRef(false);
+  useEffect(() => {
+    if (!langMounted.current) { langMounted.current = true; return; }
+    setRound(makeLetterRound(rngRef.current, tier, tileCount));
+    setMisses(0);
+    setWrongIdx(null);
+  }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!started) return;
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.1, duration: 400, useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 400, useNativeDriver: true }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulse, started]);
 
   useEffect(() => {
     lockedRef.current = false;
@@ -53,15 +82,16 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated target still gets read aloud.
   useEffect(() => {
-    if (!won) say(round.promptLine);
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (started && !won) say(round.promptLine);
+  }, [round, won, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won || lockedRef.current) return;
+    if (!started || won || lockedRef.current) return;
     lockedRef.current = true;
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
+      setMisses(0);
       const next = roundIdx + 1;
       setRoundIdx(next);
       if (next < roundsToWin) {
@@ -72,6 +102,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       setWrongIdx(i);
+      setMisses((m) => m + 1);
       setTimeout(() => {
         lockedRef.current = false;
         setWrongIdx((w) => (w === i ? null : w));
@@ -85,6 +116,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
+    setMisses(0);
     setRound(makeLetterRound(rngRef.current, tier, tileCount));
     setWrongIdx(null);
   };
@@ -133,41 +165,83 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       }
     >
       <View style={styles.board}>
-        <View
-          style={[styles.prompt, shadows.soft]}
-          testID={`letters-prompt-${round.targetKey}`}
-        >
-          <Text style={styles.promptText}>{round.promptLine}</Text>
-          {round.romanCaption ? (
-            <Text style={styles.caption}>{round.romanCaption}</Text>
-          ) : null}
-        </View>
-        <View
-          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
-        >
-          {round.tiles.map((t, i) => (
+        {!started ? (
+          <View style={styles.startScreen}>
+            <Text style={styles.startTitle}>{t(lang, "card.letters.title")}</Text>
+            <Text style={styles.startBlurb}>{t(lang, "card.letters.blurb")}</Text>
             <Pressable
-              key={`${roundIdx}-${i}-${t.key}`}
-              onPress={() => onTile(i)}
-              testID={`letters-tile-${i}`}
-              accessibilityLabel={t.label}
+              onPress={() => setStarted(true)}
+              testID="play-button"
               accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.tile,
-                shadows.soft,
-                { width: tile, height: tile },
-                wrongIdx === i && styles.wrong,
-                pressed && styles.pressed,
-              ]}
+              accessibilityLabel={t(lang, "listenchoose.play")}
+              style={({ pressed }) => [styles.playButton, shadows.soft, pressed && styles.pressed]}
             >
-              <Text
-                style={[styles.glyph, { fontSize: Math.round(tile * 0.5) }]}
-              >
-                {t.label}
+              <Text style={styles.playButtonText}>{t(lang, "listenchoose.play")}</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setCaptions((c) => !c)}
+              testID="captions-toggle"
+              accessibilityRole="button"
+              style={({ pressed }) => [styles.captionsToggle, pressed && styles.pressed]}
+            >
+              <Text style={styles.captionsToggleText}>
+                💬 {t(lang, "listenchoose.captions")}: {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
               </Text>
             </Pressable>
-          ))}
-        </View>
+          </View>
+        ) : (
+          <>
+            <View
+              style={[styles.prompt, shadows.soft, shouldShowGlyph(misses, captions) ? null : styles.promptAudioOnly]}
+              testID={`letters-prompt-${round.targetKey}`}
+            >
+              <Pressable
+                onPress={() => say(round.promptLine)}
+                testID="speaker-button"
+                accessibilityRole="button"
+                style={({ pressed }) => [styles.speakerButton, pressed && styles.pressed]}
+              >
+                <Animated.Text style={[styles.speakerIcon, { transform: [{ scale: pulse }] }]}>
+                  🔊
+                </Animated.Text>
+              </Pressable>
+              {shouldShowGlyph(misses, captions) && (
+                <View style={styles.promptGlyphContainer}>
+                  <Text style={styles.promptGlyph} testID="letters-glyph">{round.targetDisplay}</Text>
+                  {round.romanCaption ? (
+                    <Text style={styles.caption}>{round.romanCaption}</Text>
+                  ) : null}
+                </View>
+              )}
+            </View>
+            <View
+              style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+            >
+              {round.tiles.map((t, i) => (
+                <Pressable
+                  key={`${roundIdx}-${i}-${t.key}`}
+                  onPress={() => onTile(i)}
+                  testID={`letters-tile-${i}`}
+                  accessibilityLabel={t.label}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.tile,
+                    shadows.soft,
+                    { width: tile, height: tile },
+                    wrongIdx === i && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text
+                    style={[styles.glyph, { fontSize: Math.round(tile * 0.5) }]}
+                  >
+                    {t.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
       </View>
       <WinOverlay
         visible={won}
@@ -191,6 +265,48 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 16,
   },
+  startScreen: {
+    alignItems: "center",
+    gap: 24,
+  },
+  startTitle: {
+    fontFamily: fonts.display,
+    fontSize: 48,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  startBlurb: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 24,
+    color: colors.inkSoft,
+    textAlign: "center",
+    maxWidth: 400,
+  },
+  playButton: {
+    backgroundColor: colors.teal,
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 36,
+    alignItems: "center",
+  },
+  playButtonText: {
+    fontFamily: fonts.display,
+    fontSize: 22,
+    color: "#FFF",
+  },
+  captionsToggle: {
+    backgroundColor: colors.paper,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: colors.gold,
+  },
+  captionsToggleText: {
+    fontFamily: fonts.body,
+    fontSize: 18,
+    color: colors.inkSoft,
+  },
   prompt: {
     backgroundColor: "#F7EDDA",
     borderRadius: 18,
@@ -199,11 +315,34 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 22,
     alignItems: "center",
+    flexDirection: "row",
+    gap: 16,
     maxWidth: 520,
   },
-  promptText: {
+  promptAudioOnly: {
+    borderRadius: 44,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+  },
+  speakerButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.card,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  speakerIcon: {
+    fontSize: 36,
+  },
+  promptGlyphContainer: {
+    alignItems: "center",
+  },
+  promptGlyph: {
     fontFamily: fonts.display,
-    fontSize: 22,
+    fontSize: 32,
     color: colors.ink,
     textAlign: "center",
   },
