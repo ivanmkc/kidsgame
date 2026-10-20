@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import React, { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LangContext } from '../../../components/GameShell';
 import { Lang } from '../../../lang';
+import { manifest } from '../../../manifest';
 import * as sound from '../../../sound';
+import { WORDS } from '../../../words';
 import { SoundsGame } from '../SoundsGame';
 
 function LangHarness({
@@ -137,13 +139,67 @@ describe('SoundsGame language switch safety', () => {
     saySeqSpy.mockClear();
 
     // Find and click an incorrect tile
+    const pool = WORDS.filter((w) => manifest.spotit.icons.includes(w.icon));
+    const match = (screen.getByTestId(/^sounds-prompt-/).getAttribute('data-testid') || '').match(/^sounds-prompt-(\d+)$/);
+    const targetIdx = match ? Number(match[1]) : -1;
+    const targetIcon = targetIdx >= 0 ? pool[targetIdx]?.icon : undefined;
     const tiles = screen.getAllByTestId(/^sounds-tile-/);
-    for (const tile of tiles) {
-      fireEvent.click(tile);
-      if (wrongSpy.mock.calls.length > 0) break;
-    }
+    const wrongTile = tiles.find((t) => t.getAttribute('aria-label') !== targetIcon) ?? tiles[0];
+    fireEvent.click(wrongTile);
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
     expect(saySeqSpy).toHaveBeenCalledWith(['どれかな？', expect.any(String)]);
+  });
+});
+
+describe('SoundsGame fast-tap lock', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('locks input during sayThen so rapid taps do not skip rounds', () => {
+    let confirmCb: (() => void) | null = null;
+    vi.spyOn(sound, 'sayThen').mockImplementation((lines, cb) => {
+      confirmCb = cb;
+    });
+    vi.spyOn(sound, 'saySequence').mockImplementation(() => {});
+
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+
+    const tiles = [
+      screen.getByTestId('sounds-tile-0'),
+      screen.getByTestId('sounds-tile-1'),
+      screen.getByTestId('sounds-tile-2'),
+    ];
+
+    let correctTile: HTMLElement | null = null;
+    for (const tile of tiles) {
+      fireEvent.click(tile);
+      if (vi.mocked(sound.sfx.good).mock.calls.length === 1) {
+        correctTile = tile;
+        break;
+      }
+    }
+
+    expect(correctTile).not.toBeNull();
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+
+    // Rapid second tap before callback fires.
+    fireEvent.click(correctTile!);
+
+    // Should still only have called good/sayThen once!
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+
+    // Fire the callback
+    act(() => {
+      if (confirmCb) confirmCb();
+    });
+
+    // Score should show round 1. In easy, 8 rounds to win.
+    const score = screen.getByTestId('sounds-score');
+    expect(score.textContent).toMatch(/1\/8/);
   });
 });
