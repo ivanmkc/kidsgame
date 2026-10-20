@@ -187,5 +187,45 @@ describe('SameDiffGame UI', () => {
 
     vi.useRealTimers();
   });
+
+  it("updates language instantly mid-round without corrupting state", () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Check English labels and prompt
+    expect(screen.getByText("Same")).toBeTruthy();
+    expect(screen.getByText("Different")).toBeTruthy();
+    expect(screen.getByText("Same or Different")).toBeTruthy();
+    expect(screen.getByText("Do the two melodies match?")).toBeTruthy();
+    expect(screen.getByTestId("samediff-score").textContent).toMatch(/🎧 0\/\d+/);
+
+    // Change language mid-round
+    rerender(<SameDiffGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    // Check instantly updated to Japanese labels and prompt
+    expect(screen.getByText("おなじ")).toBeTruthy();
+    expect(screen.getByText("ちがう")).toBeTruthy();
+    expect(screen.getByText("おなじ ちがう")).toBeTruthy();
+    expect(screen.getByText("ふたつの メロディは おなじ？")).toBeTruthy();
+    expect(screen.getByTestId("samediff-score").textContent).toMatch(/🎧 0\/\d+/);
+
+    // Verify buttons are still present and we are still in pick phase
+    expect(screen.getByTestId("samediff-same")).toBeTruthy();
+    expect(screen.getByTestId("samediff-diff")).toBeTruthy();
+
+    // Advance time to prove no stale timers or speech fire and corrupt the round
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByTestId("samediff-same")).toBeTruthy();
+    expect(screen.getByTestId("samediff-diff")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
 });
 
