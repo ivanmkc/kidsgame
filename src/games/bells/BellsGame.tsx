@@ -288,8 +288,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={styles.replayText}>🔊</Text>
               </Pressable>
             </View>
-          )
-        )}
+          ))}
         {phase === "play" && !won && (
           <View testID="tap-dot-row" style={styles.tapDotRow}>
             {tapDots}
