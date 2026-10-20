@@ -278,6 +278,8 @@ export const JA: Table = {
   'memory.moves': 'てすう: {n}',
   'rhyme.ask': 'おなじ おとで おわるのは どれ？',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
+  'bingo.prompt': 'さがしてね {word}！',
+  'bingo.promptPhonics': '{sound} で はじまる ものを さがしてね！',
   'story.tryAgain': 'あちゃ！ べつのみち ↩️',
   'story.startOver': 'はじめから 📖',
   'story.readAgain': 'おしまい！ もういちど 📖',

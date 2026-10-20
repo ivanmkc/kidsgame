@@ -277,6 +277,8 @@ export const YUE: Table = {
   'memory.moves': '步數：{n}',
   'rhyme.ask': '邊個字尾音一樣呀？',
   'rhyme.comingSoon': '更多押韻就快嚟！🎶',
+  'bingo.prompt': '搵一搵 {word}！',
+  'bingo.promptPhonics': '搵一搵 {sound} 起頭嘅！',
   'story.tryAgain': '咦！行第二條路 ↩️',
   'story.startOver': '由頭嚟過 📖',
   'story.readAgain': '完！再睇一次 📖',

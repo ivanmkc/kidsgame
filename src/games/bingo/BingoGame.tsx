@@ -89,6 +89,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
   const board = boardRef.current;
   const call = board.calls[callIdx];
+  const targetCell = call ? board.cells[call.answerIdx] : undefined;
+  const displayPrompt =
+    call && targetCell
+      ? call.mode === "phonics"
+        ? t(lang, "bingo.promptPhonics", { sound: call.sound ?? "" })
+        : t(lang, "bingo.prompt", { word: targetCell.label })
+      : "";
 
   useEffect(() => {
     if (!won && call) saySequence(call.promptLines);
@@ -186,7 +193,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
               sfx.tap();
               saySequence(call.promptLines);
             }}
-            accessibilityLabel={call.displayPrompt}
+            accessibilityLabel={displayPrompt}
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.prompt,
@@ -202,7 +209,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
                 isLandscape && styles.promptTextLandscape,
               ]}
             >
-              {call.displayPrompt}
+              {displayPrompt}
             </Text>
             {shortH && !isLandscape ? null : (
               <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
