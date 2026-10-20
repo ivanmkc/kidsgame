@@ -173,6 +173,7 @@ export interface PickDeps {
   setWrongPick: (
     w: number | null | ((prev: number | null) => number | null),
   ) => void;
+  setWon: (w: boolean) => void;
 }
 
 export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
@@ -182,22 +183,19 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
     deps.setLocked(true);
     deps.sfx.good();
     const nextScore = state.score + 1;
-    const isWin = nextScore >= state.roundsToWin;
-    if (!isWin) {
-      deps.setScore(nextScore);
-    }
+    deps.setScore(nextScore);
     const nw = numberWord(state.lang, state.round.answer).t;
     deps.sayThen([nw, PRAISE[state.lang]], () => {
       deps.setLocked(false);
-      if (isWin) {
-        deps.setScore(nextScore);
-      } else {
+      if (nextScore < state.roundsToWin) {
         const nr = deps.makeNextRound();
         deps.setRound(nr);
         deps.setRoundNo((r) => r + 1);
         deps.setTapped(Array.from({ length: nr.n }, () => false));
         deps.setPhase("count");
         deps.setWrongPick(null);
+      } else {
+        deps.setWon(true);
       }
     });
   } else {

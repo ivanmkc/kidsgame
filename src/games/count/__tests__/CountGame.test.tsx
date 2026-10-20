@@ -11,6 +11,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import * as sound from "../../../sound";
+import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
@@ -219,6 +220,7 @@ describe("logic: applyPickAnswer", () => {
       setTapped: vi.fn(),
       setPhase: vi.fn(),
       setWrongPick: vi.fn(),
+      setWon: vi.fn(),
     };
 
     // First click (valid)
@@ -240,6 +242,57 @@ describe("logic: applyPickAnswer", () => {
     expect(deps.setRound).toHaveBeenCalledTimes(1);
     expect(deps.setRoundNo).toHaveBeenCalledTimes(1);
     expect(deps.setPhase).toHaveBeenCalledWith("count");
+  });
+
+  it("does not trigger won state until sayThen completes on the winning round", () => {
+    let score = 4;
+    const setScore = vi.fn((s: number) => {
+      score = s;
+    });
+    const setWon = vi.fn();
+    let queuedCb: (() => void) | undefined;
+    const sayThenSpy = vi.fn((lines: string[], cb: () => void) => {
+      queuedCb = cb;
+    });
+
+    const state = {
+      won: false,
+      phase: "quiz",
+      locked: false,
+      get score() {
+        return score;
+      },
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: "en" as const,
+    };
+
+    const deps = {
+      sfx: { good: vi.fn(), wrong: vi.fn() },
+      say: vi.fn(),
+      sayThen: sayThenSpy,
+      setTimeout: vi.fn(),
+      makeNextRound: vi.fn(() => dummyRound),
+      setScore,
+      setLocked: vi.fn(),
+      setRound: vi.fn(),
+      setRoundNo: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick: vi.fn(),
+      setWon,
+    };
+
+    applyPickAnswer(dummyRound.answer, state, deps);
+    // Score updates immediately for visual feedback
+    expect(setScore).toHaveBeenCalledWith(5);
+    // But won is not triggered yet
+    expect(setWon).not.toHaveBeenCalled();
+
+    if (queuedCb) queuedCb();
+    // Won is triggered after sayThen finishes
+    expect(setWon).toHaveBeenCalledWith(true);
+    expect(deps.setRound).not.toHaveBeenCalled();
   });
 
   it("handles wrong answers by playing sfx and setting wrong pick", () => {
@@ -267,69 +320,12 @@ describe("logic: applyPickAnswer", () => {
       setTapped: vi.fn(),
       setPhase: vi.fn(),
       setWrongPick,
+      setWon: vi.fn(),
     };
 
     applyPickAnswer(dummyRound.answer + 1, state, deps);
     expect(sfxSpy.wrong).toHaveBeenCalledTimes(1);
     expect(setWrongPick).toHaveBeenCalledWith(dummyRound.answer + 1);
-  });
-
-  it("defers setScore on winning round until sayThen completes", () => {
-    let locked = false;
-    let score = 4;
-    const setLocked = vi.fn((l: boolean) => {
-      locked = l;
-    });
-    const setScore = vi.fn((s: number) => {
-      score = s;
-    });
-    let queuedCb: (() => void) | undefined;
-    const sayThenSpy = vi.fn((lines: string[], cb: () => void) => {
-      queuedCb = cb;
-    });
-    const sfxSpy = { good: vi.fn(), wrong: vi.fn() };
-
-    const state = {
-      won: false,
-      phase: "quiz",
-      get locked() {
-        return locked;
-      },
-      get score() {
-        return score;
-      },
-      round: dummyRound,
-      roundsToWin: 5,
-      lang: "en" as const,
-    };
-
-    const deps = {
-      sfx: sfxSpy,
-      say: vi.fn(),
-      sayThen: sayThenSpy,
-      setTimeout: vi.fn(),
-      makeNextRound: vi.fn(() => dummyRound),
-      setScore,
-      setLocked,
-      setRound: vi.fn(),
-      setRoundNo: vi.fn(),
-      setTapped: vi.fn(),
-      setPhase: vi.fn(),
-      setWrongPick: vi.fn(),
-    };
-
-    applyPickAnswer(dummyRound.answer, state, deps);
-    expect(setLocked).toHaveBeenCalledWith(true);
-    expect(sfxSpy.good).toHaveBeenCalledTimes(1);
-    expect(sayThenSpy).toHaveBeenCalledTimes(1);
-    // Score must not be incremented yet on winning round to avoid premature win overlay
-    expect(setScore).not.toHaveBeenCalled();
-
-    // After praise speech completes, score is incremented to trigger win
-    if (queuedCb) queuedCb();
-    expect(setScore).toHaveBeenCalledWith(5);
-    expect(setLocked).toHaveBeenLastCalledWith(false);
-    expect(deps.setRound).not.toHaveBeenCalled();
   });
 });
 
@@ -422,54 +418,57 @@ describe("CountGame double-tap lock", () => {
     expect(springSpy).toHaveBeenCalledTimes(n + 2);
   });
 
-  it("does not trigger win overlay or win line until praise speech completes on final round", () => {
-    vi.spyOn(countLogic, "countSettings").mockReturnValue({
-      rounds: 1,
-      min: 1,
-      max: 5,
-    });
-    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
-
+  it("does not trigger win line or victory overlay until celebration finishes on final round", () => {
+    const saySpy = vi.spyOn(sound, "say");
     render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-    const stages = screen.getAllByTestId(/count-stage-/);
-    const stage = stages[stages.length - 1];
-    const testId = stage.getAttribute("data-testid");
-    const n = Number(testId!.split("-").pop());
+    for (let round = 1; round <= 5; round++) {
+      const stages = screen.getAllByTestId(/count-stage-/);
+      const stage = stages[stages.length - 1];
+      const testId = stage.getAttribute("data-testid");
+      const n = Number(testId!.split("-").pop());
 
-    for (let i = 0; i < n; i++) {
-      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+      for (let i = 0; i < n; i++) {
+        fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+      }
+
+      const finishCountSpeech = sayThenDoneCallbacks.pop()!;
+      act(() => {
+        finishCountSpeech();
+      });
+
+      const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+      const answerChoice = answerChoices[answerChoices.length - 1];
+      fireEvent.click(answerChoice);
+
+      if (round < 5) {
+        const advance = sayThenDoneCallbacks.pop()!;
+        act(() => {
+          advance();
+        });
+      }
     }
 
-    const finishCountSpeech = sayThenDoneCallbacks.pop()!;
-    act(() => {
-      finishCountSpeech();
-    });
+    // On final round: score updates immediately for visual feedback (R3)
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 5/5");
 
-    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
-    const answerChoice = answerChoices[answerChoices.length - 1];
-    fireEvent.click(answerChoice);
-
-    // Answer was selected: sayThen is queued for number word and praise.
-    // Win overlay and win line speech must NOT have triggered yet.
+    // But celebration audio is in flight, win line and overlay must not have triggered yet
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "win.count"));
     expect(screen.queryByTestId("win-overlay")).toBeNull();
-    expect(saySpy).not.toHaveBeenCalledWith(
-      expect.stringContaining("Amazing counter"),
-    );
+    expect(screen.queryByText(t("en", "win.count"))).toBeNull();
 
-    // Complete the praise narration.
+    // Finish celebration speech
     expect(sayThenDoneCallbacks).toHaveLength(1);
-    const finishPraiseSpeech = sayThenDoneCallbacks.pop()!;
+    const finishFinalCelebration = sayThenDoneCallbacks.pop()!;
     act(() => {
-      finishPraiseSpeech();
+      finishFinalCelebration();
     });
 
-    // Now the win overlay appears and the win line is spoken.
+    // Victory screen and speech only trigger after celebration completes
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 5/5");
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.count"));
     expect(screen.getByTestId("win-overlay")).toBeDefined();
-    expect(saySpy).toHaveBeenCalledWith(
-      expect.stringContaining("Amazing counter"),
-    );
-    expect(screen.getByTestId("count-score").textContent).toBe("🔢 1/1");
+    expect(screen.getByText(t("en", "win.count"))).toBeDefined();
   });
 });
 

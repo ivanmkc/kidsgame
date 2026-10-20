@@ -59,7 +59,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.count"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
@@ -121,6 +121,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         setTapped,
         setPhase,
         setWrongPick,
+        setWon,
       },
     );
   };
@@ -134,6 +135,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     setRoundNo((r) => r + 1);
     setTapped(Array.from({ length: nr.n }, () => false));
     setScore(0);
+    setWon(false);
     setPhase("count");
     setWrongPick(null);
   };
