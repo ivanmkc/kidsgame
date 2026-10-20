@@ -12,7 +12,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
@@ -43,6 +43,7 @@ interface Props {
  * comparative feedback is spoken aloud.
  */
 export function CompareGame({ onHome, difficulty, lang }: Props) {
+  const { isValid } = useLangEpoch(lang);
   const { rounds: roundsToWin } = compareSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<CompareRound>(() =>
@@ -61,10 +62,23 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const promptFor = (r: CompareRound) =>
     r.ask === "more" ? MORE_PROMPT[lang] : FEWER_PROMPT[lang];
 
+  // Lang switch: rebuild the live round and unlock state.
+  const langMounted = useRef(false);
+  useEffect(() => {
+    if (!langMounted.current) {
+      langMounted.current = true;
+      return;
+    }
+    setRound(makeCompareRound(rngRef.current, difficulty));
+    lockedRef.current = false;
+    setLocked(false);
+    setWrongSide(null);
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Keyed on the round OBJECT — repeats still re-speak.
   useEffect(() => {
     if (!won) say(promptFor(round));
-  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickSide = (side: "left" | "right") => {
     if (won || locked || lockedRef.current || wrongSide !== null) return;
@@ -76,6 +90,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       setScore(nextScore);
       const feedback = roundComparisonPhrase(lang, round);
       sayThen([feedback, PRAISE[lang]], () => {
+        if (!isValid()) return;
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
           setWrongSide(null);
@@ -88,10 +103,14 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       sfx.wrong();
       setWrongSide(side);
       setTimeout(() => {
+        if (!isValid()) return;
         setWrongSide((s) => (s === side ? null : s));
         lockedRef.current = false;
       }, 450);
-      setTimeout(() => say(promptFor(round)), 500);
+      setTimeout(() => {
+        if (!isValid()) return;
+        say(promptFor(round));
+      }, 500);
     }
   };
 
@@ -254,7 +273,9 @@ function Plate({
             style={[styles.badge, shadows.soft, isWinner && styles.badgeWinner]}
             testID={badgeTestID}
           >
-            <Text style={[styles.badgeText, isWinner && styles.badgeTextWinner]}>
+            <Text
+              style={[styles.badgeText, isWinner && styles.badgeTextWinner]}
+            >
               {data.count}
             </Text>
           </View>

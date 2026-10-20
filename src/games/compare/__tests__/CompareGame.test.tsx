@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   act,
   cleanup,
@@ -8,6 +8,9 @@ import {
   screen,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { Difficulty } from "../../../difficulty";
+import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { CompareGame } from "../CompareGame";
@@ -383,36 +386,36 @@ describe("CompareGame prompt replay", () => {
   });
 });
 
-describe('CompareGame badges and comparative feedback', () => {
+describe("CompareGame badges and comparative feedback", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
-    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
-    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
-    vi.spyOn(sound, 'say').mockImplementation(() => {});
-    vi.spyOn(sound, 'sayThen').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
   });
 
   afterEach(() => {
     cleanup();
   });
 
-  it('initially hides count badges and displays initial prompt', () => {
+  it("initially hides count badges and displays initial prompt", () => {
     render(<CompareGame onHome={vi.fn()} difficulty="easy" lang="en" />);
 
-    expect(screen.queryByTestId('compare-badge-left')).toBeNull();
-    expect(screen.queryByTestId('compare-badge-right')).toBeNull();
+    expect(screen.queryByTestId("compare-badge-left")).toBeNull();
+    expect(screen.queryByTestId("compare-badge-right")).toBeNull();
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain('Tap the side with MORE!');
+    expect(prompt.textContent).toContain("Tap the side with MORE!");
   });
 
-  it('wrong plate tap plays wrong sound and keeps count badges hidden', () => {
+  it("wrong plate tap plays wrong sound and keeps count badges hidden", () => {
     render(<CompareGame onHome={vi.fn()} difficulty="easy" lang="en" />);
 
-    const buttons = screen.getAllByRole('button');
+    const buttons = screen.getAllByRole("button");
     const wrongPlate = buttons.find((btn) => {
-      const id = btn.getAttribute('data-testid') || '';
-      return id.startsWith('compare-plate-') && !id.endsWith('-correct');
+      const id = btn.getAttribute("data-testid") || "";
+      return id.startsWith("compare-plate-") && !id.endsWith("-correct");
     });
     expect(wrongPlate).toBeDefined();
 
@@ -421,32 +424,38 @@ describe('CompareGame badges and comparative feedback', () => {
     expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
     expect(sound.sfx.good).not.toHaveBeenCalled();
     expect(sound.sayThen).not.toHaveBeenCalled();
-    expect(screen.queryByTestId('compare-badge-left')).toBeNull();
-    expect(screen.queryByTestId('compare-badge-right')).toBeNull();
+    expect(screen.queryByTestId("compare-badge-left")).toBeNull();
+    expect(screen.queryByTestId("compare-badge-right")).toBeNull();
   });
 
-  it('correct plate tap reveals count badges on both plates and plays comparative feedback', () => {
+  it("correct plate tap reveals count badges on both plates and plays comparative feedback", () => {
     let queuedCb: (() => void) | undefined;
-    vi.spyOn(sound, 'sayThen').mockImplementation((_lines, cb) => {
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
       queuedCb = cb;
     });
 
     render(<CompareGame onHome={vi.fn()} difficulty="easy" lang="en" />);
 
-    const buttons = screen.getAllByRole('button');
+    const buttons = screen.getAllByRole("button");
     const leftPlate = buttons.find((btn) =>
-      (btn.getAttribute('data-testid') || '').startsWith('compare-plate-left-'),
+      (btn.getAttribute("data-testid") || "").startsWith("compare-plate-left-"),
     );
     const rightPlate = buttons.find((btn) =>
-      (btn.getAttribute('data-testid') || '').startsWith('compare-plate-right-'),
+      (btn.getAttribute("data-testid") || "").startsWith(
+        "compare-plate-right-",
+      ),
     );
     expect(leftPlate).toBeDefined();
     expect(rightPlate).toBeDefined();
 
-    const leftId = leftPlate!.getAttribute('data-testid') || '';
-    const rightId = rightPlate!.getAttribute('data-testid') || '';
-    const leftMatch = leftId.match(/^compare-plate-left-.*-(\d+)(?:-correct)?$/);
-    const rightMatch = rightId.match(/^compare-plate-right-.*-(\d+)(?:-correct)?$/);
+    const leftId = leftPlate!.getAttribute("data-testid") || "";
+    const rightId = rightPlate!.getAttribute("data-testid") || "";
+    const leftMatch = leftId.match(
+      /^compare-plate-left-.*-(\d+)(?:-correct)?$/,
+    );
+    const rightMatch = rightId.match(
+      /^compare-plate-right-.*-(\d+)(?:-correct)?$/,
+    );
     expect(leftMatch).not.toBeNull();
     expect(rightMatch).not.toBeNull();
 
@@ -454,7 +463,7 @@ describe('CompareGame badges and comparative feedback', () => {
     const rightCount = rightMatch![1];
     expect(leftCount).not.toBe(rightCount);
 
-    const isLeftCorrect = leftId.endsWith('-correct');
+    const isLeftCorrect = leftId.endsWith("-correct");
     const correctPlate = isLeftCorrect ? leftPlate! : rightPlate!;
     const winCount = Number(isLeftCorrect ? leftCount : rightCount);
     const otherCount = Number(isLeftCorrect ? rightCount : leftCount);
@@ -465,18 +474,23 @@ describe('CompareGame badges and comparative feedback', () => {
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
 
     // Badges are revealed on BOTH plates with exact count text
-    const leftBadge = screen.getByTestId('compare-badge-left');
-    const rightBadge = screen.getByTestId('compare-badge-right');
+    const leftBadge = screen.getByTestId("compare-badge-left");
+    const rightBadge = screen.getByTestId("compare-badge-right");
     expect(leftBadge.textContent).toBe(String(leftCount));
     expect(rightBadge.textContent).toBe(String(rightCount));
 
     // Prompt retains promptFor(round)
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain('Tap the side with MORE!');
+    expect(prompt.textContent).toContain("Tap the side with MORE!");
 
     // sayThen receives the exact comparative line and praise
     const callArgs = vi.mocked(sound.sayThen).mock.calls[0][0];
-    const expectedFeedback = comparisonPhrase('en', 'more', winCount, otherCount);
+    const expectedFeedback = comparisonPhrase(
+      "en",
+      "more",
+      winCount,
+      otherCount,
+    );
     expect(callArgs[0]).toBe(expectedFeedback);
     expect(callArgs[1]).toBe("That's right!");
 
@@ -489,27 +503,33 @@ describe('CompareGame badges and comparative feedback', () => {
       queuedCb?.();
     });
 
-    expect(screen.queryByTestId('compare-badge-left')).toBeNull();
-    expect(screen.queryByTestId('compare-badge-right')).toBeNull();
+    expect(screen.queryByTestId("compare-badge-left")).toBeNull();
+    expect(screen.queryByTestId("compare-badge-right")).toBeNull();
   });
 
-  it('supports comparative feedback in Japanese (ja)', () => {
+  it("supports comparative feedback in Japanese (ja)", () => {
     render(<CompareGame onHome={vi.fn()} difficulty="easy" lang="ja" />);
 
-    const buttons = screen.getAllByRole('button');
+    const buttons = screen.getAllByRole("button");
     const leftPlate = buttons.find((btn) =>
-      (btn.getAttribute('data-testid') || '').startsWith('compare-plate-left-'),
+      (btn.getAttribute("data-testid") || "").startsWith("compare-plate-left-"),
     );
     const rightPlate = buttons.find((btn) =>
-      (btn.getAttribute('data-testid') || '').startsWith('compare-plate-right-'),
+      (btn.getAttribute("data-testid") || "").startsWith(
+        "compare-plate-right-",
+      ),
     );
     expect(leftPlate).toBeDefined();
     expect(rightPlate).toBeDefined();
 
-    const leftId = leftPlate!.getAttribute('data-testid') || '';
-    const rightId = rightPlate!.getAttribute('data-testid') || '';
-    const leftMatch = leftId.match(/^compare-plate-left-.*-(\d+)(?:-correct)?$/);
-    const rightMatch = rightId.match(/^compare-plate-right-.*-(\d+)(?:-correct)?$/);
+    const leftId = leftPlate!.getAttribute("data-testid") || "";
+    const rightId = rightPlate!.getAttribute("data-testid") || "";
+    const leftMatch = leftId.match(
+      /^compare-plate-left-.*-(\d+)(?:-correct)?$/,
+    );
+    const rightMatch = rightId.match(
+      /^compare-plate-right-.*-(\d+)(?:-correct)?$/,
+    );
     expect(leftMatch).not.toBeNull();
     expect(rightMatch).not.toBeNull();
 
@@ -517,28 +537,217 @@ describe('CompareGame badges and comparative feedback', () => {
     const rightCount = rightMatch![1];
     expect(leftCount).not.toBe(rightCount);
 
-    const isLeftCorrect = leftId.endsWith('-correct');
+    const isLeftCorrect = leftId.endsWith("-correct");
     const correctPlate = isLeftCorrect ? leftPlate! : rightPlate!;
     const winCount = Number(isLeftCorrect ? leftCount : rightCount);
     const otherCount = Number(isLeftCorrect ? rightCount : leftCount);
 
     fireEvent.click(correctPlate);
 
-    const leftBadge = screen.getByTestId('compare-badge-left');
-    const rightBadge = screen.getByTestId('compare-badge-right');
+    const leftBadge = screen.getByTestId("compare-badge-left");
+    const rightBadge = screen.getByTestId("compare-badge-right");
     expect(leftBadge.textContent).toBe(String(leftCount));
     expect(rightBadge.textContent).toBe(String(rightCount));
 
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain('おおい ほうは どっち？');
+    expect(prompt.textContent).toContain("おおい ほうは どっち？");
 
     const callArgs = vi.mocked(sound.sayThen).mock.calls[0][0];
-    const expectedJaFeedback = comparisonPhrase('ja', 'more', winCount, otherCount);
+    const expectedJaFeedback = comparisonPhrase(
+      "ja",
+      "more",
+      winCount,
+      otherCount,
+    );
     expect(callArgs[0]).toBe(expectedJaFeedback);
-    expect(callArgs[1]).toBe('せいかい！');
+    expect(callArgs[1]).toBe("せいかい！");
 
     const speechPool = new Set(compareSpeechLines());
     expect(speechPool.has(callArgs[0])).toBe(true);
     expect(speechPool.has(callArgs[1])).toBe(true);
+  });
+});
+
+function LangHarness({
+  difficulty = "easy",
+  initialLang = "en",
+}: {
+  difficulty?: Difficulty;
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <CompareGame onHome={noop} difficulty={difficulty} lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
+describe("CompareGame language switch safety", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("rebuilds round and speaks new language prompt when language is cycled mid-round", () => {
+    const saySpy = vi.spyOn(sound, "say");
+
+    render(<LangHarness initialLang="en" />);
+
+    // English prompt spoken initially
+    expect(saySpy).toHaveBeenCalledWith(
+      expect.stringMatching(/Tap the side with (MORE|FEWER)!/),
+    );
+    saySpy.mockClear();
+
+    // Cycle language to Japanese via in-game header chip
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // Prompt updated visually and spoken in Japanese
+    const prompt = screen.getByTestId(/^compare-prompt-/);
+    expect(prompt.textContent).toMatch(/どっち？/);
+    expect(saySpy).toHaveBeenCalledWith(
+      expect.stringMatching(/(おおい|すくない) ほうは どっち？/),
+    );
+  });
+
+  it("cycles lang during praise: drops pending sayThen callback, rebuilds round, and avoids double-advancing score", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say");
+    const goodSpy = vi.spyOn(sound.sfx, "good");
+    const makeRoundSpy = vi.spyOn(logic, "makeCompareRound");
+
+    render(<LangHarness initialLang="en" />);
+
+    // Initial mount called makeCompareRound once
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("compare-score").textContent).toContain("0/6");
+
+    // Tap correct plate for round 1
+    const plates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const correctPlate = plates.find((p) =>
+      p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+    expect(correctPlate).toBeDefined();
+
+    fireEvent.click(correctPlate);
+
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("compare-score").textContent).toContain("1/6");
+    expect(screen.getByTestId("compare-badge-left")).toBeDefined();
+
+    saySpy.mockClear();
+
+    // Cycle language while praise/sayThen is active
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // Old sayThen callback was cancelled by useLangEpoch and dropped by !isValid()
+    // makeCompareRound was called once more by the lang effect to rebuild the round (total: 2)
+    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+
+    // Score remains 1/6 (not advanced again or reset)
+    expect(screen.getByTestId("compare-score").textContent).toContain("1/6");
+
+    // Board is unlocked and badges are reset for the fresh round
+    expect(screen.queryByTestId("compare-badge-left")).toBeNull();
+    expect(screen.queryByTestId("compare-badge-right")).toBeNull();
+
+    // Prompt is spoken in Japanese for the rebuilt round
+    expect(saySpy).toHaveBeenCalledWith(
+      expect.stringMatching(/(おおい|すくない) ほうは どっち？/),
+    );
+
+    // Play the fresh round in Japanese
+    const nextPlates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const nextCorrect = nextPlates.find((p) =>
+      p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+    expect(nextCorrect).toBeDefined();
+
+    fireEvent.click(nextCorrect);
+
+    // Score advances cleanly to 2/6 without skipped rounds or double-advance
+    expect(goodSpy).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId("compare-score").textContent).toContain("2/6");
+  });
+
+  it("drops pending wrong-tap speech and unlock timers on language switch", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say");
+    const wrongSpy = vi.spyOn(sound.sfx, "wrong");
+
+    render(<LangHarness initialLang="en" />);
+
+    saySpy.mockClear();
+
+    const plates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const wrongPlate = plates.find(
+      (p) => !p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+    expect(wrongPlate).toBeDefined();
+
+    // Wrong plate tap sets 450ms and 500ms timeouts
+    fireEvent.click(wrongPlate);
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // Advance 100ms (still within error state)
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    // Cycle language mid-timeout
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // New Japanese prompt spoken
+    expect(saySpy).toHaveBeenCalledWith(
+      expect.stringMatching(/(おおい|すくない) ほうは どっち？/),
+    );
+    saySpy.mockClear();
+
+    // Advance past the old 450ms and 500ms marks
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // The old 500ms setTimeout did NOT speak the old English prompt
+    expect(saySpy).not.toHaveBeenCalledWith("Tap the side with MORE!");
+    expect(saySpy).not.toHaveBeenCalledWith("Tap the side with FEWER!");
+
+    // Board is interactive and can be answered correctly
+    const freshPlates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const freshCorrect = freshPlates.find((p) =>
+      p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+    fireEvent.click(freshCorrect);
+
+    expect(screen.getByTestId("compare-score").textContent).toContain("1/6");
   });
 });
