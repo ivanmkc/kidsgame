@@ -261,7 +261,7 @@ export const YUE: Table = {
   'rules.remind': '💡 提我！',
   'rules.progress': '搵到 {found} / {total}',
   'puzzle.peek': '🖼️ 偷睇',
-  'puzzle.peek.a11y': '睇完整嘅圖',
+  'puzzle.peekA11y': '偷睇砌好嘅圖',
   'puzzle.hint': '撳一塊，再撳另一塊，就會調位！',
   'sticker.clear': '🧹 清除',
   'sticker.hint': '將貼紙拖入畫面 · 撳一下會郁 · +/− 調大細 · 連撳兩下除走！',

@@ -85,7 +85,7 @@ const ALL_KEYS: UIKey[] = [
   'diff.pictureA', 'diff.pictureB', 'diff.hint',
   'shadow.hint', 'shadow.hintTricky',
   'rules.memoryCheck', 'rules.ruleNumber', 'rules.doAgain', 'rules.remind', 'rules.progress',
-  'puzzle.peek', 'puzzle.hint',
+  'puzzle.peek', 'puzzle.peekA11y', 'puzzle.hint',
   'sticker.clear', 'sticker.hint',
   'sticker.tab.dressup', 'sticker.tab.characters', 'sticker.tab.animals', 'sticker.tab.nature', 'sticker.tab.food', 'sticker.tab.things',
   'sticker.size.small', 'sticker.size.medium', 'sticker.size.large',

@@ -174,7 +174,7 @@ export function PuzzleGame({
           <Pressable
             onPress={showPeek}
             testID="puzzle-peek"
-            accessibilityLabel={t(lang, 'puzzle.peek.a11y')}
+            accessibilityLabel={t(lang, 'puzzle.peekA11y')}
             accessibilityRole="button"
             style={({ pressed }) => [
               styles.peekBtn,
