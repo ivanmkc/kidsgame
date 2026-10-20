@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { EchoBeatGame } from './EchoBeatGame';
 import * as sound from '../../sound';
+import * as music from '../../music';
 
 function mockAudioContext() {
   const fakeCtx = {
@@ -95,6 +96,38 @@ describe('EchoBeatGame', () => {
     });
 
     expect(screen.getByText('Your turn!')).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it('does not leak playDemo execution after unmount', () => {
+    vi.useFakeTimers();
+    const { unmount } = render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+    
+    act(() => {
+      vi.advanceTimersByTime(3000); // finish initial demo
+    });
+
+    const drum = screen.getByTestId('echobeat-drum');
+    act(() => {
+      fireEvent.click(drum); // one tap (incorrect count)
+    });
+
+    // Wait for the evaluation (1200ms)
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+
+    // Now it's the 1000ms retry timer window. Unmount.
+    unmount();
+
+    const playDrumSequenceSpy = vi.spyOn(music, 'playDrumSequence');
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(playDrumSequenceSpy).not.toHaveBeenCalled();
 
     vi.useRealTimers();
   });

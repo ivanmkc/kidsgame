@@ -32,6 +32,16 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const [sparkKey, setSparkKey] = useState(0);
   const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
+  }, []);
+
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, 'win.echobeat' as never));
@@ -82,14 +92,16 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         const nextScore = score + 1;
         setScore(nextScore);
         if (nextScore < total) {
-          setTimeout(() => {
+          if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+          advanceTimerRef.current = setTimeout(() => {
             setRound(makeEchoBeatRound(rngRef.current, difficulty));
           }, 800);
         }
       } else {
         sfx.wrong();
         setResult('bad');
-        setTimeout(() => {
+        if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+        retryTimerRef.current = setTimeout(() => {
           setTapTimes([]);
           setTapCount(0);
           setResult(null);
@@ -110,6 +122,9 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (resultTimer.current) clearTimeout(resultTimer.current);
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
     setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
