@@ -1,19 +1,26 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { SparkleBurst } from '../../components/Sparkles';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { makeRng } from '../../rng';
-import { colors, darken, fonts, shadows } from '../../theme';
-import { say, saySequence, sfx } from '../../sound';
-import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from './logic';
-import { useWinLine } from '../winlines';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { SparkleBurst } from "../../components/Sparkles";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import { makeRng } from "../../rng";
+import { colors, darken, fonts, shadows } from "../../theme";
+import { say, saySequence, sfx } from "../../sound";
+import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from "./logic";
+import { useWinLine } from "../winlines";
 
 interface Props {
   onHome: () => void;
@@ -24,18 +31,31 @@ interface Props {
 // A gentle take on "Rules!": each round shows a rule ("Tap all the
 // ANIMALS!") and a tile grid; clear every match to advance. On hard, some
 // rounds only say "Do Rule #N again!" — you have to REMEMBER what it was.
-export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
-  const { rulesRounds: roundsToWin, rulesTiles: tileCount, rulesRecallFrom: recallFrom } =
-    settingsFor(difficulty);
+export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
+  const {
+    rulesRounds: roundsToWin,
+    rulesTiles: tileCount,
+    rulesRecallFrom: recallFrom,
+  } = settingsFor(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const rulesRef = useRef(makeRules(rngRef.current, roundsToWin));
+  const lockedRef = useRef(false);
 
   const buildRound = (idx: number): RulesRound => {
     // A recall round REPEATS an earlier rule without restating it — it only
     // makes sense once that rule has already been shown.
-    const { ruleIdx, isRecall } = pickRuleIndex(rngRef.current, idx, recallFrom);
+    const { ruleIdx, isRecall } = pickRuleIndex(
+      rngRef.current,
+      idx,
+      recallFrom,
+    );
     return makeRulesRound(
-      rngRef.current, manifest.spotit.icons, rulesRef.current, ruleIdx, tileCount, isRecall,
+      rngRef.current,
+      manifest.spotit.icons,
+      rulesRef.current,
+      ruleIdx,
+      tileCount,
+      isRecall,
     );
   };
 
@@ -56,7 +76,7 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
-  useWinLine(won, t(lang, 'win.rules'));
+  useWinLine(won, t(lang, "win.rules"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
   // Speak the game intro once, then every rule aloud — pre-readers play
@@ -70,22 +90,27 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
-      saySequence(['Rule Time! Do what the rule says as fast as you can.', line]);
+      saySequence([
+        "Rule Time! Do what the rule says as fast as you can.",
+        line,
+      ]);
     } else {
       say(line);
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won || tapped.includes(i)) return;
+    if (lockedRef.current || won || tapped.includes(i)) return;
     if (round.tiles[i].isMatch) {
       sfx.good();
       const next = [...tapped, i];
       setTapped(next);
       if (next.length === round.matchCount) {
+        lockedRef.current = true;
         setCelebrate((c) => c + 1);
         const nextIdx = roundIdx + 1;
         setTimeout(() => {
+          lockedRef.current = false;
           setRoundIdx(nextIdx);
           if (nextIdx < roundsToWin) {
             setRound(buildRound(nextIdx));
@@ -94,13 +119,18 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
         }, 550);
       }
     } else {
+      lockedRef.current = true;
       sfx.wrong();
       setWrongIdx(i);
-      setTimeout(() => setWrongIdx((w) => (w === i ? null : w)), 450);
+      setTimeout(() => {
+        lockedRef.current = false;
+        setWrongIdx((w) => (w === i ? null : w));
+      }, 450);
     }
   };
 
   const reset = () => {
+    lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     rulesRef.current = makeRules(rngRef.current, roundsToWin);
@@ -115,30 +145,53 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
   const rows = Math.ceil(tileCount / cols);
   const gap = 12;
   // 44px kid-thumb floor (mobile-Chrome audit measured 41px in landscape)
-  const tile = Math.max(44, Math.min(
-    (Math.min(width - 32, 520) - (cols - 1) * gap) / cols,
-    (height - 84 - 130 - (rows - 1) * gap) / rows,
-    140
-  ));
+  const tile = Math.max(
+    44,
+    Math.min(
+      (Math.min(width - 32, 520) - (cols - 1) * gap) / cols,
+      (height - 84 - 130 - (rows - 1) * gap) / rows,
+      140,
+    ),
+  );
 
   return (
     <GameShell
-      title={t(lang, 'shell.rules.title')}
-      subtitle={t(lang, 'shell.rules.sub')}
+      title={t(lang, "shell.rules.title")}
+      subtitle={t(lang, "shell.rules.sub")}
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="rules-timer" /> : null}
-          <ScoreChip label={`📜 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`} testID="rules-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="rules-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`📜 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`}
+            testID="rules-score"
+          />
         </View>
       }
     >
       <View style={styles.board}>
-        <View style={[styles.ruleCard, shadows.soft]} testID={`rules-rule-${round.rule.category}${round.isRecall ? '-recall' : ''}`}>
-          <Text style={styles.ruleNumber}>{round.isRecall ? t(lang, 'rules.memoryCheck') : t(lang, 'rules.ruleNumber', { n: round.ruleNumber })}</Text>
+        <View
+          style={[styles.ruleCard, shadows.soft]}
+          testID={`rules-rule-${round.rule.category}${round.isRecall ? "-recall" : ""}`}
+        >
+          <Text style={styles.ruleNumber}>
+            {round.isRecall
+              ? t(lang, "rules.memoryCheck")
+              : t(lang, "rules.ruleNumber", { n: round.ruleNumber })}
+          </Text>
           <Text style={styles.ruleText}>
-            {round.isRecall && !reminded ? t(lang, 'rules.doAgain', { n: round.ruleNumber }) : round.rule.label}
+            {round.isRecall && !reminded
+              ? t(lang, "rules.doAgain", { n: round.ruleNumber })
+              : round.rule.label}
           </Text>
           {round.isRecall && !reminded ? (
             <Pressable
@@ -146,20 +199,26 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
               testID="rules-remind"
               accessibilityLabel="Remind me of the rule"
               accessibilityRole="button"
-              style={({ pressed }) => [styles.remindBtn, shadows.soft, pressed && { opacity: 0.8 }]}
+              style={({ pressed }) => [
+                styles.remindBtn,
+                shadows.soft,
+                pressed && { opacity: 0.8 },
+              ]}
             >
-              <Text style={styles.remindText}>{t(lang, 'rules.remind')}</Text>
+              <Text style={styles.remindText}>{t(lang, "rules.remind")}</Text>
             </Pressable>
           ) : null}
         </View>
-        <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
+        <View
+          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+        >
           {round.tiles.map((t, i) => {
             const done = tapped.includes(i);
             return (
               <Pressable
                 key={`${roundIdx}-${i}`}
                 onPress={() => onTile(i)}
-                testID={`rules-tile-${i}-${t.icon}-${t.isMatch ? 'y' : 'n'}`}
+                testID={`rules-tile-${i}-${t.icon}-${t.isMatch ? "y" : "n"}`}
                 accessibilityLabel={t.icon}
                 accessibilityRole="button"
                 style={({ pressed }) => [
@@ -171,20 +230,28 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
                   pressed && styles.pressed,
                 ]}
               >
-                <Image source={SPOTIT_ICONS[t.icon]} style={{ width: '78%', height: '78%' }} resizeMode="contain" />
+                <Image
+                  source={SPOTIT_ICONS[t.icon]}
+                  style={{ width: "78%", height: "78%" }}
+                  resizeMode="contain"
+                />
                 {done ? <SparkleBurst trigger={i} count={4} size={13} /> : null}
               </Pressable>
             );
           })}
         </View>
         <Text style={styles.hint} testID="rules-progress">
-          {t(lang, 'rules.progress', { found: tapped.length, total: round.matchCount })}
+          {t(lang, "rules.progress", {
+            found: tapped.length,
+            total: round.matchCount,
+          })}
         </Text>
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.rules')}
-        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
+        message={t(lang, "win.rules")}
+        onNext={reset}
+        nextLabel={t(lang, "overlay.nextRound")}
         onHome={onHome}
         lang={lang}
       />
@@ -193,9 +260,24 @@ export function RulesGame({ onHome, difficulty, lang = 'en' }: Props) {
 }
 
 const styles = StyleSheet.create({
-  remindBtn: { backgroundColor: colors.gold, borderRadius: 12, paddingVertical: 11, paddingHorizontal: 16, marginTop: 6, alignSelf: 'center', minHeight: 44, justifyContent: 'center' },
+  remindBtn: {
+    backgroundColor: colors.gold,
+    borderRadius: 12,
+    paddingVertical: 11,
+    paddingHorizontal: 16,
+    marginTop: 6,
+    alignSelf: "center",
+    minHeight: 44,
+    justifyContent: "center",
+  },
   remindText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 16,
+  },
   ruleCard: {
     backgroundColor: colors.gold,
     borderRadius: 20,
@@ -203,22 +285,34 @@ const styles = StyleSheet.create({
     borderColor: darken(colors.gold, 0.15),
     paddingVertical: 12,
     paddingHorizontal: 24,
-    alignItems: 'center',
+    alignItems: "center",
     maxWidth: 520,
   },
-  ruleNumber: { fontFamily: fonts.body, fontSize: 12, color: darken(colors.gold, 0.5) },
-  ruleText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  ruleNumber: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: darken(colors.gold, 0.5),
+  },
+  ruleText: {
+    fontFamily: fonts.display,
+    fontSize: 20,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   tile: {
     backgroundColor: colors.card,
     borderRadius: 20,
     borderWidth: 3,
     borderColor: colors.blush,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  tileDone: { borderColor: colors.green, backgroundColor: 'rgba(95,191,110,0.14)' },
-  wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
+  tileDone: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.14)",
+  },
+  wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 13 },
 });
