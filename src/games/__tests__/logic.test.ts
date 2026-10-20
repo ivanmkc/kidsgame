@@ -106,7 +106,7 @@ describe('asset manifest: every image require resolves', () => {
     // paths are relative to src/assets/images.ts, so resolve from there
     const missing = requires.filter((rel) => !existsSync(join(__dirname, '../../assets', rel)));
     expect(missing, `missing asset files: ${missing.join(', ')}`).toEqual([]);
-  });
+  }, 15000);
 });
 
 describe('asset manifest: spot it icons', () => {

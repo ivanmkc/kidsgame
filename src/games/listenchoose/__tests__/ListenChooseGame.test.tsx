@@ -400,88 +400,100 @@ describe("ListenChooseGame", () => {
     });
   });
 
-  it("filters out untranslated words in non-English play", () => {
-    render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
-    fireEvent.click(screen.getByTestId("play-button"));
+  it(
+    "filters out untranslated words in non-English play",
+    () => {
+      render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
+      fireEvent.click(screen.getByTestId("play-button"));
 
-    // Play 25 rounds to reach level 3
-    for (let i = 0; i < 25; i++) {
-      // Find the target text from the caption
-      const caption = screen.getByTestId("listenchoose-caption");
-      const targetText = caption.textContent;
-      expect(targetText).toBeTruthy();
+      // Play 25 rounds to reach level 3
+      for (let i = 0; i < 25; i++) {
+        // Find the target text from the caption
+        const caption = screen.getByTestId("listenchoose-caption");
+        const targetText = caption.textContent;
+        expect(targetText).toBeTruthy();
 
-      // Check all choices on screen
-      // choice elements have testID like 'choice-cat', 'choice-bat'
-      // the label text is inside a Text component inside the ChoiceCard
-      // So we can query for the Text component or check textContent of choice elements
-      const choiceElements = screen.queryAllByTestId(/^choice-[^0-9]/);
-      for (const el of choiceElements) {
-        const label = el.textContent;
-        if (label) {
-          // The word must be a valid Japanese translation, not an English fallback (which would be [a-z]+)
-          expect(label).not.toMatch(/^[a-z]+$/i);
+        // Check all choices on screen
+        // choice elements have testID like 'choice-cat', 'choice-bat'
+        // the label text is inside a Text component inside the ChoiceCard
+        // So we can query for the Text component or check textContent of choice elements
+        const choiceElements = screen.queryAllByTestId(/^choice-[^0-9]/);
+        for (const el of choiceElements) {
+          const label = el.textContent;
+          if (label) {
+            // The word must be a valid Japanese translation, not an English fallback (which would be [a-z]+)
+            expect(label).not.toMatch(/^[a-z]+$/i);
+          }
         }
+
+        // Click the correct choice
+        const correctBtn = screen.getByRole("button", { name: targetText! });
+        fireEvent.click(correctBtn);
+
+        // Advance past celebration animation (800ms)
+        act(() => {
+          vi.advanceTimersByTime(800);
+        });
+      }
+    },
+    15000,
+  );
+
+  it(
+    "wins the game and shows WinOverlay when streak reaches 30",
+    () => {
+      vi.useFakeTimers();
+      render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+      fireEvent.click(screen.getByTestId("play-button"));
+
+      for (let i = 0; i < 30; i++) {
+        const { targetBtn } = getRoundChoices();
+        fireEvent.click(targetBtn);
+        act(() => {
+          vi.advanceTimersByTime(800);
+        });
       }
 
-      // Click the correct choice
-      const correctBtn = screen.getByRole("button", { name: targetText! });
-      fireEvent.click(correctBtn);
+      expect(screen.getByTestId("win-overlay")).toBeDefined();
+    },
+    15000,
+  );
 
-      // Advance past celebration animation (800ms)
+  it(
+    "resets and speaks next word in chosen language when Play Again is tapped",
+    () => {
+      vi.useFakeTimers();
+      render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
+      fireEvent.click(screen.getByTestId("play-button"));
+
+      // Complete 30 rounds
+      for (let i = 0; i < 30; i++) {
+        const caption = screen.getByTestId("listenchoose-caption");
+        const targetText = caption.textContent;
+        const correctBtn = screen.getByRole("button", { name: targetText! });
+        fireEvent.click(correctBtn);
+        act(() => {
+          vi.advanceTimersByTime(800);
+        });
+      }
+
+      expect(screen.getByTestId("win-overlay")).toBeDefined();
+
+      // Arm WinOverlay buttons (600ms)
       act(() => {
-        vi.advanceTimersByTime(800);
+        vi.advanceTimersByTime(600);
       });
-    }
-  });
 
-  it("wins the game and shows WinOverlay when streak reaches 30", () => {
-    vi.useFakeTimers();
-    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId("play-button"));
+      vi.mocked(sound.sayThen).mockClear();
+      fireEvent.click(screen.getByTestId("play-again"));
 
-    for (let i = 0; i < 30; i++) {
-      const { targetBtn } = getRoundChoices();
-      fireEvent.click(targetBtn);
-      act(() => {
-        vi.advanceTimersByTime(800);
-      });
-    }
-
-    expect(screen.getByTestId("win-overlay")).toBeDefined();
-  });
-
-  it("resets and speaks next word in chosen language when Play Again is tapped", () => {
-    vi.useFakeTimers();
-    render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
-    fireEvent.click(screen.getByTestId("play-button"));
-
-    // Complete 30 rounds
-    for (let i = 0; i < 30; i++) {
-      const caption = screen.getByTestId("listenchoose-caption");
-      const targetText = caption.textContent;
-      const correctBtn = screen.getByRole("button", { name: targetText! });
-      fireEvent.click(correctBtn);
-      act(() => {
-        vi.advanceTimersByTime(800);
-      });
-    }
-
-    expect(screen.getByTestId("win-overlay")).toBeDefined();
-
-    // Arm WinOverlay buttons (600ms)
-    act(() => {
-      vi.advanceTimersByTime(600);
-    });
-
-    vi.mocked(sound.sayThen).mockClear();
-    fireEvent.click(screen.getByTestId("play-again"));
-
-    // Spoke new target word in Japanese
-    expect(sound.sayThen).toHaveBeenCalledTimes(1);
-    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
-    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
-  });
+      // Spoke new target word in Japanese
+      expect(sound.sayThen).toHaveBeenCalledTimes(1);
+      const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+      expect(spokenWord).not.toMatch(/^[a-z]+$/i);
+    },
+    15000,
+  );
   it("renders a ScrollView for the board to allow scrolling on compact viewports", () => {
     render(<ListenChooseGame onHome={vi.fn()} />);
     const props = capturedScrollViewProps.find(

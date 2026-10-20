@@ -11,6 +11,7 @@ vi.mock("../../../sound", () => ({
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
+    win: vi.fn(),
   },
 }));
 
@@ -72,44 +73,54 @@ describe("OddOneGame", () => {
   });
 
   it("prevents fast-tap hammering from advancing the round and RNG twice", () => {
-    const generatedRounds: logic.OddOneRound[] = [];
-    const origMakeOddOneRound = logic.makeOddOneRound;
-    const makeRoundSpy = vi
-      .spyOn(logic, "makeOddOneRound")
-      .mockImplementation((rng, icons, n) => {
-        const res = origMakeOddOneRound(rng, icons, n);
-        generatedRounds.push(res);
-        return res;
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.OddOneRound[] = [];
+      const origMakeOddOneRound = logic.makeOddOneRound;
+      const makeRoundSpy = vi
+        .spyOn(logic, "makeOddOneRound")
+        .mockImplementation((rng, icons, n) => {
+          const res = origMakeOddOneRound(rng, icons, n);
+          generatedRounds.push(res);
+          return res;
+        });
+
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+
+      const correctBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      expect(correctBtn).toBeTruthy();
+
+      act(() => {
+        fireEvent.click(correctBtn);
+        fireEvent.click(correctBtn);
       });
 
-    const { container } = render(
-      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
-    );
+      expect(
+        container.querySelector('[data-testid="oddone-score"]')?.textContent,
+      ).toContain("1/10");
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+      expect(sfx.good).toHaveBeenCalledTimes(1);
 
-    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
 
-    const correctBtn = container.querySelector(
-      '[data-testid$="-odd"]',
-    ) as HTMLElement;
-    expect(correctBtn).toBeTruthy();
-
-    act(() => {
-      fireEvent.click(correctBtn);
-      fireEvent.click(correctBtn);
-    });
-
-    expect(
-      container.querySelector('[data-testid="oddone-score"]')?.textContent,
-    ).toContain("1/10");
-    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
-    expect(sfx.good).toHaveBeenCalledTimes(1);
-
-    const round2 = generatedRounds[1];
-    expect(
-      container.querySelector(
-        `[data-testid="oddone-question-${round2.baseCategory}"]`,
-      ),
-    ).toBeTruthy();
+      expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+      const round2 = generatedRounds[1];
+      expect(
+        container.querySelector(
+          `[data-testid="oddone-question-${round2.baseCategory}"]`,
+        ),
+      ).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("locks input during wrong-tap feedback and unlocks after timeout", () => {
@@ -158,6 +169,146 @@ describe("OddOneGame", () => {
       expect(
         container.querySelector('[data-testid="oddone-score"]')?.textContent,
       ).toContain("1/10");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("shows celebration feedback on correct tile pick and delays round swap by 600ms", () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+      const correctBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      const initialOddTestId = correctBtn.getAttribute("data-testid");
+      expect(initialOddTestId).toBeTruthy();
+
+      // Before click: no celebration sparkles
+      expect(correctBtn.textContent).not.toMatch(/✨|⭐/);
+
+      // Tap correct odd tile
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+      expect(
+        container.querySelector('[data-testid="oddone-score"]')?.textContent,
+      ).toContain("1/10");
+
+      // Visual feedback: celebration sparkles active on chosen tile
+      expect(correctBtn.textContent).toMatch(/✨|⭐/);
+
+      // The round has NOT swapped immediately on the same tick; the initial odd tile is still mounted
+      expect(
+        container.querySelector(`[data-testid="${initialOddTestId}"]`),
+      ).toBeTruthy();
+
+      // Stray tap on another tile during celebration is locked out
+      const otherBtn = Array.from(
+        container.querySelectorAll('[data-testid^="oddone-item-"]'),
+      ).find((b) => b !== correctBtn) as HTMLElement;
+      act(() => {
+        fireEvent.click(otherBtn);
+      });
+      expect(sfx.wrong).not.toHaveBeenCalled();
+
+      // At 599ms: round still hasn't swapped
+      act(() => {
+        vi.advanceTimersByTime(599);
+      });
+      expect(
+        container.querySelector(`[data-testid="${initialOddTestId}"]`),
+      ).toBeTruthy();
+
+      // At 600ms: round advances to round 2
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+
+      // Celebration sparkles cleared, next round is active
+      const newButtons = container.querySelectorAll(
+        '[data-testid^="oddone-item-"]',
+      );
+      newButtons.forEach((btn) => {
+        expect(btn.textContent).not.toMatch(/✨|⭐/);
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("delays WinOverlay mount and sfx.win by 600ms on final winning round", () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+
+      // Play 9 rounds to reach round 10 (easy difficulty spotitRounds is 10)
+      for (let r = 0; r < 9; r++) {
+        const correctBtn = container.querySelector(
+          '[data-testid$="-odd"]',
+        ) as HTMLElement;
+        expect(correctBtn).toBeTruthy();
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      expect(
+        container.querySelector('[data-testid="oddone-score"]')?.textContent,
+      ).toContain("9/10");
+
+      vi.mocked(sfx.good).mockClear();
+      vi.mocked(sfx.win).mockClear();
+
+      // Tap final winning tile (round 10)
+      const winningBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      expect(winningBtn).toBeTruthy();
+
+      act(() => {
+        fireEvent.click(winningBtn);
+      });
+
+      // Immediately: sfx.good fires, score increments, tile celebrates, WinOverlay is deferred
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+      expect(sfx.win).not.toHaveBeenCalled();
+      expect(
+        container.querySelector('[data-testid="oddone-score"]')?.textContent,
+      ).toContain("10/10");
+      expect(winningBtn.textContent).toMatch(/✨|⭐/);
+      expect(container.querySelector('[data-testid="win-overlay"]')).toBeNull();
+
+      // Stray tap during celebration is ignored
+      act(() => {
+        fireEvent.click(winningBtn);
+      });
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // At 599ms: WinOverlay still not mounted
+      act(() => {
+        vi.advanceTimersByTime(599);
+      });
+      expect(sfx.win).not.toHaveBeenCalled();
+      expect(container.querySelector('[data-testid="win-overlay"]')).toBeNull();
+
+      // At 600ms: WinOverlay mounts and sfx.win fires
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(sfx.win).toHaveBeenCalledTimes(1);
+      expect(
+        container.querySelector('[data-testid="win-overlay"]'),
+      ).toBeTruthy();
     } finally {
       vi.useRealTimers();
     }
