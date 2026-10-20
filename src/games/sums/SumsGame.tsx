@@ -14,7 +14,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord } from "../../lang";
+import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { Position } from "../count/logic";
 import { makeRng } from "../../rng";
@@ -40,6 +40,7 @@ interface Props {
  * Little Sums — a critters, then b more slide in. Kid picks the total.
  */
 export function SumsGame({ onHome, difficulty, lang }: Props) {
+  useLangEpoch(lang);
   const { rounds: roundsToWin } = sumsSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SumsRound>(() =>
@@ -62,10 +63,14 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     [],
   );
 
-  // Speak "a plus b, how many now?" once per round object (repeat sums still
-  // re-narrate — the round object identity changes even when the values collide).
+  // Speak "a plus b, how many now?" once per round object or language switch
+  // (repeat sums still re-narrate — the round object identity changes even when the values collide).
   useEffect(() => {
     if (won) return;
+    if (wrongVoiceTimer.current) {
+      clearTimeout(wrongVoiceTimer.current);
+      wrongVoiceTimer.current = null;
+    }
     saySequence([
       numberWord(lang, round.a).t,
       PLUS[lang],
