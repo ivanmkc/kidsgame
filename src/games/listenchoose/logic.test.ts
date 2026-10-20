@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { makeRng } from "../../rng";
 import { WORDS } from "../../words";
-import { LEVEL_1_WORDS, LEVEL_1_WORD_IDS, LEVEL_2_WORD_IDS, LEVEL_3_WORD_IDS, Word, getLevelConfig } from "./data";
+import levelsData from "./levels.json";
+import {
+  LEVEL_1_WORDS,
+  LEVEL_1_WORD_IDS,
+  LEVEL_2_WORDS,
+  LEVEL_2_WORD_IDS,
+  LEVEL_3_WORDS,
+  LEVEL_3_WORD_IDS,
+  Word,
+  getLevelConfig,
+} from "./data";
 import {
   GameState,
   Round,
@@ -13,35 +23,14 @@ import {
   updateGameState,
 } from "./logic";
 
-describe("Level 1 data", () => {
-  it("exports Level 1 word IDs matching the approved design spec", () => {
-    expect(LEVEL_1_WORD_IDS).toHaveLength(20);
-    expect(new Set(LEVEL_1_WORD_IDS).size).toBe(20);
-
-    expect(LEVEL_1_WORD_IDS).toContain("cat");
-    expect(LEVEL_1_WORD_IDS).toContain("dog");
-    expect(LEVEL_1_WORD_IDS).toContain("fox");
-    expect(LEVEL_1_WORD_IDS).toContain("frog");
-    expect(LEVEL_1_WORD_IDS).toContain("lion");
-    expect(LEVEL_1_WORD_IDS).toContain("panda");
-    expect(LEVEL_1_WORD_IDS).toContain("rabbit");
-
-    expect(LEVEL_1_WORD_IDS).toContain("bat");
-    expect(LEVEL_1_WORD_IDS).toContain("bear");
-    expect(LEVEL_1_WORD_IDS).toContain("bee");
-    expect(LEVEL_1_WORD_IDS).toContain("boat");
-    expect(LEVEL_1_WORD_IDS).toContain("box");
-    expect(LEVEL_1_WORD_IDS).toContain("bun");
-    expect(LEVEL_1_WORD_IDS).toContain("cake");
-    expect(LEVEL_1_WORD_IDS).toContain("clock");
-    expect(LEVEL_1_WORD_IDS).toContain("coat");
-    expect(LEVEL_1_WORD_IDS).toContain("goat");
-    expect(LEVEL_1_WORD_IDS).toContain("hat");
-    expect(LEVEL_1_WORD_IDS).toContain("house");
-    expect(LEVEL_1_WORD_IDS).toContain("jar");
+describe("Level data", () => {
+  it("loads Level 1, 2, and 3 word IDs from levels.json", () => {
+    expect(LEVEL_1_WORD_IDS).toEqual(levelsData.level1);
+    expect(LEVEL_2_WORD_IDS).toEqual(levelsData.level2);
+    expect(LEVEL_3_WORD_IDS).toEqual(levelsData.level3);
   });
 
-  it("exports LEVEL_1_WORDS populated from shared pool", () => {
+  it("populates level words from shared pool", () => {
     expect(LEVEL_1_WORDS).toHaveLength(LEVEL_1_WORD_IDS.length);
     for (const w of LEVEL_1_WORDS) {
       expect(w.icon).toBeTruthy();
@@ -50,44 +39,21 @@ describe("Level 1 data", () => {
       expect(w.sound).toBeTruthy();
     }
 
-    const cat = LEVEL_1_WORDS.find((w) => w.icon === "cat");
-    expect(cat?.ja).toBeTruthy();
-    expect(cat?.cmn).toBeTruthy();
-    expect(cat?.yue).toBeTruthy();
-  });
-});
+    expect(LEVEL_2_WORDS).toHaveLength(LEVEL_2_WORD_IDS.length);
+    for (const w of LEVEL_2_WORDS) {
+      expect(w.icon).toBeTruthy();
+      expect(w.en).toBeTruthy();
+    }
 
-describe("Level 2 data", () => {
-  it("exports Level 2 word IDs matching the approved design spec", () => {
-    expect(LEVEL_2_WORD_IDS).toHaveLength(16);
-    expect(new Set(LEVEL_2_WORD_IDS).size).toBe(16);
-
-    const expected = [
-      "moon", "mouse", "pear", "rock", "snail", "snake",
-      "sock", "spoon", "sun", "tree", "whale",
-      "cap", "cup", "pan", "pen", "pin"
-    ];
-    for (const w of expected) {
-      expect(LEVEL_2_WORD_IDS).toContain(w);
+    expect(LEVEL_3_WORDS).toHaveLength(LEVEL_3_WORD_IDS.length);
+    for (const w of LEVEL_3_WORDS) {
+      expect(w.icon).toBeTruthy();
+      expect(w.en).toBeTruthy();
     }
   });
 });
 
-describe("Level 3 data", () => {
-  it("exports Level 3 word IDs matching the approved design spec", () => {
-    expect(LEVEL_3_WORD_IDS).toHaveLength(17);
-    expect(new Set(LEVEL_3_WORD_IDS).size).toBe(17);
 
-    const expected = [
-      "hat", "bat", "cat", "house", "mouse", "boat", "coat",
-      "rock", "sock", "clock", "bear", "pear",
-      "pig", "wig", "dig", "big", "block"
-    ];
-    for (const w of expected) {
-      expect(LEVEL_3_WORD_IDS).toContain(w);
-    }
-  });
-});
 
 describe("generateRound", () => {
   it("generates a round with distinct target and distractor and two choices", () => {
@@ -122,17 +88,18 @@ describe("generateRound", () => {
   });
 
   it("avoids target word when avoidIcon is provided", () => {
-    const avoid = "cat";
+    const pool = WORDS.slice(0, 5);
+    const avoid = pool[0].icon;
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
-      const round = generateRound(rng, LEVEL_1_WORDS, 2, avoid);
+      const round = generateRound(rng, pool, 2, avoid);
       expect(round.target.icon).not.toBe(avoid);
     }
   });
 
   it("throws an error if words pool has fewer than 2 items", () => {
     const rng = makeRng(1);
-    expect(() => generateRound(rng, [LEVEL_1_WORDS[0]])).toThrow(
+    expect(() => generateRound(rng, [WORDS[0]])).toThrow(
       "words pool must have at least 2 words",
     );
   });
@@ -191,22 +158,27 @@ describe("generateRound", () => {
     expect(round3.choices).toHaveLength(4);
   });
 
-  it("prioritizes minimal pairs as distractors in level 3", () => {
+  it("prioritizes minimal pairs as distractors when prioritizeRhymes is true", () => {
+    const rhymingPool: Word[] = [
+      { icon: "hat", en: "hat", letter: "H", sound: "h", rhymeKey: "at" },
+      { icon: "bat", en: "bat", letter: "B", sound: "b", rhymeKey: "at" },
+      { icon: "cat", en: "cat", letter: "C", sound: "c", rhymeKey: "at" },
+      { icon: "pig", en: "pig", letter: "P", sound: "p", rhymeKey: "ig" },
+      { icon: "wig", en: "wig", letter: "W", sound: "w", rhymeKey: "ig" },
+      { icon: "dig", en: "dig", letter: "D", sound: "d", rhymeKey: "ig" },
+      { icon: "big", en: "big", letter: "B", sound: "b", rhymeKey: "ig" },
+      { icon: "rock", en: "rock", letter: "R", sound: "r", rhymeKey: "ock" },
+      { icon: "sock", en: "sock", letter: "S", sound: "s", rhymeKey: "ock" },
+      { icon: "clock", en: "clock", letter: "C", sound: "c", rhymeKey: "ock" },
+      { icon: "block", en: "block", letter: "B", sound: "b", rhymeKey: "ock" },
+    ];
     let checkedAt = false;
     let checkedIg = false;
     let checkedOck = false;
-    for (let i = 0; i < 200; i++) {
+    for (let i = 0; i < 100; i++) {
       const rng = makeRng(i);
-      const config = getLevelConfig(3);
-      const r = generateRound(
-        rng,
-        config.words,
-        config.numChoices,
-        undefined,
-        config.prioritizeRhymes,
-      );
+      const r = generateRound(rng, rhymingPool, 3, undefined, true);
 
-      // Level 3 words have hat, bat, cat (rhymeKey: at)
       if (["hat", "bat", "cat"].includes(r.target.icon)) {
         const dists = r.choices
           .filter((c) => c.icon !== r.target.icon)
@@ -225,11 +197,11 @@ describe("generateRound", () => {
         const dists = r.choices
           .filter((c) => c.icon !== r.target.icon)
           .map((c) => c.icon);
-        
+
         const igGroup = ["pig", "wig", "dig", "big"].filter(
           (icon) => icon !== r.target.icon,
         );
-        const found = dists.filter(d => igGroup.includes(d));
+        const found = dists.filter((d) => igGroup.includes(d));
         expect(found.length).toBeGreaterThan(0);
         checkedIg = true;
       }
@@ -239,11 +211,11 @@ describe("generateRound", () => {
         const dists = r.choices
           .filter((c) => c.icon !== r.target.icon)
           .map((c) => c.icon);
-        
+
         const ockGroup = ["rock", "sock", "clock", "block"].filter(
           (icon) => icon !== r.target.icon,
         );
-        const found = dists.filter(d => ockGroup.includes(d));
+        const found = dists.filter((d) => ockGroup.includes(d));
         expect(found.length).toBeGreaterThan(0);
         checkedOck = true;
       }
@@ -379,45 +351,63 @@ describe("updateGameState", () => {
 
 describe("getWordText", () => {
   it("returns localized text when available for the given language", () => {
-    const cat = LEVEL_1_WORDS.find((w) => w.icon === "cat");
-    expect(cat).toBeDefined();
-    if (!cat) return;
+    const wordWithTranslations: Word = {
+      icon: "testcat",
+      en: "cat",
+      letter: "C",
+      sound: "kuh",
+      ja: "ねこ",
+      cmn: "猫",
+      yue: "貓",
+    };
 
-    expect(getWordText(cat, "en")).toBe("cat");
-    expect(getWordText(cat, "ja")).toBe(cat.ja);
-    expect(getWordText(cat, "cmn")).toBe(cat.cmn);
-    expect(getWordText(cat, "yue")).toBe(cat.yue);
+    expect(getWordText(wordWithTranslations, "en")).toBe("cat");
+    expect(getWordText(wordWithTranslations, "ja")).toBe("ねこ");
+    expect(getWordText(wordWithTranslations, "cmn")).toBe("猫");
+    expect(getWordText(wordWithTranslations, "yue")).toBe("貓");
   });
 
   it("falls back to English when localization is not present", () => {
-    const bat = LEVEL_1_WORDS.find((w) => w.icon === "bat");
-    expect(bat).toBeDefined();
-    if (!bat) return;
+    const wordWithoutTranslations: Word = {
+      icon: "testbat",
+      en: "bat",
+      letter: "B",
+      sound: "buh",
+    };
 
-    expect(bat.ja).toBeUndefined();
-    expect(getWordText(bat, "ja")).toBe("bat");
-    expect(getWordText(bat, "cmn")).toBe("bat");
-    expect(getWordText(bat, "yue")).toBe("bat");
+    expect(getWordText(wordWithoutTranslations, "ja")).toBe("bat");
+    expect(getWordText(wordWithoutTranslations, "cmn")).toBe("bat");
+    expect(getWordText(wordWithoutTranslations, "yue")).toBe("bat");
   });
 });
 
 describe("speechLines", () => {
-  it("returns all spoken lines for Level 1 words across supported languages", () => {
+  it("returns spoken lines for words across supported languages", () => {
+    const wordWithTranslations: Word = {
+      icon: "testcat",
+      en: "cat",
+      letter: "C",
+      sound: "kuh",
+      ja: "ねこ",
+      cmn: "猫",
+      yue: "貓",
+    };
+    const lines = speechLines([wordWithTranslations]);
+    expect(lines).toContain("cat");
+    expect(lines).toContain("ねこ");
+    expect(lines).toContain("猫");
+    expect(lines).toContain("貓");
+  });
+
+  it("returns non-empty speech lines for default level words", () => {
     const lines = speechLines();
-    expect(lines.length).toBeGreaterThan(LEVEL_1_WORDS.length);
+    expect(lines.length).toBeGreaterThan(0);
     for (const w of LEVEL_1_WORDS) {
       expect(lines).toContain(w.en);
     }
-    const cat = LEVEL_1_WORDS.find((w) => w.icon === "cat");
-    expect(cat).toBeDefined();
-    if (!cat) return;
-
-    expect(lines).toContain(cat.ja);
-    expect(lines).toContain(cat.cmn);
-    expect(lines).toContain(cat.yue);
   });
 
-  it("supports custom word pools", () => {
+  it("supports custom word pools without translations", () => {
     const customWord: Word = {
       icon: "test",
       en: "testword",

@@ -1,4 +1,5 @@
 import { RHYME_WORDS, WORDS } from "../../words";
+import levels from "./levels.json";
 
 export interface Word {
   icon: string;
@@ -16,95 +17,27 @@ export interface Word {
   yueR?: string;
 }
 
-export const LEVEL_1_WORD_IDS = [
-  "cat",
-  "dog",
-  "fox",
-  "frog",
-  "lion",
-  "panda",
-  "rabbit",
-  "bat",
-  "bear",
-  "bee",
-  "boat",
-  "box",
-  "bun",
-  "cake",
-  "clock",
-  "coat",
-  "goat",
-  "hat",
-  "house",
-  "jar",
-] as const;
+export const LEVEL_1_WORD_IDS: readonly string[] = levels.level1;
+export const LEVEL_2_WORD_IDS: readonly string[] = levels.level2;
+export const LEVEL_3_WORD_IDS: readonly string[] = levels.level3;
 
 const ALL_WORDS_BY_ID = new Map<string, Word>(
   [...WORDS, ...RHYME_WORDS].map((w) => [w.icon, w]),
 );
 
-export const LEVEL_1_WORDS: Word[] = LEVEL_1_WORD_IDS.map((id) => {
-  const entry = ALL_WORDS_BY_ID.get(id);
-  if (!entry) {
-    throw new Error(`Word ID not found in shared pool: ${id}`);
-  }
-  return entry;
-});
+function wordsFromIds(ids: readonly string[]): Word[] {
+  return ids.map((id) => {
+    const entry = ALL_WORDS_BY_ID.get(id);
+    if (!entry) {
+      throw new Error(`Word ID not found in shared pool: ${id}`);
+    }
+    return entry;
+  });
+}
 
-export const LEVEL_2_WORD_IDS = [
-  "moon",
-  "mouse",
-  "pear",
-  "rock",
-  "snail",
-  "snake",
-  "sock",
-  "spoon",
-  "sun",
-  "tree",
-  "whale",
-  "cap",
-  "cup",
-  "pan",
-  "pen",
-  "pin",
-] as const;
-
-export const LEVEL_2_WORDS: Word[] = LEVEL_2_WORD_IDS.map((id) => {
-  const entry = ALL_WORDS_BY_ID.get(id);
-  if (!entry) {
-    throw new Error(`Word ID not found in shared pool: ${id}`);
-  }
-  return entry;
-});
-
-export const LEVEL_3_WORD_IDS = [
-  "hat",
-  "bat",
-  "cat",
-  "house",
-  "mouse",
-  "boat",
-  "coat",
-  "rock",
-  "sock",
-  "clock",
-  "bear",
-  "pear",
-  "pig",
-  "wig",
-  "dig",
-  "big",
-  "block",
-] as const;
-
-export const LEVEL_3_WORDS: Word[] = LEVEL_3_WORD_IDS.map((id) => {
-  const entry = ALL_WORDS_BY_ID.get(id);
-  if (!entry) {
-    throw new Error(`Word ID not found in shared pool: ${id}`);
-  }
-  return entry;
-});
+export const LEVEL_1_WORDS: Word[] = wordsFromIds(LEVEL_1_WORD_IDS);
+export const LEVEL_2_WORDS: Word[] = wordsFromIds(LEVEL_2_WORD_IDS);
+export const LEVEL_3_WORDS: Word[] = wordsFromIds(LEVEL_3_WORD_IDS);
 
 export interface LevelConfig {
   words: Word[];
