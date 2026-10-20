@@ -2,9 +2,13 @@ import * as childProcess from 'node:child_process';
 import * as fs from 'node:fs';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { main } from '../verify_promoted';
+import { main as makeScanPlan } from '../../artifact_review/make_scan_plan';
 
 vi.mock('node:child_process');
 vi.mock('node:fs');
+vi.mock('../../artifact_review/make_scan_plan', () => ({
+  main: vi.fn(() => 0),
+}));
 
 describe('verifyPromoted', () => {
   const rootDir = '/mock/root';
@@ -48,6 +52,8 @@ describe('verifyPromoted', () => {
 
   it('runs tools successfully when there are no findings', () => {
     expect(() => main(['--decisions', 'review_decisions.json'], rootDir)).not.toThrow();
+
+    expect(makeScanPlan).toHaveBeenCalledWith(rootDir);
 
     expect(spawnSyncMock).toHaveBeenCalledWith(
       'python3',
