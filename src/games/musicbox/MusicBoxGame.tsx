@@ -64,6 +64,7 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
   return (
     <GameShell
       title={t(lang, `song.${scene.songId}` as UIKey)}
+      subtitle={t(lang, 'shell.musicbox.subPlay')}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}

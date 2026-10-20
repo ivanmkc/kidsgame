@@ -45,4 +45,24 @@ describe('MusicBoxGame rendering', () => {
 
     unmount();
   });
+
+  it('renders instructional subtitle in scene play mode', () => {
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    const { unmount } = render(
+      <MusicBoxGame
+        onHome={onHome}
+        sceneId="twinkle"
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="en"
+      />,
+    );
+
+    expect(screen.getByText('Tap anywhere to play the next note!')).toBeDefined();
+
+    unmount();
+  });
 });
