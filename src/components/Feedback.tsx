@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 import { track } from '../analytics';
+import { buildFeedbackContext, generateUuid } from '../analyticsContext';
 import { Lang } from '../lang';
 import { t } from '../i18n';
 import { sfx } from '../sound';
 import { colors, fonts, shadows } from '../theme';
+import { readHash } from '../nav';
 
 // Parent feedback: one tap to flag "this screen is broken" or share an
 // idea, with optional text. Lands in the analytics beacon (event
@@ -14,13 +16,11 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
   const [kind, setKind] = useState<'broken' | 'idea' | null>(null);
   const [text, setText] = useState('');
   const [sent, setSent] = useState(false);
+  const viewport = useWindowDimensions();
 
   const reset = () => { setOpen(false); setKind(null); setText(''); setSent(false); };
   const send = () => {
-    track('feedback', {
-      kind: kind ?? 'idea',
-      text: text.trim().slice(0, 500),
-    });
+    track('feedback', buildFeedbackContext(readHash(), lang, viewport, kind, text, generateUuid()));
     sfx.good();
     setSent(true);
     setTimeout(reset, 1400);
@@ -51,7 +51,7 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
                     testID="feedback-broken"
                     accessibilityRole="button"
                     accessibilityLabel={t(lang, 'feedback.broken')}
-                    accessibilityState={{ selected: kind === 'broken' }}
+                    aria-selected={kind === 'broken'}
                     style={[styles.kind, kind === 'broken' && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>{t(lang, 'feedback.broken')}</Text>
@@ -61,7 +61,7 @@ export function FeedbackChip({ compact, lang = 'en' }: { compact?: boolean; lang
                     testID="feedback-idea"
                     accessibilityRole="button"
                     accessibilityLabel={t(lang, 'feedback.idea')}
-                    accessibilityState={{ selected: kind === 'idea' }}
+                    aria-selected={kind === 'idea'}
                     style={[styles.kind, kind === 'idea' && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>{t(lang, 'feedback.idea')}</Text>

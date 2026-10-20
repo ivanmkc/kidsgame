@@ -1,177 +1,111 @@
+// @vitest-environment happy-dom
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { FeedbackChip } from '../Feedback';
+import * as analytics from '../../analytics';
+import * as nav from '../../nav';
 import { t } from '../../i18n';
 
-let stateValues: unknown[] = [];
-let stateIndex = 0;
+vi.mock('../../sound', () => ({
+  sfx: { tap: vi.fn(), good: vi.fn() },
+}));
 
-vi.mock('react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('react')>();
-  return {
-    ...actual,
-    useState: (init: unknown) => {
-      const i = stateIndex++;
-      if (stateValues.length <= i) {
-        stateValues[i] = typeof init === 'function' ? (init as () => unknown)() : init;
-      }
-      const setState = (next: unknown) => {
-        stateValues[i] = typeof next === 'function' ? (next as (prev: unknown) => unknown)(stateValues[i]) : next;
-      };
-      return [stateValues[i], setState];
-    },
-  };
-});
-
-import { FeedbackChip } from '../Feedback';
-
-interface ElementNode {
-  type: unknown;
-  props?: {
-    testID?: string;
-    accessibilityRole?: string;
-    accessibilityLabel?: string;
-    accessibilityState?: { selected?: boolean };
-    style?: unknown;
-    children?: unknown;
-    onPress?: () => void;
-  };
-}
-
-function renderChip(props: Parameters<typeof FeedbackChip>[0] = {}) {
-  stateIndex = 0;
-  return FeedbackChip(props) as unknown as ElementNode;
-}
-
-function findInTree(tree: unknown, predicate: (node: ElementNode) => boolean): ElementNode[] {
-  const matches: ElementNode[] = [];
-  function walk(node: unknown) {
-    if (!node || typeof node !== 'object') return;
-    const el = node as ElementNode;
-    if (predicate(el)) matches.push(el);
-    if (el.props && el.props.children) {
-      React.Children.forEach(el.props.children, walk);
-    }
-  }
-  walk(tree);
-  return matches;
-}
-
-function getByTestId(tree: ElementNode, testId: string): ElementNode {
-  const matches = findInTree(tree, (node) => node.props?.testID === testId);
-  if (matches.length === 0) throw new Error(`Element with testID "${testId}" not found`);
-  return matches[0];
-}
-
-function getByRole(tree: ElementNode, role: string, options?: { name?: string }): ElementNode {
-  const matches = findInTree(tree, (node) => {
-    if (node.props?.accessibilityRole !== role) return false;
-    if (options?.name !== undefined && node.props?.accessibilityLabel !== options.name) return false;
-    return true;
-  });
-  if (matches.length === 0) {
-    throw new Error(`Element with role "${role}" and name "${options?.name}" not found`);
-  }
-  return matches[0];
-}
-
-function resolveStyle(node: ElementNode) {
-  const s = typeof node.props?.style === 'function' ? node.props.style({ pressed: false }) : node.props?.style;
-  return StyleSheet.flatten(s);
-}
-
-describe('Feedback modal accessibility and touch targets', () => {
+describe('FeedbackChip', () => {
   beforeEach(() => {
-    stateValues = [];
-    stateIndex = 0;
+    vi.useFakeTimers();
+    vi.spyOn(analytics, 'track').mockImplementation(() => {});
   });
 
-  it('finds each modal button by role and name after opening the modal', () => {
-    let tree = renderChip({ lang: 'en' });
-    const openBtn = getByTestId(tree, 'feedback-open');
-    expect(openBtn.props?.accessibilityRole).toBe('button');
-    expect(openBtn.props?.accessibilityLabel).toBe(t('en', 'feedback.chip'));
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
 
-    openBtn.props?.onPress?.();
-    tree = renderChip({ lang: 'en' });
+  it('renders open button and opens modal', () => {
+    render(<FeedbackChip lang="en" />);
+    const openBtn = screen.getByRole('button', { name: t('en', 'feedback.chip') });
+    expect(openBtn).toBeDefined();
 
-    const brokenBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.broken'),
-    });
-    expect(brokenBtn.props?.testID).toBe('feedback-broken');
-
-    const ideaBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.idea'),
-    });
-    expect(ideaBtn.props?.testID).toBe('feedback-idea');
-
-    const cancelBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.cancel'),
-    });
-    expect(cancelBtn.props?.testID).toBe('feedback-cancel');
-
-    const sendBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.send'),
-    });
-    expect(sendBtn.props?.testID).toBe('feedback-send');
+    fireEvent.click(openBtn);
+    expect(screen.getByRole('button', { name: t('en', 'feedback.broken') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('en', 'feedback.idea') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('en', 'feedback.cancel') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('en', 'feedback.send') })).toBeDefined();
   });
 
   it('exposes selection through accessibilityState on kind buttons', () => {
-    let tree = renderChip({ lang: 'en' });
-    getByTestId(tree, 'feedback-open').props?.onPress?.();
+    render(<FeedbackChip lang="en" />);
+    fireEvent.click(screen.getByRole('button', { name: t('en', 'feedback.chip') }));
 
-    tree = renderChip({ lang: 'en' });
-    let broken = getByRole(tree, 'button', {
-      name: t('en', 'feedback.broken'),
-    });
-    let idea = getByRole(tree, 'button', { name: t('en', 'feedback.idea') });
-    expect(broken.props?.accessibilityState?.selected).toBe(false);
-    expect(idea.props?.accessibilityState?.selected).toBe(false);
+    const brokenBtn = screen.getByRole('button', { name: t('en', 'feedback.broken') });
+    const ideaBtn = screen.getByRole('button', { name: t('en', 'feedback.idea') });
 
-    broken.props?.onPress?.();
-    tree = renderChip({ lang: 'en' });
-    broken = getByRole(tree, 'button', { name: t('en', 'feedback.broken') });
-    idea = getByRole(tree, 'button', { name: t('en', 'feedback.idea') });
-    expect(broken.props?.accessibilityState?.selected).toBe(true);
-    expect(idea.props?.accessibilityState?.selected).toBe(false);
+    expect(brokenBtn.getAttribute('aria-selected')).toBe('false');
+    expect(ideaBtn.getAttribute('aria-selected')).toBe('false');
 
-    idea.props?.onPress?.();
-    tree = renderChip({ lang: 'en' });
-    broken = getByRole(tree, 'button', { name: t('en', 'feedback.broken') });
-    idea = getByRole(tree, 'button', { name: t('en', 'feedback.idea') });
-    expect(broken.props?.accessibilityState?.selected).toBe(false);
-    expect(idea.props?.accessibilityState?.selected).toBe(true);
+    fireEvent.click(brokenBtn);
+    expect(brokenBtn.getAttribute('aria-selected')).toBe('true');
+    expect(ideaBtn.getAttribute('aria-selected')).toBe('false');
+
+    fireEvent.click(ideaBtn);
+    expect(brokenBtn.getAttribute('aria-selected')).toBe('false');
+    expect(ideaBtn.getAttribute('aria-selected')).toBe('true');
   });
 
   it('ensures Send and Cancel buttons have at least 44pt touch height and center alignment', () => {
-    let tree = renderChip({ lang: 'en' });
-    getByTestId(tree, 'feedback-open').props?.onPress?.();
+    render(<FeedbackChip lang="en" />);
+    fireEvent.click(screen.getByRole('button', { name: t('en', 'feedback.chip') }));
 
-    tree = renderChip({ lang: 'en' });
-    const sendBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.send'),
-    });
-    const cancelBtn = getByRole(tree, 'button', {
-      name: t('en', 'feedback.cancel'),
-    });
+    const sendBtn = screen.getByRole('button', { name: t('en', 'feedback.send') });
+    const cancelBtn = screen.getByRole('button', { name: t('en', 'feedback.cancel') });
 
-    const sendStyle = resolveStyle(sendBtn);
-    const cancelStyle = resolveStyle(cancelBtn);
-
-    expect(sendStyle.minHeight).toBeGreaterThanOrEqual(44);
-    expect(sendStyle.justifyContent).toBe('center');
-    expect(cancelStyle.minHeight).toBeGreaterThanOrEqual(44);
-    expect(cancelStyle.justifyContent).toBe('center');
+    expect(window.getComputedStyle(sendBtn).minHeight).toBe('44px');
+    expect(window.getComputedStyle(sendBtn).justifyContent).toBe('center');
+    expect(window.getComputedStyle(cancelBtn).minHeight).toBe('44px');
+    expect(window.getComputedStyle(cancelBtn).justifyContent).toBe('center');
   });
 
   it('translates modal button accessibility labels in another language', () => {
-    let tree = renderChip({ lang: 'ja' });
-    getByTestId(tree, 'feedback-open').props?.onPress?.();
+    render(<FeedbackChip lang="ja" />);
+    fireEvent.click(screen.getByRole('button', { name: t('ja', 'feedback.chip') }));
 
-    tree = renderChip({ lang: 'ja' });
-    expect(getByRole(tree, 'button', { name: t('ja', 'feedback.broken') })).toBeDefined();
-    expect(getByRole(tree, 'button', { name: t('ja', 'feedback.idea') })).toBeDefined();
-    expect(getByRole(tree, 'button', { name: t('ja', 'feedback.cancel') })).toBeDefined();
-    expect(getByRole(tree, 'button', { name: t('ja', 'feedback.send') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('ja', 'feedback.broken') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('ja', 'feedback.idea') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('ja', 'feedback.cancel') })).toBeDefined();
+    expect(screen.getByRole('button', { name: t('ja', 'feedback.send') })).toBeDefined();
+  });
+
+  it('sends extended feedback payload when track is called', () => {
+    vi.spyOn(nav, 'readHash').mockReturnValue('story/dog');
+    
+    render(<FeedbackChip lang="en" />);
+    
+    // Open modal
+    fireEvent.click(screen.getByRole('button', { name: t('en', 'feedback.chip') }));
+    
+    // Select 'idea'
+    fireEvent.click(screen.getByRole('button', { name: t('en', 'feedback.idea') }));
+    
+    // Enter text
+    const input = screen.getByPlaceholderText(t('en', 'feedback.placeholder'));
+    fireEvent.change(input, { target: { value: 'Awesome app!' } });
+    
+    // Send
+    fireEvent.click(screen.getByRole('button', { name: t('en', 'feedback.send') }));
+    
+    expect(analytics.track).toHaveBeenCalledWith('feedback', expect.objectContaining({
+      kind: 'idea',
+      text: 'Awesome app!',
+      gameId: 'story',
+      sceneId: 'dog',
+      screen: 'story/dog',
+      lang: 'en',
+      viewport: '0x0',
+    }));
+    
+    const calls = vi.mocked(analytics.track).mock.calls;
+    expect(calls[0][1]?.uuid).toBeDefined();
   });
 });
