@@ -179,14 +179,55 @@ export const PRAISE: Record<Lang, string> = {
   yue: "啱晒！",
 };
 
-/** Prompt/celebration lines for all four langs (number words come from the
- *  shared orchestrator pool). */
+/** Comparative feedback when a round is completed. */
+export function comparisonPhrase(
+  lang: Lang,
+  ask: 'more' | 'fewer',
+  winningCount: number,
+  otherCount: number,
+): string {
+  switch (lang) {
+    case 'ja':
+      return ask === 'more'
+        ? `${winningCount} は ${otherCount} より おおい`
+        : `${winningCount} は ${otherCount} より すくない`;
+    case 'cmn':
+      return ask === 'more'
+        ? `${winningCount}比${otherCount}多`
+        : `${winningCount}比${otherCount}少`;
+    case 'yue':
+      return ask === 'more'
+        ? `${winningCount}多過${otherCount}`
+        : `${winningCount}少過${otherCount}`;
+    case 'en':
+    default:
+      return ask === 'more'
+        ? `${winningCount} is more than ${otherCount}`
+        : `${winningCount} is fewer than ${otherCount}`;
+  }
+}
+
+export function roundComparisonPhrase(lang: Lang, round: CompareRound): string {
+  const winningSide = round.correctSide === 'left' ? round.left : round.right;
+  const otherSide = round.correctSide === 'left' ? round.right : round.left;
+  return comparisonPhrase(lang, round.ask, winningSide.count, otherSide.count);
+}
+
+/** Prompt/celebration lines for all four langs, plus all comparative feedback
+ *  phrases across shipped count ranges (1..10) so the offline TTS pipeline
+ *  pre-renders Gemini clips for instant playback. */
 export function speechLines(): string[] {
   const s = new Set<string>();
   (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
     s.add(MORE_PROMPT[L]);
     s.add(FEWER_PROMPT[L]);
     s.add(PRAISE[L]);
+    for (let a = 1; a <= 10; a++) {
+      for (let b = 1; b <= 10; b++) {
+        if (a > b) s.add(comparisonPhrase(L, 'more', a, b));
+        if (a < b) s.add(comparisonPhrase(L, 'fewer', a, b));
+      }
+    }
   });
   return [...s];
 }

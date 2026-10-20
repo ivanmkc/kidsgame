@@ -12,7 +12,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord } from "../../lang";
+import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
@@ -28,6 +28,7 @@ import {
   makeCompareRound,
   plateCritterPos,
   plateCritterSize,
+  roundComparisonPhrase,
 } from "./logic";
 
 interface Props {
@@ -38,7 +39,8 @@ interface Props {
 
 /**
  * More or Less — two plates of critters, kid taps the one with MORE (or
- * FEWER on hard). On correct, the winning count is spoken aloud.
+ * FEWER on hard). On correct, count badges reveal on both plates and
+ * comparative feedback is spoken aloud.
  */
 export function CompareGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin } = compareSettings(difficulty);
@@ -48,6 +50,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrongSide, setWrongSide] = useState<"left" | "right" | null>(null);
+  const [locked, setLocked] = useState(false);
   const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -64,19 +67,20 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickSide = (side: "left" | "right") => {
-    if (won || lockedRef.current || wrongSide !== null) return;
+    if (won || locked || lockedRef.current || wrongSide !== null) return;
     if (side === round.correctSide) {
       lockedRef.current = true;
+      setLocked(true);
       sfx.good();
-      const winningSide =
-        round.correctSide === "left" ? round.left : round.right;
       const nextScore = score + 1;
       setScore(nextScore);
-      sayThen([numberWord(lang, winningSide.count).t, PRAISE[lang]], () => {
+      const feedback = roundComparisonPhrase(lang, round);
+      sayThen([feedback, PRAISE[lang]], () => {
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
           setWrongSide(null);
           lockedRef.current = false;
+          setLocked(false);
         }
       });
     } else {
@@ -93,6 +97,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     lockedRef.current = false;
+    setLocked(false);
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeCompareRound(rngRef.current, difficulty));
@@ -160,16 +165,22 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
             width={plateW}
             height={plateH}
             wrong={wrongSide === "left"}
+            isWinner={locked && round.correctSide === "left"}
+            showCount={locked}
             onPress={() => pickSide("left")}
             testID={`compare-plate-left-${round.left.icon}-${round.left.count}${round.correctSide === "left" ? "-correct" : ""}`}
+            badgeTestID="compare-badge-left"
           />
           <Plate
             data={round.right}
             width={plateW}
             height={plateH}
             wrong={wrongSide === "right"}
+            isWinner={locked && round.correctSide === "right"}
+            showCount={locked}
             onPress={() => pickSide("right")}
             testID={`compare-plate-right-${round.right.icon}-${round.right.count}${round.correctSide === "right" ? "-correct" : ""}`}
+            badgeTestID="compare-badge-right"
           />
         </View>
       </View>
@@ -190,11 +201,24 @@ interface PlateProps {
   width: number;
   height: number;
   wrong: boolean;
+  isWinner?: boolean;
+  showCount?: boolean;
   onPress: () => void;
   testID: string;
+  badgeTestID?: string;
 }
 
-function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
+function Plate({
+  data,
+  width,
+  height,
+  wrong,
+  isWinner = false,
+  showCount = false,
+  onPress,
+  testID,
+  badgeTestID,
+}: PlateProps) {
   const critterSize = plateCritterSize(data.count, width, height);
   return (
     <Pressable
@@ -207,7 +231,8 @@ function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
         shadows.soft,
         { width, height },
         wrong && styles.plateWrong,
-        pressed && styles.pressed,
+        isWinner && styles.plateWinner,
+        pressed && !showCount && styles.pressed,
       ]}
     >
       {data.positions.map((p, i) => (
@@ -223,6 +248,18 @@ function Plate({ data, width, height, wrong, onPress, testID }: PlateProps) {
           resizeMode="contain"
         />
       ))}
+      {showCount ? (
+        <View style={styles.badgeContainer} pointerEvents="none">
+          <View
+            style={[styles.badge, shadows.soft, isWinner && styles.badgeWinner]}
+            testID={badgeTestID}
+          >
+            <Text style={[styles.badgeText, isWinner && styles.badgeTextWinner]}>
+              {data.count}
+            </Text>
+          </View>
+        </View>
+      ) : null}
     </Pressable>
   );
 }
@@ -272,6 +309,41 @@ const styles = StyleSheet.create({
   plateWrong: {
     borderColor: colors.red,
     backgroundColor: "rgba(232,86,79,0.10)",
+  },
+  plateWinner: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.12)",
+  },
+  badgeContainer: {
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: colors.blush,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    minWidth: 42,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeWinner: {
+    borderColor: colors.green,
+    backgroundColor: "#F0FFF4",
+  },
+  badgeText: {
+    fontFamily: fonts.display,
+    fontSize: 24,
+    color: colors.ink,
+  },
+  badgeTextWinner: {
+    color: darken(colors.green, 0.2),
   },
   pressed: { transform: [{ scale: 0.96 }] },
 });
