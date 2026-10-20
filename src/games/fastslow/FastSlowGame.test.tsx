@@ -25,10 +25,11 @@ vi.mock("../../music", () => ({
   stopSequence: vi.fn(),
 }));
 
+afterEach(() => {
+  cleanup();
+});
+
 describe("FastSlowGame UI interaction", () => {
-  afterEach(() => {
-    cleanup();
-  });
   it("tracks history and prevents streaks of 3 identical speeds", () => {
     vi.useFakeTimers();
     const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.12345);
@@ -226,6 +227,91 @@ describe("FastSlowGame UI interaction", () => {
     expect(within(round2FastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
     expect(within(round2SlowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
+    vi.useRealTimers();
+  });
+});
+
+describe("FastSlowGame accessibility", () => {
+  it('renders fast, slow, and replay buttons with accessibilityRole="button" and localized labels in English', () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward through the initial 400ms listen phase timer into the pick phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    const fastBtn = screen.getByTestId("fastslow-fast");
+    expect(fastBtn.getAttribute("role")).toBe("button");
+    expect(fastBtn.getAttribute("aria-label")).toBe("Fast");
+
+    const slowBtn = screen.getByTestId("fastslow-slow");
+    expect(slowBtn.getAttribute("role")).toBe("button");
+    expect(slowBtn.getAttribute("aria-label")).toBe("Slow");
+
+    const replayBtn = screen.getByTestId("fastslow-replay");
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("Replay");
+
+    vi.useRealTimers();
+  });
+
+  it("renders localized accessibility labels in Japanese", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    const fastBtn = screen.getByTestId("fastslow-fast");
+    expect(fastBtn.getAttribute("role")).toBe("button");
+    expect(fastBtn.getAttribute("aria-label")).toBe("はやい");
+
+    const slowBtn = screen.getByTestId("fastslow-slow");
+    expect(slowBtn.getAttribute("role")).toBe("button");
+    expect(slowBtn.getAttribute("aria-label")).toBe("おそい");
+
+    const replayBtn = screen.getByTestId("fastslow-replay");
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("もういちどきく");
+
+    vi.useRealTimers();
+  });
+
+  it("tapping replay returns to listen phase until playback finishes", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    const origImpl = vi.mocked(playSequence).getMockImplementation();
+    vi.mocked(playSequence).mockImplementation((notes, bpm, onNote, onDone) => {
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Initial 400ms delay triggers playRound
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Complete playback so phase becomes 'pick'
+    act(() => {
+      onDoneCb?.();
+    });
+
+    const replayBtn = screen.getByTestId("fastslow-replay");
+    act(() => {
+      fireEvent.click(replayBtn);
+    });
+
+    // Now it should be back in listen phase
+    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
+    expect(screen.getByText("Listen...")).toBeTruthy();
+
+    if (origImpl) {
+      vi.mocked(playSequence).mockImplementation(origImpl);
+    }
     vi.useRealTimers();
   });
 });

@@ -198,6 +198,7 @@ export const JA: Table = {
   'music.slow': 'おそい',
   'music.same': 'おなじ',
   'music.different': 'ちがう',
+  'music.replay': 'もういちどきく',
 
   'overlay.next': 'つぎのレベル ▶️',
   'overlay.nextRound': 'つぎのラウンド ▶️',
