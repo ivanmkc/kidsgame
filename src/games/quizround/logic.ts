@@ -46,10 +46,18 @@ export function makeQuizRound<T>(
       .map((v) => [rng(), v] as const)
       .sort((p, q) => p[0] - q[0])
       .map(([, v]) => v);
-  const distractors = [...shuffle(preferred), ...shuffle(rest)].slice(
-    0,
-    tileCount - 1,
-  );
+  const seenKeys = new Set<string>();
+  const distractors: T[] = [];
+  for (const item of [...shuffle(preferred), ...shuffle(rest)]) {
+    if (distractors.length >= tileCount - 1) {
+      break;
+    }
+    const key = keyOf(item);
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      distractors.push(item);
+    }
+  }
   const tiles = shuffle([target, ...distractors]).map(toTile);
   const answerIdx = tiles.findIndex((t) => t.key === keyOf(target));
   return { target, tiles, answerIdx };

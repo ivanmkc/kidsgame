@@ -138,6 +138,75 @@ describe("makeQuizRound", () => {
       expect(count).toBeGreaterThan(20);
     }
   });
+
+  it("deduplicates distractors by keyOf when pool items share keys", () => {
+    interface WordItem {
+      word: string;
+      letter: string;
+    }
+    const sharedPool: WordItem[] = [
+      { word: "apple", letter: "a" },
+      { word: "ant", letter: "a" },
+      { word: "axe", letter: "a" },
+      { word: "bear", letter: "b" },
+      { word: "bird", letter: "b" },
+      { word: "bat", letter: "b" },
+      { word: "cat", letter: "c" },
+      { word: "cup", letter: "c" },
+      { word: "car", letter: "c" },
+      { word: "dog", letter: "d" },
+      { word: "duck", letter: "d" },
+      { word: "door", letter: "d" },
+    ];
+    for (let seed = 1; seed <= 50; seed++) {
+      const rng = makeRng(seed);
+      const round = makeQuizRound(
+        rng,
+        sharedPool,
+        3,
+        (item) => ({ key: item.letter, label: item.word }),
+        (item) => item.letter,
+      );
+      expect(round.tiles).toHaveLength(3);
+      const keys = round.tiles.map((t) => t.key);
+      expect(new Set(keys).size).toBe(3);
+    }
+  });
+
+  it("deduplicates confusable distractors by keyOf when multiple confusables share keys", () => {
+    interface WordItem {
+      word: string;
+      letter: string;
+      confusableGroup?: string;
+    }
+    const sharedPool: WordItem[] = [
+      { word: "bear", letter: "b", confusableGroup: "tall" },
+      { word: "bird", letter: "b", confusableGroup: "tall" },
+      { word: "dog", letter: "d", confusableGroup: "tall" },
+      { word: "duck", letter: "d", confusableGroup: "tall" },
+      { word: "pig", letter: "p", confusableGroup: "tall" },
+      { word: "pen", letter: "p", confusableGroup: "tall" },
+      { word: "cat", letter: "c", confusableGroup: "other" },
+    ];
+    const confusable = (target: WordItem, candidate: WordItem) =>
+      target.confusableGroup !== undefined &&
+      target.confusableGroup === candidate.confusableGroup;
+
+    for (let seed = 1; seed <= 50; seed++) {
+      const rng = makeRng(seed);
+      const round = makeQuizRound(
+        rng,
+        sharedPool,
+        3,
+        (item) => ({ key: item.letter, label: item.word }),
+        (item) => item.letter,
+        confusable,
+      );
+      expect(round.tiles).toHaveLength(3);
+      const keys = round.tiles.map((t) => t.key);
+      expect(new Set(keys).size).toBe(3);
+    }
+  });
 });
 
 describe("spriteLT", () => {
