@@ -66,6 +66,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     // replace the board a frame after first paint (flicker + stale taps)
     if (prevPairs.current === pairs) return;
     prevPairs.current = pairs;
+    setTimerKey((k) => k + 1);
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     setFaceUp([]);
     setMatched([]);
@@ -157,7 +158,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
           const owner = matchedBy[card.icon];
           return (
             <FlipCard
-              key={card.key}
+              key={`${timerKey}-${card.key}`}
               size={cardW}
               up={isUp}
               matched={isMatched}
