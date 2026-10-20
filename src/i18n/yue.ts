@@ -275,6 +275,7 @@ export const YUE: Table = {
   'sticker.size.large': '大',
   'sticker.charactersEmpty': '角色即將登場！ ✨',
   'memory.moves': '步數：{n}',
+  'rhyme.ask': '邊個字尾音一樣呀？',
   'rhyme.comingSoon': '更多押韻就快嚟！🎶',
   'story.tryAgain': '咦！行第二條路 ↩️',
   'story.startOver': '由頭嚟過 📖',

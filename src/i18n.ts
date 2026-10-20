@@ -257,6 +257,7 @@ export type UIKey =
   | 'sticker.size.large'
   | 'sticker.charactersEmpty'
   | 'memory.moves'
+  | 'rhyme.ask'
   | 'rhyme.comingSoon'
   | 'story.tryAgain'
   | 'story.startOver'
@@ -561,6 +562,9 @@ export const EN: Table = {
   'sticker.size.large': 'Large',
   'sticker.charactersEmpty': 'Characters coming soon! ✨',
   'memory.moves': 'Moves: {n}',
+  // Rhyme game prompts: EN interpolates {word} into the full sentence;
+  // non-EN pairs this fixed question clip with the target word clip.
+  'rhyme.ask': 'Which one rhymes with {word}?',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
   'story.tryAgain': 'Oops! Try another way ↩️',
   'story.startOver': 'Start over 📖',
