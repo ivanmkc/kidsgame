@@ -10,6 +10,7 @@ import {
   within,
 } from "@testing-library/react";
 import * as music from "../../music";
+import { sfx } from "../../sound";
 import { HighLowGame } from "./HighLowGame";
 
 describe("HighLowGame UI", () => {
@@ -254,66 +255,87 @@ describe("HighLowGame UI", () => {
 
   it("delays WinOverlay mount on final winning round by 1000ms celebration", () => {
     vi.useFakeTimers();
-    let capturedNotes: { m: number; b: number }[] = [];
+    let lastNotes: music.SeqNote[] = [];
     let onDoneCb: (() => void) | undefined;
-
     vi.spyOn(music, "playSequence").mockImplementation(
       (notes, _bpm, _onNote, onDone) => {
-        capturedNotes = notes as { m: number; b: number }[];
+        lastNotes = notes;
         onDoneCb = onDone;
         return () => {};
       },
     );
+    const goodSpy = vi.spyOn(sfx, "good");
+    const winSpy = vi.spyOn(sfx, "win");
 
     render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-    // Play 7 rounds (easy requires 8 rounds)
-    for (let roundIdx = 0; roundIdx < 7; roundIdx++) {
+    // Play 7 rounds to reach the final round (easy requires 8 rounds)
+    for (let i = 0; i < 7; i++) {
       act(() => {
         vi.advanceTimersByTime(400);
         onDoneCb?.();
       });
-      const isHigh = capturedNotes[1].m > capturedNotes[0].m;
-      fireEvent.click(
-        screen.getByTestId(isHigh ? "highlow-high" : "highlow-low"),
+      const answer = lastNotes[1].m > lastNotes[0].m ? "high" : "low";
+      const btn = screen.getByTestId(
+        answer === "high" ? "highlow-high" : "highlow-low",
       );
+      fireEvent.click(btn);
       act(() => {
         vi.advanceTimersByTime(1000);
       });
     }
 
-    // Round 8: listen finishes and buttons are ready
+    // Round 8: listen phase finishes, buttons ready
     act(() => {
       vi.advanceTimersByTime(400);
       onDoneCb?.();
     });
-
-    const isHigh = capturedNotes[1].m > capturedNotes[0].m;
+    const finalAnswer = lastNotes[1].m > lastNotes[0].m ? "high" : "low";
     const winningBtn = screen.getByTestId(
-      isHigh ? "highlow-high" : "highlow-low",
+      finalAnswer === "high" ? "highlow-high" : "highlow-low",
     );
 
     expect(screen.queryByTestId("win-overlay")).toBeNull();
+    goodSpy.mockClear();
+    winSpy.mockClear();
 
     // Tap winning answer
     fireEvent.click(winningBtn);
 
-    // Immediate tick: celebration is active, pick buttons mounted, WinOverlay deferred
+    // Immediate tick: sfx.good fires, celebration is active, but WinOverlay is deferred
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(winSpy).not.toHaveBeenCalled();
     expect(screen.queryByTestId("highlow-high")).not.toBeNull();
     expect(screen.queryByTestId("highlow-low")).not.toBeNull();
     expect(screen.queryByTestId("win-overlay")).toBeNull();
 
-    // At 500ms: still celebrating, no WinOverlay
+    // Taps during celebration are ignored
+    fireEvent.click(winningBtn);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+
+    // At 999ms: WinOverlay is still not mounted
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(999);
     });
+    expect(winSpy).not.toHaveBeenCalled();
     expect(screen.queryByTestId("win-overlay")).toBeNull();
 
-    // At 1000ms: WinOverlay mounts
+    // At 1000ms: WinOverlay mounts and sfx.win fires
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(1);
     });
-    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(winSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    // WinOverlay buttons arm after 600ms
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    // Reset via play-again hides WinOverlay and returns to listen phase
+    fireEvent.click(screen.getByTestId("play-again"));
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.getByTestId("melody-dot-0")).toBeDefined();
 
     vi.useRealTimers();
   });

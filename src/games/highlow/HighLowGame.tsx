@@ -47,7 +47,16 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const [wrongPick, setWrongPick] = useState<"high" | "low" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const [won, setWon] = useState(false);
+  const winTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useWinLine(won, t(lang, "win.highlow" as never));
+
+  useEffect(() => {
+    return () => {
+      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      if (winTimerRef.current) clearTimeout(winTimerRef.current);
+    };
+  }, []);
 
   const playRound = useCallback((r: HighLowRound) => {
     stopSequence();
@@ -62,13 +71,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       (index) => setListenNote(index),
       () => setPhase("pick"),
     );
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
-    };
   }, []);
 
   useEffect(() => {
@@ -94,12 +96,15 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       setWrongPick(null);
       setPhase("celebrate");
       if (next < total) {
+        if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
         advanceTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
           setRound(makeHighLowRound(rngRef.current, difficulty));
         }, 1000);
       } else {
-        advanceTimerRef.current = setTimeout(() => {
+        if (winTimerRef.current) clearTimeout(winTimerRef.current);
+        winTimerRef.current = setTimeout(() => {
+          lockedRef.current = false;
           setWon(true);
         }, 1000);
       }
@@ -114,6 +119,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    if (winTimerRef.current) clearTimeout(winTimerRef.current);
     lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
