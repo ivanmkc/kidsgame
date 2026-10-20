@@ -5,6 +5,7 @@ import { Animated } from 'react-native';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SCENES } from '../scenes';
 import { JourneyScene } from '../JourneyScene';
+import { ScrollingWorld } from '../ScrollingWorld';
 import { SpawnedObject, SpawnEntry } from '../SpawnedObject';
 
 vi.mock('../../assets/images', () => {
@@ -84,5 +85,44 @@ describe('JourneyScene accessibility', () => {
     expect(onTapSpawn).toHaveBeenCalledWith(entry);
 
     unmount();
+  });
+
+  it('wraps parallax layers modulo 1280 during extended play so scenery never scrolls off-screen', () => {
+    // At scrollX = 3840 (80 taps * 48px), without modulo the foreground would scroll to
+    // translateX(-3840px), completely past the 2560px container into an empty void.
+    const scrollX = new Animated.Value(3840);
+    const { container, unmount } = render(<ScrollingWorld scrollX={scrollX} scene={SCENES[0]} />);
+
+    const root = container.firstChild as HTMLElement;
+    expect(root).toBeDefined();
+
+    // Three parallax layers: bg, mid, fg
+    const layers = Array.from(root.children) as HTMLElement[];
+    expect(layers).toHaveLength(3);
+
+    // bg: (3840 * 0.2) % 1280 = 768 -> translateX(-768px)
+    expect(layers[0].style.transform).toBe('translateX(-768px)');
+    // mid: (3840 * 0.5) % 1280 = 640 -> translateX(-640px)
+    expect(layers[1].style.transform).toBe('translateX(-640px)');
+    // fg: 3840 % 1280 = 0 -> translateX(-0px) or translateX(0px)
+    expect(layers[2].style.transform).toMatch(/^translateX\(-?0px\)$/);
+
+    unmount();
+
+    // After 300 taps (scrollX = 14400), background sky would be at -2880px without modulo
+    // and scrolled completely off the 2560px container into an empty void.
+    const extendedScrollX = new Animated.Value(14400);
+    const { container: extContainer, unmount: extUnmount } = render(
+      <ScrollingWorld scrollX={extendedScrollX} scene={SCENES[0]} />,
+    );
+    const extLayers = Array.from((extContainer.firstChild as HTMLElement).children) as HTMLElement[];
+    // bg: (14400 * 0.2) % 1280 = 2880 % 1280 = 320 -> translateX(-320px)
+    expect(extLayers[0].style.transform).toBe('translateX(-320px)');
+    // mid: (14400 * 0.5) % 1280 = 7200 % 1280 = 800 -> translateX(-800px)
+    expect(extLayers[1].style.transform).toBe('translateX(-800px)');
+    // fg: 14400 % 1280 = 320 -> translateX(-320px)
+    expect(extLayers[2].style.transform).toBe('translateX(-320px)');
+
+    extUnmount();
   });
 });
