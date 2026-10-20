@@ -1,4 +1,6 @@
 import { Platform } from 'react-native';
+import { useLayoutEffect, useRef } from 'react';
+import { stopNarration } from './sound';
 
 // Language mode for the Word/Number game suites: English, Japanese,
 // Mandarin, Cantonese. Vocabulary and counting localize; English-phonics
@@ -69,3 +71,29 @@ export function numberWord(lang: Lang, n: number): { t: string; r: string } {
 
 // Hanzi/kanji numeral tiles for the JA/zh hard tiers.
 export const HAN_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+
+
+export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolean } {
+  const epochRef = useRef(0);
+  const prevLangRef = useRef(lang);
+
+  if (prevLangRef.current !== lang) {
+    prevLangRef.current = lang;
+    epochRef.current += 1;
+  }
+
+  const epoch = epochRef.current;
+
+  useLayoutEffect(() => {
+    if (epoch > 0) {
+      stopNarration();
+    }
+  }, [epoch]);
+
+  return {
+    epoch,
+    isValid: () => epochRef.current === epoch,
+  };
+}
+
+
