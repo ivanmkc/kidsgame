@@ -21,8 +21,40 @@ describe('PuzzleGame', () => {
   });
 
   it('renders the scene picker when no scene is selected', () => {
-    render(<PuzzleGame onHome={noop} difficulty="medium" onPickScene={noop} onBackToPicker={noop} lang="en" />);
+    render(<PuzzleGame onHome={noop} difficulty="easy" onPickScene={noop} onBackToPicker={noop} lang="en" />);
     expect(screen.getByTestId('scene-surprise')).toBeTruthy();
+    expect(screen.queryByTestId('puzzle-peek')).toBeNull();
+  });
+
+  it('launches puzzle when a dimmed scene outside the active filter is picked', () => {
+    // Farm is a medium-difficulty scene ('d-farm'), dimmed when filter='easy'
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId="d-farm"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByTestId('puzzle-peek')).toBeTruthy();
+    expect(screen.queryByTestId('scene-surprise')).toBeNull();
+  });
+
+  it('launches puzzle when a matching scene is picked', () => {
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId="d-dinos"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByTestId('puzzle-peek')).toBeTruthy();
+    expect(screen.queryByTestId('scene-surprise')).toBeNull();
   });
 
   it('renders 6 tiles and no timer for an easy scene under the all filter', () => {
