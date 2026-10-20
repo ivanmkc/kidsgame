@@ -327,5 +327,23 @@ describe('StickerGame', () => {
     expect(sizeStyle?.width).toBeGreaterThanOrEqual(450);
     expect(sizeStyle?.height).toBeGreaterThanOrEqual(180);
   });
+
+  it('displays accurate gesture hint describing pinch without referencing +/- buttons or wiggle', () => {
+    const expectedHints = {
+      en: 'Drag to place · pinch to resize & turn · double-tap to pop!',
+      ja: 'シールを えへ · ピンチで おおきさ と むき · ダブルタップで けす！',
+      cmn: '把贴纸拖进画里 · 双指缩放和旋转 · 双击去掉！',
+      yue: '將貼紙拖入畫面 · 雙指縮放同旋轉 · 連撳兩下除走！',
+    } as const;
+
+    for (const [lang, hintText] of Object.entries(expectedHints)) {
+      const html = renderToString(
+        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang as 'en' | 'ja' | 'cmn' | 'yue'} />,
+      );
+      expect(html).toContain(hintText.replace('&', '&amp;'));
+      expect(html).not.toMatch(/wiggle|\+\/[-−]|うごく|会动|會郁/);
+    }
+  });
 });
+
 

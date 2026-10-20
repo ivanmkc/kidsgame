@@ -265,7 +265,7 @@ export const JA: Table = {
   'puzzle.peek.a11y': 'かんせいした えを みる',
   'puzzle.hint': '1まい タップして、もう1まい タップして いれかえよう！',
   'sticker.clear': '🧹 けす',
-  'sticker.hint': 'シールを えへ · タップで うごく · +/− で おおきさ · ダブルタップで けす！',
+  'sticker.hint': 'シールを えへ · ピンチで おおきさ と むき · ダブルタップで けす！',
   'sticker.tab.dressup': 'きせかえ',
   'sticker.tab.characters': 'キャラクター',
   'sticker.tab.animals': 'どうぶつ',

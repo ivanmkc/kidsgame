@@ -264,7 +264,7 @@ export const YUE: Table = {
   'puzzle.peek.a11y': '睇完整嘅圖',
   'puzzle.hint': '撳一塊，再撳另一塊，就會調位！',
   'sticker.clear': '🧹 清除',
-  'sticker.hint': '將貼紙拖入畫面 · 撳一下會郁 · +/− 調大細 · 連撳兩下除走！',
+  'sticker.hint': '將貼紙拖入畫面 · 雙指縮放同旋轉 · 連撳兩下除走！',
   'sticker.tab.dressup': '換裝',
   'sticker.tab.characters': '角色',
   'sticker.tab.animals': '動物',
