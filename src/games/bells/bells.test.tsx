@@ -37,6 +37,7 @@ describe('BellsGame', () => {
 
     // Tap count is initially 0
     expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.queryByText(/\(\d+\/\d+\)/)).toBeNull();
     const dot0 = screen.getByTestId("tap-dot-0");
     const dot1 = screen.getByTestId("tap-dot-1");
     const emptyClass = dot0.className;
@@ -246,6 +247,8 @@ describe('BellsGame', () => {
 
     // Back in play phase with 0 taps
     expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-0")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-1")).toBeTruthy();
 
     vi.useRealTimers();
   });
@@ -451,6 +454,49 @@ describe('BellsGame', () => {
     expect(screen.getByTestId('tap-dot-2')).toBeTruthy();
     expect(screen.queryByTestId('tap-dot-3')).toBeNull();
 
+    vi.useRealTimers();
+  });
+
+  it('renders tapDot count matching sequence length for hard difficulty and updates on taps', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+
+    const { unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="hard" lang="en" />,
+    );
+
+    // In listen phase, dots are not rendered
+    expect(screen.queryByTestId('tap-dot-row')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // In hard difficulty, sequence length is 5 dots, all empty
+    expect(screen.getByText('Your turn!')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-0')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-1')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-2')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-3')).toBeTruthy();
+    expect(screen.getByTestId('tap-dot-4')).toBeTruthy();
+    expect(screen.queryByTestId('tap-dot-5')).toBeNull();
+
+    const emptyClass = screen.getByTestId('tap-dot-0').className;
+    expect(screen.getByTestId('tap-dot-4').className).toBe(emptyClass);
+
+    const round = makeBellsRound(makeRng(0), 'hard');
+    const bellStep0 = screen.getByTestId(`bell-${round.sequence[0]}`);
+    fireEvent.click(bellStep0);
+    expect(screen.getByTestId('tap-dot-0').className).not.toBe(emptyClass);
+    expect(screen.getByTestId('tap-dot-1').className).toBe(emptyClass);
+
+    const bellStep1 = screen.getByTestId(`bell-${round.sequence[1]}`);
+    fireEvent.click(bellStep1);
+    expect(screen.getByTestId('tap-dot-1').className).not.toBe(emptyClass);
+    expect(screen.getByTestId('tap-dot-2').className).toBe(emptyClass);
+
+    unmount();
     vi.useRealTimers();
   });
 });

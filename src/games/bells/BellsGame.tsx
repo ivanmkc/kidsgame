@@ -270,9 +270,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 ]}
               >
                 <Text style={styles.statusEmoji}>👆</Text>
-                <Text style={styles.statusText}>
-                  {t(lang, "music.yourTurn")}
-                </Text>
+                <Text style={styles.statusText}>{t(lang, "music.yourTurn")}</Text>
               </View>
               <Pressable
                 testID="replay-button"
