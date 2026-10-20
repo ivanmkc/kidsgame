@@ -192,4 +192,77 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("does not leak drum audio if unmounted during retry delay", () => {
+    vi.useFakeTimers();
+    const playDrumSequenceSpy = vi.spyOn(music, "playDrumSequence");
+
+    const { unmount } = render(
+      <EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(playDrumSequenceSpy).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+    expect(screen.getAllByText("🔄").length).toBeGreaterThan(0);
+
+    unmount();
+
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+
+    expect(playDrumSequenceSpy).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+
+  it("replays demo after 1000 ms even if drum is tapped during retry window", () => {
+    vi.useFakeTimers();
+    const playDrumSequenceSpy = vi.spyOn(music, "playDrumSequence");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(playDrumSequenceSpy).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+    expect(screen.getAllByText("🔄").length).toBeGreaterThan(0);
+
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(playDrumSequenceSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
 });

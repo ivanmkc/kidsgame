@@ -54,6 +54,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     (r: EchoBeatRound) => {
       stopSequence();
       if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (resultTimer.current) clearTimeout(resultTimer.current);
       setFlash(null);
       setPhase("listen");
       playDrumSequence(
@@ -87,6 +88,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     }
     return () => {
       if (flashTimer.current) clearTimeout(flashTimer.current);
+      if (resultTimer.current) clearTimeout(resultTimer.current);
       stopSequence();
     };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
