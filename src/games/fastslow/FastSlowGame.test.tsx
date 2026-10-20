@@ -28,7 +28,9 @@ vi.mock("../../music", () => ({
 
 describe("FastSlowGame UI interaction", () => {
   afterEach(() => {
-    cleanup();
+    act(() => { cleanup(); });
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
   it("tracks history and prevents streaks of 3 identical speeds", () => {
     vi.useFakeTimers();
@@ -73,7 +75,6 @@ describe("FastSlowGame UI interaction", () => {
     randomSpy.mockRestore();
     vi.useRealTimers();
   });
-
   it("prevents fast-tap hammering from queueing multiple round transitions", () => {
     vi.useFakeTimers();
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
@@ -286,6 +287,98 @@ describe("FastSlowGame UI interaction", () => {
     });
     expect(sfx.win).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it('fills dots sequentially as notes play and resets them on new round', () => {
+    vi.useFakeTimers();
+    let onNoteCb: ((index: number) => void) | undefined;
+    let onDoneCb: (() => void) | undefined;
+
+    vi.mocked(playSequence).mockImplementation((_notes, _bpm, onNote, onDone) => {
+      onNoteCb = onNote;
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<FastSlowGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Advance past initial 400ms delay to start playback
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const notesCount = calls[calls.length - 1][0].length;
+
+    // dots should be rendered dynamically
+    const dots = screen.getAllByTestId(/melody-dot-/);
+    expect(dots.length).toBe(notesCount);
+
+    const emptyBg = 'rgba(0, 0, 0, 0.00)';
+    const filledBg = 'rgba(255, 194, 75, 1.00)';
+
+    // Before note callback: all dots are empty
+    for (let i = 0; i < notesCount; i++) {
+      expect(window.getComputedStyle(dots[i]).backgroundColor).toBe(emptyBg);
+    }
+
+    // Note 0 begins playing: dot 0 fills
+    act(() => {
+      onNoteCb?.(0);
+    });
+    
+    expect(window.getComputedStyle(screen.getByTestId('melody-dot-0')).backgroundColor).toBe(filledBg);
+    expect(window.getComputedStyle(screen.getByTestId('melody-dot-1')).backgroundColor).toBe(emptyBg);
+
+    // Last note begins playing: all dots are filled
+    act(() => {
+      onNoteCb?.(notesCount - 1);
+    });
+    for (let i = 0; i < notesCount; i++) {
+      expect(window.getComputedStyle(screen.getByTestId(`melody-dot-${i}`)).backgroundColor).toBe(filledBg);
+    }
+
+    // Sequence finishes: transitions to pick phase
+    act(() => {
+      onDoneCb?.();
+    });
+
+    expect(screen.queryByTestId('melody-dot-0')).toBeNull();
+
+    // Replay returns to listen phase and resets melody dots to empty
+    fireEvent.click(screen.getByTestId('fastslow-replay'));
+    const replayDots = screen.getAllByTestId(/melody-dot-/);
+    expect(replayDots.length).toBe(notesCount);
+    for (let i = 0; i < notesCount; i++) {
+      expect(window.getComputedStyle(screen.getByTestId(`melody-dot-${i}`)).backgroundColor).toBe(emptyBg);
+    }
+
+    // Finish sequence again to return to pick phase
+    act(() => {
+      onNoteCb?.(notesCount - 1); // simulate filling dots again
+      onDoneCb?.();
+    });
+
+    // Pick the correct answer to transition to a new round
+    const lastCalls = vi.mocked(playSequence).mock.calls;
+    const bpm = lastCalls[lastCalls.length - 1][1] as number;
+    const speed = bpm >= 140 ? 'fast' : 'slow';
+    const btn = speed === 'fast' ? screen.getByTestId('fastslow-fast') : screen.getByTestId('fastslow-slow');
+    fireEvent.click(btn);
+
+    // Advance through the 1000ms celebration
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // We are now in the 'listen' phase of the new round, before the 400ms delay finishes.
+    // The dots should be visible and immediately empty, not filled from the previous round.
+    const nextRoundDots = screen.getAllByTestId(/melody-dot-/);
+    for (let i = 0; i < nextRoundDots.length; i++) {
+      expect(window.getComputedStyle(nextRoundDots[i]).backgroundColor).toBe(emptyBg);
+    }
 
     vi.useRealTimers();
   });

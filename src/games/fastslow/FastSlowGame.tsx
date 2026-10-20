@@ -42,6 +42,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
+  const [listenNote, setListenNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<"fast" | "slow" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
   const [won, setWon] = useState(false);
@@ -50,12 +51,19 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const playRound = useCallback((r: FastSlowRound) => {
     stopSequence();
     setPhase("listen");
-    playSequence(r.notes, r.bpm, undefined, () => setPhase("pick"));
+    setListenNote(null);
+    playSequence(
+      r.notes,
+      r.bpm,
+      (idx) => setListenNote(idx),
+      () => setPhase("pick"),
+    );
   }, []);
 
   useEffect(() => {
     if (!won) {
       setPhase("listen");
+      setListenNote(null);
       const timer = setTimeout(() => playRound(round), 400);
       return () => {
         clearTimeout(timer);
@@ -115,6 +123,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       stopSequence();
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
       setPhase("listen");
+      setListenNote(null);
       replayTimerRef.current = setTimeout(() => playRound(round), 400);
     }
   };
@@ -127,6 +136,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     setWon(false);
     setWrongPick(null);
     setHistory([]);
+    setListenNote(null);
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));
   };
 
@@ -203,6 +213,18 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
             <Text style={styles.listenText}>
               {t(lang, "music.listen" as never)}
             </Text>
+            <View style={styles.melodyDotRow}>
+              {round.notes.map((_, i) => (
+                <View
+                  key={i}
+                  testID={`melody-dot-${i}`}
+                  style={[
+                    styles.melodyDot,
+                    listenNote !== null && listenNote >= i && styles.melodyDotFilled,
+                  ]}
+                />
+              ))}
+            </View>
           </View>
         ) : (
           <View style={styles.pickRow}>
@@ -297,6 +319,16 @@ const styles = StyleSheet.create({
   },
   listenEmoji: { fontSize: 56 },
   listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },
+  melodyDotRow: { flexDirection: "row", gap: 12 },
+  melodyDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    backgroundColor: "transparent",
+  },
+  melodyDotFilled: { backgroundColor: colors.gold },
   pickRow: { flexDirection: "row", alignItems: "center", gap: 20 },
   pickBtn: {
     borderRadius: 28,
