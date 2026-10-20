@@ -1,5 +1,9 @@
-import { Rng, shuffle } from '../../rng';
-import { CATEGORY_CONFLICTS, CATEGORY_TEXT, ICON_CATEGORIES } from '../iconCategories';
+import { Rng, shuffle } from "../../rng";
+import {
+  CATEGORY_CONFLICTS,
+  CATEGORY_TEXT,
+  ICON_CATEGORIES,
+} from "../iconCategories";
 
 export interface Rule {
   category: string;
@@ -32,9 +36,12 @@ export function makeRulesRound(
 ): RulesRound {
   const rule = rules[ruleIndex];
   const inCat = ICON_CATEGORIES[rule.category].filter((m) => icons.includes(m));
-  const confusable = (CATEGORY_CONFLICTS[rule.category] ?? []).flatMap((c) => ICON_CATEGORIES[c]);
+  const confusable = (CATEGORY_CONFLICTS[rule.category] ?? []).flatMap(
+    (c) => ICON_CATEGORIES[c],
+  );
   const outCat = icons.filter(
-    (i) => !ICON_CATEGORIES[rule.category].includes(i) && !confusable.includes(i),
+    (i) =>
+      !ICON_CATEGORIES[rule.category].includes(i) && !confusable.includes(i),
   );
   const matchCount = Math.min(2 + Math.floor(rng() * 2), inCat.length); // 2-3 matches
   const matches = shuffle(rng, inCat).slice(0, matchCount);

@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   act,
   cleanup,
@@ -7,7 +8,6 @@ import {
   render,
   screen,
 } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RulesGame } from "../RulesGame";
 import * as logic from "../logic";
 import { sfx } from "../../../sound";
@@ -30,6 +30,7 @@ describe("RulesGame", () => {
 
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
   });
 
   it("renders initial round for hard difficulty", () => {
@@ -136,6 +137,41 @@ describe("RulesGame", () => {
         fireEvent.click(matchTile);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("displays Rule #6 after memory check on Hard difficulty without skipping numbers", () => {
+    vi.useFakeTimers();
+    try {
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+      // Play through rounds 0..4 (Rules #1 through #5)
+      for (let r = 0; r < 5; r++) {
+        expect(screen.getByText(`Rule #${r + 1}`)).toBeTruthy();
+        const matchTiles = screen.getAllByTestId(/-y$/);
+        for (const tile of matchTiles) {
+          fireEvent.click(tile);
+        }
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      // Round 5 is memory check
+      expect(screen.getByText("Memory check!")).toBeTruthy();
+      expect(screen.getByText(/Do Rule #\d again/)).toBeTruthy();
+      const recallMatches = screen.getAllByTestId(/-y$/);
+      for (const tile of recallMatches) {
+        fireEvent.click(tile);
+      }
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+
+      // Round 6 must be Rule #6 (not skipped to Rule #7)
+      expect(screen.getByText("Rule #6")).toBeTruthy();
     } finally {
       vi.useRealTimers();
     }
