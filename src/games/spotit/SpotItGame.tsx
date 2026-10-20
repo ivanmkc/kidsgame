@@ -127,7 +127,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
       <WinOverlay
         visible={won}
         message={showTimer ? t(lang, 'win.spotitTimed', { time: mmss }) : t(lang, 'win.spotit')}
-        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
+        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
         onHome={onHome}
         lang={lang}
       />
