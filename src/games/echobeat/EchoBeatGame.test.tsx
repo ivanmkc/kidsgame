@@ -12,6 +12,7 @@ import { EchoBeatGame } from "./EchoBeatGame";
 import * as sound from "../../sound";
 import * as music from "../../music";
 import * as logic from "./logic";
+import { speechLines } from "./logic";
 
 function mockAudioContext() {
   const fakeCtx = {
@@ -209,6 +210,28 @@ describe("EchoBeatGame", () => {
     const drum = screen.getByTestId("echobeat-drum");
     expect(drum.style.width).toBe("121px");
     expect(drum.style.height).toBe("121px");
+  });
+
+  it("speaks instruction prompt on mount", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(saySpy).toHaveBeenCalledWith("Tap the rhythm you hear!");
+  });
+
+  it("speaks localized instruction prompt for selected language", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    expect(saySpy).toHaveBeenCalledWith("きこえた リズムを タップ！");
+  });
+
+  it("speechLines exports localized subtitles for all languages", () => {
+    const lines = speechLines();
+    expect(lines.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(lines).size).toBe(lines.length);
+    expect(lines).toContain("Tap the rhythm you hear!");
+    expect(lines).toContain("きこえた リズムを タップ！");
+    expect(lines).toContain("拍出你听到的节拍！");
+    expect(lines).toContain("撳出你聽到嘅節拍！");
   });
 });
 

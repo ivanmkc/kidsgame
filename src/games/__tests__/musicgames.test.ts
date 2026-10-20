@@ -25,6 +25,7 @@ import {
   checkEcho,
   roundsToWin as echoRounds,
   tolerancePct,
+  speechLines as echoSpeechLines,
 } from "../echobeat/logic";
 import {
   makeSteadyBeatRound,
@@ -362,6 +363,12 @@ describe("echo beat", () => {
     expect(echoRounds("easy")).toBeLessThan(echoRounds("medium"));
     expect(echoRounds("medium")).toBeLessThan(echoRounds("hard"));
   });
+
+  it("speechLines covers at least 4 langs, no duplicates", () => {
+    const lines = echoSpeechLines();
+    expect(lines.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(lines).size).toBe(lines.length);
+  });
 });
 
 describe("steady beat", () => {
@@ -437,7 +444,6 @@ describe("steady beat", () => {
     expect(new Set(lines).size).toBe(lines.length);
   });
 });
-
 
 describe("same or different", () => {
   it("same rounds have identical phrases", () => {
