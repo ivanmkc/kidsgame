@@ -160,6 +160,34 @@ describe('PuzzleGame', () => {
     expect(peekBtn.getAttribute('aria-label')).toBe('かんせいした えを みる');
   });
 
+  it('speaks localized prompts for scene picker and puzzle board', () => {
+    const useSaySpy = vi.spyOn(sound, 'useSay');
+    const { unmount } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="medium"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(useSaySpy).toHaveBeenCalledWith('どの えを ときたい？');
+
+    unmount();
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId="d-dinos"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(useSaySpy).toHaveBeenCalledWith('1まい タップして、もう1まい タップして いれかえよう！');
+  });
+
   it('swaps tiles when tapped in rapid succession before re-render', () => {
     vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 2, 3, 4, 5]);
 
@@ -276,3 +304,4 @@ describe('PuzzleGame', () => {
     expect(screen.getByTestId('puzzle-moves').textContent).toContain('1');
   });
 });
+
