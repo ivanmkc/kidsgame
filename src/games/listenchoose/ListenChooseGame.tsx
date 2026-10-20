@@ -4,6 +4,7 @@ import {
   Easing,
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -126,7 +127,7 @@ export function ListenChooseGame({
         <ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />
       }
     >
-      <View style={styles.board}>
+      <ScrollView testID="listenchoose-scrollview" style={{ flex: 1 }} contentContainerStyle={styles.board}>
         {!started ? (
           <View style={styles.startScreen}>
             <Text style={styles.startTitle}>
@@ -229,7 +230,7 @@ export function ListenChooseGame({
             </View>
           </>
         )}
-      </View>
+      </ScrollView>
       <WinOverlay
         visible={state.won}
         message={t(lang, "win.soundsWords")}
@@ -332,7 +333,7 @@ function ChoiceCard({
 
 const styles = StyleSheet.create({
   board: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
