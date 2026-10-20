@@ -14,7 +14,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { SparkleBurst } from "../../components/Sparkles";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { sayThen, sfx } from "../../sound";
@@ -43,6 +43,7 @@ export function ListenChooseGame({
   difficulty = "easy",
   lang = "en",
 }: Props) {
+  const { epoch, isValid } = useLangEpoch(lang);
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(true);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -64,16 +65,39 @@ export function ListenChooseGame({
     };
   }, []);
 
+  useEffect(() => {
+    if (epoch === 0) return;
+    if (celebrateTimerRef.current) {
+      clearTimeout(celebrateTimerRef.current);
+      celebrateTimerRef.current = null;
+    }
+    if (wobbleTimerRef.current) {
+      clearTimeout(wobbleTimerRef.current);
+      wobbleTimerRef.current = null;
+    }
+    lockedRef.current = false;
+    setWobbleIcon(null);
+    setCelebrate(false);
+    setStarted(false);
+    setGameState(initGameState(rngRef.current, difficulty, lang));
+  }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onPlay = () => {
+    if (!isValid()) return;
     lockedRef.current = false;
     setStarted(true);
     const targetWord = getWordText(state.currentRound.target, lang);
-    sayThen([targetWord], () => {});
+    sayThen([targetWord], () => {
+      if (!isValid()) return;
+    });
   };
 
   const onReplay = () => {
+    if (!isValid()) return;
     const targetWord = getWordText(state.currentRound.target, lang);
-    sayThen([targetWord], () => {});
+    sayThen([targetWord], () => {
+      if (!isValid()) return;
+    });
   };
 
   const handleHome = () => {
@@ -82,7 +106,7 @@ export function ListenChooseGame({
   };
 
   const onPick = (choice: Word) => {
-    if (lockedRef.current) return;
+    if (lockedRef.current || !isValid()) return;
     lockedRef.current = true;
     const isCorrect = choice.icon === state.currentRound.target.icon;
     if (isCorrect) {
@@ -91,6 +115,7 @@ export function ListenChooseGame({
       setCelebrate(true);
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
+        if (!isValid()) return;
         lockedRef.current = false;
         setCelebrate(false);
         const next = updateGameState(
@@ -102,14 +127,18 @@ export function ListenChooseGame({
         );
         setGameState(next);
         if (!next.won) {
+          if (!isValid()) return;
           const nextWord = getWordText(next.currentRound.target, lang);
-          sayThen([nextWord], () => {});
+          sayThen([nextWord], () => {
+            if (!isValid()) return;
+          });
         }
       }, 800);
     } else {
       setWobbleIcon(choice.icon);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
       wobbleTimerRef.current = setTimeout(() => {
+        if (!isValid()) return;
         lockedRef.current = false;
         setWobbleIcon((w) => (w === choice.icon ? null : w));
       }, 450);
@@ -121,8 +150,11 @@ export function ListenChooseGame({
         lang,
       );
       setGameState(next);
+      if (!isValid()) return;
       const targetWord = getWordText(state.currentRound.target, lang);
-      sayThen([targetWord], () => {});
+      sayThen([targetWord], () => {
+        if (!isValid()) return;
+      });
     }
   };
 
@@ -248,10 +280,14 @@ export function ListenChooseGame({
         visible={state.won}
         message={t(lang, "win.soundsWords")}
         onNext={() => {
+          if (!isValid()) return;
           lockedRef.current = false;
           const next = initGameState(rngRef.current, difficulty, lang);
           setGameState(next);
-          sayThen([getWordText(next.currentRound.target, lang)], () => {});
+          if (!isValid()) return;
+          sayThen([getWordText(next.currentRound.target, lang)], () => {
+            if (!isValid()) return;
+          });
         }}
         onHome={handleHome}
         lang={lang}
