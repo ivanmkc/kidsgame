@@ -2,6 +2,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import * as sound from "../../../sound";
 import { MusicBoxGame } from "../MusicBoxGame";
 
 vi.mock("../../assets/images", () => {
@@ -95,6 +96,100 @@ describe("MusicBoxGame rendering", () => {
     fireEvent.click(jingleCard);
     expect(onPickScene).toHaveBeenCalledWith("jingle");
 
+    unmount();
+  });
+
+  it("speaks picker prompt on mount when on song picker screen", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    const { unmount } = render(
+      <MusicBoxGame
+        onHome={onHome}
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="en"
+      />,
+    );
+
+    expect(saySpy).toHaveBeenCalledWith("Pick a song to play!");
+    unmount();
+  });
+
+  it("speaks localized picker prompt for selected language", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    const { unmount } = render(
+      <MusicBoxGame
+        onHome={onHome}
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="ja"
+      />,
+    );
+
+    expect(saySpy).toHaveBeenCalledWith("うたを えらんでね！");
+    unmount();
+  });
+
+  it("speaks scene intro prompt when a scene is selected", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    const { unmount } = render(
+      <MusicBoxGame
+        onHome={onHome}
+        sceneId="twinkle"
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="en"
+      />,
+    );
+
+    expect(saySpy).toHaveBeenCalledWith(
+      "Tap, tap, tap anywhere to play the song!",
+    );
+    unmount();
+  });
+
+  it("speaks picker prompt when navigating back from a scene to picker", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    const { rerender, unmount } = render(
+      <MusicBoxGame
+        onHome={onHome}
+        sceneId="twinkle"
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="en"
+      />,
+    );
+
+    expect(saySpy).toHaveBeenLastCalledWith(
+      "Tap, tap, tap anywhere to play the song!",
+    );
+
+    rerender(
+      <MusicBoxGame
+        onHome={onHome}
+        sceneId={undefined}
+        onPickScene={onPickScene}
+        onBackToPicker={onBackToPicker}
+        lang="en"
+      />,
+    );
+
+    expect(saySpy).toHaveBeenLastCalledWith("Pick a song to play!");
     unmount();
   });
 });
