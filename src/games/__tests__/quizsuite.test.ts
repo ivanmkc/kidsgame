@@ -14,7 +14,7 @@ import {
   hanNumeral, makeNumberRound, reskinNumberRound, settingsForNumbers, speechLines as numberSpeechLines,
 } from '../numbers/logic';
 import {
-  makeSoundsRound, settingsForSounds, speechLines as soundsSpeechLines,
+  makeSoundsRound, resolveSoundsPrompts, settingsForSounds, speechLines as soundsSpeechLines,
 } from '../sounds/logic';
 import {
   availableEntries, canPlay, effectiveLang, makeRhymeRound, playableFamilies,
@@ -261,8 +261,9 @@ describe('sounds: quiz round', () => {
     const lines = new Set(soundsSpeechLines());
     for (const seed of SEEDS.slice(0, 60)) {
       const r = makeSoundsRound(makeRng(seed), manifest.spotit.icons, 'en', 4);
-      for (const line of r.promptLines) expect(lines.has(line)).toBe(true);
-      for (const line of r.confirmLines) expect(lines.has(line)).toBe(true);
+      const { promptLines, confirmLines } = resolveSoundsPrompts(r.target, 'en');
+      for (const line of promptLines) expect(lines.has(line)).toBe(true);
+      for (const line of confirmLines) expect(lines.has(line)).toBe(true);
     }
   });
 
@@ -271,8 +272,9 @@ describe('sounds: quiz round', () => {
     for (const lang of ['ja', 'cmn', 'yue'] as const) {
       for (const seed of SEEDS.slice(0, 40)) {
         const r = makeSoundsRound(makeRng(seed), manifest.spotit.icons, lang, 4);
-        for (const line of r.promptLines) expect(lines.has(line)).toBe(true);
-        for (const line of r.confirmLines) expect(lines.has(line)).toBe(true);
+        const { promptLines, confirmLines } = resolveSoundsPrompts(r.target, lang);
+        for (const line of promptLines) expect(lines.has(line)).toBe(true);
+        for (const line of confirmLines) expect(lines.has(line)).toBe(true);
       }
     }
   });
