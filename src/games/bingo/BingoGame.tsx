@@ -83,6 +83,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCallIdx(0);
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
+    setCelebrate(0);
     lockedRef.current = false;
     setGameKey((k) => k + 1);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -150,6 +151,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
     setWrongIdx(null);
+    setCelebrate(0);
     lockedRef.current = false;
     setGameKey((k) => k + 1);
   };
@@ -177,7 +179,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
         />
       }
     >
-      <View style={[styles.board, isLandscape ? styles.boardLandscape : shortH && { gap: 8 }]} key={gameKey}>
+      <View
+        style={[
+          styles.board,
+          isLandscape ? styles.boardLandscape : shortH && { gap: 8 },
+        ]}
+        key={gameKey}
+      >
         {call && (
           <Pressable
             disabled={won}
@@ -233,7 +241,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
           ))}
         </View>
       </View>
-      {celebrate ? <Confetti count={18} /> : null}
+      {celebrate ? <Confetti key={celebrate} count={18} /> : null}
       <WinOverlay
         visible={won}
         message={t(lang, "win.bingo")}
@@ -347,7 +355,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   boardLandscape: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 20,
   },
   prompt: {
