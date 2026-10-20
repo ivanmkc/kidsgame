@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { makeRng } from '../../../rng';
-import { pickRuleIndex } from '../logic';
+import { describe, expect, it } from "vitest";
+import { makeRng } from "../../../rng";
+import { pickRuleIndex } from "../logic";
 
-describe('pickRuleIndex', () => {
-  it('easy difficulty never recalls and advances rule indices consecutively', () => {
+describe("pickRuleIndex", () => {
+  it("easy difficulty never recalls and advances rule indices consecutively", () => {
     const rng = makeRng(12345);
     for (let idx = 0; idx < 10; idx++) {
       const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, Infinity);
@@ -12,7 +12,7 @@ describe('pickRuleIndex', () => {
     }
   });
 
-  it('medium difficulty triggers recall only at round index 8 and advances consecutively', () => {
+  it("medium difficulty triggers recall only at round index 8 and advances consecutively", () => {
     const rng = makeRng(12345);
     for (let idx = 0; idx < 8; idx++) {
       const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 6);
@@ -27,9 +27,18 @@ describe('pickRuleIndex', () => {
     const nextRound = pickRuleIndex(rng, 9, 6);
     expect(nextRound.isRecall).toBe(false);
     expect(nextRound.ruleIdx).toBe(8);
+
+    // Newly introduced rules are sequentially numbered without skipping Rule #9
+    const allRounds = Array.from({ length: 10 }, (_, i) =>
+      pickRuleIndex(rng, i, 6),
+    );
+    const introduced = allRounds
+      .filter((r) => !r.isRecall)
+      .map((r) => r.ruleIdx + 1);
+    expect(introduced).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 
-  it('hard difficulty triggers recall at rounds 5 and 8 and introduces rules consecutively', () => {
+  it("hard difficulty triggers recall at rounds 5 and 8 and introduces rules consecutively", () => {
     const rng = makeRng(42);
     for (let idx = 0; idx < 5; idx++) {
       const { ruleIdx, isRecall } = pickRuleIndex(rng, idx, 3);
@@ -58,9 +67,18 @@ describe('pickRuleIndex', () => {
     const round9 = pickRuleIndex(rng, 9, 3);
     expect(round9.isRecall).toBe(false);
     expect(round9.ruleIdx).toBe(7);
+
+    // Newly introduced rules are sequentially numbered 1 through 8 without skipping Rule #6 or #9
+    const allRounds = Array.from({ length: 10 }, (_, i) =>
+      pickRuleIndex(rng, i, 3),
+    );
+    const introduced = allRounds
+      .filter((r) => !r.isRecall)
+      .map((r) => r.ruleIdx + 1);
+    expect(introduced).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
   });
 
-  it('hard mode recall rounds vary across seeds and are not locked to Rule #3', () => {
+  it("hard mode recall rounds vary across seeds and are not locked to Rule #3", () => {
     const round5Recalled = new Set<number>();
     const round8Recalled = new Set<number>();
     let differentRecallsInSameGame = false;
@@ -99,7 +117,7 @@ describe('pickRuleIndex', () => {
     expect(differentRecallsInSameGame).toBe(true);
   });
 
-  it('medium mode recall round varies across seeds and tests earlier rules', () => {
+  it("medium mode recall round varies across seeds and tests earlier rules", () => {
     const recalled = new Set<number>();
     for (let seed = 1; seed <= 50; seed++) {
       const rng = makeRng(seed);
