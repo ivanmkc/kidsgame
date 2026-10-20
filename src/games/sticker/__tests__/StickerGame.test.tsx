@@ -1,6 +1,10 @@
+// @vitest-environment happy-dom
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { t } from '../../../i18n';
+import { Lang } from '../../../lang';
 import { GestureResponderEvent, PanResponder, PanResponderCallbacks, PanResponderGestureState } from 'react-native';
 import { sfx } from '../../../sound';
 import { allSceneOptions } from '../../sceneOptions';
@@ -133,6 +137,11 @@ describe('StickerGame', () => {
       delete capturedViewProps[key];
     }
     vi.restoreAllMocks();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+  });
+
+  afterEach(() => {
+    cleanup();
   });
 
   const noop = () => {};
@@ -343,6 +352,69 @@ describe('StickerGame', () => {
       expect(html).toContain(hintText.replace('&', '&amp;'));
       expect(html).not.toMatch(/wiggle|\+\/[-−]|うごく|会动|會郁/);
     }
+  });
+
+  it('speaks localized voice prompt when scene picker is displayed in non-English languages', () => {
+    const spokenUtterances: string[] = [];
+    class MockUtterance {
+      text: string;
+      rate = 1;
+      pitch = 1;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const mockSpeechSynthesis = {
+      cancel: vi.fn(),
+      speak: vi.fn((u: MockUtterance) => {
+        spokenUtterances.push(u.text);
+      }),
+    };
+    vi.stubGlobal('SpeechSynthesisUtterance', MockUtterance);
+    vi.stubGlobal('speechSynthesis', mockSpeechSynthesis);
+    window.speechSynthesis = mockSpeechSynthesis as unknown as SpeechSynthesis;
+
+    const nonEnLangs: Lang[] = ['ja', 'cmn', 'yue'];
+    for (const lang of nonEnLangs) {
+      spokenUtterances.length = 0;
+      const { unmount } = render(
+        <StickerGame onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang} />,
+      );
+      expect(spokenUtterances).toContain(t(lang, 'picker.sticker'));
+      expect(spokenUtterances).not.toContain("Where's the party?");
+      unmount();
+    }
+  });
+
+  it('stays silent when a scene is already picked', () => {
+    const spokenUtterances: string[] = [];
+    class MockUtterance {
+      text: string;
+      rate = 1;
+      pitch = 1;
+      onstart: (() => void) | null = null;
+      onend: (() => void) | null = null;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const mockSpeechSynthesis = {
+      cancel: vi.fn(),
+      speak: vi.fn((u: MockUtterance) => {
+        spokenUtterances.push(u.text);
+      }),
+    };
+    vi.stubGlobal('SpeechSynthesisUtterance', MockUtterance);
+    vi.stubGlobal('speechSynthesis', mockSpeechSynthesis);
+    window.speechSynthesis = mockSpeechSynthesis as unknown as SpeechSynthesis;
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />,
+    );
+    expect(spokenUtterances).toHaveLength(0);
+    unmount();
   });
 });
 
