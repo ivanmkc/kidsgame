@@ -7,6 +7,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import * as music from "../../music";
 import { HighLowGame } from "./HighLowGame";
@@ -190,6 +191,67 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("does not show celebration sparkles before a pick or on wrong buttons across rounds", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    let latestNotes: { m: number; b: number }[] = [];
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        latestNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance through the initial listen phase so pick buttons appear
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    const lowBtn = screen.getByTestId("highlow-low");
+
+    // Before any user tap, neither button should contain celebration sparkles
+    expect(within(highBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(lowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    const isHigh = latestNotes[1].m > latestNotes[0].m;
+    const correctBtn = isHigh ? highBtn : lowBtn;
+    const wrongBtn = isHigh ? lowBtn : highBtn;
+
+    // Tap the wrong button first: still no celebration sparkles
+    fireEvent.click(wrongBtn);
+    expect(within(highBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(lowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    // Tap the correct button: only the correct button shows celebration sparkles
+    fireEvent.click(correctBtn);
+    expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(
+      0,
+    );
+    expect(within(wrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    // Advance through celebration (1000ms) and next round listen phase (400ms)
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // In round 2 before any tap, neither button should show celebration sparkles
+    const round2HighBtn = screen.getByTestId("highlow-high");
+    const round2LowBtn = screen.getByTestId("highlow-low");
+    expect(within(round2HighBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(round2LowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    vi.useRealTimers();
+  });
+
   it("delays WinOverlay mount on final winning round by 1000ms celebration", () => {
     vi.useFakeTimers();
     let capturedNotes: { m: number; b: number }[] = [];
@@ -230,6 +292,8 @@ describe("HighLowGame UI", () => {
     const winningBtn = screen.getByTestId(
       isHigh ? "highlow-high" : "highlow-low",
     );
+
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
 
     // Tap winning answer
     fireEvent.click(winningBtn);
