@@ -21,13 +21,23 @@ it("renders progress dots correctly during the tap phase", () => {
 
   render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-  // Should not have progress dots initially in the 'listen' phase
+  // Should not have tap progress dots initially in the 'listen' phase
   expect(screen.queryAllByTestId("steadybeat-tap-dot-empty")).toHaveLength(0);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
 
   // Advance to tap phase
   act(() => {
     vi.advanceTimersByTime(5000);
   });
+
+  // Listen dots should no longer be present in tap phase
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(
+    0,
+  );
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(
+    0,
+  );
 
   // Now the game is in 'tap' phase, there should be 8 dots, all empty
   expect(screen.getAllByTestId("steadybeat-tap-dot-empty")).toHaveLength(8);
@@ -43,6 +53,59 @@ it("renders progress dots correctly during the tap phase", () => {
   expect(screen.getAllByTestId("steadybeat-tap-dot-filled")).toHaveLength(1);
   expect(screen.getAllByTestId("steadybeat-tap-dot-empty")).toHaveLength(7);
 
+  vi.useRealTimers();
+});
+
+it("renders sequence-progress dots for listen phase that fill progressively", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Initially in listen phase at t = 0 (1st beat plays): 1 filled dot, 3 empty dots
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
+
+  // 100 bpm = 600ms per beat.
+  // After 2nd beat (600ms): 2 dots filled, 2 empty
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(2);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(2);
+
+  // After 3rd beat (1200ms total): 3 dots filled, 1 empty
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(3);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(1);
+
+  // After 4th beat (1800ms total): all 4 dots filled for a full beat!
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(4);
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(
+    0,
+  );
+
+  // After 4th beat period completes (2400ms total): transitions to tap phase
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(
+    0,
+  );
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(
+    0,
+  );
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+
+  roundSpy.mockRestore();
   vi.useRealTimers();
 });
 
