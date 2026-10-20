@@ -211,6 +211,7 @@ describe('StickerGame', () => {
     expect(clearBtn).toBeDefined();
     expect(clearBtn?.accessibilityLabel).toBe('Clear all stickers');
     expect(clearBtn?.accessibilityRole).toBe('button');
+    expect(clearBtn?.hitSlop).toEqual({ top: 12, bottom: 12, left: 12, right: 12 });
 
     // Exercise style function on clear button
     expect(typeof clearBtn?.style).toBe('function');
@@ -219,6 +220,7 @@ describe('StickerGame', () => {
     const stylePressed = styleFn({ pressed: true });
     expect(stylePressed).toContainEqual({ opacity: 0.8 });
     expect(styleNormal).not.toContainEqual({ opacity: 0.8 });
+    expect(styleNormal).toContainEqual(expect.objectContaining({ minHeight: 44 }));
 
     clearBtn?.onPress?.();
     expect(sfxFlipSpy).toHaveBeenCalledOnce();
@@ -229,6 +231,8 @@ describe('StickerGame', () => {
       const tabBtn = capturedPressableProps[`sticker-tab-${tabId}`];
       expect(tabBtn).toBeDefined();
       expect(tabBtn?.accessibilityRole).toBe('button');
+      expect(tabBtn?.hitSlop).toEqual({ top: 12, bottom: 12, left: 12, right: 12 });
+      expect(tabBtn?.style).toContainEqual(expect.objectContaining({ minHeight: 44 }));
       tabBtn?.onPress?.();
     }
     expect(sfxTapSpy).toHaveBeenCalledTimes(5);

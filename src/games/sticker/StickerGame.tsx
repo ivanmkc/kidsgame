@@ -233,6 +233,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
           testID="sticker-clear"
           accessibilityLabel="Clear all stickers"
           accessibilityRole="button"
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           style={({ pressed }) => [styles.clearBtn, shadows.soft, pressed && { opacity: 0.8 }]}
         >
           <Text style={styles.clearText}>{t(lang, 'sticker.clear')}</Text>
@@ -304,6 +305,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                   testID={`sticker-tab-${tt.id}`}
                   accessibilityLabel={`${name} stickers`}
                   accessibilityRole="button"
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   style={[styles.tabChip, isLandscape && styles.tabChipLandscape, shadows.soft, tab === tt.id && styles.tabChipOn]}
                 >
                   <Text style={styles.tabEmoji}>{tt.emoji}</Text>
@@ -546,6 +548,7 @@ const styles = StyleSheet.create({
   tabChip: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 5,
     backgroundColor: colors.paper,
     borderRadius: 999,
@@ -553,6 +556,7 @@ const styles = StyleSheet.create({
     borderColor: colors.blush,
     paddingVertical: 5,
     paddingHorizontal: 12,
+    minHeight: 44,
   },
   tabChipLandscape: {
     paddingVertical: 4,
@@ -572,7 +576,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  clearBtn: { backgroundColor: colors.gold, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 14 },
+  clearBtn: {
+    backgroundColor: colors.gold,
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    minHeight: 44,
+    minWidth: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   clearText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 12 },
   // A slot anchored to the top-right corner of the sticker that lives
