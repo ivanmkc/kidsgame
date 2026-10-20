@@ -1,25 +1,33 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import * as sound from '../../../sound';
-import { sfx } from '../../../sound';
-import { buildGameSections, WORD_CARDS } from '../../../menuCards';
-import { ListenChooseGame } from '../ListenChooseGame';
-import { LEVEL_1_WORDS, Word } from '../data';
-import { PressableProps } from 'react-native';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
+import * as sound from "../../../sound";
+import { sfx } from "../../../sound";
+import { buildGameSections, WORD_CARDS } from "../../../menuCards";
+import { ListenChooseGame } from "../ListenChooseGame";
+import { LEVEL_1_WORDS, Word } from "../data";
+import { PressableProps } from "react-native";
 
 type FakePressableProps = Partial<PressableProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
 
-vi.mock('react-native', async (importOriginal) => {
+vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
-  const ActualPressable = actual.Pressable as React.ComponentType<FakePressableProps>;
+  const ActualPressable =
+    actual.Pressable as React.ComponentType<FakePressableProps>;
   return {
     ...actual,
     Pressable: (props: FakePressableProps) => {
-      if (typeof props.testID === 'string') {
-        if (!capturedPressableMap[props.testID]) capturedPressableMap[props.testID] = [];
+      if (typeof props.testID === "string") {
+        if (!capturedPressableMap[props.testID])
+          capturedPressableMap[props.testID] = [];
         capturedPressableMap[props.testID].push(props);
       }
       return React.createElement(ActualPressable, props);
@@ -27,19 +35,19 @@ vi.mock('react-native', async (importOriginal) => {
   };
 });
 
-describe('ListenChooseGame', () => {
+describe("ListenChooseGame", () => {
   beforeEach(() => {
     for (const key in capturedPressableMap) {
       delete capturedPressableMap[key];
     }
     vi.restoreAllMocks();
-    vi.spyOn(sound, 'sayThen').mockImplementation((_text, cb) => {
+    vi.spyOn(sound, "sayThen").mockImplementation((_text, cb) => {
       if (cb) cb();
     });
-    vi.spyOn(sound, 'say').mockImplementation(() => {});
-    vi.spyOn(sfx, 'good').mockImplementation(() => {});
-    vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
-    vi.spyOn(sfx, 'tap').mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sfx, "tap").mockImplementation(() => {});
     vi.useFakeTimers();
   });
 
@@ -59,8 +67,12 @@ describe('ListenChooseGame', () => {
   } {
     const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     const targetWord = LEVEL_1_WORDS.find((w) => w.en === targetText)!;
-    const visibleWords = LEVEL_1_WORDS.filter((w) => screen.queryByTestId(`choice-${w.icon}`));
-    const distractorWord = visibleWords.find((w) => w.icon !== targetWord.icon)!;
+    const visibleWords = LEVEL_1_WORDS.filter((w) =>
+      screen.queryByTestId(`choice-${w.icon}`),
+    );
+    const distractorWord = visibleWords.find(
+      (w) => w.icon !== targetWord.icon,
+    )!;
     return {
       targetBtn: screen.getByTestId(`choice-${targetWord.icon}`),
       distractorBtn: screen.getByTestId(`choice-${distractorWord.icon}`),
@@ -69,31 +81,33 @@ describe('ListenChooseGame', () => {
     };
   }
 
-  it('appears in the Word Games section of the main menu catalogue', () => {
-    const card = WORD_CARDS.find((c) => c.route === 'listenchoose');
+  it("appears in the Word Games section of the main menu catalogue", () => {
+    const card = WORD_CARDS.find((c) => c.route === "listenchoose");
     expect(card).toBeDefined();
-    expect(card?.key).toBe('listenchoose');
+    expect(card?.key).toBe("listenchoose");
 
-    const sections = buildGameSections('en');
-    const wordSection = sections.find((s) => s.title === 'Word Games');
+    const sections = buildGameSections("en");
+    const wordSection = sections.find((s) => s.title === "Word Games");
     expect(wordSection).toBeDefined();
-    const gameEntry = wordSection?.games.find((g) => g.id === 'listenchoose');
+    const gameEntry = wordSection?.games.find((g) => g.id === "listenchoose");
     expect(gameEntry).toBeDefined();
-    expect(gameEntry?.label).toBe('Listen and Choose');
+    expect(gameEntry?.label).toBe("Listen and Choose");
   });
 
-  it('renders start screen initially and starts round 1 on Play', () => {
+  it("renders start screen initially and starts round 1 on Play", () => {
     const onHome = vi.fn();
     render(<ListenChooseGame onHome={onHome} lang="en" />);
 
     // Start Screen with title and Play button
-    expect(screen.getAllByText('Listen and Choose').length).toBeGreaterThanOrEqual(1);
-    const playBtn = screen.getByTestId('play-button');
+    expect(
+      screen.getAllByText("Listen and Choose").length,
+    ).toBeGreaterThanOrEqual(1);
+    const playBtn = screen.getByTestId("play-button");
     expect(playBtn).toBeTruthy();
-    expect(screen.getByText('Play')).toBeTruthy();
+    expect(screen.getByText("Play")).toBeTruthy();
 
     // Round screen elements should not be visible yet
-    expect(screen.queryByTestId('speaker-button')).toBeNull();
+    expect(screen.queryByTestId("speaker-button")).toBeNull();
 
     // Tap Play button
     fireEvent.click(playBtn);
@@ -101,33 +115,37 @@ describe('ListenChooseGame', () => {
     // Audio triggers with the target word
     expect(sound.sayThen).toHaveBeenCalled();
     const targetText = vi.mocked(sound.sayThen).mock.calls[0][0][0];
-    expect(typeof targetText).toBe('string');
+    expect(typeof targetText).toBe("string");
 
     // Round screen elements are now visible
-    expect(screen.getByTestId('speaker-button')).toBeTruthy();
-    const { targetBtn, distractorBtn, targetWord, distractorWord } = getRoundChoices();
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    const { targetBtn, distractorBtn, targetWord, distractorWord } =
+      getRoundChoices();
     expect(targetBtn).toBeTruthy();
     expect(distractorBtn).toBeTruthy();
     expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(distractorWord.en)).toBeTruthy();
   });
 
-  it('replays target word when Big Speaker button is tapped', () => {
+  it("replays target word when Big Speaker button is tapped", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const spokenTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     vi.mocked(sound.sayThen).mockClear();
 
-    const speakerBtn = screen.getByTestId('speaker-button');
+    const speakerBtn = screen.getByTestId("speaker-button");
     fireEvent.click(speakerBtn);
 
-    expect(sound.sayThen).toHaveBeenCalledWith([spokenTarget], expect.any(Function));
+    expect(sound.sayThen).toHaveBeenCalledWith(
+      [spokenTarget],
+      expect.any(Function),
+    );
   });
 
-  it('handles wrong picks by wobbling, replaying without penalty, and highlighting after 2 misses', () => {
+  it("handles wrong picks by wobbling, replaying without penalty, and highlighting after 2 misses", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const { targetBtn, distractorBtn, targetWord } = getRoundChoices();
     vi.mocked(sound.sayThen).mockClear();
@@ -136,9 +154,12 @@ describe('ListenChooseGame', () => {
     fireEvent.click(distractorBtn);
 
     expect(sfx.wrong).toHaveBeenCalledTimes(1);
-    expect(sound.sayThen).toHaveBeenCalledWith([targetWord.en], expect.any(Function));
-    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 0');
-    expect(targetBtn.getAttribute('aria-selected')).toBe('false');
+    expect(sound.sayThen).toHaveBeenCalledWith(
+      [targetWord.en],
+      expect.any(Function),
+    );
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
+    expect(targetBtn.getAttribute("aria-selected")).toBe("false");
 
     // Advance timer past wobble duration
     act(() => {
@@ -149,23 +170,23 @@ describe('ListenChooseGame', () => {
     fireEvent.click(distractorBtn);
 
     expect(sfx.wrong).toHaveBeenCalledTimes(2);
-    expect(targetBtn.getAttribute('aria-selected')).toBe('true');
+    expect(targetBtn.getAttribute("aria-selected")).toBe("true");
   });
 
-  it('handles correct pick by playing good sfx, celebrating, incrementing streak, and advancing', () => {
+  it("handles correct pick by playing good sfx, celebrating, incrementing streak, and advancing", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const { targetBtn, targetWord } = getRoundChoices();
     vi.mocked(sound.sayThen).mockClear();
 
-    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 0');
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
 
     // Click correct answer
     fireEvent.click(targetBtn);
 
     expect(sfx.good).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('celebration')).toBeTruthy();
+    expect(screen.getByTestId("celebration")).toBeTruthy();
     expect(sound.sayThen).not.toHaveBeenCalled();
 
     // Advance past celebration animation (800ms)
@@ -173,7 +194,7 @@ describe('ListenChooseGame', () => {
       vi.advanceTimersByTime(800);
     });
 
-    expect(screen.getByTestId('listenchoose-streak').textContent).toBe('⭐ 1');
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
 
     // Next round loaded: sayThen is called with the next target word
     expect(sound.sayThen).toHaveBeenCalled();
@@ -181,9 +202,9 @@ describe('ListenChooseGame', () => {
     expect(newTarget).not.toBe(targetWord.en);
   });
 
-  it('ignores rapid repeat taps during celebration animation', () => {
+  it("ignores rapid repeat taps during celebration animation", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const { targetBtn } = getRoundChoices();
     fireEvent.click(targetBtn);
@@ -195,9 +216,9 @@ describe('ListenChooseGame', () => {
     expect(sfx.good).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores rapid repeat taps during wobble animation', () => {
+  it("ignores rapid repeat taps during wobble animation", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const { distractorBtn } = getRoundChoices();
     fireEvent.click(distractorBtn);
@@ -209,9 +230,9 @@ describe('ListenChooseGame', () => {
     expect(sfx.wrong).toHaveBeenCalledTimes(1);
   });
 
-  it('cleans up celebration timer on unmount without speaking next word', () => {
+  it("cleans up celebration timer on unmount without speaking next word", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
-    fireEvent.click(screen.getByTestId('play-button'));
+    fireEvent.click(screen.getByTestId("play-button"));
 
     const { targetBtn } = getRoundChoices();
     vi.mocked(sound.sayThen).mockClear();
@@ -231,38 +252,74 @@ describe('ListenChooseGame', () => {
     expect(sound.sayThen).not.toHaveBeenCalled();
   });
 
-  it('supports captions toggle, defaults to ON for sound-off play, and translates ON/OFF', () => {
+  it("supports captions toggle, defaults to ON for sound-off play, and translates ON/OFF", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
 
-    const captionsToggle = screen.getByTestId('captions-toggle');
+    const captionsToggle = screen.getByTestId("captions-toggle");
     // Captions are ON by default for R3 sound-off accessibility
-    expect(captionsToggle.textContent).toContain('ON');
+    expect(captionsToggle.textContent).toContain("ON");
 
     fireEvent.click(captionsToggle);
-    expect(captionsToggle.textContent).toContain('OFF');
+    expect(captionsToggle.textContent).toContain("OFF");
 
-    fireEvent.click(screen.getByTestId('play-button'));
-    expect(screen.queryByTestId('listenchoose-caption')).toBeNull();
+    fireEvent.click(screen.getByTestId("play-button"));
+    expect(screen.queryByTestId("listenchoose-caption")).toBeNull();
 
     // Toggle back ON during gameplay
-    const gameToggle = screen.getByTestId('captions-toggle');
+    const gameToggle = screen.getByTestId("captions-toggle");
     fireEvent.click(gameToggle);
     const spokenTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
-    expect(screen.getByTestId('listenchoose-caption').textContent).toBe(spokenTarget);
+    expect(screen.getByTestId("listenchoose-caption").textContent).toBe(
+      spokenTarget,
+    );
     unmount();
 
     // Verify non-English (Japanese) localization of toggle
     render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
-    const jaToggle = screen.getByTestId('captions-toggle');
-    expect(jaToggle.textContent).toContain('オン');
+    const jaToggle = screen.getByTestId("captions-toggle");
+    expect(jaToggle.textContent).toContain("オン");
     fireEvent.click(jaToggle);
-    expect(jaToggle.textContent).toContain('オフ');
+    expect(jaToggle.textContent).toContain("オフ");
 
     // Verify hitSlop is applied to the toggles
-    const captures = capturedPressableMap['captions-toggle'];
+    const captures = capturedPressableMap["captions-toggle"];
     expect(captures).toBeDefined();
-    captures.forEach(props => {
+    captures.forEach((props) => {
       expect(props.hitSlop).toBe(12);
     });
+  });
+  it("filters out untranslated words in non-English play", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // Play 25 rounds to reach level 3
+    for (let i = 0; i < 25; i++) {
+      // Find the target text from the caption
+      const caption = screen.getByTestId("listenchoose-caption");
+      const targetText = caption.textContent;
+      expect(targetText).toBeTruthy();
+
+      // Check all choices on screen
+      // choice elements have testID like 'choice-cat', 'choice-bat'
+      // the label text is inside a Text component inside the ChoiceCard
+      // So we can query for the Text component or check textContent of choice elements
+      const choiceElements = screen.queryAllByTestId(/^choice-[^0-9]/);
+      for (const el of choiceElements) {
+        const label = el.textContent;
+        if (label) {
+          // The word must be a valid Japanese translation, not an English fallback (which would be [a-z]+)
+          expect(label).not.toMatch(/^[a-z]+$/i);
+        }
+      }
+
+      // Click the correct choice
+      const correctBtn = screen.getByRole("button", { name: targetText! });
+      fireEvent.click(correctBtn);
+
+      // Advance past celebration animation (800ms)
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
   });
 });

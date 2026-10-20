@@ -418,3 +418,50 @@ describe("speechLines", () => {
     expect(lines).toEqual(["testword"]);
   });
 });
+
+describe("game state with non-English languages", () => {
+  it("filters out words without translations through initGameState and updateGameState", () => {
+    const langs = ["ja", "cmn", "yue"] as const;
+    for (const lang of langs) {
+      const rng = makeRng(1234);
+      let state = initGameState(rng, lang);
+
+      for (let i = 0; i < 25; i++) {
+        // Assert current level properties
+        const expectedChoices =
+          state.level >= 3 ? 4 : state.level === 2 ? 3 : 2;
+        expect(state.currentRound.choices).toHaveLength(expectedChoices);
+
+        // Assert all choices have a valid translation for the lang
+        for (const choice of state.currentRound.choices) {
+          expect(choice[lang]).toBeDefined();
+          expect(choice[lang]).toBeTruthy();
+        }
+
+        // Advance the game with a correct guess
+        state = updateGameState(
+          state,
+          state.currentRound.target.icon,
+          rng,
+          lang,
+        );
+      }
+
+      // Ensure we reached level 3 after 20+ correct guesses
+      expect(state.level).toBe(3);
+    }
+  });
+
+  it("filters out RHYME_WORDS from the pool and disables prioritizeRhymes in getLevelConfig", () => {
+    const langs = ["ja", "cmn", "yue"] as const;
+    for (const lang of langs) {
+      for (const level of [1, 2, 3]) {
+        const config = getLevelConfig(level, lang);
+        // "bat" is in RHYME_WORDS, "cat" is in WORDS.
+        expect(config.words.find((w) => w.icon === "cat")).toBeDefined();
+        expect(config.words.find((w) => w.icon === "bat")).toBeUndefined();
+        expect(config.prioritizeRhymes).toBe(false);
+      }
+    }
+  });
+});
