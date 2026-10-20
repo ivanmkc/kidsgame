@@ -18,15 +18,18 @@ import {
   LEVEL_3_WORDS,
   Word,
 } from "../data";
-import { PressableProps } from "react-native";
+import { PressableProps, ScrollViewProps } from "react-native";
 
 type FakePressableProps = Partial<PressableProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
+const capturedScrollViewProps: ScrollViewProps[] = [];
 
 vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable =
     actual.Pressable as React.ComponentType<FakePressableProps>;
+  const ActualScrollView =
+    actual.ScrollView as React.ComponentType<ScrollViewProps>;
   return {
     ...actual,
     Pressable: (props: FakePressableProps) => {
@@ -36,6 +39,10 @@ vi.mock("react-native", async (importOriginal) => {
         capturedPressableMap[props.testID].push(props);
       }
       return React.createElement(ActualPressable, props);
+    },
+    ScrollView: (props: ScrollViewProps) => {
+      capturedScrollViewProps.push(props);
+      return React.createElement(ActualScrollView, props);
     },
   };
 });
@@ -54,6 +61,7 @@ describe("ListenChooseGame", () => {
     for (const key in capturedPressableMap) {
       delete capturedPressableMap[key];
     }
+    capturedScrollViewProps.length = 0;
     vi.restoreAllMocks();
     vi.spyOn(sound, "sayThen").mockImplementation((_text, cb) => {
       if (cb) cb();
@@ -422,6 +430,16 @@ describe("ListenChooseGame", () => {
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
     const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     expect(spokenWord).not.toMatch(/^[a-z]+$/i);
+  });
+
+  it("renders a ScrollView for the board to allow scrolling on compact viewports", () => {
+    render(<ListenChooseGame onHome={vi.fn()} />);
+    const props = capturedScrollViewProps.find(
+      (p) => p.testID === "listenchoose-scrollview",
+    );
+    expect(props).toBeDefined();
+    expect(props!.style).toEqual({ flex: 1 });
+    expect(props!.contentContainerStyle).toHaveProperty("flexGrow", 1);
   });
 });
 
