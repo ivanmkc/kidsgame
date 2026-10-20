@@ -222,6 +222,8 @@ export type UIKey =
   | 'musicbox.intro'
   | 'musicbox.introFree'
   | 'musicbox.freeplay'
+  | 'musicbox.stage'
+  | 'musicbox.note'
   | 'song.twinkle'
   | 'song.mary'
   | 'song.row'
@@ -524,6 +526,8 @@ export const EN: Table = {
   'musicbox.intro': 'Tap, tap, tap anywhere to play the song!',
   'musicbox.introFree': 'Magic keys! Every tap makes a pretty note!',
   'musicbox.freeplay': 'Magic Keys',
+  'musicbox.stage': 'Stage',
+  'musicbox.note': 'Music note',
   'song.twinkle': 'Twinkle Twinkle Little Star',
   'song.mary': 'Mary Had a Little Lamb',
   'song.row': 'Row Row Row Your Boat',

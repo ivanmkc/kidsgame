@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Animated, Image, Pressable, StyleSheet } from 'react-native';
 import { MUSICBOX_IMAGES } from '../../assets/images';
+import { t } from '../../i18n';
+import { Lang } from '../../lang';
 import type { SpawnZone } from './logic';
 
 export interface SpawnEntry {
@@ -18,6 +20,7 @@ interface Props {
   entry: SpawnEntry;
   scrollX: Animated.Value;
   onTapSpawn?: (entry: SpawnEntry) => void;
+  lang: Lang;
 }
 
 const BASE_SIZE = 56;
@@ -29,7 +32,7 @@ const IDLE_CONFIGS: Record<SpawnZone, { dy: number; dur: number }> = {
   ground: { dy: 3, dur: 3000 },
 };
 
-export function SpawnedObject({ entry, scrollX, onTapSpawn }: Props) {
+export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
   const spawnIn = useRef(new Animated.Value(0)).current;
   const idle = useRef(new Animated.Value(0)).current;
   const wiggle = useRef(new Animated.Value(0)).current;
@@ -118,7 +121,12 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn }: Props) {
         },
       ]}
     >
-      <Pressable onPress={handlePress} hitSlop={8}>
+      <Pressable
+        onPress={handlePress}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel={t(lang, 'musicbox.note')}
+      >
         <Image source={src} style={{ width: size, height: size }} resizeMode="contain" />
       </Pressable>
     </Animated.View>

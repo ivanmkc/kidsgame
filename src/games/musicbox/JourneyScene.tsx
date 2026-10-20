@@ -7,15 +7,18 @@ import { songById } from './logic';
 import { ScrollingWorld } from './ScrollingWorld';
 import { SpawnedObject, SpawnEntry } from './SpawnedObject';
 import { VehicleSprite } from './VehicleSprite';
+import { t } from '../../i18n';
+import { Lang } from '../../lang';
 
 interface Props {
   scene: SceneDef;
+  lang: Lang;
 }
 
 const SCROLL_PER_TAP = 48;
 const MAX_SPAWNS = 20;
 
-export function JourneyScene({ scene }: Props) {
+export function JourneyScene({ scene, lang }: Props) {
   const song = songById(scene.songId);
   const [state, setState] = useState<BoxState>(() => startState(song));
   const [spawns, setSpawns] = useState<SpawnEntry[]>([]);
@@ -145,6 +148,8 @@ export function JourneyScene({ scene }: Props) {
       onResponderRelease={onPressOut}
       onResponderTerminate={onPressOut}
       testID="musicbox-stage"
+      accessibilityRole="button"
+      accessibilityLabel={t(lang, 'musicbox.stage')}
     >
       <ScrollingWorld scrollX={scrollX} scene={scene} />
 
@@ -156,7 +161,7 @@ export function JourneyScene({ scene }: Props) {
       />
 
       {spawns.map((s) => (
-        <SpawnedObject key={s.id} entry={s} scrollX={scrollX} onTapSpawn={onTapSpawn} />
+        <SpawnedObject key={s.id} entry={s} scrollX={scrollX} onTapSpawn={onTapSpawn} lang={lang} />
       ))}
     </View>
   );

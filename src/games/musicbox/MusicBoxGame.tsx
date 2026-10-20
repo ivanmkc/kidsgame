@@ -68,7 +68,7 @@ export function MusicBoxGame({ onHome, sceneId, onPickScene, onBackToPicker, lan
       backKind="picker"
       lang={lang}
     >
-      <JourneyScene scene={scene} />
+      <JourneyScene scene={scene} lang={lang} />
     </GameShell>
   );
 }

@@ -240,6 +240,8 @@ export const YUE: Table = {
   'musicbox.intro': '撳、撳、撳！撳邊度都彈到歌㗎！',
   'musicbox.introFree': '魔法琴鍵！每撳一下都有好聽嘅音！',
   'musicbox.freeplay': '魔法琴鍵',
+  'musicbox.stage': '舞台',
+  'musicbox.note': '音符',
   'song.twinkle': '一閃一閃小星星',
   'song.mary': '瑪莉有隻小綿羊',
   'song.row': '划船歌',

@@ -241,6 +241,8 @@ export const JA: Table = {
   'musicbox.intro': 'とん とん とん！ どこでも タップして うたを ひこう！',
   'musicbox.introFree': 'まほうの けんばん！ タップすると きれいなおとが なるよ！',
   'musicbox.freeplay': 'まほうの けんばん',
+  'musicbox.stage': 'ステージ',
+  'musicbox.note': 'おんぷ',
   'song.twinkle': 'きらきらぼし',
   'song.mary': 'メリーさんの ひつじ',
   'song.row': 'こげこげ ボート',
