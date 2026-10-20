@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
@@ -99,13 +99,22 @@ describe('asset manifest: every image require resolves', () => {
   // failed outright on a missing ice_palace_thumb.jpg, with no test and no
   // CI to notice. Cheap to check, and it needs no image bytes (an LFS
   // pointer still exists on disk), so it runs anywhere.
-  it('no require() in images.ts points at a missing file', () => {
-    const src = readFileSync(join(__dirname, '../../assets/images.ts'), 'utf8');
-    const requires = [...src.matchAll(/require\('(\.\.\/\.\.\/assets\/[^']+)'\)/g)].map((m) => m[1]);
-    expect(requires.length).toBeGreaterThan(100);
-    // paths are relative to src/assets/images.ts, so resolve from there
-    const missing = requires.filter((rel) => !existsSync(join(__dirname, '../../assets', rel)));
-    expect(missing, `missing asset files: ${missing.join(', ')}`).toEqual([]);
+  it('no require() in images.ts or images/ points at a missing file', () => {
+    const imagesDir = join(__dirname, '../../assets/images');
+    const imageFiles = [
+      join(__dirname, '../../assets/images.ts'),
+      ...(existsSync(imagesDir) ? readdirSync(imagesDir).map((f) => join(imagesDir, f)) : []),
+    ];
+    let totalRequires = 0;
+    for (const file of imageFiles) {
+      const src = readFileSync(file, 'utf8');
+      const dir = dirname(file);
+      const requires = [...src.matchAll(/require\('([^']+)'\)/g)].map((m) => m[1]);
+      totalRequires += requires.length;
+      const missing = requires.filter((rel) => !existsSync(resolve(dir, rel)));
+      expect(missing, `missing asset files in ${file}: ${missing.join(', ')}`).toEqual([]);
+    }
+    expect(totalRequires).toBeGreaterThan(100);
   });
 });
 
@@ -136,9 +145,10 @@ describe('asset manifest: picker thumbnails', () => {
     ...(manifest.stories ?? []).map((s) => s.nodes.start.image),
   ].filter((x): x is string => !!x);
   const imagesTs = readFileSync(join(__dirname, '../../assets/images.ts'), 'utf8');
+  const thumbStart = imagesTs.indexOf('export const SCENE_THUMBS');
   const thumbMap = imagesTs.slice(
-    imagesTs.indexOf('export const SCENE_THUMBS'),
-    imagesTs.indexOf('export const DRESSUP_ICONS'),
+    thumbStart,
+    imagesTs.indexOf('};', thumbStart),
   );
 
   it('every picker scene has a thumbnail on disk', () => {
