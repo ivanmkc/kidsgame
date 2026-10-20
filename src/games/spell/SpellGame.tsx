@@ -44,6 +44,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
   );
   const [placedIds, setPlacedIds] = useState<number[]>([]); // tile ids in slot order
+  const placedIdsRef = useRef<number[]>([]);
   const [wrongId, setWrongId] = useState<number | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
@@ -54,6 +55,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     if (!langMounted.current) { langMounted.current = true; return; }
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
+    placedIdsRef.current = [];
     setPlacedIds([]);
     setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
     setGameKey((k) => k + 1);
@@ -74,16 +76,15 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
   }, []);
 
-  const filled = placedIds.length;
-  const expected = round.chars[filled];
-
   const onTile = (tile: SpellTile) => {
-    if (won || placedIds.includes(tile.id)) return;
-    if (filled >= round.chars.length) return; // guarded during the 1s advance delay
+    if (won || placedIdsRef.current.includes(tile.id)) return;
+    if (placedIdsRef.current.length >= round.chars.length) return; // guarded during the 1s advance delay
+    const expected = round.chars[placedIdsRef.current.length];
     if (tile.char === expected) {
       sfx.good();
       say(charLine(expected, round.word.lang));
-      const nextPlaced = [...placedIds, tile.id];
+      const nextPlaced = [...placedIdsRef.current, tile.id];
+      placedIdsRef.current = nextPlaced;
       setPlacedIds(nextPlaced);
       if (nextPlaced.length === round.chars.length) {
         setCelebrate((c) => c + 1);
@@ -92,6 +93,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
             setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
+            placedIdsRef.current = [];
             setPlacedIds([]);
           }
           setWordIdx(nextI);
@@ -111,6 +113,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
+    placedIdsRef.current = [];
     setPlacedIds([]);
     setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
     setGameKey((k) => k + 1);

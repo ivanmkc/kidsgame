@@ -225,4 +225,160 @@ describe("SpellGame", () => {
     unmount();
     expect(clearTimeoutSpy).toHaveBeenCalledWith(secondTimerId);
   });
+
+  it("accepts rapid consecutive correct taps without triggering sfx.wrong", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "dog",
+        lang: "en",
+        text: "DOG",
+        chars: ["D", "O", "G"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: word.chars[0] },
+          { id: 2, char: word.chars[1] },
+          { id: 3, char: word.chars[2] },
+          { id: 4, char: "Z" }, // decoy
+        ],
+      }),
+    );
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Rapidly tap the first two correct tiles ('C', then 'A') in the same batch
+    act(() => {
+      fireEvent.click(screen.getByTestId("spell-tile-1"));
+      fireEvent.click(screen.getByTestId("spell-tile-2"));
+    });
+
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.good).toHaveBeenCalledTimes(2);
+
+    // Slots for 'C' and 'A' should be filled
+    expect(screen.getByTestId("spell-slot-0").textContent).toContain("C");
+    expect(screen.getByTestId("spell-slot-1").textContent).toContain("A");
+    expect(screen.getByTestId("spell-slot-2").textContent).toBe("");
+
+    // Now tap the third correct tile 'T' to advance to the next word
+    fireEvent.click(screen.getByTestId("spell-tile-3"));
+    expect(sfx.good).toHaveBeenCalledTimes(3);
+    expect(screen.getByTestId("spell-word-dog")).toBeTruthy();
+  });
+
+  it("ignores rapid repeat taps on an already placed tile", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: word.chars[0] },
+          { id: 2, char: word.chars[1] },
+          { id: 3, char: word.chars[2] },
+        ],
+      }),
+    );
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const tile1 = screen.getByTestId("spell-tile-1");
+    // Rapidly tap the first tile twice in the same batch
+    act(() => {
+      fireEvent.click(tile1);
+      fireEvent.click(tile1);
+    });
+
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("spell-slot-0").textContent).toContain("C");
+    expect(screen.getByTestId("spell-slot-1").textContent).toBe("");
+  });
+
+  it("ignores extra taps during the celebration advance delay", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "dog",
+        lang: "en",
+        text: "DOG",
+        chars: ["D", "O", "G"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: word.chars[0] },
+          { id: 2, char: word.chars[1] },
+          { id: 3, char: word.chars[2] },
+          { id: 4, char: "Z" },
+        ],
+      }),
+    );
+
+    let advance: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      advance = cb ?? null;
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Rapidly tap all 3 correct tiles in the same batch
+    act(() => {
+      fireEvent.click(screen.getByTestId("spell-tile-1"));
+      fireEvent.click(screen.getByTestId("spell-tile-2"));
+      fireEvent.click(screen.getByTestId("spell-tile-3"));
+    });
+
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.good).toHaveBeenCalledTimes(3);
+
+    // Tap an extra tile while advance is pending (during speech delay)
+    fireEvent.click(screen.getByTestId("spell-tile-4"));
+    expect(sfx.wrong).not.toHaveBeenCalled();
+
+    // Now trigger the completion callback
+    act(() => {
+      advance?.();
+    });
+
+    expect(screen.getByTestId("spell-word-dog")).toBeTruthy();
+  });
 });
