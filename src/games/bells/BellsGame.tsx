@@ -37,6 +37,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const demoTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const glowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [round, setRound] = useState<BellsRound>(() =>
     makeBellsRound(rngRef.current, difficulty),
   );
@@ -59,6 +60,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const playDemo = useCallback(
     (r: BellsRound) => {
       clearDemo();
+      if (glowTimer.current) clearTimeout(glowTimer.current);
+      setGlowIdx(null);
       stopSequence();
       setPhase("listen");
       let i = 0;
@@ -93,6 +96,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     }
     return () => {
       clearDemo();
+      if (glowTimer.current) clearTimeout(glowTimer.current);
       stopSequence();
     };
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -101,8 +105,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     if (!canTap(round, tappedRef.current, phase, won, flashingRef.current))
       return;
     playNote(round.bells[idx].midi, 0.8);
+    if (glowTimer.current) clearTimeout(glowTimer.current);
     setGlowIdx(idx);
-    setTimeout(() => setGlowIdx(null), 250);
+    glowTimer.current = setTimeout(() => {
+      setGlowIdx(null);
+      glowTimer.current = null;
+    }, 250);
     const prev = tappedRef.current;
     const next = [...prev, idx];
     tappedRef.current = next;
@@ -153,6 +161,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     clearDemo();
+    if (glowTimer.current) clearTimeout(glowTimer.current);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     flashingRef.current = false;
@@ -288,8 +297,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={styles.replayText}>🔊</Text>
               </Pressable>
             </View>
-          )
-        )}
+          ))}
         {phase === "play" && !won && (
           <View testID="tap-dot-row" style={styles.tapDotRow}>
             {tapDots}
