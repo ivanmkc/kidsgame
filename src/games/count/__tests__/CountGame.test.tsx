@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import { Animated } from "react-native";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,8 @@ import {
 import * as sound from "../../../sound";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
+import { LangContext } from "../../../components/GameShell";
+import { type Lang } from "../../../lang";
 import {
   STAGE_PADDING,
   applyPickAnswer,
@@ -543,3 +545,156 @@ describe("CountGame stage critter positioning", () => {
     expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
   });
 });
+
+describe("CountGame language switch", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  function Harness({ initialLang = "en" }: { initialLang?: Lang }) {
+    const [lang, setLang] = useState<Lang>(initialLang);
+    const onCycle = () => {
+      setLang((l) => (l === "en" ? "ja" : "en"));
+    };
+    return (
+      <LangContext.Provider value={{ lang, onCycle }}>
+        <CountGame onHome={() => {}} difficulty="easy" lang={lang} />
+      </LangContext.Provider>
+    );
+  }
+
+  it("rebuilds round and resets phase to 'count' on language switch mid-round without skipping", () => {
+    const saySpy = vi.spyOn(sound, "say");
+
+    render(<Harness initialLang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+
+    // Tap all critters to trigger pending sayThen for phase transition
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    // Phase is still count (speech in flight)
+    expect(screen.queryByTestId("count-prompt")).toBeNull();
+
+    // Switch language mid-round
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // Advance all timers: stale sayThen must not advance phase or score
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    // Phase stays 'count' (prompt card not shown, progress indicator shown)
+    expect(screen.queryByTestId("count-prompt")).toBeNull();
+    expect(screen.getByTestId("count-progress")).toBeTruthy();
+    expect(screen.getByTestId("count-progress").textContent).toMatch(/^0 \/ \d+$/);
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/5");
+    expect(saySpy).toHaveBeenCalledWith("みんなを タップして いくつか おしえて");
+  });
+
+  it("drops old-language sayThen callback on language switch and does not advance score", () => {
+    vi.spyOn(countLogic, "countSettings").mockReturnValue({
+      rounds: 1,
+      min: 1,
+      max: 1,
+    });
+
+    render(<Harness initialLang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+
+    // Tap all critters to complete count phase
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    // Advance timers so count speech completes and quiz phase is active
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    expect(screen.getByTestId("count-prompt")).toBeTruthy();
+
+    // Click correct answer
+    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+    fireEvent.click(answerChoices[answerChoices.length - 1]);
+
+    // sayThen for praise is now pending. Score is still 0/1.
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/1");
+
+    // Switch language mid-praise
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // Advance all timers
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    // Score must NOT have advanced, and overlay must NOT show
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/1");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.queryByTestId("count-prompt")).toBeNull();
+    expect(screen.getByTestId("count-progress")).toBeTruthy();
+  });
+
+  it("discards stale setTimeout callback from wrong answer on language switch (R2)", () => {
+    const saySpy = vi.spyOn(sound, "say");
+
+    render(<Harness initialLang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+
+    // Tap all critters to complete count phase
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    // Advance timers so count speech completes and quiz phase is active
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    expect(screen.getByTestId("count-prompt")).toBeTruthy();
+
+    // Click a wrong answer
+    const choices = screen.getAllByTestId(/count-choice-\d+/);
+    const wrongChoice = choices.find(
+      (el) => !el.getAttribute("data-testid")?.includes("-answer"),
+    );
+    expect(wrongChoice).toBeDefined();
+
+    fireEvent.click(wrongChoice!);
+
+    // Clear saySpy to track speech after language switch
+    saySpy.mockClear();
+
+    // Immediately switch language before the 500ms wrong-answer prompt timer fires
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // Advance all timers
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    // The stale English prompt "How many?" must NOT be spoken
+    expect(saySpy).not.toHaveBeenCalledWith("How many?");
+    expect(saySpy).toHaveBeenCalledWith("みんなを タップして いくつか おしえて");
+  });
+});
+
