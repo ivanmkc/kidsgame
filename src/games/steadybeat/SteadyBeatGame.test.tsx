@@ -15,6 +15,7 @@ import * as logic from "./logic";
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  sound.setMuted(false);
 });
 it("renders progress dots correctly during the tap phase", () => {
   vi.useFakeTimers();
@@ -198,5 +199,65 @@ it("speaks when entering tap phase", () => {
 
   expect(saySpy).toHaveBeenCalledWith("Your turn!");
   saySpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("provides visual beat cues during listen phase when muted", () => {
+  vi.useFakeTimers();
+  sound.setMuted(true);
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Immediately on mount at 0ms (first beat): beat flashes visually
+  expect(screen.getByTestId("steadybeat-beat-flash")).toBeTruthy();
+
+  // Between beats (200ms): flash clears
+  act(() => {
+    vi.advanceTimersByTime(200);
+  });
+  expect(screen.queryByTestId("steadybeat-beat-flash")).toBeNull();
+
+  // On the second beat (600ms): beat flashes visually again
+  act(() => {
+    vi.advanceTimersByTime(400);
+  });
+  expect(screen.getByTestId("steadybeat-beat-flash")).toBeTruthy();
+
+  // Between beats (800ms): flash clears
+  act(() => {
+    vi.advanceTimersByTime(200);
+  });
+  expect(screen.queryByTestId("steadybeat-beat-flash")).toBeNull();
+
+  // On the third beat (1200ms): beat flashes visually again
+  act(() => {
+    vi.advanceTimersByTime(400);
+  });
+  expect(screen.getByTestId("steadybeat-beat-flash")).toBeTruthy();
+
+  // Between beats (1400ms): flash clears
+  act(() => {
+    vi.advanceTimersByTime(200);
+  });
+  expect(screen.queryByTestId("steadybeat-beat-flash")).toBeNull();
+
+  // On the fourth beat (1800ms): beat flashes visually again
+  act(() => {
+    vi.advanceTimersByTime(400);
+  });
+  expect(screen.getByTestId("steadybeat-beat-flash")).toBeTruthy();
+
+  // Advance to tap phase (at 2400ms)
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  expect(screen.queryByTestId("steadybeat-beat-flash")).toBeNull();
+
+  roundSpy.mockRestore();
   vi.useRealTimers();
 });
