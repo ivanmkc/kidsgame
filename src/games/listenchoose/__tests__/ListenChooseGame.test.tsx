@@ -239,6 +239,21 @@ describe("ListenChooseGame", () => {
     expect(sfx.wrong).toHaveBeenCalledTimes(1);
   });
 
+  it("allows tapping correct choice while wrong choice is wobbling", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn, distractorBtn } = getRoundChoices();
+
+    // Tap wrong choice
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Immediately tap correct choice while wrong is still wobbling
+    fireEvent.click(targetBtn);
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("celebration")).toBeTruthy();
+  });
   it("cleans up celebration timer on unmount without speaking next word", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));

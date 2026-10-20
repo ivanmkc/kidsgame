@@ -70,7 +70,7 @@ export function ListenChooseGame({
   };
 
   const onPick = (choice: Word) => {
-    if (celebrate || wobbleIcon) return;
+    if (celebrate || wobbleIcon === choice.icon) return;
     const isCorrect = choice.icon === state.currentRound.target.icon;
     if (isCorrect) {
       sfx.good();
