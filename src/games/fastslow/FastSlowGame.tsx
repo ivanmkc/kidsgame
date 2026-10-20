@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Easing,
@@ -6,25 +6,25 @@ import {
   StyleSheet,
   Text,
   View,
-} from "react-native";
-import { GameShell, ScoreChip } from "../../components/GameShell";
-import { WinOverlay } from "../../components/WinOverlay";
-import { SparkleBurst } from "../../components/Sparkles";
-import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
-import { t } from "../../i18n";
-import { makeRng } from "../../rng";
-import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
-import { playSequence, stopSequence } from "../../music";
-import { useWinLine } from "../winlines";
+} from 'react-native';
+import { GameShell, ScoreChip } from '../../components/GameShell';
+import { WinOverlay } from '../../components/WinOverlay';
+import { SparkleBurst } from '../../components/Sparkles';
+import { Difficulty } from '../../difficulty';
+import { Lang } from '../../lang';
+import { t } from '../../i18n';
+import { makeRng } from '../../rng';
+import { colors, fonts, shadows } from '../../theme';
+import { say, saySequence, sfx } from '../../sound';
+import { playSequence, stopSequence } from '../../music';
+import { useWinLine } from '../winlines';
 import {
   makeFastSlowRound,
   roundsToWin,
   getActualSpeed,
   isCorrect,
   FastSlowRound,
-} from "./logic";
+} from './logic';
 
 interface Props {
   onHome: () => void;
@@ -64,8 +64,17 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onPick = (picked: "fast" | "slow") => {
-    if (won || phase !== "pick" || lockedRef.current) return;
+  useEffect(() => {
+    if (won) return;
+    if (phase === 'listen') {
+      say(t(lang, 'music.listen'));
+    } else if (phase === 'pick') {
+      saySequence([t(lang, 'music.fast'), t(lang, 'music.slow')]);
+    }
+  }, [phase, won, lang]);
+
+  const onPick = (picked: 'fast' | 'slow') => {
+    if (won || phase !== 'pick' || lockedRef.current) return;
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
@@ -93,14 +102,25 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     }
   };
 
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+    };
+  }, []);
+
   const replay = () => {
     if (phase === "pick") {
+      stopSequence();
+      if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
       setPhase("listen");
-      playRound(round);
+      replayTimerRef.current = setTimeout(() => playRound(round), 400);
     }
   };
 
   const reset = () => {
+    if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
     lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);

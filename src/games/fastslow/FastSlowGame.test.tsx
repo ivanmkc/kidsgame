@@ -16,6 +16,7 @@ import { sfx } from "../../sound";
 vi.mock("../../sound", () => ({
   sfx: { good: vi.fn(), wrong: vi.fn(), win: vi.fn(), tap: vi.fn() },
   say: vi.fn(),
+  saySequence: vi.fn(),
 }));
 
 vi.mock("../../music", () => ({
