@@ -15,14 +15,20 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
-import { playDrum, playDrumSequence, stopSequence } from "../../music";
+import { say, sfx } from "../../sound";
+import {
+  playDrum,
+  playDrumSequence,
+  playSequence,
+  stopSequence,
+} from "../../music";
 import { useWinLine } from "../winlines";
 import {
   makeEchoBeatRound,
   roundsToWin,
   checkEcho,
   EchoBeatRound,
+  tolerancePct,
 } from "./logic";
 
 interface Props {
@@ -37,71 +43,91 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<EchoBeatRound>(() =>
     makeEchoBeatRound(rngRef.current, difficulty),
   );
+  const roundRef = useRef(round);
+  roundRef.current = round;
   const [score, setScore] = useState(0);
+  const scoreRef = useRef(score);
+  scoreRef.current = score;
   const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
   const [flash, setFlash] = useState<number | null>(null);
+  const [activePulseBeat, setActivePulseBeat] = useState<number | null>(null);
   const [tapTimes, setTapTimes] = useState<number[]>([]);
+  const tapTimesRef = useRef(tapTimes);
+  tapTimesRef.current = tapTimes;
   const [tapCount, setTapCount] = useState(0);
   const [result, setResult] = useState<"good" | "bad" | null>(null);
   const [sparkKey, setSparkKey] = useState(0);
-  const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const gridStartRef = useRef(0);
+  const playDemoRef = useRef<(r: EchoBeatRound) => void>(() => {});
+  const countInCancelRef = useRef<(() => void) | null>(null);
+  const drumCancelRef = useRef<(() => void) | null>(null);
+  const pulseIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pulseClearTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const demoTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const deadlineTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const judgedRef = useRef(false);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, "win.echobeat" as never));
 
-  const playDemo = useCallback(
-    (r: EchoBeatRound) => {
-      stopSequence();
-      if (flashTimer.current) clearTimeout(flashTimer.current);
-      setFlash(null);
-      setPhase("listen");
-      playDrumSequence(
-        r.gaps,
-        (i) => {
-          setFlash(i);
-          pulseAnim.setValue(1.25);
-          Animated.spring(pulseAnim, {
-            toValue: 1,
-            friction: 4,
-            useNativeDriver: true,
-          }).start();
-          if (flashTimer.current) clearTimeout(flashTimer.current);
-          flashTimer.current = setTimeout(() => setFlash(null), 180);
-        },
-        () => {
-          setFlash(null);
-          setPhase("tap");
-        },
-      );
-    },
-    [pulseAnim],
-  );
-
-  useEffect(() => {
-    if (!won) {
-      setTapTimes([]);
-      setTapCount(0);
-      setResult(null);
-      playDemo(round);
+  const stopAllTimers = useCallback(() => {
+    stopSequence();
+    if (countInCancelRef.current) {
+      countInCancelRef.current();
+      countInCancelRef.current = null;
     }
-    return () => {
-      if (flashTimer.current) clearTimeout(flashTimer.current);
-      stopSequence();
-    };
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (drumCancelRef.current) {
+      drumCancelRef.current();
+      drumCancelRef.current = null;
+    }
+    if (pulseIntervalRef.current) {
+      clearInterval(pulseIntervalRef.current);
+      pulseIntervalRef.current = null;
+    }
+    if (pulseClearTimer.current) {
+      clearTimeout(pulseClearTimer.current);
+      pulseClearTimer.current = null;
+    }
+    if (flashTimer.current) {
+      clearTimeout(flashTimer.current);
+      flashTimer.current = null;
+    }
+    if (deadlineTimer.current) {
+      clearTimeout(deadlineTimer.current);
+      deadlineTimer.current = null;
+    }
+    if (resultTimer.current) {
+      clearTimeout(resultTimer.current);
+      resultTimer.current = null;
+    }
+    demoTimers.current.forEach(clearTimeout);
+    demoTimers.current = [];
+  }, []);
 
-  useEffect(() => {
-    if (phase !== "tap" || tapCount === 0) return;
-    if (resultTimer.current) clearTimeout(resultTimer.current);
-    resultTimer.current = setTimeout(() => {
+  const finishRound = useCallback(
+    (currentTaps: number[]) => {
+      if (judgedRef.current) return;
+      judgedRef.current = true;
+      stopAllTimers();
+      setActivePulseBeat(null);
       setPhase("result");
-      const res = checkEcho(round, tapTimes, difficulty);
+
+      const curRound = roundRef.current;
+      const curScore = scoreRef.current;
+      const res = checkEcho(
+        curRound,
+        currentTaps,
+        difficulty,
+        gridStartRef.current,
+      );
       if (res.countCorrect && res.timingCorrect) {
         sfx.good();
         setSparkKey((k) => k + 1);
         setResult("good");
-        const nextScore = score + 1;
+        const nextScore = curScore + 1;
         setScore(nextScore);
         if (nextScore < total) {
           resultTimer.current = setTimeout(() => {
@@ -113,32 +139,145 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         setResult("bad");
         resultTimer.current = setTimeout(() => {
           setTapTimes([]);
+          tapTimesRef.current = [];
           setTapCount(0);
           setResult(null);
-          playDemo(round);
+          playDemoRef.current(curRound);
         }, 1000);
       }
-    }, 1200);
+    },
+    [difficulty, stopAllTimers, total],
+  );
+
+  const playDemo = useCallback(
+    (r: EchoBeatRound) => {
+      stopAllTimers();
+      judgedRef.current = false;
+      setFlash(null);
+      setActivePulseBeat(null);
+      setPhase("listen");
+
+      const bpm = r.bpm;
+      const beatMs = 60000 / bpm;
+      const pulseHoldMs = Math.min(180, beatMs * 0.4);
+      const flashHoldMs = Math.min(160, beatMs * 0.3);
+
+      const now = performance.now();
+      const audioDelayMs = 50; // Web Audio 0.05s lookahead in playSequence/playDrumSequence
+      const tapStartMs = now + audioDelayMs + (4 + r.totalBeats) * beatMs;
+      gridStartRef.current = tapStartMs;
+
+      // 1. Four distinct high chime clicks for count-in (midi 72 = C5)
+      const countInNotes = [
+        { m: 72, b: 1 },
+        { m: 72, b: 1 },
+        { m: 72, b: 1 },
+        { m: 72, b: 1 },
+      ];
+      countInCancelRef.current = playSequence(countInNotes, bpm);
+
+      // 2. Drum pattern onsets 4 beats later, scheduled with playDrumSequence
+      // Waiting 4 * beatMs lets playDrumSequence's internal 0.05s lookahead
+      // perfectly align the first drum hit with audioDelayMs + 4 * beatMs
+      demoTimers.current.push(
+        setTimeout(() => {
+          drumCancelRef.current = playDrumSequence(r.gaps, (idx) => {
+            setFlash(idx);
+            pulseAnim.setValue(1.25);
+            Animated.spring(pulseAnim, {
+              toValue: 1,
+              friction: 4,
+              useNativeDriver: true,
+            }).start();
+            if (flashTimer.current) clearTimeout(flashTimer.current);
+            flashTimer.current = setTimeout(() => setFlash(null), flashHoldMs);
+          });
+        }, 4 * beatMs),
+      );
+
+      // 3. Unlock tap phase slightly early (at tapStartMs - tolMs) so anticipatory
+      // taps within the valid timing tolerance window are captured
+      const tolMs = tolerancePct(difficulty) * beatMs;
+      const unlockDelayMs = audioDelayMs + (4 + r.totalBeats) * beatMs - tolMs;
+      demoTimers.current.push(
+        setTimeout(() => {
+          setPhase("tap");
+          say(t(lang, "music.yourTurn"));
+        }, unlockDelayMs),
+      );
+
+      // 4. Grid-derived judging deadline: end of echo bar + tolMs
+      const deadlineDelayMs =
+        audioDelayMs + (4 + r.totalBeats + r.totalBeats) * beatMs + tolMs;
+      deadlineTimer.current = setTimeout(() => {
+        finishRound(tapTimesRef.current);
+      }, deadlineDelayMs);
+
+      // 5. Single continuous musical pulse across both listen and tap phases:
+      // Started at audioDelayMs to align perfectly with Web Audio playback
+      demoTimers.current.push(
+        setTimeout(() => {
+          let beatIndex = 0;
+          setActivePulseBeat(0);
+          pulseClearTimer.current = setTimeout(
+            () => setActivePulseBeat(null),
+            pulseHoldMs,
+          );
+
+          pulseIntervalRef.current = setInterval(() => {
+            beatIndex++;
+            const currentBeatInBar = beatIndex % 4;
+            setActivePulseBeat(currentBeatInBar);
+            if (pulseClearTimer.current) clearTimeout(pulseClearTimer.current);
+            pulseClearTimer.current = setTimeout(
+              () => setActivePulseBeat(null),
+              pulseHoldMs,
+            );
+          }, beatMs);
+        }, audioDelayMs),
+      );
+    },
+    [difficulty, finishRound, lang, pulseAnim, stopAllTimers],
+  );
+
+  playDemoRef.current = playDemo;
+
+  useEffect(() => {
+    if (!won) {
+      setTapTimes([]);
+      tapTimesRef.current = [];
+      setTapCount(0);
+      setResult(null);
+      playDemo(round);
+    }
     return () => {
-      if (resultTimer.current) clearTimeout(resultTimer.current);
+      stopAllTimers();
     };
-  }, [tapCount]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = () => {
-    if (won || phase !== "tap") return;
+    if (won || phase !== "tap" || judgedRef.current) return;
     playDrum();
     const now = performance.now();
-    setTapTimes((prev) => [...prev, now]);
-    setTapCount((c) => c + 1);
+    const nextTaps = [...tapTimesRef.current, now];
+    tapTimesRef.current = nextTaps;
+    setTapTimes(nextTaps);
+    const nextCount = tapCount + 1;
+    setTapCount(nextCount);
+
+    if (nextTaps.length >= round.hitCount) {
+      finishRound(nextTaps);
+    }
   };
 
   const reset = () => {
-    if (flashTimer.current) clearTimeout(flashTimer.current);
-    if (resultTimer.current) clearTimeout(resultTimer.current);
+    stopAllTimers();
+    setActivePulseBeat(null);
     setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setTapTimes([]);
+    tapTimesRef.current = [];
     setTapCount(0);
     setResult(null);
     setRound(makeEchoBeatRound(rngRef.current, difficulty));
@@ -210,7 +349,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   });
 
   const tapDots = [];
-  const expectedHits = round.gaps.length + 1;
+  const expectedHits = round.hitCount;
   for (let i = 0; i < expectedHits; i++) {
     tapDots.push(
       <View
@@ -259,10 +398,24 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
                 ? "🎉"
                 : result === "bad"
                   ? "🔄"
-                  : t(lang, "music.yourTurn" as never)}
+                  : t(lang, "music.yourTurn")}
             </Text>
           </View>
         )}
+        <View style={styles.beatDotRow}>
+          {[0, 1, 2, 3].map((b) => (
+            <View
+              key={b}
+              testID={`beat-dot-${b}`}
+              accessibilityState={{ selected: activePulseBeat === b }}
+              aria-selected={activePulseBeat === b}
+              style={[
+                styles.beatDot,
+                activePulseBeat === b && styles.beatDotActive,
+              ]}
+            />
+          ))}
+        </View>
         <Animated.View
           style={
             phase === "tap" ? { transform: [{ scale: drumScale }] } : undefined
@@ -332,6 +485,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.ink,
     textAlign: "center",
+  },
+  beatDotRow: {
+    flexDirection: "row",
+    gap: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  beatDot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    backgroundColor: "rgba(232, 135, 79, 0.15)",
+  },
+  beatDotActive: {
+    backgroundColor: colors.gold,
+    borderColor: "#C5693A",
+    transform: [{ scale: 1.25 }],
   },
   drum: {
     width: 180,

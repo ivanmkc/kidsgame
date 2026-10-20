@@ -322,13 +322,65 @@ describe("echo beat", () => {
     }
   });
 
-  it("perfect echo passes on easy (count only)", () => {
+  it("perfect echo passes on easy", () => {
     const rng = makeRng(42);
     const r = makeEchoBeatRound(rng, "easy");
-    const taps = Array.from({ length: r.hitCount }, (_, i) => i * 500);
+    const beatMs = 60000 / r.bpm;
+    const taps = r.onsets.map((o) => o * beatMs);
     const result = checkEcho(r, taps, "easy");
     expect(result.countCorrect).toBe(true);
     expect(result.timingCorrect).toBe(true);
+  });
+
+  it("every generated pattern sums to whole bars of 4/4", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      for (const d of ["easy", "medium", "hard"] as const) {
+        const rng = makeRng(seed);
+        const r = makeEchoBeatRound(rng, d);
+        expect(r.totalBeats % 4).toBe(0);
+        expect(r.totalBeats).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("every onset lies on the quantized grid for its difficulty", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      for (const d of ["easy", "medium", "hard"] as const) {
+        const rng = makeRng(seed);
+        const r = makeEchoBeatRound(rng, d);
+        for (const onset of r.onsets) {
+          if (d === "easy") {
+            expect(Math.round(onset)).toBe(onset);
+          } else if (d === "medium") {
+            expect(Math.round(onset * 2) / 2).toBe(onset);
+          } else {
+            expect(Math.round(onset * 4) / 4).toBe(onset);
+          }
+        }
+      }
+    }
+  });
+
+  it("judging window accepts on-grid taps and rejects off-grid taps", () => {
+    for (const d of ["easy", "medium", "hard"] as const) {
+      const rng = makeRng(42);
+      const r = makeEchoBeatRound(rng, d);
+      const beatMs = 60000 / r.bpm;
+      const startMs = 1000;
+
+      // On-grid taps
+      const onGridTaps = r.onsets.map((o) => startMs + o * beatMs);
+      const goodRes = checkEcho(r, onGridTaps, d, startMs);
+      expect(goodRes.countCorrect).toBe(true);
+      expect(goodRes.timingCorrect).toBe(true);
+
+      // Off-grid taps: relative rhythm is perfect, but the entire sequence
+      // is shifted off the grid by 0.6 * beatMs (outside tolerance)
+      const offGridTaps = r.onsets.map((o) => startMs + (o + 0.6) * beatMs);
+      const badRes = checkEcho(r, offGridTaps, d, startMs);
+      expect(badRes.countCorrect).toBe(true);
+      expect(badRes.timingCorrect).toBe(false);
+    }
   });
 
   it("wrong count fails", () => {
