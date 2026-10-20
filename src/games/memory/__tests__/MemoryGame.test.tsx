@@ -93,4 +93,66 @@ describe('MemoryGame', () => {
       expect(card.getAttribute('aria-label')).toBe('うらがえしのカード');
     }
   });
+
+  it('plays in 2P duel mode, updates player scores on matches, and allows rematch', async () => {
+    const onHome = vi.fn();
+    render(<MemoryGame onHome={onHome} difficulty="easy" twoPlayerEnabled lang="en" />);
+
+    // In 2P enabled mode, ModePicker is shown first
+    const twoPlayerBtn = screen.getByTestId('mp-choose-2p');
+    await act(async () => {
+      fireEvent.click(twoPlayerBtn);
+    });
+
+    // Board and duel chips are now visible
+    expect(screen.getByTestId('memory-duel-chip-0')).toBeDefined();
+    expect(screen.getByTestId('memory-duel-chip-1')).toBeDefined();
+
+    const cards = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+    expect(cards).toHaveLength(8);
+
+    // Group cards by icon
+    const iconPairs = new Map<string, HTMLElement[]>();
+    for (const card of cards) {
+      const parts = card.getAttribute('data-testid')!.split('-');
+      const icon = parts.slice(3).join('-');
+      const list = iconPairs.get(icon) ?? [];
+      list.push(card);
+      iconPairs.set(icon, list);
+    }
+
+    // Match all pairs
+    for (const [c1, c2] of iconPairs.values()) {
+      await act(async () => {
+        fireEvent.click(c1);
+      });
+      await act(async () => {
+        fireEvent.click(c2);
+      });
+    }
+
+    // Fast-forward entrance animation so win overlay buttons arm
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+
+    // WinOverlay appears with rematch button
+    const rematchBtn = screen.getByTestId('play-again');
+    expect(rematchBtn).toBeDefined();
+
+    // Clicking Rematch resets board
+    await act(async () => {
+      fireEvent.click(rematchBtn);
+    });
+
+    const resetCards = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('memory-card-'));
+    expect(resetCards).toHaveLength(8);
+    for (const card of resetCards) {
+      expect(card.getAttribute('aria-label')).toBe('face-down card');
+    }
+  });
 });

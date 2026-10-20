@@ -5,12 +5,12 @@ import { makeRng } from "../../rng";
 import { PlayerIx } from "../../multiplayer";
 import {
   DuelState,
-  buildBoard,
   duelInit,
   duelResolve,
   duelWinner,
   nextStarter,
-} from "../memory/logic";
+} from "../../components/memoryLogic";
+import { buildBoard } from "../memory/logic";
 import { isSolved, makePuzzle, swap } from "../puzzle/logic";
 
 describe("memory match", () => {
