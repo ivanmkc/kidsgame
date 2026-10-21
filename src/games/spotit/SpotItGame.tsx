@@ -55,11 +55,15 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   }));
   const [score, setScore] = useState(0);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
   const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
   useSay(locked ? null : t(lang, 'shell.spotit.sub'));
   useEffect(() => { if (won) say(t(lang, 'win.spotit')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => {
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+  }, []);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
   const mmss = fmtTime(elapsed);
@@ -73,6 +77,10 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const onTap = (symbol: number) => {
     if (won || locked) return;
     if (symbol === round.answer) {
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
       const next = score + 1;
       setScore(next);
       setWrongFlash(null);
@@ -81,11 +89,19 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
     } else {
       sfx.wrong();
       setWrongFlash(symbol);
-      setTimeout(() => setWrongFlash((w) => (w === symbol ? null : w)), 450);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = setTimeout(() => {
+        setWrongFlash((w) => (w === symbol ? null : w));
+        wrongTimerRef.current = null;
+      }, 450);
     }
   };
 
   const reset = () => {
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongFlash(null);

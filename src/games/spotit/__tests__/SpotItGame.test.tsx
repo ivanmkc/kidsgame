@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as sound from '../../../sound';
 import { t } from '../../../i18n';
 import { SpotItGame } from '../SpotItGame';
@@ -67,5 +67,111 @@ describe('SpotItGame spoken prompt localization', () => {
       expect(label).toBeTruthy();
       expect(label).not.toMatch(/^[a-z]+$/);
     }
+  });
+});
+
+describe('SpotItGame wrong-tap timer cleanup', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('clears wrong-tap timer on unmount', () => {
+    vi.useFakeTimers();
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    const { unmount } = render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} lang="en" />);
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+
+    const wrongId = topSymbolIds.find((id) => id !== matchingId);
+    expect(wrongId).toBeDefined();
+
+    fireEvent.click(screen.getByTestId(`top-symbol-${wrongId}`));
+
+    const wrongCallIndex = setTimeoutSpy.mock.calls.findIndex((call) => call[1] === 450);
+    expect(wrongCallIndex).toBeGreaterThanOrEqual(0);
+    const wrongTimerId = setTimeoutSpy.mock.results[wrongCallIndex].value;
+
+    unmount();
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(wrongTimerId);
+    expect(() => {
+      vi.advanceTimersByTime(500);
+    }).not.toThrow();
+  });
+
+  it('clears previous wrong-tap timer when another wrong symbol is tapped', () => {
+    vi.useFakeTimers();
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} lang="en" />);
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+
+    const wrongIds = topSymbolIds.filter((id) => id !== matchingId);
+    expect(wrongIds.length).toBeGreaterThanOrEqual(2);
+
+    fireEvent.click(screen.getByTestId(`top-symbol-${wrongIds[0]}`));
+    const firstCallIndex = setTimeoutSpy.mock.calls.findIndex((call) => call[1] === 450);
+    const firstTimerId = setTimeoutSpy.mock.results[firstCallIndex].value;
+
+    fireEvent.click(screen.getByTestId(`top-symbol-${wrongIds[1]}`));
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(firstTimerId);
+  });
+
+  it('clears wrong-tap timer when correct symbol is tapped', () => {
+    vi.useFakeTimers();
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} lang="en" />);
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+
+    const wrongId = topSymbolIds.find((id) => id !== matchingId);
+    expect(wrongId).toBeDefined();
+
+    fireEvent.click(screen.getByTestId(`top-symbol-${wrongId}`));
+    const wrongCallIndex = setTimeoutSpy.mock.calls.findIndex((call) => call[1] === 450);
+    const wrongTimerId = setTimeoutSpy.mock.results[wrongCallIndex].value;
+
+    fireEvent.click(screen.getByTestId(`top-symbol-${matchingId}`));
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(wrongTimerId);
   });
 });
