@@ -26,7 +26,6 @@ import {
   BingoBoard,
   bingoLayout,
   checkBingo,
-  bingoShout,
   makeBoard,
   settingsForBingo,
 } from "./logic";
@@ -122,7 +121,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
       const line = checkBingo(next, board.size);
       if (line) {
-        sayThen([bingoShout(lang), ...call.confirmLines], () => {
+        sayThen(call.confirmLines, () => {
           lockedRef.current = false;
           setWinLine(line);
         });
