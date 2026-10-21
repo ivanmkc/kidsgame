@@ -41,8 +41,8 @@ describe("MusicBoxGame rendering", () => {
     );
 
     // If JourneyScene receives `lang="ja"`, the stage's aria-label will be 'ステージ'
-    const stageBtn = screen.getByRole("button", { name: "ステージ" });
-    expect(stageBtn).toBeDefined();
+    const stage = screen.getByLabelText("ステージ");
+    expect(stage).toBeDefined();
 
     unmount();
   });
