@@ -193,6 +193,7 @@ describe('CarModeGame', () => {
     for (const packId of PACK_ORDER) {
       const btn = capturedPressables[`carmode-pack-${packId}`];
       expect(btn).toBeDefined();
+      expect(btn.accessibilityRole).toBe('button');
       expect(btn.accessibilityLabel).toBe(ALL_PACKS[packId].name);
 
       type StyleFn = (state: { pressed: boolean }) => Array<Record<string, unknown>>;

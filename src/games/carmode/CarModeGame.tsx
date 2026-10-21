@@ -258,6 +258,7 @@ export function CarModeGame({ onHome, lang }: Props) {
                     id === packId && styles.packBtnActive,
                     pressed && { opacity: 0.7 },
                   ]}
+                  accessibilityRole="button"
                   accessibilityLabel={ALL_PACKS[id].name}
                   testID={`carmode-pack-${id}`}
                 >
