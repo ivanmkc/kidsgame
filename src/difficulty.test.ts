@@ -135,6 +135,12 @@ describe('DIFFICULTIES', () => {
       expect('emoji' in s).toBe(false);
     }
   });
+
+  it('scaffolds hiddenDraw progression strictly from easy to hard', () => {
+    expect(DIFFICULTIES.easy.hiddenDraw).toBeLessThan(DIFFICULTIES.medium.hiddenDraw);
+    expect(DIFFICULTIES.medium.hiddenDraw).toBeLessThan(DIFFICULTIES.hard.hiddenDraw);
+    expect(DIFFICULTIES.hard.hiddenDraw).toBe(8);
+  });
 });
 
 describe('loadFilter and saveFilter', () => {

@@ -96,4 +96,38 @@ describe('HiddenGame render with the 2P toggle OFF', () => {
     expect(html).toContain('hidden-checklist');
     expect(html).toContain('hidden-timer'); // medium shows the solo timer
   });
+
+  it('scaffolds target draw count between medium and hard for expanded scenes', () => {
+    const wizardScene = manifest.hidden.find((h) => h.id === 'wizard_library')!;
+    expect(wizardScene.targets.length).toBe(8);
+
+    const mediumHtml = renderToString(
+      React.createElement(HiddenGame, {
+        onHome: noop,
+        difficulty: 'medium',
+        filter: 'medium',
+        twoPlayerEnabled: false,
+        sceneId: wizardScene.id,
+        onPickScene: noop,
+        onBackToPicker: noop,
+      })
+    );
+    const hardHtml = renderToString(
+      React.createElement(HiddenGame, {
+        onHome: noop,
+        difficulty: 'hard',
+        filter: 'hard',
+        twoPlayerEnabled: false,
+        sceneId: wizardScene.id,
+        onPickScene: noop,
+        onBackToPicker: noop,
+      })
+    );
+
+    const mediumMatches = wizardScene.targets.filter((t) => mediumHtml.includes(`checklist-${t.id}`));
+    const hardMatches = wizardScene.targets.filter((t) => hardHtml.includes(`checklist-${t.id}`));
+
+    expect(mediumMatches.length).toBe(6);
+    expect(hardMatches.length).toBe(8);
+  });
 });
