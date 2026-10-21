@@ -4,13 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
-import { sfx } from "../../../sound";
+import { say, sfx } from "../../../sound";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
+    tap: vi.fn(),
+    win: vi.fn(),
   },
 }));
 
@@ -161,5 +163,71 @@ describe("OddOneGame", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("renders question banner as a button and replays prompt audio on tap", () => {
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    const banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner).toBeTruthy();
+    expect(banner.getAttribute("role")).toBe("button");
+
+    expect(say).toHaveBeenCalledTimes(1);
+    const initialPrompt = vi.mocked(say).mock.calls[0][0];
+    expect(banner.textContent).toBe(initialPrompt);
+
+    act(() => {
+      fireEvent.click(banner);
+    });
+
+    expect(sfx.tap).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(say).mock.calls[1][0]).toBe(initialPrompt);
+  });
+
+  it("disables question banner replay when game is won", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementation(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["apple", "banana", "cat", "pizza"],
+      oddIndex: 2,
+    }));
+
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    const banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner).toBeTruthy();
+
+    // Advance 10 rounds to win (easy spotitRounds = 10)
+    for (let i = 0; i < 10; i++) {
+      const correctBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      expect(correctBtn).toBeTruthy();
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+    }
+
+    expect(
+      container.querySelector('[data-testid="oddone-score"]')?.textContent,
+    ).toContain("10/10");
+
+    vi.mocked(say).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+
+    act(() => {
+      fireEvent.click(banner);
+    });
+
+    expect(sfx.tap).not.toHaveBeenCalled();
+    expect(say).not.toHaveBeenCalled();
   });
 });
