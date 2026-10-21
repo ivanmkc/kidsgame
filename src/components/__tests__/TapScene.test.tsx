@@ -2,6 +2,8 @@ import * as React from "react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, test, vi } from "vitest";
 import { Animated } from "react-native";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
 import { TapScene } from "../TapScene";
 
 const effects: React.EffectCallback[] = [];
@@ -162,22 +164,27 @@ describe("TapScene minimum touch target size", () => {
     expect(html).toContain("top:38px");
   });
 
-  it("provides accessibilityRole button", () => {
-    const html = renderToString(
-      <TapScene
-        source={mockSource}
-        sceneW={100}
-        sceneH={100}
-        displayWidth={100}
-        boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
-        foundIds={[]}
-        onHit={() => {}}
-        onMiss={() => {}}
-        testIDPrefix="left"
-      />,
-    );
+  it("provides accessibilityRole button and localized accessibilityLabel across all supported languages", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const lang of langs) {
+      const html = renderToString(
+        <TapScene
+          source={mockSource}
+          sceneW={100}
+          sceneH={100}
+          displayWidth={100}
+          boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+          foundIds={[]}
+          onHit={() => {}}
+          onMiss={() => {}}
+          testIDPrefix="left"
+          lang={lang}
+        />,
+      );
 
-    expect(html).toContain('role="button"');
+      expect(html).toContain('role="button"');
+      expect(html).toContain(`aria-label="${t(lang, "a11y.target")}"`);
+    }
   });
 
   it("sizes the visual ring to raw dimensions rather than stretching to the enlarged touch target", () => {

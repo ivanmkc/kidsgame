@@ -210,6 +210,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
           onHit={onHit}
           onMiss={() => {}}
           testIDPrefix="left"
+          lang={lang}
         />
       </View>
       <View style={styles.sceneBlock}>
@@ -227,6 +228,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
           onHit={onHit}
           onMiss={() => {}}
           testIDPrefix="right"
+          lang={lang}
         />
       </View>
     </>
