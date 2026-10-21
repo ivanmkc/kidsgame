@@ -139,6 +139,14 @@ describe('numbers: quiz round', () => {
     }
   });
 
+  it.each(['ja', 'cmn', 'yue'] as const)('%s hard tier: prompt card uses arabic numerals', (lang) => {
+    const s = settingsForNumbers('hard', lang);
+    for (const seed of SEEDS.slice(0, 60)) {
+      const r = makeNumberRound(makeRng(seed), s, lang);
+      expect(r.displayText).toBe(String(r.targetN));
+    }
+  });
+
   it('en covers 0..20 across the three tiers', () => {
     const easy = settingsForNumbers('easy', 'en');
     const medium = settingsForNumbers('medium', 'en');

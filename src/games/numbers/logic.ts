@@ -99,7 +99,7 @@ export function makeNumberRound(
   ]);
 
   const targetKey = tiles.find((t) => t.isAnswer)!.key;
-  const displayText = label(targetN, useHan);
+  const displayText = label(targetN, false);
   let promptLines: string[];
   if (lang === 'en') {
     promptLines = [`Find the number ${targetN}!`];
