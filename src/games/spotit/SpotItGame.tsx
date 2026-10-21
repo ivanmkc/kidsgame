@@ -58,7 +58,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
   const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
-  useSay(locked ? null : 'Tap the picture that is on BOTH cards!');
+  useSay(locked ? null : t(lang, 'shell.spotit.sub'));
   useEffect(() => { if (won) say(t(lang, 'win.spotit')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
