@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import * as process from 'node:process';
 import { parseReviewDecisions, runStep, detectScanFindings } from './promote';
 import { parseScanReport, parseLoopFindings } from './findings';
+import { main as makeScanPlan } from '../artifact_review/make_scan_plan';
 
 export function main(argv = process.argv.slice(2), rootDir = process.cwd()): void {
   let decisionsFile = 'review_decisions.json';
@@ -25,6 +26,10 @@ export function main(argv = process.argv.slice(2), rootDir = process.cwd()): voi
   }
 
   const scanOutDir = 'tools/audit_out/artifact_scan';
+  const planStatus = makeScanPlan(rootDir);
+  if (planStatus !== 0) {
+    throw new Error(`makeScanPlan failed with status ${planStatus}`);
+  }
   runStep('python3', ['tools/artifact_scan.py', '--out', scanOutDir], rootDir);
 
   const videoScanOutJson = 'tools/audit_out/video_artifact_scan/video_artifact_report.json';

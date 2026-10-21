@@ -11,9 +11,13 @@ import {
   promoteAssets,
   resolvePromotionPaths,
 } from '../promote';
+import { main as makeScanPlan } from '../../artifact_review/make_scan_plan';
 
 vi.mock('node:fs');
 vi.mock('node:child_process');
+vi.mock('../../artifact_review/make_scan_plan', () => ({
+  main: vi.fn(() => 0),
+}));
 
 const virtualFiles = new Map<string, string>();
 const spawnOverrides = new Map<string, { status?: number; stdout?: string; stderr?: string }>();
@@ -309,6 +313,7 @@ describe('promoteAssets copy logic and pipeline execution', () => {
       'npx tsc --noEmit',
       'npx vitest run',
     ]);
+    expect(makeScanPlan).toHaveBeenCalledWith('.');
   });
 
   it('throws error when candidate file does not exist without writing earlier candidates', () => {

@@ -3,6 +3,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as process from 'node:process';
 import { parseScanReport, type ReviewFinding } from './findings';
+import { main as makeScanPlan } from '../artifact_review/make_scan_plan';
 
 export interface ReviewDecision {
   path: string;
@@ -152,6 +153,12 @@ export function promoteAssets(options: PromoteOptions = {}): PromoteResult {
   runStep('python3', ['tools/compress_assets.py'], rootDir);
   runStep('node', ['tools/gen_images_ts.mjs'], rootDir);
   const scanOutDir = 'tools/audit_out/artifact_scan';
+  
+  const planStatus = makeScanPlan(rootDir);
+  if (planStatus !== 0) {
+    throw new Error(`makeScanPlan failed with status ${planStatus}`);
+  }
+  
   runStep('python3', ['tools/artifact_scan.py', '--out', scanOutDir], rootDir);
 
   const reportPath = path.join(rootDir, scanOutDir, 'artifact_report.json');
