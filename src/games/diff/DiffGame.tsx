@@ -247,7 +247,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
       }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View ref={wrapRef} style={[isLandscape ? styles.rowWrap : styles.colWrap, !showRound && styles.hiddenUntilLoaded]}>{pictures}</View>
+        <View ref={wrapRef} testID="diff-wrap" pointerEvents={showRound ? 'auto' : 'none'} style={[isLandscape ? styles.rowWrap : styles.colWrap, !showRound && styles.hiddenUntilLoaded]}>{pictures}</View>
         {!showRound ? (
           <View pointerEvents="none" style={styles.loadingWrap} testID="diff-loading">
             <ActivityIndicator size="large" color={colors.inkSoft} />
