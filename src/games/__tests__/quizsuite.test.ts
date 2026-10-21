@@ -42,18 +42,19 @@ describe('letters: quiz round', () => {
     }
   });
 
-  it('mixed tier: no tile is drawn as the target\u2019s look-alike glyph', () => {
+  it('mixed tier: no two tiles are drawn as look-alike glyphs (I vs l)', () => {
     // Capital I and lowercase l are the same bare bar in the display face,
-    // and the mixed tier deliberately prefers the I/L/J confusable group —
-    // so "Find the letter I!" could put two identical-looking tiles up and
-    // score only one of them.
+    // and the mixed tier deliberately prefers the I/L/J confusable group.
+    // Neither target nor distractors should show both 'I' and 'l'.
     for (let seed = 1; seed <= 5000; seed++) {
       const r = makeLetterRound(makeRng(seed), 'mixed', 8);
-      const twins = new Set(glyphTwinsOf(r.tiles[r.answerIdx].label));
-      if (!twins.size) continue;
       for (const [i, tile] of r.tiles.entries()) {
-        if (i === r.answerIdx) continue;
-        expect(twins.has(tile.label)).toBe(false);
+        const twins = new Set(glyphTwinsOf(tile.label));
+        if (!twins.size) continue;
+        for (const [j, other] of r.tiles.entries()) {
+          if (i === j) continue;
+          expect(twins.has(other.label)).toBe(false);
+        }
       }
     }
   });

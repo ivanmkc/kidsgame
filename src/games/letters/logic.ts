@@ -166,14 +166,17 @@ export function makeLetterRound(
   }
 
   // Mixed tier draws each distractor's case at random; flip that coin back
-  // if it would render the target's look-alike glyph (I vs l).
-  const targetTwins = new Set(glyphTwinsOf(displayed));
+  // if it would render a look-alike glyph (I vs l) already on the board.
+  const usedLabels = new Set<string>([displayed]);
   const tiles: LetterTile[] = shuffle(rng, [
     { key, label: displayed, isAnswer: true },
     ...distractorLetters.map((L) => {
       const lower = tier === 'mixed' && rng() < 0.5;
       let lbl = lower ? L.toLowerCase() : L;
-      if (targetTwins.has(lbl)) lbl = lower ? L : L.toLowerCase();
+      if (glyphTwinsOf(lbl).some((twin) => usedLabels.has(twin))) {
+        lbl = lower ? L : L.toLowerCase();
+      }
+      usedLabels.add(lbl);
       return { key: lbl, label: lbl, isAnswer: false };
     }),
   ]);
