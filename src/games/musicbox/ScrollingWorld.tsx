@@ -20,14 +20,19 @@ interface Props {
 const STRIP_W = 1280;
 const TALL = 900;
 
+function parallaxTranslate(scrollX: Animated.Value, speed: number) {
+  const scaled = speed === 1 ? scrollX : Animated.multiply(scrollX, speed);
+  return Animated.multiply(Animated.modulo(scaled, STRIP_W), -1);
+}
+
 export function ScrollingWorld({ scrollX, scene }: Props) {
   const bgSrc = MUSICBOX_IMAGES[`${scene.id}/bg`];
   const midSrc = MUSICBOX_IMAGES[`${scene.id}/mid`];
   const fgSrc = MUSICBOX_IMAGES[`${scene.id}/fg`];
 
-  const bgTranslate = Animated.multiply(scrollX, -0.2);
-  const midTranslate = Animated.multiply(scrollX, -0.5);
-  const fgTranslate = Animated.multiply(scrollX, -1);
+  const bgTranslate = parallaxTranslate(scrollX, 0.2);
+  const midTranslate = parallaxTranslate(scrollX, 0.5);
+  const fgTranslate = parallaxTranslate(scrollX, 1);
 
   return (
     <View style={styles.container} pointerEvents="none">
