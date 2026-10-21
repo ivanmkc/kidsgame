@@ -220,28 +220,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
             </View>
           </View>
         ) : (
-          <View style={styles.pickRow}>
-            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
-              <Pressable
-                onPress={() => onPick('same')}
-                testID="samediff-same"
-                accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.same')}
-                style={({ pressed }) => [
-                  styles.pickBtn,
-                  { backgroundColor: '#E8F5E9', borderColor: '#5FBF6E' },
-                  shadows.glowGold,
-                  wrongPick === 'same' && styles.wrong,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={styles.pickEmoji}>👯</Text>
-                <Text style={[styles.pickLabel, { color: '#5FBF6E' }]}>
-                  {t(lang, 'music.same' as never)}
-                </Text>
-                <SparkleBurst trigger={sparkKeys.same} count={5} size={14} />
-              </Pressable>
-            </Animated.View>
+          <View style={styles.pickContainer}>
             <Pressable
               onPress={replay}
               testID="samediff-replay"
@@ -251,27 +230,50 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
             >
               <Text style={styles.replayText}>🔊</Text>
             </Pressable>
-            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
-              <Pressable
-                onPress={() => onPick('different')}
-                testID="samediff-diff"
-                accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.different')}
-                style={({ pressed }) => [
-                  styles.pickBtn,
-                  { backgroundColor: '#FEF3E8', borderColor: '#E89B4F' },
-                  shadows.glowGold,
-                  wrongPick === 'different' && styles.wrong,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={styles.pickEmoji}>🙅</Text>
-                <Text style={[styles.pickLabel, { color: '#E89B4F' }]}>
-                  {t(lang, 'music.different' as never)}
-                </Text>
-                <SparkleBurst trigger={sparkKeys.different} count={5} size={14} />
-              </Pressable>
-            </Animated.View>
+            <View style={styles.pickRow}>
+              <Animated.View style={[{ transform: [{ scale: pickScale }] }, styles.pickBtnWrapper]}>
+                <Pressable
+                  onPress={() => onPick('same')}
+                  testID="samediff-same"
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, 'music.same')}
+                  style={({ pressed }) => [
+                    styles.pickBtn,
+                    { backgroundColor: '#E8F5E9', borderColor: '#5FBF6E' },
+                    shadows.glowGold,
+                    wrongPick === 'same' && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.pickEmoji}>👯</Text>
+                  <Text style={[styles.pickLabel, { color: '#5FBF6E' }]}>
+                    {t(lang, 'music.same' as never)}
+                  </Text>
+                  <SparkleBurst trigger={sparkKeys.same} count={5} size={14} />
+                </Pressable>
+              </Animated.View>
+              <Animated.View style={[{ transform: [{ scale: pickScale }] }, styles.pickBtnWrapper]}>
+                <Pressable
+                  onPress={() => onPick('different')}
+                  testID="samediff-diff"
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, 'music.different')}
+                  style={({ pressed }) => [
+                    styles.pickBtn,
+                    { backgroundColor: '#FEF3E8', borderColor: '#E89B4F' },
+                    shadows.glowGold,
+                    wrongPick === 'different' && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.pickEmoji}>🙅</Text>
+                  <Text style={[styles.pickLabel, { color: '#E89B4F' }]}>
+                    {t(lang, 'music.different' as never)}
+                  </Text>
+                  <SparkleBurst trigger={sparkKeys.different} count={5} size={14} />
+                </Pressable>
+              </Animated.View>
+            </View>
           </View>
         )}
       </View>
@@ -361,15 +363,31 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     marginBottom: 12,
   },
-  pickRow: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+  pickContainer: {
+    alignItems: 'center',
+    gap: 16,
+    width: '100%',
+    maxWidth: 360,
+  },
+  pickRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    width: '100%',
+  },
+  pickBtnWrapper: {
+    flex: 1,
+    maxWidth: 160,
+  },
   pickBtn: {
+    width: '100%',
     borderRadius: 28,
     borderWidth: 4,
-    paddingVertical: 28,
-    paddingHorizontal: 32,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
     alignItems: 'center',
     gap: 8,
-    minWidth: 130,
     ...shadows.soft,
   },
   pickEmoji: { fontSize: 56 },

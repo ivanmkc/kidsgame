@@ -316,5 +316,30 @@ describe('SameDiffGame UI', () => {
 
     vi.useRealTimers();
   });
+
+  it('places replay button in its own row above choice buttons to prevent mobile overflow', () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const replayBtn = screen.getByTestId('samediff-replay');
+    const sameBtn = screen.getByTestId('samediff-same');
+    const diffBtn = screen.getByTestId('samediff-diff');
+
+    // Replay button is separated from the choice row into its own row above,
+    // avoiding horizontal overflow on 360-375px mobile screens.
+    const sameWrapper = sameBtn.parentElement as HTMLElement;
+    const diffWrapper = diffBtn.parentElement as HTMLElement;
+    const pickRow = sameWrapper.parentElement as HTMLElement;
+
+    expect(pickRow).toBe(diffWrapper.parentElement);
+    expect(pickRow.contains(replayBtn)).toBe(false);
+    expect(replayBtn.parentElement?.contains(pickRow)).toBe(true);
+
+    vi.useRealTimers();
+  });
 });
 
