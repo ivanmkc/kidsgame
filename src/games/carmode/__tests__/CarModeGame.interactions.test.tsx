@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { render, screen, act, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, act, cleanup, fireEvent, within } from '@testing-library/react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import * as sound from '../../../sound';
 import * as logic from '../logic';
@@ -122,5 +122,39 @@ describe('CarModeGame interactions', () => {
     fireEvent.click(tapBtn);
 
     expect(screen.getByText('きみの ばん！')).toBeDefined();
+  });
+
+  it.each([
+    { lang: 'ja', expected: 'タップ！' },
+    { lang: 'cmn', expected: '点一点！' },
+    { lang: 'yue', expected: '撳一撳！' },
+  ] as const)('localizes reveal button text for $lang', ({ lang, expected }) => {
+    const actual = logic.startState('silly', 42);
+    vi.spyOn(logic, 'startState').mockReturnValue({
+      ...actual,
+      phase: 'reveal',
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang={lang} />);
+    const tapBtn = screen.getByTestId('carmode-tap');
+    expect(within(tapBtn).getByText(expected)).toBeDefined();
+    expect(within(tapBtn).queryByText('Tap!')).toBeNull();
+  });
+
+  it.each([
+    { lang: 'ja', expected: 'おしまい！' },
+    { lang: 'cmn', expected: '全部完成！' },
+    { lang: 'yue', expected: '全部搞掂！' },
+  ] as const)('localizes completion screen text for $lang', ({ lang, expected }) => {
+    const actual = logic.startState('boops', 42);
+    vi.spyOn(logic, 'startState').mockReturnValue({
+      ...actual,
+      phase: 'done',
+    });
+
+    render(<CarModeGame onHome={noop} lang={lang} />);
+    expect(screen.getByText(expected)).toBeDefined();
+    expect(screen.queryByText('All done!')).toBeNull();
   });
 });

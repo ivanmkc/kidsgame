@@ -244,7 +244,7 @@ export function CarModeGame({ onHome, lang }: Props) {
                   ? t(lang, 'music.listen')
                   : state.phase === 'gap'
                     ? t(lang, 'music.yourTurn')
-                    : 'Tap!'}
+                    : t(lang, 'carmode.tap')}
               </Text>
             </Animated.View>
           </Pressable>
@@ -252,7 +252,7 @@ export function CarModeGame({ onHome, lang }: Props) {
 
         {done && (
           <View style={styles.doneWrap}>
-            <Text style={styles.doneText}>All done!</Text>
+            <Text style={styles.doneText}>{t(lang, 'carmode.done')}</Text>
             <View style={styles.packRow}>
               {PACK_ORDER.map((id) => (
                 <Pressable
