@@ -279,6 +279,8 @@ export type UIKey =
   | 'story.startOver'
   | 'story.readAgain'
   | 'story.allStories'
+  | 'carmode.tap'
+  | 'carmode.done'
   // ── Feedback modal ─────────────────────────────────────────────
   | 'feedback.chip'
   | 'feedback.title'
@@ -606,6 +608,8 @@ export const EN: Table = {
   'story.startOver': 'Start over 📖',
   'story.readAgain': 'The End! Read again 📖',
   'story.allStories': 'All Stories 🏠',
+  'carmode.tap': 'Tap!',
+  'carmode.done': 'All done!',
 
   'feedback.chip': '💬 Send Feedback',
   'feedback.title': 'Tell us!',

@@ -94,6 +94,7 @@ const ALL_KEYS: UIKey[] = [
   'sticker.charactersEmpty',
   'memory.moves', 'rhyme.comingSoon',
   'story.tryAgain', 'story.startOver', 'story.readAgain', 'story.allStories',
+  'carmode.tap', 'carmode.done',
   'feedback.chip', 'feedback.title', 'feedback.broken', 'feedback.idea',
   'feedback.placeholder', 'feedback.cancel', 'feedback.send', 'feedback.thanks',
 ] satisfies UIKey[];

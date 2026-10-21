@@ -297,6 +297,8 @@ export const YUE: Table = {
   'story.startOver': '由頭嚟過 📖',
   'story.readAgain': '完！再睇一次 📖',
   'story.allStories': '所有故事 🏠',
+  'carmode.tap': '撳一撳！',
+  'carmode.done': '全部搞掂！',
 
   'feedback.chip': '💬 意見',
   'feedback.title': '話俾我哋知！',

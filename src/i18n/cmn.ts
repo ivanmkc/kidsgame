@@ -297,6 +297,8 @@ export const CMN: Table = {
   'story.startOver': '重新开始 📖',
   'story.readAgain': '结束！再读一次 📖',
   'story.allStories': '所有故事 🏠',
+  'carmode.tap': '点一点！',
+  'carmode.done': '全部完成！',
 
   'feedback.chip': '💬 反馈意见',
   'feedback.title': '告诉我们！',

@@ -298,6 +298,8 @@ export const JA: Table = {
   'story.startOver': 'はじめから 📖',
   'story.readAgain': 'おしまい！ もういちど 📖',
   'story.allStories': 'おはなし いちらん 🏠',
+  'carmode.tap': 'タップ！',
+  'carmode.done': 'おしまい！',
 
   'feedback.chip': '💬 ごいけん',
   'feedback.title': 'おしえて！',
