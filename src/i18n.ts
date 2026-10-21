@@ -261,6 +261,8 @@ export type UIKey =
   | 'memory.cardFaceDown'
   | 'rhyme.ask'
   | 'rhyme.comingSoon'
+  | 'bingo.prompt'
+  | 'bingo.promptPhonics'
   | 'story.tryAgain'
   | 'story.startOver'
   | 'story.readAgain'
@@ -570,6 +572,8 @@ export const EN: Table = {
   // non-EN pairs this fixed question clip with the target word clip.
   'rhyme.ask': 'Which one rhymes with {word}?',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
+  'bingo.prompt': 'Find the {word}!',
+  'bingo.promptPhonics': 'Find something that starts with {sound}!',
   'story.tryAgain': 'Oops! Try another way ↩️',
   'story.startOver': 'Start over 📖',
   'story.readAgain': 'The End! Read again 📖',

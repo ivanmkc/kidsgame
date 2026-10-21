@@ -22,8 +22,8 @@ export interface BingoCall {
   mode: BingoMode;
   answerIdx: number;
   promptLines: string[];
-  displayPrompt: string;
   confirmLines: string[];
+  sound?: string;
 }
 
 export interface BingoBoard {
@@ -99,19 +99,13 @@ export function tileLabel(icon: string, lang: Lang): string {
   return wordFor(entry, lang).text;
 }
 
-function namePromptLines(icon: string, lang: Lang): { prompt: string[]; display: string } {
+function namePromptLines(icon: string, lang: Lang): string[] {
   const entry = entryFor(icon);
-  if (!entry) {
-    const line = `Find the ${icon}!`;
-    return { prompt: [line], display: line };
-  }
-  if (lang === 'en') {
-    const line = `Find the ${entry.en}!`;
-    return { prompt: [line], display: line };
-  }
+  if (!entry) return [`Find the ${icon}!`];
+  if (lang === 'en') return [`Find the ${entry.en}!`];
   const w = wordFor(entry, lang);
   const ask = NAME_ASK[lang];
-  return { prompt: [ask, `${w.text}！`], display: `${ask} ${w.text}！` };
+  return [ask, `${w.text}！`];
 }
 
 function nameConfirmLines(icon: string, lang: Lang): string[] {
@@ -122,9 +116,8 @@ function nameConfirmLines(icon: string, lang: Lang): string[] {
   return [`${w.text}！`];
 }
 
-function phonicsPromptLines(sound: string): { prompt: string[]; display: string } {
-  const line = `Find something that starts with ${sound}!`;
-  return { prompt: [line], display: line };
+function phonicsPromptLines(sound: string): string[] {
+  return [`Find something that starts with ${sound}!`];
 }
 
 function phonicsConfirmLines(icon: string): string[] {
@@ -203,11 +196,20 @@ export function makeBoard(
     const icon = cells[idx].icon;
     if (mode === 'phonics') {
       const entry = entryFor(icon)!;
-      const { prompt, display } = phonicsPromptLines(entry.sound);
-      return { mode, answerIdx: idx, promptLines: prompt, displayPrompt: display, confirmLines: phonicsConfirmLines(icon) };
+      return {
+        mode,
+        answerIdx: idx,
+        sound: entry.sound,
+        promptLines: phonicsPromptLines(entry.sound),
+        confirmLines: phonicsConfirmLines(icon),
+      };
     }
-    const { prompt, display } = namePromptLines(icon, lang);
-    return { mode, answerIdx: idx, promptLines: prompt, displayPrompt: display, confirmLines: nameConfirmLines(icon, lang) };
+    return {
+      mode,
+      answerIdx: idx,
+      promptLines: namePromptLines(icon, lang),
+      confirmLines: nameConfirmLines(icon, lang),
+    };
   });
 
   return { size, cells, calls };
@@ -246,8 +248,7 @@ export function speechLines(): string[] {
     s.add(BINGO_SHOUT[lang]);
     if (lang !== 'en') s.add(NAME_ASK[lang]);
     for (const w of WORDS) {
-      const { prompt } = namePromptLines(w.icon, lang);
-      for (const l of prompt) s.add(l);
+      for (const l of namePromptLines(w.icon, lang)) s.add(l);
       for (const l of nameConfirmLines(w.icon, lang)) s.add(l);
     }
   }
@@ -255,8 +256,7 @@ export function speechLines(): string[] {
   for (const w of WORDS) {
     if (!seenSound.has(w.sound)) {
       seenSound.add(w.sound);
-      const { prompt } = phonicsPromptLines(w.sound);
-      for (const l of prompt) s.add(l);
+      for (const l of phonicsPromptLines(w.sound)) s.add(l);
     }
     for (const l of phonicsConfirmLines(w.icon)) s.add(l);
   }

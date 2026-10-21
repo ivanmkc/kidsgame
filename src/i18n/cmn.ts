@@ -279,6 +279,8 @@ export const CMN: Table = {
   'memory.cardFaceDown': '盖着的卡片',
   'rhyme.ask': '哪个词的结尾一样？',
   'rhyme.comingSoon': '更多押韵马上就来！🎶',
+  'bingo.prompt': '找一找 {word}！',
+  'bingo.promptPhonics': '找一找 {sound} 开头的！',
   'story.tryAgain': '哎呀！换一条路 ↩️',
   'story.startOver': '重新开始 📖',
   'story.readAgain': '结束！再读一次 📖',

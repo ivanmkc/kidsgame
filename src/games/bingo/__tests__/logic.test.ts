@@ -96,7 +96,6 @@ describe('makeBoard', () => {
       expect(b.cells).toHaveLength(9);
       for (const call of b.calls) {
         expect(call.promptLines.length).toBeGreaterThan(0);
-        expect(call.displayPrompt.length).toBeGreaterThan(0);
         expect(call.confirmLines.length).toBeGreaterThan(0);
       }
     }

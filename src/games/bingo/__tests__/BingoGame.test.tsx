@@ -1,6 +1,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as i18n from '../../../i18n';
 import * as sound from '../../../sound';
 import { sfx } from '../../../sound';
 import { BingoGame } from '../BingoGame';
@@ -113,5 +114,28 @@ describe('BingoGame prompt', () => {
     expect(tile0.accessibilityRole).toBe('button');
     expect(tile0.accessibilityLabel).toBeDefined();
     expect(tile0.accessibilityLabel).toMatch(/[\u3040-\u30ff\u4e00-\u9faf]/);
+  });
+
+  it('renders displayPrompt through i18n translation table for all languages', () => {
+    const tSpy = vi.spyOn(i18n, 't');
+    for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+      tSpy.mockClear();
+      renderToString(<BingoGame onHome={() => {}} difficulty="easy" lang={lang} />);
+      expect(tSpy).toHaveBeenCalledWith(
+        lang,
+        'bingo.prompt',
+        expect.objectContaining({ word: expect.any(String) }),
+      );
+    }
+  });
+
+  it('renders phonics displayPrompt through i18n translation table in phonics mode', () => {
+    const tSpy = vi.spyOn(i18n, 't');
+    renderToString(<BingoGame onHome={() => {}} difficulty="medium" lang="en" />);
+    expect(tSpy).toHaveBeenCalledWith(
+      'en',
+      'bingo.promptPhonics',
+      expect.objectContaining({ sound: expect.any(String) }),
+    );
   });
 });
