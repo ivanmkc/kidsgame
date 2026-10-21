@@ -66,7 +66,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   });
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer && mode !== '2p';
-  useSay(duel ? null : 'Flip the cards and find the pairs!');
+  useSay(mode === null || duel ? null : t(lang, 'card.memory.blurb'));
   useEffect(() => { if (won && !duel) say(t(lang, 'win.memory')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
 

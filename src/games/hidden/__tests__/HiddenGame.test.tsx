@@ -2,6 +2,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { t } from '../../../i18n';
 import { manifest } from '../../../manifest';
 import { HiddenGame } from '../HiddenGame';
 
@@ -153,5 +154,64 @@ describe('HiddenGame localization', () => {
     );
     fireEvent.click(screen.getByTestId('mp-choose-2p'));
     expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: 'Foxyの ばん！' }));
+  });
+
+  it('does not speak intro prompts when mode is null (ModePicker is visible)', () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    // In picker with 2P enabled (mode === null)
+    const { unmount: unmountPicker } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(screen.getByTestId('mode-picker')).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'mp.title') }));
+    expect(speakSpy).not.toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'picker.hidden') }));
+
+    // Choosing solo speaks the picker prompt
+    speakSpy.mockClear();
+    fireEvent.click(screen.getByTestId('mp-choose-1p'));
+    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'picker.hidden') }));
+
+    unmountPicker();
+    cleanup();
+    speakSpy.mockClear();
+
+    // In active scene with 2P enabled (mode === null)
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(screen.getByTestId('mode-picker')).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'mp.title') }));
+    expect(speakSpy).not.toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'hidden.prompt') }));
+
+    // Choosing solo speaks the game prompt
+    speakSpy.mockClear();
+    fireEvent.click(screen.getByTestId('mp-choose-1p'));
+    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'hidden.prompt') }));
   });
 });
