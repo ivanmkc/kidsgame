@@ -1,4 +1,4 @@
-import { say, sfx, useSay } from '../../sound';
+import { say, sfx } from '../../sound';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
@@ -33,7 +33,9 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
   const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
-  useSay(diffPrompt(lang, !!scene));
+  useEffect(() => {
+    say(diffPrompt(lang, !!scene));
+  }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const [found, setFound] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
