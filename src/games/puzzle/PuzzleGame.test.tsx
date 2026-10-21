@@ -36,6 +36,7 @@ describe('PuzzleGame', () => {
         onBackToPicker={() => {}}
         onPickScene={onPickScene}
         difficulty="easy"
+        filter="easy"
         sceneId="d-farm"
       />,
     );
@@ -107,6 +108,7 @@ describe('PuzzleGame', () => {
         onBackToPicker={() => {}}
         onPickScene={() => {}}
         difficulty="easy"
+        filter="easy"
         sceneId="d-farm"
       />,
     );

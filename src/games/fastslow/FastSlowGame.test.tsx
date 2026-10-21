@@ -17,6 +17,9 @@ vi.mock("../../sound", () => ({
   sfx: { good: vi.fn(), wrong: vi.fn(), win: vi.fn(), tap: vi.fn() },
   say: vi.fn(),
   saySequence: vi.fn(),
+  sayThen: vi.fn((msgs, done) => {
+    if (done) done();
+  }),
 }));
 
 vi.mock("../../music", () => ({
@@ -207,6 +210,11 @@ describe("FastSlowGame UI interaction", () => {
     expect(within(fastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
     expect(within(slowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
+    // Wait for the wrong-pick speech delay (500ms)
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
     // Tap the correct button: only the correct button shows celebration sparkles
     fireEvent.click(correctBtn);
     expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(
@@ -214,12 +222,15 @@ describe("FastSlowGame UI interaction", () => {
     );
     expect(within(wrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
-    // Advance through celebration (1000ms) and next round listen phase (450ms)
+    // Verify the score is withheld on fallback picks
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+
+    // Advance through celebration (1000ms) and next round listen phase (400ms for playRound start)
     act(() => {
       vi.advanceTimersByTime(1000);
     });
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(400);
     });
 
     // In round 2 before any tap, neither button should show celebration sparkles

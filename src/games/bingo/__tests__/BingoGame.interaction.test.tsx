@@ -98,7 +98,7 @@ test("rapid double-tap on correct tile only scores once and does not double-adva
 
   // Exactly 1 tile should be marked
   const score = screen.getByTestId("bingo-score");
-  expect(score.textContent).toBe("⭐ 1/9");
+  expect(score.textContent).toBe("⭐ 1");
 });
 
 test("changes language", async () => {
