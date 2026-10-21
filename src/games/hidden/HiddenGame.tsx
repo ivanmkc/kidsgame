@@ -202,6 +202,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
           onHit={onHit}
           onMiss={() => {}}
           testIDPrefix="hidden"
+          lang={lang}
         />
       </ScrollView>
       <WinOverlay

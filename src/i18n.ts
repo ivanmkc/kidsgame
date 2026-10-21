@@ -33,6 +33,7 @@ export type UIKey =
   | 'a11y.twoPlayer'
   | 'a11y.backMenu'
   | 'a11y.backPicker'
+  | 'a11y.target'
   | 'grownups.install'
   | 'grownups.share'
   | 'grownups.copied'
@@ -325,6 +326,7 @@ export const EN: Table = {
   'a11y.twoPlayer': 'Two player mode',
   'a11y.backMenu': 'Back to menu',
   'a11y.backPicker': 'Back to level choices',
+  'a11y.target': 'Target',
   'grownups.install': '📲 Add to Home Screen',
   'grownups.share': '📤 Share with Parents',
   'grownups.copied': '✅ Link copied!',

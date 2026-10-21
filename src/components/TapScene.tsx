@@ -1,5 +1,7 @@
 import React, { useRef } from 'react';
 import { Animated, Image, Pressable, StyleSheet, View } from 'react-native';
+import { Lang } from '../lang';
+import { t } from '../i18n';
 import { Box } from '../manifest';
 import { colors, shadows } from '../theme';
 import { SparkleBurst } from './Sparkles';
@@ -17,12 +19,13 @@ interface Props {
   onHit: (id: string) => void;
   onMiss: () => void;
   testIDPrefix: string;
+  lang?: Lang;
 }
 
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix,
+  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix, lang = 'en',
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
@@ -94,6 +97,7 @@ export function TapScene({
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
             accessibilityRole="button"
+            accessibilityLabel={t(lang, 'a11y.target')}
             onPress={() => (found ? undefined : onHit(id))}
             style={{ position: 'absolute', left, top, width: w, height: h, alignItems: 'center', justifyContent: 'center' }}
           >

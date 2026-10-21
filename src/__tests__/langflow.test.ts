@@ -28,6 +28,7 @@ const ALL_KEYS: UIKey[] = [
   'menu.heading', 'menu.word', 'menu.number', 'menu.grownups',
   'chip.sound', 'chip.muted', 'chip.twoPlayers', 'chip.twoPlayersOn',
   'a11y.langCycle', 'a11y.diffCycle', 'a11y.soundOn', 'a11y.soundOff', 'a11y.twoPlayer',
+  'a11y.target',
   'grownups.install', 'grownups.share', 'grownups.copied', 'grownups.feedback',
   'install.iosHint', 'install.iosHelp', 'share.copied',
   'filter.all', 'filter.easy', 'filter.medium', 'filter.hard',

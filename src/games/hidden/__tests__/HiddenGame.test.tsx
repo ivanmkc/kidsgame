@@ -214,4 +214,26 @@ describe('HiddenGame localization', () => {
     fireEvent.click(screen.getByTestId('mp-choose-1p'));
     expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'hidden.prompt') }));
   });
+
+  it('renders TapScene targets with localized accessibilityLabel in active scene', () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const targets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
+    );
+    expect(targets.length).toBeGreaterThan(0);
+    for (const target of targets) {
+      expect(target.getAttribute('aria-label')).toBe(t('ja', 'a11y.target'));
+    }
+  });
 });

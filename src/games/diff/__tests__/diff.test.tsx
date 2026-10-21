@@ -1,12 +1,14 @@
+// @vitest-environment happy-dom
 import React from 'react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { manifest } from '../../../manifest';
 import { sfx } from '../../../sound';
+import { t } from '../../../i18n';
 import { DiffGame } from '../DiffGame';
 import { DiffHintButton } from '../DiffHintButton';
 
-let lastTapSceneProps: { onHit: (id: string) => void } | null = null;
 let lastDiffWrapProps: import('react-native').ViewProps | null = null;
 
 vi.mock('react-native', async (importOriginal) => {
@@ -22,26 +24,24 @@ vi.mock('react-native', async (importOriginal) => {
   };
 });
 
-vi.mock('../../../components/TapScene', () => ({
-  TapScene: (props: { onHit: (id: string) => void }) => {
-    lastTapSceneProps = props;
-    return null;
-  },
-}));
-
 describe('DiffGame', () => {
   const noop = () => {};
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
   it('renders the scene picker when no scene is selected', () => {
-    const html = renderToString(
+    render(
       <DiffGame onHome={noop} difficulty="medium" onPickScene={noop} onBackToPicker={noop} />,
     );
-    expect(html).toContain('scene-surprise');
+    expect(screen.getByTestId('scene-surprise')).toBeDefined();
   });
 
   it('plays sfx.good when a difference is found', () => {
     const sfxSpy = vi.spyOn(sfx, 'good').mockReturnValue();
-    renderToString(
+    render(
       <DiffGame
         onHome={noop}
         difficulty="medium"
@@ -51,10 +51,8 @@ describe('DiffGame', () => {
       />,
     );
 
-    expect(lastTapSceneProps).not.toBeNull();
-    lastTapSceneProps?.onHit('0');
+    fireEvent.click(screen.getByTestId('left-target-0'));
     expect(sfxSpy).toHaveBeenCalledOnce();
-    sfxSpy.mockRestore();
   });
 
   it('renders hint button with localized accessibilityLabel following lang', () => {
@@ -70,7 +68,7 @@ describe('DiffGame', () => {
   });
   it('disables touch events on the invisible scene while loading', () => {
     lastDiffWrapProps = null;
-    renderToString(
+    render(
       <DiffGame
         onHome={() => {}}
         difficulty="medium"
@@ -81,5 +79,34 @@ describe('DiffGame', () => {
     );
     expect(lastDiffWrapProps).not.toBeNull();
     expect(lastDiffWrapProps!.pointerEvents).toBe('none');
+  });
+
+  it('renders TapScene targets with localized accessibilityLabel for both pictures', () => {
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={manifest.diff[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const leftTargets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('left-target-'),
+    );
+    expect(leftTargets.length).toBeGreaterThan(0);
+    for (const target of leftTargets) {
+      expect(target.getAttribute('aria-label')).toBe(t('ja', 'a11y.target'));
+    }
+
+    const rightTargets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('right-target-'),
+    );
+    expect(rightTargets.length).toBeGreaterThan(0);
+    for (const target of rightTargets) {
+      expect(target.getAttribute('aria-label')).toBe(t('ja', 'a11y.target'));
+    }
   });
 });
