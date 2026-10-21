@@ -35,6 +35,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   } = settingsForLetters(difficulty, lang);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(false);
@@ -56,10 +57,18 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const langMounted = useRef(false);
   useEffect(() => {
     if (!langMounted.current) { langMounted.current = true; return; }
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
     setRound(makeLetterRound(rngRef.current, tier, tileCount));
     setMisses(0);
     setWrongIdx(null);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => () => {
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+  }, []);
 
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -103,9 +112,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       sfx.wrong();
       setWrongIdx(i);
       setMisses((m) => m + 1);
-      setTimeout(() => {
+      errorTimerRef.current = setTimeout(() => {
         lockedRef.current = false;
         setWrongIdx((w) => (w === i ? null : w));
+        errorTimerRef.current = null;
       }, 450);
       say(round.promptLine); // re-speak so a stuck kid gets another try
     }
