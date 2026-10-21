@@ -1,5 +1,6 @@
 import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
+import { WORDS, wordFor } from '../../words';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
 export const SYMBOLS = [
@@ -118,4 +119,11 @@ export const DUEL_COUNTDOWN_PROMPTS: Record<Lang, string> = {
 
 export function duelCountdownPrompt(lang: Lang): string {
   return DUEL_COUNTDOWN_PROMPTS[lang];
+}
+
+/** Localized screen-reader label for a card symbol. */
+export function symbolLabel(iconName: string, lang: Lang): string {
+  const entry = WORDS.find((w) => w.icon === iconName);
+  if (!entry) throw new Error(`Unknown spotit icon: ${iconName}`);
+  return wordFor(entry, lang).text;
 }

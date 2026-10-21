@@ -56,4 +56,16 @@ describe('SpotItGame spoken prompt localization', () => {
     expect(useSaySpy).toHaveBeenCalledWith(null);
     expect(useSaySpy).not.toHaveBeenCalledWith(t('ja', 'shell.spotit.sub'));
   });
+
+  it('renders localized accessibility labels on card symbols', () => {
+    render(<SpotItGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    const buttons = screen.getAllByRole('button');
+    const symbolButtons = buttons.filter((b) => b.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    expect(symbolButtons.length).toBeGreaterThan(0);
+    for (const btn of symbolButtons) {
+      const label = btn.getAttribute('aria-label');
+      expect(label).toBeTruthy();
+      expect(label).not.toMatch(/^[a-z]+$/);
+    }
+  });
 });

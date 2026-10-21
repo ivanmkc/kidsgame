@@ -106,6 +106,19 @@ describe('SpotItDuel', () => {
     expect(sfxWrongSpy).not.toHaveBeenCalled();
   });
 
+  it('localizes symbol accessibility labels for non-English languages', () => {
+    renderToString(<SpotItDuel onHome={noop} difficulty="easy" seed={42} lang="ja" />);
+
+    const symbolPressableKeys = Object.keys(capturedPressableProps).filter((k) => k.startsWith('duel-'));
+    expect(symbolPressableKeys.length).toBeGreaterThan(0);
+
+    for (const key of symbolPressableKeys) {
+      const btn = capturedPressableProps[key];
+      expect(btn.accessibilityLabel).toBeDefined();
+      expect(btn.accessibilityLabel).not.toMatch(/^[a-z]+$/);
+    }
+  });
+
   it('handles rematch callback from WinOverlay and redeals a new round', () => {
     const dealSpy = vi.spyOn(spotitLogic, 'dealDuelRound');
     const layoutSpy = vi.spyOn(cardsModule, 'layoutSlots');
