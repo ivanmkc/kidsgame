@@ -77,6 +77,15 @@ describe('letters: quiz round', () => {
     expect(confusableWithSameGroupCount / totalConfusableTargets).toBeGreaterThan(0.9);
   });
 
+  it('mixed tier: avoidKey excludes target letter regardless of case', () => {
+    for (const seed of SEEDS) {
+      const lower = makeLetterRound(makeRng(seed), 'mixed', 8, 'a');
+      expect(lower.targetKey.toUpperCase()).not.toBe('A');
+      const upper = makeLetterRound(makeRng(seed), 'mixed', 8, 'A');
+      expect(upper.targetKey.toUpperCase()).not.toBe('A');
+    }
+  });
+
   it('sound tier: distractors never share the target sound', () => {
     for (const seed of SEEDS) {
       const r = makeLetterRound(makeRng(seed), 'sound', 8);

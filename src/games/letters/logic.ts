@@ -142,7 +142,7 @@ export function makeLetterRound(
   }
 
   // upper / mixed
-  const upperCands = ALL_LETTERS.filter((L) => L !== avoidKey);
+  const upperCands = ALL_LETTERS.filter((L) => L !== avoidKey?.toUpperCase());
   const targetLetter = upperCands[pickIndex(rng, upperCands.length)];
   const useLower = tier === 'mixed' && rng() < 0.5;
   const displayed = useLower ? targetLetter.toLowerCase() : targetLetter;
