@@ -113,6 +113,7 @@ export const CMN: Table = {
   'shell.numbers.title': '找数字',
   'shell.numbers.titleHan': '找数字（汉数字）',
   'shell.numbers.sub': '听到数字就点它',
+  'button.switchScript': '切换数字写法',
   'shell.sounds.titleEn': '首音',
   'shell.sounds.titleWords': '听词找图',
   'shell.sounds.subEn': '哪张图是这个音开头的？',

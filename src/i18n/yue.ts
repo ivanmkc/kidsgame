@@ -113,6 +113,7 @@ export const YUE: Table = {
   'shell.numbers.title': '搵數字',
   'shell.numbers.titleHan': '搵數字（漢數字）',
   'shell.numbers.sub': '聽到數字就撳佢',
+  'button.switchScript': '切換數字寫法',
   'shell.sounds.titleEn': '首音',
   'shell.sounds.titleWords': '聽詞搵圖',
   'shell.sounds.subEn': '邊張圖係呢個音起頭？',

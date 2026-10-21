@@ -94,7 +94,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
               onPress={() => { sfx.tap(); setScript(numSettings.useHan ? 'arabic' : 'han'); }}
               testID="numbers-script"
               accessibilityRole="button"
-              accessibilityLabel="Switch numeral script"
+              accessibilityLabel={t(lang, 'button.switchScript')}
               style={{ backgroundColor: numSettings.useHan ? '#FFE9B8' : 'white', borderRadius: 12, borderWidth: 2, borderColor: '#E8C97A', paddingVertical: 11, paddingHorizontal: 12, minHeight: 44, justifyContent: 'center' }}
             >
               <Text style={{ fontFamily: fonts.display, fontSize: 14, color: colors.ink }}>{numSettings.useHan ? '一二三' : '123'}</Text>
