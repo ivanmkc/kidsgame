@@ -296,7 +296,11 @@ export type UIKey =
   | 'gate.wordTitle'
   | 'gate.wordPrompt'
   | 'gate.wordPlaceholder'
-  | 'gate.continue';
+  | 'gate.continue'
+  // ── Colors ─────────────────────────────────────────────────────
+  | 'color.red' | 'color.blue' | 'color.green' | 'color.yellow'
+  | 'color.purple' | 'color.orange' | 'color.black' | 'color.white'
+  | 'color.pink' | 'color.brown' | 'color.gray';
 
 export type Table = Record<UIKey, string>;
 
@@ -618,6 +622,17 @@ export const EN: Table = {
   'gate.wordPrompt': 'To continue, type the word',
   'gate.wordPlaceholder': 'Type the word here',
   'gate.continue': 'Continue',
+  'color.red': 'red',
+  'color.blue': 'blue',
+  'color.green': 'green',
+  'color.yellow': 'yellow',
+  'color.purple': 'purple',
+  'color.orange': 'orange',
+  'color.black': 'black',
+  'color.white': 'white',
+  'color.pink': 'pink',
+  'color.brown': 'brown',
+  'color.gray': 'gray',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };
