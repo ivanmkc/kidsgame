@@ -111,11 +111,12 @@ export function settingsForRhyme(
 ): { rounds: number; tiles: number } {
   if (familyCount >= 8) {
     if (difficulty === 'easy') return { rounds: 8, tiles: 3 };
-    if (difficulty === 'hard') return { rounds: 12, tiles: 3 };
-    return { rounds: 10, tiles: 3 };
+    if (difficulty === 'hard') return { rounds: 12, tiles: 5 };
+    return { rounds: 10, tiles: 4 };
   }
   if (difficulty === 'easy') return { rounds: 8, tiles: 3 };
-  return { rounds: 10, tiles: 3 };
+  if (difficulty === 'hard') return { rounds: 10, tiles: 5 };
+  return { rounds: 10, tiles: 4 };
 }
 
 export interface RhymeLayout {

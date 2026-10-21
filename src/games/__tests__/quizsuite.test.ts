@@ -426,15 +426,15 @@ describe('rhyme: per-language families', () => {
 describe('rhyme: settings scale with pool size', () => {
   it('≥8 families: easy/medium/hard = 8/10/12 rounds', () => {
     expect(settingsForRhyme('easy', 8)).toEqual({ rounds: 8, tiles: 3 });
-    expect(settingsForRhyme('medium', 8)).toEqual({ rounds: 10, tiles: 3 });
-    expect(settingsForRhyme('hard', 8)).toEqual({ rounds: 12, tiles: 3 });
-    expect(settingsForRhyme('hard', 20)).toEqual({ rounds: 12, tiles: 3 });
+    expect(settingsForRhyme('medium', 8)).toEqual({ rounds: 10, tiles: 4 });
+    expect(settingsForRhyme('hard', 8)).toEqual({ rounds: 12, tiles: 5 });
+    expect(settingsForRhyme('hard', 20)).toEqual({ rounds: 12, tiles: 5 });
   });
 
   it('lean pool (<8 families): hard tier stays at 10 rounds (no over-replay)', () => {
     expect(settingsForRhyme('easy', 5)).toEqual({ rounds: 8, tiles: 3 });
-    expect(settingsForRhyme('medium', 5)).toEqual({ rounds: 10, tiles: 3 });
-    expect(settingsForRhyme('hard', 5)).toEqual({ rounds: 10, tiles: 3 });
-    expect(settingsForRhyme('hard', 3)).toEqual({ rounds: 10, tiles: 3 });
+    expect(settingsForRhyme('medium', 5)).toEqual({ rounds: 10, tiles: 4 });
+    expect(settingsForRhyme('hard', 5)).toEqual({ rounds: 10, tiles: 5 });
+    expect(settingsForRhyme('hard', 3)).toEqual({ rounds: 10, tiles: 5 });
   });
 });
