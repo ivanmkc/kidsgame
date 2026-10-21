@@ -168,6 +168,7 @@ export function EscapeGame({
       case 'revealed':
         sfx.good();
         playAnim();
+        { const s = locSay('sayFound'); if (s) say(s); }
         break;
       case 'collected': {
         sfx.good();
@@ -188,7 +189,7 @@ export function EscapeGame({
             key: `${hotspotId}-${Date.now()}`, emoji: item.emoji, fromX, fromY,
           }]);
         }
-        { const s = locSay('sayFound'); if (s) say(s); }
+        if (item) say(itemLabel(item, lang));
         break;
       }
       case 'unlocked':
