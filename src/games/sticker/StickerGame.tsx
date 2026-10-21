@@ -162,7 +162,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         if (!res.ok || !res.image_b64) {
           setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
           setPendingKey((k) => (k === sticker.key ? null : k));
-          flashToast('The magic fizzled — try again!');
+          flashToast(t(lang, 'sticker.magicFizzled'));
           return;
         }
         const dataUrl = `data:image/png;base64,${res.image_b64}`;
@@ -174,9 +174,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         magicAborts.current.delete(sticker.key);
         setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
         setPendingKey((k) => (k === sticker.key ? null : k));
-        flashToast('The magic fizzled — try again!');
+        flashToast(t(lang, 'sticker.magicFizzled'));
       });
-  }, [picked, publicImageUrl, pendingKey, flashToast]);
+  }, [picked, publicImageUrl, pendingKey, flashToast, lang]);
 
   const { width, height } = useWindowDimensions();
   const stageRef = useRef<View | null>(null);
@@ -231,7 +231,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         <Pressable
           onPress={() => { sfx.flip(); setPlaced([]); resetMagic(); }}
           testID="sticker-clear"
-          accessibilityLabel="Clear all stickers"
+          accessibilityLabel={t(lang, 'sticker.a11yClear')}
           accessibilityRole="button"
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           style={({ pressed }) => [styles.clearBtn, shadows.soft, pressed && { opacity: 0.8 }]}
@@ -278,6 +278,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                     pending={phase === 'pending'}
                     disabled={!magicEnabled}
                     onPress={() => runMagic(s)}
+                    lang={lang}
                   />
                 ) : null}
               />
@@ -303,7 +304,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                   key={tt.id}
                   onPress={() => { sfx.tap(); setTab(tt.id); }}
                   testID={`sticker-tab-${tt.id}`}
-                  accessibilityLabel={`${name} stickers`}
+                  accessibilityLabel={t(lang, 'sticker.a11yTab', { name })}
                   accessibilityRole="button"
                   hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   style={[styles.tabChip, isLandscape && styles.tabChipLandscape, shadows.soft, tab === tt.id && styles.tabChipOn]}
@@ -323,6 +324,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
               <TrayItem
                 key={icon}
                 icon={icon}
+                lang={lang}
                 onTap={() => addSticker(icon)}
                 onDragMove={(px, py) => setGhost({ icon, x: px, y: py })}
                 onDrop={(px, py) => {
@@ -349,11 +351,12 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   );
 }
 
-function TrayItem({ icon, onTap, onDragMove, onDrop }: {
+function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
   icon: string;
   onTap: () => void;
   onDragMove: (pageX: number, pageY: number) => void;
   onDrop: (pageX: number, pageY: number) => void;
+  lang?: Lang;
 }) {
   const live = useRef({ onTap, onDragMove, onDrop });
   live.current = { onTap, onDragMove, onDrop };
@@ -379,7 +382,7 @@ function TrayItem({ icon, onTap, onDragMove, onDrop }: {
     <View
       {...responder.current.panHandlers}
       testID={`sticker-tray-${icon}`}
-      accessibilityLabel={`Add ${icon} sticker`}
+      accessibilityLabel={t(lang, 'sticker.a11yAdd', { icon })}
       style={[styles.trayItem, shadows.soft]}
     >
       <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
@@ -495,11 +498,12 @@ const DraggableSticker = React.memo(function DraggableSticker({
 // placed dressup sticker. While pending it swaps to a rotating label
 // so the kid sees the magic in flight; a second "adding the magic
 // touches…" label kicks in past 30s so the wait doesn't feel dead.
-function MagicButton({ stickerKey, pending, disabled, onPress }: {
+function MagicButton({ stickerKey, pending, disabled, onPress, lang = 'en' }: {
   stickerKey: number;
   pending: boolean;
   disabled: boolean;
   onPress: () => void;
+  lang?: Lang;
 }) {
   const [long, setLong] = useState(false);
   useEffect(() => {
@@ -511,7 +515,7 @@ function MagicButton({ stickerKey, pending, disabled, onPress }: {
     return (
       <View testID={`magic-pending-${stickerKey}`} style={styles.magicPending}>
         <Text style={styles.magicPendingText}>
-          {long ? 'Adding the magic touches…' : 'Doing magic… ✨'}
+          {long ? t(lang, 'sticker.magicLong') : t(lang, 'sticker.magicPending')}
         </Text>
       </View>
     );
@@ -519,7 +523,7 @@ function MagicButton({ stickerKey, pending, disabled, onPress }: {
   return (
     <Pressable
       testID={`magic-btn-${stickerKey}`}
-      accessibilityLabel="Make it real"
+      accessibilityLabel={t(lang, 'sticker.a11yMagic')}
       accessibilityRole="button"
       onPress={onPress}
       disabled={disabled}

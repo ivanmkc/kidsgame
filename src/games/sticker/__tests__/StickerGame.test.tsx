@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import * as magic from '../magic';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../../../i18n';
 import { Lang } from '../../../lang';
@@ -199,7 +200,7 @@ describe('StickerGame', () => {
     const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
 
     const html = renderToString(
-      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={onBackToPickerSpy} lang="en" />,
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={onBackToPickerSpy} lang="ja" />,
     );
 
     expect(html).toContain('data-testid="sticker-stage"');
@@ -218,7 +219,7 @@ describe('StickerGame', () => {
     // Test clear button press
     const clearBtn = capturedPressableProps['sticker-clear'];
     expect(clearBtn).toBeDefined();
-    expect(clearBtn?.accessibilityLabel).toBe('Clear all stickers');
+    expect(clearBtn?.accessibilityLabel).toBe('シールを ぜんぶ けす');
     expect(clearBtn?.accessibilityRole).toBe('button');
     expect(clearBtn?.hitSlop).toEqual({ top: 12, bottom: 12, left: 12, right: 12 });
 
@@ -416,6 +417,88 @@ describe('StickerGame', () => {
     expect(spokenUtterances).toHaveLength(0);
     unmount();
   });
+
+  it('shows fizzle toast when magic API resolves with ok: false', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(c => c.onPanResponderRelease && (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')));
+    
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    if (release) {
+      act(() => {
+        release({}, { dx: 0, dy: 0 });
+      });
+    }
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+    
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const toastText = await screen.findByText('まほうに しっぱいしちゃった — もういちど！');
+    expect(toastText).toBeDefined();
+
+    panSpy.mockRestore();
+    unmount();
+  });
+
+  it('shows fizzle toast when magic API rejects', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockRejectedValue(new Error('network'));
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(c => c.onPanResponderRelease && (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')));
+    
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    if (release) {
+      act(() => {
+        release({}, { dx: 0, dy: 0 });
+      });
+    }
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+    
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const toastText = await screen.findByText('まほうに しっぱいしちゃった — もういちど！');
+    expect(toastText).toBeDefined();
+
+    panSpy.mockRestore();
+    unmount();
+  });
 });
-
-

@@ -250,6 +250,13 @@ export type UIKey =
   | 'puzzle.peekA11y'
   | 'puzzle.hint'
   | 'sticker.clear'
+  | 'sticker.magicFizzled'
+  | 'sticker.magicPending'
+  | 'sticker.magicLong'
+  | 'sticker.a11yClear'
+  | 'sticker.a11yAdd'
+  | 'sticker.a11yMagic'
+  | 'sticker.a11yTab'
   | 'sticker.hint'
   | 'sticker.tab.dressup'
   | 'sticker.tab.characters'
@@ -563,6 +570,13 @@ export const EN: Table = {
   'puzzle.peekA11y': 'Peek at the finished picture',
   'puzzle.hint': 'Tap one piece, then tap another to swap them!',
   'sticker.clear': '🧹 Clear',
+  'sticker.magicFizzled': 'The magic fizzled — try again!',
+  'sticker.magicPending': 'Doing magic… ✨',
+  'sticker.magicLong': 'Adding the magic touches…',
+  'sticker.a11yClear': 'Clear all stickers',
+  'sticker.a11yAdd': 'Add {icon} sticker',
+  'sticker.a11yMagic': 'Make it real',
+  'sticker.a11yTab': '{name} stickers',
   'sticker.hint': 'Drag to place · pinch to resize & turn · double-tap to pop!',
   'sticker.tab.dressup': 'Dress-Up',
   'sticker.tab.characters': 'Characters',
