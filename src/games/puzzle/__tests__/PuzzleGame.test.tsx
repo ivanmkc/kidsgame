@@ -2,14 +2,16 @@
 import React from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { t } from '../../../i18n';
 import * as sound from '../../../sound';
-import { manifest } from '../../../manifest';
+import { sfx } from '../../../sound';
+import { allSceneOptions } from '../../sceneOptions';
 import { PuzzleGame } from '../PuzzleGame';
 import * as logic from '../logic';
 
 describe('PuzzleGame', () => {
   const noop = () => {};
-  const sceneId = `d-${manifest.diff[0].id}`;
+  const sceneId = allSceneOptions()[0].id;
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -143,21 +145,90 @@ describe('PuzzleGame', () => {
     expect(screen.getByTestId('puzzle-peek-overlay')).toBeTruthy();
   });
 
-  it('translates the peek button accessibility label', () => {
-    // Render in Japanese
-    render(
+  it('renders peek button with English accessibility label', () => {
+    const { unmount } = render(
       <PuzzleGame
-        onHome={() => {}}
+        onHome={noop}
         difficulty="easy"
-        sceneId="d-beach"
-        onPickScene={() => {}}
-        onBackToPicker={() => {}}
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const peekBtn = screen.getByTestId('puzzle-peek');
+    expect(peekBtn.getAttribute('role')).toBe('button');
+    expect(peekBtn.getAttribute('aria-label')).toBe(t('en', 'puzzle.peekA11y'));
+    expect(peekBtn.getAttribute('aria-label')).toBe('Peek at the finished picture');
+    unmount();
+  });
+
+  it('renders peek button with localized accessibility label in Japanese', () => {
+    const { unmount } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
         lang="ja"
       />,
     );
+
     const peekBtn = screen.getByTestId('puzzle-peek');
-    // For Japanese, 'puzzle.peek.a11y' is 'かんせいした えを みる'
-    expect(peekBtn.getAttribute('aria-label')).toBe('かんせいした えを みる');
+    expect(peekBtn.getAttribute('role')).toBe('button');
+    expect(peekBtn.getAttribute('aria-label')).toBe(t('ja', 'puzzle.peekA11y'));
+    expect(peekBtn.getAttribute('aria-label')).toBe('かんせいした えを ちらっとみる');
+    unmount();
+  });
+
+  it('renders peek button with localized accessibility label in Mandarin and Cantonese', () => {
+    const { unmount: unmountCmn } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="cmn"
+      />,
+    );
+    expect(screen.getByTestId('puzzle-peek').getAttribute('aria-label')).toBe(t('cmn', 'puzzle.peekA11y'));
+    unmountCmn();
+
+    const { unmount: unmountYue } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="yue"
+      />,
+    );
+    expect(screen.getByTestId('puzzle-peek').getAttribute('aria-label')).toBe(t('yue', 'puzzle.peekA11y'));
+    unmountYue();
+  });
+
+  it('plays tap sound when peek button is clicked', () => {
+    const tapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
+    const { unmount } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const peekBtn = screen.getByTestId('puzzle-peek');
+    fireEvent.click(peekBtn);
+    expect(tapSpy).toHaveBeenCalled();
+    tapSpy.mockRestore();
+    unmount();
   });
 
   it('speaks localized prompts for scene picker and puzzle board', () => {

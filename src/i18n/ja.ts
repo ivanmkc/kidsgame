@@ -265,7 +265,7 @@ export const JA: Table = {
   'rules.remind': '💡 おしえて！',
   'rules.progress': '{total}こ ちゅう {found}こ',
   'puzzle.peek': '🖼️ ちらみ',
-  'puzzle.peek.a11y': 'かんせいした えを みる',
+  'puzzle.peekA11y': 'かんせいした えを ちらっとみる',
   'puzzle.hint': '1まい タップして、もう1まい タップして いれかえよう！',
   'sticker.clear': '🧹 けす',
   'sticker.hint': 'シールを えへ · ピンチで おおきさ と むき · ダブルタップで けす！',

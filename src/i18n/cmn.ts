@@ -264,7 +264,7 @@ export const CMN: Table = {
   'rules.remind': '💡 提醒我！',
   'rules.progress': '已找到 {found} / {total}',
   'puzzle.peek': '🖼️ 偷看',
-  'puzzle.peek.a11y': '看完整的图',
+  'puzzle.peekA11y': '偷看拼好的图片',
   'puzzle.hint': '点一块，再点另一块，就能交换！',
   'sticker.clear': '🧹 清除',
   'sticker.hint': '把贴纸拖进画里 · 双指缩放和旋转 · 双击去掉！',
