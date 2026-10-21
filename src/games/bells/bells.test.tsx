@@ -445,6 +445,45 @@ describe("BellsGame", () => {
     vi.useRealTimers();
   });
 
+  it('status card displays retry emoji and hides "Your turn!" during wrong-answer buzz', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const statusCard = screen.getByTestId("bells-status");
+    expect(statusCard.textContent).toContain("👆");
+    expect(statusCard.textContent).toContain("Your turn!");
+
+    // Tap incorrect bell
+    const round = makeBellsRound(makeRng(0), "medium");
+    const wrongIdx = (round.sequence[0] + 1) % round.bells.length;
+    fireEvent.click(screen.getByTestId(`bell-${wrongIdx}`));
+
+    // During 800ms wrongFlash, card shows 🔄 and hides pointing finger and "Your turn!"
+    expect(statusCard.textContent).toBe("🔄");
+    expect(statusCard.textContent).not.toContain("👆");
+    expect(screen.queryByText("Your turn!", { exact: false })).toBeNull();
+
+    // After wrong flash and replayed demo, normal "Your turn!" status returns
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByTestId("bells-status").textContent).toContain("👆");
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   it("renders tapDots that fill in visually and removes text fractions", () => {
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0); // Sequence [0, 0] for easy
