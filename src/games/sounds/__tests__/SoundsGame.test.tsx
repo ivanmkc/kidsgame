@@ -1,22 +1,33 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import React, { useState } from 'react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { LangContext } from '../../../components/GameShell';
-import { Lang } from '../../../lang';
-import * as sound from '../../../sound';
-import { SoundsGame } from '../SoundsGame';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import React, { useState } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
+import { manifest } from "../../../manifest";
+import * as sound from "../../../sound";
+import { WORDS } from "../../../words";
+import { SoundsGame } from "../SoundsGame";
+import * as logic from "../logic";
 
 function LangHarness({
-  initialLang = 'en',
-  difficulty = 'easy',
+  initialLang = "en",
+  difficulty = "easy",
 }: {
   initialLang?: Lang;
-  difficulty?: 'easy' | 'medium' | 'hard';
+  difficulty?: "easy" | "medium" | "hard";
 }) {
   const [lang, setLang] = useState<Lang>(initialLang);
   const cycleLang = () => {
-    setLang((l) => (l === 'en' ? 'ja' : l === 'ja' ? 'cmn' : l === 'cmn' ? 'yue' : 'en'));
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
   };
   return (
     <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
@@ -25,13 +36,13 @@ function LangHarness({
   );
 }
 
-describe('SoundsGame language switch safety', () => {
+describe("SoundsGame language switch safety", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
-    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
-    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
-    vi.spyOn(sound, 'saySequence').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -39,13 +50,15 @@ describe('SoundsGame language switch safety', () => {
     vi.useRealTimers();
   });
 
-  it('updates display prompt and speaks new language prompt when language switches mid-round', () => {
-    const saySeqSpy = vi.spyOn(sound, 'saySequence');
+  it("updates display prompt and speaks new language prompt when language switches mid-round", () => {
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
 
     render(<LangHarness initialLang="en" />);
 
     // English prompt spoken initially
-    expect(saySeqSpy).toHaveBeenCalledWith([expect.stringMatching(/^Which one starts with .+\?$/)]);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^Which one starts with .+\?$/),
+    ]);
     saySeqSpy.mockClear();
 
     // Verify visual prompt in English
@@ -53,34 +66,38 @@ describe('SoundsGame language switch safety', () => {
     expect(promptText).toMatch(/^Which one starts with .+\?$/);
 
     // Initial tile set on the board
-    const initialTiles = screen.getAllByTestId(/^sounds-tile-/).map((t) => t.getAttribute('aria-label'));
+    const initialTiles = screen
+      .getAllByTestId(/^sounds-tile-/)
+      .map((t) => t.getAttribute("aria-label"));
 
     // Header chip switches to Japanese
-    const langBtn = screen.getByTestId('lang-cycle');
+    const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
 
     // Visual prompt immediately resolves to Japanese with "どれかな？"
     const jaPromptText = screen.getByTestId(/^sounds-prompt-/).textContent;
-    expect(jaPromptText).toContain('どれかな？');
+    expect(jaPromptText).toContain("どれかな？");
 
     // Japanese prompt is spoken via saySequence
-    expect(saySeqSpy).toHaveBeenCalledWith(['どれかな？', expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
 
     // Board tiles remain identical across the language switch
-    const currentTiles = screen.getAllByTestId(/^sounds-tile-/).map((t) => t.getAttribute('aria-label'));
+    const currentTiles = screen
+      .getAllByTestId(/^sounds-tile-/)
+      .map((t) => t.getAttribute("aria-label"));
     expect(currentTiles).toEqual(initialTiles);
 
     // Score remains at 0/8
-    expect(screen.getByTestId('sounds-score').textContent).toContain('0/8');
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
   });
 
-  it('plays confirmation in current language after mid-round switch', () => {
-    const sayThenSpy = vi.spyOn(sound, 'sayThen');
+  it("plays confirmation in current language after mid-round switch", () => {
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
 
     render(<LangHarness initialLang="en" />);
 
     // Switch from EN to JA mid-round
-    fireEvent.click(screen.getByTestId('lang-cycle'));
+    fireEvent.click(screen.getByTestId("lang-cycle"));
     sayThenSpy.mockClear();
 
     // Tap tiles until answer is found
@@ -96,14 +113,14 @@ describe('SoundsGame language switch safety', () => {
     expect(confirmLines[0]).toMatch(/！$/);
   });
 
-  it('drops pending confirmation callback and does not advance round if language switches during praise', () => {
+  it("drops pending confirmation callback and does not advance round if language switches during praise", () => {
     vi.useFakeTimers();
-    const saySeqSpy = vi.spyOn(sound, 'saySequence');
-    const goodSpy = vi.spyOn(sound.sfx, 'good');
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const goodSpy = vi.spyOn(sound.sfx, "good");
 
     render(<LangHarness initialLang="en" />);
 
-    expect(screen.getByTestId('sounds-score').textContent).toContain('0/8');
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
 
     // Click answer tile in English
     const tiles = screen.getAllByTestId(/^sounds-tile-/);
@@ -116,34 +133,159 @@ describe('SoundsGame language switch safety', () => {
     saySeqSpy.mockClear();
 
     // Cycle language while confirmation is active
-    const langBtn = screen.getByTestId('lang-cycle');
+    const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
 
     // Old sayThen callback was cancelled by useLangEpoch and dropped by !isValid()
-    expect(screen.getByTestId('sounds-score').textContent).toContain('0/8');
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
 
     // Japanese prompt is spoken for the active round
-    expect(saySeqSpy).toHaveBeenCalledWith(['どれかな？', expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
   });
 
-  it('re-speaks prompt in current language on incorrect tile tap after language switch', () => {
-    const saySeqSpy = vi.spyOn(sound, 'saySequence');
-    const wrongSpy = vi.spyOn(sound.sfx, 'wrong');
+  it("re-speaks prompt in current language on incorrect tile tap after language switch", () => {
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const wrongSpy = vi.spyOn(sound.sfx, "wrong");
 
     render(<LangHarness initialLang="en" />);
 
     // Switch to JA
-    fireEvent.click(screen.getByTestId('lang-cycle'));
+    fireEvent.click(screen.getByTestId("lang-cycle"));
     saySeqSpy.mockClear();
 
     // Find and click an incorrect tile
-    const tiles = screen.getAllByTestId(/^sounds-tile-/);
-    for (const tile of tiles) {
-      fireEvent.click(tile);
-      if (wrongSpy.mock.calls.length > 0) break;
-    }
+    const promptEl = screen.getByTestId(/^sounds-prompt-/);
+    const targetIdx = Number(
+      promptEl.getAttribute("data-testid")!.replace("sounds-prompt-", ""),
+    );
+    const pool = WORDS.filter((w) => manifest.spotit.icons.includes(w.icon));
+    const targetIcon = pool[targetIdx].icon;
+    const incorrectTile = screen
+      .getAllByTestId(/^sounds-tile-/)
+      .find((t) => t.getAttribute("aria-label") !== targetIcon)!;
+    fireEvent.click(incorrectTile);
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
-    expect(saySeqSpy).toHaveBeenCalledWith(['どれかな？', expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+  });
+});
+
+describe("SoundsGame round transition lock", () => {
+  let goodSpy: ReturnType<typeof vi.spyOn>;
+  let wrongSpy: ReturnType<typeof vi.spyOn>;
+  let saySequenceSpy: ReturnType<typeof vi.spyOn>;
+  let sayThenSpy: ReturnType<typeof vi.spyOn>;
+  let sayThenCallback: (() => void) | null = null;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    sayThenCallback = null;
+    goodSpy = vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    wrongSpy = vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    saySequenceSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {
+      if (sayThenCallback) {
+        const cb = sayThenCallback;
+        sayThenCallback = null;
+        cb();
+      }
+    });
+    sayThenSpy = vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCallback = cb ?? null;
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("prevents taps during round transition after tapping the correct answer", () => {
+    const generatedRounds: logic.SoundsRound[] = [];
+    const origMakeSoundsRound = logic.makeSoundsRound;
+    vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+      const res = origMakeSoundsRound(...args);
+      generatedRounds.push(res);
+      return res;
+    });
+
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(generatedRounds.length).toBe(1);
+    const round1 = generatedRounds[0];
+    const correctIdx = round1.answerIdx;
+    const wrongIdx = (correctIdx + 1) % round1.tiles.length;
+
+    const correctTile = screen.getByTestId(`sounds-tile-${correctIdx}`);
+    const wrongTile = screen.getByTestId(`sounds-tile-${wrongIdx}`);
+
+    // Tap the correct tile
+    fireEvent.click(correctTile);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
+
+    // While celebration is playing (sayThen has not completed):
+    // 1. Tapping a wrong tile is ignored (no wrong buzzer, no prompt re-narration)
+    saySequenceSpy.mockClear();
+    fireEvent.click(wrongTile);
+    expect(wrongSpy).not.toHaveBeenCalled();
+    expect(saySequenceSpy).not.toHaveBeenCalled();
+    expect(sayThenCallback).not.toBeNull();
+
+    // 2. Rapid second tap on the correct tile is also ignored
+    fireEvent.click(correctTile);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+    // Spoken celebration finishes
+    expect(sayThenCallback).not.toBeNull();
+    act(() => {
+      sayThenCallback!();
+      sayThenCallback = null;
+    });
+
+    // Round has advanced
+    expect(screen.getByTestId("sounds-score").textContent).toContain("1/8");
+    expect(generatedRounds.length).toBe(2);
+
+    // Input is unlocked in the next round
+    const round2 = generatedRounds[1];
+    const round2CorrectTile = screen.getByTestId(
+      `sounds-tile-${round2.answerIdx}`,
+    );
+    fireEvent.click(round2CorrectTile);
+    expect(goodSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("unlocks input when language changes during transition", () => {
+    const generatedRounds: logic.SoundsRound[] = [];
+    const origMakeSoundsRound = logic.makeSoundsRound;
+    vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+      const res = origMakeSoundsRound(...args);
+      generatedRounds.push(res);
+      return res;
+    });
+
+    const { rerender } = render(
+      <SoundsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    const round1 = generatedRounds[0];
+    const correctTile = screen.getByTestId(`sounds-tile-${round1.answerIdx}`);
+
+    fireEvent.click(correctTile);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(sayThenCallback).not.toBeNull();
+
+    // Language changes mid-transition: saySequence cancels sayThen
+    rerender(<SoundsGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    // sayThen callback was executed by saySequence cancellation
+    expect(sayThenCallback).toBeNull();
+
+    // Current round is active and interactive in new language
+    const currentCorrectTile = screen.getByTestId(
+      `sounds-tile-${round1.answerIdx}`,
+    );
+    fireEvent.click(currentCorrectTile);
+    expect(goodSpy).toHaveBeenCalledTimes(2);
   });
 });
