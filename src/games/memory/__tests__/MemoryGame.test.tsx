@@ -9,6 +9,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import * as sound from "../../../sound";
+import { t } from "../../../i18n";
 import { MemoryGame } from "../MemoryGame";
 import * as logic from "../logic";
 
@@ -108,6 +109,76 @@ describe("MemoryGame", () => {
     for (const card of cards) {
       expect(card.getAttribute("aria-label")).toBe("うらがえしのカード");
     }
+  });
+
+  it("localizes intro blurb in solo mode and speaks it on mount", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const onHome = vi.fn();
+    render(<MemoryGame onHome={onHome} difficulty="easy" lang="ja" />);
+
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
+    );
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: "Flip the cards and find the pairs!" }),
+    );
+  });
+
+  it("mutes intro blurb when mode is null and speaks it once solo is chosen", async () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const onHome = vi.fn();
+    render(
+      <MemoryGame
+        onHome={onHome}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+
+    // ModePicker is visible, ModePicker title is spoken
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "mp.title") }),
+    );
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
+    );
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: "Flip the cards and find the pairs!" }),
+    );
+
+    // Choose solo mode
+    speakSpy.mockClear();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("mp-choose-1p"));
+    });
+
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
+    );
   });
 
   it("plays in 2P duel mode, updates player scores on matches, and allows rematch", async () => {
