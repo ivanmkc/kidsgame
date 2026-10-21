@@ -147,6 +147,7 @@ export const WORDS: WordEntry[] = [
     en: "pig",
     letter: "P",
     sound: "puh",
+    rhymeKey: "ig",
     cmnRhyme: "u",
     yueRhyme: "yu",
     ja: "ぶた",
