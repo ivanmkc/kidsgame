@@ -54,6 +54,7 @@ describe('RhymeGame', () => {
   let sayThenDoneCallbacks: Array<() => void> = [];
 
   beforeEach(() => {
+    vi.useFakeTimers();
     cleanup();
     sayThenDoneCallbacks = [];
     vi.restoreAllMocks();
@@ -67,6 +68,10 @@ describe('RhymeGame', () => {
   });
 
   afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
     cleanup();
   });
 
@@ -212,7 +217,6 @@ describe('RhymeGame', () => {
   });
 
   it('resets locked state on play again after winning', () => {
-    vi.useFakeTimers();
     vi.spyOn(logic, 'settingsForRhyme').mockReturnValue({ rounds: 1, tiles: 3 });
     const makeRhymeRoundSpy = vi.spyOn(logic, 'makeRhymeRound');
 
@@ -248,6 +252,5 @@ describe('RhymeGame', () => {
     fireEvent.click(screen.getByTestId(`rhyme-tile-${newWrongIdx}`));
     expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
 
-    vi.useRealTimers();
   });
 });
