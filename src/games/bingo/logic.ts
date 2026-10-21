@@ -7,11 +7,11 @@
 // correct tile — phonics boards carry distinct first-sounds (alternate
 // child names included), name boards never show two icons a kid would
 // call by the same word.
-import { Lang } from '../../lang';
-import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../../words';
+import { Lang } from "../../lang";
+import { Rng, shuffle } from "../../rng";
+import { WORDS, WordEntry, soundsFor, wordFor } from "../../words";
 
-export type BingoMode = 'name' | 'phonics';
+export type BingoMode = "name" | "phonics";
 
 export interface BingoCell {
   icon: string;
@@ -43,7 +43,11 @@ export interface BingoLayout {
   isLandscape: boolean;
 }
 
-export function bingoLayout(width: number, height: number, size: number): BingoLayout {
+export function bingoLayout(
+  width: number,
+  height: number,
+  size: number,
+): BingoLayout {
   const isLandscape = width > height;
   if (isLandscape) {
     // Landscape: prompt card is placed side-by-side with the grid, freeing
@@ -67,22 +71,25 @@ export function bingoLayout(width: number, height: number, size: number): BingoL
   return { tileSize, gap, isLandscape };
 }
 
-export function settingsForBingo(difficulty: 'easy' | 'medium' | 'hard', lang: Lang): BingoSettings {
-  if (lang === 'en') {
-    if (difficulty === 'easy') return { gridSize: 3, mode: 'name' };
-    if (difficulty === 'hard') return { gridSize: 4, mode: 'name' };
-    return { gridSize: 3, mode: 'phonics' };
+export function settingsForBingo(
+  difficulty: "easy" | "medium" | "hard",
+  lang: Lang,
+): BingoSettings {
+  if (lang === "en") {
+    if (difficulty === "easy") return { gridSize: 3, mode: "name" };
+    if (difficulty === "medium") return { gridSize: 4, mode: "name" };
+    return { gridSize: 3, mode: "phonics" };
   }
-  if (difficulty === 'easy') return { gridSize: 3, mode: 'name' };
-  if (difficulty === 'hard') return { gridSize: 5, mode: 'name' };
-  return { gridSize: 4, mode: 'name' };
+  if (difficulty === "easy") return { gridSize: 3, mode: "name" };
+  if (difficulty === "hard") return { gridSize: 5, mode: "name" };
+  return { gridSize: 4, mode: "name" };
 }
 
 const NAME_ASK: Record<Lang, string> = {
-  en: '',
-  ja: 'さがしてね',
-  cmn: '找一找',
-  yue: '搵一搵',
+  en: "",
+  ja: "さがしてね",
+  cmn: "找一找",
+  yue: "搵一搵",
 };
 
 function capitalize(s: string): string {
@@ -102,7 +109,7 @@ export function tileLabel(icon: string, lang: Lang): string {
 function namePromptLines(icon: string, lang: Lang): string[] {
   const entry = entryFor(icon);
   if (!entry) return [`Find the ${icon}!`];
-  if (lang === 'en') return [`Find the ${entry.en}!`];
+  if (lang === "en") return [`Find the ${entry.en}!`];
   const w = wordFor(entry, lang);
   const ask = NAME_ASK[lang];
   return [ask, `${w.text}！`];
@@ -111,7 +118,7 @@ function namePromptLines(icon: string, lang: Lang): string[] {
 function nameConfirmLines(icon: string, lang: Lang): string[] {
   const entry = entryFor(icon);
   if (!entry) return [`${icon}!`];
-  if (lang === 'en') return [`${capitalize(entry.en)}!`];
+  if (lang === "en") return [`${capitalize(entry.en)}!`];
   const w = wordFor(entry, lang);
   return [`${w.text}！`];
 }
@@ -134,13 +141,17 @@ function playablePool(icons: string[]): WordEntry[] {
 }
 
 export function makeBoard(
-  rng: Rng, icons: string[], size: number, mode: BingoMode, lang: Lang,
+  rng: Rng,
+  icons: string[],
+  size: number,
+  mode: BingoMode,
+  lang: Lang,
 ): BingoBoard {
   const cellCount = size * size;
   const pool = playablePool(icons);
 
   let selected: WordEntry[];
-  if (mode === 'phonics') {
+  if (mode === "phonics") {
     // Every cell becomes a call, so the whole BOARD has to be unambiguous:
     // no two icons may share a first-sound — counting the alternate names a
     // kid might use ("bunny" makes the rabbit a 'buh' answer next to the
@@ -149,8 +160,14 @@ export function makeBoard(
     // 9-cell board if they went first.
     const claimed = new Set<string>();
     const byPickiness = [
-      ...shuffle(rng, pool.filter((w) => soundsFor(w).length === 1)),
-      ...shuffle(rng, pool.filter((w) => soundsFor(w).length > 1)),
+      ...shuffle(
+        rng,
+        pool.filter((w) => soundsFor(w).length === 1),
+      ),
+      ...shuffle(
+        rng,
+        pool.filter((w) => soundsFor(w).length > 1),
+      ),
     ];
     selected = [];
     for (const w of byPickiness) {
@@ -165,7 +182,10 @@ export function makeBoard(
       // uniqueness (the pre-existing guarantee) rather than shipping a
       // short board.
       const canonical = new Set(selected.map((w) => w.sound));
-      for (const w of shuffle(rng, pool.filter((w) => !selected.includes(w)))) {
+      for (const w of shuffle(
+        rng,
+        pool.filter((w) => !selected.includes(w)),
+      )) {
         if (selected.length >= cellCount) break;
         if (canonical.has(w.sound)) continue;
         canonical.add(w.sound);
@@ -185,16 +205,22 @@ export function makeBoard(
     }
   }
 
-  const boardIcons = shuffle(rng, selected.map((w) => w.icon));
+  const boardIcons = shuffle(
+    rng,
+    selected.map((w) => w.icon),
+  );
   const cells: BingoCell[] = boardIcons.map((icon) => ({
     icon,
     label: tileLabel(icon, lang),
   }));
 
-  const callOrder = shuffle(rng, Array.from({ length: cellCount }, (_, i) => i));
+  const callOrder = shuffle(
+    rng,
+    Array.from({ length: cellCount }, (_, i) => i),
+  );
   const calls: BingoCall[] = callOrder.map((idx) => {
     const icon = cells[idx].icon;
-    if (mode === 'phonics') {
+    if (mode === "phonics") {
       const entry = entryFor(icon)!;
       return {
         mode,
@@ -226,16 +252,19 @@ export function checkBingo(marked: boolean[], size: number): number[] | null {
   }
   const diag1 = Array.from({ length: size }, (_, i) => i * size + i);
   if (diag1.every((i) => marked[i])) return diag1;
-  const diag2 = Array.from({ length: size }, (_, i) => i * size + (size - 1 - i));
+  const diag2 = Array.from(
+    { length: size },
+    (_, i) => i * size + (size - 1 - i),
+  );
   if (diag2.every((i) => marked[i])) return diag2;
   return null;
 }
 
 const BINGO_SHOUT: Record<Lang, string> = {
-  en: 'BINGO!',
-  ja: 'ビンゴ！',
-  cmn: '宾果！',
-  yue: 'BINGO!',
+  en: "BINGO!",
+  ja: "ビンゴ！",
+  cmn: "宾果！",
+  yue: "BINGO!",
 };
 
 export function bingoShout(lang: Lang): string {
@@ -244,9 +273,9 @@ export function bingoShout(lang: Lang): string {
 
 export function speechLines(): string[] {
   const s = new Set<string>();
-  for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+  for (const lang of ["en", "ja", "cmn", "yue"] as const) {
     s.add(BINGO_SHOUT[lang]);
-    if (lang !== 'en') s.add(NAME_ASK[lang]);
+    if (lang !== "en") s.add(NAME_ASK[lang]);
     for (const w of WORDS) {
       for (const l of namePromptLines(w.icon, lang)) s.add(l);
       for (const l of nameConfirmLines(w.icon, lang)) s.add(l);
