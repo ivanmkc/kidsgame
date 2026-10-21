@@ -413,4 +413,80 @@ describe("EscapeGame", () => {
     expect(sfx.tap).toHaveBeenCalledOnce();
     expect(sound.say).toHaveBeenCalledWith(jaLabel);
   });
+
+  it("speaks sayFound on container reveal and announces item label on collection", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+    const pillow = room.hotspots.find((h) => h.id === "pillow")!;
+    const chest = room.hotspots.find((h) => h.id === "chest")!;
+    const keyItem = room.items.find((i) => i.id === "key")!;
+    const boneItem = room.items.find((i) => i.id === "bone")!;
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="en"
+      />,
+    );
+
+    // Initial mount speaks room intro
+    expect(sound.say).toHaveBeenCalledWith(room.intro);
+    vi.mocked(sound.say).mockClear();
+
+    // 1. Search pillow to reveal key: should speak pillow's sayFound
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    expect(sound.say).toHaveBeenCalledWith(pillow.sayFound);
+
+    vi.mocked(sound.say).mockClear();
+
+    // 2. Tap pillow to collect key: should announce key item's label
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    expect(sound.say).toHaveBeenCalledWith(keyItem.label);
+
+    vi.mocked(sound.say).mockClear();
+
+    // 3. Unlock chest with key: reveals bone and speaks chest's sayFound
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    expect(sound.say).toHaveBeenCalledWith(chest.sayFound);
+
+    vi.mocked(sound.say).mockClear();
+
+    // 4. Tap chest to collect bone: should announce bone item's label
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    expect(sound.say).toHaveBeenCalledWith(boneItem.label);
+  });
+
+  it("speaks localized sayFound on container reveal and localized item label on collection", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+    const pillow = room.hotspots.find((h) => h.id === "pillow")!;
+    const keyItem = room.items.find((i) => i.id === "key")!;
+    const jaFound = pillow.t?.ja?.sayFound ?? pillow.sayFound;
+    const jaLabel = keyItem.t?.ja ?? keyItem.label;
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="ja"
+      />,
+    );
+
+    vi.mocked(sound.say).mockClear();
+
+    // Reveal key
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    expect(sound.say).toHaveBeenCalledWith(jaFound);
+
+    vi.mocked(sound.say).mockClear();
+
+    // Collect key
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    expect(sound.say).toHaveBeenCalledWith(jaLabel);
+  });
 });

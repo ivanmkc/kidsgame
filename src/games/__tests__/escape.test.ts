@@ -27,14 +27,14 @@ describe('escape logic', () => {
 
     // Tap pillow → reveals key (not yet in inventory)
     let r = applyTap(ROOM, s, 'pillow');
-    expect(r.effect).toMatchObject({ kind: 'revealed', item: 'key' });
+    expect(r.effect).toMatchObject({ kind: 'revealed', item: 'key', say: 'A shiny key!' });
     s = r.state;
     expect(s.revealed).toContain('pillow');
     expect(s.inventory).toEqual([]);
 
     // Tap pillow again (or itemBox) → collects key into inventory
     r = applyTap(ROOM, s, 'pillow');
-    expect(r.effect).toMatchObject({ kind: 'collected', item: 'key' });
+    expect(r.effect).toMatchObject({ kind: 'collected', item: 'key', say: 'A key!' });
     s = r.state;
     expect(s.inventory).toEqual(['key']);
     expect(s.used).toContain('pillow');
@@ -50,7 +50,7 @@ describe('escape logic', () => {
 
     // Collect bone from revealed chest
     r = applyTap(ROOM, s, 'chest');
-    expect(r.effect).toMatchObject({ kind: 'collected', item: 'bone' });
+    expect(r.effect).toMatchObject({ kind: 'collected', item: 'bone', say: 'A bone!' });
     s = r.state;
     expect(s.inventory).toEqual(['bone']);
     expect(s.selected).toBeNull();

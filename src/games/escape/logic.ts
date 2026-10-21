@@ -60,13 +60,14 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
   // visible, tapping the hotspot (or the item region) collects it.
   // Forgiveness: re-tapping the container also collects.
   if (s.revealed.includes(h.id) && h.gives) {
+    const item = room.items.find((i) => i.id === h.gives);
     const state: EscapeState = {
       ...s,
       revealed: s.revealed.filter((id) => id !== h.id),
       used: [...s.used, h.id],
       inventory: [...s.inventory, h.gives],
     };
-    return { state, effect: { kind: 'collected', item: h.gives, say: h.sayFound, pop: h.pop } };
+    return { state, effect: { kind: 'collected', item: h.gives, say: item?.label, pop: h.pop } };
   }
 
   if (h.kind === 'search') {
@@ -76,7 +77,7 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
       ...s,
       revealed: [...s.revealed, h.id],
     };
-    return { state, effect: { kind: 'revealed', item: h.gives } };
+    return { state, effect: { kind: 'revealed', item: h.gives, say: h.sayFound } };
   }
 
   // lock / win: an item requirement gates the tap. Forgiveness rule:
