@@ -261,3 +261,16 @@ it("provides visual beat cues during listen phase when muted", () => {
   roundSpy.mockRestore();
   vi.useRealTimers();
 });
+
+it("renders tap circle with accessibilityRole button and localized label", () => {
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.getAttribute("role")).toBe("button");
+  expect(circle.getAttribute("aria-label")).toBe("Tap along with the beat!");
+});
+
+it("localizes tap circle accessibility label when lang is ja", () => {
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.getAttribute("aria-label")).toBe("ビートに あわせて タップ！");
+});

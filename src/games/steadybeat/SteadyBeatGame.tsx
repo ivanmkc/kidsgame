@@ -279,6 +279,8 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         <Pressable
           onPress={onTap}
           testID="steadybeat-circle"
+          accessibilityRole="button"
+          accessibilityLabel={t(lang, "shell.steadybeat.sub")}
           disabled={phase !== "tap"}
           style={({ pressed }) => [
             styles.circle,
