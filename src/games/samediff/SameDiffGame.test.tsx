@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, act, cleanup } from '@testing-library/react';
+import { render, screen, act, fireEvent, cleanup } from '@testing-library/react';
 import { SameDiffGame } from './SameDiffGame';
 import { phrasePitchRatios, SameDiffRound } from './logic';
 
@@ -9,8 +9,8 @@ describe('SameDiffGame UI', () => {
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
-
   it('renders dots during listen phases', () => {
     const { container } = render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
     expect(container.textContent).not.toContain('1/2 🎵');
@@ -143,6 +143,101 @@ describe('SameDiffGame UI', () => {
       vi.useRealTimers();
     }
   });
+  it('locks buttons during round transition to prevent blind guessing while keeping visual cues', () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const sameBtn = screen.getByTestId('samediff-same');
+    const diffBtn = screen.getByTestId('samediff-diff');
+
+    act(() => {
+      fireEvent.click(sameBtn);
+    });
+    if (screen.getByTestId('samediff-score').textContent?.includes('0/')) {
+      act(() => {
+        fireEvent.click(diffBtn);
+      });
+    }
+
+    expect(screen.getByTestId('samediff-score').textContent).toContain('1/');
+
+    // Pick buttons remain mounted during transition so visual cues play
+    expect(screen.getByTestId('samediff-same')).toBeTruthy();
+    expect(screen.getByTestId('samediff-diff')).toBeTruthy();
+
+    // Spam clicks during the transition do not register additional guesses
+    act(() => {
+      fireEvent.click(sameBtn);
+      fireEvent.click(diffBtn);
+    });
+    expect(screen.getByTestId('samediff-score').textContent).toContain('1/');
+
+    // Advance through the transition delay and playback for round 2
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // In round 2, picks are unlocked and advance score
+    const round2Same = screen.getByTestId('samediff-same');
+    const round2Diff = screen.getByTestId('samediff-diff');
+    act(() => {
+      fireEvent.click(round2Same);
+    });
+    if (screen.getByTestId('samediff-score').textContent?.includes('1/')) {
+      act(() => {
+        fireEvent.click(round2Diff);
+      });
+    }
+    expect(screen.getByTestId('samediff-score').textContent).toContain('2/');
+
+    vi.useRealTimers();
+  });
+
+  it('resets game and unlocks picks when playing again', () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    for (let r = 0; r < 8; r++) {
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      const sameBtn = screen.getByTestId('samediff-same');
+      const diffBtn = screen.getByTestId('samediff-diff');
+      act(() => {
+        fireEvent.click(sameBtn);
+      });
+      if (screen.getByTestId('samediff-score').textContent?.includes(`${r}/`)) {
+        act(() => {
+          fireEvent.click(diffBtn);
+        });
+      }
+    }
+
+    expect(screen.getByTestId('samediff-score').textContent).toContain('8/8');
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+
+    const playAgainBtn = screen.getByTestId('play-again');
+    act(() => {
+      fireEvent.click(playAgainBtn);
+    });
+
+    expect(screen.getByTestId('samediff-score').textContent).toContain('0/8');
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByTestId('samediff-same')).toBeTruthy();
+    expect(screen.getByTestId('samediff-diff')).toBeTruthy();
+
+    vi.useRealTimers();
+  });
 
   it('renders pick and replay buttons with accessibilityRole="button" and localized labels', () => {
     vi.useFakeTimers();
@@ -152,22 +247,22 @@ describe('SameDiffGame UI', () => {
       vi.advanceTimersByTime(2000);
     });
 
-    const sameBtn = screen.getByTestId("samediff-same");
-    expect(sameBtn.getAttribute("role")).toBe("button");
-    expect(sameBtn.getAttribute("aria-label")).toBe("Same");
+    const sameBtn = screen.getByTestId('samediff-same');
+    expect(sameBtn.getAttribute('role')).toBe('button');
+    expect(sameBtn.getAttribute('aria-label')).toBe('Same');
 
-    const diffBtn = screen.getByTestId("samediff-diff");
-    expect(diffBtn.getAttribute("role")).toBe("button");
-    expect(diffBtn.getAttribute("aria-label")).toBe("Different");
+    const diffBtn = screen.getByTestId('samediff-diff');
+    expect(diffBtn.getAttribute('role')).toBe('button');
+    expect(diffBtn.getAttribute('aria-label')).toBe('Different');
 
-    const replayBtn = screen.getByTestId("samediff-replay");
-    expect(replayBtn.getAttribute("role")).toBe("button");
-    expect(replayBtn.getAttribute("aria-label")).toBe("🔊 Tap to hear again");
+    const replayBtn = screen.getByTestId('samediff-replay');
+    expect(replayBtn.getAttribute('role')).toBe('button');
+    expect(replayBtn.getAttribute('aria-label')).toBe('🔊 Tap to hear again');
 
     vi.useRealTimers();
   });
 
-  it("localizes accessibility labels when lang is ja", () => {
+  it('localizes accessibility labels when lang is ja', () => {
     vi.useFakeTimers();
     render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="ja" />);
 
@@ -175,15 +270,9 @@ describe('SameDiffGame UI', () => {
       vi.advanceTimersByTime(2000);
     });
 
-    expect(screen.getByTestId("samediff-same").getAttribute("aria-label")).toBe(
-      "おなじ",
-    );
-    expect(screen.getByTestId("samediff-diff").getAttribute("aria-label")).toBe(
-      "ちがう",
-    );
-    expect(
-      screen.getByTestId("samediff-replay").getAttribute("aria-label"),
-    ).toBe("🔊 タップでもういちど聞く");
+    expect(screen.getByTestId('samediff-same').getAttribute('aria-label')).toBe('おなじ');
+    expect(screen.getByTestId('samediff-diff').getAttribute('aria-label')).toBe('ちがう');
+    expect(screen.getByTestId('samediff-replay').getAttribute('aria-label')).toBe('🔊 タップでもういちど聞く');
 
     vi.useRealTimers();
   });
