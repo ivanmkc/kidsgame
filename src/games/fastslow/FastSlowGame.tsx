@@ -15,7 +15,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, saySequence, sfx } from "../../sound";
+import { say, saySequence, sayThen, sfx } from "../../sound";
 import { playSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -44,6 +44,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [wrongPick, setWrongPick] = useState<"fast" | "slow" | null>(null);
+  const [hintPick, setHintPick] = useState<"fast" | "slow" | null>(null);
+  const [hasMissed, setHasMissed] = useState(false);
   const [sparkKey, setSparkKey] = useState(0);
   const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.fastslow" as never));
@@ -78,21 +80,34 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     }
   }, [phase, won, lang]);
 
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
+
   const onPick = (picked: "fast" | "slow") => {
     if (won || phase !== "pick" || lockedRef.current) return;
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
-      const next = score + 1;
+      const next = score + (hasMissed ? 0 : 1);
       setScore(next);
       setWrongPick(null);
+      setHintPick(null);
       const nextHistory = [...history, picked];
       setHistory(nextHistory);
       setPhase("celebrate");
       if (next < total) {
         transitionTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
+          setHasMissed(false);
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
       } else {
@@ -101,25 +116,32 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
         }, 1000);
       }
     } else {
+      lockedRef.current = true;
       sfx.wrong();
       setWrongPick(picked);
-      setTimeout(() => setWrongPick(null), 500);
+      setHasMissed(true);
+      const actual = getActualSpeed(round);
+      wrongTimerRef.current = setTimeout(() => {
+        setWrongPick(null);
+        setHintPick(actual);
+        sayThen([
+          t(lang, actual === 'fast' ? 'music.fast' : 'music.slow'),
+          t(lang, 'music.listen'),
+        ], () => {
+          setHintPick(null);
+          lockedRef.current = false;
+          playRound(round);
+        });
+      }, 500);
     }
   };
 
-  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
-      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
-    };
-  }, []);
 
   const replay = () => {
-    if (phase === "pick") {
+    if (phase === "pick" && !lockedRef.current) {
       stopSequence();
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       setPhase("listen");
       replayTimerRef.current = setTimeout(() => playRound(round), 400);
     }
@@ -127,12 +149,16 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);
     setWrongPick(null);
+    setHintPick(null);
     setHistory([]);
+    setHasMissed(false);
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));
   };
 
@@ -223,6 +249,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                   { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
                   shadows.glowGold,
                   wrongPick === "fast" && styles.wrong,
+                  hintPick === "fast" && styles.hint,
                   pressed && styles.pressed,
                 ]}
               >
@@ -261,6 +288,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                   { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
                   shadows.glowGold,
                   wrongPick === "slow" && styles.wrong,
+                  hintPick === "slow" && styles.hint,
                   pressed && styles.pressed,
                 ]}
               >
@@ -323,6 +351,7 @@ const styles = StyleSheet.create({
   pickEmoji: { fontSize: 56 },
   pickLabel: { fontFamily: fonts.display, fontSize: 22 },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.12)" },
+  hint: { borderColor: colors.green, backgroundColor: "rgba(95,191,110,0.12)" },
   pressed: { transform: [{ scale: 0.94 }] },
   replayBtn: {
     width: 72,

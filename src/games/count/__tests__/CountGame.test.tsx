@@ -281,6 +281,7 @@ describe("logic: applyPickAnswer", () => {
       say: vi.fn(),
       sayThen: sayThenSpy,
       setTimeout: vi.fn(),
+      clearTimeouts: vi.fn(),
       makeNextRound: vi.fn(() => dummyRound),
       setScore,
       setLocked: vi.fn(),
