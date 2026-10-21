@@ -56,12 +56,17 @@ export function CarModeGame({ onHome, lang }: Props) {
 
   const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const boopsTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const startRoundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const round = currentRound(state);
 
   const clearTimers = useCallback(() => {
     if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
     if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
+    if (startRoundTimerRef.current) { clearTimeout(startRoundTimerRef.current); startRoundTimerRef.current = null; }
+    boopsTimersRef.current.forEach(clearTimeout);
+    boopsTimersRef.current = [];
   }, []);
 
   const applyStateTransition = useCallback((next: CarModeState) => {
@@ -100,7 +105,8 @@ export function CarModeGame({ onHome, lang }: Props) {
     primeMusic();
     const PENTATONIC = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81];
     for (let i = 0; i < n; i++) {
-      setTimeout(() => playNote(PENTATONIC[i % PENTATONIC.length]), i * 400);
+      const t = setTimeout(() => playNote(PENTATONIC[i % PENTATONIC.length]), i * 400);
+      boopsTimersRef.current.push(t);
     }
   }, []);
 
@@ -108,7 +114,7 @@ export function CarModeGame({ onHome, lang }: Props) {
     if (r.pack === 'boops' && r.noteCount) {
       playBoops(r.noteCount);
       const boopsDuration = (r.noteCount - 1) * 400 + 800;
-      setTimeout(() => {
+      startRoundTimerRef.current = setTimeout(() => {
         if (stateRef.current.phase !== 'prompt' || currentRound(stateRef.current) !== r) return;
         sayThen(r.prompt, () => {
           if (stateRef.current.phase === 'prompt' && currentRound(stateRef.current) === r) {
