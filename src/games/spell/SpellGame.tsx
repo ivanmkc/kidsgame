@@ -44,7 +44,9 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
   );
   const [placedIds, setPlacedIds] = useState<number[]>([]); // tile ids in slot order
+  const placedIdsRef = useRef<number[]>([]);
   const [wrongId, setWrongId] = useState<number | null>(null);
+  const wrongIdRef = useRef<number | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
 
@@ -52,8 +54,13 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const langMounted = useRef(false);
   useEffect(() => {
     if (!langMounted.current) { langMounted.current = true; return; }
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    wrongTimer.current = null;
+    wrongIdRef.current = null;
+    setWrongId(null);
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
+    placedIdsRef.current = [];
     setPlacedIds([]);
     setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
     setGameKey((k) => k + 1);
@@ -74,16 +81,25 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
   }, []);
 
-  const filled = placedIds.length;
-  const expected = round.chars[filled];
-
   const onTile = (tile: SpellTile) => {
-    if (won || placedIds.includes(tile.id)) return;
-    if (filled >= round.chars.length) return; // guarded during the 1s advance delay
+    const placed = placedIdsRef.current;
+    if (won || placed.includes(tile.id)) return;
+    if (placed.length >= round.chars.length) return; // guarded during the 1s advance delay
+    if (wrongIdRef.current === tile.id) return; // ignore hammering on the active wrong tile
+
+    const expected = round.chars[placed.length];
     if (tile.char === expected) {
+      if (wrongTimer.current) {
+        clearTimeout(wrongTimer.current);
+        wrongTimer.current = null;
+      }
+      wrongIdRef.current = null;
+      setWrongId(null);
+
       sfx.good();
       say(charLine(expected, round.word.lang));
-      const nextPlaced = [...placedIds, tile.id];
+      const nextPlaced = [...placed, tile.id];
+      placedIdsRef.current = nextPlaced;
       setPlacedIds(nextPlaced);
       if (nextPlaced.length === round.chars.length) {
         setCelebrate((c) => c + 1);
@@ -92,6 +108,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
             setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
+            placedIdsRef.current = [];
             setPlacedIds([]);
           }
           setWordIdx(nextI);
@@ -99,18 +116,30 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
+      wrongIdRef.current = tile.id;
       setWrongId(tile.id);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
-      wrongTimer.current = setTimeout(() => setWrongId((w) => (w === tile.id ? null : w)), 500);
+      wrongTimer.current = setTimeout(() => {
+        if (wrongIdRef.current === tile.id) {
+          wrongIdRef.current = null;
+        }
+        setWrongId((w) => (w === tile.id ? null : w));
+        wrongTimer.current = null;
+      }, 500);
       // Re-speak the whole word slowly so the kid can try again with the cue.
       say(linesForWord(round.word).spell);
     }
   };
 
   const reset = () => {
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    wrongTimer.current = null;
+    wrongIdRef.current = null;
+    setWrongId(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
+    placedIdsRef.current = [];
     setPlacedIds([]);
     setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
     setGameKey((k) => k + 1);
