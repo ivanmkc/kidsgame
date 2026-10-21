@@ -217,7 +217,7 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: sayThenSpy,
-      setTimeout: vi.fn((fn: () => void) => {
+      clearTimeouts: vi.fn(), setTimeout: vi.fn((fn: () => void) => {
         fn();
         return setTimeout(() => {}, 0);
       }),
@@ -320,7 +320,7 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: vi.fn(),
-      setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
+      clearTimeouts: vi.fn(), setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
       makeNextRound: vi.fn(),
       setScore: vi.fn(),
       setLocked: vi.fn(),
