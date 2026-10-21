@@ -48,6 +48,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
       rngRef.current,
       idx,
       recallFrom,
+      rulesRef.current,
     );
     return makeRulesRound(
       rngRef.current,
