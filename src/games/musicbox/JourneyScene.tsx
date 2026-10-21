@@ -30,7 +30,6 @@ export function JourneyScene({ scene, lang }: Props) {
   const vehicleBounce = useRef(new Animated.Value(0)).current;
   const vehicleIdle = useRef(new Animated.Value(0)).current;
   const stageSize = useRef({ w: 1, h: 1 });
-  const holdDown = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -63,8 +62,7 @@ export function JourneyScene({ scene, lang }: Props) {
     const big = beatsForTap(s) > 1;
     setState(advance(s));
 
-    const scrollAmount = holdDown.current ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;
-    scrollTotal.current += scrollAmount;
+    scrollTotal.current += SCROLL_PER_TAP;
     Animated.spring(scrollX, {
       toValue: scrollTotal.current,
       friction: 14,
@@ -106,9 +104,6 @@ export function JourneyScene({ scene, lang }: Props) {
     doTap(x, y, fingerCount);
   }, [doTap]);
 
-  const onPressIn = useCallback(() => { holdDown.current = true; }, []);
-  const onPressOut = useCallback(() => { holdDown.current = false; }, []);
-
   const vehicleTranslateY = useMemo(() =>
     Animated.add(
       vehicleBounce.interpolate({
@@ -141,12 +136,7 @@ export function JourneyScene({ scene, lang }: Props) {
       }}
       onStartShouldSetResponder={() => true}
       onMoveShouldSetResponder={() => false}
-      onResponderGrant={(e) => {
-        onPressIn();
-        onTouchStart(e);
-      }}
-      onResponderRelease={onPressOut}
-      onResponderTerminate={onPressOut}
+      onResponderGrant={onTouchStart}
       testID="musicbox-stage"
       accessibilityLabel={t(lang, 'musicbox.stage')}
     >
