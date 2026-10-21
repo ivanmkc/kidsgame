@@ -3,7 +3,9 @@ import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, act, fireEvent, cleanup } from '@testing-library/react';
 import { SameDiffGame } from './SameDiffGame';
-import { phrasePitchRatios, SameDiffRound } from './logic';
+import * as samediffLogic from './logic';
+import { phrasePitchRatios, SameDiffRound, makeSameDiffRound, roundsToWin, BASE_PHRASES } from './logic';
+import { makeRng } from '../../rng';
 
 describe('SameDiffGame UI', () => {
   afterEach(() => {
@@ -44,6 +46,7 @@ describe('SameDiffGame UI', () => {
       phraseA: [{ m: 60, b: 1 }, { m: 64, b: 1 }, { m: 67, b: 1 }],
       phraseB: [{ m: 60, b: 1 }, { m: 64, b: 1 }, { m: 67, b: 1 }],
       answer: 'same',
+      phraseIdx: 0,
     };
     const ratiosA = phrasePitchRatios(roundSame, roundSame.phraseA);
     const ratiosB = phrasePitchRatios(roundSame, roundSame.phraseB);
@@ -54,6 +57,7 @@ describe('SameDiffGame UI', () => {
       phraseA: [{ m: 60, b: 1 }, { m: 64, b: 1 }, { m: 67, b: 1 }],
       phraseB: [{ m: 60, b: 1 }, { m: 68, b: 1 }, { m: 67, b: 1 }],
       answer: 'different',
+      phraseIdx: 0,
     };
     const diffRatiosA = phrasePitchRatios(roundDiff, roundDiff.phraseA);
     const diffRatiosB = phrasePitchRatios(roundDiff, roundDiff.phraseB);
@@ -64,6 +68,7 @@ describe('SameDiffGame UI', () => {
       phraseA: [{ m: 60, b: 1 }, { m: 60, b: 1 }],
       phraseB: [{ m: 60, b: 1 }, { m: 60, b: 1 }],
       answer: 'same',
+      phraseIdx: 0,
     };
     expect(phrasePitchRatios(flatRound, flatRound.phraseA)).toEqual([0.5, 0.5]);
   });
@@ -341,5 +346,128 @@ describe('SameDiffGame UI', () => {
 
     vi.useRealTimers();
   });
+
+  it('defines at least 12 ascending 3-note base phrases with pitch gaps >= 3', () => {
+    expect(BASE_PHRASES.length).toBeGreaterThanOrEqual(12);
+    for (const phrase of BASE_PHRASES) {
+      expect(phrase).toHaveLength(3);
+      expect(phrase[0].m).toBeLessThan(phrase[1].m);
+      expect(phrase[1].m).toBeLessThan(phrase[2].m);
+      expect(phrase[1].m - phrase[0].m).toBeGreaterThanOrEqual(3);
+      expect(phrase[2].m - phrase[1].m).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('never repeats base phrases back-to-back and provides variety across rounds', () => {
+    for (const d of ['easy', 'medium', 'hard'] as const) {
+      for (let seed = 1; seed <= 50; seed++) {
+        const rng = makeRng(seed);
+        const history: number[] = [];
+        const total = roundsToWin(d);
+        for (let r = 0; r < total; r++) {
+          const round = makeSameDiffRound(rng, d, history);
+          expect(round.phraseIdx).toBeDefined();
+          if (history.length > 0) {
+            expect(round.phraseIdx).not.toBe(history[history.length - 1]);
+          }
+          history.push(round.phraseIdx);
+        }
+        // Across the session (<= 12 rounds), all picked phrases are distinct
+        expect(new Set(history).size).toBe(total);
+      }
+    }
+  });
+
+  it('cycles phrase pool when history spans all base phrases without back-to-back repeats', () => {
+    const rng = makeRng(42);
+    const fullHistory = Array.from({ length: BASE_PHRASES.length }, (_, i) => i);
+    const lastPhrase = fullHistory[fullHistory.length - 1];
+    const round = makeSameDiffRound(rng, 'easy', fullHistory);
+    expect(round.phraseIdx).toBeDefined();
+    expect(round.phraseIdx).not.toBe(lastPhrase);
+  });
+
+  it('threads historyRef across rounds and resets after Play Again', () => {
+    vi.useFakeTimers();
+    const spy = vi.spyOn(samediffLogic, 'makeSameDiffRound');
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Round 1 was created on mount: initial call has no history
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][2]).toBeUndefined();
+
+    // Play through all 8 easy rounds
+    for (let r = 0; r < 8; r++) {
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+      const sameBtn = screen.getByTestId('samediff-same');
+      const diffBtn = screen.getByTestId('samediff-diff');
+      act(() => {
+        fireEvent.click(sameBtn);
+      });
+      if (screen.getByTestId('samediff-score').textContent?.includes(`${r}/`)) {
+        act(() => {
+          fireEvent.click(diffBtn);
+        });
+      }
+    }
+
+    expect(screen.getByTestId('samediff-score').textContent).toContain('8/8');
+    // Exactly 8 rounds were generated for the 8 rounds
+    expect(spy).toHaveBeenCalledTimes(8);
+
+    // Verify each round n received a history whose last entry is round n-1's phraseIdx,
+    // and that each returned round has a phraseIdx different from the previous round
+    for (let n = 1; n < 8; n++) {
+      const prevResult = spy.mock.results[n - 1].value;
+      const currResult = spy.mock.results[n].value;
+      const passedHistory = spy.mock.calls[n][2];
+
+      expect(passedHistory).toBeDefined();
+      expect(passedHistory).toHaveLength(n);
+      expect(passedHistory?.[passedHistory.length - 1]).toBe(prevResult.phraseIdx);
+      expect(currResult.phraseIdx).not.toBe(prevResult.phraseIdx);
+    }
+
+    // Advance to win overlay and click Play Again
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+    const playAgainBtn = screen.getByTestId('play-again');
+    act(() => {
+      fireEvent.click(playAgainBtn);
+    });
+
+    // Reset generates round 1 of the new game without history (call 9)
+    expect(spy).toHaveBeenCalledTimes(9);
+    expect(screen.getByTestId('samediff-score').textContent).toContain('0/8');
+
+    // Advance and win round 1 of the second game
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    const round1Same = screen.getByTestId('samediff-same');
+    const round1Diff = screen.getByTestId('samediff-diff');
+    act(() => {
+      fireEvent.click(round1Same);
+    });
+    if (screen.getByTestId('samediff-score').textContent?.includes('0/')) {
+      act(() => {
+        fireEvent.click(round1Diff);
+      });
+    }
+
+    // Call 10 is round 2 of the second game: history passed must have length 1
+    expect(spy).toHaveBeenCalledTimes(10);
+    const round2History = spy.mock.calls[9][2];
+    expect(round2History).toHaveLength(1);
+    expect(round2History?.[0]).toBe(spy.mock.results[8].value.phraseIdx);
+    expect(spy.mock.results[9].value.phraseIdx).not.toBe(spy.mock.results[8].value.phraseIdx);
+
+    vi.useRealTimers();
+  });
 });
+
 
