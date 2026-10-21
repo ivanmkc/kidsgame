@@ -213,7 +213,9 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
             >
               {displayPrompt}
             </Text>
-            {shortH && !isLandscape ? null : (
+            {shortH ? (
+              <Text style={styles.speakerIcon}>🔊</Text>
+            ) : (
               <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
             )}
           </Pressable>
@@ -382,6 +384,9 @@ const styles = StyleSheet.create({
   },
   promptTextLandscape: {
     fontSize: 18,
+  },
+  speakerIcon: {
+    fontSize: 16,
   },
   hearHint: {
     fontFamily: fonts.bodyReg,
