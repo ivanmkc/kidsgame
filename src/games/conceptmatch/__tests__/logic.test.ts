@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { t, UIKey } from "../../../i18n";
+import { Lang } from "../../../lang";
 import { makeRng } from "../../../rng";
 import { WORDS, wordFor } from "../../../words";
 import {
   ALPHABET,
+  COLORS,
   ConceptMatchCard,
   ConceptMatchDeck,
   buildBoard,
@@ -323,6 +326,109 @@ describe("conceptmatch/logic", () => {
             false,
           );
         }
+      });
+    });
+
+    describe("color-word deck", () => {
+      it("defaults to 2 pairs (4 cards)", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "color-word");
+        expect(board).toHaveLength(4);
+      });
+
+      it("generates the requested number of pairs with color and text display variants", () => {
+        const rng = makeRng(321);
+        const board = buildBoard(rng, "color-word", "en", 4);
+        expect(board).toHaveLength(8);
+
+        const byConcept = new Map<string, ConceptMatchCard[]>();
+        for (const card of board) {
+          const group = byConcept.get(card.conceptId) ?? [];
+          group.push(card);
+          byConcept.set(card.conceptId, group);
+        }
+
+        expect(byConcept.size).toBe(4);
+
+        for (const [conceptId, cards] of byConcept.entries()) {
+          expect(cards).toHaveLength(2);
+          const [card1, card2] = cards;
+          expect(isMatch(card1, card2)).toBe(true);
+
+          const entry = COLORS.find((c) => c.id === conceptId);
+          expect(entry).toBeDefined();
+
+          const colorCard = cards.find(
+            (c) => c.display.type === "color" && c.display.color === entry!.hex,
+          );
+          const wordCard = cards.find(
+            (c) => c.display.type === "text" && c.display.text === conceptId,
+          );
+
+          expect(colorCard).toBeDefined();
+          expect(wordCard).toBeDefined();
+
+          expect(colorCard?.key).toBe(`${conceptId}-color`);
+          expect(wordCard?.key).toBe(`${conceptId}-word`);
+
+          expect(colorCard?.speech).toBe(conceptId);
+          expect(wordCard?.speech).toBe(conceptId);
+        }
+      });
+
+      it("localizes color word display and speech across all 4 languages", () => {
+        const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+        for (const lang of langs) {
+          const rng = makeRng(555);
+          const board = buildBoard(rng, "color-word", lang, 11);
+          expect(board).toHaveLength(22);
+
+          for (const card of board) {
+            const expectedWord = t(lang, `color.${card.conceptId}` as UIKey);
+            expect(card.speech).toBe(expectedWord);
+            if (card.display.type === "text") {
+              expect(card.display.text).toBe(expectedWord);
+            }
+          }
+        }
+      });
+
+      it("translates all 11 colors across all 4 languages without English fallback", () => {
+        expect(COLORS).toHaveLength(11);
+        for (const color of COLORS) {
+          const en = t("en", `color.${color.id}` as UIKey);
+          const ja = t("ja", `color.${color.id}` as UIKey);
+          const cmn = t("cmn", `color.${color.id}` as UIKey);
+          const yue = t("yue", `color.${color.id}` as UIKey);
+
+          expect(en).toBeTruthy();
+          expect(ja).toBeTruthy();
+          expect(cmn).toBeTruthy();
+          expect(yue).toBeTruthy();
+
+          expect(ja).not.toBe(en);
+          expect(cmn).not.toBe(en);
+          expect(yue).not.toBe(en);
+        }
+      });
+
+      it("produces unique keys for every card", () => {
+        const rng = makeRng(888);
+        const board = buildBoard(rng, "color-word", "en", 6);
+        const keys = board.map((c) => c.key);
+        expect(new Set(keys).size).toBe(board.length);
+      });
+
+      it("is reproducible with the same RNG seed", () => {
+        const board1 = buildBoard(makeRng(12345), "color-word", "en", 4);
+        const board2 = buildBoard(makeRng(12345), "color-word", "en", 4);
+        expect(board1).toEqual(board2);
+      });
+
+      it("produces different layouts with different RNG seeds", () => {
+        const board1 = buildBoard(makeRng(1), "color-word", "en", 4);
+        const board2 = buildBoard(makeRng(2), "color-word", "en", 4);
+        expect(board1).not.toEqual(board2);
       });
     });
 

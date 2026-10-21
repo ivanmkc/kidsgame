@@ -1,3 +1,4 @@
+import { t, UIKey } from "../../i18n";
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, wordFor } from "../../words";
@@ -15,7 +16,27 @@ export interface ConceptMatchCard {
   speech: string;
 }
 
-export type ConceptMatchDeck = "letters" | "picture-word" | "picture-spoken";
+export type ConceptMatchDeck =
+  "letters" | "picture-word" | "picture-spoken" | "color-word";
+
+export interface ColorEntry {
+  id: string;
+  hex: string;
+}
+
+export const COLORS: ColorEntry[] = [
+  { id: "red", hex: "#E53935" },
+  { id: "blue", hex: "#1E88E5" },
+  { id: "green", hex: "#43A047" },
+  { id: "yellow", hex: "#FDD835" },
+  { id: "purple", hex: "#8E24AA" },
+  { id: "orange", hex: "#FB8C00" },
+  { id: "black", hex: "#212121" },
+  { id: "white", hex: "#FFFFFF" },
+  { id: "pink", hex: "#F06292" },
+  { id: "brown", hex: "#6D4C41" },
+  { id: "gray", hex: "#757575" },
+];
 
 export const ALPHABET: string[] = [
   "A",
@@ -142,6 +163,29 @@ export function buildBoard(
           display: isPictureWord
             ? { type: "text", text: word }
             : { type: "audio" },
+          speech: word,
+        },
+      ];
+    });
+    return shuffle(rng, cards);
+  }
+
+  if (deck === "color-word") {
+    const pool = shuffle(rng, COLORS);
+    const chosen = pool.slice(0, pairs);
+    const cards: ConceptMatchCard[] = chosen.flatMap((entry) => {
+      const word = t(lang, `color.${entry.id}` as UIKey);
+      return [
+        {
+          key: `${entry.id}-color`,
+          conceptId: entry.id,
+          display: { type: "color", color: entry.hex },
+          speech: word,
+        },
+        {
+          key: `${entry.id}-word`,
+          conceptId: entry.id,
+          display: { type: "text", text: word },
           speech: word,
         },
       ];
