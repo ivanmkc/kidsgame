@@ -197,6 +197,7 @@ export const YUE: Table = {
   'music.slow': '慢',
   'music.same': '一樣',
   'music.different': '唔同',
+  'music.replay': '再聽一次',
 
   'overlay.next': '下一關 ▶️',
   'overlay.nextRound': '下一輪 ▶️',

@@ -216,6 +216,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick("fast")}
                 testID="fastslow-fast"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, 'music.fast')}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
@@ -238,6 +240,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
             <Pressable
               onPress={replay}
               testID="fastslow-replay"
+              accessibilityRole="button"
+              accessibilityLabel={t(lang, "music.replay")}
               style={({ pressed }) => [
                 styles.replayBtn,
                 shadows.soft,
@@ -250,6 +254,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick("slow")}
                 testID="fastslow-slow"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, 'music.slow')}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },

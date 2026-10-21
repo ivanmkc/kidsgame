@@ -197,6 +197,7 @@ export const CMN: Table = {
   'music.slow': '慢',
   'music.same': '一样',
   'music.different': '不同',
+  'music.replay': '再听一次',
 
   'overlay.next': '下一关 ▶️',
   'overlay.nextRound': '下一轮 ▶️',

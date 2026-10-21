@@ -178,6 +178,7 @@ export type UIKey =
   | 'music.slow'
   | 'music.same'
   | 'music.different'
+  | 'music.replay'
   // ── WinOverlay: labels + per-game messages ─────────────────────
   | 'overlay.next'
   | 'overlay.nextRound'
@@ -490,6 +491,7 @@ export const EN: Table = {
   'music.slow': 'Slow',
   'music.same': 'Same',
   'music.different': 'Different',
+  'music.replay': 'Replay',
 
   'overlay.next': 'Next Level ▶️',
   'overlay.nextRound': 'Next Round ▶️',
