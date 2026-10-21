@@ -179,12 +179,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       )}
       onBack={onHome}
       lang={lang}
-      right={
-        <ScoreChip
-          label={`⭐ ${markedCount}/${board.cells.length}`}
-          testID="bingo-score"
-        />
-      }
+      right={<ScoreChip label={`⭐ ${markedCount}`} testID="bingo-score" />}
     >
       <View
         style={[

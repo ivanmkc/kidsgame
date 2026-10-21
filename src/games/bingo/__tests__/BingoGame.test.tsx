@@ -29,6 +29,29 @@ vi.mock('react', async (importOriginal) => {
   };
 });
 
+describe('BingoGame ScoreChip', () => {
+  beforeEach(() => {
+    mockWon = false;
+    callCount = 0;
+  });
+
+  it('during active play, ScoreChip shows marked count and no denominator', () => {
+    const { renderToString } = require('react-dom/server');
+    const html = renderToString(<BingoGame onHome={() => {}} difficulty="easy" lang="en" />);
+    // Check that it doesn't show /9 or /16
+    expect(html).toContain('⭐ 0');
+    expect(html).not.toContain('⭐ 0/9');
+  });
+
+  it('when won, ScoreChip continues to show just the marked count', () => {
+    const { renderToString } = require('react-dom/server');
+    mockWon = true;
+    const html = renderToString(<BingoGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(html).toContain('⭐ 3');
+    expect(html).not.toContain('⭐ 3/9');
+  });
+});
+
 let capturedPromptProps: {
   disabled?: boolean;
   onPress?: () => void;
