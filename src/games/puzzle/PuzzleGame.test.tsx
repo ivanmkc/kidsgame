@@ -35,7 +35,7 @@ describe('PuzzleGame', () => {
         onHome={() => {}}
         onBackToPicker={() => {}}
         onPickScene={onPickScene}
-        difficulty="easy"
+        difficulty="medium"
         sceneId="d-farm"
       />,
     );
@@ -50,7 +50,7 @@ describe('PuzzleGame', () => {
     expect(screen.queryByTestId('puzzle-peek-overlay')).toBeNull();
 
     const tiles = screen.getAllByTestId(/puzzle-tile-\d+-piece-\d+/);
-    expect(tiles).toHaveLength(6);
+    expect(tiles).toHaveLength(9);
 
     fireEvent.click(tiles[0]);
     fireEvent.click(tiles[1]);
@@ -81,7 +81,7 @@ describe('PuzzleGame', () => {
     };
 
     // Bubble sort or selection sort manually by firing clicks
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 9; i++) {
       let arr = getPieces();
       if (arr[i] !== i) {
         const targetPos = arr.indexOf(i);
