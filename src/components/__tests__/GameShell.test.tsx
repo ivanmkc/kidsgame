@@ -31,7 +31,9 @@ describe('GameShell', () => {
     const backBtn = screen.getByTestId('back-button');
     expect(backBtn.getAttribute('role')).toBe('button');
     expect(backBtn.getAttribute('aria-label')).toBe('レベルえらびにもどる');
-    expect(screen.getByText('レベル')).toBeDefined();
+    expect(screen.getByText('レベル')).toBeTruthy();
     unmount();
   });
 });
+
+
