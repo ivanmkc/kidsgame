@@ -62,6 +62,34 @@ describe('JourneyScene accessibility', () => {
     unmount();
   });
 
+  it('scrolls by full 48px on initial tap without hold-down throttling', () => {
+    const springSpy = vi.spyOn(Animated, 'spring');
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+
+    const stage = screen.getByLabelText('Stage');
+    fireEvent.touchStart(stage, {
+      changedTouches: [
+        {
+          locationX: 100,
+          locationY: 100,
+          force: 1,
+          identifier: 1,
+          pageX: 100,
+          pageY: 100,
+          clientX: 100,
+          clientY: 100,
+        },
+      ],
+    });
+
+    expect(springSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ toValue: 48 }),
+    );
+
+    unmount();
+  });
+
   it('renders spawned object with button role and accessibility label', () => {
     const onTapSpawn = vi.fn();
     const entry: SpawnEntry = {
