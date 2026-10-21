@@ -23,6 +23,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SameDiffRound>(() => makeSameDiffRound(rngRef.current, difficulty));
+  const historyRef = useRef<number[]>([round.phraseIdx]);
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<'listenA' | 'listenB' | 'pick' | 'transition'>('listenA');
   const [activeNote, setActiveNote] = useState<number | null>(null);
@@ -80,7 +81,9 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       setScore(next);
       setWrongPick(null);
       if (next < total) {
-        setRound(makeSameDiffRound(rngRef.current, difficulty));
+        const nextRound = makeSameDiffRound(rngRef.current, difficulty, [...historyRef.current]);
+        historyRef.current.push(nextRound.phraseIdx);
+        setRound(nextRound);
       }
     } else {
       sfx.wrong();
@@ -98,7 +101,9 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     setScore(0);
     setWrongPick(null);
     setActiveNote(null);
-    setRound(makeSameDiffRound(rngRef.current, difficulty));
+    const firstRound = makeSameDiffRound(rngRef.current, difficulty);
+    historyRef.current = [firstRound.phraseIdx];
+    setRound(firstRound);
   };
 
 
