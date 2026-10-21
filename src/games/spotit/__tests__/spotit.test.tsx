@@ -68,6 +68,7 @@ describe('SpotItGame language switch safety', () => {
 
     // Initial English title
     expect(screen.getByText('Spot It!')).toBeDefined();
+    expect(screen.getByText('Tap the picture that is on BOTH cards')).toBeDefined();
     expect(screen.getByTestId('spotit-score').textContent).toContain('0/10');
 
     // Extract symbols from top and bottom cards before language switch
@@ -95,6 +96,7 @@ describe('SpotItGame language switch safety', () => {
 
     // Assert UI labels update instantly to Japanese
     expect(screen.getByText('いっしょさがし')).toBeDefined();
+    expect(screen.getByText('りょうほうのカードに ある えを タップ')).toBeDefined();
 
     // Assert that no old-language speech or unexpected speech/timer fires after language switch (say is not called again for the sub prompt)
     expect(saySpy).not.toHaveBeenCalled();
