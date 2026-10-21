@@ -32,6 +32,8 @@ interface Props {
   lang: Lang;
 }
 
+const LISTEN_DELAY_MS = 1000;
+
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
@@ -57,7 +59,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) {
       setPhase("listen");
-      const timer = setTimeout(() => playRound(round), 400);
+      const timer = setTimeout(() => playRound(round), LISTEN_DELAY_MS);
       return () => {
         clearTimeout(timer);
         stopSequence();
@@ -121,7 +123,10 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       stopSequence();
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
       setPhase("listen");
-      replayTimerRef.current = setTimeout(() => playRound(round), 400);
+      replayTimerRef.current = setTimeout(
+        () => playRound(round),
+        LISTEN_DELAY_MS,
+      );
     }
   };
 
@@ -217,7 +222,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 onPress={() => onPick("fast")}
                 testID="fastslow-fast"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.fast')}
+                accessibilityLabel={t(lang, "music.fast")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
@@ -255,7 +260,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 onPress={() => onPick("slow")}
                 testID="fastslow-slow"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.slow')}
+                accessibilityLabel={t(lang, "music.slow")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
