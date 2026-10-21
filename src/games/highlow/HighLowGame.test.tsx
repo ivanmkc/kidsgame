@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import React from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import React, { useState } from "react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   act,
   cleanup,
@@ -9,6 +9,9 @@ import {
   screen,
   within,
 } from "@testing-library/react";
+import { LangContext } from "../../components/GameShell";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
 import * as music from "../../music";
 import { sfx } from "../../sound";
 import { HighLowGame } from "./HighLowGame";
@@ -338,5 +341,90 @@ describe("HighLowGame UI", () => {
     expect(screen.getByTestId("melody-dot-0")).toBeDefined();
 
     vi.useRealTimers();
+  });
+});
+
+const noop = () => {};
+
+function LangHarness({
+  initialLang = "en",
+}: {
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <HighLowGame onHome={noop} difficulty="easy" lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
+describe("HighLowGame language switch safety", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("switches language mid-round and updates labels without resetting state or firing stale timers", () => {
+    vi.useFakeTimers();
+    let lastNotes: music.SeqNote[] = [];
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        lastNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<LangHarness initialLang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    expect(highBtn.textContent).toContain(t("en", "music.high" as never));
+    const scoreChip = screen.getByTestId("highlow-score");
+    const initialScore = scoreChip.textContent;
+
+    // Cycle language
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // Labels should update to Japanese
+    expect(highBtn.textContent).toContain(t("ja", "music.high" as never));
+    
+    // Score should not reset
+    expect(screen.getByTestId("highlow-score").textContent).toBe(initialScore);
+
+    // Advance timers to ensure no stale timeouts trigger
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Score is still the same, we are still in pick phase
+    expect(screen.getByTestId("highlow-score").textContent).toBe(initialScore);
+    expect(screen.getByTestId("highlow-high")).toBeDefined();
+
+    const isHigh = lastNotes[1].m > lastNotes[0].m;
+    const correctBtn = screen.getByTestId(
+      isHigh ? "highlow-high" : "highlow-low",
+    );
+    fireEvent.click(correctBtn);
+
+    // Check score updated
+    expect(screen.getByTestId("highlow-score").textContent).not.toBe(initialScore);
   });
 });
