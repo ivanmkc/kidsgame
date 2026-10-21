@@ -1,14 +1,24 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { manifest } from '../../../manifest';
 import * as sound from '../../../sound';
 import { RhymeGame } from '../RhymeGame';
+import * as logic from '../logic';
 import { availableEntries } from '../logic';
 
 vi.mock('../../assets/images', () => {
-  const p = new Proxy({}, { get: () => ({ uri: 'stub.png' }) });
+  const rhymeKeys = [
+    'sun', 'bun', 'cake', 'snake', 'bear', 'pear', 'moon', 'spoon',
+    'tree', 'bee', 'house', 'mouse', 'hat', 'bat', 'sock', 'rock',
+    'clock', 'box', 'whale', 'snail', 'jar', 'coat', 'boat', 'goat',
+  ];
+  const stub = { uri: 'stub.png' };
+  const target = Object.fromEntries(rhymeKeys.map((k) => [k, stub]));
+  const p = new Proxy(target, {
+    get: (t, prop) => (typeof prop === 'string' && prop in t ? t[prop] : stub),
+  });
   return {
     SPOTIT_ICONS: p,
     RHYME_SPRITES: p,
@@ -41,11 +51,16 @@ describe('RhymeGame', () => {
   const onHome = vi.fn();
   let goodSpy: ReturnType<typeof vi.spyOn>;
   let wrongSpy: ReturnType<typeof vi.spyOn>;
+  let sayThenDoneCallbacks: Array<() => void> = [];
 
   beforeEach(() => {
+    cleanup();
+    sayThenDoneCallbacks = [];
     vi.restoreAllMocks();
     vi.spyOn(sound, 'saySequence').mockImplementation(() => {});
-    vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => cb && cb());
+    vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => {
+      if (cb) sayThenDoneCallbacks.push(cb);
+    });
     goodSpy = vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
     wrongSpy = vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
     vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
@@ -131,5 +146,108 @@ describe('RhymeGame', () => {
     const round2Tile = screen.getByTestId('rhyme-tile-0');
     fireEvent.click(round2Tile);
     expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
+  });
+
+  it('handles wrong tile tap when not celebrating with wrong buzzer and prompt replay', () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, 'makeRhymeRound');
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const currentRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const wrongIdx = currentRound.answerIdx === 0 ? 1 : 0;
+
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
+
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sound.sfx.good).not.toHaveBeenCalled();
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 0/8');
+    expect(sayThenDoneCallbacks).toHaveLength(0);
+  });
+
+  it('ignores wrong tile taps during celebration audio without buzzing or advancing round prematurely', () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, 'makeRhymeRound');
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const currentRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const answerIdx = currentRound.answerIdx;
+    const wrongIdx = answerIdx === 0 ? 1 : 0;
+
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 0/8');
+
+    // Tap correct tile
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${answerIdx}`));
+
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 0/8');
+
+    // While celebration is in progress, tap wrong tile
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
+
+    // Wrong buzzer must NOT sound, and round must not advance prematurely
+    expect(sound.sfx.wrong).not.toHaveBeenCalled();
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 0/8');
+
+    // Rapid second tap on correct tile must also be ignored
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${answerIdx}`));
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+
+    const callCountBeforeAdvance = makeRhymeRoundSpy.mock.calls.length;
+
+    // Celebration completes
+    const finishCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishCelebration();
+    });
+
+    // Score advances to next round
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 1/8');
+    expect(makeRhymeRoundSpy).toHaveBeenCalledTimes(callCountBeforeAdvance + 1);
+
+    // Tiles in round 2 can be tapped
+    const secondRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const secondWrongIdx = secondRound.answerIdx === 0 ? 1 : 0;
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${secondWrongIdx}`));
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+  });
+
+  it('resets locked state on play again after winning', () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, 'settingsForRhyme').mockReturnValue({ rounds: 1, tiles: 3 });
+    const makeRhymeRoundSpy = vi.spyOn(logic, 'makeRhymeRound');
+
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const currentRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const answerIdx = currentRound.answerIdx;
+
+    // Answer single round to win
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${answerIdx}`));
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+    const finishCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishCelebration();
+    });
+
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 1/1');
+    const playAgainBtn = screen.getByTestId('play-again');
+    expect(playAgainBtn).toBeDefined();
+
+    // Advance past the 600ms tap shield on WinOverlay
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+
+    // Reset game
+    fireEvent.click(playAgainBtn);
+    expect(screen.getByTestId('rhyme-score').textContent).toBe('🎵 0/1');
+
+    // Verify advancing/locked lock is released in reset game
+    const newRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const newWrongIdx = newRound.answerIdx === 0 ? 1 : 0;
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${newWrongIdx}`));
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
   });
 });
