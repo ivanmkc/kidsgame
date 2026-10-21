@@ -64,5 +64,32 @@ describe('analyticsContext', () => {
 
       expect(uuid1).not.toEqual(uuid2);
     });
+
+    it('falls back to Math.random when crypto is undefined', () => {
+      vi.stubGlobal('crypto', undefined);
+
+      const uuid1 = generateUuid();
+      const uuid2 = generateUuid();
+
+      const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      expect(uuid1).toMatch(uuidV4Regex);
+      expect(uuid2).toMatch(uuidV4Regex);
+      expect(uuid1).not.toEqual(uuid2);
+
+      vi.unstubAllGlobals();
+    });
+
+    it('falls back to Math.random when crypto.randomUUID is not available', () => {
+      // Simulate an environment where crypto exists but lacks randomUUID.
+      const mockCrypto = {};
+      vi.stubGlobal('crypto', mockCrypto);
+
+      const uuid = generateUuid();
+
+      const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      expect(uuid).toMatch(uuidV4Regex);
+
+      vi.unstubAllGlobals();
+    });
   });
 });
