@@ -125,10 +125,19 @@ describe("CountGame", () => {
     const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
 
     render(<CountGame onHome={noop} difficulty="easy" lang="ja" />);
-
     expect(saySpy).toHaveBeenCalledWith(
       "みんなを タップして いくつか おしえて",
     );
+
+    cleanup();
+    saySpy.mockClear();
+    render(<CountGame onHome={noop} difficulty="easy" lang="cmn" />);
+    expect(saySpy).toHaveBeenCalledWith("点每个小伙伴，然后告诉我一共几个");
+
+    cleanup();
+    saySpy.mockClear();
+    render(<CountGame onHome={noop} difficulty="easy" lang="yue" />);
+    expect(saySpy).toHaveBeenCalledWith("撳每個朋友仔，然後話俾我聽有幾多個");
   });
 
   it("speaks instructional prompt again upon advancing to next round", () => {
