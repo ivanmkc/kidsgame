@@ -185,7 +185,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     stageRef.current?.measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
   };
   const [ghost, setGhost] = useState<{ icon: string; x: number; y: number } | null>(null);
-  useSay(picked ? null : "Where's the party?");
+  useSay(picked ? null : t(lang, 'picker.sticker'));
 
   if (!picked) {
     return (
