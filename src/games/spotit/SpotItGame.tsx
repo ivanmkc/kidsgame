@@ -113,15 +113,15 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
         <DealIn key={`t${roundKey}`} from={-1}>
           {showTimer ? (
             <TimerRing elapsed={elapsed} size={cardSize + 24} stroke={9} testID="spotit-timer">
-              <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+              <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" lang={lang} />
             </TimerRing>
           ) : (
-            <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" />
+            <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" lang={lang} />
           )}
         </DealIn>
         <Text style={styles.vs}>👀</Text>
         <DealIn key={`b${roundKey}`} from={1}>
-          <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" />
+          <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" lang={lang} />
         </DealIn>
       </View>
       <WinOverlay

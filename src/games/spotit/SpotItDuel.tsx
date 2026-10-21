@@ -186,6 +186,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   const zone = (z: ZoneId) => (
     <Zone
       z={z}
+      lang={lang}
       rotated={!isLandscape && z === 'b'}
       phase={phase}
       count={count}
@@ -254,10 +255,11 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
 }
 
 function Zone({
-  z, rotated, phase, count, card, center, ownSlots, sharedSlots, cardSize, roundKey,
+  z, lang, rotated, phase, count, card, center, ownSlots, sharedSlots, cardSize, roundKey,
   onTap, wrongFlash, frozen, hintSymbol, won, score, total,
 }: {
   z: ZoneId;
+  lang: Lang;
   rotated: boolean;
   phase: Phase;
   count: number;
@@ -313,6 +315,7 @@ function Zone({
             testIDPrefix={`duel-${z}-shared`}
             disabled={disabled}
             hintSymbol={hintSymbol}
+            lang={lang}
           />
         </DealIn>
         <DealIn key={`${z}o${roundKey}`} from={1}>
@@ -326,6 +329,7 @@ function Zone({
             testIDPrefix={`duel-${z}-my`}
             disabled={disabled}
             hintSymbol={hintSymbol}
+            lang={lang}
           />
         </DealIn>
       </View>

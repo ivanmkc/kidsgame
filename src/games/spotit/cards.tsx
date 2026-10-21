@@ -5,7 +5,8 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { manifest } from '../../manifest';
 import { Rng } from '../../rng';
 import { colors, shadows } from '../../theme';
-import { Card } from './logic';
+import { Lang } from '../../lang';
+import { Card, symbolLabel } from './logic';
 
 // Classic Dobble layout: one icon in the middle, five in a ring, each with
 // its own size + tilt so cards feel hand-scattered.
@@ -53,7 +54,7 @@ export function DealIn({ from, children }: { from: number; children: React.React
 }
 
 export function SpotCard({
-  card, slots, size, onTap, wrongFlash, tint, testIDPrefix, disabled, hintSymbol,
+  card, slots, size, onTap, wrongFlash, tint, testIDPrefix, disabled, hintSymbol, lang = 'en',
 }: {
   card: Card;
   slots: Slot[];
@@ -64,6 +65,7 @@ export function SpotCard({
   testIDPrefix: string;
   disabled?: boolean;
   hintSymbol?: number | null;
+  lang?: Lang;
 }) {
   return (
     <View style={[styles.card, shadows.sticker, { width: size, height: size, borderRadius: size / 2, borderColor: tint }]}>
@@ -83,6 +85,7 @@ export function SpotCard({
             rot={slot.rot}
             disabled={disabled}
             hinted={hintSymbol === sym}
+            lang={lang}
           />
         );
       })}
@@ -91,7 +94,7 @@ export function SpotCard({
 }
 
 export function SymbolButton({
-  iconName, wrong, onTap, testID, left, top, size, rot, disabled, hinted,
+  iconName, wrong, onTap, testID, left, top, size, rot, disabled, hinted, lang = 'en',
 }: {
   iconName: string;
   wrong: boolean;
@@ -103,6 +106,7 @@ export function SymbolButton({
   rot: number;
   disabled?: boolean;
   hinted?: boolean;
+  lang?: Lang;
 }) {
   const pad = Math.max(0, 44 - size) / 2;
   const scale = useRef(new Animated.Value(1)).current;
@@ -125,7 +129,15 @@ export function SymbolButton({
     onTap();
   };
   return (
-    <Pressable onPress={press} disabled={disabled} testID={testID} hitSlop={pad} accessibilityLabel={iconName} accessibilityRole="button" style={{ position: 'absolute', left, top, width: size, height: size }}>
+    <Pressable
+      onPress={press}
+      disabled={disabled}
+      testID={testID}
+      hitSlop={pad}
+      accessibilityLabel={symbolLabel(iconName, lang)}
+      accessibilityRole="button"
+      style={{ position: 'absolute', left, top, width: size, height: size }}
+    >
       <Animated.View
         style={[
           styles.symbol,
