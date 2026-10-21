@@ -1,18 +1,30 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang, useLangEpoch } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { sayThen, saySequence, sfx } from '../../sound';
-import { SoundsRound, makeSoundsRound, resolveSoundsPrompts, settingsForSounds } from './logic';
-import { useWinLine } from '../winlines';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang, useLangEpoch } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { sayThen, saySequence, sfx } from "../../sound";
+import {
+  SoundsRound,
+  makeSoundsRound,
+  resolveSoundsPrompts,
+  settingsForSounds,
+} from "./logic";
+import { useWinLine } from "../winlines";
 
 interface Props {
   onHome: () => void;
@@ -28,14 +40,14 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const [roundIdx, setRoundIdx] = useState(0);
-  const [round, setRound] = useState<SoundsRound>(
-    () => makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
+  const [round, setRound] = useState<SoundsRound>(() =>
+    makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
-  useWinLine(won, t(lang, lang === 'en' ? 'win.sounds' : 'win.soundsWords'));
+  useWinLine(won, t(lang, lang === "en" ? "win.sounds" : "win.soundsWords"));
   const { isValid } = useLangEpoch(lang);
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
@@ -60,7 +72,15 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
         if (!isValid()) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
-          setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount, round.tiles[i].icon));
+          setRound(
+            makeSoundsRound(
+              rngRef.current,
+              manifest.spotit.icons,
+              lang,
+              tileCount,
+              round.tiles[i].icon,
+            ),
+          );
         }
       });
     } else {
@@ -71,12 +91,19 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     }
   };
 
+  const onReplay = () => {
+    if (won || lockedRef.current) return;
+    saySequence(prompts.promptLines);
+  };
+
   const reset = () => {
     lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
-    setRound(makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount));
+    setRound(
+      makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
+    );
     setWrongIdx(null);
   };
 
@@ -91,23 +118,73 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={lang === 'en' ? t(lang, 'shell.sounds.titleEn') : t(lang, 'shell.sounds.titleWords')}
-      subtitle={lang === 'en' ? t(lang, 'shell.sounds.subEn') : t(lang, 'shell.sounds.subWord')}
+      title={
+        lang === "en"
+          ? t(lang, "shell.sounds.titleEn")
+          : t(lang, "shell.sounds.titleWords")
+      }
+      subtitle={
+        lang === "en"
+          ? t(lang, "shell.sounds.subEn")
+          : t(lang, "shell.sounds.subWord")
+      }
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="sounds-timer" /> : null}
-          <ScoreChip label={`👂 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`} testID="sounds-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="sounds-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`👂 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`}
+            testID="sounds-score"
+          />
         </View>
       }
     >
       <View style={styles.board}>
-        <View style={[styles.prompt, shadows.soft]} testID={`sounds-prompt-${round.targetIdx}`}>
-          <Text style={styles.promptText}>{prompts.displayPrompt}</Text>
-          {prompts.caption ? <Text style={styles.caption}>{prompts.caption}</Text> : null}
+        <View style={styles.promptRow}>
+          <Pressable
+            onPress={onReplay}
+            testID="speaker-button"
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, "spell.hearAgain")}
+            disabled={won}
+            style={({ pressed }) => [
+              styles.speakerButton,
+              shadows.soft,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.speakerIcon}>🔊</Text>
+          </Pressable>
+          <Pressable
+            onPress={onReplay}
+            testID={`sounds-prompt-${round.targetIdx}`}
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, "spell.hearAgain")}
+            disabled={won}
+            style={({ pressed }) => [
+              styles.prompt,
+              shadows.soft,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.promptText}>{prompts.displayPrompt}</Text>
+            {prompts.caption ? (
+              <Text style={styles.caption}>{prompts.caption}</Text>
+            ) : null}
+          </Pressable>
         </View>
-        <View style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}>
+        <View
+          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+        >
           {round.tiles.map((t, i) => (
             <Pressable
               key={`${roundIdx}-${i}-${t.icon}`}
@@ -123,15 +200,22 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
                 pressed && styles.pressed,
               ]}
             >
-              <Image source={SPOTIT_ICONS[t.icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+              <Image
+                source={SPOTIT_ICONS[t.icon]}
+                style={{ width: "80%", height: "80%" }}
+                resizeMode="contain"
+              />
             </Pressable>
           ))}
         </View>
       </View>
       <WinOverlay
         visible={won}
-        message={lang === 'en' ? t(lang, 'win.sounds') : t(lang, 'win.soundsWords')}
-        onNext={reset} nextLabel={t(lang, 'overlay.playAgain')}
+        message={
+          lang === "en" ? t(lang, "win.sounds") : t(lang, "win.soundsWords")
+        }
+        onNext={reset}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
@@ -140,28 +224,65 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    paddingHorizontal: 16,
+  },
+  promptRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    maxWidth: 560,
+  },
+  speakerButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#F7EDDA",
+    borderWidth: 3,
+    borderColor: colors.gold,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  speakerIcon: {
+    fontSize: 24,
+  },
   prompt: {
-    backgroundColor: '#F7EDDA',
+    backgroundColor: "#F7EDDA",
     borderRadius: 18,
     borderWidth: 3,
     borderColor: colors.gold,
     paddingVertical: 10,
     paddingHorizontal: 22,
-    alignItems: 'center',
+    alignItems: "center",
     maxWidth: 520,
+    flexShrink: 1,
   },
-  promptText: { fontFamily: fonts.display, fontSize: 20, color: colors.ink, textAlign: 'center' },
-  caption: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.inkSoft, marginTop: 2 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  promptText: {
+    fontFamily: fonts.display,
+    fontSize: 20,
+    color: colors.ink,
+    textAlign: "center",
+  },
+  caption: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 13,
+    color: colors.inkSoft,
+    marginTop: 2,
+  },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   tile: {
     backgroundColor: colors.card,
     borderRadius: 22,
     borderWidth: 3,
     borderColor: colors.blush,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
+  wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
 });

@@ -9,6 +9,7 @@ import {
 import React, { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LangContext } from "../../../components/GameShell";
+import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
@@ -287,5 +288,127 @@ describe("SoundsGame round transition lock", () => {
     );
     fireEvent.click(currentCorrectTile);
     expect(goodSpy).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("SoundsGame prompt replay affordance", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders speaker button and re-speaks prompt when clicked", () => {
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const speakerBtn = screen.getByTestId("speaker-button");
+    expect(speakerBtn).toBeTruthy();
+    expect(speakerBtn.getAttribute("aria-label")).toBe(
+      t("en", "spell.hearAgain"),
+    );
+
+    saySeqSpy.mockClear();
+    fireEvent.click(speakerBtn);
+
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^Which one starts with .+\?$/),
+    ]);
+  });
+
+  it("re-speaks prompt when prompt banner is tapped", () => {
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const promptBtn = screen.getByTestId(/^sounds-prompt-/);
+    expect(promptBtn.getAttribute("aria-label")).toBe(
+      t("en", "spell.hearAgain"),
+    );
+
+    saySeqSpy.mockClear();
+    fireEvent.click(promptBtn);
+
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^Which one starts with .+\?$/),
+    ]);
+  });
+
+  it("localizes speaker button accessibilityLabel and speaks in active language after switch", () => {
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    render(<LangHarness initialLang="en" />);
+
+    // Switch to Japanese
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+    saySeqSpy.mockClear();
+
+    const speakerBtn = screen.getByTestId("speaker-button");
+    expect(speakerBtn.getAttribute("aria-label")).toBe(
+      t("ja", "spell.hearAgain"),
+    );
+
+    fireEvent.click(speakerBtn);
+    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+  });
+
+  it("ignores replay taps while transition lock is active", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Tap tiles until answer is found to enter transition lock
+    const tiles = screen.getAllByTestId(/^sounds-tile-/);
+    for (const tile of tiles) {
+      fireEvent.click(tile);
+      if (sayThenCb) break;
+    }
+    expect(sayThenCb).not.toBeNull();
+
+    saySeqSpy.mockClear();
+    fireEvent.click(screen.getByTestId("speaker-button"));
+    fireEvent.click(screen.getByTestId(/^sounds-prompt-/));
+
+    expect(saySeqSpy).not.toHaveBeenCalled();
+  });
+
+  it("disables replay and ignores taps when game is won", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+    vi.spyOn(logic, "settingsForSounds").mockReturnValue({
+      rounds: 1,
+      tiles: 3,
+    });
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Solve the 1 round
+    const tiles = screen.getAllByTestId(/^sounds-tile-/);
+    for (const tile of tiles) {
+      fireEvent.click(tile);
+      if (sayThenCb) break;
+    }
+    act(() => {
+      sayThenCb!();
+    });
+
+    saySeqSpy.mockClear();
+    fireEvent.click(screen.getByTestId("speaker-button"));
+    fireEvent.click(screen.getByTestId(/^sounds-prompt-/));
+
+    expect(saySeqSpy).not.toHaveBeenCalled();
   });
 });
