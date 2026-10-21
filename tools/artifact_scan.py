@@ -17,6 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
+from batch_executor import BatchExecutor
+
 ROOT = Path(__file__).resolve().parent.parent
 PLAN = ROOT / "tools" / "audit_out" / "scan_plan.json"
 OUT = ROOT / "tools" / "audit_out" / "artifact_scan"
@@ -58,6 +60,28 @@ def judge_tile(args) -> dict | None:
     return None
 
 
+def compute_asset_fingerprint_seed(plan: list, root: Path) -> str:
+    import hashlib
+
+    seen_paths: set[str] = set()
+    for batch in plan:
+        for job in batch:
+            if isinstance(job, dict) and job.get("asset", {}).get("kind") == "image":
+                path_str = job.get("asset", {}).get("path")
+                if path_str:
+                    seen_paths.add(path_str)
+
+    entries: list[tuple[str, int, int]] = []
+    for path_str in sorted(seen_paths):
+        file = root / path_str
+        if file.exists():
+            st = file.stat()
+            entries.append((path_str, st.st_size, st.st_mtime_ns))
+        else:
+            entries.append((path_str, -1, -1))
+    return hashlib.sha256(json.dumps(entries).encode("utf-8")).hexdigest()
+
+
 def main(argv: list[str] | None = None) -> None:
     global OUT
 
@@ -78,27 +102,57 @@ def main(argv: list[str] | None = None) -> None:
         metavar="DIR",
         help="output directory (default: %(default)s)",
     )
+    parser.add_argument(
+        "--state",
+        type=Path,
+        default=None,
+        metavar="FILE",
+        help="path to batch state file (default: <out>/scan_state.json)",
+    )
     args = parser.parse_args(argv)
     OUT = args.out
 
-    plan = json.loads(args.plan.read_text())
-    jobs = []
-    for batch in plan:
-        for job in batch:
-            if job.get("asset", {}).get("kind") == "image":
-                jobs.append((job["asset"]["path"], tuple(job["rect"]), job["tag"]))
-
-    findings: list[dict] = []
-    print(f"judging {len(jobs)} tiles...")
-    with ThreadPoolExecutor(max_workers=8) as pool:
-        for res in pool.map(judge_tile, jobs):
-            if res:
-                findings.append(res)
-                print(f"  FLAG {res['asset']} tile {res.get('rect')}")
-
     OUT.mkdir(parents=True, exist_ok=True)
     report_path = OUT / "artifact_report.json"
-    report_path.write_text(json.dumps(findings, indent=2))
+    state_file = args.state or (OUT / "scan_state.json")
+
+    findings: list[dict] = []
+
+    def process_batch(batch: list[dict]) -> None:
+        batch_jobs = []
+        for job in batch:
+            if job.get("asset", {}).get("kind") == "image":
+                batch_jobs.append((job["asset"]["path"], tuple(job["rect"]), job["tag"]))
+        if batch_jobs:
+            print(f"judging {len(batch_jobs)} tiles...")
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                for res in pool.map(judge_tile, batch_jobs):
+                    if res:
+                        findings.append(res)
+                        print(f"  FLAG {res['asset']} tile {res.get('rect')}")
+        report_path.write_text(json.dumps(findings, indent=2), encoding="utf-8")
+
+    plan_data = json.loads(args.plan.read_text(encoding="utf-8"))
+    asset_seed = compute_asset_fingerprint_seed(plan_data, ROOT)
+    executor = BatchExecutor(
+        args.plan,
+        state_file,
+        process_batch,
+        fingerprint_seed=asset_seed,
+    )
+    completed_index = executor.get_completed_index()
+    if completed_index >= 0:
+        findings = json.loads(report_path.read_text(encoding="utf-8"))
+        resume_batch = completed_index + 1
+        if resume_batch > 0:
+            print(f"resuming at batch {resume_batch} of {len(executor.plan)}")
+    else:
+        report_path.write_text(json.dumps(findings, indent=2), encoding="utf-8")
+
+    executor.execute()
+    state_file.unlink(missing_ok=True)
+
+    report_path.write_text(json.dumps(findings, indent=2), encoding="utf-8")
     try:
         report_display = report_path.resolve().relative_to(ROOT.resolve())
     except ValueError:
