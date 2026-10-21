@@ -217,7 +217,8 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: sayThenSpy,
-      clearTimeouts: vi.fn(), setTimeout: vi.fn((fn: () => void) => {
+      clearTimeouts: vi.fn(),
+      setTimeout: vi.fn((fn: () => void) => {
         fn();
         return setTimeout(() => {}, 0);
       }),
@@ -280,8 +281,8 @@ describe("logic: applyPickAnswer", () => {
       sfx: { good: vi.fn(), wrong: vi.fn() },
       say: vi.fn(),
       sayThen: sayThenSpy,
-      setTimeout: vi.fn(),
       clearTimeouts: vi.fn(),
+      setTimeout: vi.fn(),
       makeNextRound: vi.fn(() => dummyRound),
       setScore,
       setLocked: vi.fn(),
@@ -321,7 +322,8 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: vi.fn(),
-      clearTimeouts: vi.fn(), setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
+      clearTimeouts: vi.fn(),
+      setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
       makeNextRound: vi.fn(),
       setScore: vi.fn(),
       setLocked: vi.fn(),
