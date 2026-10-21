@@ -23,6 +23,7 @@ import {
   makeSoundsRound,
   resolveSoundsPrompts,
   settingsForSounds,
+  soundsLayout,
 } from "./logic";
 import { useWinLine } from "../winlines";
 
@@ -107,14 +108,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     setWrongIdx(null);
   };
 
-  const cols = tileCount <= 3 ? 3 : tileCount === 4 ? 2 : 3;
-  const rows = Math.ceil(tileCount / cols);
-  const gap = 14;
-  const tile = Math.min(
-    (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
-    (height - 84 - 130 - (rows - 1) * gap) / rows,
-    170,
-  );
+  const { gap, tile, gridWidth } = soundsLayout(width, height, tileCount);
 
   return (
     <GameShell
@@ -182,9 +176,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
             ) : null}
           </Pressable>
         </View>
-        <View
-          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
-        >
+        <View style={[styles.grid, { width: gridWidth, gap }]}>
           {round.tiles.map((t, i) => (
             <Pressable
               key={`${roundIdx}-${i}-${t.icon}`}

@@ -31,6 +31,63 @@ export function settingsForSounds(difficulty: 'easy' | 'medium' | 'hard'): Sound
   return                            { rounds: 10, tiles: 4 };
 }
 
+export interface SoundsLayout {
+  gap: number;
+  tile: number;
+  gridWidth: number;
+}
+
+function candidateTile(
+  width: number,
+  height: number,
+  cols: number,
+  rows: number,
+): number {
+  const gap = 14;
+  return Math.min(
+    (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
+    (height - 84 - 130 - (rows - 1) * gap) / rows,
+    170,
+  );
+}
+
+export function soundsLayout(
+  width: number,
+  height: number,
+  tileCount: number,
+): SoundsLayout {
+  const gap = 14;
+
+  let cols: number;
+  let rows: number;
+  let tile: number;
+
+  if (tileCount === 4) {
+    const tile2x2 = candidateTile(width, height, 2, 2);
+    const tile1x4 = candidateTile(width, height, 4, 1);
+    if (tile1x4 > tile2x2) {
+      cols = 4;
+      rows = 1;
+      tile = tile1x4;
+    } else {
+      cols = 2;
+      rows = 2;
+      tile = tile2x2;
+    }
+  } else if (tileCount <= 3) {
+    cols = 3;
+    rows = 1;
+    tile = candidateTile(width, height, cols, rows);
+  } else {
+    cols = 3;
+    rows = Math.ceil(tileCount / cols);
+    tile = candidateTile(width, height, cols, rows);
+  }
+
+  const gridWidth = cols * tile + (cols - 1) * gap;
+  return { gap, tile, gridWidth };
+}
+
 const ASK: Record<Lang, string> = {
   en: '',                    // EN builds a full "Which one starts with X?" line
   ja: 'どれかな？',
