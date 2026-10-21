@@ -7,6 +7,7 @@ import {
   buildDeck,
   dealDuelRound,
   dealRound,
+  duelCountdownPrompt,
   hintAfterMs,
   leaderDealDelayMs,
   sharedSymbol,
@@ -89,6 +90,13 @@ describe('spot it duel', () => {
     expect(hintAfterMs(3, 1, 3)).toBe(Infinity); // leader gets no hint
     expect(hintAfterMs(0, 2, 3)).toBe(3000);
     expect(hintAfterMs(1, 4, 5)).toBe(5000);
+  });
+
+  it('duelCountdownPrompt returns localized prompt for every supported language', () => {
+    expect(duelCountdownPrompt('en')).toBe('Ready... Spot!');
+    expect(duelCountdownPrompt('ja')).toBe('ようい… スタート！');
+    expect(duelCountdownPrompt('cmn')).toBe('准备… 开始！');
+    expect(duelCountdownPrompt('yue')).toBe('預備… 開始！');
   });
 });
 

@@ -1,3 +1,4 @@
+import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
@@ -104,4 +105,17 @@ export function hintAfterMs(myScore: number, otherScore: number, baseSecs: numbe
   const deficit = otherScore - myScore;
   if (deficit < 2) return Infinity;
   return baseSecs * 1000;
+}
+
+// --- Duel spoken prompts ----------------------------------------------------
+
+export const DUEL_COUNTDOWN_PROMPTS: Record<Lang, string> = {
+  en: 'Ready... Spot!',
+  ja: 'ようい… スタート！',
+  cmn: '准备… 开始！',
+  yue: '預備… 開始！',
+};
+
+export function duelCountdownPrompt(lang: Lang): string {
+  return DUEL_COUNTDOWN_PROMPTS[lang];
 }
