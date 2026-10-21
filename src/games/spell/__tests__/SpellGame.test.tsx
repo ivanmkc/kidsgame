@@ -227,6 +227,125 @@ describe("SpellGame", () => {
     expect(clearTimeoutSpy).toHaveBeenCalledWith(secondTimerId);
   });
 
+  it("rapidly tapping the same incorrect tile plays the error sound only once", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: "C" },
+          { id: 2, char: "Z" },
+          { id: 3, char: "X" },
+        ],
+      }),
+    );
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Rapidly hammer the same wrong tile
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // After 500ms error wobble finishes, it can be tapped again
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+  });
+
+  it("allows tapping the correct tile immediately while a wrong tile is wobbling", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: "C" },
+          { id: 2, char: "Z" },
+        ],
+      }),
+    );
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Tap wrong tile 'Z'
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Immediately tap correct tile 'C' without waiting for 500ms
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+  });
+
+  it("fast taps during state transitions evaluate correctly without marking them wrong", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, _decoys, _alphabet) => ({
+        word,
+        chars: word.chars,
+        decoys: [],
+        tiles: [
+          { id: 1, char: "C" },
+          { id: 2, char: "A" },
+          { id: 3, char: "T" },
+        ],
+      }),
+    );
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-hammer correct tiles during state transition:
+    // Tap 'C', hammer 'C' again, and tap 'A' before 'C' commits
+    act(() => {
+      fireEvent.click(screen.getByTestId("spell-tile-1")); // 'C'
+      fireEvent.click(screen.getByTestId("spell-tile-1")); // repeated tap on 'C'
+      fireEvent.click(screen.getByTestId("spell-tile-2")); // 'A' in rapid succession
+    });
+
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.good).toHaveBeenCalledTimes(2);
+
+    // Tap 'T' to complete word
+    fireEvent.click(screen.getByTestId("spell-tile-3"));
+    expect(sfx.good).toHaveBeenCalledTimes(3);
+    expect(sfx.wrong).not.toHaveBeenCalled();
+  });
+
   it("localizes speaker button and tile accessibilityLabels according to lang", () => {
     vi.spyOn(logic, "pickGameWords").mockReturnValue([
       {
