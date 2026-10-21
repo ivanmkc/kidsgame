@@ -289,4 +289,79 @@ describe("FastSlowGame UI interaction", () => {
 
     vi.useRealTimers();
   });
+
+  it("clears celebration transition timer when unmounted during celebration", () => {
+    vi.useFakeTimers();
+
+    const { unmount } = render(
+      <FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+
+    fireEvent.click(correctBtn);
+
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+
+    vi.useRealTimers();
+  });
+
+  it("clears celebration transition timer when unmounted during final round celebration", () => {
+    vi.useFakeTimers();
+
+    const { unmount } = render(
+      <FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Play 7 rounds to reach the final round (easy requires 8 rounds)
+    for (let i = 0; i < 7; i++) {
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      const calls = vi.mocked(playSequence).mock.calls;
+      const bpm = calls[calls.length - 1][1] as number;
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const btn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
+      fireEvent.click(btn);
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+    }
+
+    // Round 8: listen phase finishes, buttons ready
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const winningBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+
+    fireEvent.click(winningBtn);
+
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+
+    vi.useRealTimers();
+  });
 });

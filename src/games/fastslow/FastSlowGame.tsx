@@ -36,6 +36,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [history, setHistory] = useState<("fast" | "slow")[]>([]);
   const [round, setRound] = useState<FastSlowRound>(() =>
     makeFastSlowRound(rngRef.current, difficulty, []),
@@ -86,12 +87,12 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       setHistory(nextHistory);
       setPhase("celebrate");
       if (next < total) {
-        setTimeout(() => {
+        transitionTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
       } else {
-        setTimeout(() => {
+        transitionTimerRef.current = setTimeout(() => {
           setWon(true);
         }, 1000);
       }
@@ -107,6 +108,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     return () => {
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     };
   }, []);
 
