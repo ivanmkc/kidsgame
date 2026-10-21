@@ -253,6 +253,8 @@ export const CMN: Table = {
   'diff.pictureA': '图A',
   'diff.pictureB': '图B',
   'diff.hint': '💡 提示',
+  'hidden.turn': '轮到{name}了！',
+  'hidden.prompt': '找出所有藏起来的东西！',
   'shadow.hint': '点出这个影子对应的贴纸！',
   'shadow.hintTricky': '可能被翻过或转过 — 看形状！',
   'rules.memoryCheck': '记忆挑战！',

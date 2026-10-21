@@ -235,6 +235,8 @@ export type UIKey =
   | 'diff.pictureA'
   | 'diff.pictureB'
   | 'diff.hint'
+  | 'hidden.turn'
+  | 'hidden.prompt'
   | 'shadow.hint'
   | 'shadow.hintTricky'
   | 'rules.memoryCheck'
@@ -544,6 +546,8 @@ export const EN: Table = {
   'diff.pictureA': 'Picture A',
   'diff.pictureB': 'Picture B',
   'diff.hint': '💡 Hint',
+  'hidden.turn': "{name}'s turn!",
+  'hidden.prompt': 'Find all the hidden things!',
   'shadow.hint': 'Tap the sticker that makes the shadow!',
   'shadow.hintTricky': 'It might be flipped or turned — look at the shape!',
   'rules.memoryCheck': 'Memory check!',

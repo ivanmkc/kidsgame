@@ -253,6 +253,8 @@ export const YUE: Table = {
   'diff.pictureA': '圖A',
   'diff.pictureB': '圖B',
   'diff.hint': '💡 提示',
+  'hidden.turn': '到{name}喇！',
+  'hidden.prompt': '搵出所有匿埋嘅嘢！',
   'shadow.hint': '撳呢個影對應嘅貼紙！',
   'shadow.hintTricky': '可能反轉或者轉咗 — 睇形狀！',
   'rules.memoryCheck': '記憶挑戰！',

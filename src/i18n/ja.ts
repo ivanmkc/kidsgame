@@ -254,6 +254,8 @@ export const JA: Table = {
   'diff.pictureA': 'えA',
   'diff.pictureB': 'えB',
   'diff.hint': '💡 ヒント',
+  'hidden.turn': '{name}の ばん！',
+  'hidden.prompt': 'かくれてる ものを ぜんぶ みつけよう！',
   'shadow.hint': 'このかげの もとに なる シールを タップ！',
   'shadow.hintTricky': 'まわってたり ひっくりかえってるかも — かたちを みてね！',
   'rules.memoryCheck': 'きおくクイズ！',
