@@ -29,6 +29,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [wrongPick, setWrongPick] = useState<'same' | 'different' | null>(null);
   const [sparkKeys, setSparkKeys] = useState({ same: 0, different: 0 });
   const gapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockedRef = useRef(false);
   const won = score >= total;
   useWinLine(won, t(lang, 'win.samediff' as never));
 
@@ -60,18 +62,26 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   useEffect(() => {
+    if (phase === 'pick') {
+      lockedRef.current = false;
+    }
+  }, [phase]);
+
+  useEffect(() => {
     if (!won) {
       const timer = setTimeout(() => playRound(round), 400);
       return () => {
         clearTimeout(timer);
         if (gapTimer.current) clearTimeout(gapTimer.current);
+        if (wrongTimer.current) clearTimeout(wrongTimer.current);
         stopSequence();
       };
     }
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: 'same' | 'different') => {
-    if (won || phase !== 'pick') return;
+    if (won || phase !== 'pick' || lockedRef.current) return;
+    lockedRef.current = true;
     if (isCorrect(round, picked)) {
       setPhase('transition');
       sfx.good();
@@ -85,15 +95,24 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       setWrongPick(picked);
-      setTimeout(() => setWrongPick(null), 500);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => {
+        setWrongPick(null);
+        lockedRef.current = false;
+      }, 500);
     }
   };
 
   const replay = () => {
-    if (phase === 'pick') playRound(round);
+    if (phase === 'pick' && !lockedRef.current) {
+      lockedRef.current = true;
+      playRound(round);
+    }
   };
 
   const reset = () => {
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    lockedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
