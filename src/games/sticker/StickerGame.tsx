@@ -70,6 +70,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   const [magicBurst, setMagicBurst] = useState(0);
   const magicCache = useRef<Map<string, string>>(new Map());
   const magicAborts = useRef<Map<number, AbortController>>(new Map());
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Whether ✨ can even work in this environment. We resolve the public
   // URL of the backdrop and HEAD-check it once per scene; if it 404s
@@ -93,6 +94,10 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   // Scene change / Clear: cancel everything, wipe caches. Live requests
   // resolve into a no-op because we abort their signals.
   const resetMagic = useCallback(() => {
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+      toastTimer.current = null;
+    }
     magicAborts.current.forEach((c) => c.abort());
     magicAborts.current.clear();
     magicCache.current.clear();
@@ -102,7 +107,11 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     setToast(null);
   }, []);
   useEffect(() => { resetMagic(); }, [sceneId, resetMagic]);
-  useEffect(() => () => { magicAborts.current.forEach((c) => c.abort()); }, []);
+  useEffect(() => () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    magicAborts.current.forEach((c) => c.abort());
+    magicAborts.current.clear();
+  }, []);
 
   const popSticker = useCallback((key: number) => {
     sfx.flip();
@@ -123,8 +132,12 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   }, []);
 
   const flashToast = useCallback((msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(msg);
-    setTimeout(() => setToast((cur) => (cur === msg ? null : cur)), 3000);
+    toastTimer.current = setTimeout(() => {
+      setToast((cur) => (cur === msg ? null : cur));
+      toastTimer.current = null;
+    }, 3000);
   }, []);
 
   const runMagic = useCallback((sticker: Placed) => {
@@ -158,7 +171,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     void callMagic({ imageUrl: publicImageUrl, x: cx, y: cy, item: sticker.icon }, { signal: ac.signal })
       .then((res) => {
         clearTimeout(timeout);
+        const cancelled = !magicAborts.current.has(sticker.key);
         magicAborts.current.delete(sticker.key);
+        if (cancelled) return;
         if (!res.ok || !res.image_b64) {
           setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
           setPendingKey((k) => (k === sticker.key ? null : k));
@@ -171,7 +186,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
       })
       .catch(() => {
         clearTimeout(timeout);
+        const cancelled = !magicAborts.current.has(sticker.key);
         magicAborts.current.delete(sticker.key);
+        if (cancelled) return;
         setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
         setPendingKey((k) => (k === sticker.key ? null : k));
         flashToast(t(lang, 'sticker.magicFizzled'));

@@ -501,4 +501,298 @@ describe('StickerGame', () => {
     panSpy.mockRestore();
     unmount();
   });
+
+  it('does not show fizzle toast when in-flight magic is cancelled by clear', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockImplementation((_args, init) => {
+      return new Promise((resolve) => {
+        init?.signal?.addEventListener('abort', () => {
+          resolve({ ok: false, reason: 'aborted' });
+        });
+      });
+    });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(
+      c => c.onPanResponderRelease &&
+      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    if (release) {
+      act(() => {
+        release({}, { dx: 0, dy: 0 });
+      });
+    }
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const clearBtn = capturedPressableProps['sticker-clear'];
+    await act(async () => {
+      clearBtn?.onPress?.();
+    });
+
+    expect(screen.queryByTestId('magic-toast')).toBeNull();
+    expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).toBeNull();
+
+    panSpy.mockRestore();
+    unmount();
+  });
+
+  it('does not show fizzle toast when sticker is popped mid-magic', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockImplementation((_args, init) => {
+      return new Promise((resolve) => {
+        init?.signal?.addEventListener('abort', () => {
+          resolve({ ok: false, reason: 'aborted' });
+        });
+      });
+    });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(
+      c => c.onPanResponderRelease &&
+      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    if (release) {
+      act(() => {
+        release({}, { dx: 0, dy: 0 });
+      });
+    }
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const placedPan = configs.find(
+      c => c !== trayPan && c.onPanResponderRelease && c.onPanResponderRelease.toString().includes('lastTap'),
+    );
+    const placedRelease = placedPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+
+    expect(placedRelease).toBeDefined();
+    await act(async () => {
+      placedRelease!({}, { dx: 0, dy: 0 });
+      placedRelease!({}, { dx: 0, dy: 0 });
+    });
+
+    expect(screen.queryByTestId('magic-toast')).toBeNull();
+    expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).toBeNull();
+
+    panSpy.mockRestore();
+    unmount();
+  });
+
+  it('clears active toast and timeout when clear is pressed', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(
+      c => c.onPanResponderRelease &&
+      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    expect(release).toBeDefined();
+    act(() => {
+      release!({}, { dx: 0, dy: 0 });
+    });
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const toastText = await screen.findByText('まほうに しっぱいしちゃった — もういちど！');
+    expect(toastText).toBeDefined();
+
+    const toastCallIndex = setTimeoutSpy.mock.calls.findIndex(
+      (call) => call[1] === 3000,
+    );
+    expect(toastCallIndex).toBeGreaterThanOrEqual(0);
+    const toastTimerId = setTimeoutSpy.mock.results[toastCallIndex].value;
+
+    const clearBtn = capturedPressableProps['sticker-clear'];
+    expect(clearBtn).toBeDefined();
+    act(() => {
+      clearBtn?.onPress?.();
+    });
+
+    expect(screen.queryByTestId('magic-toast')).toBeNull();
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(toastTimerId);
+
+    panSpy.mockRestore();
+    unmount();
+  });
+
+  it('clears active toast timeout on unmount', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(
+      c => c.onPanResponderRelease &&
+      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    expect(release).toBeDefined();
+    act(() => {
+      release!({}, { dx: 0, dy: 0 });
+    });
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const toastCallIndex = setTimeoutSpy.mock.calls.findIndex(
+      (call) => call[1] === 3000,
+    );
+    expect(toastCallIndex).toBeGreaterThanOrEqual(0);
+    const toastTimerId = setTimeoutSpy.mock.results[toastCallIndex].value;
+
+    unmount();
+
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(toastTimerId);
+    panSpy.mockRestore();
+  });
+
+  it('handles 90-second timeout by clearing pending state and displaying fizzle toast', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockImplementation((_args, init) => {
+      return new Promise((resolve) => {
+        init?.signal?.addEventListener('abort', () => {
+          resolve({ ok: false, reason: 'aborted' });
+        });
+      });
+    });
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
+    );
+
+    const trayPan = configs.find(
+      c => c.onPanResponderRelease &&
+      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    if (release) {
+      act(() => {
+        release({}, { dx: 0, dy: 0 });
+      });
+    }
+
+    const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
+
+    vi.useFakeTimers();
+
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    expect(screen.queryByTestId('magic-pending-1')).not.toBeNull();
+
+    // Advance past the 90-second timeout
+    await act(async () => {
+      vi.advanceTimersByTime(90_000);
+    });
+
+    // Verify pending state was cleared and fizzle toast is displayed
+    expect(screen.queryByTestId('magic-pending-1')).toBeNull();
+    expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).not.toBeNull();
+
+    panSpy.mockRestore();
+    unmount();
+    vi.useRealTimers();
+  });
 });
