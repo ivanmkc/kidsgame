@@ -6,15 +6,21 @@ import {
   act,
   cleanup,
 } from "@testing-library/react";
-import React from "react";
-import { vi, test, expect, afterEach } from "vitest";
+import React, { useState } from "react";
+import { vi, test, expect, afterEach, describe, it } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { Difficulty } from "../../../difficulty";
+import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { BingoGame } from "../BingoGame";
+import * as logic from "../logic";
 
 vi.useFakeTimers();
 
 afterEach(() => {
+  sound.stopNarration();
   cleanup();
+  vi.restoreAllMocks();
 });
 
 test("tapping an incorrect tile after a correct one does not cancel the round advance", async () => {
@@ -240,3 +246,183 @@ test("confetti remounts and triggers on subsequent correct answers", async () =>
   expect(secondConfetti[0]).not.toBe(firstConfetti[0]);
   expect(firstConfetti[0].isConnected).toBe(false);
 });
+
+function LangHarness({
+  difficulty = "easy",
+  initialLang = "en",
+}: {
+  difficulty?: Difficulty;
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <BingoGame onHome={() => {}} difficulty={difficulty} lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
+const mockBoardEn: logic.BingoBoard = {
+  size: 3,
+  cells: [
+    { icon: "apple", label: "apple" },
+    { icon: "banana", label: "banana" },
+    { icon: "cat", label: "cat" },
+    { icon: "dog", label: "dog" },
+    { icon: "elephant", label: "elephant" },
+    { icon: "fish", label: "fish" },
+    { icon: "guitar", label: "guitar" },
+    { icon: "hat", label: "hat" },
+    { icon: "icecream", label: "ice cream" },
+  ],
+  calls: [
+    {
+      mode: "name",
+      answerIdx: 0,
+      promptLines: ["Find the apple!"],
+      confirmLines: ["Apple!"],
+    },
+    {
+      mode: "name",
+      answerIdx: 1,
+      promptLines: ["Find the banana!"],
+      confirmLines: ["Banana!"],
+    },
+    {
+      mode: "name",
+      answerIdx: 2,
+      promptLines: ["Find the cat!"],
+      confirmLines: ["Cat!"],
+    },
+  ],
+};
+
+const mockBoardJa: logic.BingoBoard = {
+  size: 3,
+  cells: [
+    { icon: "apple", label: "りんご" },
+    { icon: "banana", label: "バナナ" },
+    { icon: "cat", label: "ねこ" },
+    { icon: "dog", label: "いぬ" },
+    { icon: "elephant", label: "ぞう" },
+    { icon: "fish", label: "さかな" },
+    { icon: "guitar", label: "ギター" },
+    { icon: "hat", label: "ぼうし" },
+    { icon: "icecream", label: "アイスクリーム" },
+  ],
+  calls: [
+    {
+      mode: "name",
+      answerIdx: 0,
+      promptLines: ["さがしてね", "りんご！"],
+      confirmLines: ["りんご！"],
+    },
+    {
+      mode: "name",
+      answerIdx: 1,
+      promptLines: ["さがしてね", "バナナ！"],
+      confirmLines: ["バナナ！"],
+    },
+    {
+      mode: "name",
+      answerIdx: 2,
+      promptLines: ["さがしてね", "ねこ！"],
+      confirmLines: ["ねこ！"],
+    },
+  ],
+};
+
+describe("Bingo mid-game language switch stale callback bug", () => {
+  it("prematurely triggers WinOverlay on fresh board when cycling language after winning tile tap", async () => {
+    vi.spyOn(logic, "makeBoard").mockImplementation(
+      (_rng, _icons, _size, _mode, lang) =>
+        lang === "ja" ? mockBoardJa : mockBoardEn,
+    );
+
+    render(<LangHarness initialLang="en" />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Tap first tile (cell 0)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-0"));
+    });
+    // Advance past confirmation for first tile
+    await act(async () => {
+      vi.advanceTimersByTime(9000);
+    });
+
+    // Tap second tile (cell 1)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-1"));
+    });
+    // Advance past confirmation for second tile
+    await act(async () => {
+      vi.advanceTimersByTime(9000);
+    });
+
+    // Tap third tile (cell 2) - completes winning line [0, 1, 2]
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-2"));
+    });
+
+    // Immediately cycle language before confirmation finishes
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    // The new Japanese board should be fresh: 0 marked tiles, no win overlay
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.getByTestId("bingo-score").textContent).toBe("⭐ 0");
+
+    // Even after timers expire, win overlay must not appear
+    await act(async () => {
+      vi.advanceTimersByTime(9000);
+    });
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+  });
+
+  it("skips call 0 on new board due to stale setCallIdx callback on language switch", async () => {
+    vi.spyOn(logic, "makeBoard").mockImplementation(
+      (_rng, _icons, _size, _mode, lang) =>
+        lang === "ja" ? mockBoardJa : mockBoardEn,
+    );
+
+    render(<LangHarness initialLang="en" />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Tap call 0 (cell 0) - not a winning line
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-0"));
+    });
+
+    // Immediately cycle language before confirmation finishes
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    // Prompt on new Japanese board must still be call 0 (Apple), not call 1 (Banana)
+    const prompt = screen.getByTestId("bingo-prompt");
+    expect(prompt.textContent).toContain("りんご");
+    expect(prompt.textContent).not.toContain("バナナ");
+
+    // Advance timers - stale callback should not advance callIdx
+    await act(async () => {
+      vi.advanceTimersByTime(9000);
+    });
+
+    const promptAfter = screen.getByTestId("bingo-prompt");
+    expect(promptAfter.textContent).toContain("りんご");
+  });
+});
+
