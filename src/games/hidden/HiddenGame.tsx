@@ -84,7 +84,7 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   // Gentle auto-hint: 15s with no find → pulse one random unfound target
   // ~2.5s. Resets on find/turn/scene.
   useEffect(() => {
-    if (!coop || !scene || won) return;
+    if (!scene || won) return;
     setHintId(null);
     const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(setTimeout(() => {

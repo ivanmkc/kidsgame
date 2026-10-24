@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../../../i18n';
 import { manifest } from '../../../manifest';
 import { HiddenGame } from '../HiddenGame';
@@ -235,5 +235,121 @@ describe('HiddenGame localization', () => {
     for (const target of targets) {
       expect(target.getAttribute('aria-label')).toBe(t('ja', 'a11y.target'));
     }
+  });
+});
+
+describe('HiddenGame gentle auto-hint', () => {
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it('triggers a visual hint on an unfound target after 15 seconds of inactivity in solo mode', () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const targets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
+    );
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(14999);
+    });
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    const hinted = targets.filter((t) => t.children.length > 0);
+    expect(hinted.length).toBe(1);
+  });
+
+  it('clears the hint after its 2.5-second duration', () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const targets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(15000);
+    });
+    expect(targets.filter((t) => t.children.length > 0).length).toBe(1);
+
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+  });
+
+  it('resets the 15-second inactivity timer when a target is found', () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const targets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
+    );
+    expect(targets.length).toBeGreaterThan(1);
+
+    // Wait 10 seconds (no hint yet)
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+
+    // Find the first target
+    fireEvent.click(targets[0]);
+
+    // Target 0 is now found (has FoundRing)
+    expect(targets[0].children.length).toBeGreaterThan(0);
+
+    const remaining = targets.slice(1);
+
+    // Advance 10 more seconds (20 seconds since game start, but 10 seconds since hit)
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+    expect(remaining.every((t) => t.children.length === 0)).toBe(true);
+
+    // Advance 5 more seconds (15 seconds since hit) -> hint appears on one of the remaining targets
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(remaining.filter((t) => t.children.length > 0).length).toBe(1);
   });
 });
