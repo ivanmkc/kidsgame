@@ -15,6 +15,7 @@ import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
+  PROMPTS,
   STAGE_PADDING,
   applyPickAnswer,
   makeCountRound,
@@ -217,7 +218,8 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: sayThenSpy,
-      clearTimeouts: vi.fn(), setTimeout: vi.fn((fn: () => void) => {
+      clearTimeouts: vi.fn(),
+      setTimeout: vi.fn((fn: () => void) => {
         fn();
         return setTimeout(() => {}, 0);
       }),
@@ -321,7 +323,8 @@ describe("logic: applyPickAnswer", () => {
       sfx: sfxSpy,
       say: vi.fn(),
       sayThen: vi.fn(),
-      clearTimeouts: vi.fn(), setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
+      clearTimeouts: vi.fn(),
+      setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
       makeNextRound: vi.fn(),
       setScore: vi.fn(),
       setLocked: vi.fn(),
@@ -550,5 +553,90 @@ describe("CountGame stage critter positioning", () => {
         badgeCenterY - cornerRadius,
       ) + 11;
     expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
+  });
+});
+
+describe("CountGame language switch mid-quiz", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.runOnlyPendingTimers();
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  it("cancels pending wrong-pick timeout on language switch so stale prompt does not speak", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      done?.();
+    });
+
+    const { rerender } = render(
+      <CountGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Tap all critters to enter the quiz phase.
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    // Quiz phase is now active. Verify the initial English prompt.
+    expect(screen.getByText(PROMPTS.en)).toBeDefined();
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+
+    // Find and tap a wrong answer choice.
+    const buttons = screen.getAllByRole("button");
+    const wrongChoice = buttons.find((b) => {
+      const tid = b.getAttribute("data-testid");
+      return tid && tid.startsWith("count-choice-") && !tid.endsWith("-answer");
+    });
+    expect(wrongChoice).toBeDefined();
+
+    saySpy.mockClear();
+    fireEvent.click(wrongChoice!);
+    const wrongTid = wrongChoice!.getAttribute("data-testid")!;
+    const getWrongStyles = () => {
+      const p = capturedPressables[wrongTid] as {
+        style?: (s: { pressed: boolean }) => unknown[];
+      };
+      return typeof p?.style === "function" ? p.style({ pressed: false }) : [];
+    };
+    expect(getWrongStyles()).toContainEqual(
+      expect.objectContaining({ borderColor: "#E8564F" }),
+    );
+
+    // Immediately switch language to Japanese before the 500ms timeout expires.
+    act(() => {
+      rerender(<CountGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    });
+
+    // Wrong pick visual state is immediately cleared on language switch.
+    expect(getWrongStyles()).not.toContainEqual(
+      expect.objectContaining({ borderColor: "#E8564F" }),
+    );
+
+    // Spoken prompt and display text should immediately reflect Japanese.
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(screen.getByText(PROMPTS.ja)).toBeDefined();
+    expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/5");
+
+    saySpy.mockClear();
+
+    // Advance past the 500ms wrong-pick timeout.
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // The stale English prompt must NOT be spoken.
+    expect(saySpy).not.toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).not.toHaveBeenCalled();
+    expect(screen.getByText(PROMPTS.ja)).toBeDefined();
   });
 });
