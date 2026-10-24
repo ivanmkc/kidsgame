@@ -274,3 +274,41 @@ it("localizes tap circle accessibility label when lang is ja", () => {
   const circle = screen.getByTestId("steadybeat-circle");
   expect(circle.getAttribute("aria-label")).toBe("ビートに あわせて タップ！");
 });
+
+it("speaks in the updated language when lang changes during listen phase", () => {
+  vi.useFakeTimers();
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  const { rerender } = render(
+    <SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+  );
+  expect(saySpy).toHaveBeenCalledWith("Tap along with the beat!");
+  saySpy.mockClear();
+
+  // Advance partway through the listen phase (1200ms = 2 beats at 100 bpm)
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // Switch language to Japanese mid-listen
+  rerender(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
+  saySpy.mockClear();
+
+  // Advance remaining time for the listen phase (1200ms more to reach 2400ms = 4 beats)
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // Should speak "Your turn!" in Japanese, not English
+  expect(saySpy).toHaveBeenCalledWith("きみの ばん！");
+  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+
+  roundSpy.mockRestore();
+  saySpy.mockRestore();
+  vi.useRealTimers();
+});
