@@ -4,6 +4,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, act, fireEvent, cleanup } from '@testing-library/react';
 import { SameDiffGame } from './SameDiffGame';
 import { phrasePitchRatios, SameDiffRound } from './logic';
+import * as logic from './logic';
+import { sfx } from '../../sound';
 
 describe('SameDiffGame UI', () => {
   afterEach(() => {
@@ -159,6 +161,7 @@ describe('SameDiffGame UI', () => {
     });
     if (screen.getByTestId('samediff-score').textContent?.includes('0/')) {
       act(() => {
+        vi.advanceTimersByTime(500);
         fireEvent.click(diffBtn);
       });
     }
@@ -189,6 +192,7 @@ describe('SameDiffGame UI', () => {
     });
     if (screen.getByTestId('samediff-score').textContent?.includes('1/')) {
       act(() => {
+        vi.advanceTimersByTime(500);
         fireEvent.click(round2Diff);
       });
     }
@@ -212,6 +216,7 @@ describe('SameDiffGame UI', () => {
       });
       if (screen.getByTestId('samediff-score').textContent?.includes(`${r}/`)) {
         act(() => {
+          vi.advanceTimersByTime(500);
           fireEvent.click(diffBtn);
         });
       }
@@ -341,5 +346,132 @@ describe('SameDiffGame UI', () => {
 
     vi.useRealTimers();
   });
+
+  it('prevents fast-tap hammering on correct choice from queuing duplicate sounds and transitions', () => {
+    vi.useFakeTimers();
+    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
+    const roundSame: SameDiffRound = {
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: 'same',
+    };
+    vi.spyOn(logic, 'makeSameDiffRound').mockReturnValue(roundSame);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const sameBtn = screen.getByTestId('samediff-same');
+
+    // Rapidly hammer the correct button multiple times in the same tick
+    act(() => {
+      fireEvent.click(sameBtn);
+      fireEvent.click(sameBtn);
+      fireEvent.click(sameBtn);
+    });
+
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('samediff-score').textContent).toContain('1/');
+
+    // Advance past transition and playback into round 2
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Score remains 1, round 2 is active
+    expect(screen.getByTestId('samediff-score').textContent).toContain('1/');
+
+    vi.useRealTimers();
+  });
+
+  it('prevents fast-tap hammering on wrong choice from playing wrong sound multiple times', () => {
+    vi.useFakeTimers();
+    const wrongSpy = vi.spyOn(sfx, 'wrong').mockImplementation(() => {});
+    const goodSpy = vi.spyOn(sfx, 'good').mockImplementation(() => {});
+    const roundSame: SameDiffRound = {
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: 'same',
+    };
+    vi.spyOn(logic, 'makeSameDiffRound').mockReturnValue(roundSame);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const diffBtn = screen.getByTestId('samediff-diff');
+    const sameBtn = screen.getByTestId('samediff-same');
+
+    // Rapidly hammer the wrong button multiple times
+    act(() => {
+      fireEvent.click(diffBtn);
+      fireEvent.click(diffBtn);
+      fireEvent.click(diffBtn);
+    });
+
+    // Wrong sound played exactly once
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // Tapping the correct choice during the 500ms lock is ignored
+    act(() => {
+      vi.advanceTimersByTime(200);
+      fireEvent.click(sameBtn);
+    });
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('samediff-score').textContent).toContain('0/');
+
+    // After the 500ms wrong cooldown expires, taps are unlocked
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    act(() => {
+      fireEvent.click(sameBtn);
+    });
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('samediff-score').textContent).toContain('1/');
+
+    vi.useRealTimers();
+  });
+
+  it('ignores rapid clicks on replay button while listening sequence is queued', () => {
+    vi.useFakeTimers();
+    const roundSame: SameDiffRound = {
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: 'same',
+    };
+    vi.spyOn(logic, 'makeSameDiffRound').mockReturnValue(roundSame);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const replayBtn = screen.getByTestId('samediff-replay');
+
+    act(() => {
+      fireEvent.click(replayBtn);
+      fireEvent.click(replayBtn);
+    });
+
+    // Melodies play and return to pick phase cleanly
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByTestId('samediff-same')).toBeTruthy();
+    expect(screen.getByTestId('samediff-diff')).toBeTruthy();
+
+    vi.useRealTimers();
+  });
 });
+
 
