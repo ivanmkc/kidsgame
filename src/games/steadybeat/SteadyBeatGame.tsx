@@ -44,6 +44,8 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
   const tapTimesRef = useRef(tapTimesMs);
   tapTimesRef.current = tapTimesMs;
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const [startMs, setStartMs] = useState(0);
   const [hits, setHits] = useState(0);
   const [sparkKey, setSparkKey] = useState(0);
@@ -96,7 +98,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           playDrum(0.5);
           setListenBeat(null);
           setPhase("tap");
-          say(t(lang, "music.yourTurn" as never));
+          say(t(langRef.current, "music.yourTurn" as never));
           setStartMs(performance.now());
           const tapBeatMs = 60000 / r.bpm;
           pulseAnim.setValue(0);
@@ -117,7 +119,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         listenPulse.setValue(1);
       };
     },
-    [lang, listenPulse, pulseAnim],
+    [listenPulse, pulseAnim],
   );
 
   useEffect(() => {
