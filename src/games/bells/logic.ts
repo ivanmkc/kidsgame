@@ -1,8 +1,8 @@
-import { Rng, randInt } from '../../rng';
-import { Difficulty } from '../../difficulty';
+import { Rng, randInt } from "../../rng";
+import { Difficulty } from "../../difficulty";
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
-const BELL_COLORS = ['#E8564F', '#FFC24B', '#5FBF6E', '#2FB8AC', '#9B7EDE'];
+const BELL_COLORS = ["#E8564F", "#FFC24B", "#5FBF6E", "#2FB8AC", "#9B7EDE"];
 
 export interface Bell {
   midi: number;
@@ -11,24 +11,24 @@ export interface Bell {
 
 export interface BellsRound {
   bells: Bell[];
-  sequence: number[];  // indices into bells[]
+  sequence: number[]; // indices into bells[]
 }
 
 function bellCount(d: Difficulty): number {
-  if (d === 'easy') return 3;
-  if (d === 'medium') return 4;
+  if (d === "easy") return 3;
+  if (d === "medium") return 4;
   return 5;
 }
 
 export function seqLength(d: Difficulty): number {
-  if (d === 'easy') return 2;
-  if (d === 'medium') return 3;
+  if (d === "easy") return 2;
+  if (d === "medium") return 3;
   return 5;
 }
 
 export function roundsToWin(d: Difficulty): number {
-  if (d === 'easy') return 5;
-  if (d === 'medium') return 6;
+  if (d === "easy") return 5;
+  if (d === "medium") return 6;
   return 8;
 }
 
@@ -46,36 +46,62 @@ export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
   return { bells, sequence };
 }
 
-export type TapResult = 'continue' | 'complete' | 'wrong';
+export type TapResult = "continue" | "complete" | "wrong";
 
 export function judgeTap(
   round: BellsRound,
   tapped: number[],
-  bell: number
+  bell: number,
 ): TapResult {
   const step = tapped.length;
   if (step >= round.sequence.length || round.sequence[step] !== bell) {
-    return 'wrong';
+    return "wrong";
   }
   if (step + 1 === round.sequence.length) {
-    return 'complete';
+    return "complete";
   }
-  return 'continue';
+  return "continue";
 }
 
-export type BellsPhase = 'listen' | 'play';
+export type BellsPhase = "listen" | "play";
 
 export function canTap(
   round: BellsRound,
   tapped: number[],
   phase: BellsPhase,
   won = false,
-  flashing = false
+  flashing = false,
 ): boolean {
-  if (won || flashing || phase !== 'play') return false;
+  if (won || flashing || phase !== "play") return false;
   return tapped.length < round.sequence.length;
 }
 
 export function speechLines(): string[] {
   return [];
+}
+
+export interface BellsLayout {
+  bellSize: number;
+  gap: number;
+  isLandscape: boolean;
+  shortH: boolean;
+}
+
+export function bellsLayout(
+  width: number,
+  height: number,
+  bellCount = 5,
+): BellsLayout {
+  const isLandscape = width > height;
+  const shortH = isLandscape && height < 500;
+  const gap = shortH ? (height < 360 ? 8 : 12) : 28;
+
+  const maxBellByWidth =
+    (Math.min(width - 40, 600) - (bellCount - 1) * 14) / bellCount;
+
+  const maxBellByHeight = shortH ? Math.floor((height - 84) * 0.3) : 110;
+
+  const bellSize = Math.max(44, Math.min(110, maxBellByWidth, maxBellByHeight));
+
+  return { bellSize, gap, isLandscape, shortH };
 }
