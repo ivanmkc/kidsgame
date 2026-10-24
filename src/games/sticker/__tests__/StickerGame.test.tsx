@@ -796,6 +796,84 @@ describe('StickerGame', () => {
     vi.useRealTimers();
   });
 
+  it('reverts first magicked sticker to placed overlay when second sticker is magicked', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockImplementation(async (args) => ({
+      ok: true,
+      image_b64: `b64_${args.item}`,
+    }));
+
+    const configs: PanResponderCallbacks[] = [];
+    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
+      configs.push(config);
+      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
+        panHandlers: {
+          onStartShouldSetResponder: () => true,
+        } as ReturnType<typeof PanResponder.create>['panHandlers'],
+      };
+      return fakePan as ReturnType<typeof PanResponder.create>;
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayPans = configs.filter(
+      (c) =>
+        c.onPanResponderRelease &&
+        (c.onPanResponderRelease.toString().includes('onTap()') ||
+          c.onPanResponderRelease.toString().includes('onDrop')),
+    );
+
+    const releaseTray = (index: number) => {
+      const release = trayPans[index]?.onPanResponderRelease as
+        | ((e: FakeResponderEvent, g: FakeGestureState) => void)
+        | undefined;
+      release?.({}, { dx: 0, dy: 0 });
+    };
+
+    // Place first sticker
+    act(() => {
+      releaseTray(0);
+    });
+
+    expect(screen.getByTestId('sticker-placed-1')).not.toBeNull();
+    const magicBtn1 = await screen.findByTestId('magic-btn-1');
+
+    // Apply magic to first sticker
+    await act(async () => {
+      fireEvent.click(magicBtn1);
+    });
+
+    // First sticker is now baked into backdrop, visually hidden from draggable overlays
+    expect(screen.getByTestId('magic-backdrop')).not.toBeNull();
+    expect(screen.queryByTestId('sticker-placed-1')).toBeNull();
+
+    // Place second sticker
+    act(() => {
+      releaseTray(1);
+    });
+
+    expect(screen.getByTestId('sticker-placed-2')).not.toBeNull();
+    expect(screen.queryByTestId('sticker-placed-1')).toBeNull();
+
+    const magicBtn2 = await screen.findByTestId('magic-btn-2');
+
+    // Apply magic to second sticker
+    await act(async () => {
+      fireEvent.click(magicBtn2);
+    });
+
+    // Second sticker is now baked into backdrop; first sticker is not deleted and reverts to placed
+    expect(screen.queryByTestId('sticker-placed-2')).toBeNull();
+    expect(screen.getByTestId('sticker-placed-1')).not.toBeNull();
+    expect(screen.getByTestId('magic-btn-1')).not.toBeNull();
+
+    panSpy.mockRestore();
+    unmount();
+  });
+
   it('sets localized accessibilityLabel on TrayItem across languages without underscores', () => {
     const cases: { lang: Lang; expectedDress: string; expectedHelmet: string; expectedLadybug: string }[] = [
       {

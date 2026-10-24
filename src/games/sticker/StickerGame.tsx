@@ -152,8 +152,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
 
     const applySuccess = (dataUrl: string) => {
       setMagicBackdrop(dataUrl);
-      setMagicPhase((m) => ({ ...m, [sticker.key]: 'done' }));
-      setPlaced((p) => p.filter((s) => s.key !== sticker.key));
+      setMagicPhase({ [sticker.key]: 'done' });
       setPendingKey(null);
       setMagicBurst((n) => n + 1);
       sfx.win();
@@ -276,8 +275,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
           )}
           {placed.map((s) => {
             const phase: MagicPhase = magicPhase[s.key] ?? 'idle';
+            if (phase === 'done') return null;
             const isDressup = DRESSUP_SET.has(s.icon);
-            const magicVisible = isDressup && magicReachable === true && phase !== 'done';
+            const magicVisible = isDressup && magicReachable === true;
             const magicEnabled = magicVisible && (pendingKey === null || pendingKey === s.key);
             return (
               <DraggableSticker
