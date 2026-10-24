@@ -131,7 +131,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
           const owner = matchedBy[card.key];
           return (
             <FlipCard
-              key={card.key}
+              key={`${timerKey}-${card.key}`}
               size={cardW}
               up={isUp}
               matched={isMatched}
