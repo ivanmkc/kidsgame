@@ -10,13 +10,47 @@ import {
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { FastSlowGame } from "./FastSlowGame";
-import { playSequence } from "../../music";
-import { sfx } from "../../sound";
+import { playSequence, stopSequence } from "../../music";
+import { sayThen, sfx, stopNarration } from "../../sound";
+
+let activeSayThenDone: (() => void) | null = null;
+let sayThenCapTimer: ReturnType<typeof setTimeout> | null = null;
+
+const defaultSayThenImpl = (
+  _texts: string[],
+  done: () => void,
+  capMs = 3000,
+) => {
+  let fired = false;
+  const fire = () => {
+    if (!fired) {
+      fired = true;
+      if (sayThenCapTimer) {
+        clearTimeout(sayThenCapTimer);
+        sayThenCapTimer = null;
+      }
+      activeSayThenDone = null;
+      done();
+    }
+  };
+  activeSayThenDone = fire;
+  sayThenCapTimer = setTimeout(fire, capMs);
+};
 
 vi.mock("../../sound", () => ({
   sfx: { good: vi.fn(), wrong: vi.fn(), win: vi.fn(), tap: vi.fn() },
   say: vi.fn(),
   saySequence: vi.fn(),
+  sayThen: vi.fn((texts: string[], done: () => void, capMs = 3000) =>
+    defaultSayThenImpl(texts, done, capMs),
+  ),
+  stopNarration: vi.fn(() => {
+    if (activeSayThenDone) {
+      const fn = activeSayThenDone;
+      activeSayThenDone = null;
+      fn();
+    }
+  }),
 }));
 
 vi.mock("../../music", () => ({
@@ -28,6 +62,12 @@ vi.mock("../../music", () => ({
 
 afterEach(() => {
   cleanup();
+  if (sayThenCapTimer) {
+    clearTimeout(sayThenCapTimer);
+    sayThenCapTimer = null;
+  }
+  activeSayThenDone = null;
+  vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
 });
 
 describe("FastSlowGame UI interaction", () => {
@@ -199,20 +239,37 @@ describe("FastSlowGame UI interaction", () => {
     const calls = vi.mocked(playSequence).mock.calls;
     const bpm = calls[calls.length - 1][1] as number;
     const speed = bpm >= 140 ? "fast" : "slow";
-    const correctBtn = speed === "fast" ? fastBtn : slowBtn;
     const wrongBtn = speed === "fast" ? slowBtn : fastBtn;
 
     // Tap the wrong button first: still no celebration sparkles
     fireEvent.click(wrongBtn);
-    expect(within(fastBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
-    expect(within(slowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(
+      within(screen.getByTestId("fastslow-fast")).queryAllByText(/✨|⭐/),
+    ).toHaveLength(0);
+    expect(
+      within(screen.getByTestId("fastslow-slow")).queryAllByText(/✨|⭐/),
+    ).toHaveLength(0);
+
+    // Advance through 500ms red tint and demonstration into pick phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
 
     // Tap the correct button: only the correct button shows celebration sparkles
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+    const activeWrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
     fireEvent.click(correctBtn);
     expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(
       0,
     );
-    expect(within(wrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(activeWrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
     // Advance through celebration (1000ms) and next round listen phase (450ms)
     act(() => {
@@ -362,6 +419,484 @@ describe("FastSlowGame UI interaction", () => {
     unmount();
 
     expect(vi.getTimerCount()).toBe(0);
+
+    vi.useRealTimers();
+  });
+
+  it("provides spoken instructional guidance, replays melody, and withholds score advancement on binary fallback", () => {
+    vi.useFakeTimers();
+    let onSpeechDone: (() => void) | undefined;
+    vi.mocked(sayThen).mockImplementation(
+      (_texts?: string[], onDone?: () => void) => {
+        onSpeechDone = onDone;
+      },
+    );
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward initial listen phase
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    vi.mocked(sfx.wrong).mockClear();
+    const playSeqBefore = vi.mocked(playSequence).mock.calls.length;
+
+    // Pick wrong speed
+    fireEvent.click(wrongBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Advance 500ms wrong tint timer to transition into listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(sayThen).toHaveBeenCalledWith(
+      [speed === "fast" ? "Fast" : "Slow", "Listen..."],
+      expect.any(Function),
+      3000,
+    );
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
+    );
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore);
+
+    // Speech finishes -> melody replays
+    act(() => {
+      onSpeechDone?.();
+    });
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore + 1);
+    expect(vi.mocked(playSequence).mock.calls[playSeqBefore][1]).toBe(bpm);
+
+    // Pick correct speed afterwards
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+    fireEvent.click(correctBtn);
+
+    // Celebration happens, but score does NOT increment on fallback!
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+
+    // Advance celebration
+    act(() => {
+      vi.advanceTimersByTime(1100);
+    });
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    // Round 2 is loaded
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+
+    vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
+    vi.useRealTimers();
+  });
+
+  it("scout repro: missing all rounds initially provides instructional feedback and finishes with 0 score rather than 8/8", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    for (let roundIdx = 0; roundIdx < 8; roundIdx++) {
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+
+      const calls = vi.mocked(playSequence).mock.calls;
+      const bpm = calls[calls.length - 1][1] as number;
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const wrongBtn = screen.getByTestId(
+        speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+      );
+
+      vi.mocked(sfx.wrong).mockClear();
+      vi.mocked(sayThen).mockClear();
+      const playSeqCount = vi.mocked(playSequence).mock.calls.length;
+
+      // Tap wrong speed first
+      fireEvent.click(wrongBtn);
+
+      // Advance 500ms wrong tint timer + 3000ms sayThen cap
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+
+      expect(sfx.wrong).toHaveBeenCalledTimes(1);
+      expect(sayThen).toHaveBeenCalledWith(
+        [speed === "fast" ? "Fast" : "Slow", "Listen..."],
+        expect.any(Function),
+        3000,
+      );
+      expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqCount + 1);
+
+      // Tap remaining button
+      const correctBtn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
+      fireEvent.click(correctBtn);
+
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+    }
+
+    // After 8 rounds, score is 0/8, NOT 8/8
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+
+    // WinOverlay mounts
+    act(() => {
+      vi.advanceTimersByTime(650);
+    });
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it("awards points only for first-try correct rounds in mixed performance game", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // First 3 rounds: correct on first try
+    for (let i = 0; i < 3; i++) {
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      const calls = vi.mocked(playSequence).mock.calls;
+      const bpm = calls[calls.length - 1][1] as number;
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const btn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
+      fireEvent.click(btn);
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+    }
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 3/8");
+
+    // Next 5 rounds: wrong pick first, then fallback pick
+    for (let i = 3; i < 8; i++) {
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      const calls = vi.mocked(playSequence).mock.calls;
+      const bpm = calls[calls.length - 1][1] as number;
+      const speed = bpm >= 140 ? "fast" : "slow";
+      const wrongBtn = screen.getByTestId(
+        speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+      );
+      fireEvent.click(wrongBtn);
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      const correctBtn = screen.getByTestId(
+        speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+      );
+      fireEvent.click(correctBtn);
+      act(() => {
+        vi.advanceTimersByTime(1100);
+      });
+    }
+
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 3/8");
+
+    vi.useRealTimers();
+  });
+
+  it("stops sequence and narration when unmounted during wrong answer feedback", () => {
+    vi.useFakeTimers();
+    const { unmount } = render(
+      <FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    fireEvent.click(wrongBtn);
+    expect(vi.getTimerCount()).toBe(1);
+    vi.mocked(stopSequence).mockClear();
+    vi.mocked(stopNarration).mockClear();
+
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
+    expect(stopSequence).toHaveBeenCalled();
+    expect(stopNarration).toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it("delays melody replay until instructional speech finishes", () => {
+    vi.useFakeTimers();
+    let onSpeechDone: (() => void) | undefined;
+    vi.mocked(sayThen).mockImplementation(
+      (_texts?: string[], onDone?: () => void) => {
+        onSpeechDone = onDone;
+      },
+    );
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    const playSeqBefore = vi.mocked(playSequence).mock.calls.length;
+
+    // Click wrong button
+    fireEvent.click(wrongBtn);
+
+    // Advance 500ms wrong tint timer into listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Instructional speech was triggered, ear card is shown with true tempo, picks are locked,
+    // and melody has NOT started replaying yet
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
+    );
+    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
+    expect(sayThen).toHaveBeenCalledWith(
+      [speed === "fast" ? "Fast" : "Slow", "Listen..."],
+      expect.any(Function),
+      3000,
+    );
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore);
+
+    // Now speech finishes and fires callback
+    act(() => {
+      onSpeechDone?.();
+    });
+
+    // Melody starts replaying now
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore + 1);
+
+    vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
+    vi.useRealTimers();
+  });
+
+  it("does not replay old round melody if demonstration completes after round transition", () => {
+    vi.useFakeTimers();
+    let onSpeechDone: (() => void) | undefined;
+    vi.mocked(sayThen).mockImplementation(
+      (_texts?: string[], onDone?: () => void) => {
+        onSpeechDone = onDone;
+      },
+    );
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward initial listen delay to start round 1 melody
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    // Click wrong button: triggers red tint, then transitions to listen card
+    fireEvent.click(wrongBtn);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
+    );
+    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
+
+    // Finish speech so replay plays round 1 melody
+    const playSeqCallsBefore = vi.mocked(playSequence).mock.calls.length;
+    act(() => {
+      onSpeechDone?.();
+    });
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(
+      playSeqCallsBefore + 1,
+    );
+
+    // Pick correct answer now that round 1 replay returned to pick phase
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+    fireEvent.click(correctBtn);
+
+    // Advance celebration into round 2
+    act(() => {
+      vi.advanceTimersByTime(1100);
+    });
+    // Advance round 2 listen delay
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    // Capture calls after round 2 started
+    const latestCalls = vi.mocked(playSequence).mock.calls.length;
+
+    // Simulate stale callback from round 1 demonstration firing in round 2
+    act(() => {
+      onSpeechDone?.();
+    });
+
+    // Old round's melody was NOT replayed
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(latestCalls);
+
+    vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
+    vi.useRealTimers();
+  });
+
+  it("provides visual feedback on wrong pick with red tint, blocks immediate taps, and shows instructional tempo on listen card (R3)", () => {
+    vi.useFakeTimers();
+    let onSpeechDone: (() => void) | undefined;
+    vi.mocked(sayThen).mockImplementation(
+      (_texts?: string[], onDone?: () => void) => {
+        onSpeechDone = onDone;
+      },
+    );
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward initial listen phase
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+
+    // Tap wrong button
+    fireEvent.click(wrongBtn);
+
+    // 1. Visual cue: tapped button is tinted red, picks are locked
+    // 2. Immediate exploitation attempt: tapping correct button while red tint is active does NOT award score or advance
+    fireEvent.click(correctBtn);
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    expect(within(correctBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    // 3. Advance through 500ms red tint into listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // 4. Visual cue for true tempo and listen card (R3)
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
+    );
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    // Pick buttons are unmounted during listen demonstration
+    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
+
+    // 5. Complete speech and melody replay
+    act(() => {
+      onSpeechDone?.();
+    });
+
+    // Re-query buttons once demonstration returns to pick phase
+    const activeCorrectBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+    fireEvent.click(activeCorrectBtn);
+
+    // Celebration sparkles appear on correct button, but score does not increase on fallback
+    expect(
+      within(activeCorrectBtn).queryAllByText(/✨|⭐/).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+
+    vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
+    vi.useRealTimers();
+  });
+
+  it("replays melody and returns to pick phase even when speech callback never arrives (sound off / dropped onDone)", () => {
+    vi.useFakeTimers();
+    // Simulate sayThen when saySequence drops onDone (sound muted / speechSynthesis throws or missing)
+    // The capMs timer inside sayThen ensures done() fires regardless.
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward initial listen phase
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+    const playSeqBefore = vi.mocked(playSequence).mock.calls.length;
+
+    // Tap wrong speed
+    fireEvent.click(wrongBtn);
+
+    // Advance 500ms wrong tint timer into listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
+    );
+    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore);
+
+    // Speech never fires onDone (sound off / dropped callback).
+    // The sayThen cap timer (3000ms) fires.
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    // Melody replayed
+    expect(vi.mocked(playSequence).mock.calls.length).toBe(playSeqBefore + 1);
+
+    // Pick buttons are remounted and unlocked
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+    expect(correctBtn).toBeTruthy();
+
+    // Fallback tap awards 0 points
+    fireEvent.click(correctBtn);
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
 
     vi.useRealTimers();
   });

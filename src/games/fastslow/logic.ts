@@ -1,7 +1,7 @@
 import { Rng } from "../../rng";
 import { Difficulty } from "../../difficulty";
 import { SeqNote } from "../../music";
-import { LANGS } from "../../lang";
+import { LANGS, Lang } from "../../lang";
 import { t } from "../../i18n";
 
 const MELODIES: SeqNote[][] = [
@@ -114,6 +114,22 @@ export function isCorrect(
 
 export function getActualSpeed(round: FastSlowRound): "fast" | "slow" {
   return speedOf(round.bpm);
+}
+
+export function getInstructionalFeedback(
+  round: FastSlowRound,
+  lang: Lang,
+): string[] {
+  const speed = getActualSpeed(round);
+  const speedKey = speed === "fast" ? "music.fast" : "music.slow";
+  return [t(lang, speedKey), t(lang, "music.listen")];
+}
+
+export function nextScoreValue(
+  currentScore: number,
+  isFirstTry: boolean,
+): number {
+  return isFirstTry ? currentScore + 1 : currentScore;
 }
 
 /** Voice-clip contract: every spoken line, all langs. */

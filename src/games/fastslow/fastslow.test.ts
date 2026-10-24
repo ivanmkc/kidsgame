@@ -249,4 +249,53 @@ describe("FastSlowGame", () => {
     });
     expect(saySequenceSpy).toHaveBeenCalledWith(["音樂係快定慢？", "快", "慢"]);
   });
+
+  it("speaks localized instructional feedback on incorrect pick in Japanese", () => {
+    vi.useFakeTimers();
+    let playCb: (() => void) | undefined;
+    let actualSpeed: "fast" | "slow" | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, bpm, _inst, cb) => {
+        playCb = cb;
+        actualSpeed = bpm >= 140 ? "fast" : "slow";
+        return () => {};
+      },
+    );
+
+    const sayThenSpy = vi.spyOn(sound, "sayThen").mockImplementation(() => {});
+
+    render(
+      React.createElement(FastSlowGame, {
+        onHome: () => {},
+        difficulty: "easy",
+        lang: "ja",
+      }),
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    act(() => {
+      if (playCb) playCb();
+    });
+
+    const wrongBtn = screen.getByTestId(
+      actualSpeed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+    fireEvent.click(wrongBtn);
+
+    // Advance 500ms wrong tint timer to transition into listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      [actualSpeed === "fast" ? "はやい" : "おそい", "きいてね…"],
+      expect.any(Function),
+      3000,
+    );
+    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
+      actualSpeed === "fast" ? "🐰 はやい" : "🐢 おそい",
+    );
+  });
 });

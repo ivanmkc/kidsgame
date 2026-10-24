@@ -15,7 +15,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, saySequence, sfx } from "../../sound";
+import { say, saySequence, sayThen, sfx, stopNarration } from "../../sound";
 import { playSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -24,6 +24,8 @@ import {
   getActualSpeed,
   isCorrect,
   FastSlowRound,
+  getInstructionalFeedback,
+  nextScoreValue,
 } from "./logic";
 
 interface Props {
@@ -37,6 +39,11 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roundEpochRef = useRef(0);
+  const feedbackSpeechRef = useRef<string[] | null>(null);
+  const firstTryRef = useRef(true);
   const [history, setHistory] = useState<("fast" | "slow")[]>([]);
   const [round, setRound] = useState<FastSlowRound>(() =>
     makeFastSlowRound(rngRef.current, difficulty, []),
@@ -44,6 +51,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [wrongPick, setWrongPick] = useState<"fast" | "slow" | null>(null);
+  const [instructionalTempo, setInstructionalTempo] = useState<
+    "fast" | "slow" | null
+  >(null);
   const [sparkKey, setSparkKey] = useState(0);
   const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.fastslow" as never));
@@ -51,7 +61,14 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const playRound = useCallback((r: FastSlowRound) => {
     stopSequence();
     setPhase("listen");
-    playSequence(r.notes, r.bpm, undefined, () => setPhase("pick"));
+    const epoch = roundEpochRef.current;
+    playSequence(r.notes, r.bpm, undefined, () => {
+      if (roundEpochRef.current === epoch) {
+        setInstructionalTempo(null);
+        lockedRef.current = false;
+        setPhase("pick");
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -63,12 +80,27 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
         stopSequence();
       };
     }
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won, playRound]);
 
   useEffect(() => {
     if (won) return;
     if (phase === "listen") {
-      say(t(lang, "music.listen"));
+      if (feedbackSpeechRef.current) {
+        const feedback = feedbackSpeechRef.current;
+        feedbackSpeechRef.current = null;
+        const currentEpoch = roundEpochRef.current;
+        sayThen(
+          feedback,
+          () => {
+            if (roundEpochRef.current === currentEpoch) {
+              playRound(round);
+            }
+          },
+          3000,
+        );
+      } else {
+        say(t(lang, "music.listen"));
+      }
     } else if (phase === "pick") {
       saySequence([
         t(lang, "shell.fastslow.sub"),
@@ -76,7 +108,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
         t(lang, "music.slow"),
       ]);
     }
-  }, [phase, won, lang]);
+  }, [phase, won, lang, playRound, round]);
 
   const onPick = (picked: "fast" | "slow") => {
     if (won || phase !== "pick" || lockedRef.current) return;
@@ -84,15 +116,18 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
-      const next = score + 1;
+      const next = nextScoreValue(score, firstTryRef.current);
       setScore(next);
       setWrongPick(null);
+      setInstructionalTempo(null);
       const nextHistory = [...history, picked];
       setHistory(nextHistory);
       setPhase("celebrate");
-      if (next < total) {
+      if (nextHistory.length < total) {
         transitionTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
+          firstTryRef.current = true;
+          roundEpochRef.current++;
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
       } else {
@@ -102,36 +137,60 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
+      lockedRef.current = true;
+      firstTryRef.current = false;
       setWrongPick(picked);
-      setTimeout(() => setWrongPick(null), 500);
+      const currentEpoch = roundEpochRef.current;
+      const trueSpeed = getActualSpeed(round);
+      wrongTimerRef.current = setTimeout(() => {
+        if (roundEpochRef.current !== currentEpoch) return;
+        setWrongPick(null);
+        setInstructionalTempo(trueSpeed);
+        feedbackSpeechRef.current = getInstructionalFeedback(round, lang);
+        setPhase("listen");
+      }, 500);
     }
   };
 
-  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     return () => {
+      roundEpochRef.current++;
+      feedbackSpeechRef.current = null;
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      stopSequence();
+      stopNarration();
     };
   }, []);
 
   const replay = () => {
     if (phase === "pick") {
       stopSequence();
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+      setWrongPick(null);
+      setInstructionalTempo(null);
       setPhase("listen");
       replayTimerRef.current = setTimeout(() => playRound(round), 400);
     }
   };
 
   const reset = () => {
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    stopSequence();
+    stopNarration();
+    roundEpochRef.current++;
+    feedbackSpeechRef.current = null;
     lockedRef.current = false;
+    firstTryRef.current = true;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);
     setWrongPick(null);
+    setInstructionalTempo(null);
     setHistory([]);
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));
   };
@@ -206,6 +265,24 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
             >
               👂
             </Animated.Text>
+            {instructionalTempo ? (
+              <Text
+                testID="fastslow-instructional-tempo"
+                style={[
+                  styles.instructionalText,
+                  {
+                    color:
+                      instructionalTempo === "fast" ? "#E8874F" : "#5DA9E8",
+                  },
+                ]}
+              >
+                {instructionalTempo === "fast" ? "🐰 " : "🐢 "}
+                {t(
+                  lang,
+                  instructionalTempo === "fast" ? "music.fast" : "music.slow",
+                )}
+              </Text>
+            ) : null}
             <Text style={styles.listenText}>
               {t(lang, "music.listen" as never)}
             </Text>
@@ -217,7 +294,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 onPress={() => onPick("fast")}
                 testID="fastslow-fast"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.fast')}
+                accessibilityLabel={t(lang, "music.fast")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
@@ -255,7 +332,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 onPress={() => onPick("slow")}
                 testID="fastslow-slow"
                 accessibilityRole="button"
-                accessibilityLabel={t(lang, 'music.slow')}
+                accessibilityLabel={t(lang, "music.slow")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
@@ -309,6 +386,11 @@ const styles = StyleSheet.create({
   },
   listenEmoji: { fontSize: 56 },
   listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },
+  instructionalText: {
+    fontFamily: fonts.display,
+    fontSize: 26,
+    color: colors.ink,
+  },
   pickRow: { flexDirection: "row", alignItems: "center", gap: 20 },
   pickBtn: {
     borderRadius: 28,
