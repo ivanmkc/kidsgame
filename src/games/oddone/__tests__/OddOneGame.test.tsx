@@ -230,4 +230,28 @@ describe("OddOneGame", () => {
     expect(sfx.tap).not.toHaveBeenCalled();
     expect(say).not.toHaveBeenCalled();
   });
+
+  it("speaks localized category prompt for non-English languages", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementationOnce(() => ({
+      baseCategory: "animals",
+      oddCategory: "food",
+      odd: "apple",
+      items: ["dog", "cat", "lion", "apple"],
+      oddIndex: 3,
+    }));
+    render(<OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    expect(say).toHaveBeenCalledWith("どうぶつじゃないのは？");
+  });
+
+  describe("speechLines", () => {
+    it("exports all 16 prompt lines across all categories and languages", () => {
+      const lines = logic.speechLines();
+      expect(lines).toHaveLength(16);
+      expect(lines).toContain("Which one is NOT an animal?");
+      expect(lines).toContain("どうぶつじゃないのは？");
+      expect(lines).toContain("哪一个不是动物？");
+      expect(lines).toContain("邊個唔係動物？");
+      expect(new Set(lines).size).toBe(16);
+    });
+  });
 });

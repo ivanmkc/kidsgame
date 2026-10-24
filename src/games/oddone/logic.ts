@@ -1,5 +1,9 @@
 import { Rng, shuffle } from "../../rng";
-import { CATEGORY_CONFLICTS, ICON_CATEGORIES } from "../iconCategories";
+import {
+  CATEGORY_CONFLICTS,
+  CATEGORY_TEXT,
+  ICON_CATEGORIES,
+} from "../iconCategories";
 
 export interface OddOneRound {
   baseCategory: string;
@@ -58,4 +62,15 @@ export function makeOddOneRound(
     items,
     oddIndex: items.indexOf(odd),
   };
+}
+
+/** All category prompt lines across every supported language (clip pre-render contract). */
+export function speechLines(): string[] {
+  const lines = new Set<string>();
+  for (const cat of Object.values(CATEGORY_TEXT)) {
+    for (const line of Object.values(cat.not)) {
+      lines.add(line);
+    }
+  }
+  return [...lines];
 }

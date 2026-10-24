@@ -21,6 +21,7 @@ import { speechLines as steadybeat } from "../steadybeat/logic";
 import { speechLines as fastslow } from "../fastslow/logic";
 import { speechLines as samediff } from "../samediff/logic";
 import { speechLines as listenchoose } from "../listenchoose/logic";
+import { speechLines as oddone } from "../oddone/logic";
 import { speechLines as winlines } from "../winlines";
 
 describe("speech line dump", () => {
@@ -50,6 +51,7 @@ describe("speech line dump", () => {
         ...fastslow(),
         ...samediff(),
         ...listenchoose(),
+        ...oddone(),
         ...winlines(),
       ]),
     ].sort();
