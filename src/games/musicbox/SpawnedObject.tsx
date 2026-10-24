@@ -14,6 +14,7 @@ export interface SpawnEntry {
   sceneId: string;
   big: boolean;
   zone: SpawnZone;
+  midi: number;
 }
 
 interface Props {
