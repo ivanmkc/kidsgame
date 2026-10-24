@@ -55,10 +55,17 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   useWinLine(won, t(lang, "win.sums"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const wrongVoiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const boingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearBoingTimers = () => {
+    boingTimersRef.current.forEach(clearTimeout);
+    boingTimersRef.current = [];
+  };
 
   useEffect(
     () => () => {
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
+      clearBoingTimers();
     },
     [],
   );
@@ -83,17 +90,20 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   // animation itself is per-critter (Incoming component); this just adds
   // the audio beat.
   useEffect(() => {
+    clearBoingTimers();
     if (won) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
     for (let i = 0; i < round.b; i++) {
-      timers.push(setTimeout(() => sfx.boing(0.35), 400 + i * 250));
+      boingTimersRef.current.push(
+        setTimeout(() => sfx.boing(0.35), 400 + i * 250),
+      );
     }
-    return () => timers.forEach(clearTimeout);
+    return clearBoingTimers;
   }, [round, won]);
 
   const pickAnswer = (v: number) => {
     if (won || locked) return;
     if (v === round.sum) {
+      clearBoingTimers();
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
       sfx.good();
       setLocked(true);
@@ -118,6 +128,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    clearBoingTimers();
     if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
