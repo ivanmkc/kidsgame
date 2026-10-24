@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { t, UIKey } from "../../../i18n";
-import { Lang } from "../../../lang";
+import { hanNumeral, Lang, numberWord } from "../../../lang";
 import { makeRng } from "../../../rng";
 import { WORDS, wordFor } from "../../../words";
 import {
@@ -77,11 +77,18 @@ describe("conceptmatch/logic", () => {
         display: { type: "text", text: "red" },
         speech: "red",
       };
+      const dotsCard: ConceptMatchCard = {
+        key: "red-dots",
+        conceptId: "red",
+        display: { type: "dots", count: 3 },
+        speech: "red",
+      };
 
       expect(isMatch(iconCard, textCard)).toBe(true);
       expect(isMatch(iconCard, audioCard)).toBe(true);
       expect(isMatch(textCard, audioCard)).toBe(true);
       expect(isMatch(colorCard, redTextCard)).toBe(true);
+      expect(isMatch(redTextCard, dotsCard)).toBe(true);
       expect(isMatch(iconCard, colorCard)).toBe(false);
     });
   });
@@ -429,6 +436,195 @@ describe("conceptmatch/logic", () => {
         const board1 = buildBoard(makeRng(1), "color-word", "en", 4);
         const board2 = buildBoard(makeRng(2), "color-word", "en", 4);
         expect(board1).not.toEqual(board2);
+      });
+    });
+
+    describe("numerals-han deck", () => {
+      it("defaults to 2 pairs (4 cards)", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "numerals-han");
+        expect(board).toHaveLength(4);
+      });
+
+      it("generates the requested number of pairs", () => {
+        const rng = makeRng(123);
+        const board = buildBoard(rng, "numerals-han", "en", 5);
+        expect(board).toHaveLength(10);
+      });
+
+      it("generates one Arabic and one Han text card for each chosen number from 1 to 10", () => {
+        const rng = makeRng(999);
+        const board = buildBoard(rng, "numerals-han", "en", 4);
+        expect(board).toHaveLength(8);
+
+        const byConcept = new Map<string, ConceptMatchCard[]>();
+        for (const card of board) {
+          const group = byConcept.get(card.conceptId) ?? [];
+          group.push(card);
+          byConcept.set(card.conceptId, group);
+        }
+
+        expect(byConcept.size).toBe(4);
+
+        for (const [conceptId, cards] of byConcept.entries()) {
+          const n = Number(conceptId);
+          expect(n).toBeGreaterThanOrEqual(1);
+          expect(n).toBeLessThanOrEqual(10);
+          expect(cards).toHaveLength(2);
+
+          const [card1, card2] = cards;
+          expect(isMatch(card1, card2)).toBe(true);
+
+          const arabicCard = cards.find(
+            (c) => c.display.type === "text" && c.display.text === String(n),
+          );
+          const hanCard = cards.find(
+            (c) =>
+              c.display.type === "text" && c.display.text === hanNumeral(n),
+          );
+
+          expect(arabicCard).toBeDefined();
+          expect(hanCard).toBeDefined();
+
+          expect(arabicCard?.key).toBe(`${n}-arabic`);
+          expect(hanCard?.key).toBe(`${n}-han`);
+
+          expect(arabicCard?.speech).toBe(numberWord("en", n).t);
+          expect(hanCard?.speech).toBe(numberWord("en", n).t);
+        }
+      });
+
+      it("localizes speech across all 4 languages", () => {
+        const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+        for (const lang of langs) {
+          const rng = makeRng(777);
+          const board = buildBoard(rng, "numerals-han", lang, 10);
+          expect(board).toHaveLength(20);
+
+          for (const card of board) {
+            const n = Number(card.conceptId);
+            expect(card.speech).toBe(numberWord(lang, n).t);
+          }
+        }
+      });
+
+      it("produces unique keys for every card", () => {
+        const rng = makeRng(888);
+        const board = buildBoard(rng, "numerals-han", "en", 6);
+        const keys = board.map((c) => c.key);
+        expect(new Set(keys).size).toBe(board.length);
+      });
+
+      it("is reproducible with the same RNG seed", () => {
+        const board1 = buildBoard(makeRng(12345), "numerals-han", "en", 4);
+        const board2 = buildBoard(makeRng(12345), "numerals-han", "en", 4);
+        expect(board1).toEqual(board2);
+      });
+
+      it("produces different layouts with different RNG seeds", () => {
+        const board1 = buildBoard(makeRng(1), "numerals-han", "en", 4);
+        const board2 = buildBoard(makeRng(2), "numerals-han", "en", 4);
+        expect(board1).not.toEqual(board2);
+      });
+
+      it("caps at 10 pairs when requested pairs exceeds pool size", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "numerals-han", "en", 15);
+        expect(board).toHaveLength(20);
+      });
+    });
+
+    describe("numerals-dots deck", () => {
+      it("defaults to 2 pairs (4 cards)", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "numerals-dots");
+        expect(board).toHaveLength(4);
+      });
+
+      it("generates the requested number of pairs", () => {
+        const rng = makeRng(123);
+        const board = buildBoard(rng, "numerals-dots", "en", 4);
+        expect(board).toHaveLength(8);
+      });
+
+      it("generates one Arabic text card and one dots icon card for each chosen number from 1 to 9", () => {
+        const rng = makeRng(999);
+        const board = buildBoard(rng, "numerals-dots", "en", 4);
+        expect(board).toHaveLength(8);
+
+        const byConcept = new Map<string, ConceptMatchCard[]>();
+        for (const card of board) {
+          const group = byConcept.get(card.conceptId) ?? [];
+          group.push(card);
+          byConcept.set(card.conceptId, group);
+        }
+
+        expect(byConcept.size).toBe(4);
+
+        for (const [conceptId, cards] of byConcept.entries()) {
+          const n = Number(conceptId);
+          expect(n).toBeGreaterThanOrEqual(1);
+          expect(n).toBeLessThanOrEqual(9);
+          expect(cards).toHaveLength(2);
+
+          const [card1, card2] = cards;
+          expect(isMatch(card1, card2)).toBe(true);
+
+          const arabicCard = cards.find(
+            (c) => c.display.type === "text" && c.display.text === String(n),
+          );
+          const dotsCard = cards.find(
+            (c) => c.display.type === "dots" && c.display.count === n,
+          );
+
+          expect(arabicCard).toBeDefined();
+          expect(dotsCard).toBeDefined();
+
+          expect(arabicCard?.key).toBe(`${n}-arabic`);
+          expect(dotsCard?.key).toBe(`${n}-dots`);
+
+          expect(arabicCard?.speech).toBe(numberWord("en", n).t);
+          expect(dotsCard?.speech).toBe(numberWord("en", n).t);
+        }
+      });
+
+      it("localizes speech across all 4 languages", () => {
+        const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+        for (const lang of langs) {
+          const rng = makeRng(777);
+          const board = buildBoard(rng, "numerals-dots", lang, 9);
+          expect(board).toHaveLength(18);
+
+          for (const card of board) {
+            const n = Number(card.conceptId);
+            expect(card.speech).toBe(numberWord(lang, n).t);
+          }
+        }
+      });
+
+      it("produces unique keys for every card", () => {
+        const rng = makeRng(888);
+        const board = buildBoard(rng, "numerals-dots", "en", 6);
+        const keys = board.map((c) => c.key);
+        expect(new Set(keys).size).toBe(board.length);
+      });
+
+      it("is reproducible with the same RNG seed", () => {
+        const board1 = buildBoard(makeRng(12345), "numerals-dots", "en", 4);
+        const board2 = buildBoard(makeRng(12345), "numerals-dots", "en", 4);
+        expect(board1).toEqual(board2);
+      });
+
+      it("produces different layouts with different RNG seeds", () => {
+        const board1 = buildBoard(makeRng(1), "numerals-dots", "en", 4);
+        const board2 = buildBoard(makeRng(2), "numerals-dots", "en", 4);
+        expect(board1).not.toEqual(board2);
+      });
+
+      it("caps at 9 pairs when requested pairs exceeds pool size", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "numerals-dots", "en", 15);
+        expect(board).toHaveLength(18);
       });
     });
 

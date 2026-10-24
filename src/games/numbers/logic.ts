@@ -2,7 +2,7 @@
 // JA/cmn/yue speak two ("さがしてね！" then the number word) so each spoken
 // asset stays short and reusable. Hard tier in JA/zh swaps arabic tiles
 // for han numerals (一..十) with numbers 1-10.
-import { HAN_NUMERALS, Lang, numberWord } from '../../lang';
+import { hanNumeral, Lang, numberWord } from '../../lang';
 import { Rng, shuffle } from '../../rng';
 
 export interface NumberTile {
@@ -51,13 +51,6 @@ export function settingsForNumbers(
   if (difficulty === 'easy')   return { rounds: 8,  tiles: 5, min: useHan ? 1 : min, max: 5,  useHan };
   if (difficulty === 'hard')   return { rounds: 12, tiles: 9, min: useHan ? 1 : min, max: 20, useHan };
   return                              { rounds: 10, tiles: 7, min: useHan ? 1 : min, max: 9,  useHan };
-}
-
-export function hanNumeral(n: number): string {
-  if (n <= 10) return HAN_NUMERALS[n - 1] ?? String(n);
-  if (n < 20) return `十${HAN_NUMERALS[n - 11]}`;
-  if (n === 20) return '二十';
-  return String(n);
 }
 
 function label(n: number, useHan: boolean): string {

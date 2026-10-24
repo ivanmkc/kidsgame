@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { HAN_NUMERALS, LANGS, type Lang, loadLang, nextLang, numberWord, saveLang } from '../lang';
+import { HAN_NUMERALS, hanNumeral, LANGS, type Lang, loadLang, nextLang, numberWord, saveLang } from '../lang';
 type FakePlatform = Partial<typeof Platform>;
 type FakeStorage = Pick<Storage, 'getItem' | 'setItem'>;
 type FakeWindow = Omit<Partial<Window>, 'localStorage'> & {
@@ -140,5 +140,27 @@ describe('lang', () => {
       expect(HAN_NUMERALS).toEqual(['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']);
     });
   });
-});
 
+  describe('hanNumeral', () => {
+    it('returns han numerals for 1..10', () => {
+      expect(hanNumeral(1)).toBe('一');
+      expect(hanNumeral(5)).toBe('五');
+      expect(hanNumeral(10)).toBe('十');
+    });
+
+    it('returns compound han numerals for 11..19', () => {
+      expect(hanNumeral(11)).toBe('十一');
+      expect(hanNumeral(15)).toBe('十五');
+      expect(hanNumeral(19)).toBe('十九');
+    });
+
+    it('returns 二十 for 20', () => {
+      expect(hanNumeral(20)).toBe('二十');
+    });
+
+    it('falls back to stringified number for out-of-range numbers', () => {
+      expect(hanNumeral(0)).toBe('0');
+      expect(hanNumeral(21)).toBe('21');
+    });
+  });
+});

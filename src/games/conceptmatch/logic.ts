@@ -1,5 +1,5 @@
 import { t, UIKey } from "../../i18n";
-import { Lang } from "../../lang";
+import { hanNumeral, Lang, numberWord } from "../../lang";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, wordFor } from "../../words";
 
@@ -7,7 +7,8 @@ export type CardDisplay =
   | { type: "text"; text: string }
   | { type: "icon"; icon: string }
   | { type: "color"; color: string }
-  | { type: "audio"; text?: string };
+  | { type: "audio"; text?: string }
+  | { type: "dots"; count: number };
 
 export interface ConceptMatchCard {
   key: string;
@@ -17,7 +18,12 @@ export interface ConceptMatchCard {
 }
 
 export type ConceptMatchDeck =
-  "letters" | "picture-word" | "picture-spoken" | "color-word";
+  | "letters"
+  | "picture-word"
+  | "picture-spoken"
+  | "color-word"
+  | "numerals-han"
+  | "numerals-dots";
 
 export interface ColorEntry {
   id: string;
@@ -187,6 +193,52 @@ export function buildBoard(
           conceptId: entry.id,
           display: { type: "text", text: word },
           speech: word,
+        },
+      ];
+    });
+    return shuffle(rng, cards);
+  }
+
+  if (deck === "numerals-han") {
+    const pool = shuffle(rng, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const chosen = pool.slice(0, pairs);
+    const cards: ConceptMatchCard[] = chosen.flatMap((n) => {
+      const speech = numberWord(lang, n).t;
+      return [
+        {
+          key: `${n}-arabic`,
+          conceptId: String(n),
+          display: { type: "text", text: String(n) },
+          speech,
+        },
+        {
+          key: `${n}-han`,
+          conceptId: String(n),
+          display: { type: "text", text: hanNumeral(n) },
+          speech,
+        },
+      ];
+    });
+    return shuffle(rng, cards);
+  }
+
+  if (deck === "numerals-dots") {
+    const pool = shuffle(rng, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    const chosen = pool.slice(0, pairs);
+    const cards: ConceptMatchCard[] = chosen.flatMap((n) => {
+      const speech = numberWord(lang, n).t;
+      return [
+        {
+          key: `${n}-arabic`,
+          conceptId: String(n),
+          display: { type: "text", text: String(n) },
+          speech,
+        },
+        {
+          key: `${n}-dots`,
+          conceptId: String(n),
+          display: { type: "dots", count: n },
+          speech,
         },
       ];
     });
