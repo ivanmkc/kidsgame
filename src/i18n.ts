@@ -242,6 +242,7 @@ export type UIKey =
   | 'hidden.prompt'
   | 'shadow.hint'
   | 'shadow.hintTricky'
+  | 'oddone.defaultQuestion'
   | 'rules.memoryCheck'
   | 'rules.ruleNumber'
   | 'rules.doAgain'
@@ -569,6 +570,7 @@ export const EN: Table = {
   'hidden.prompt': 'Find all the hidden things!',
   'shadow.hint': 'Tap the sticker that makes the shadow!',
   'shadow.hintTricky': 'It might be flipped or turned — look at the shape!',
+  'oddone.defaultQuestion': 'Which one does not belong?',
   'rules.memoryCheck': 'Memory check!',
   'rules.ruleNumber': 'Rule #{n}',
   'rules.doAgain': 'Do Rule #{n} again — remember it? 🤔',
