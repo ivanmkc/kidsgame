@@ -1,9 +1,9 @@
+import importlib.util
 import json
 import sys
 import types as pytypes
-import importlib.util
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from PIL import Image
@@ -36,24 +36,123 @@ if not has_genai:
 import artifact_scan
 from batch_executor import BatchExecutor
 
-def test_tiles():
-    # tiles(w=100, h=100, cols=2, rows=2, overlap=0.25)
-    # tw = 50, th = 50, ox = 12, oy = 12
-    t = list(artifact_scan.tiles(100, 100, cols=2, rows=2, overlap=0.25))
-    assert t == [
-        (0, 0, 62, 62),
-        (38, 0, 100, 62),
-        (0, 38, 62, 100),
-        (38, 38, 100, 100),
+
+def test_check_pair_identity(tmp_path):
+    assets_dir = tmp_path / "assets" / "game"
+    assets_dir.mkdir(parents=True)
+    img_a_path = assets_dir / "diff_a.png"
+    img_b_path = assets_dir / "diff_b.png"
+
+    Image.new("RGB", (100, 100), color=(128, 128, 128)).save(img_a_path)
+    Image.new("RGB", (100, 100), color=(128, 128, 128)).save(img_b_path)
+
+    entry = {
+        "id": "test_diff",
+        "imageA": "diff_a.png",
+        "imageB": "diff_b.png",
+        "diffs": [{"x": 10, "y": 10, "w": 20, "h": 20}],
+    }
+    with patch("artifact_scan.ROOT", tmp_path), patch("artifact_scan.ASSETS", assets_dir):
+        # Perfect match outside diffs -> no findings
+        assert artifact_scan.check_pair_identity(entry) == []
+
+        # Mismatch outside diffs -> flag finding with repo-relative path prepended
+        diff_b = Image.new("RGB", (100, 100), color=(0, 255, 0))
+        diff_b.save(img_b_path)
+        findings = artifact_scan.check_pair_identity(entry)
+        assert len(findings) == 1
+        assert findings[0]["asset"] == "assets/game/diff_b.png"
+        assert findings[0]["kind"] == "pair-identity"
+        assert "differ" in findings[0]["detail"]
+
+        # Already repo-relative path in imageB is not double-prefixed
+        entry_repo_rel = {
+            "id": "test_diff",
+            "imageA": "diff_a.png",
+            "imageB": "assets/game/diff_b.png",
+            "diffs": [{"x": 10, "y": 10, "w": 20, "h": 20}],
+        }
+        findings_rel = artifact_scan.check_pair_identity(entry_repo_rel)
+        assert len(findings_rel) == 1
+        assert findings_rel[0]["asset"] == "assets/game/diff_b.png"
+
+
+def test_process_scan_batches(tmp_path):
+    assets_dir = tmp_path / "assets"
+    assets_dir.mkdir()
+    img_path = assets_dir / "item.png"
+    Image.new("RGB", (100, 100), color=(10, 20, 30)).save(img_path)
+
+    batches = [
+        [
+            {
+                "asset": {"path": "assets/item.png", "kind": "image"},
+                "rect": [0, 0, 50, 50],
+                "tag": "item_tile_0",
+            },
+            {
+                "asset": {"path": "audio.mp3", "kind": "audio"},
+                "rect": [0, 0, 0, 0],
+                "tag": "ignored",
+            },
+        ],
+        [
+            {
+                "asset": {"path": "assets/item.png", "kind": "image"},
+                "rect": [50, 50, 100, 100],
+                "tag": "item_tile_1",
+            }
+        ],
     ]
+
+    calls = []
+
+    def fake_judge(q, crops, attempts=3):
+        calls.append(crops)
+        # Flag only the second image crop
+        return len(calls) == 2
+
+    out_dir = tmp_path / "out"
+    with patch("artifact_scan.ROOT", tmp_path), \
+         patch("artifact_scan.OUT", out_dir), \
+         patch("gen.judge.ask_yes_no", side_effect=fake_judge):
+        findings = artifact_scan.process_scan_batches(batches, max_workers=2)
+
+    assert len(findings) == 1
+    assert findings[0]["asset"] == "assets/item.png"
+    assert findings[0]["kind"] == "judged-artifact"
+    assert findings[0]["crop"] == "item_tile_1.png"
+    assert (out_dir / "item_tile_1.png").exists()
+
 
 def test_main(tmp_path):
     assets_dir = tmp_path / "assets"
     assets_dir.mkdir()
+    game_assets_dir = tmp_path / "assets" / "game"
+    game_assets_dir.mkdir(parents=True)
     out_dir = tmp_path / "out"
     plan_file = tmp_path / "scan_plan.json"
+    manifest_file = tmp_path / "manifest.json"
 
-    # Create dummy images
+    # Create dummy diff pair in manifest for deterministic check
+    diff_a_path = game_assets_dir / "diff_a.png"
+    diff_b_path = game_assets_dir / "diff_b.png"
+    Image.new("RGB", (100, 100), color=(255, 0, 0)).save(diff_a_path)
+    Image.new("RGB", (100, 100), color=(0, 255, 0)).save(diff_b_path)
+
+    manifest_data = {
+        "diff": [
+            {
+                "id": "diff1",
+                "imageA": "diff_a.png",
+                "imageB": "diff_b.png",
+                "diffs": [{"x": 10, "y": 10, "w": 20, "h": 20}],
+            }
+        ]
+    }
+    manifest_file.write_text(json.dumps(manifest_data))
+
+    # Create dummy images for scan plan
     img_a_path = assets_dir / "a.png"
     img_b_path = assets_dir / "b.png"
 
@@ -113,6 +212,8 @@ def test_main(tmp_path):
         return False
 
     with patch("artifact_scan.ROOT", tmp_path), \
+         patch("artifact_scan.ASSETS", game_assets_dir), \
+         patch("artifact_scan.MANIFEST", manifest_file), \
          patch("artifact_scan.PLAN", plan_file), \
          patch("gen.judge.ask_yes_no", side_effect=mock_ask_yes_no):
 
@@ -122,18 +223,26 @@ def test_main(tmp_path):
     assert report_path.exists()
     findings = json.loads(report_path.read_text())
 
-    assert len(findings) == 1
-    finding = findings[0]
-    assert finding["asset"] == "assets/a.png"
-    assert finding["kind"] == "judged-artifact"
-    assert isinstance(finding["rect"], list)
-    assert len(finding["rect"]) == 4
-    assert finding["rect"] == [0, 0, 50, 50]
-    assert isinstance(finding["crop"], str)
-    assert finding["crop"] == "a_tile_0.png"
+    assert len(findings) == 2
+
+    # Deterministic pair-identity finding
+    pair_finding = findings[0]
+    assert pair_finding["kind"] == "pair-identity"
+    assert pair_finding["asset"] == "assets/game/diff_b.png"
+    assert "differ" in pair_finding["detail"]
+
+    # Judged-artifact finding
+    judged_finding = findings[1]
+    assert judged_finding["asset"] == "assets/a.png"
+    assert judged_finding["kind"] == "judged-artifact"
+    assert isinstance(judged_finding["rect"], list)
+    assert len(judged_finding["rect"]) == 4
+    assert judged_finding["rect"] == [0, 0, 50, 50]
+    assert isinstance(judged_finding["crop"], str)
+    assert judged_finding["crop"] == "a_tile_0.png"
 
     # Check if the crop was saved
-    crop_path = out_dir / finding["crop"]
+    crop_path = out_dir / judged_finding["crop"]
     assert crop_path.exists()
 
 
@@ -188,11 +297,13 @@ def test_main_checkpoint_and_resume(tmp_path):
             raise RuntimeError("Vertex API transient error")
         return True
 
-    with patch("artifact_scan.ROOT", tmp_path), \
-         patch("artifact_scan.PLAN", plan_file), \
-         patch("gen.judge.ask_yes_no", side_effect=failing_ask_yes_no):
-        with pytest.raises(RuntimeError, match="Vertex API transient error"):
-            artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
+    with (
+        patch("artifact_scan.ROOT", tmp_path),
+        patch("artifact_scan.PLAN", plan_file),
+        patch("gen.judge.ask_yes_no", side_effect=failing_ask_yes_no),
+        pytest.raises(RuntimeError, match="Vertex API transient error"),
+    ):
+        artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
 
     state_file = out_dir / "scan_state.json"
     assert state_file.exists()
@@ -369,11 +480,13 @@ def test_main_fresh_run_with_empty_first_batch_clears_stale_report(tmp_path):
     def failing_judge(q, crops, attempts=3):
         raise RuntimeError("simulated error on batch 1")
 
-    with patch("artifact_scan.ROOT", tmp_path), \
-         patch("artifact_scan.PLAN", plan_file), \
-         patch("gen.judge.ask_yes_no", side_effect=failing_judge):
-        with pytest.raises(RuntimeError, match="simulated error on batch 1"):
-            artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
+    with (
+        patch("artifact_scan.ROOT", tmp_path),
+        patch("artifact_scan.PLAN", plan_file),
+        patch("gen.judge.ask_yes_no", side_effect=failing_judge),
+        pytest.raises(RuntimeError, match="simulated error on batch 1"),
+    ):
+        artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
 
     # State file must show batch 0 was completed
     state_file = out_dir / "scan_state.json"
@@ -419,11 +532,13 @@ def test_main_resume_missing_report_fails_loudly(tmp_path):
     if report_path.exists():
         report_path.unlink()
 
-    with patch("artifact_scan.ROOT", tmp_path), \
-         patch("artifact_scan.PLAN", plan_file), \
-         patch("gen.judge.ask_yes_no", return_value=True):
-        with pytest.raises(FileNotFoundError, match=r"artifact_report\.json"):
-            artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
+    with (
+        patch("artifact_scan.ROOT", tmp_path),
+        patch("artifact_scan.PLAN", plan_file),
+        patch("gen.judge.ask_yes_no", return_value=True),
+        pytest.raises(FileNotFoundError, match=r"artifact_report\.json"),
+    ):
+        artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
 
 
 def test_main_replaced_asset_same_plan_invalidates_checkpoint(tmp_path):
@@ -465,11 +580,13 @@ def test_main_replaced_asset_same_plan_invalidates_checkpoint(tmp_path):
             raise RuntimeError("API quota error on batch 1")
         return True
 
-    with patch("artifact_scan.ROOT", tmp_path), \
-         patch("artifact_scan.PLAN", plan_file), \
-         patch("gen.judge.ask_yes_no", side_effect=failing_ask_yes_no):
-        with pytest.raises(RuntimeError, match="API quota error on batch 1"):
-            artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
+    with (
+        patch("artifact_scan.ROOT", tmp_path),
+        patch("artifact_scan.PLAN", plan_file),
+        patch("gen.judge.ask_yes_no", side_effect=failing_ask_yes_no),
+        pytest.raises(RuntimeError, match="API quota error on batch 1"),
+    ):
+        artifact_scan.main(["--plan", str(plan_file), "--out", str(out_dir)])
 
     state_file = out_dir / "scan_state.json"
     assert state_file.exists()
