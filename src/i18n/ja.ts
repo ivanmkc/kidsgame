@@ -261,6 +261,7 @@ export const JA: Table = {
   'hidden.prompt': 'かくれてる ものを ぜんぶ みつけよう！',
   'shadow.hint': 'このかげの もとに なる シールを タップ！',
   'shadow.hintTricky': 'まわってたり ひっくりかえってるかも — かたちを みてね！',
+  'oddone.defaultQuestion': 'ひとつだけ なかまじゃないのは？',
   'rules.memoryCheck': 'きおくクイズ！',
   'rules.ruleNumber': 'ルール #{n}',
   'rules.doAgain': 'ルール #{n} を もういちど — おぼえてる？ 🤔',

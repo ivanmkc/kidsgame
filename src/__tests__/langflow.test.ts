@@ -85,7 +85,7 @@ const ALL_KEYS: UIKey[] = [
   'song.twinkle', 'song.mary', 'song.row', 'song.london', 'song.spider', 'song.macdonald',
   'diff.pictureA', 'diff.pictureB', 'diff.hint',
   'hidden.turn', 'hidden.prompt',
-  'shadow.hint', 'shadow.hintTricky',
+  'shadow.hint', 'shadow.hintTricky', 'oddone.defaultQuestion',
   'rules.memoryCheck', 'rules.ruleNumber', 'rules.doAgain', 'rules.remind', 'rules.progress',
   'puzzle.peek', 'puzzle.peekA11y', 'puzzle.hint',
   'sticker.clear', 'sticker.hint',
