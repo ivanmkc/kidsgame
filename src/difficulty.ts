@@ -34,6 +34,7 @@ export interface DifficultySettings {
   diffHint: boolean; // easy players get a 💡 button that flashes one answer
   diffDraw: number;   // differences drawn per play from the scene pool
   hiddenDraw: number; // targets drawn per play from the scene pool
+  hiddenHintSecs: number; // gentle inactivity auto-hint delay in secs (Infinity = disabled)
   timer: boolean;    // easy mode is pressure-free: no visible timer
   rulesRounds: number;
   rulesTiles: number;
@@ -48,6 +49,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     puzzleCols: 3, puzzleRows: 2,
     diffHint: true, timer: false,
     diffDraw: 3, hiddenDraw: 5,
+    hiddenHintSecs: 15,
     rulesRounds: 10, rulesTiles: 6, rulesRecallFrom: Infinity,
     duelWins: 3, duelHintSecs: 3,
   },
@@ -56,6 +58,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     puzzleCols: 3, puzzleRows: 3,
     diffHint: false, timer: true,
     diffDraw: 4, hiddenDraw: 6,
+    hiddenHintSecs: 15,
     rulesRounds: 10, rulesTiles: 8, rulesRecallFrom: 6,
     duelWins: 5, duelHintSecs: 4,
   },
@@ -64,6 +67,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     puzzleCols: 4, puzzleRows: 3,
     diffHint: false, timer: true,
     diffDraw: 4, hiddenDraw: 8,
+    hiddenHintSecs: Infinity,
     rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
     duelWins: 7, duelHintSecs: 5,
   },
