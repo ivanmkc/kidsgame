@@ -751,3 +751,82 @@ describe("CompareGame language switch safety", () => {
     expect(screen.getByTestId("compare-score").textContent).toContain("1/6");
   });
 });
+
+describe("CompareGame unmount safety", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("clears wrong-tap timeouts without leaking audio or state updates after unmount", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say");
+    const { unmount } = render(
+      <CompareGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    saySpy.mockClear();
+
+    const plates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const wrongPlate = plates.find(
+      (p) => !p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+
+    fireEvent.click(wrongPlate);
+
+    // Unmount before the 450ms / 500ms timeouts fire
+    unmount();
+
+    // Advance past 500ms
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Voice prompt should not fire on home screen
+    expect(saySpy).not.toHaveBeenCalled();
+  });
+
+  it("prevents correct-tap sayThen callback from executing state updates on unmounted component when exiting mid-narration", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+    const makeRoundSpy = vi.spyOn(logic, "makeCompareRound");
+
+    const { unmount } = render(
+      <CompareGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+
+    const plates = [
+      screen.getByTestId(/^compare-plate-left-/),
+      screen.getByTestId(/^compare-plate-right-/),
+    ];
+    const correctPlate = plates.find((p) =>
+      p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+
+    fireEvent.click(correctPlate);
+    expect(sayThenCb).not.toBeNull();
+
+    // Unmount while sayThen celebration is active
+    unmount();
+
+    // Invoking callback after unmount should be a no-op
+    act(() => {
+      sayThenCb!();
+    });
+
+    // makeCompareRound should not be called again on unmounted component
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+  });
+});

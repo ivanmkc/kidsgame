@@ -58,6 +58,22 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const won = score >= roundsToWin;
   useWinLine(won, t(lang, "win.compare"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+  const isMountedRef = useRef(true);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearWrongTimers = () => {
+    wrongTimerRef.current.forEach(clearTimeout);
+    wrongTimerRef.current = [];
+  };
+
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+      wrongTimerRef.current.forEach(clearTimeout);
+      wrongTimerRef.current = [];
+    },
+    [],
+  );
 
   const promptFor = (r: CompareRound) =>
     r.ask === "more" ? MORE_PROMPT[lang] : FEWER_PROMPT[lang];
@@ -69,6 +85,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       langMounted.current = true;
       return;
     }
+    clearWrongTimers();
     setRound(makeCompareRound(rngRef.current, difficulty));
     lockedRef.current = false;
     setLocked(false);
@@ -83,6 +100,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const pickSide = (side: "left" | "right") => {
     if (won || locked || lockedRef.current || wrongSide !== null) return;
     if (side === round.correctSide) {
+      clearWrongTimers();
       lockedRef.current = true;
       setLocked(true);
       sfx.good();
@@ -90,7 +108,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       setScore(nextScore);
       const feedback = roundComparisonPhrase(lang, round);
       sayThen([feedback, PRAISE[lang]], () => {
-        if (!isValid()) return;
+        if (!isMountedRef.current || !isValid()) return;
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
           setWrongSide(null);
@@ -102,19 +120,25 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.wrong();
       setWrongSide(side);
-      setTimeout(() => {
-        if (!isValid()) return;
-        setWrongSide((s) => (s === side ? null : s));
-        lockedRef.current = false;
-      }, 450);
-      setTimeout(() => {
-        if (!isValid()) return;
-        say(promptFor(round));
-      }, 500);
+      clearWrongTimers();
+      wrongTimerRef.current.push(
+        setTimeout(() => {
+          if (!isMountedRef.current || !isValid()) return;
+          setWrongSide((s) => (s === side ? null : s));
+          lockedRef.current = false;
+        }, 450),
+      );
+      wrongTimerRef.current.push(
+        setTimeout(() => {
+          if (!isMountedRef.current || !isValid()) return;
+          say(promptFor(round));
+        }, 500),
+      );
     }
   };
 
   const reset = () => {
+    clearWrongTimers();
     lockedRef.current = false;
     setLocked(false);
     setTimerKey((k) => k + 1);
