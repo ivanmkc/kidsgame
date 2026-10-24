@@ -48,7 +48,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
-  const [locked, setLocked] = useState(false);
+  const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const [won, setWon] = useState(false);
@@ -101,19 +101,19 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]);
 
   const pickAnswer = (v: number) => {
-    if (won || locked) return;
+    if (won || lockedRef.current) return;
     if (v === round.sum) {
+      lockedRef.current = true;
       clearBoingTimers();
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
       sfx.good();
-      setLocked(true);
       const nextScore = score + 1;
       setScore(nextScore);
       sayThen([numberWord(lang, round.sum).t, PRAISE[lang]], () => {
+        lockedRef.current = false;
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
           setWrongPick(null);
-          setLocked(false);
         } else {
           setWon(true);
         }
@@ -135,7 +135,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     setRound(makeSumsRound(rngRef.current, difficulty));
     setScore(0);
     setWrongPick(null);
-    setLocked(false);
+    lockedRef.current = false;
     setWon(false);
   };
 

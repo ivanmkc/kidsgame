@@ -80,6 +80,46 @@ describe("SumsGame fast-tap", () => {
 
     expect(sound.say).toHaveBeenCalledTimes(1);
   });
+
+  it("ignores rapid double tap on the correct answer before state update", () => {
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
+      sayThenCb = cb;
+    });
+
+    render(<SumsGame onHome={() => {}} difficulty="easy" lang="en" />);
+    vi.clearAllMocks();
+
+    const buttons = screen.getAllByRole("button");
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    );
+    expect(correctBtn).toBeDefined();
+
+    act(() => {
+      fireEvent.click(correctBtn!);
+      fireEvent.click(correctBtn!);
+    });
+
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("sums-score").textContent).toContain("1/5");
+
+    // Praise finishes: advances round and unlocks input
+    act(() => {
+      sayThenCb?.();
+    });
+
+    const nextButtons = screen.getAllByRole("button");
+    const nextCorrectBtn = nextButtons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    );
+    expect(nextCorrectBtn).toBeDefined();
+    fireEvent.click(nextCorrectBtn!);
+    expect(sound.sfx.good).toHaveBeenCalledTimes(2);
+    expect(sound.sayThen).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId("sums-score").textContent).toContain("2/5");
+  });
 });
 
 describe("SumsGame", () => {
