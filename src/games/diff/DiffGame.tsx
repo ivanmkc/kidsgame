@@ -1,20 +1,34 @@
-import { say, sfx, useSay } from '../../sound';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
-import { TapScene } from '../../components/TapScene';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { baseImage, manifest } from '../../manifest';
-import { makeRng, sample } from '../../rng';
-import { colors, fonts } from '../../theme';
-import { DiffHintButton } from './DiffHintButton';
-import { diffPrompt } from './logic';
+import { say, sfx, useSay } from "../../sound";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SCENE_IMAGES } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
+import { TapScene } from "../../components/TapScene";
+import { WinOverlay } from "../../components/WinOverlay";
+import {
+  Difficulty,
+  DifficultyFilter,
+  inFilter,
+  nextFilter,
+  nextSceneId,
+  settingsFor,
+} from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { baseImage, manifest } from "../../manifest";
+import { makeRng, sample } from "../../rng";
+import { colors, fonts } from "../../theme";
+import { DiffHintButton } from "./DiffHintButton";
+import { diffPrompt } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -27,19 +41,34 @@ interface Props {
   lang?: Lang;
 }
 
-export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
+export function DiffGame({
+  onHome,
+  difficulty,
+  filter = "all",
+  onFilter,
+  sceneId,
+  onPickScene,
+  onBackToPicker,
+  lang = "en",
+}: Props) {
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
-  const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
+  const effDifficulty =
+    filter === "all" && scene?.level ? scene.level : difficulty;
   useSay(diffPrompt(lang, !!scene));
   const [found, setFound] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
   const wrapRef = useRef<View>(null);
   const [hintId, setHintId] = useState<string | null>(null);
-  const [hintRegion, setHintRegion] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [hintRegion, setHintRegion] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,15 +109,29 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   // same twice. Legacy flat pairs keep their fixed four.
   const { boxes, overlaysA, overlaysB, total } = useMemo(() => {
     const rng = makeRng(Math.floor(Math.random() * 1e9));
-    const round = scene?.pool && scene.image
-      ? sample(rng, scene.pool, settingsFor(effDifficulty).diffDraw)
-          .map((p) => ({ box: p, patch: p.patch as string | undefined, patchOnA: rng() < 0.5 }))
-      : (scene?.diffs ?? []).map((d) => ({ box: d, patch: undefined as string | undefined, patchOnA: false }));
+    const round =
+      scene?.pool && scene.image
+        ? sample(rng, scene.pool, settingsFor(effDifficulty).diffDraw).map(
+            (p) => ({
+              box: p,
+              patch: p.patch as string | undefined,
+              patchOnA: rng() < 0.5,
+            }),
+          )
+        : (scene?.diffs ?? []).map((d) => ({
+            box: d,
+            patch: undefined as string | undefined,
+            patchOnA: false,
+          }));
     return {
       total: round.length,
       boxes: round.map((r, i) => ({ id: String(i), box: r.box })),
-      overlaysA: round.filter((r) => r.patch && r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
-      overlaysB: round.filter((r) => r.patch && !r.patchOnA).map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
+      overlaysA: round
+        .filter((r) => r.patch && r.patchOnA)
+        .map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
+      overlaysB: round
+        .filter((r) => r.patch && !r.patchOnA)
+        .map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
     };
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
   const won = found.length === total && total > 0;
@@ -100,20 +143,25 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   useEffect(() => {
     if (ready) return;
     const iv = setInterval(() => {
-      const node = wrapRef.current as unknown as { querySelectorAll?: (sel: string) => ArrayLike<HTMLImageElement> } | null;
+      const node = wrapRef.current as unknown as {
+        querySelectorAll?: (sel: string) => ArrayLike<HTMLImageElement>;
+      } | null;
       if (!node?.querySelectorAll) {
         setReady(true); // non-DOM platform: no gate needed
         return;
       }
-      const imgs = Array.from(node.querySelectorAll('img'));
-      if (imgs.length >= expectedAssets && imgs.every((im) => im.complete && im.naturalWidth > 0)) {
+      const imgs = Array.from(node.querySelectorAll("img"));
+      if (
+        imgs.length >= expectedAssets &&
+        imgs.every((im) => im.complete && im.naturalWidth > 0)
+      ) {
         setReady(true);
       }
     }, 80);
     return () => clearInterval(iv);
   }, [ready, sceneId, expectedAssets]);
   useEffect(() => {
-    if (won) say(t(lang, 'win.diff'));
+    if (won) say(t(lang, "win.diff"));
   }, [won]);
   const showRound = ready || forceReady;
   const showTimer = settingsFor(effDifficulty).timer;
@@ -124,19 +172,40 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 
   if (!scene) {
     return (
-      <GameShell title={t(lang, 'shell.diff.title')} subtitle={t(lang, 'shell.diff.subPicker')} onBack={onHome} lang={lang}>
+      <GameShell
+        title={t(lang, "shell.diff.title")}
+        subtitle={t(lang, "shell.diff.subPicker")}
+        onBack={onHome}
+        lang={lang}
+      >
         <ScenePicker
-          title={t(lang, 'picker.diff')}
+          title={t(lang, "picker.diff")}
           lang={lang}
-          options={manifest.diff.map((d) => ({ id: d.id, name: d.name, image: baseImage(d), flagged: d.flagged, level: d.level, dimmed: !inFilter(d.level, filter) }))}
+          options={manifest.diff.map((d) => ({
+            id: d.id,
+            name: d.name,
+            image: baseImage(d),
+            flagged: d.flagged,
+            level: d.level,
+            dimmed: !inFilter(d.level, filter),
+          }))}
           onPick={onPickScene}
-          onSurprise={() => onPickScene(visible[Math.floor(Math.random() * visible.length)].id)}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
+          onSurprise={() =>
+            onPickScene(visible[Math.floor(Math.random() * visible.length)].id)
+          }
+          filterChip={
+            onFilter ? (
+              <FilterCycleChip
+                filter={filter}
+                onCycle={() => onFilter(nextFilter(filter))}
+                lang={lang}
+              />
+            ) : undefined
+          }
         />
       </GameShell>
     );
   }
-
 
   // Fit both pictures in the viewport — side by side in landscape,
   // stacked in portrait — so no scrolling is needed on normal screens.
@@ -145,9 +214,17 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   const availH = height - headerAllowance - (settings.diffHint ? 54 : 12);
   let sceneWidth: number;
   if (isLandscape) {
-    sceneWidth = Math.min((width - 44) / 2, (availH - labelAllowance) * ar, 760);
+    sceneWidth = Math.min(
+      (width - 44) / 2,
+      (availH - labelAllowance) * ar,
+      760,
+    );
   } else {
-    sceneWidth = Math.min(width - 24, ((availH - 2 * labelAllowance - 8) / 2) * ar, 640);
+    sceneWidth = Math.min(
+      width - 24,
+      ((availH - 2 * labelAllowance - 8) / 2) * ar,
+      640,
+    );
   }
 
   const onHit = (id: string) => {
@@ -168,9 +245,18 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
     const target = remaining[Math.floor(Math.random() * remaining.length)];
     const RW = Math.round(scene.w * 0.45);
     const RH = Math.round(scene.h * 0.55);
-    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-    const overlaps = (r: { x: number; y: number; w: number; h: number }, b: typeof target) =>
-      !(b.box.x > r.x + r.w || b.box.x + b.box.w < r.x || b.box.y > r.y + r.h || b.box.y + b.box.h < r.y);
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.min(hi, Math.max(lo, v));
+    const overlaps = (
+      r: { x: number; y: number; w: number; h: number },
+      b: typeof target,
+    ) =>
+      !(
+        b.box.x > r.x + r.w ||
+        b.box.x + b.box.w < r.x ||
+        b.box.y > r.y + r.h ||
+        b.box.y + b.box.h < r.y
+      );
     let best: { x: number; y: number; w: number; h: number } | null = null;
     for (let tries = 0; tries < 40; tries++) {
       const ox = Math.random() * Math.max(1, RW - target.box.w);
@@ -183,7 +269,10 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
       };
       if (!overlaps(r, target)) continue;
       const hits = remaining.filter((b) => overlaps(r, b)).length;
-      if (hits === 1) { best = r; break; }
+      if (hits === 1) {
+        best = r;
+        break;
+      }
       if (!best) best = r; // fallback: at least contains the target
     }
     if (!best) return;
@@ -196,7 +285,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
   const pictures = (
     <>
       <View style={styles.sceneBlock}>
-        <Text style={styles.label}>{t(lang, 'diff.pictureA')}</Text>
+        <Text style={styles.label}>{t(lang, "diff.pictureA")}</Text>
         <TapScene
           source={srcA}
           overlays={overlaysA}
@@ -214,7 +303,7 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
         />
       </View>
       <View style={styles.sceneBlock}>
-        <Text style={styles.label}>{t(lang, 'diff.pictureB')}</Text>
+        <Text style={styles.label}>{t(lang, "diff.pictureB")}</Text>
         <TapScene
           source={srcB}
           overlays={overlaysB}
@@ -236,33 +325,64 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 
   return (
     <GameShell
-      title={t(lang, 'shell.diff.title')}
-      subtitle={t(lang, 'shell.diff.subPlay', { name: scene.name, n: total })}
+      title={t(lang, "shell.diff.title")}
+      subtitle={t(lang, "shell.diff.subPlay", { name: scene.name, n: total })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="diff-timer" /> : null}
-          <ScoreChip label={`🔍 ${found.length}/${total}`} testID="diff-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="diff-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🔍 ${found.length}/${total}`}
+            testID="diff-score"
+          />
         </View>
       }
     >
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View ref={wrapRef} testID="diff-wrap" pointerEvents={showRound ? 'auto' : 'none'} style={[isLandscape ? styles.rowWrap : styles.colWrap, !showRound && styles.hiddenUntilLoaded]}>{pictures}</View>
+        <View
+          ref={wrapRef}
+          testID="diff-wrap"
+          pointerEvents={showRound ? "auto" : "none"}
+          style={[
+            isLandscape ? styles.rowWrap : styles.colWrap,
+            !showRound && styles.hiddenUntilLoaded,
+          ]}
+        >
+          {pictures}
+        </View>
         {!showRound ? (
-          <View pointerEvents="none" style={styles.loadingWrap} testID="diff-loading">
+          <View
+            pointerEvents="none"
+            style={styles.loadingWrap}
+            testID="diff-loading"
+          >
             <ActivityIndicator size="large" color={colors.inkSoft} />
           </View>
         ) : null}
-        {settings.diffHint && hintAvailable && !won ? (
-          <DiffHintButton lang={lang} onPress={showHint} />
+        {settings.diffHint ? (
+          <View style={styles.hintSlot} testID="diff-hint-slot">
+            {hintAvailable && !won ? (
+              <DiffHintButton lang={lang} onPress={showHint} />
+            ) : null}
+          </View>
         ) : null}
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.diff')}
-        onNext={() => onPickScene(nextSceneId(manifest.diff, visible, scene.id))}
+        message={t(lang, "win.diff")}
+        onNext={() =>
+          onPickScene(nextSceneId(manifest.diff, visible, scene.id))
+        }
         onHome={onHome}
         lang={lang}
       />
@@ -271,11 +391,41 @@ export function DiffGame({ onHome, difficulty, filter = 'all', onFilter, sceneId
 }
 
 const styles = StyleSheet.create({
-  scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 10, paddingHorizontal: 12 },
-  rowWrap: { flexDirection: 'row', gap: 16, justifyContent: 'center', alignItems: 'flex-start' },
-  colWrap: { flexDirection: 'column', gap: 8, alignItems: 'center' },
+  scroll: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 10,
+    paddingHorizontal: 12,
+  },
+  rowWrap: {
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  colWrap: { flexDirection: "column", gap: 8, alignItems: "center" },
   hiddenUntilLoaded: { opacity: 0 },
-  loadingWrap: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
-  sceneBlock: { alignItems: 'center' },
-  label: { fontSize: 14, fontFamily: fonts.displayMed, color: colors.inkSoft, marginBottom: 2 },
+  loadingWrap: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sceneBlock: { alignItems: "center" },
+  label: {
+    fontSize: 14,
+    fontFamily: fonts.displayMed,
+    color: colors.inkSoft,
+    marginBottom: 2,
+  },
+  hintSlot: {
+    height: 44,
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 });
