@@ -1,4 +1,6 @@
+// @vitest-environment happy-dom
 import React from 'react';
+import { render } from '@testing-library/react';
 import { renderToString } from 'react-dom/server';
 import { Platform } from 'react-native';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
@@ -105,7 +107,7 @@ describe('useLockdown', () => {
       hook = useLockdown();
       return null;
     }
-    renderToString(React.createElement(Harness));
+    render(React.createElement(Harness));
     return hook;
   }
 
@@ -181,7 +183,7 @@ describe('useLockdown', () => {
     );
   });
 
-  it('handles storage write failures silently', () => {
+  it('handles storage write failures silently and keeps state in memory', () => {
     const originalSetItem = window.localStorage.setItem;
     window.localStorage.setItem = () => {
       throw new Error('QuotaExceeded');
@@ -189,19 +191,58 @@ describe('useLockdown', () => {
     try {
       const hook = getHook();
       expect(() => hook.toggleGame('story')).not.toThrow();
+      expect(getHook().state.hiddenGames).toEqual(['story']);
     } finally {
       window.localStorage.setItem = originalSetItem;
+      getHook().setHiddenGames([]);
     }
   });
 
-  it('does nothing when Platform.OS is not web', () => {
+  it('falls back to memory when localStorage access throws SecurityError', () => {
+    const originalGetItem = window.localStorage.getItem;
+    const originalSetItem = window.localStorage.setItem;
+    window.localStorage.getItem = () => {
+      throw new Error('SecurityError');
+    };
+    window.localStorage.setItem = () => {
+      throw new Error('SecurityError');
+    };
+    try {
+      const hook = getHook();
+      expect(hook.state).toEqual({ hiddenGames: [], hiddenLangs: [] });
+      hook.toggleGame('diff');
+      expect(getHook().state.hiddenGames).toEqual(['diff']);
+      expect(getHook().isGameHidden('diff')).toBe(true);
+    } finally {
+      window.localStorage.getItem = originalGetItem;
+      window.localStorage.setItem = originalSetItem;
+      getHook().setHiddenGames([]);
+    }
+  });
+
+  it('persists state in memory without touching localStorage when Platform.OS is not web', () => {
     const origOS = Platform.OS;
     Platform.OS = 'ios';
     try {
       const hook = getHook();
+      expect(hook.state).toEqual({ hiddenGames: [], hiddenLangs: [] });
       hook.setHiddenGames(['diff']);
       expect(mockStorage.get('kgb.lockdown.v1')).toBeUndefined();
+      expect(getHook().state.hiddenGames).toEqual(['diff']);
+      expect(getHook().isGameHidden('diff')).toBe(true);
+
+      hook.toggleGame('story');
+      expect(getHook().state.hiddenGames).toEqual(['diff', 'story']);
+
+      hook.toggleGame('diff');
+      expect(getHook().state.hiddenGames).toEqual(['story']);
+
+      expect(hook.toggleLang('ja')).toBe(true);
+      expect(getHook().state.hiddenLangs).toEqual(['ja']);
+      expect(getHook().isLangHidden('ja')).toBe(true);
     } finally {
+      getHook().setHiddenGames([]);
+      getHook().setHiddenLangs([]);
       Platform.OS = origOS;
     }
   });

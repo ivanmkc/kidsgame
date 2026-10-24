@@ -1,4 +1,4 @@
-import { useState, useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 import { Lang, LANGS } from './lang';
 
@@ -11,8 +11,11 @@ export interface LockdownState {
 
 const EMPTY: LockdownState = { hiddenGames: [], hiddenLangs: [] };
 
+let memoryFallback: LockdownState = EMPTY;
+
 function read(): LockdownState {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return EMPTY;
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return memoryFallback;
+  if (memoryFallback !== EMPTY) return memoryFallback;
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return EMPTY;
@@ -22,16 +25,21 @@ function read(): LockdownState {
       hiddenLangs: Array.isArray(parsed.hiddenLangs) ? parsed.hiddenLangs : [],
     };
   } catch {
-    return EMPTY;
+    return memoryFallback;
   }
 }
 
 function write(state: LockdownState): void {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+    memoryFallback = state;
+    return;
+  }
   try {
     window.localStorage.setItem(KEY, JSON.stringify(state));
-  } catch { /* quota or private browsing */ }
-  notifyListeners();
+    memoryFallback = EMPTY;
+  } catch {
+    memoryFallback = state;
+  }
 }
 
 type Listener = () => void;
