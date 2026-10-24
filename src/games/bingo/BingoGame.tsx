@@ -15,7 +15,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { SparkleBurst } from "../../components/Sparkles";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
@@ -37,6 +37,7 @@ interface Props {
 }
 
 export function BingoGame({ onHome, difficulty, lang }: Props) {
+  const { isValid } = useLangEpoch(lang);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const settings = settingsForBingo(difficulty, lang);
 
@@ -122,11 +123,13 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       const line = checkBingo(next, board.size);
       if (line) {
         sayThen(call.confirmLines, () => {
+          if (!isValid()) return;
           lockedRef.current = false;
           setWinLine(line);
         });
       } else {
         sayThen(call.confirmLines, () => {
+          if (!isValid()) return;
           lockedRef.current = false;
           setCallIdx((i) => i + 1);
         });
