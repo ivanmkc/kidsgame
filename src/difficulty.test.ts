@@ -136,10 +136,18 @@ describe('DIFFICULTIES', () => {
     }
   });
 
-  it('scaffolds hiddenDraw progression strictly from easy to hard', () => {
+  it('scaffolds hiddenDraw progression from easy to hard', () => {
+    expect(DIFFICULTIES.easy.hiddenDraw).toBe(5);
+    expect(DIFFICULTIES.medium.hiddenDraw).toBe(6);
+    expect(DIFFICULTIES.hard.hiddenDraw).toBe(8);
     expect(DIFFICULTIES.easy.hiddenDraw).toBeLessThan(DIFFICULTIES.medium.hiddenDraw);
     expect(DIFFICULTIES.medium.hiddenDraw).toBeLessThan(DIFFICULTIES.hard.hiddenDraw);
-    expect(DIFFICULTIES.hard.hiddenDraw).toBe(8);
+  });
+
+  it('scaffolds hint availability for hard difficulty in hidden scenes', () => {
+    expect(DIFFICULTIES.easy.hiddenHintSecs).toBe(15);
+    expect(DIFFICULTIES.medium.hiddenHintSecs).toBe(15);
+    expect(DIFFICULTIES.hard.hiddenHintSecs).toBe(Infinity);
   });
 });
 

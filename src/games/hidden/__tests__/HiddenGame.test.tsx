@@ -352,4 +352,29 @@ describe('HiddenGame gentle auto-hint', () => {
     });
     expect(remaining.filter((t) => t.children.length > 0).length).toBe(1);
   });
+
+  it('does not trigger visual hints on hard difficulty after 15 seconds of inactivity', () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="hard"
+        filter="hard"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const targets = screen.getAllByRole('button').filter((el) =>
+      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
+    );
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+
+    act(() => {
+      vi.advanceTimersByTime(15000);
+    });
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+  });
 });

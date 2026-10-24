@@ -47,12 +47,13 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   const findsRef = useRef<Set<string>>(new Set());
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
 
-  const showTimer = settingsFor(effDifficulty).timer && !coop;
+  const settings = settingsFor(effDifficulty);
+  const showTimer = settings.timer && !coop;
 
   const drawn = useMemo(
     () => {
       if (!scene) return [];
-      const base = settingsFor(effDifficulty).hiddenDraw;
+      const base = settings.hiddenDraw;
       const n = coop ? coopDrawCount(base, scene.targets.length) : base;
       return sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, n);
     },
@@ -81,10 +82,10 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
     if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Gentle auto-hint: 15s with no find → pulse one random unfound target
-  // ~2.5s. Resets on find/turn/scene.
+  // Gentle auto-hint: pulse one random unfound target after inactivity delay
+  // ~2.5s. Resets on find/turn/scene. Disabled on Hard (hiddenHintSecs: Infinity).
   useEffect(() => {
-    if (!scene || won) return;
+    if (!scene || won || !isFinite(settings.hiddenHintSecs)) return;
     setHintId(null);
     const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(setTimeout(() => {
@@ -93,9 +94,9 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
       const pick = unfound[Math.floor(Math.random() * unfound.length)];
       setHintId(pick.id);
       timers.push(setTimeout(() => setHintId((h) => (h === pick.id ? null : h)), 2500));
-    }, 15000));
+    }, settings.hiddenHintSecs * 1000));
     return () => timers.forEach(clearTimeout);
-  }, [coop, scene, won, drawn, finds, turn]);
+  }, [coop, scene, won, drawn, finds, turn, settings.hiddenHintSecs]);
 
   const { width, height } = useWindowDimensions();
 
