@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Animated, Image, Pressable, StyleSheet } from 'react-native';
-import { MUSICBOX_IMAGES } from '../../assets/images';
-import { t } from '../../i18n';
-import { Lang } from '../../lang';
-import type { SpawnZone } from './logic';
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { Animated, Image, Pressable, StyleSheet } from "react-native";
+import { MUSICBOX_IMAGES } from "../../assets/images";
+import { t } from "../../i18n";
+import { Lang } from "../../lang";
+import type { SpawnZone } from "./logic";
 
 export interface SpawnEntry {
   id: number;
@@ -27,8 +27,8 @@ const BASE_SIZE = 56;
 const BIG_SIZE = 72;
 
 const IDLE_CONFIGS: Record<SpawnZone, { dy: number; dur: number }> = {
-  sky:    { dy: 6, dur: 2200 },
-  mid:    { dy: 4, dur: 2600 },
+  sky: { dy: 6, dur: 2200 },
+  mid: { dy: 4, dur: 2600 },
   ground: { dy: 3, dur: 3000 },
 };
 
@@ -49,8 +49,16 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
     }).start(() => {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(idle, { toValue: 1, duration: cfg.dur, useNativeDriver: true }),
-          Animated.timing(idle, { toValue: 0, duration: cfg.dur, useNativeDriver: true }),
+          Animated.timing(idle, {
+            toValue: 1,
+            duration: cfg.dur,
+            useNativeDriver: true,
+          }),
+          Animated.timing(idle, {
+            toValue: 0,
+            duration: cfg.dur,
+            useNativeDriver: true,
+          }),
         ]),
       ).start();
     });
@@ -63,14 +71,17 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
 
   const handlePress = useCallback(() => {
     wiggle.setValue(0);
-    Animated.spring(wiggle, { toValue: 1, friction: 4, useNativeDriver: true }).start(() =>
-      wiggle.setValue(0),
-    );
+    Animated.spring(wiggle, {
+      toValue: 1,
+      friction: 4,
+      useNativeDriver: true,
+    }).start(() => wiggle.setValue(0));
     onTapSpawn?.(entry);
   }, [entry, onTapSpawn, wiggle]);
 
   return (
     <Animated.View
+      onPointerDown={(e) => e.stopPropagation()}
       style={[
         styles.spawn,
         {
@@ -106,7 +117,11 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
               rotate: Animated.add(
                 idle.interpolate({
                   inputRange: [0, 0.5, 1],
-                  outputRange: [0, entry.zone === 'ground' ? 3 : 0, entry.zone === 'ground' ? -3 : 0],
+                  outputRange: [
+                    0,
+                    entry.zone === "ground" ? 3 : 0,
+                    entry.zone === "ground" ? -3 : 0,
+                  ],
                 }),
                 wiggle.interpolate({
                   inputRange: [0, 0.25, 0.5, 0.75, 1],
@@ -114,7 +129,7 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
                 }),
               ).interpolate({
                 inputRange: [-15, 15],
-                outputRange: ['-15deg', '15deg'],
+                outputRange: ["-15deg", "15deg"],
               }),
             },
           ],
@@ -125,9 +140,13 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
         onPress={handlePress}
         hitSlop={8}
         accessibilityRole="button"
-        accessibilityLabel={t(lang, 'musicbox.note')}
+        accessibilityLabel={t(lang, "musicbox.note")}
       >
-        <Image source={src} style={{ width: size, height: size }} resizeMode="contain" />
+        <Image
+          source={src}
+          style={{ width: size, height: size }}
+          resizeMode="contain"
+        />
       </Pressable>
     </Animated.View>
   );
@@ -135,7 +154,7 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
 
 const styles = StyleSheet.create({
   spawn: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: 10,
   },
 });

@@ -1,15 +1,16 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { Animated } from 'react-native';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SCENES } from '../scenes';
-import { JourneyScene } from '../JourneyScene';
-import { ScrollingWorld } from '../ScrollingWorld';
-import { SpawnedObject, SpawnEntry } from '../SpawnedObject';
+import React from "react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import { Animated } from "react-native";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { SCENES } from "../scenes";
+import { JourneyScene } from "../JourneyScene";
+import { ScrollingWorld } from "../ScrollingWorld";
+import { SpawnedObject, SpawnEntry } from "../SpawnedObject";
+import * as music from "../../../music";
 
-vi.mock('../../assets/images', () => {
-  const p = new Proxy({}, { get: () => ({ uri: 'stub.png' }) });
+vi.mock("../../assets/images", () => {
+  const p = new Proxy({}, { get: () => ({ uri: "stub.png" }) });
   return {
     MUSICBOX_IMAGES: p,
     SPOTIT_ICONS: p,
@@ -22,65 +23,197 @@ vi.mock('../../assets/images', () => {
   };
 });
 
-describe('JourneyScene accessibility', () => {
+describe("JourneyScene accessibility", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
   });
 
-  it('renders stage as a container with accessibility label and not a button', () => {
+  it("renders stage as a container with accessibility label and not a button", () => {
     const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
-    const stage = screen.getByLabelText('Stage');
+    const stage = screen.getByLabelText("Stage");
 
     expect(stage).toBeDefined();
-    expect(screen.queryByRole('button', { name: 'Stage' })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Stage" })).toBeNull();
     unmount();
   });
 
-  it('spawns an object on tap, which receives the lang prop', () => {
+  it("spawns an object on tap, which receives the lang prop", () => {
     const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="ja" />);
 
-    const stage = screen.getByLabelText('ステージ');
-    fireEvent.touchStart(stage, {
-      changedTouches: [
-        {
-          locationX: 100,
-          locationY: 100,
-          force: 1,
-          identifier: 1,
-          pageX: 100,
-          pageY: 100,
-          clientX: 100,
-          clientY: 100,
-        },
-      ],
+    const stage = screen.getByLabelText("ステージ");
+    fireEvent.pointerDown(stage, {
+      pointerId: 1,
+      clientX: 100,
+      clientY: 100,
     });
 
-    const note = screen.getByRole('button', { name: 'おんぷ' });
+    const note = screen.getByRole("button", { name: "おんぷ" });
     expect(note).toBeDefined();
 
     unmount();
   });
 
-  it('renders spawned object with button role and accessibility label', () => {
+  it("handles multi-touch without premature scroll penalty and registers second touch while holding", () => {
+    const playNoteSpy = vi.spyOn(music, "playNote");
+    const springSpy = vi.spyOn(Animated, "spring");
+
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Initial single-finger touch down: should get full scroll (48) with 1 note played at full velocity (1)
+    fireEvent.pointerDown(stage, {
+      pointerId: 1,
+      clientX: 100,
+      clientY: 100,
+    });
+
+    expect(springSpy).toHaveBeenCalled();
+    const firstScrollConfig = springSpy.mock.calls[0][1];
+    expect(firstScrollConfig.toValue).toBe(48);
+    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(expect.any(Number), 1);
+
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      1,
+    );
+
+    // Second finger touches while first finger is held: fires onPointerDown with active pointers = 2
+    fireEvent.pointerDown(stage, {
+      pointerId: 2,
+      clientX: 200,
+      clientY: 100,
+    });
+
+    const scrollSpringCalls = springSpy.mock.calls.filter(
+      (c) => c[1].friction === 14 && c[1].tension === 50,
+    );
+    expect(scrollSpringCalls).toHaveLength(2);
+    expect(scrollSpringCalls[0][1].toValue).toBe(48);
+    expect(scrollSpringCalls[1][1].toValue).toBeCloseTo(62.4);
+
+    // Initial tap played 1 note at velocity 1; second tap with 2 fingers played 2 notes (harmony chord) at velocity 0.7
+    expect(playNoteSpy).toHaveBeenCalledTimes(3);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(1, expect.any(Number), 1);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, expect.any(Number), 0.7);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(3, expect.any(Number), 0.7);
+
+    // Second object successfully spawned while first finger was held
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      2,
+    );
+
+    unmount();
+  });
+
+  it("registers mouse click on stage in web build, playing a note and spawning an object", () => {
+    const playNoteSpy = vi.spyOn(music, "playNote");
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    fireEvent.pointerDown(stage, {
+      pointerId: 1,
+      pointerType: "mouse",
+      clientX: 100,
+      clientY: 100,
+    });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    expect(playNoteSpy).toHaveBeenCalledWith(expect.any(Number), 1);
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      1,
+    );
+
+    unmount();
+  });
+
+  it("tapping a spawned note does not advance song index, scroll, or spawn new objects", () => {
+    // SCENES[1] is 'row': notes are [60, 60, 60, 62, 64, ...]
+    const rowScene = SCENES[1];
+    const playNoteSpy = vi.spyOn(music, "playNote");
+    const springSpy = vi.spyOn(Animated, "spring");
+
+    const { unmount } = render(<JourneyScene scene={rowScene} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Three stage taps: play notes 0, 1, 2 (all 60) and spawn 3 objects; next note is 62
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(playNoteSpy).toHaveBeenCalledTimes(3);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 72, 1);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(3, 72, 1);
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      3,
+    );
+
+    const scrollCallsBefore = springSpy.mock.calls.filter(
+      (c) => c[1].friction === 14 && c[1].tension === 50,
+    ).length;
+    expect(scrollCallsBefore).toBe(3);
+
+    // Tap one of the spawned notes with pointer and click
+    const notes = screen.getAllByRole("button", { name: "Music note" });
+    fireEvent.pointerDown(notes[0], { pointerId: 2 });
+    fireEvent.click(notes[0]);
+
+    // Spawned note tap played preview note with velocity 0.5
+    expect(playNoteSpy).toHaveBeenLastCalledWith(62, 0.5);
+
+    // Spawn count should still be 3 (no new objects spawned)
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      3,
+    );
+
+    // Scroll spring calls count should stay the same (no scroll occurred)
+    const scrollCallsAfter = springSpy.mock.calls.filter(
+      (c) => c[1].friction === 14 && c[1].tension === 50,
+    ).length;
+    expect(scrollCallsAfter).toBe(scrollCallsBefore);
+
+    // Next stage tap: plays note 3 (62 + 12 = 74) at full velocity, verifying song index was not advanced by note tap
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    expect(playNoteSpy).toHaveBeenLastCalledWith(74, 1);
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      4,
+    );
+
+    unmount();
+  });
+
+  it("renders spawned object with button role and accessibility label", () => {
     const onTapSpawn = vi.fn();
     const entry: SpawnEntry = {
       id: 1,
       x: 50,
       y: 50,
       scrollAtSpawn: 0,
-      spriteKey: 'obj_sky_star',
-      sceneId: 'twinkle',
+      spriteKey: "obj_sky_star",
+      sceneId: "twinkle",
       big: false,
-      zone: 'sky',
+      zone: "sky",
     };
     const scrollX = new Animated.Value(0);
 
-    const { unmount } = render(<SpawnedObject entry={entry} scrollX={scrollX} onTapSpawn={onTapSpawn} lang="en" />);
+    const { unmount } = render(
+      <SpawnedObject
+        entry={entry}
+        scrollX={scrollX}
+        onTapSpawn={onTapSpawn}
+        lang="en"
+      />,
+    );
 
-    const button = screen.getByRole('button', { name: 'Music note' });
+    const button = screen.getByRole("button", { name: "Music note" });
     expect(button).toBeDefined();
-    expect(button.getAttribute('aria-label')).toBe('Music note');
+    expect(button.getAttribute("aria-label")).toBe("Music note");
 
     fireEvent.click(button);
     expect(onTapSpawn).toHaveBeenCalledWith(entry);
@@ -88,11 +221,13 @@ describe('JourneyScene accessibility', () => {
     unmount();
   });
 
-  it('wraps parallax layers modulo 1280 during extended play so scenery never scrolls off-screen', () => {
+  it("wraps parallax layers modulo 1280 during extended play so scenery never scrolls off-screen", () => {
     // At scrollX = 3840 (80 taps * 48px), without modulo the foreground would scroll to
     // translateX(-3840px), completely past the 2560px container into an empty void.
     const scrollX = new Animated.Value(3840);
-    const { container, unmount } = render(<ScrollingWorld scrollX={scrollX} scene={SCENES[0]} />);
+    const { container, unmount } = render(
+      <ScrollingWorld scrollX={scrollX} scene={SCENES[0]} />,
+    );
 
     const root = container.firstChild as HTMLElement;
     expect(root).toBeDefined();
@@ -102,9 +237,9 @@ describe('JourneyScene accessibility', () => {
     expect(layers).toHaveLength(3);
 
     // bg: (3840 * 0.2) % 1280 = 768 -> translateX(-768px)
-    expect(layers[0].style.transform).toBe('translateX(-768px)');
+    expect(layers[0].style.transform).toBe("translateX(-768px)");
     // mid: (3840 * 0.5) % 1280 = 640 -> translateX(-640px)
-    expect(layers[1].style.transform).toBe('translateX(-640px)');
+    expect(layers[1].style.transform).toBe("translateX(-640px)");
     // fg: 3840 % 1280 = 0 -> translateX(-0px) or translateX(0px)
     expect(layers[2].style.transform).toMatch(/^translateX\(-?0px\)$/);
 
@@ -116,13 +251,15 @@ describe('JourneyScene accessibility', () => {
     const { container: extContainer, unmount: extUnmount } = render(
       <ScrollingWorld scrollX={extendedScrollX} scene={SCENES[0]} />,
     );
-    const extLayers = Array.from((extContainer.firstChild as HTMLElement).children) as HTMLElement[];
+    const extLayers = Array.from(
+      (extContainer.firstChild as HTMLElement).children,
+    ) as HTMLElement[];
     // bg: (14400 * 0.2) % 1280 = 2880 % 1280 = 320 -> translateX(-320px)
-    expect(extLayers[0].style.transform).toBe('translateX(-320px)');
+    expect(extLayers[0].style.transform).toBe("translateX(-320px)");
     // mid: (14400 * 0.5) % 1280 = 7200 % 1280 = 800 -> translateX(-800px)
-    expect(extLayers[1].style.transform).toBe('translateX(-800px)');
+    expect(extLayers[1].style.transform).toBe("translateX(-800px)");
     // fg: 14400 % 1280 = 320 -> translateX(-320px)
-    expect(extLayers[2].style.transform).toBe('translateX(-320px)');
+    expect(extLayers[2].style.transform).toBe("translateX(-320px)");
 
     extUnmount();
   });

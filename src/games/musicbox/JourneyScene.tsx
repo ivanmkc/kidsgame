@@ -1,14 +1,30 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, StyleSheet, View, GestureResponderEvent } from 'react-native';
-import { playNote, primeMusic } from '../../music';
-import { BoxState, advance, beatsForTap, harmonyOffsets, noteForTap, octaveOffset, pickSpawnSprite, spawnZone, startState } from './logic';
-import { SceneDef } from './scenes';
-import { songById } from './logic';
-import { ScrollingWorld } from './ScrollingWorld';
-import { SpawnedObject, SpawnEntry } from './SpawnedObject';
-import { VehicleSprite } from './VehicleSprite';
-import { t } from '../../i18n';
-import { Lang } from '../../lang';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Animated, StyleSheet, View, PointerEvent } from "react-native";
+import { playNote, primeMusic } from "../../music";
+import {
+  BoxState,
+  advance,
+  beatsForTap,
+  harmonyOffsets,
+  noteForTap,
+  octaveOffset,
+  pickSpawnSprite,
+  spawnZone,
+  startState,
+} from "./logic";
+import { SceneDef } from "./scenes";
+import { songById } from "./logic";
+import { ScrollingWorld } from "./ScrollingWorld";
+import { SpawnedObject, SpawnEntry } from "./SpawnedObject";
+import { VehicleSprite } from "./VehicleSprite";
+import { t } from "../../i18n";
+import { Lang } from "../../lang";
 
 interface Props {
   scene: SceneDef;
@@ -30,7 +46,7 @@ export function JourneyScene({ scene, lang }: Props) {
   const vehicleBounce = useRef(new Animated.Value(0)).current;
   const vehicleIdle = useRef(new Animated.Value(0)).current;
   const stageSize = useRef({ w: 1, h: 1 });
-  const holdDown = useRef(false);
+  const activePointers = useRef(new Set<number>());
   const stateRef = useRef(state);
   stateRef.current = state;
 
@@ -39,116 +55,154 @@ export function JourneyScene({ scene, lang }: Props) {
     setSpawns([]);
     scrollX.setValue(0);
     scrollTotal.current = 0;
+    activePointers.current.clear();
 
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(vehicleIdle, { toValue: 1, duration: 2400, useNativeDriver: true }),
-        Animated.timing(vehicleIdle, { toValue: 0, duration: 2400, useNativeDriver: true }),
+        Animated.timing(vehicleIdle, {
+          toValue: 1,
+          duration: 2400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(vehicleIdle, {
+          toValue: 0,
+          duration: 2400,
+          useNativeDriver: true,
+        }),
       ]),
     );
     loop.start();
     return () => loop.stop();
   }, [scene.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const doTap = useCallback((x: number, y: number, fingerCount: number) => {
-    primeMusic();
-    const yFrac = y / Math.max(1, stageSize.current.h);
-    const offset = octaveOffset(yFrac);
-    const s = stateRef.current;
-    const midi = noteForTap(s);
-    const offsets = harmonyOffsets(fingerCount);
-    for (const h of offsets) {
-      playNote(midi + offset + h, fingerCount > 1 ? 0.7 : 1);
-    }
-    const big = beatsForTap(s) > 1;
-    setState(advance(s));
+  const doTap = useCallback(
+    (x: number, y: number, fingerCount: number) => {
+      primeMusic();
+      const yFrac = y / Math.max(1, stageSize.current.h);
+      const offset = octaveOffset(yFrac);
+      const s = stateRef.current;
+      const midi = noteForTap(s);
+      const offsets = harmonyOffsets(fingerCount);
+      for (const h of offsets) {
+        playNote(midi + offset + h, fingerCount > 1 ? 0.7 : 1);
+      }
+      const big = beatsForTap(s) > 1;
+      setState(advance(s));
 
-    const scrollAmount = holdDown.current ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;
-    scrollTotal.current += scrollAmount;
-    Animated.spring(scrollX, {
-      toValue: scrollTotal.current,
-      friction: 14,
-      tension: 50,
-      useNativeDriver: true,
-    }).start();
+      const scrollAmount =
+        fingerCount > 1 ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;
+      scrollTotal.current += scrollAmount;
+      Animated.spring(scrollX, {
+        toValue: scrollTotal.current,
+        friction: 14,
+        tension: 50,
+        useNativeDriver: true,
+      }).start();
 
-    vehicleBounce.setValue(0);
-    Animated.spring(vehicleBounce, {
-      toValue: 1,
-      friction: 4,
-      useNativeDriver: true,
-    }).start(() => vehicleBounce.setValue(0));
+      vehicleBounce.setValue(0);
+      Animated.spring(vehicleBounce, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }).start(() => vehicleBounce.setValue(0));
 
-    const zone = spawnZone(yFrac);
-    const pool = scene.objects[zone];
-    const activeKeys = spawnsRef.current.map((s) => s.spriteKey);
-    const spriteKey = pickSpawnSprite(pool, nextId.current, activeKeys);
-    const id = nextId.current++;
-    const scrollAtSpawn = scrollTotal.current;
-    setSpawns((prev) => [
-      ...prev.slice(-(MAX_SPAWNS - 1)),
-      { id, x, y, scrollAtSpawn, spriteKey, sceneId: scene.id, big, zone },
-    ]);
-  }, [scene, scrollX, vehicleBounce]);
+      const zone = spawnZone(yFrac);
+      const pool = scene.objects[zone];
+      const activeKeys = spawnsRef.current.map((s) => s.spriteKey);
+      const spriteKey = pickSpawnSprite(pool, nextId.current, activeKeys);
+      const id = nextId.current++;
+      const scrollAtSpawn = scrollTotal.current;
+      setSpawns((prev) => [
+        ...prev.slice(-(MAX_SPAWNS - 1)),
+        { id, x, y, scrollAtSpawn, spriteKey, sceneId: scene.id, big, zone },
+      ]);
+    },
+    [scene, scrollX, vehicleBounce],
+  );
 
-  const onTapSpawn = useCallback((entry: SpawnEntry) => {
+  const onTapSpawn = useCallback((_entry: SpawnEntry) => {
     primeMusic();
     const s = stateRef.current;
     const midi = noteForTap(s);
     playNote(midi, 0.5);
   }, []);
 
-  const onTouchStart = useCallback((e: GestureResponderEvent) => {
-    const touch = e.nativeEvent;
-    const fingerCount = (touch as unknown as { touches?: unknown[] }).touches?.length ?? 1;
-    const x = touch.locationX ?? stageSize.current.w * (0.2 + 0.6 * Math.random());
-    const y = touch.locationY ?? stageSize.current.h * 0.5;
-    doTap(x, y, fingerCount);
-  }, [doTap]);
+  const onPointerDown = useCallback(
+    (e: PointerEvent) => {
+      const id = e.nativeEvent.pointerId ?? 1;
+      activePointers.current.add(id);
+      const fingerCount = activePointers.current.size;
+      const touch = e.nativeEvent;
+      const x =
+        touch.offsetX ??
+        (touch as unknown as { locationX?: number }).locationX ??
+        stageSize.current.w * (0.2 + 0.6 * Math.random());
+      const y =
+        touch.offsetY ??
+        (touch as unknown as { locationY?: number }).locationY ??
+        stageSize.current.h * 0.5;
+      doTap(x, y, fingerCount);
+    },
+    [doTap],
+  );
 
-  const onPressIn = useCallback(() => { holdDown.current = true; }, []);
-  const onPressOut = useCallback(() => { holdDown.current = false; }, []);
+  const onPointerUp = useCallback((e: PointerEvent) => {
+    const id = e.nativeEvent.pointerId ?? 1;
+    activePointers.current.delete(id);
+  }, []);
 
-  const vehicleTranslateY = useMemo(() =>
-    Animated.add(
+  const onPointerCancel = useCallback((e: PointerEvent) => {
+    const id = e.nativeEvent.pointerId ?? 1;
+    activePointers.current.delete(id);
+  }, []);
+
+  const vehicleTranslateY = useMemo(
+    () =>
+      Animated.add(
+        vehicleBounce.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0, -18, 0],
+        }),
+        vehicleIdle.interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0, -6, 0],
+        }),
+      ),
+    [vehicleBounce, vehicleIdle],
+  );
+
+  const vehicleScale = useMemo(
+    () =>
       vehicleBounce.interpolate({
         inputRange: [0, 0.5, 1],
-        outputRange: [0, -18, 0],
+        outputRange: [1, 1.08, 1],
       }),
+    [vehicleBounce],
+  );
+
+  const vehicleRotate = useMemo(
+    () =>
       vehicleIdle.interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0, -6, 0],
+        inputRange: [0, 0.25, 0.5, 0.75, 1],
+        outputRange: ["-2deg", "0deg", "2deg", "0deg", "-2deg"],
       }),
-    ), [vehicleBounce, vehicleIdle]);
-
-  const vehicleScale = useMemo(() =>
-    vehicleBounce.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: [1, 1.08, 1],
-    }), [vehicleBounce]);
-
-  const vehicleRotate = useMemo(() =>
-    vehicleIdle.interpolate({
-      inputRange: [0, 0.25, 0.5, 0.75, 1],
-      outputRange: ['-2deg', '0deg', '2deg', '0deg', '-2deg'],
-    }), [vehicleIdle]);
+    [vehicleIdle],
+  );
 
   return (
     <View
       style={styles.stage}
       onLayout={(e) => {
-        stageSize.current = { w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height };
+        stageSize.current = {
+          w: e.nativeEvent.layout.width,
+          h: e.nativeEvent.layout.height,
+        };
       }}
-      onStartShouldSetResponder={() => true}
-      onMoveShouldSetResponder={() => false}
-      onResponderGrant={(e) => {
-        onPressIn();
-        onTouchStart(e);
-      }}
-      onResponderRelease={onPressOut}
-      onResponderTerminate={onPressOut}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
       testID="musicbox-stage"
-      accessibilityLabel={t(lang, 'musicbox.stage')}
+      accessibilityLabel={t(lang, "musicbox.stage")}
     >
       <ScrollingWorld scrollX={scrollX} scene={scene} />
 
@@ -160,7 +214,13 @@ export function JourneyScene({ scene, lang }: Props) {
       />
 
       {spawns.map((s) => (
-        <SpawnedObject key={s.id} entry={s} scrollX={scrollX} onTapSpawn={onTapSpawn} lang={lang} />
+        <SpawnedObject
+          key={s.id}
+          entry={s}
+          scrollX={scrollX}
+          onTapSpawn={onTapSpawn}
+          lang={lang}
+        />
       ))}
     </View>
   );
@@ -169,9 +229,9 @@ export function JourneyScene({ scene, lang }: Props) {
 const styles = StyleSheet.create({
   stage: {
     flex: 1,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderRadius: 12,
     margin: 4,
-    backgroundColor: '#1B1440',
+    backgroundColor: "#1B1440",
   },
 });
