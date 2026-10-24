@@ -201,7 +201,13 @@ describe("CarModeGame interactions", () => {
     // Advance to round 2
     const tapBtn = screen.getByTestId("carmode-tap");
     fireEvent.click(tapBtn);
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(tapBtn);
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(tapBtn);
 
     expect(screen.getByText("Car Mode")).toBeDefined();
@@ -268,10 +274,19 @@ describe("CarModeGame interactions", () => {
     // Advance to round 2, then to gap phase
     const tapBtn = screen.getByTestId("carmode-tap");
     fireEvent.click(tapBtn);
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(tapBtn);
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(tapBtn);
     expect(screen.getByTestId("carmode-score").textContent).toContain("2/10");
 
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     fireEvent.click(tapBtn);
     expect(screen.getByText("Your turn!")).toBeDefined();
 
@@ -327,5 +342,100 @@ describe("CarModeGame interactions", () => {
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
     expect(startStateSpy).toHaveBeenCalledOnce();
     expect(startStateSpy).toHaveBeenCalledWith("rhyme", expect.any(Number));
+  });
+
+  it("ignores rapid taps when transitioning to reveal phase to prevent cutting off reveal audio", () => {
+    vi.useFakeTimers();
+    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockReturnValue();
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Advance from prompt to gap phase
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+    expect(screen.getByText("Your turn!")).toBeDefined();
+
+    // Advance past debounce window
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    stopNarrationSpy.mockClear();
+
+    // First tap in gap phase answers the round and enters reveal phase
+    fireEvent.click(tapBtn);
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(saySequenceSpy).toHaveBeenCalled();
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    // Rapid double-tap 50ms later must be ignored so it does not cancel reveal audio
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    fireEvent.click(tapBtn);
+
+    // Stays in reveal phase on round 1/10 without cutting off audio
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(screen.getByTestId("carmode-score").textContent).toContain("1/10");
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    // After debounce window (another 350ms to reach 400ms total), next tap advances to prompt
+    act(() => {
+      vi.advanceTimersByTime(350);
+    });
+    fireEvent.click(tapBtn);
+
+    expect(screen.getByText("Listen...")).toBeDefined();
+    expect(screen.getByTestId("carmode-score").textContent).toContain("2/10");
+    expect(stopNarrationSpy).toHaveBeenCalled();
+  });
+
+  it("allows rapid second tap in twoTapAnswer gap phase but ignores subsequent rapid tap in reveal", () => {
+    vi.useFakeTimers();
+    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockReturnValue();
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+
+    const actual = logic.startState("silly", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn = screen.getByTestId("carmode-tap");
+
+    // Advance past initial debounce
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    stopNarrationSpy.mockClear();
+
+    // First tap in gap for twoTapAnswer round: sets pendingTaps to 1
+    fireEvent.click(tapBtn);
+    expect(screen.getByText("Your turn!")).toBeDefined();
+
+    // Rapid second tap 100ms later (answering silly statement) must be accepted
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(tapBtn);
+
+    // Enters reveal phase
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(saySequenceSpy).toHaveBeenCalled();
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    // Rapid third tap 50ms later must be ignored by reveal debounce
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    fireEvent.click(tapBtn);
+
+    // Still in reveal phase, audio has not been stopped
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
   });
 });

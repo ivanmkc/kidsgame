@@ -42,6 +42,7 @@ const PACK_COLORS: Record<PackId, string> = {
 };
 
 const TAP_WINDOW_MS = 600;
+const PHASE_DEBOUNCE_MS = 400;
 
 export function CarModeGame({ onHome, lang }: Props) {
   const { isValid } = useLangEpoch(lang);
@@ -55,6 +56,7 @@ export function CarModeGame({ onHome, lang }: Props) {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const phaseEnterTime = useRef(0);
   const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boopsTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -82,6 +84,10 @@ export function CarModeGame({ onHome, lang }: Props) {
   const applyStateTransition = useCallback(
     (next: CarModeState) => {
       const current = stateRef.current;
+
+      if (current.phase !== next.phase) {
+        phaseEnterTime.current = Date.now();
+      }
 
       if (
         current.phase === "reveal" &&
@@ -216,6 +222,10 @@ export function CarModeGame({ onHome, lang }: Props) {
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = useCallback(() => {
+    if (Date.now() - phaseEnterTime.current < PHASE_DEBOUNCE_MS) {
+      return;
+    }
+
     sfx.tap();
     primeMusic();
 
