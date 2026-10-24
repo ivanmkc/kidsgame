@@ -192,9 +192,9 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       >
         {call && (
           <Pressable
-            disabled={won}
+            disabled={won || marked[call.answerIdx]}
             onPress={() => {
-              if (won || lockedRef.current) return;
+              if (won || lockedRef.current || marked[call.answerIdx]) return;
               sfx.tap();
               saySequence(call.promptLines);
             }}

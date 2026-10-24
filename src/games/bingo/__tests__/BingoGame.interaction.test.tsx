@@ -107,6 +107,59 @@ test("rapid double-tap on correct tile only scores once and does not double-adva
   expect(score.textContent).toBe("⭐ 1");
 });
 
+test("prompt button is disabled during round advance transition and spamming it does not cancel transition", async () => {
+  const sfxTapSpy = vi.spyOn(sound.sfx, "tap");
+  const saySequenceSpy = vi.spyOn(sound, "saySequence");
+  const onHome = vi.fn();
+  render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  let prompt = screen.getByTestId("bingo-prompt");
+  const initialPrompt = prompt.textContent!;
+  const icon = initialPrompt.replace("Find the ", "").replace("!", "");
+
+  const cells = screen.queryAllByTestId(/bingo-cell-/);
+  const correctCell = cells.find((c) => c.getAttribute("aria-label") === icon);
+  expect(correctCell).toBeDefined();
+
+  // Active play: prompt is enabled
+  expect(prompt.getAttribute("aria-disabled")).toBeFalsy();
+
+  // Tap correct tile
+  await act(async () => {
+    fireEvent.click(correctCell!);
+  });
+
+  // During confirmation transition: prompt must be disabled
+  prompt = screen.getByTestId("bingo-prompt");
+  expect(prompt.getAttribute("aria-disabled")).toBe("true");
+
+  sfxTapSpy.mockClear();
+  saySequenceSpy.mockClear();
+
+  // Spam tap prompt button while in transition
+  await act(async () => {
+    fireEvent.click(prompt);
+    fireEvent.click(prompt);
+  });
+
+  // Taps while disabled must not play tap sfx or saySequence
+  expect(sfxTapSpy).not.toHaveBeenCalled();
+  expect(saySequenceSpy).not.toHaveBeenCalled();
+
+  // Advance past confirmation duration
+  await act(async () => {
+    vi.advanceTimersByTime(9000);
+  });
+
+  prompt = screen.getByTestId("bingo-prompt");
+  expect(prompt.textContent).not.toBe(initialPrompt);
+  expect(prompt.getAttribute("aria-disabled")).toBeFalsy();
+});
+
 test("changes language", async () => {
   const onHome = vi.fn();
   const { rerender } = render(
