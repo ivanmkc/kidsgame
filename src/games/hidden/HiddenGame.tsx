@@ -1,20 +1,41 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Image, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
-import { TapScene } from '../../components/TapScene';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, DifficultyFilter, inFilter, nextSceneId, settingsFor, nextFilter } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
-import { makeRng, sample } from '../../rng';
-import { sfx, useSay, say } from '../../sound';
-import { colors, fonts, shadows } from '../../theme';
-import { Find, coopDrawCount, countFor } from './coop';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Animated,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SCENE_IMAGES } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
+import { TapScene } from "../../components/TapScene";
+import { WinOverlay } from "../../components/WinOverlay";
+import {
+  Difficulty,
+  DifficultyFilter,
+  inFilter,
+  nextSceneId,
+  settingsFor,
+  nextFilter,
+} from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import {
+  MP_PLAYERS,
+  ModePicker,
+  PlayerChip,
+  PlayerIx,
+  nextTurn,
+} from "../../multiplayer";
+import { makeRng, sample } from "../../rng";
+import { sfx, useSay, say } from "../../sound";
+import { colors, fonts, shadows } from "../../theme";
+import { Find, coopDrawCount, countFor } from "./coop";
 
 interface Props {
   onHome: () => void;
@@ -28,16 +49,29 @@ interface Props {
   lang?: Lang;
 }
 
-export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPlayerEnabled, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
+export function HiddenGame({
+  onHome,
+  difficulty,
+  filter = "all",
+  onFilter,
+  twoPlayerEnabled,
+  sceneId,
+  onPickScene,
+  onBackToPicker,
+  lang = "en",
+}: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
-  const effDifficulty = (filter === 'all' && scene?.level) ? scene.level : difficulty;
+  const effDifficulty =
+    filter !== "all" ? filter : (scene?.level ?? difficulty);
 
   // ALL hooks live above the `if (!scene)` early return (repo hard rule).
-  const [mode, setMode] = useState<'solo' | '2p' | null>(twoPlayerEnabled ? null : 'solo');
-  const coop = mode === '2p';
+  const [mode, setMode] = useState<"solo" | "2p" | null>(
+    twoPlayerEnabled ? null : "solo",
+  );
+  const coop = mode === "2p";
   const [turn, setTurn] = useState<PlayerIx>(0);
   const [finds, setFinds] = useState<Find[]>([]); // solo stamps by:null
   const [hintId, setHintId] = useState<string | null>(null);
@@ -50,14 +84,12 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   const settings = settingsFor(effDifficulty);
   const showTimer = settings.timer && !coop;
 
-  const drawn = useMemo(
-    () => {
-      if (!scene) return [];
-      const base = settings.hiddenDraw;
-      const n = coop ? coopDrawCount(base, scene.targets.length) : base;
-      return sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, n);
-    },
-    [sceneId, coop]); // eslint-disable-line react-hooks/exhaustive-deps
+  const drawn = useMemo(() => {
+    if (!scene) return [];
+    const base = settings.hiddenDraw;
+    const n = coop ? coopDrawCount(base, scene.targets.length) : base;
+    return sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, n);
+  }, [sceneId, coop]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = drawn.length;
   const won = finds.length === total && total > 0;
   const elapsed = useElapsed(showTimer && !!scene && !won, sceneId);
@@ -76,10 +108,22 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
   }, [sceneId]);
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
-  useSay(coop && scene && !won ? t(lang, 'hidden.turn', { name: MP_PLAYERS[turn].name }) : null);
-  useSay(mode === null ? null : (scene ? (coop ? null : t(lang, 'hidden.prompt')) : t(lang, 'picker.hidden')));
+  useSay(
+    coop && scene && !won
+      ? t(lang, "hidden.turn", { name: MP_PLAYERS[turn].name })
+      : null,
+  );
+  useSay(
+    mode === null
+      ? null
+      : scene
+        ? coop
+          ? null
+          : t(lang, "hidden.prompt")
+        : t(lang, "picker.hidden"),
+  );
   useEffect(() => {
-    if (won) say(t(lang, coop ? 'win.hiddenCoop' : 'win.hidden'));
+    if (won) say(t(lang, coop ? "win.hiddenCoop" : "win.hidden"));
   }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Gentle auto-hint: pulse one random unfound target after inactivity delay
@@ -88,13 +132,17 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
     if (!scene || won || !isFinite(settings.hiddenHintSecs)) return;
     setHintId(null);
     const timers: ReturnType<typeof setTimeout>[] = [];
-    timers.push(setTimeout(() => {
-      const unfound = drawn.filter((d) => !finds.some((f) => f.id === d.id));
-      if (!unfound.length) return;
-      const pick = unfound[Math.floor(Math.random() * unfound.length)];
-      setHintId(pick.id);
-      timers.push(setTimeout(() => setHintId((h) => (h === pick.id ? null : h)), 2500));
-    }, settings.hiddenHintSecs * 1000));
+    timers.push(
+      setTimeout(() => {
+        const unfound = drawn.filter((d) => !finds.some((f) => f.id === d.id));
+        if (!unfound.length) return;
+        const pick = unfound[Math.floor(Math.random() * unfound.length)];
+        setHintId(pick.id);
+        timers.push(
+          setTimeout(() => setHintId((h) => (h === pick.id ? null : h)), 2500),
+        );
+      }, settings.hiddenHintSecs * 1000),
+    );
     return () => timers.forEach(clearTimeout);
   }, [coop, scene, won, drawn, finds, turn, settings.hiddenHintSecs]);
 
@@ -102,16 +150,45 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   if (!scene) {
     return (
-      <GameShell title={t(lang, 'shell.hidden.title')} subtitle={t(lang, 'shell.hidden.subPicker')} onBack={onHome} lang={lang}>
+      <GameShell
+        title={t(lang, "shell.hidden.title")}
+        subtitle={t(lang, "shell.hidden.subPicker")}
+        onBack={onHome}
+        lang={lang}
+      >
         <ScenePicker
-          title={t(lang, 'picker.hidden')}
+          title={t(lang, "picker.hidden")}
           lang={lang}
-          options={manifest.hidden.map((h) => ({ id: h.id, name: h.name, image: h.image, flagged: h.flagged, level: h.level, dimmed: !inFilter(h.level, filter) }))}
-          onPick={(id) => { if (mode !== null) onPickScene(id); }}
-          onSurprise={() => { if (mode !== null) onPickScene(visible[Math.floor(Math.random() * visible.length)].id); }}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
+          options={manifest.hidden.map((h) => ({
+            id: h.id,
+            name: h.name,
+            image: h.image,
+            flagged: h.flagged,
+            level: h.level,
+            dimmed: !inFilter(h.level, filter),
+          }))}
+          onPick={(id) => {
+            if (mode !== null) onPickScene(id);
+          }}
+          onSurprise={() => {
+            if (mode !== null)
+              onPickScene(
+                visible[Math.floor(Math.random() * visible.length)].id,
+              );
+          }}
+          filterChip={
+            onFilter ? (
+              <FilterCycleChip
+                filter={filter}
+                onCycle={() => onFilter(nextFilter(filter))}
+                lang={lang}
+              />
+            ) : undefined
+          }
         />
-        {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
+        {twoPlayerEnabled && mode === null ? (
+          <ModePicker onPick={setMode} lang={lang} />
+        ) : null}
       </GameShell>
     );
   }
@@ -125,7 +202,11 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   const foundIds = finds.map((f) => f.id);
   const ringColors = coop
-    ? Object.fromEntries(finds.filter((f) => f.by !== null).map((f) => [f.id, MP_PLAYERS[f.by as PlayerIx].color]))
+    ? Object.fromEntries(
+        finds
+          .filter((f) => f.by !== null)
+          .map((f) => [f.id, MP_PLAYERS[f.by as PlayerIx].color]),
+      )
     : undefined;
 
   const onHit = (id: string) => {
@@ -150,21 +231,42 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
 
   return (
     <GameShell
-      title={t(lang, 'shell.hidden.title')}
-      subtitle={t(lang, 'shell.hidden.subPlay', { name: scene.name })}
+      title={t(lang, "shell.hidden.title")}
+      subtitle={t(lang, "shell.hidden.subPlay", { name: scene.name })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           {coop ? (
             <>
-              <PlayerChip player={0} count={countFor(finds, 0)} active={turn === 0 && !won} testID="hidden-player-chip-0" />
-              <PlayerChip player={1} count={countFor(finds, 1)} active={turn === 1 && !won} testID="hidden-player-chip-1" />
+              <PlayerChip
+                player={0}
+                count={countFor(finds, 0)}
+                active={turn === 0 && !won}
+                testID="hidden-player-chip-0"
+              />
+              <PlayerChip
+                player={1}
+                count={countFor(finds, 1)}
+                active={turn === 1 && !won}
+                testID="hidden-player-chip-1"
+              />
             </>
           ) : null}
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="hidden-timer" /> : null}
-          <ScoreChip label={`🔎 ${finds.length}/${total}`} testID="hidden-score" />
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="hidden-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🔎 ${finds.length}/${total}`}
+            testID="hidden-score"
+          />
         </View>
       }
     >
@@ -174,16 +276,32 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
           const done = foundIds.includes(t.id);
           const finder = coop && done ? finderFor(t.id) : null;
           return (
-            <View key={t.id} style={[styles.chip, shadows.soft, done && styles.chipFound]} testID={`checklist-${t.id}`}>
-              <Image source={SCENE_IMAGES[t.thumb]} style={styles.chipImg} resizeMode="contain" />
+            <View
+              key={t.id}
+              style={[styles.chip, shadows.soft, done && styles.chipFound]}
+              testID={`checklist-${t.id}`}
+            >
+              <Image
+                source={SCENE_IMAGES[t.thumb]}
+                style={styles.chipImg}
+                resizeMode="contain"
+              />
               {done ? (
                 <View style={styles.chipCheck}>
                   <Text style={styles.chipCheckText}>✔️</Text>
                 </View>
               ) : null}
               {finder !== null ? (
-                <View style={[styles.finderBadge, { borderColor: MP_PLAYERS[finder].color }]} testID={`checklist-${t.id}-finder`}>
-                  <Text style={styles.finderBadgeText}>{MP_PLAYERS[finder].emoji}</Text>
+                <View
+                  style={[
+                    styles.finderBadge,
+                    { borderColor: MP_PLAYERS[finder].color },
+                  ]}
+                  testID={`checklist-${t.id}-finder`}
+                >
+                  <Text style={styles.finderBadgeText}>
+                    {MP_PLAYERS[finder].emoji}
+                  </Text>
                 </View>
               ) : null}
             </View>
@@ -208,12 +326,16 @@ export function HiddenGame({ onHome, difficulty, filter = 'all', onFilter, twoPl
       </ScrollView>
       <WinOverlay
         visible={won}
-        message={coop ? t(lang, 'win.hiddenCoop') : t(lang, 'win.hidden')}
-        onNext={() => onPickScene(nextSceneId(manifest.hidden, visible, scene.id))}
+        message={coop ? t(lang, "win.hiddenCoop") : t(lang, "win.hidden")}
+        onNext={() =>
+          onPickScene(nextSceneId(manifest.hidden, visible, scene.id))
+        }
         onHome={onHome}
         lang={lang}
       />
-      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
+      {twoPlayerEnabled && mode === null ? (
+        <ModePicker onPick={setMode} lang={lang} />
+      ) : null}
     </GameShell>
   );
 }
@@ -226,16 +348,26 @@ function TurnBanner({ turn, lang }: { turn: PlayerIx; lang: Lang }) {
     if (prev.current === turn) return;
     prev.current = turn;
     scaleAnim.setValue(0.9);
-    Animated.spring(scaleAnim, { toValue: 1, friction: 5, useNativeDriver: true }).start();
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 5,
+      useNativeDriver: true,
+    }).start();
   }, [turn, scaleAnim]);
-  const turnLabel = t(lang, 'hidden.turn', { name: p.name });
+  const turnLabel = t(lang, "hidden.turn", { name: p.name });
   return (
     <Animated.View
       testID="hidden-turn-banner"
       accessibilityLabel={turnLabel}
-      style={[styles.banner, shadows.soft, { backgroundColor: p.color, transform: [{ scale: scaleAnim }] }]}
+      style={[
+        styles.banner,
+        shadows.soft,
+        { backgroundColor: p.color, transform: [{ scale: scaleAnim }] },
+      ]}
     >
-      <Text style={styles.bannerText}>{p.emoji} {turnLabel}</Text>
+      <Text style={styles.bannerText}>
+        {p.emoji} {turnLabel}
+      </Text>
     </Animated.View>
   );
 }
@@ -246,17 +378,17 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginBottom: 8,
     borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  bannerText: { fontSize: 22, fontFamily: fonts.display, color: '#FFFFFF' },
+  bannerText: { fontSize: 22, fontFamily: fonts.display, color: "#FFFFFF" },
   checklist: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: 10,
     paddingHorizontal: 12,
     paddingBottom: 8,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   chip: {
     width: 92,
@@ -265,24 +397,24 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: colors.card,
     backgroundColor: colors.paper,
-    overflow: 'hidden',
+    overflow: "hidden",
     padding: 5,
   },
   chipFound: { borderColor: colors.green },
-  chipImg: { width: '100%', height: '100%' },
+  chipImg: { width: "100%", height: "100%" },
   chipCheck: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(95,191,110,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(95,191,110,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   chipCheckText: { fontSize: 24 },
   finderBadge: {
-    position: 'absolute',
+    position: "absolute",
     right: 3,
     bottom: 3,
     width: 22,
@@ -290,9 +422,15 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     borderWidth: 2,
     backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   finderBadgeText: { fontSize: 12, lineHeight: 15 },
-  scroll: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 12, paddingHorizontal: 12 },
+  scroll: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 12,
+    paddingHorizontal: 12,
+  },
 });
