@@ -260,6 +260,7 @@ export const CMN: Table = {
   'hidden.prompt': '找出所有藏起来的东西！',
   'shadow.hint': '点出这个影子对应的贴纸！',
   'shadow.hintTricky': '可能被翻过或转过 — 看形状！',
+  'oddone.defaultQuestion': '哪一个不是一伙的？',
   'rules.memoryCheck': '记忆挑战！',
   'rules.ruleNumber': '规则 #{n}',
   'rules.doAgain': '再做一次规则 #{n} — 还记得吗？🤔',

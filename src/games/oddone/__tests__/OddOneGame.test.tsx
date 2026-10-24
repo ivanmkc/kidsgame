@@ -254,4 +254,24 @@ describe("OddOneGame", () => {
       expect(new Set(lines).size).toBe(16);
     });
   });
+
+  it("uses translated fallback question when category lacks translation", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementation(() => ({
+      baseCategory: "unknown_category",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["balloon", "car", "cat", "plane"],
+      oddIndex: 2,
+    }));
+
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+    const banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner).toBeTruthy();
+    expect(banner.textContent).toBe("ひとつだけ なかまじゃないのは？");
+    expect(say).toHaveBeenCalledWith("ひとつだけ なかまじゃないのは？");
+  });
 });
