@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   Animated,
   Easing,
@@ -7,15 +7,15 @@ import {
   Text,
   View,
   useWindowDimensions,
-} from 'react-native';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { Confetti } from '../../components/Confetti';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { saySequence, sayThen, sfx, stopNarration } from '../../sound';
-import { playNote, primeMusic } from '../../music';
-import { fonts, shadows } from '../../theme';
-import { ALL_PACKS, PACK_ORDER, PackId, Round } from './packs';
+} from "react-native";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { Confetti } from "../../components/Confetti";
+import { Lang, useLangEpoch } from "../../lang";
+import { t } from "../../i18n";
+import { saySequence, sayThen, sfx, stopNarration } from "../../sound";
+import { playNote, primeMusic } from "../../music";
+import { fonts, shadows } from "../../theme";
+import { ALL_PACKS, PACK_ORDER, PackId, Round } from "./packs";
 import {
   CarModeState,
   currentRound,
@@ -25,7 +25,7 @@ import {
   toReveal,
   handleTap,
   handleTapTimeout,
-} from './logic';
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -33,20 +33,21 @@ interface Props {
 }
 
 const PACK_COLORS: Record<PackId, string> = {
-  boops: '#E8A24F',
-  rhyme: '#9C6FD6',
-  simon: '#2FB8AC',
-  silly: '#E8564F',
-  whoami: '#5DA9E8',
-  animal: '#5FBF6E',
+  boops: "#E8A24F",
+  rhyme: "#9C6FD6",
+  simon: "#2FB8AC",
+  silly: "#E8564F",
+  whoami: "#5DA9E8",
+  animal: "#5FBF6E",
 };
 
 const TAP_WINDOW_MS = 600;
 
 export function CarModeGame({ onHome, lang }: Props) {
-  const [packId, setPackId] = useState<PackId>('boops');
+  const { isValid } = useLangEpoch(lang);
+  const [packId, setPackId] = useState<PackId>("boops");
   const [state, setState] = useState<CarModeState>(() =>
-    startState('boops', Math.floor(Math.random() * 1e9)),
+    startState("boops", Math.floor(Math.random() * 1e9)),
   );
   const [celebrate, setCelebrate] = useState(0);
   const [gameKey, setGameKey] = useState(0);
@@ -62,97 +63,154 @@ export function CarModeGame({ onHome, lang }: Props) {
   const round = currentRound(state);
 
   const clearTimers = useCallback(() => {
-    if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
-    if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
-    if (startRoundTimerRef.current) { clearTimeout(startRoundTimerRef.current); startRoundTimerRef.current = null; }
+    if (gapTimerRef.current) {
+      clearTimeout(gapTimerRef.current);
+      gapTimerRef.current = null;
+    }
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+      tapTimerRef.current = null;
+    }
+    if (startRoundTimerRef.current) {
+      clearTimeout(startRoundTimerRef.current);
+      startRoundTimerRef.current = null;
+    }
     boopsTimersRef.current.forEach(clearTimeout);
     boopsTimersRef.current = [];
   }, []);
 
-  const applyStateTransition = useCallback((next: CarModeState) => {
-    const current = stateRef.current;
-    
-    if (current.phase === 'reveal' && (next.phase === 'prompt' || next.phase === 'done')) {
+  const applyStateTransition = useCallback(
+    (next: CarModeState) => {
+      const current = stateRef.current;
+
+      if (
+        current.phase === "reveal" &&
+        (next.phase === "prompt" || next.phase === "done")
+      ) {
+        clearTimers();
+        stopNarration();
+        if (next.phase === "done") {
+          setCelebrate((c) => c + 1);
+        }
+      }
+
+      if (current.phase === "gap" && next.phase === "reveal") {
+        if (gapTimerRef.current) {
+          clearTimeout(gapTimerRef.current);
+          gapTimerRef.current = null;
+        }
+      }
+
+      if (current.pendingTaps === 0 && next.pendingTaps === 1) {
+        if (tapTimerRef.current) {
+          clearTimeout(tapTimerRef.current);
+          tapTimerRef.current = null;
+        }
+        tapTimerRef.current = setTimeout(() => {
+          tapTimerRef.current = null;
+          if (!isValid()) return;
+          const timeoutNext = handleTapTimeout(stateRef.current);
+          applyStateTransition(timeoutNext);
+        }, TAP_WINDOW_MS);
+      } else if (current.pendingTaps > 0 && next.pendingTaps === 0) {
+        if (tapTimerRef.current) {
+          clearTimeout(tapTimerRef.current);
+          tapTimerRef.current = null;
+        }
+      }
+
+      stateRef.current = next;
+      setState(next);
+    },
+    [clearTimers, isValid],
+  );
+
+  useEffect(
+    () => () => {
       clearTimers();
       stopNarration();
-      if (next.phase === 'done') {
-        setCelebrate((c) => c + 1);
-      }
-    }
-
-    if (current.phase === 'gap' && next.phase === 'reveal') {
-      if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
-    }
-
-    if (current.pendingTaps === 0 && next.pendingTaps === 1) {
-      if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
-      tapTimerRef.current = setTimeout(() => {
-        tapTimerRef.current = null;
-        const timeoutNext = handleTapTimeout(stateRef.current);
-        applyStateTransition(timeoutNext);
-      }, TAP_WINDOW_MS);
-    } else if (current.pendingTaps > 0 && next.pendingTaps === 0) {
-      if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
-    }
-
-    stateRef.current = next;
-    setState(next);
-  }, [clearTimers]);
-
-  useEffect(() => () => clearTimers(), [clearTimers]);
+    },
+    [clearTimers],
+  );
 
   const playBoops = useCallback((n: number) => {
     primeMusic();
     const PENTATONIC = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81];
     for (let i = 0; i < n; i++) {
-      const t = setTimeout(() => playNote(PENTATONIC[i % PENTATONIC.length]), i * 400);
+      const t = setTimeout(
+        () => playNote(PENTATONIC[i % PENTATONIC.length]),
+        i * 400,
+      );
       boopsTimersRef.current.push(t);
     }
   }, []);
 
-  const startRound = useCallback((r: Round) => {
-    if (r.pack === 'boops' && r.noteCount) {
-      playBoops(r.noteCount);
-      const boopsDuration = (r.noteCount - 1) * 400 + 800;
-      startRoundTimerRef.current = setTimeout(() => {
-        if (stateRef.current.phase !== 'prompt' || currentRound(stateRef.current) !== r) return;
+  const startRound = useCallback(
+    (r: Round) => {
+      if (r.pack === "boops" && r.noteCount) {
+        playBoops(r.noteCount);
+        const boopsDuration = (r.noteCount - 1) * 400 + 800;
+        startRoundTimerRef.current = setTimeout(() => {
+          if (!isValid()) return;
+          if (
+            stateRef.current.phase !== "prompt" ||
+            currentRound(stateRef.current) !== r
+          )
+            return;
+          sayThen(r.prompt, () => {
+            if (!isValid()) return;
+            if (
+              stateRef.current.phase === "prompt" &&
+              currentRound(stateRef.current) === r
+            ) {
+              applyStateTransition(toGap(stateRef.current));
+            }
+          });
+        }, boopsDuration);
+      } else {
         sayThen(r.prompt, () => {
-          if (stateRef.current.phase === 'prompt' && currentRound(stateRef.current) === r) {
+          if (!isValid()) return;
+          if (
+            stateRef.current.phase === "prompt" &&
+            currentRound(stateRef.current) === r
+          ) {
             applyStateTransition(toGap(stateRef.current));
           }
         });
-      }, boopsDuration);
-    } else {
-      sayThen(r.prompt, () => {
-        if (stateRef.current.phase === 'prompt' && currentRound(stateRef.current) === r) {
-          applyStateTransition(toGap(stateRef.current));
-        }
-      });
-    }
-  }, [playBoops, applyStateTransition]);
+      }
+    },
+    [playBoops, applyStateTransition, isValid],
+  );
 
   useEffect(() => {
-    if (state.phase === 'prompt' && round) {
+    if (state.phase === "prompt" && round) {
       startRound(round);
     }
   }, [state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (state.phase === 'gap' && round) {
+    if (state.phase === "gap" && round) {
       gapTimerRef.current = setTimeout(() => {
-        if (tapTimerRef.current) { clearTimeout(tapTimerRef.current); tapTimerRef.current = null; }
+        if (!isValid()) return;
+        if (tapTimerRef.current) {
+          clearTimeout(tapTimerRef.current);
+          tapTimerRef.current = null;
+        }
         applyStateTransition(toReveal(stateRef.current));
       }, round.gapMs);
     }
     return () => {
-      if (gapTimerRef.current) { clearTimeout(gapTimerRef.current); gapTimerRef.current = null; }
+      if (gapTimerRef.current) {
+        clearTimeout(gapTimerRef.current);
+        gapTimerRef.current = null;
+      }
     };
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (state.phase === 'reveal' && round) {
-      if (round.sfx === 'boing') sfx.boing();
-      else if (round.sfx === 'good') sfx.good();
+    if (state.phase === "reveal" && round) {
+      if (round.sfx === "boing") sfx.boing();
+      else if (round.sfx === "good") sfx.good();
       saySequence(round.reveal);
     }
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -164,7 +222,7 @@ export function CarModeGame({ onHome, lang }: Props) {
     const current = stateRef.current;
     if (isComplete(current)) return;
 
-    if (current.phase === 'prompt') {
+    if (current.phase === "prompt") {
       stopNarration();
       applyStateTransition(toGap(current));
       return;
@@ -174,16 +232,38 @@ export function CarModeGame({ onHome, lang }: Props) {
     applyStateTransition(next);
   }, [applyStateTransition]);
 
-  const switchPack = useCallback((id: PackId) => {
+  const switchPack = useCallback(
+    (id: PackId) => {
+      clearTimers();
+      stopNarration();
+      setPackId(id);
+      setCelebrate(0);
+      const next = startState(id, Math.floor(Math.random() * 1e9));
+      stateRef.current = next;
+      setState(next);
+      setGameKey((k) => k + 1);
+    },
+    [clearTimers],
+  );
+
+  const langMountedRef = useRef(false);
+  useEffect(() => {
+    if (!langMountedRef.current) {
+      langMountedRef.current = true;
+      return;
+    }
     clearTimers();
-    stopNarration();
-    setPackId(id);
-    setCelebrate(0);
-    const next = startState(id, Math.floor(Math.random() * 1e9));
-    stateRef.current = next;
-    setState(next);
-    setGameKey((k) => k + 1);
-  }, [clearTimers]);
+    if (stateRef.current.phase !== "done") {
+      const next: CarModeState = {
+        ...stateRef.current,
+        phase: "prompt",
+        pendingTaps: 0,
+      };
+      stateRef.current = next;
+      setState(next);
+      setGameKey((k) => k + 1);
+    }
+  }, [lang, clearTimers]);
 
   const done = isComplete(state);
   const bgColor = PACK_COLORS[packId];
@@ -192,11 +272,21 @@ export function CarModeGame({ onHome, lang }: Props) {
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
-    if (state.phase === 'gap' || state.phase === 'reveal') {
+    if (state.phase === "gap" || state.phase === "reveal") {
       const loop = Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.06, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 800, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+          Animated.timing(pulseAnim, {
+            toValue: 1.06,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
         ]),
       );
       loop.start();
@@ -210,13 +300,21 @@ export function CarModeGame({ onHome, lang }: Props) {
 
   return (
     <GameShell
-      title={t(lang, 'shell.carmode.title')}
-      subtitle={t(lang, 'shell.carmode.sub')}
+      title={t(lang, "shell.carmode.title")}
+      subtitle={t(lang, "shell.carmode.sub")}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`${roundNum}/${totalRounds}`} testID="carmode-score" />}
+      right={
+        <ScoreChip
+          label={`${roundNum}/${totalRounds}`}
+          testID="carmode-score"
+        />
+      }
     >
-      <View style={[styles.surface, { backgroundColor: bgColor }]} testID="carmode-surface">
+      <View
+        style={[styles.surface, { backgroundColor: bgColor }]}
+        testID="carmode-surface"
+      >
         {!done && (
           <Pressable
             onPress={onTap}
@@ -237,14 +335,18 @@ export function CarModeGame({ onHome, lang }: Props) {
               ]}
             >
               <Text style={styles.phaseEmoji}>
-                {state.phase === 'prompt' ? '👂' : state.phase === 'gap' ? '🤔' : '👆'}
+                {state.phase === "prompt"
+                  ? "👂"
+                  : state.phase === "gap"
+                    ? "🤔"
+                    : "👆"}
               </Text>
               <Text style={styles.phaseText}>
-                {state.phase === 'prompt'
-                  ? t(lang, 'music.listen')
-                  : state.phase === 'gap'
-                    ? t(lang, 'music.yourTurn')
-                    : t(lang, 'carmode.tap')}
+                {state.phase === "prompt"
+                  ? t(lang, "music.listen")
+                  : state.phase === "gap"
+                    ? t(lang, "music.yourTurn")
+                    : t(lang, "carmode.tap")}
               </Text>
             </Animated.View>
           </Pressable>
@@ -252,7 +354,7 @@ export function CarModeGame({ onHome, lang }: Props) {
 
         {done && (
           <View style={styles.doneWrap}>
-            <Text style={styles.doneText}>{t(lang, 'carmode.done')}</Text>
+            <Text style={styles.doneText}>{t(lang, "carmode.done")}</Text>
             <View style={styles.packRow}>
               {PACK_ORDER.map((id) => (
                 <Pressable
@@ -283,19 +385,19 @@ export function CarModeGame({ onHome, lang }: Props) {
 const styles = StyleSheet.create({
   surface: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   tapArea: {
     flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   bigButton: {
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255,255,255,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
     ...shadows.lifted,
   },
   phaseEmoji: {
@@ -304,29 +406,29 @@ const styles = StyleSheet.create({
   phaseText: {
     fontFamily: fonts.display,
     fontSize: 28,
-    color: '#fff',
+    color: "#fff",
     marginTop: 8,
-    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   doneWrap: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 24,
     paddingHorizontal: 24,
   },
   doneText: {
     fontFamily: fonts.display,
     fontSize: 36,
-    color: '#fff',
-    textShadowColor: 'rgba(0,0,0,0.3)',
+    color: "#fff",
+    textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
   packRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
     gap: 12,
     maxWidth: 500,
   },
@@ -335,16 +437,16 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 22,
     minWidth: 130,
-    alignItems: 'center',
+    alignItems: "center",
     ...shadows.soft,
   },
   packBtnActive: {
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: "#fff",
   },
   packBtnText: {
     fontFamily: fonts.display,
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
   },
 });
