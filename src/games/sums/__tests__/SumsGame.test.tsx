@@ -366,4 +366,72 @@ describe("SumsGame", () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
+
+  it("maintains minimum stage height and prevents critter overlap on mobile landscape viewports", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 800,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 360,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "frog",
+      a: 5,
+      b: 5,
+      sum: 10,
+      aPositions: [
+        { x: 12.5, y: 16.7 },
+        { x: 37.5, y: 16.7 },
+        { x: 62.5, y: 16.7 },
+        { x: 87.5, y: 16.7 },
+        { x: 12.5, y: 50.0 },
+      ],
+      bPositions: [
+        { x: 37.5, y: 50.0 },
+        { x: 62.5, y: 50.0 },
+        { x: 87.5, y: 50.0 },
+        { x: 12.5, y: 83.3 },
+        { x: 37.5, y: 83.3 },
+      ],
+      choices: [8, 9, 10],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="hard" lang="en" />,
+    );
+
+    const stage = screen.getByTestId("sums-stage-5+5");
+    const stageH = parseFloat(stage.style.height);
+    expect(stageH).toBeGreaterThanOrEqual(160);
+
+    const critterRow1 = screen.getByTestId("sums-initial-0");
+    const critterRow2 = screen.getByTestId("sums-initial-4");
+    const critterRow3 = screen.getByTestId("sums-incoming-3");
+
+    const top1 = parseFloat(critterRow1.style.top);
+    const size1 = parseFloat(critterRow1.style.height);
+    const bottom1 = top1 + size1;
+
+    const top2 = parseFloat(critterRow2.style.top);
+    const size2 = parseFloat(critterRow2.style.height);
+    const bottom2 = top2 + size2;
+
+    const top3 = parseFloat(critterRow3.style.top);
+
+    expect(bottom1).toBeLessThanOrEqual(top2);
+    expect(bottom2).toBeLessThanOrEqual(top3);
+
+    const choiceButtons = screen.getAllByRole("button");
+    const correctBtn = choiceButtons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    );
+    expect(correctBtn).toBeDefined();
+
+    unmount();
+    vi.restoreAllMocks();
+  });
 });
