@@ -26,6 +26,7 @@ import {
   QUESTION,
   SumsRound,
   makeSumsRound,
+  sumsLayout,
   sumsSettings,
 } from "./logic";
 import { useWinLine } from "../winlines";
@@ -140,12 +141,11 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
-  const stageW = Math.min(width - 32, 560);
-  const stageH = Math.min(height - 84 - 200, stageW * 0.72);
   const total = round.a + round.b;
-  const critterSize = Math.min(
-    Math.max(40, Math.min(70, stageW / (total <= 4 ? 5 : total <= 7 ? 6 : 7))),
-    Math.max(30, stageH * 0.45),
+  const { isLandscape, stageW, stageH, critterSize } = sumsLayout(
+    width,
+    height,
+    total,
   );
 
   return (
@@ -169,7 +169,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         </View>
       }
     >
-      <View style={styles.board}>
+      <View style={[styles.board, isLandscape && styles.boardLandscape]}>
         <View
           style={[
             styles.stage,
@@ -202,29 +202,36 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
             />
           ))}
         </View>
-        <View style={[styles.equation, shadows.soft]}>
-          <Text style={styles.equationText}>
-            {round.a} + {round.b} = ?
-          </Text>
-        </View>
-        <View style={styles.choiceRow}>
-          {round.choices.map((c) => (
-            <Pressable
-              key={c}
-              onPress={() => pickAnswer(c)}
-              testID={`sums-choice-${c}${c === round.sum ? "-answer" : ""}`}
-              accessibilityRole="button"
-              accessibilityLabel={String(c)}
-              style={({ pressed }) => [
-                styles.choice,
-                shadows.soft,
-                wrongPick === c && styles.choiceWrong,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.choiceText}>{c}</Text>
-            </Pressable>
-          ))}
+        <View
+          style={[styles.controls, isLandscape && styles.controlsLandscape]}
+        >
+          <View style={[styles.equation, shadows.soft]}>
+            <Text style={styles.equationText}>
+              {round.a} + {round.b} = ?
+            </Text>
+          </View>
+          <View
+            style={[styles.choiceRow, isLandscape && styles.choiceRowLandscape]}
+          >
+            {round.choices.map((c) => (
+              <Pressable
+                key={c}
+                onPress={() => pickAnswer(c)}
+                testID={`sums-choice-${c}${c === round.sum ? "-answer" : ""}`}
+                accessibilityRole="button"
+                accessibilityLabel={String(c)}
+                style={({ pressed }) => [
+                  styles.choice,
+                  isLandscape && styles.choiceLandscape,
+                  shadows.soft,
+                  wrongPick === c && styles.choiceWrong,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.choiceText}>{c}</Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
       </View>
       <WinOverlay
@@ -327,6 +334,19 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 16,
   },
+  boardLandscape: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  controls: {
+    alignItems: "center",
+    gap: 14,
+  },
+  controlsLandscape: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+  },
   stage: {
     backgroundColor: colors.paper,
     borderRadius: 24,
@@ -345,6 +365,7 @@ const styles = StyleSheet.create({
   },
   equationText: { fontFamily: fonts.display, fontSize: 26, color: colors.ink },
   choiceRow: { flexDirection: "row", gap: 14 },
+  choiceRowLandscape: { gap: 10 },
   choice: {
     backgroundColor: colors.card,
     borderRadius: 20,
@@ -354,6 +375,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     minWidth: 74,
     alignItems: "center",
+  },
+  choiceLandscape: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minWidth: 64,
   },
   choiceWrong: {
     borderColor: colors.red,
