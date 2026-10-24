@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { stickerLayout } from '../logic';
+import { Lang } from '../../../lang';
+import { manifest } from '../../../manifest';
+import { stickerLabel, stickerLayout } from '../logic';
 
 describe('stickerLayout', () => {
   describe('mobile landscape viewports', () => {
@@ -90,5 +92,60 @@ describe('stickerLayout', () => {
       expect(layout.stageH).toBeGreaterThan(0);
       expect(layout.stageW).toBeLessThanOrEqual(320);
     });
+  });
+});
+
+describe('stickerLabel', () => {
+  it('localizes dressup items across all supported languages', () => {
+    expect(stickerLabel('dress_pink', 'en')).toBe('pink dress');
+    expect(stickerLabel('dress_pink', 'ja')).toBe('ピンクのドレス');
+    expect(stickerLabel('dress_pink', 'cmn')).toBe('粉色连衣裙');
+    expect(stickerLabel('dress_pink', 'yue')).toBe('粉紅色連身裙');
+
+    expect(stickerLabel('fire_helmet', 'en')).toBe('fire helmet');
+    expect(stickerLabel('fire_helmet', 'ja')).toBe('しょうぼうしのヘルメット');
+    expect(stickerLabel('fire_helmet', 'cmn')).toBe('消防头盔');
+    expect(stickerLabel('fire_helmet', 'yue')).toBe('消防頭盔');
+
+    expect(stickerLabel('sunglasses', 'en')).toBe('sunglasses');
+    expect(stickerLabel('sunglasses', 'ja')).toBe('サングラス');
+    expect(stickerLabel('sunglasses', 'cmn')).toBe('太阳镜');
+    expect(stickerLabel('sunglasses', 'yue')).toBe('太陽眼鏡');
+
+    expect(stickerLabel('space_helmet', 'en')).toBe('space helmet');
+    expect(stickerLabel('space_helmet', 'ja')).toBe('うちゅうのヘルメット');
+    expect(stickerLabel('space_helmet', 'cmn')).toBe('太空头盔');
+    expect(stickerLabel('space_helmet', 'yue')).toBe('太空頭盔');
+  });
+
+  it('localizes WORDS icons across all supported languages', () => {
+    expect(stickerLabel('ladybug', 'en')).toBe('ladybug');
+    expect(stickerLabel('ladybug', 'ja')).toBe('てんとうむし');
+    expect(stickerLabel('ladybug', 'cmn')).toBe('瓢虫');
+    expect(stickerLabel('ladybug', 'yue')).toBe('甲蟲');
+
+    expect(stickerLabel('dog', 'en')).toBe('dog');
+    expect(stickerLabel('dog', 'ja')).toBe('いぬ');
+    expect(stickerLabel('dog', 'cmn')).toBe('狗');
+    expect(stickerLabel('dog', 'yue')).toBe('狗');
+  });
+
+  it('localizes every manifest dressup icon across all supported languages', () => {
+    const langs: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+    expect(manifest.dressup).toBeDefined();
+    expect(manifest.dressup!.length).toBeGreaterThan(0);
+    for (const icon of manifest.dressup!) {
+      for (const lang of langs) {
+        const label = stickerLabel(icon, lang);
+        expect(label).toBeTruthy();
+        expect(label).not.toContain('_');
+      }
+    }
+  });
+
+  it('fails loudly on unknown sticker icon', () => {
+    expect(() => stickerLabel('unknown_custom_item', 'en')).toThrow(
+      'Unknown sticker icon: unknown_custom_item',
+    );
   });
 });

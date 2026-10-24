@@ -795,4 +795,53 @@ describe('StickerGame', () => {
     unmount();
     vi.useRealTimers();
   });
+
+  it('sets localized accessibilityLabel on TrayItem across languages without underscores', () => {
+    const cases: { lang: Lang; expectedDress: string; expectedHelmet: string; expectedLadybug: string }[] = [
+      {
+        lang: 'en',
+        expectedDress: 'Add pink dress sticker',
+        expectedHelmet: 'Add fire helmet sticker',
+        expectedLadybug: 'Add ladybug sticker',
+      },
+      {
+        lang: 'ja',
+        expectedDress: 'ピンクのドレスの シールを はる',
+        expectedHelmet: 'しょうぼうしのヘルメットの シールを はる',
+        expectedLadybug: 'てんとうむしの シールを はる',
+      },
+      {
+        lang: 'cmn',
+        expectedDress: '添加粉色连衣裙贴纸',
+        expectedHelmet: '添加消防头盔贴纸',
+        expectedLadybug: '添加瓢虫贴纸',
+      },
+      {
+        lang: 'yue',
+        expectedDress: '加粉紅色連身裙貼紙',
+        expectedHelmet: '加消防頭盔貼紙',
+        expectedLadybug: '加甲蟲貼紙',
+      },
+    ];
+
+    for (const c of cases) {
+      const { unmount } = render(
+        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={c.lang} />,
+      );
+
+      const dressPink = screen.getByTestId('sticker-tray-dress_pink');
+      const fireHelmet = screen.getByTestId('sticker-tray-fire_helmet');
+      expect(dressPink.getAttribute('aria-label')).toBe(c.expectedDress);
+      expect(fireHelmet.getAttribute('aria-label')).toBe(c.expectedHelmet);
+      expect(dressPink.getAttribute('aria-label')).not.toContain('_');
+      expect(fireHelmet.getAttribute('aria-label')).not.toContain('_');
+
+      fireEvent.click(screen.getByTestId('sticker-tab-animals'));
+      const ladybug = screen.getByTestId('sticker-tray-ladybug');
+      expect(ladybug.getAttribute('aria-label')).toBe(c.expectedLadybug);
+      expect(ladybug.getAttribute('aria-label')).not.toContain('_');
+
+      unmount();
+    }
+  });
 });

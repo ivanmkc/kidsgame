@@ -1,3 +1,6 @@
+import { Lang } from '../../lang';
+import { t, UIKey } from '../../i18n';
+import { WORDS, wordFor } from '../../words';
 import { SCENE_AR } from '../../manifest';
 
 export interface StickerLayout {
@@ -35,4 +38,57 @@ export function stickerLayout(width: number, height: number): StickerLayout {
   const stageW = Math.round(Math.max(Math.min(MIN_STAGE_W, width - 24), Math.min(maxW, availH * ar, 1100)));
   const stageH = Math.round(stageW / ar);
   return { isLandscape, stageW, stageH };
+}
+
+const DRESSUP_KEYS: Record<string, UIKey> = {
+  dress_pink: 'sticker.item.dress_pink',
+  dress_blue: 'sticker.item.dress_blue',
+  tutu: 'sticker.item.tutu',
+  crown: 'sticker.item.crown',
+  tiara: 'sticker.item.tiara',
+  wizard_hat: 'sticker.item.wizard_hat',
+  sun_hat: 'sticker.item.sun_hat',
+  wings_fairy: 'sticker.item.wings_fairy',
+  wings_butterfly: 'sticker.item.wings_butterfly',
+  cape: 'sticker.item.cape',
+  sunglasses: 'sticker.item.sunglasses',
+  bowtie: 'sticker.item.bowtie',
+  necklace: 'sticker.item.necklace',
+  boots: 'sticker.item.boots',
+  wand: 'sticker.item.wand',
+  umbrella: 'sticker.item.umbrella',
+  dress_rainbow: 'sticker.item.dress_rainbow',
+  dress_star: 'sticker.item.dress_star',
+  dress_flower: 'sticker.item.dress_flower',
+  dress_snow: 'sticker.item.dress_snow',
+  kimono: 'sticker.item.kimono',
+  raincoat: 'sticker.item.raincoat',
+  party_hat: 'sticker.item.party_hat',
+  police_cap: 'sticker.item.police_cap',
+  fire_helmet: 'sticker.item.fire_helmet',
+  chef_hat: 'sticker.item.chef_hat',
+  cowboy_hat: 'sticker.item.cowboy_hat',
+  space_helmet: 'sticker.item.space_helmet',
+  flower_crown: 'sticker.item.flower_crown',
+  scarf: 'sticker.item.scarf',
+  ballet_slippers: 'sticker.item.ballet_slippers',
+  rain_boots: 'sticker.item.rain_boots',
+};
+
+/**
+ * Returns the localized child-friendly label for a sticker icon.
+ * For icons in WORDS (animals, nature, food, things), looks up the translated word.
+ * For dressup items, looks up the localized item name in i18n dictionaries.
+ * Fails loudly on unknown icons to prevent untranslated labels from shipping.
+ */
+export function stickerLabel(icon: string, lang: Lang = 'en'): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (entry) {
+    return wordFor(entry, lang).text;
+  }
+  const key = DRESSUP_KEYS[icon];
+  if (key) {
+    return t(lang, key);
+  }
+  throw new Error(`Unknown sticker icon: ${icon}`);
 }

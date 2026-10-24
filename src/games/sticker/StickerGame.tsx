@@ -7,7 +7,7 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
 import { manifest } from '../../manifest';
-import { stickerLayout } from './logic';
+import { stickerLabel, stickerLayout } from './logic';
 import { allSceneOptions } from '../sceneOptions';
 import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
@@ -399,7 +399,7 @@ function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
     <View
       {...responder.current.panHandlers}
       testID={`sticker-tray-${icon}`}
-      accessibilityLabel={t(lang, 'sticker.a11yAdd', { icon })}
+      accessibilityLabel={t(lang, 'sticker.a11yAdd', { icon: stickerLabel(icon, lang) })}
       style={[styles.trayItem, shadows.soft]}
     >
       <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
