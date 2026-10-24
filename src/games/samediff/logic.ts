@@ -2,18 +2,30 @@ import { Rng, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
 import { SeqNote } from '../../music';
 
-const BASE_PHRASES: SeqNote[][] = [
+export const BASE_PHRASES: SeqNote[][] = [
   [{ m: 60, b: 1 }, { m: 64, b: 1 }, { m: 67, b: 1 }], // C E G
   [{ m: 62, b: 1 }, { m: 65, b: 1 }, { m: 69, b: 1 }], // D F A
   [{ m: 64, b: 1 }, { m: 67, b: 1 }, { m: 72, b: 1 }], // E G C'
   [{ m: 65, b: 1 }, { m: 69, b: 1 }, { m: 72, b: 1 }], // F A C'
   [{ m: 67, b: 1 }, { m: 72, b: 1 }, { m: 76, b: 1 }], // G C' E'
+  [{ m: 57, b: 1 }, { m: 60, b: 1 }, { m: 64, b: 1 }], // A C E
+  [{ m: 59, b: 1 }, { m: 62, b: 1 }, { m: 67, b: 1 }], // B D G
+  [{ m: 60, b: 1 }, { m: 65, b: 1 }, { m: 69, b: 1 }], // C F A
+  [{ m: 62, b: 1 }, { m: 67, b: 1 }, { m: 71, b: 1 }], // D G B
+  [{ m: 64, b: 1 }, { m: 69, b: 1 }, { m: 72, b: 1 }], // E A C'
+  [{ m: 65, b: 1 }, { m: 69, b: 1 }, { m: 74, b: 1 }], // F A D'
+  [{ m: 67, b: 1 }, { m: 71, b: 1 }, { m: 74, b: 1 }], // G B D'
+  [{ m: 69, b: 1 }, { m: 72, b: 1 }, { m: 76, b: 1 }], // A C' E'
+  [{ m: 71, b: 1 }, { m: 74, b: 1 }, { m: 79, b: 1 }], // B D' G'
+  [{ m: 72, b: 1 }, { m: 76, b: 1 }, { m: 79, b: 1 }], // C' E' G'
+  [{ m: 60, b: 1 }, { m: 67, b: 1 }, { m: 72, b: 1 }], // C G C'
 ];
 
 export interface SameDiffRound {
   phraseA: SeqNote[];
   phraseB: SeqNote[];
   answer: 'same' | 'different';
+  phraseIdx: number;
 }
 
 function stepSize(d: Difficulty): number {
@@ -28,18 +40,35 @@ export function roundsToWin(d: Difficulty): number {
   return 12;
 }
 
-export function makeSameDiffRound(rng: Rng, d: Difficulty): SameDiffRound {
-  const phraseIdx = randInt(rng, BASE_PHRASES.length);
+export function makeSameDiffRound(
+  rng: Rng,
+  d: Difficulty,
+  history: number[] = [],
+): SameDiffRound {
+  const allIndices = BASE_PHRASES.map((_, i) => i);
+  const cycleLength = BASE_PHRASES.length;
+  const currentPass = history.slice(Math.floor(history.length / cycleLength) * cycleLength);
+  let available = allIndices.filter((i) => !currentPass.includes(i));
+  if (history.length > 0) {
+    const last = history[history.length - 1];
+    available = available.filter((i) => i !== last);
+  }
+  if (available.length === 0) {
+    const last = history.length > 0 ? history[history.length - 1] : undefined;
+    available = allIndices.filter((i) => i !== last);
+    if (available.length === 0) available = allIndices;
+  }
+  const phraseIdx = available[randInt(rng, available.length)];
   const phraseA = BASE_PHRASES[phraseIdx].map((n) => ({ ...n }));
   const isSame = rng() < 0.5;
   if (isSame) {
-    return { phraseA, phraseB: phraseA.map((n) => ({ ...n })), answer: 'same' };
+    return { phraseA, phraseB: phraseA.map((n) => ({ ...n })), answer: 'same', phraseIdx };
   }
   const phraseB = phraseA.map((n) => ({ ...n }));
   const changeIdx = randInt(rng, phraseB.length);
   const dir = rng() < 0.5 ? 1 : -1;
   phraseB[changeIdx] = { ...phraseB[changeIdx], m: phraseB[changeIdx].m + dir * stepSize(d) };
-  return { phraseA, phraseB, answer: 'different' };
+  return { phraseA, phraseB, answer: 'different', phraseIdx };
 }
 
 export function isCorrect(round: SameDiffRound, picked: 'same' | 'different'): boolean {
