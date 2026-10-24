@@ -1,8 +1,10 @@
 """Artifact detection phase: sweep image tiles from a scan plan for editing artifacts.
 
-Overlapping tiles of every image go through an inverted artifact-hunt question
-("answer YES if you see ANY editing mistake"), threaded for speed. Flags are saved
-as crops for human review.
+Layer 1 (deterministic): a diff pair must be pixel-identical outside its
+difference rects (+feather margin) — any violation is a pipeline bug.
+Layer 2 (judged): image tiles from a scan plan go through an inverted
+artifact-hunt question ("answer YES if you see ANY editing mistake"),
+threaded for speed. Flags are saved as crops for human review.
 
 Output: tools/audit_out/artifact_scan/artifact_report.json + flagged crop PNGs.
 """
@@ -20,6 +22,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 from batch_executor import BatchExecutor
 
 ROOT = Path(__file__).resolve().parent.parent
+ASSETS = ROOT / "assets" / "game"
+MANIFEST = ROOT / "src" / "assets" / "manifest.json"
 PLAN = ROOT / "tools" / "audit_out" / "scan_plan.json"
 OUT = ROOT / "tools" / "audit_out" / "artifact_scan"
 
@@ -32,21 +36,40 @@ ARTIFACT_Q = (
 )
 
 
-def tiles(w: int, h: int, cols: int = 3, rows: int = 2, overlap: float = 0.25):
-    tw, th = w // cols, h // rows
-    ox, oy = int(tw * overlap), int(th * overlap)
-    for r in range(rows):
-        for c in range(cols):
-            x0 = max(0, c * tw - ox)
-            y0 = max(0, r * th - oy)
-            x1 = min(w, (c + 1) * tw + ox)
-            y1 = min(h, (r + 1) * th + oy)
-            yield (x0, y0, x1, y1)
+def check_pair_identity(entry: dict) -> list[dict]:
+    """Outside the diff rects (+6px feather margin), A and B must match."""
+    import numpy as np
+    from PIL import Image
+
+    path_a = ASSETS / entry["imageA"]
+    if not path_a.exists() and (ROOT / entry["imageA"]).exists():
+        path_a = ROOT / entry["imageA"]
+    path_b = ASSETS / entry["imageB"]
+    if not path_b.exists() and (ROOT / entry["imageB"]).exists():
+        path_b = ROOT / entry["imageB"]
+
+    a = np.asarray(Image.open(path_a).convert("RGB"), np.int16)
+    b = np.asarray(Image.open(path_b).convert("RGB"), np.int16)
+    mask = np.zeros(a.shape[:2], bool)
+    for d in entry.get("diffs", []):
+        y0, y1 = max(0, d["y"] - 6), min(a.shape[0], d["y"] + d["h"] + 6)
+        x0, x1 = max(0, d["x"] - 6), min(a.shape[1], d["x"] + d["w"] + 6)
+        mask[y0:y1, x0:x1] = True
+    outside = np.abs(a - b).sum(-1) > 60  # JPEG noise tolerance
+    outside[mask] = False
+    frac = float(outside.mean())
+    if frac > 0.002:
+        asset_path = entry["imageB"]
+        if not asset_path.startswith("assets/game/"):
+            asset_path = f"assets/game/{asset_path}"
+        return [{"asset": asset_path, "kind": "pair-identity",
+                 "detail": f"{frac:.3%} of out-of-rect pixels differ"}]
+    return []
 
 
 def judge_tile(args) -> dict | None:
-    from PIL import Image
     from gen.judge import ask_yes_no
+    from PIL import Image
 
     path, rect, tag = args
     img = Image.open(ROOT / path).convert("RGB")
@@ -58,6 +81,23 @@ def judge_tile(args) -> dict | None:
         return {"asset": path, "kind": "judged-artifact",
                 "rect": list(rect), "crop": crop_name}
     return None
+
+
+def process_scan_batches(batches: list[list[dict]], max_workers: int = 8) -> list[dict]:
+    findings: list[dict] = []
+    for batch in batches:
+        batch_jobs = []
+        for job in batch:
+            if isinstance(job, dict) and job.get("asset", {}).get("kind") == "image":
+                batch_jobs.append((job["asset"]["path"], tuple(job["rect"]), job["tag"]))
+        if batch_jobs:
+            print(f"judging {len(batch_jobs)} tiles...")
+            with ThreadPoolExecutor(max_workers=max_workers) as pool:
+                for res in pool.map(judge_tile, batch_jobs):
+                    if res:
+                        findings.append(res)
+                        print(f"  FLAG {res['asset']} tile {res.get('rect')}")
+    return findings
 
 
 def compute_asset_fingerprint_seed(plan: list, root: Path) -> str:
@@ -119,17 +159,8 @@ def main(argv: list[str] | None = None) -> None:
     findings: list[dict] = []
 
     def process_batch(batch: list[dict]) -> None:
-        batch_jobs = []
-        for job in batch:
-            if job.get("asset", {}).get("kind") == "image":
-                batch_jobs.append((job["asset"]["path"], tuple(job["rect"]), job["tag"]))
-        if batch_jobs:
-            print(f"judging {len(batch_jobs)} tiles...")
-            with ThreadPoolExecutor(max_workers=8) as pool:
-                for res in pool.map(judge_tile, batch_jobs):
-                    if res:
-                        findings.append(res)
-                        print(f"  FLAG {res['asset']} tile {res.get('rect')}")
+        batch_findings = process_scan_batches([batch])
+        findings.extend(batch_findings)
         report_path.write_text(json.dumps(findings, indent=2), encoding="utf-8")
 
     plan_data = json.loads(args.plan.read_text(encoding="utf-8"))
@@ -147,6 +178,12 @@ def main(argv: list[str] | None = None) -> None:
         if resume_batch > 0:
             print(f"resuming at batch {resume_batch} of {len(executor.plan)}")
     else:
+        if MANIFEST.exists():
+            m = json.loads(MANIFEST.read_text(encoding="utf-8"))
+            for entry in m.get("diff", []):
+                if "imageA" in entry and "imageB" in entry:
+                    findings.extend(check_pair_identity(entry))
+            print(f"deterministic pair checks done ({len(findings)} flags)")
         report_path.write_text(json.dumps(findings, indent=2), encoding="utf-8")
 
     executor.execute()
