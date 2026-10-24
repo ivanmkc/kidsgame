@@ -117,7 +117,9 @@ describe("MemoryGame", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     };
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
       text: string;
       constructor(text: string) {
         this.text = text;
@@ -141,7 +143,9 @@ describe("MemoryGame", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     };
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
       text: string;
       constructor(text: string) {
         this.text = text;
@@ -347,5 +351,61 @@ describe("MemoryGame", () => {
     });
 
     expect(sound.say).toHaveBeenCalledWith(expect.stringContaining("'s turn!"));
+  });
+
+  it("mounts fresh face-down cards on next round without flipping down from face-up", async () => {
+    const onHome = vi.fn();
+    render(<MemoryGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    const cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
+
+    // Group cards by icon
+    const iconPairs = new Map<string, HTMLElement[]>();
+    for (const card of cards) {
+      const parts = card.getAttribute("data-testid")!.split("-");
+      const icon = parts.slice(3).join("-");
+      const list = iconPairs.get(icon) ?? [];
+      list.push(card);
+      iconPairs.set(icon, list);
+    }
+
+    // Match all pairs
+    for (const [c1, c2] of iconPairs.values()) {
+      await act(async () => {
+        fireEvent.click(c1);
+      });
+      await act(async () => {
+        fireEvent.click(c2);
+      });
+    }
+
+    // Fast-forward entrance animation so win overlay buttons arm
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+
+    const nextRoundBtn = screen.getByTestId("play-again");
+    expect(nextRoundBtn).toBeDefined();
+
+    // Click Next Round
+    await act(async () => {
+      fireEvent.click(nextRoundBtn);
+    });
+
+    // All card DOM elements should be fresh instances (not reused from round 1)
+    const newCards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
+    expect(newCards).toHaveLength(8);
+    for (const card of newCards) {
+      expect(cards).not.toContain(card);
+      expect(card.getAttribute("aria-label")).toBe("face-down card");
+    }
   });
 });
