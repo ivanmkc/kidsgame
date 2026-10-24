@@ -482,4 +482,23 @@ describe("same or different", () => {
     expect(sdRounds("easy")).toBeLessThan(sdRounds("medium"));
     expect(sdRounds("medium")).toBeLessThan(sdRounds("hard"));
   });
+
+  it("never selects back-to-back duplicate base phrases across rounds", () => {
+    for (const d of ["easy", "medium", "hard"] as const) {
+      for (let seed = 1; seed <= 30; seed++) {
+        const rng = makeRng(seed);
+        const history: number[] = [];
+        const total = sdRounds(d);
+        for (let r = 0; r < total; r++) {
+          const round = makeSameDiffRound(rng, d, history);
+          expect(round.phraseIdx).toBeDefined();
+          if (history.length > 0) {
+            expect(round.phraseIdx).not.toBe(history[history.length - 1]);
+          }
+          history.push(round.phraseIdx);
+        }
+        expect(new Set(history).size).toBe(total);
+      }
+    }
+  });
 });
