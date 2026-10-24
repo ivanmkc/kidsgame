@@ -51,7 +51,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [locked, setLocked] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.sums"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const wrongVoiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -104,6 +104,8 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
           setRound(makeSumsRound(rngRef.current, difficulty));
           setWrongPick(null);
           setLocked(false);
+        } else {
+          setWon(true);
         }
       });
     } else {
@@ -123,6 +125,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     setScore(0);
     setWrongPick(null);
     setLocked(false);
+    setWon(false);
   };
 
   const { width, height } = useWindowDimensions();
