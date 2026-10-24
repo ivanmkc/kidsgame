@@ -68,7 +68,18 @@ function generateIconsTs(manifest, root) {
       }
     }
   }
-  lines.push("};", "", "export const UI_IMAGES = {");
+  lines.push("};");
+  const shapesDir = path.join(root, "assets/game/shapes");
+  if (fs.existsSync(shapesDir)) {
+    lines.push("", "export const SHAPE_ICONS: Record<string, number> = {");
+    for (const f of fs.readdirSync(shapesDir).sort()) {
+      if (!f.endsWith(".png")) continue;
+      const key = f.replace(/\.png$/, "");
+      lines.push(`  ${key}: require('../../../assets/game/shapes/${f}'),`);
+    }
+    lines.push("};");
+  }
+  lines.push("", "export const UI_IMAGES = {");
   for (const f of fs.readdirSync(path.join(root, "assets/game/ui")).sort()) {
     const key = f.replace(/\.(png|jpg)$/, "");
     lines.push(`  ${key}: require('../../../assets/game/ui/${f}'),`);
