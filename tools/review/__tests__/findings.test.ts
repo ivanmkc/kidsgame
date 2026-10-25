@@ -79,6 +79,25 @@ describe('parseScanReport', () => {
     ]);
   });
 
+  it('preserves public/ asset paths without prepending assets/game/', () => {
+    const raw = [
+      { asset: 'public/voice/cat.png', kind: 'judged-artifact' },
+      { asset: '/public/voice/dog.png', kind: 'judged-artifact' },
+      { asset: './public/voice/bird.png', kind: 'judged-artifact' },
+      { asset: 'public\\voice\\frog.png', kind: 'judged-artifact' },
+    ];
+
+    const result = parseScanReport(raw);
+
+    expect(result.rejected).toBe(0);
+    expect(result.findings.map((f) => f.assetPath)).toEqual([
+      'public/voice/cat.png',
+      'public/voice/dog.png',
+      'public/voice/bird.png',
+      'public/voice/frog.png',
+    ]);
+  });
+
   it('handles custom kind with clampable severity or defaults to 1', () => {
     const raw = [
       { asset: 'diff/custom.png', kind: 'other-issue', severity: 3 },
@@ -460,5 +479,31 @@ describe('attachFindings', () => {
       { path: 'assets/game/diff/dog_1.png', maxSeverity: 0 },
       { path: 'assets/game/escape/toyroom/clock.png', maxSeverity: 0 },
     ]);
+  });
+
+  it('attaches scan report findings for public assets to their inventory entries', () => {
+    const combinedAssets: MediaAsset[] = [
+      ...assets,
+      {
+        path: 'public/voice/cat.png',
+        kind: 'image',
+        game: 'voice',
+        group: 'cat',
+        ledgerClean: true,
+      },
+    ];
+
+    const { findings } = parseScanReport([
+      { asset: 'public/voice/cat.png', kind: 'judged-artifact', severity: 2 },
+    ]);
+
+    const { entries, unmatched } = attachFindings(combinedAssets, findings);
+
+    expect(unmatched).toEqual([]);
+    const entry = entries.find((e) => e.asset.path === 'public/voice/cat.png');
+    expect(entry).toBeDefined();
+    expect(entry?.findings).toHaveLength(1);
+    expect(entry?.findings[0].assetPath).toBe('public/voice/cat.png');
+    expect(entry?.maxSeverity).toBe(2);
   });
 });

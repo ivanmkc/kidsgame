@@ -24,8 +24,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function prefixAssetPath(rawPath: string): string {
-  const norm = rawPath.replace(/\\/g, '/').replace(/^\.\//, '');
-  return norm.startsWith('assets/game/') ? norm : `assets/game/${norm.replace(/^\/+/, '')}`;
+  const norm = rawPath.replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+  return norm.startsWith('assets/game/') || norm.startsWith('public/')
+    ? norm
+    : `assets/game/${norm}`;
 }
 
 function parseRect(val: unknown): [number, number, number, number] | null {
