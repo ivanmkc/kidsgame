@@ -156,6 +156,17 @@ export const ANIMAL_ICONS: Record<string, number> = {
   unicorn_jump: require('../../../assets/game/animals/unicorn_jump.png'),
 };
 
+export const SHAPE_ICONS: Record<string, number> = {
+  circle: require('../../../assets/game/shapes/circle.png'),
+  clock: require('../../../assets/game/shapes/clock.png'),
+  pizza_slice: require('../../../assets/game/shapes/pizza_slice.png'),
+  square: require('../../../assets/game/shapes/square.png'),
+  star: require('../../../assets/game/shapes/star.png'),
+  starfish: require('../../../assets/game/shapes/starfish.png'),
+  triangle: require('../../../assets/game/shapes/triangle.png'),
+  window: require('../../../assets/game/shapes/window.png'),
+};
+
 export const UI_IMAGES = {
   logo: require('../../../assets/game/ui/logo.png'),
   menu_bg: require('../../../assets/game/ui/menu_bg.jpg'),
