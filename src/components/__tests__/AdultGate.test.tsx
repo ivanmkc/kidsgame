@@ -1,21 +1,31 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { renderToString } from 'react-dom/server';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { AdultGate } from '../AdultGate';
-import { LangContext } from '../GameShell';
-import { t } from '../../i18n';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { AdultGate } from "../AdultGate";
+import { LangContext } from "../GameShell";
+import { t } from "../../i18n";
 
-let gateWords = ['apple', 'banana'];
-vi.mock('../../lockdown', () => ({
-  randomGateWord: () => gateWords.shift() || 'default',
+let gateWords = ["apple", "banana"];
+const randomGateWordMock = vi.fn(
+  (_lang?: string) => gateWords.shift() || "default",
+);
+vi.mock("../../lockdown", () => ({
+  randomGateWord: (lang?: string) => randomGateWordMock(lang),
 }));
 
-describe('AdultGate i18n and interaction', () => {
+describe("AdultGate i18n and interaction", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    gateWords = ['apple', 'banana'];
+    gateWords = ["apple", "banana"];
+    randomGateWordMock.mockClear();
   });
 
   afterEach(() => {
@@ -24,37 +34,41 @@ describe('AdultGate i18n and interaction', () => {
   });
 
   it('renders Japanese title with renderToString and lang="ja"', () => {
-    const jaTitle = t('ja', 'gate.title');
-    const html = renderToString(<AdultGate lang="ja" onPass={vi.fn()} onCancel={vi.fn()} />);
+    const jaTitle = t("ja", "gate.title");
+    const html = renderToString(
+      <AdultGate lang="ja" onPass={vi.fn()} onCancel={vi.fn()} />,
+    );
     expect(html).toContain(jaTitle);
-    expect(html).toContain('保護者用設定');
-    expect(html).toContain(t('ja', 'gate.holdPrompt'));
-    expect(html).toContain(t('ja', 'gate.holdButton'));
-    expect(html).toContain(t('ja', 'gate.cancel'));
+    expect(html).toContain("保護者用設定");
+    expect(html).toContain(t("ja", "gate.holdPrompt"));
+    expect(html).toContain(t("ja", "gate.holdButton"));
+    expect(html).toContain(t("ja", "gate.cancel"));
   });
 
-  it('inherits language from LangContext when rendered via renderToString', () => {
-    const jaTitle = t('ja', 'gate.title');
+  it("inherits language from LangContext when rendered via renderToString", () => {
+    const jaTitle = t("ja", "gate.title");
     const html = renderToString(
-      <LangContext.Provider value={{ lang: 'ja', onCycle: vi.fn() }}>
+      <LangContext.Provider value={{ lang: "ja", onCycle: vi.fn() }}>
         <AdultGate onPass={vi.fn()} onCancel={vi.fn()} />
       </LangContext.Provider>,
     );
     expect(html).toContain(jaTitle);
   });
 
-  it('renders English by default when no prop or context is present', () => {
-    const html = renderToString(<AdultGate onPass={vi.fn()} onCancel={vi.fn()} />);
-    expect(html).toContain('Parental Controls');
-    expect(html).toContain(t('en', 'gate.holdPrompt'));
-    expect(html).toContain(t('en', 'gate.holdButton'));
-    expect(html).toContain(t('en', 'gate.cancel'));
+  it("renders English by default when no prop or context is present", () => {
+    const html = renderToString(
+      <AdultGate onPass={vi.fn()} onCancel={vi.fn()} />,
+    );
+    expect(html).toContain("Parental Controls");
+    expect(html).toContain(t("en", "gate.holdPrompt"));
+    expect(html).toContain(t("en", "gate.holdButton"));
+    expect(html).toContain(t("en", "gate.cancel"));
   });
 
-  it('shows translated word-phase strings after holding button in Japanese', () => {
+  it("shows translated word-phase strings after holding button in Japanese", () => {
     render(<AdultGate lang="ja" onPass={vi.fn()} onCancel={vi.fn()} />);
 
-    const holdBtn = screen.getByLabelText(t('ja', 'gate.holdA11y'));
+    const holdBtn = screen.getByLabelText(t("ja", "gate.holdA11y"));
     expect(holdBtn).toBeDefined();
 
     fireEvent.mouseDown(holdBtn);
@@ -62,28 +76,34 @@ describe('AdultGate i18n and interaction', () => {
       vi.advanceTimersByTime(3100);
     });
 
-    expect(screen.getByText(t('ja', 'gate.wordTitle'))).toBeDefined();
-    expect(screen.getByText(new RegExp(t('ja', 'gate.wordPrompt')))).toBeDefined();
-    expect(screen.getByPlaceholderText(t('ja', 'gate.wordPlaceholder'))).toBeDefined();
-    expect(screen.getByText(t('ja', 'gate.continue'))).toBeDefined();
+    expect(screen.getByText(t("ja", "gate.wordTitle"))).toBeDefined();
+    expect(
+      screen.getByText(new RegExp(t("ja", "gate.wordPrompt"))),
+    ).toBeDefined();
+    expect(
+      screen.getByPlaceholderText(t("ja", "gate.wordPlaceholder")),
+    ).toBeDefined();
+    expect(screen.getByText(t("ja", "gate.continue"))).toBeDefined();
   });
 
-  it('handles cancel button click in hold phase', () => {
+  it("handles cancel button click in hold phase", () => {
     const onPass = vi.fn();
     const onCancel = vi.fn();
     render(<AdultGate lang="en" onPass={onPass} onCancel={onCancel} />);
 
-    const cancelBtn = screen.getByText('Cancel');
+    const cancelBtn = screen.getByText("Cancel");
     fireEvent.click(cancelBtn);
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('exercises onHoldEnd by releasing the hold button before 3 seconds and ensuring timer is cleared', () => {
+  it("exercises onHoldEnd by releasing the hold button before 3 seconds and ensuring timer is cleared", () => {
     const onPass = vi.fn();
     const onCancel = vi.fn();
     render(<AdultGate lang="en" onPass={onPass} onCancel={onCancel} />);
 
-    const holdBtn = screen.getByLabelText('Hold for 3 seconds to access parental controls');
+    const holdBtn = screen.getByLabelText(
+      "Hold for 3 seconds to access parental controls",
+    );
     fireEvent.mouseDown(holdBtn);
     act(() => {
       vi.advanceTimersByTime(1000);
@@ -94,10 +114,10 @@ describe('AdultGate i18n and interaction', () => {
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    expect(screen.queryByPlaceholderText('Type the word here')).toBeNull();
+    expect(screen.queryByPlaceholderText("Type the word here")).toBeNull();
   });
 
-  it('triggers idle timeout (onCancel) after 30 seconds without interaction', () => {
+  it("triggers idle timeout (onCancel) after 30 seconds without interaction", () => {
     const onPass = vi.fn();
     const onCancel = vi.fn();
     render(<AdultGate lang="en" onPass={onPass} onCancel={onCancel} />);
@@ -108,13 +128,15 @@ describe('AdultGate i18n and interaction', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('runs through the hold phase, submits wrong word via submit button, and submits correct word to trigger onPass', () => {
+  it("runs through the hold phase, submits wrong word via submit button, and submits correct word to trigger onPass", () => {
     const onPass = vi.fn();
     const onCancel = vi.fn();
 
     render(<AdultGate lang="en" onPass={onPass} onCancel={onCancel} />);
 
-    const holdBtn = screen.getByLabelText('Hold for 3 seconds to access parental controls');
+    const holdBtn = screen.getByLabelText(
+      "Hold for 3 seconds to access parental controls",
+    );
     expect(holdBtn).toBeDefined();
 
     // Press and hold to completion
@@ -123,18 +145,69 @@ describe('AdultGate i18n and interaction', () => {
       vi.advanceTimersByTime(3500);
     });
 
-    const input = screen.getByTestId('gate-input');
+    const input = screen.getByTestId("gate-input");
     expect(input).toBeDefined();
 
     // Type wrong word and click submit button
-    fireEvent.change(input, { target: { value: 'wrongword' } });
-    const submitBtn = screen.getByTestId('gate-submit');
+    fireEvent.change(input, { target: { value: "wrongword" } });
+    const submitBtn = screen.getByTestId("gate-submit");
     fireEvent.click(submitBtn);
     expect(onPass).not.toHaveBeenCalled();
 
     // Type correct word (banana) and click submit button
-    fireEvent.change(input, { target: { value: 'banana' } });
+    fireEvent.change(input, { target: { value: "banana" } });
     fireEvent.click(submitBtn);
     expect(onPass).toHaveBeenCalledTimes(1);
+  });
+
+  it("requests localized word for configured language", () => {
+    render(<AdultGate lang="ja" onPass={vi.fn()} onCancel={vi.fn()} />);
+    expect(randomGateWordMock).toHaveBeenCalledWith("ja");
+  });
+
+  it("updates localized word when language changes", () => {
+    const { rerender } = render(
+      <AdultGate lang="en" onPass={vi.fn()} onCancel={vi.fn()} />,
+    );
+    expect(randomGateWordMock).toHaveBeenCalledWith("en");
+
+    gateWords = ["自転車"];
+    rerender(<AdultGate lang="ja" onPass={vi.fn()} onCancel={vi.fn()} />);
+    expect(randomGateWordMock).toHaveBeenCalledWith("ja");
+  });
+
+  it("passes adult gate when typing localized word in Japanese", () => {
+    gateWords = ["自転車"];
+    const onPass = vi.fn();
+    render(<AdultGate lang="ja" onPass={onPass} onCancel={vi.fn()} />);
+
+    const holdBtn = screen.getByLabelText(t("ja", "gate.holdA11y"));
+    fireEvent.mouseDown(holdBtn);
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+
+    const input = screen.getByTestId("gate-input");
+    fireEvent.change(input, { target: { value: "自転車" } });
+    fireEvent.click(screen.getByTestId("gate-submit"));
+    expect(onPass).toHaveBeenCalledTimes(1);
+  });
+
+  it("requests retry word in configured language on failed submission", () => {
+    gateWords = ["apple", "banana"];
+    render(<AdultGate lang="cmn" onPass={vi.fn()} onCancel={vi.fn()} />);
+
+    const holdBtn = screen.getByLabelText(t("cmn", "gate.holdA11y"));
+    fireEvent.mouseDown(holdBtn);
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+
+    randomGateWordMock.mockClear();
+    const input = screen.getByTestId("gate-input");
+    fireEvent.change(input, { target: { value: "wrong" } });
+    fireEvent.click(screen.getByTestId("gate-submit"));
+
+    expect(randomGateWordMock).toHaveBeenCalledWith("cmn");
   });
 });

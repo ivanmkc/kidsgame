@@ -1,8 +1,8 @@
-import { useCallback, useSyncExternalStore } from 'react';
-import { Platform } from 'react-native';
-import { Lang, LANGS } from './lang';
+import { useCallback, useSyncExternalStore } from "react";
+import { Platform } from "react-native";
+import { Lang, LANGS } from "./lang";
 
-const KEY = 'kgb.lockdown.v1';
+const KEY = "kgb.lockdown.v1";
 
 export interface LockdownState {
   hiddenGames: string[];
@@ -14,7 +14,8 @@ const EMPTY: LockdownState = { hiddenGames: [], hiddenLangs: [] };
 let memoryFallback: LockdownState = EMPTY;
 
 function read(): LockdownState {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') return memoryFallback;
+  if (Platform.OS !== "web" || typeof window === "undefined")
+    return memoryFallback;
   if (memoryFallback !== EMPTY) return memoryFallback;
   try {
     const raw = window.localStorage.getItem(KEY);
@@ -30,7 +31,7 @@ function read(): LockdownState {
 }
 
 function write(state: LockdownState): void {
-  if (Platform.OS !== 'web' || typeof window === 'undefined') {
+  if (Platform.OS !== "web" || typeof window === "undefined") {
     memoryFallback = state;
     return;
   }
@@ -49,7 +50,9 @@ function notifyListeners() {
 }
 function subscribe(fn: Listener): () => void {
   listeners.add(fn);
-  return () => { listeners.delete(fn); };
+  return () => {
+    listeners.delete(fn);
+  };
 }
 
 let snapshotCache: LockdownState | null = null;
@@ -132,9 +135,9 @@ export function useLockdown(): {
     return true;
   }, []);
 
-  const allowedLangs = LANGS
-    .map((l) => l.id)
-    .filter((l) => !state.hiddenLangs.includes(l));
+  const allowedLangs = LANGS.map((l) => l.id).filter(
+    (l) => !state.hiddenLangs.includes(l),
+  );
 
   return {
     state,
@@ -153,7 +156,7 @@ export function effectiveLang(current: Lang, hiddenLangs: string[]): Lang {
   if (!hiddenLangs.includes(current)) return current;
   const allIds = LANGS.map((l) => l.id);
   const allowed = allIds.filter((l) => !hiddenLangs.includes(l));
-  return allowed[0] ?? 'en';
+  return allowed[0] ?? "en";
 }
 
 export function visibleCards<T extends { route: string }>(
@@ -164,12 +167,78 @@ export function visibleCards<T extends { route: string }>(
   return cards.filter((c) => !hiddenGames.includes(c.route));
 }
 
-export const GATE_WORDS = [
-  'bicycle', 'giraffe', 'kitchen', 'purple', 'rocket',
-  'seven', 'window', 'garden', 'orange', 'basket',
-  'dolphin', 'volcano', 'blanket', 'crystal', 'feather',
-];
+export const GATE_WORDS: Record<Lang, readonly string[]> = {
+  en: [
+    "bicycle",
+    "giraffe",
+    "kitchen",
+    "purple",
+    "bridge",
+    "tunnel",
+    "window",
+    "garden",
+    "orange",
+    "basket",
+    "dolphin",
+    "volcano",
+    "blanket",
+    "crystal",
+    "feather",
+  ],
+  ja: [
+    "保護者",
+    "設定",
+    "確認",
+    "台所",
+    "自転車",
+    "窓口",
+    "庭園",
+    "火山",
+    "毛布",
+    "結晶",
+    "羽毛",
+    "眼鏡",
+    "階段",
+    "図書館",
+    "封筒",
+  ],
+  cmn: [
+    "保护",
+    "设置",
+    "确认",
+    "密码",
+    "台灯",
+    "厨房",
+    "自行车",
+    "窗户",
+    "火山",
+    "毛毯",
+    "羽毛",
+    "水饺",
+    "眼镜",
+    "楼梯",
+    "日历",
+  ],
+  yue: [
+    "保護",
+    "設置",
+    "確認",
+    "密碼",
+    "檯燈",
+    "廚房",
+    "單車",
+    "窗戶",
+    "火山",
+    "毛氈",
+    "羽毛",
+    "水餃",
+    "眼鏡",
+    "樓梯",
+    "日曆",
+  ],
+};
 
-export function randomGateWord(): string {
-  return GATE_WORDS[Math.floor(Math.random() * GATE_WORDS.length)];
+export function randomGateWord(lang: Lang = "en"): string {
+  const pool = GATE_WORDS[lang] ?? GATE_WORDS.en;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
