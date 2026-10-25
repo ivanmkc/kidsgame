@@ -163,8 +163,8 @@ describe("JourneyScene accessibility", () => {
     fireEvent.pointerDown(notes[0], { pointerId: 2 });
     fireEvent.click(notes[0]);
 
-    // Spawned note tap played preview note with velocity 0.5
-    expect(playNoteSpy).toHaveBeenLastCalledWith(62, 0.5);
+    // Spawned note tap plays the note sounded when it was spawned (72) rather than previewing next unplayed note (62)
+    expect(playNoteSpy).toHaveBeenLastCalledWith(72, 0.5);
 
     // Spawn count should still be 3 (no new objects spawned)
     expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
@@ -188,6 +188,38 @@ describe("JourneyScene accessibility", () => {
     unmount();
   });
 
+  it("tapping a spawned object replays its spawn note instead of previewing the unplayed song note", () => {
+    // Twinkle notes: note 0 is C (60), note 1 is C (60), note 2 is G (67)
+    const twinkleScene = SCENES[0];
+    const playNoteSpy = vi.spyOn(music, "playNote");
+
+    const { unmount } = render(<JourneyScene scene={twinkleScene} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Tap stage twice: plays notes 0 and 1 (both 60 + 12 = 72 at top default yFrac)
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 72, 1);
+
+    const notes = screen.getAllByRole("button", { name: "Music note" });
+    expect(notes).toHaveLength(2);
+
+    // Tap first spawned object (spawned on note 0). Plays note 0 (72) at 0.5 volume, NOT unplayed note 2 (67 or 79)
+    fireEvent.click(notes[0]);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(72, 0.5);
+
+    // Tapping stage now plays note 2 (67 + 12 = 79) at full volume without melodic repetition
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    expect(playNoteSpy).toHaveBeenLastCalledWith(79, 1);
+
+    unmount();
+  });
+
   it("renders spawned object with button role and accessibility label", () => {
     const onTapSpawn = vi.fn();
     const entry: SpawnEntry = {
@@ -199,6 +231,7 @@ describe("JourneyScene accessibility", () => {
       sceneId: "twinkle",
       big: false,
       zone: "sky",
+      midi: 60,
     };
     const scrollX = new Animated.Value(0);
 

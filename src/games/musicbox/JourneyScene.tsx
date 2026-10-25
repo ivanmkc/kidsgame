@@ -81,10 +81,10 @@ export function JourneyScene({ scene, lang }: Props) {
       const yFrac = y / Math.max(1, stageSize.current.h);
       const offset = octaveOffset(yFrac);
       const s = stateRef.current;
-      const midi = noteForTap(s);
+      const midi = noteForTap(s) + offset;
       const offsets = harmonyOffsets(fingerCount);
       for (const h of offsets) {
-        playNote(midi + offset + h, fingerCount > 1 ? 0.7 : 1);
+        playNote(midi + h, fingerCount > 1 ? 0.7 : 1);
       }
       const big = beatsForTap(s) > 1;
       setState(advance(s));
@@ -114,17 +114,25 @@ export function JourneyScene({ scene, lang }: Props) {
       const scrollAtSpawn = scrollTotal.current;
       setSpawns((prev) => [
         ...prev.slice(-(MAX_SPAWNS - 1)),
-        { id, x, y, scrollAtSpawn, spriteKey, sceneId: scene.id, big, zone },
+        {
+          id,
+          x,
+          y,
+          scrollAtSpawn,
+          spriteKey,
+          sceneId: scene.id,
+          big,
+          zone,
+          midi,
+        },
       ]);
     },
     [scene, scrollX, vehicleBounce],
   );
 
-  const onTapSpawn = useCallback((_entry: SpawnEntry) => {
+  const onTapSpawn = useCallback((entry: SpawnEntry) => {
     primeMusic();
-    const s = stateRef.current;
-    const midi = noteForTap(s);
-    playNote(midi, 0.5);
+    playNote(entry.midi, 0.5);
   }, []);
 
   const onPointerDown = useCallback(
