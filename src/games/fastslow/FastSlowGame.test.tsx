@@ -60,8 +60,39 @@ vi.mock("../../music", () => ({
   stopSequence: vi.fn(),
 }));
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  if (window.visualViewport) {
+    Object.defineProperty(window.visualViewport, "width", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window.visualViewport, "height", {
+      value: height,
+      configurable: true,
+    });
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
 afterEach(() => {
   cleanup();
+  setViewport(1024, 768);
   if (sayThenCapTimer) {
     clearTimeout(sayThenCapTimer);
     sayThenCapTimer = null;
@@ -983,6 +1014,29 @@ describe("FastSlowGame accessibility", () => {
     if (origImpl) {
       vi.mocked(playSequence).mockImplementation(origImpl);
     }
+    vi.useRealTimers();
+  });
+
+  it("renders responsive pick row and buttons fitting mobile portrait viewport (390x844)", () => {
+    vi.useFakeTimers();
+    setViewport(390, 844);
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    const fastBtn = screen.getByTestId("fastslow-fast");
+    const slowBtn = screen.getByTestId("fastslow-slow");
+    const replayBtn = screen.getByTestId("fastslow-replay");
+    const pickRow = screen.getByTestId("fastslow-pick-row");
+
+    expect(fastBtn.style.minWidth).toBe("110px");
+    expect(slowBtn.style.minWidth).toBe("110px");
+    expect(replayBtn.style.width).toBe("64px");
+    expect(replayBtn.style.height).toBe("64px");
+    expect(pickRow.style.gap).toBe("12px");
+
     vi.useRealTimers();
   });
 });

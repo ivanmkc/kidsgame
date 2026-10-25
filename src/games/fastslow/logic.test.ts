@@ -7,6 +7,7 @@ import {
   roundsToWin as fsRounds,
   getInstructionalFeedback,
   nextScoreValue,
+  fastSlowLayout,
 } from "./logic";
 import { renderToString } from "react-dom/server";
 import React from "react";
@@ -164,5 +165,55 @@ describe("fast or slow", () => {
     );
     expect(html).toContain("Fast or Slow");
     expect(html).toContain("Listen");
+  });
+
+  describe("fastSlowLayout", () => {
+    it("adapts layout for mobile portrait viewports (390px, 375px, 360px) so buttons fit without clipping", () => {
+      const portrait390 = fastSlowLayout(390);
+      expect(portrait390.gap).toBe(12);
+      expect(portrait390.pickBtnPaddingHorizontal).toBe(18);
+      expect(portrait390.pickBtnMinWidth).toBe(110);
+      expect(portrait390.replaySize).toBe(64);
+      expect(portrait390.replayFontSize).toBe(32);
+
+      const viewports = [360, 375, 390];
+      for (const width of viewports) {
+        const layout = fastSlowLayout(width);
+        const containerWidth = width - 32;
+        const minRowWidth =
+          layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
+        expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+      }
+    });
+
+    it("adapts layout for ultra-compact 320px portrait viewport", () => {
+      const layout = fastSlowLayout(320);
+      expect(layout.gap).toBe(10);
+      expect(layout.pickBtnPaddingHorizontal).toBe(14);
+      expect(layout.pickBtnMinWidth).toBe(96);
+      expect(layout.replaySize).toBe(56);
+      expect(layout.replayFontSize).toBe(28);
+
+      const containerWidth = 320 - 32;
+      const minRowWidth =
+        layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
+      expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+    });
+
+    it("preserves spacious layout on tablets and desktop (>= 500px)", () => {
+      const tablet = fastSlowLayout(768);
+      expect(tablet.gap).toBe(20);
+      expect(tablet.pickBtnPaddingHorizontal).toBe(32);
+      expect(tablet.pickBtnMinWidth).toBe(130);
+      expect(tablet.replaySize).toBe(72);
+      expect(tablet.replayFontSize).toBe(36);
+
+      const desktop = fastSlowLayout(1024);
+      expect(desktop.gap).toBe(20);
+      expect(desktop.pickBtnPaddingHorizontal).toBe(32);
+      expect(desktop.pickBtnMinWidth).toBe(130);
+      expect(desktop.replaySize).toBe(72);
+      expect(desktop.replayFontSize).toBe(36);
+    });
   });
 });

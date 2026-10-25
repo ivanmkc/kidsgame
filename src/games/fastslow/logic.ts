@@ -132,6 +132,42 @@ export function nextScoreValue(
   return isFirstTry ? currentScore + 1 : currentScore;
 }
 
+export interface FastSlowLayout {
+  gap: number;
+  pickBtnPaddingHorizontal: number;
+  pickBtnMinWidth: number;
+  replaySize: number;
+  replayFontSize: number;
+}
+
+export function fastSlowLayout(width: number): FastSlowLayout {
+  if (width > 0 && width < 360) {
+    return {
+      gap: 10,
+      pickBtnPaddingHorizontal: 14,
+      pickBtnMinWidth: 96,
+      replaySize: 56,
+      replayFontSize: 28,
+    };
+  }
+  if (width > 0 && width < 500) {
+    return {
+      gap: 12,
+      pickBtnPaddingHorizontal: 18,
+      pickBtnMinWidth: 110,
+      replaySize: 64,
+      replayFontSize: 32,
+    };
+  }
+  return {
+    gap: 20,
+    pickBtnPaddingHorizontal: 32,
+    pickBtnMinWidth: 130,
+    replaySize: 72,
+    replayFontSize: 36,
+  };
+}
+
 /** Voice-clip contract: every spoken line, all langs. */
 export function speechLines(): string[] {
   const out: string[] = [];

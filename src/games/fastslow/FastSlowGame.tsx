@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
@@ -26,6 +27,7 @@ import {
   FastSlowRound,
   getInstructionalFeedback,
   nextScoreValue,
+  fastSlowLayout,
 } from "./logic";
 
 interface Props {
@@ -35,6 +37,8 @@ interface Props {
 }
 
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
+  const { width } = useWindowDimensions();
+  const layout = fastSlowLayout(width);
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
@@ -288,7 +292,10 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
             </Text>
           </View>
         ) : (
-          <View style={styles.pickRow}>
+          <View
+            style={[styles.pickRow, { gap: layout.gap }]}
+            testID="fastslow-pick-row"
+          >
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
                 onPress={() => onPick("fast")}
@@ -297,7 +304,12 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 accessibilityLabel={t(lang, "music.fast")}
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
+                  {
+                    backgroundColor: "#FFF0E5",
+                    borderColor: "#E8874F",
+                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                    minWidth: layout.pickBtnMinWidth,
+                  },
                   shadows.glowGold,
                   wrongPick === "fast" && styles.wrong,
                   pressed && styles.pressed,
@@ -321,11 +333,20 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
               accessibilityLabel={t(lang, "music.replay")}
               style={({ pressed }) => [
                 styles.replayBtn,
+                {
+                  width: layout.replaySize,
+                  height: layout.replaySize,
+                  borderRadius: layout.replaySize / 2,
+                },
                 shadows.soft,
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.replayText}>🔊</Text>
+              <Text
+                style={[styles.replayText, { fontSize: layout.replayFontSize }]}
+              >
+                🔊
+              </Text>
             </Pressable>
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
@@ -335,7 +356,12 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
                 accessibilityLabel={t(lang, "music.slow")}
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
+                  {
+                    backgroundColor: "#E3EEFB",
+                    borderColor: "#5DA9E8",
+                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                    minWidth: layout.pickBtnMinWidth,
+                  },
                   shadows.glowGold,
                   wrongPick === "slow" && styles.wrong,
                   pressed && styles.pressed,
@@ -391,15 +417,17 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: colors.ink,
   },
-  pickRow: { flexDirection: "row", alignItems: "center", gap: 20 },
+  pickRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   pickBtn: {
     borderRadius: 28,
     borderWidth: 4,
     paddingVertical: 28,
-    paddingHorizontal: 32,
     alignItems: "center",
     gap: 8,
-    minWidth: 130,
     ...shadows.soft,
   },
   pickEmoji: { fontSize: 56 },
@@ -407,12 +435,9 @@ const styles = StyleSheet.create({
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.12)" },
   pressed: { transform: [{ scale: 0.94 }] },
   replayBtn: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
     backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
   },
-  replayText: { fontSize: 36 },
+  replayText: {},
 });
