@@ -3,7 +3,7 @@
 // and the domain-specific invariants (confusables, sound uniqueness,
 // same-family single choice, han-tier tiles).
 import { describe, expect, it } from 'vitest';
-import { Lang, numberWord } from '../../lang';
+import { hanNumeral, Lang, numberWord } from '../../lang';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import {
@@ -11,7 +11,7 @@ import {
   makeLetterRound, speechLines as letterSpeechLines,
 } from '../letters/logic';
 import {
-  hanNumeral, makeNumberRound, reskinNumberRound, settingsForNumbers, speechLines as numberSpeechLines,
+  makeNumberRound, reskinNumberRound, settingsForNumbers, speechLines as numberSpeechLines,
 } from '../numbers/logic';
 import {
   makeSoundsRound, resolveSoundsPrompts, settingsForSounds, speechLines as soundsSpeechLines,

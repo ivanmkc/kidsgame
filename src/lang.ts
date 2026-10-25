@@ -72,6 +72,12 @@ export function numberWord(lang: Lang, n: number): { t: string; r: string } {
 // Hanzi/kanji numeral tiles for the JA/zh hard tiers.
 export const HAN_NUMERALS = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
 
+export function hanNumeral(n: number): string {
+  if (n <= 10) return HAN_NUMERALS[n - 1] ?? String(n);
+  if (n < 20) return `十${HAN_NUMERALS[n - 11]}`;
+  if (n === 20) return '二十';
+  return String(n);
+}
 
 export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolean } {
   const epochRef = useRef(0);
@@ -95,5 +101,6 @@ export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolea
     isValid: () => epochRef.current === epoch,
   };
 }
+
 
 
