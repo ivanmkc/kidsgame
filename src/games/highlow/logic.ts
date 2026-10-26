@@ -1,5 +1,7 @@
 import { Rng, randInt } from '../../rng';
 import { Difficulty } from '../../difficulty';
+import { LANGS, Lang } from '../../lang';
+import { t } from '../../i18n';
 
 export interface HighLowRound {
   noteA: number;  // midi — played first
@@ -42,6 +44,30 @@ export function isCorrect(round: HighLowRound, picked: 'high' | 'low'): boolean 
   return picked === correctAnswer(round);
 }
 
-export function speechLines(): string[] {
-  return [];
+export function getInstructionalFeedback(
+  round: HighLowRound,
+  lang: Lang,
+): string[] {
+  const answer = correctAnswer(round);
+  const dirKey = answer === 'high' ? 'music.high' : 'music.low';
+  return [t(lang, dirKey), t(lang, 'music.listen')];
 }
+
+export function nextScoreValue(
+  currentScore: number,
+  isFirstTry: boolean,
+): number {
+  return isFirstTry ? currentScore + 1 : currentScore;
+}
+
+export function speechLines(): string[] {
+  const out: string[] = [];
+  for (const l of LANGS) {
+    out.push(t(l.id, 'shell.highlow.sub'));
+    out.push(t(l.id, 'music.listen'));
+    out.push(t(l.id, 'music.high'));
+    out.push(t(l.id, 'music.low'));
+  }
+  return [...new Set(out)];
+}
+

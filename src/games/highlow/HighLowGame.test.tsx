@@ -13,6 +13,7 @@ import { LangContext } from "../../components/GameShell";
 import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import * as music from "../../music";
+import * as sound from "../../sound";
 import { sfx } from "../../sound";
 import { HighLowGame } from "./HighLowGame";
 
@@ -223,7 +224,6 @@ describe("HighLowGame UI", () => {
     expect(within(lowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
     const isHigh = latestNotes[1].m > latestNotes[0].m;
-    const correctBtn = isHigh ? highBtn : lowBtn;
     const wrongBtn = isHigh ? lowBtn : highBtn;
 
     // Tap the wrong button first: still no celebration sparkles
@@ -231,12 +231,25 @@ describe("HighLowGame UI", () => {
     expect(within(highBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
     expect(within(lowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
+    // Advance wrong timer (500ms) to trigger listen phase, instructional feedback, and replay
+    act(() => {
+      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(3000);
+      onDoneCb?.();
+    });
+
     // Tap the correct button: only the correct button shows celebration sparkles
+    const correctBtn = screen.getByTestId(
+      isHigh ? "highlow-high" : "highlow-low",
+    );
+    const wrongBtnAgain = screen.getByTestId(
+      isHigh ? "highlow-low" : "highlow-high",
+    );
     fireEvent.click(correctBtn);
     expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(
       0,
     );
-    expect(within(wrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+    expect(within(wrongBtnAgain).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
     // Advance through celebration (1000ms) and next round listen phase (400ms)
     act(() => {
@@ -252,6 +265,255 @@ describe("HighLowGame UI", () => {
     const round2LowBtn = screen.getByTestId("highlow-low");
     expect(within(round2HighBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
     expect(within(round2LowBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
+
+    vi.useRealTimers();
+  });
+
+  it("locks input on incorrect pick and ignores taps during the 500ms error flash", () => {
+    vi.useFakeTimers();
+    let latestNotes: music.SeqNote[] = [];
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        latestNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const wrongSpy = vi.spyOn(sfx, "wrong");
+    const goodSpy = vi.spyOn(sfx, "good");
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const isHigh = latestNotes[1].m > latestNotes[0].m;
+    const correctBtn = screen.getByTestId(
+      isHigh ? "highlow-high" : "highlow-low",
+    );
+    const wrongBtn = screen.getByTestId(
+      isHigh ? "highlow-low" : "highlow-high",
+    );
+
+    // Tap wrong button
+    fireEvent.click(wrongBtn);
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // Tapping alternate button immediately during the 500ms error flash is ignored
+    fireEvent.click(correctBtn);
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+
+    vi.useRealTimers();
+  });
+
+  it("triggers instructional visual cue, spoken feedback, and note sequence replay after 500ms wrong flash", () => {
+    vi.useFakeTimers();
+    let latestNotes: music.SeqNote[] = [];
+    let onDoneCb: (() => void) | undefined;
+    const playSpy = vi
+      .spyOn(music, "playSequence")
+      .mockImplementation((notes, _bpm, _onNote, onDone) => {
+        latestNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      });
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Round 1 start
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    const isHigh = latestNotes[1].m > latestNotes[0].m;
+    const wrongBtn = screen.getByTestId(
+      isHigh ? "highlow-low" : "highlow-high",
+    );
+    const expectedDirection = isHigh ? "High" : "Low";
+
+    // Click wrong direction
+    fireEvent.click(wrongBtn);
+
+    // Buttons still visible during 500ms flash
+    expect(screen.queryByTestId("highlow-high")).not.toBeNull();
+
+    // Advance 500ms wrong timer to enter listen phase
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Instructional speech feedback is triggered
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      [expectedDirection, "Listen..."],
+      expect.any(Function),
+      3000,
+    );
+
+    // Instructional visual cue is rendered
+    const cue = screen.getByTestId("highlow-instructional-direction");
+    expect(cue.textContent).toContain(expectedDirection);
+
+    // Sequence replays after speech
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(2);
+
+    // Sequence finishes, returning to pick phase
+    act(() => {
+      onDoneCb?.();
+    });
+
+    // Pick phase restored, instructional cue removed, buttons ready
+    expect(screen.queryByTestId("highlow-instructional-direction")).toBeNull();
+    expect(screen.getByTestId("highlow-high")).toBeDefined();
+    expect(screen.getByTestId("highlow-low")).toBeDefined();
+
+    vi.useRealTimers();
+  });
+
+  it("gates score progression so fallback picks complete round with celebration but do not increment score", () => {
+    vi.useFakeTimers();
+    let latestNotes: music.SeqNote[] = [];
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        latestNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const goodSpy = vi.spyOn(sfx, "good");
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const isHigh = latestNotes[1].m > latestNotes[0].m;
+    const wrongBtn = screen.getByTestId(
+      isHigh ? "highlow-low" : "highlow-high",
+    );
+
+    // Make a wrong pick on first try
+    fireEvent.click(wrongBtn);
+
+    // Advance past wrong flash, sayThen, and replay
+    act(() => {
+      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(3000);
+      onDoneCb?.();
+    });
+
+    // Tap the correct button on the second try
+    const correctBtnAgain = screen.getByTestId(
+      isHigh ? "highlow-high" : "highlow-low",
+    );
+    fireEvent.click(correctBtnAgain);
+
+    // Celebration happens
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+
+    // But score does NOT increment!
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+
+    // Advance celebration to load round 2
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // In round 2, pick correctly on first try
+    const isHighR2 = latestNotes[1].m > latestNotes[0].m;
+    const correctBtnR2 = screen.getByTestId(
+      isHighR2 ? "highlow-high" : "highlow-low",
+    );
+    fireEvent.click(correctBtnR2);
+
+    // Score now increments to 1/8
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 1/8");
+
+    vi.useRealTimers();
+  });
+
+  it("scout repro: missing all rounds initially provides instructional feedback and finishes with 0 score rather than 8/8", () => {
+    vi.useFakeTimers();
+    let latestNotes: music.SeqNote[] = [];
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        latestNotes = notes;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const wrongSpy = vi.spyOn(sfx, "wrong");
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    for (let roundIdx = 0; roundIdx < 8; roundIdx++) {
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      const isHigh = latestNotes[1].m > latestNotes[0].m;
+      const wrongBtn = screen.getByTestId(
+        isHigh ? "highlow-low" : "highlow-high",
+      );
+
+      wrongSpy.mockClear();
+      sayThenSpy.mockClear();
+
+      // Tap wrong button first
+      fireEvent.click(wrongBtn);
+      expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+      // Advance 500ms wrong flash + 3000ms sayThen cap + sequence replay
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      expect(sayThenSpy).toHaveBeenCalledWith(
+        [isHigh ? "High" : "Low", "Listen..."],
+        expect.any(Function),
+        3000,
+      );
+      act(() => {
+        vi.advanceTimersByTime(3000);
+        onDoneCb?.();
+      });
+
+      // Tap correct button on second try
+      const correctBtnAfterReplay = screen.getByTestId(
+        isHigh ? "highlow-high" : "highlow-low",
+      );
+      fireEvent.click(correctBtnAfterReplay);
+
+      // Score stays 0
+      expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+
+      // Advance celebration
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+
+    // WinOverlay is displayed and final score remains 0/8
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
 
     vi.useRealTimers();
   });

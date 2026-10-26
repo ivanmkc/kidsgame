@@ -15,7 +15,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
+import { sayThen, sfx, stopNarration } from "../../sound";
 import { playSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -24,6 +24,8 @@ import {
   HighLowRound,
   correctAnswer,
   isCorrect,
+  getInstructionalFeedback,
+  nextScoreValue,
 } from "./logic";
 
 interface Props {
@@ -38,13 +40,20 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const lockedRef = useRef(false);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roundEpochRef = useRef(0);
+  const feedbackSpeechRef = useRef<string[] | null>(null);
+  const firstTryRef = useRef(true);
   const [round, setRound] = useState<HighLowRound>(() =>
     makeHighLowRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
+  const [roundIndex, setRoundIndex] = useState(0);
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [listenNote, setListenNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<"high" | "low" | null>(null);
+  const [instructionalDirection, setInstructionalDirection] = useState<
+    "high" | "low" | null
+  >(null);
   const [sparkKey, setSparkKey] = useState(0);
   const [won, setWon] = useState(false);
   const winTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -52,15 +61,20 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     return () => {
+      roundEpochRef.current++;
+      feedbackSpeechRef.current = null;
       if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (winTimerRef.current) clearTimeout(winTimerRef.current);
+      stopSequence();
+      stopNarration();
     };
   }, []);
 
   const playRound = useCallback((r: HighLowRound) => {
     stopSequence();
     setListenNote(null);
+    const epoch = roundEpochRef.current;
     const notes = [
       { m: r.noteA, b: 2 },
       { m: r.noteB, b: 2 },
@@ -68,8 +82,18 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     playSequence(
       notes,
       80,
-      (index) => setListenNote(index),
-      () => setPhase("pick"),
+      (index) => {
+        if (roundEpochRef.current === epoch) {
+          setListenNote(index);
+        }
+      },
+      () => {
+        if (roundEpochRef.current === epoch) {
+          setInstructionalDirection(null);
+          lockedRef.current = false;
+          setPhase("pick");
+        }
+      },
     );
   }, []);
 
@@ -83,7 +107,25 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
         stopSequence();
       };
     }
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won, playRound]);
+
+  useEffect(() => {
+    if (won) return;
+    if (phase === "listen" && feedbackSpeechRef.current) {
+      const feedback = feedbackSpeechRef.current;
+      feedbackSpeechRef.current = null;
+      const currentEpoch = roundEpochRef.current;
+      sayThen(
+        feedback,
+        () => {
+          if (roundEpochRef.current === currentEpoch) {
+            playRound(round);
+          }
+        },
+        3000,
+      );
+    }
+  }, [phase, won, playRound, round]);
 
   const onPick = (picked: "high" | "low") => {
     if (won || phase !== "pick" || lockedRef.current) return;
@@ -91,14 +133,19 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
-      const next = score + 1;
-      setScore(next);
+      const nextScore = nextScoreValue(score, firstTryRef.current);
+      setScore(nextScore);
       setWrongPick(null);
+      setInstructionalDirection(null);
+      const nextRoundIndex = roundIndex + 1;
+      setRoundIndex(nextRoundIndex);
       setPhase("celebrate");
-      if (next < total) {
+      if (nextRoundIndex < total) {
         if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
         advanceTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
+          firstTryRef.current = true;
+          roundEpochRef.current++;
           setRound(makeHighLowRound(rngRef.current, difficulty));
         }, 1000);
       } else {
@@ -110,27 +157,50 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
+      lockedRef.current = true;
+      firstTryRef.current = false;
       setWrongPick(picked);
+      const currentEpoch = roundEpochRef.current;
+      const trueDir = correctAnswer(round);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
-      wrongTimerRef.current = setTimeout(() => setWrongPick(null), 500);
+      wrongTimerRef.current = setTimeout(() => {
+        if (roundEpochRef.current !== currentEpoch) return;
+        setWrongPick(null);
+        setInstructionalDirection(trueDir);
+        feedbackSpeechRef.current = getInstructionalFeedback(round, lang);
+        setPhase("listen");
+        setListenNote(null);
+      }, 500);
     }
   };
 
   const reset = () => {
+    roundEpochRef.current++;
+    feedbackSpeechRef.current = null;
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     if (winTimerRef.current) clearTimeout(winTimerRef.current);
+    stopSequence();
+    stopNarration();
     lockedRef.current = false;
+    firstTryRef.current = true;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setRoundIndex(0);
     setWon(false);
     setWrongPick(null);
+    setInstructionalDirection(null);
     setListenNote(null);
     setRound(makeHighLowRound(rngRef.current, difficulty));
   };
 
   const replay = () => {
     if (phase === "pick" && !lockedRef.current) {
+      stopSequence();
+      stopNarration();
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      setWrongPick(null);
+      setInstructionalDirection(null);
       setPhase("listen");
       setListenNote(null);
       playRound(round);
@@ -207,6 +277,28 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
             >
               👂
             </Animated.Text>
+            {instructionalDirection ? (
+              <Text
+                testID="highlow-instructional-direction"
+                style={[
+                  styles.instructionalText,
+                  {
+                    color:
+                      instructionalDirection === "high"
+                        ? "#5DA9E8"
+                        : "#E8874F",
+                  },
+                ]}
+              >
+                {instructionalDirection === "high" ? "🐦 " : "🐻 "}
+                {t(
+                  lang,
+                  instructionalDirection === "high"
+                    ? "music.high"
+                    : "music.low",
+                )}
+              </Text>
+            ) : null}
             <View style={styles.melodyDotRow}>
               <View
                 testID="melody-dot-0"
@@ -320,6 +412,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   listenEmoji: { fontSize: 56 },
+  instructionalText: {
+    fontFamily: fonts.display,
+    fontSize: 26,
+    color: colors.ink,
+  },
   melodyDotRow: { flexDirection: "row", gap: 12 },
   melodyDot: {
     width: 16,
