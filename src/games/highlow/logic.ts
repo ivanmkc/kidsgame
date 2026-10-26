@@ -71,3 +71,30 @@ export function speechLines(): string[] {
   return [...new Set(out)];
 }
 
+export interface HighLowLayout {
+  gap: number;
+  pickBtnPaddingHorizontal: number;
+  pickBtnMinWidth: number;
+  replaySize: number;
+  replayFontSize: number;
+}
+
+export function highLowLayout(width: number): HighLowLayout {
+  if (width > 0 && width < 380) {
+    return {
+      gap: 10,
+      pickBtnPaddingHorizontal: 12,
+      pickBtnMinWidth: 96,
+      replaySize: 56,
+      replayFontSize: 28,
+    };
+  }
+  return {
+    gap: 12,
+    pickBtnPaddingHorizontal: 16,
+    pickBtnMinWidth: 130,
+    replaySize: 72,
+    replayFontSize: 36,
+  };
+}
+
