@@ -48,6 +48,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const deck = useMemo(() => buildDeck(), []);
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
+  const roundClosedRef = useRef(false);
   const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
   const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
     top: layoutSlots(rngRef.current),
@@ -64,6 +65,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   useEffect(() => () => {
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
   }, []);
+  useEffect(() => { roundClosedRef.current = false; }, [round]);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
   const mmss = fmtTime(elapsed);
@@ -75,8 +77,9 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   };
 
   const onTap = (symbol: number) => {
-    if (won || locked) return;
+    if (won || locked || roundClosedRef.current) return;
     if (symbol === round.answer) {
+      roundClosedRef.current = true;
       if (wrongTimerRef.current) {
         clearTimeout(wrongTimerRef.current);
         wrongTimerRef.current = null;
@@ -103,6 +106,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
       wrongTimerRef.current = null;
     }
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
+    roundClosedRef.current = false;
     setScore(0);
     setWrongFlash(null);
     setTimerKey((k) => k + 1);
