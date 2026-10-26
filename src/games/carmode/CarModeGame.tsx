@@ -125,6 +125,10 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
         }
       }
 
+      if (current.phase === "prompt" && next.phase === "gap") {
+        clearTimers();
+      }
+
       if (current.phase === "gap" && next.phase === "reveal") {
         if (gapTimerRef.current) {
           clearTimeout(gapTimerRef.current);
