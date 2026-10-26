@@ -88,12 +88,14 @@ describe('analytics', () => {
     expect(url).toBe(BEACON_URL);
 
     const payload = JSON.parse(bodyStr) as {
+      kgb: boolean;
       e: string;
       p: Record<string, string | number>;
       sid: string;
       path: string;
     };
     expect(payload).toEqual({
+      kgb: true,
       e: 'press_button',
       p: { score: 10 },
       sid: 'existing-sid-999',
@@ -179,11 +181,13 @@ describe('analytics', () => {
 
     const callArgs = fetchMock.mock.calls[0] as [string, { body: string }];
     const payload = JSON.parse(callArgs[1].body) as {
+      kgb: boolean;
       e: string;
       p: Record<string, string | number>;
       sid: string;
       path: string;
     };
+    expect(payload.kgb).toBe(true);
     expect(payload.e).toBe('fetch_event');
     expect(payload.p).toEqual({});
     expect(payload.path).toBe('#/');
