@@ -446,6 +446,8 @@ function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: strin
   const pulse = useRef(new Animated.Value(0)).current;
   const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const animating = useRef(false);
+  const latestReveal = useRef(reveal ?? scare.reveal);
+  latestReveal.current = reveal ?? scare.reveal;
 
   useEffect(() => {
     Animated.loop(
@@ -467,7 +469,7 @@ function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: strin
       animating.current = false;
     });
     revealTimer.current = setTimeout(() => {
-      say(reveal ?? scare.reveal);
+      say(latestReveal.current);
       revealTimer.current = null;
     }, scare.delay);
   };

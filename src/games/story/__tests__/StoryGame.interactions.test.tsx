@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as sound from '../../../sound';
 import { sfx } from '../../../sound';
 import { manifest, Story } from '../../../manifest';
+import { LangContext } from '../../../components/GameShell';
+import { Lang } from '../../../lang';
 import { StoryGame } from '../StoryGame';
 
 describe('StoryGame ScareSpot interactions', () => {
@@ -153,4 +155,70 @@ describe('StoryGame ScareSpot interactions', () => {
     fireEvent.click(scareSpot);
     expect(sfxBoingSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('speaks updated language reveal when language is switched mid-scare before reveal fires', () => {
+    const saySpy = vi.spyOn(sound, 'say');
+
+    const scareStory: Story = {
+      id: 'test-scare-lang-switch',
+      title: 'Scare Story Lang Switch',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Look closely...',
+          scare: {
+            x: 10,
+            y: 20,
+            w: 80,
+            h: 90,
+            pop: 'story/luna_start_c0.png',
+            sting: 'thunder',
+            reveal: 'It is a friendly ghost!',
+            t: {
+              ja: 'やさしい おばけ だよ！',
+            },
+            delay: 300,
+          },
+        },
+      },
+    };
+    manifest.stories?.push(scareStory);
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>('en');
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === 'en' ? 'ja' : 'en')),
+          }}
+        >
+          <StoryGame
+            sceneId="test-scare-lang-switch"
+            onHome={noop}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    const scareSpot = screen.getByTestId('story-scare');
+    fireEvent.click(scareSpot);
+
+    // Switch language before reveal delay elapses
+    fireEvent.click(screen.getByTestId('lang-cycle'));
+
+    // Advance time to allow reveal timer to fire
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    expect(saySpy).toHaveBeenCalledWith('やさしい おばけ だよ！');
+    expect(saySpy).not.toHaveBeenCalledWith('It is a friendly ghost!');
+  });
 });
+
