@@ -10,6 +10,8 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { t } from "../../../i18n";
 import { manifest } from "../../../manifest";
+import * as sound from "../../../sound";
+import { sfx } from "../../../sound";
 import { HiddenGame } from "../HiddenGame";
 
 describe("HiddenGame localization", () => {
@@ -366,13 +368,21 @@ describe("HiddenGame gentle auto-hint", () => {
     });
     expect(targets.every((t) => t.children.length === 0)).toBe(true);
 
-    // Find the first target
-    fireEvent.click(targets[0]);
+    // Find the first checklist target
+    const firstChecklistId = screen
+      .getAllByTestId(/^checklist-/)
+      .map((el) =>
+        el.getAttribute("data-testid")!.replace("checklist-", ""),
+      )[0];
+    const targetToFind = screen.getByTestId(
+      `hidden-target-${firstChecklistId}`,
+    );
+    fireEvent.click(targetToFind);
 
-    // Target 0 is now found (has FoundRing)
-    expect(targets[0].children.length).toBeGreaterThan(0);
+    // Target is now found (has FoundRing)
+    expect(targetToFind.children.length).toBeGreaterThan(0);
 
-    const remaining = targets.slice(1);
+    const remaining = targets.filter((t) => t !== targetToFind);
 
     // Advance 10 more seconds (20 seconds since game start, but 10 seconds since hit)
     act(() => {
@@ -437,5 +447,261 @@ describe("HiddenGame difficulty settings", () => {
 
     expect(screen.queryByTestId("hidden-timer")).toBeNull();
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+  });
+});
+
+describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("registers hitboxes for all targets present in scene artwork including those omitted from checklist", () => {
+    const jungleScene = manifest.hidden.find((h) => h.id === "jungle")!;
+    expect(jungleScene.targets.length).toBe(6);
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId={jungleScene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    // Easy mode draws 5 checklist items
+    const checklistItems = jungleScene.targets.filter(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
+    );
+    expect(checklistItems.length).toBe(5);
+
+    // 1 target is omitted from the checklist
+    const omittedTargets = jungleScene.targets.filter(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
+    );
+    expect(omittedTargets.length).toBe(1);
+
+    // Hitboxes exist for all 6 targets in the artwork, including the omitted one
+    for (const target of jungleScene.targets) {
+      const button = screen.getByTestId(`hidden-target-${target.id}`);
+      expect(button).toBeDefined();
+      expect(button.getAttribute("role")).toBe("button");
+    }
+  });
+
+  it("acknowledges omitted targets with sfx.tap and instructional guidance without advancing finds", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const goodSpy = vi.spyOn(sfx, "good");
+    const tapSpy = vi.spyOn(sfx, "tap");
+    const saySpy = vi.spyOn(sound, "say");
+
+    const jungleScene = manifest.hidden.find((h) => h.id === "jungle")!;
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        twoPlayerEnabled={false}
+        sceneId={jungleScene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const omittedTarget = jungleScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
+    )!;
+    const drawnTarget = jungleScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
+    )!;
+
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+
+    goodSpy.mockClear();
+    tapSpy.mockClear();
+    saySpy.mockClear();
+
+    // Tap the omitted target
+    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
+    fireEvent.click(omittedBtn);
+
+    // It plays tap and speaks guidance
+    expect(tapSpy).toHaveBeenCalled();
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
+
+    // Omitted target flashes a visual hint ring for players with sound off
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(omittedBtn.children.length).toBeGreaterThan(0);
+
+    // The visual flash clears after 1500ms
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(omittedBtn.children.length).toBe(0);
+
+    // Now tap an active checklist target
+    const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
+    fireEvent.click(drawnBtn);
+
+    // It plays good and updates score
+    expect(goodSpy).toHaveBeenCalled();
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/5");
+    expect(drawnBtn.children.length).toBeGreaterThan(0);
+  });
+
+  it("in 2P co-op mode, tapping an omitted target does not advance player turn", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const goodSpy = vi.spyOn(sfx, "good");
+    const tapSpy = vi.spyOn(sfx, "tap");
+    const saySpy = vi.spyOn(sound, "say");
+
+    // dinonest has 7 targets; in 2P easy, coopDrawCount(5, 7) draws 6 targets, leaving 1 omitted
+    const dinoScene = manifest.hidden.find((h) => h.id === "dinonest")!;
+    expect(dinoScene.targets.length).toBe(7);
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        twoPlayerEnabled={true}
+        sceneId={dinoScene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const omittedTarget = dinoScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
+    )!;
+    expect(omittedTarget).toBeDefined();
+
+    const drawnTarget = dinoScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
+    )!;
+
+    // Turn starts on player 0 (Foxy)
+    expect(
+      screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
+    ).toBe("Foxyの ばん！");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+
+    goodSpy.mockClear();
+    tapSpy.mockClear();
+    saySpy.mockClear();
+
+    // Tap omitted target
+    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
+    fireEvent.click(omittedBtn);
+
+    expect(tapSpy).toHaveBeenCalled();
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+    expect(
+      screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
+    ).toBe("Foxyの ばん！");
+
+    // Tap active checklist target
+    const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
+    fireEvent.click(drawnBtn);
+
+    expect(goodSpy).toHaveBeenCalled();
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/6");
+    expect(
+      screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
+    ).toBe("Bunnyの ばん！");
+  });
+
+  it("clears hint ring immediately if a valid checklist target is tapped before omitted flash timer expires", () => {
+    const toyboxScene = manifest.hidden.find((h) => h.id === "toybox")!;
+    expect(toyboxScene.targets.length).toBe(7);
+
+    // Hard 2P mode has auto-hints disabled (hiddenHintSecs: Infinity)
+    // and draws coopDrawCount(8, 7) = 6 targets, leaving 1 omitted target.
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="hard"
+        filter="hard"
+        twoPlayerEnabled={true}
+        sceneId={toyboxScene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const omittedTarget = toyboxScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
+    )!;
+    const drawnTarget = toyboxScene.targets.find(
+      (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
+    )!;
+
+    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
+    const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
+
+    // Tap omitted target -> visual HintRing flashes
+    fireEvent.click(omittedBtn);
+    expect(omittedBtn.children.length).toBeGreaterThan(0);
+
+    // Before 1500ms timer elapses, tap a real checklist target
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    fireEvent.click(drawnBtn);
+
+    // Omitted target hint ring must be cleared immediately, not stuck permanently
+    expect(omittedBtn.children.length).toBe(0);
+
+    // Advance time past the original 1500ms
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(omittedBtn.children.length).toBe(0);
   });
 });
