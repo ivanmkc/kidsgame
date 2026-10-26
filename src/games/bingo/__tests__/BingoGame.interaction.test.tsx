@@ -118,7 +118,7 @@ test("prompt button is disabled during round advance transition and spamming it 
   });
 
   let prompt = screen.getByTestId("bingo-prompt");
-  const initialPrompt = prompt.textContent!;
+  const initialPrompt = prompt.getAttribute("aria-label")!;
   const icon = initialPrompt.replace("Find the ", "").replace("!", "");
 
   const cells = screen.queryAllByTestId(/bingo-cell-/);
@@ -156,7 +156,7 @@ test("prompt button is disabled during round advance transition and spamming it 
   });
 
   prompt = screen.getByTestId("bingo-prompt");
-  expect(prompt.textContent).not.toBe(initialPrompt);
+  expect(prompt.getAttribute("aria-label")).not.toBe(initialPrompt);
   expect(prompt.getAttribute("aria-disabled")).toBeFalsy();
 });
 
