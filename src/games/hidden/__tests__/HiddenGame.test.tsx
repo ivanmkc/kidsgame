@@ -705,3 +705,98 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(omittedBtn.children.length).toBe(0);
   });
 });
+
+describe("HiddenGame mode picker on active scene", () => {
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("does not run timer or auto-hint while ModePicker is open on an active scene", () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="medium"
+        twoPlayerEnabled={true}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    // ModePicker modal is displayed
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+
+    // Timer ring is NOT displayed while awaiting player mode selection
+    expect(screen.queryByTestId("hidden-timer")).toBeNull();
+
+    // Advance time by 15 seconds (inactivity auto-hint delay and timer advance)
+    act(() => {
+      vi.advanceTimersByTime(15000);
+    });
+
+    // Timer remains not displayed and did not run
+    expect(screen.queryByTestId("hidden-timer")).toBeNull();
+
+    // Auto-hint did not trigger in the background
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
+    expect(targets.every((t) => t.children.length === 0)).toBe(true);
+
+    // Choosing solo starts the timer at 0:00 and begins auto-hint inactivity timer
+    act(() => {
+      fireEvent.click(screen.getByTestId("mp-choose-1p"));
+    });
+
+    const timer = screen.getByTestId("hidden-timer");
+    expect(timer.textContent).toBe("0:00");
+
+    // Advance by 3 seconds; timer advances to 0:03
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(timer.textContent).toBe("0:03");
+
+    // Advance by 12 more seconds (total 15s since solo picked); auto-hint triggers
+    act(() => {
+      vi.advanceTimersByTime(12000);
+    });
+    expect(targets.filter((t) => t.children.length > 0).length).toBe(1);
+  });
+
+  it("does not display timer when 2P mode is selected from ModePicker", () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="medium"
+        twoPlayerEnabled={true}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(screen.queryByTestId("hidden-timer")).toBeNull();
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    });
+
+    // 2P coop mode does not show timer
+    expect(screen.queryByTestId("hidden-timer")).toBeNull();
+  });
+});
