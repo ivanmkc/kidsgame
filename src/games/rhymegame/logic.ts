@@ -105,19 +105,13 @@ export function effectiveLang(lang: Lang, spotitIcons: string[]): Lang {
   return Object.keys(playableFamilies(entries)).length >= 3 ? lang : 'en';
 }
 
-/** Rounds scale with pool size — 8/10/12 for the full pool (≥8 families
- *  is enough to keep 12 rounds novel), 8/10/10 for a leaner pool so the
- *  hard tier doesn't just replay the same handful of families twice. */
+/** Rounds scale with difficulty — 8 for easy, 10 for medium, 12 for hard.
+ *  Tiles scale from 3 to 5 across tiers. */
 export function settingsForRhyme(
-  difficulty: 'easy' | 'medium' | 'hard', familyCount: number,
+  difficulty: 'easy' | 'medium' | 'hard', _familyCount?: number,
 ): { rounds: number; tiles: number } {
-  if (familyCount >= 8) {
-    if (difficulty === 'easy') return { rounds: 8, tiles: 3 };
-    if (difficulty === 'hard') return { rounds: 12, tiles: 5 };
-    return { rounds: 10, tiles: 4 };
-  }
   if (difficulty === 'easy') return { rounds: 8, tiles: 3 };
-  if (difficulty === 'hard') return { rounds: 10, tiles: 5 };
+  if (difficulty === 'hard') return { rounds: 12, tiles: 5 };
   return { rounds: 10, tiles: 4 };
 }
 
