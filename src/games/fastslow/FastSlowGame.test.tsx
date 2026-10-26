@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   render,
   fireEvent,
@@ -8,10 +8,13 @@ import {
   cleanup,
   within,
 } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FastSlowGame } from "./FastSlowGame";
 import { playSequence, stopSequence } from "../../music";
-import { sayThen, sfx, stopNarration } from "../../sound";
+import { say, saySequence, sayThen, sfx, stopNarration } from "../../sound";
+import { LangContext } from "../../components/GameShell";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
 
 let activeSayThenDone: (() => void) | null = null;
 let sayThenCapTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1054,5 +1057,179 @@ describe("FastSlowGame accessibility", () => {
     expect(vi.getTimerCount()).toBe(0);
 
     vi.useRealTimers();
+  });
+});
+
+function LangHarness({
+  difficulty = "easy",
+  initialLang = "en",
+}: {
+  difficulty?: Difficulty;
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <FastSlowGame onHome={() => {}} difficulty={difficulty} lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
+describe("FastSlowGame language switch safety", () => {
+  const defaultPlayImpl = (
+    _notes: unknown,
+    _bpm: unknown,
+    _cb: unknown,
+    onEnd?: () => void,
+  ) => {
+    if (onEnd) onEnd();
+    return () => {};
+  };
+
+  beforeEach(() => {
+    vi.mocked(playSequence).mockReset();
+    vi.mocked(playSequence).mockImplementation(defaultPlayImpl);
+    vi.mocked(stopSequence).mockClear();
+    vi.mocked(say).mockClear();
+    vi.mocked(saySequence).mockClear();
+    vi.mocked(stopNarration).mockClear();
+  });
+
+  afterEach(() => {
+    vi.mocked(playSequence).mockImplementation(defaultPlayImpl);
+    vi.useRealTimers();
+  });
+
+  it("switching language mid-listen cancels playing sequence, stops narration, speaks new prompt, and restarts playback after lead time", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.mocked(playSequence).mockImplementation((_notes, _bpm, _onNote, onDone) => {
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    // Fast-forward initial 1000ms delay to start playback
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Melody is now playing (playSequence was called once, stopSequence called once during playRound)
+    expect(playSequence).toHaveBeenCalledTimes(1);
+    expect(stopSequence).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledWith("Listen...");
+    vi.mocked(say).mockClear();
+    vi.mocked(stopSequence).mockClear();
+    vi.mocked(stopNarration).mockClear();
+
+    // Tap language switcher to change from English to Japanese
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // stopSequence and stopNarration should be called immediately to stop active playback and voice
+    expect(stopSequence).toHaveBeenCalled();
+    expect(stopNarration).toHaveBeenCalled();
+    // New prompt spoken in Japanese
+    expect(say).toHaveBeenCalledWith("きいてね…");
+
+    // Melody has NOT restarted yet during the narration lead time (500ms after switch)
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(playSequence).toHaveBeenCalledTimes(1);
+
+    // After full LISTEN_DELAY_MS (another 500ms), playSequence is called again to restart playback
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(playSequence).toHaveBeenCalledTimes(2);
+
+    // When the restarted playback finishes, phase transitions to pick
+    act(() => {
+      onDoneCb?.();
+    });
+    expect(screen.getByTestId("fastslow-fast").textContent).toContain("はやい");
+    expect(screen.getByTestId("fastslow-slow").textContent).toContain("おそい");
+    expect(saySequence).toHaveBeenCalledWith([
+      "おんがくは はやい？ おそい？",
+      "はやい",
+      "おそい",
+    ]);
+  });
+
+  it("switching language during initial listen delay cancels pending playback and restarts delay with new prompt", () => {
+    vi.useFakeTimers();
+    vi.mocked(playSequence).mockImplementation(() => () => {});
+
+    render(<LangHarness initialLang="en" />);
+
+    // Advance 400ms into initial 1000ms delay (melody has not started yet)
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSequence).not.toHaveBeenCalled();
+
+    // Switch to Japanese
+    vi.mocked(say).mockClear();
+    act(() => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+    expect(say).toHaveBeenCalledWith("きいてね…");
+
+    // Advance 600ms (1000ms from start, but only 600ms from switch):
+    // The old timer was cancelled, so playback should not trigger yet.
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(playSequence).not.toHaveBeenCalled();
+
+    // Advance another 400ms (1000ms from switch):
+    // The new timer triggers playback.
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSequence).toHaveBeenCalledTimes(1);
+  });
+
+  it("switching language in pick phase updates labels and spoken prompt without re-entering listen playback", () => {
+    vi.useFakeTimers();
+    render(<LangHarness initialLang="en" />);
+
+    // Advance past initial listen into pick phase
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByTestId("fastslow-fast").textContent).toContain("Fast");
+    vi.mocked(playSequence).mockClear();
+    vi.mocked(saySequence).mockClear();
+
+    // Switch to Japanese while in pick phase
+    act(() => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    // Pick buttons should update immediately
+    expect(screen.getByTestId("fastslow-fast").textContent).toContain("はやい");
+    expect(screen.getByTestId("fastslow-slow").textContent).toContain("おそい");
+    expect(saySequence).toHaveBeenCalledWith([
+      "おんがくは はやい？ おそい？",
+      "はやい",
+      "おそい",
+    ]);
+
+    // Advancing timers should not trigger playSequence (does not throw back to listen)
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(playSequence).not.toHaveBeenCalled();
   });
 });

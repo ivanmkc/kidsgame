@@ -12,7 +12,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
 import { SparkleBurst } from "../../components/Sparkles";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
@@ -39,6 +39,7 @@ interface Props {
 const LISTEN_DELAY_MS = 1000;
 
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
+  const { epoch, isValid } = useLangEpoch(lang);
   const { width } = useWindowDimensions();
   const layout = fastSlowLayout(width);
   const total = roundsToWin(difficulty);
@@ -47,6 +48,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
   const firstTryRef = useRef(true);
@@ -80,13 +82,40 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) {
       setPhase("listen");
-      const timer = setTimeout(() => playRound(round), LISTEN_DELAY_MS);
+      listenTimerRef.current = setTimeout(
+        () => playRound(round),
+        LISTEN_DELAY_MS,
+      );
       return () => {
-        clearTimeout(timer);
+        if (listenTimerRef.current) {
+          clearTimeout(listenTimerRef.current);
+          listenTimerRef.current = null;
+        }
         stopSequence();
       };
     }
   }, [round, won, playRound]);
+
+  useEffect(() => {
+    if (epoch === 0 || won) return;
+    if (phase === "listen") {
+      if (listenTimerRef.current) {
+        clearTimeout(listenTimerRef.current);
+        listenTimerRef.current = null;
+      }
+      if (replayTimerRef.current) {
+        clearTimeout(replayTimerRef.current);
+        replayTimerRef.current = null;
+      }
+      stopSequence();
+      stopNarration();
+      roundEpochRef.current++;
+      listenTimerRef.current = setTimeout(
+        () => playRound(round),
+        LISTEN_DELAY_MS,
+      );
+    }
+  }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (won) return;
@@ -117,7 +146,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   }, [phase, won, lang, playRound, round]);
 
   const onPick = (picked: "fast" | "slow") => {
-    if (won || phase !== "pick" || lockedRef.current) return;
+    if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
@@ -162,6 +191,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     return () => {
       roundEpochRef.current++;
       feedbackSpeechRef.current = null;
+      if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
@@ -171,21 +201,22 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   const replay = () => {
-    if (phase === "pick") {
-      stopSequence();
-      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
-      if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
-      setWrongPick(null);
-      setInstructionalTempo(null);
-      setPhase("listen");
-      replayTimerRef.current = setTimeout(
-        () => playRound(round),
-        LISTEN_DELAY_MS,
-      );
-    }
+    if (!isValid() || phase !== "pick") return;
+    stopSequence();
+    if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
+    setWrongPick(null);
+    setInstructionalTempo(null);
+    setPhase("listen");
+    replayTimerRef.current = setTimeout(
+      () => playRound(round),
+      LISTEN_DELAY_MS,
+    );
   };
 
   const reset = () => {
+    if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
     if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
