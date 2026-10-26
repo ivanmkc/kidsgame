@@ -5,6 +5,7 @@ import { makeRng } from "../../../rng";
 import { WORDS, wordFor } from "../../../words";
 import {
   ALPHABET,
+  ANIMALS,
   COLORS,
   ConceptMatchCard,
   ConceptMatchDeck,
@@ -742,6 +743,131 @@ describe("conceptmatch/logic", () => {
         const rng = makeRng(42);
         const board = buildBoard(rng, "shapes-objects", "en", 10);
         expect(board).toHaveLength(8);
+      });
+    });
+
+    describe("animals-sounds deck", () => {
+      it("defaults to 2 pairs (4 cards)", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "animals-sounds");
+        expect(board).toHaveLength(4);
+      });
+
+      it("generates the requested number of pairs with animal icon and audio display variants", () => {
+        const rng = makeRng(100);
+        const board = buildBoard(rng, "animals-sounds", "en", 3);
+        expect(board).toHaveLength(6);
+
+        const byConcept = new Map<string, ConceptMatchCard[]>();
+        for (const card of board) {
+          const list = byConcept.get(card.conceptId) ?? [];
+          list.push(card);
+          byConcept.set(card.conceptId, list);
+        }
+
+        expect(byConcept.size).toBe(3);
+        for (const [conceptId, cards] of byConcept.entries()) {
+          expect(cards).toHaveLength(2);
+          const [card1, card2] = cards;
+          expect(isMatch(card1, card2)).toBe(true);
+          expect(ANIMALS).toContain(conceptId);
+
+          const entry = WORDS.find((w) => w.icon === conceptId)!;
+          const expectedName = wordFor(entry, "en").text;
+          const expectedSound = t("en", `sound.${conceptId}` as UIKey);
+
+          const iconCard = cards.find(
+            (c) => c.display.type === "icon" && c.display.icon === conceptId,
+          );
+          const audioCard = cards.find((c) => c.display.type === "audio");
+
+          expect(iconCard).toBeDefined();
+          expect(audioCard).toBeDefined();
+          expect(iconCard?.key).toBe(`${conceptId}-icon`);
+          expect(audioCard?.key).toBe(`${conceptId}-sound`);
+          expect(iconCard?.speech).toBe(expectedName);
+          expect(audioCard?.speech).toBe(expectedSound);
+          expect(audioCard?.display).toEqual({
+            type: "audio",
+            text: expectedSound,
+          });
+        }
+      });
+
+      it("localizes animal name and sound speech across all 4 languages", () => {
+        const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+        for (const lang of langs) {
+          const rng = makeRng(42);
+          const board = buildBoard(rng, "animals-sounds", lang, 2);
+          for (const card of board) {
+            const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+            const expectedName = wordFor(entry, lang).text;
+            const expectedSound = t(lang, `sound.${card.conceptId}` as UIKey);
+
+            if (card.display.type === "icon") {
+              expect(card.speech).toBe(expectedName);
+            } else if (card.display.type === "audio") {
+              expect(card.speech).toBe(expectedSound);
+              expect(card.display.text).toBe(expectedSound);
+            }
+          }
+        }
+      });
+
+      it("translates all 5 animal sounds across all 4 languages without English fallback", () => {
+        expect(ANIMALS).toHaveLength(5);
+        for (const animal of ANIMALS) {
+          const en = t("en", `sound.${animal}` as UIKey);
+          const ja = t("ja", `sound.${animal}` as UIKey);
+          const cmn = t("cmn", `sound.${animal}` as UIKey);
+          const yue = t("yue", `sound.${animal}` as UIKey);
+
+          expect(en).toBeTruthy();
+          expect(ja).toBeTruthy();
+          expect(cmn).toBeTruthy();
+          expect(yue).toBeTruthy();
+
+          expect(ja).not.toBe(en);
+          expect(cmn).not.toBe(en);
+          expect(yue).not.toBe(en);
+        }
+      });
+
+      it("produces unique keys for every card", () => {
+        const rng = makeRng(888);
+        const board = buildBoard(rng, "animals-sounds", "en", 5);
+        const keys = board.map((c) => c.key);
+        expect(new Set(keys).size).toBe(board.length);
+      });
+
+      it("is reproducible with the same RNG seed", () => {
+        const board1 = buildBoard(makeRng(12345), "animals-sounds", "en", 3);
+        const board2 = buildBoard(makeRng(12345), "animals-sounds", "en", 3);
+        expect(board1).toEqual(board2);
+      });
+
+      it("produces different layouts with different RNG seeds", () => {
+        const board1 = buildBoard(makeRng(1), "animals-sounds", "en", 3);
+        const board2 = buildBoard(makeRng(2), "animals-sounds", "en", 3);
+        expect(board1).not.toEqual(board2);
+      });
+
+      it("satisfies R3 by including visual onomatopoeia text on audio sound cards", () => {
+        const board = buildBoard(makeRng(1), "animals-sounds", "en", 5);
+        const audioCards = board.filter((c) => c.display.type === "audio");
+        expect(audioCards).toHaveLength(5);
+        for (const card of audioCards) {
+          if (card.display.type === "audio") {
+            expect(card.display.text).toBeTruthy();
+            expect(card.display.text).toBe(card.speech);
+          }
+        }
+      });
+
+      it("caps at 5 pairs when requested pairs exceeds pool size", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "animals-sounds", "en", 10);
+        expect(board).toHaveLength(10);
       });
     });
 

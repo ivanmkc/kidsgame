@@ -370,4 +370,9 @@ export const JA: Table = {
   'shape.square': 'しかく',
   'shape.triangle': 'さんかく',
   'shape.star': 'ほし',
+  'sound.dog': 'わんわん',
+  'sound.cat': 'にゃー',
+  'sound.lion': 'がおー',
+  'sound.frog': 'けろけろ',
+  'sound.pig': 'ぶーぶー',
 };

@@ -343,7 +343,9 @@ export type UIKey =
   | 'color.purple' | 'color.orange' | 'color.black' | 'color.white'
   | 'color.pink' | 'color.brown' | 'color.gray'
   // ── Shapes ─────────────────────────────────────────────────────
-  | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star';
+  | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star'
+  // ── Animals & Sounds ───────────────────────────────────────────
+  | 'sound.dog' | 'sound.cat' | 'sound.lion' | 'sound.frog' | 'sound.pig';
 
 export type Table = Record<UIKey, string>;
 
@@ -720,6 +722,11 @@ export const EN: Table = {
   'shape.square': 'square',
   'shape.triangle': 'triangle',
   'shape.star': 'star',
+  'sound.dog': 'woof',
+  'sound.cat': 'meow',
+  'sound.lion': 'roar',
+  'sound.frog': 'ribbit',
+  'sound.pig': 'oink',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };
