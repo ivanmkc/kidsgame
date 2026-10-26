@@ -5,7 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { hanNumeral } from "../../../lang";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import { NumbersGame } from "../NumbersGame";
+import * as logic from "../logic";
 
 describe("NumbersGame", () => {
   beforeEach(() => {
@@ -146,6 +149,120 @@ describe("NumbersGame", () => {
     );
     for (const label of nextHanLabels) {
       expect(label).toMatch(/^[一二三四五六七八九十]+$/);
+    }
+  });
+
+  it("rebuilds active round, updates spoken prompts, removes 0 and cancels stale timers on language switch", () => {
+    vi.useFakeTimers();
+    try {
+      function NumbersGameTestWrapper() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        const onCycle = () => {
+          setLang((prev) => (prev === "en" ? "ja" : "en"));
+        };
+        return (
+          <LangContext.Provider value={{ lang, onCycle }}>
+            <NumbersGame onHome={vi.fn()} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      const generatedRounds: logic.NumberRound[] = [];
+      const origMakeNumberRound = logic.makeNumberRound;
+      vi.spyOn(logic, "makeNumberRound").mockImplementation(
+        (rng, settings, lang, avoidN) => {
+          if (lang === "en") {
+            const round = origMakeNumberRound(() => 0, settings, lang, avoidN);
+            generatedRounds.push(round);
+            return round;
+          }
+          const res = origMakeNumberRound(rng, settings, lang, avoidN);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      render(<NumbersGameTestWrapper />);
+
+      // Initial English round speaks English prompt line
+      expect(sound.saySequence).toHaveBeenCalledTimes(1);
+      expect(sound.saySequence).toHaveBeenLastCalledWith([
+        "Find the number 0!",
+      ]);
+
+      // Confirm 0 is on the board in English
+      expect(screen.queryByLabelText("0")).toBeTruthy();
+
+      const round1 = generatedRounds[0];
+      const wrongTile = round1.tiles.find((t) => !t.isAnswer)!;
+      const wrongBtn = screen.getByTestId(
+        `numbers-tile-${round1.tiles.indexOf(wrongTile)}`,
+      );
+
+      // Tap wrong tile
+      fireEvent.click(wrongBtn);
+      expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+      expect(sound.saySequence).toHaveBeenCalledTimes(2);
+      expect(sound.saySequence).toHaveBeenLastCalledWith([
+        "Find the number 0!",
+      ]);
+
+      // Advance timers partially (200ms of 450ms)
+      vi.advanceTimersByTime(200);
+      expect(vi.getTimerCount()).toBe(1);
+
+      // Switch language to Japanese via header lang button
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+
+      // Stale error timer from old language must be cancelled immediately
+      expect(vi.getTimerCount()).toBe(0);
+
+      // Active round rebuilt for Japanese
+      expect(generatedRounds).toHaveLength(2);
+      const round2 = generatedRounds[1];
+      expect(sound.saySequence).toHaveBeenCalledTimes(3);
+      expect(sound.saySequence).toHaveBeenLastCalledWith([
+        "さがしてね！",
+        expect.any(String),
+      ]);
+
+      // Tile 0 must not remain on the board in Asian language
+      expect(screen.queryByLabelText("0")).toBeNull();
+      for (const t of round2.tiles) {
+        expect(t.n).toBeGreaterThanOrEqual(1);
+      }
+
+      // Round counter agrees
+      expect(screen.getByTestId("numbers-score").textContent).toContain("0/8");
+
+      // Tap wrong tile in Japanese round: must speak Japanese prompt, never old English prompt
+      const wrongTile2 = round2.tiles.find((t) => !t.isAnswer)!;
+      const wrongBtn2 = screen.getByTestId(
+        `numbers-tile-${round2.tiles.indexOf(wrongTile2)}`,
+      );
+      fireEvent.click(wrongBtn2);
+      expect(sound.sfx.wrong).toHaveBeenCalledTimes(2);
+      expect(sound.saySequence).toHaveBeenCalledTimes(4);
+      expect(sound.saySequence).toHaveBeenLastCalledWith([
+        "さがしてね！",
+        expect.any(String),
+      ]);
+      expect(vi.getTimerCount()).toBe(1);
+
+      // Advance timers past error timer
+      vi.advanceTimersByTime(450);
+      expect(vi.getTimerCount()).toBe(0);
+
+      // Tap correct tile in Japanese: advances round
+      const correctTile2 = round2.tiles.find((t) => t.isAnswer)!;
+      const correctBtn2 = screen.getByTestId(
+        `numbers-tile-${round2.tiles.indexOf(correctTile2)}`,
+      );
+      fireEvent.click(correctBtn2);
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("numbers-score").textContent).toContain("1/8");
+    } finally {
+      vi.useRealTimers();
     }
   });
 });
