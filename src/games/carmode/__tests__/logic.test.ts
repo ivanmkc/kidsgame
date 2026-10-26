@@ -114,6 +114,22 @@ describe('boops pack specifics', () => {
       expect(r.reveal[0]).toContain(String(r.noteCount));
     }
   });
+
+  it('uses singular phrasing for round 1', () => {
+    const round1 = rounds.find((r) => r.id === 'boops-1');
+    expect(round1).toBeDefined();
+    expect(round1?.reveal).toEqual(['1! There was 1 boop!']);
+  });
+
+  it('uses plural phrasing for rounds with more than 1 boop', () => {
+    for (const r of rounds) {
+      if (r.noteCount && r.noteCount > 1) {
+        expect(r.reveal).toEqual([
+          `${r.noteCount}! There were ${r.noteCount} boops!`,
+        ]);
+      }
+    }
+  });
 });
 
 describe('silly pack specifics', () => {
