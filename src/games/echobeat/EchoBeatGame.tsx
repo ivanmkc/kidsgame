@@ -275,7 +275,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         <ScoreChip label={`🥁 ${score}/${total}`} testID="echobeat-score" />
       }
     >
-      <View style={[styles.board, { gap }]}>
+      <View testID="echobeat-board" style={[styles.board, { gap }]}>
         {phase === "listen" ? (
           <View
             style={[
@@ -353,11 +353,17 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             <SparkleBurst trigger={sparkKey} count={6} size={14} />
           </Pressable>
         </Animated.View>
-        {phase === "tap" && (
-          <View style={[styles.tapDotRow, shortH && styles.tapDotRowShort]}>
-            {tapDots}
-          </View>
-        )}
+        <View
+          testID="echobeat-tap-dots"
+          style={[
+            styles.tapDotRow,
+            shortH && styles.tapDotRowShort,
+            phase === "listen" && styles.tapDotRowHidden,
+          ]}
+          aria-hidden={phase === "listen" ? true : undefined}
+        >
+          {tapDots}
+        </View>
       </View>
       <WinOverlay
         visible={won}
@@ -428,6 +434,7 @@ const styles = StyleSheet.create({
   drumEmoji: { fontSize: 64 },
   tapDotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
   tapDotRowShort: { marginTop: 0 },
+  tapDotRowHidden: { opacity: 0 },
   tapDot: {
     width: 16,
     height: 16,
