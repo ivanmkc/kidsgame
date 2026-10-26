@@ -69,7 +69,7 @@ export function reskinNumberRound(round: NumberRound, useHan: boolean): NumberRo
     ...round,
     useHan,
     targetKey: targetTile?.key ?? `${useHan ? 'h' : 'n'}-${round.targetN}`,
-    displayText: label(round.targetN, useHan),
+    displayText: label(round.targetN, false),
     tiles,
   };
 }
