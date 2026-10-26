@@ -34,7 +34,9 @@ function boopRounds(): Round[] {
       pack: 'boops',
       prompt: [`How many boops?`],
       gapMs: 3000,
-      reveal: [`${n}! There were ${n} boops!`],
+      reveal: [
+        n === 1 ? '1! There was 1 boop!' : `${n}! There were ${n} boops!`,
+      ],
       sfx: 'good',
       noteCount: n,
     });
