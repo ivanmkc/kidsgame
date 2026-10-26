@@ -265,4 +265,64 @@ describe("NumbersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("locks input between rounds so rapid double-taps do not register wrong answers on the next round", () => {
+    vi.useFakeTimers();
+    try {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN) {
+          correctTile = tile;
+          break;
+        }
+      }
+      expect(correctTile).not.toBeNull();
+
+      // First tap on the correct tile advances round and locks input
+      fireEvent.click(correctTile!);
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+      // Identify distractor and answer tiles in the newly mounted round
+      const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
+      const nextTargetN = nextPromptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let nextWrongTile: HTMLElement | null = null;
+      let nextCorrectTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") !== nextTargetN) {
+          nextWrongTile = tile;
+        } else {
+          nextCorrectTile = tile;
+        }
+      }
+      expect(nextWrongTile).not.toBeNull();
+      expect(nextCorrectTile).not.toBeNull();
+
+      // Trailing tap 80ms later (within celebration lock window) must be ignored
+      vi.advanceTimersByTime(80);
+      fireEvent.click(nextWrongTile!);
+
+      expect(sound.sfx.wrong).not.toHaveBeenCalled();
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+      // Advance past celebration lock delay (remaining 220ms of 300ms)
+      vi.advanceTimersByTime(220);
+
+      // Next round now accepts input
+      fireEvent.click(nextCorrectTile!);
+      expect(sound.sfx.good).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
