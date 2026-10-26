@@ -25,6 +25,7 @@ import {
   BellsRound,
   canTap,
   judgeTap,
+  bellsLayout,
 } from "./logic";
 
 interface Props {
@@ -171,11 +172,11 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     setRound(makeBellsRound(rngRef.current, difficulty));
   };
 
-  const { width } = useWindowDimensions();
-  const bellSize = Math.min(
-    110,
-    (Math.min(width - 40, 600) - (round.bells.length - 1) * 14) /
-      round.bells.length,
+  const { width, height } = useWindowDimensions();
+  const { bellSize, gap, shortH } = bellsLayout(
+    width,
+    height,
+    round.bells.length,
   );
 
   const earPulse = useRef(new Animated.Value(1)).current;
@@ -250,22 +251,31 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       lang={lang}
       right={<ScoreChip label={`🔔 ${score}/${total}`} testID="bells-score" />}
     >
-      <View style={styles.board}>
+      <View style={[styles.board, { gap }]}>
         {!won &&
           (phase === "listen" ? (
             <View
               testID="bells-status"
-              style={[styles.statusCard, shadows.soft]}
+              style={[
+                styles.statusCard,
+                shadows.soft,
+                shortH && styles.statusCardShort,
+              ]}
             >
               <Animated.Text
                 style={[
                   styles.statusEmoji,
+                  shortH && styles.statusEmojiShort,
                   { transform: [{ scale: earPulse }] },
                 ]}
               >
                 👂
               </Animated.Text>
-              <Text style={styles.statusText}>{t(lang, "music.listen")}</Text>
+              <Text
+                style={[styles.statusText, shortH && styles.statusTextShort]}
+              >
+                {t(lang, "music.listen")}
+              </Text>
             </View>
           ) : (
             <View style={styles.statusRow}>
@@ -276,10 +286,22 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                   shadows.soft,
                   styles.yourTurnCard,
                   wrongFlash && styles.wrongCard,
+                  shortH && styles.statusCardShort,
                 ]}
               >
-                <Text style={styles.statusEmoji}>👆</Text>
-                <Text style={styles.statusText}>{t(lang, "music.yourTurn")}</Text>
+                <Text
+                  style={[
+                    styles.statusEmoji,
+                    shortH && styles.statusEmojiShort,
+                  ]}
+                >
+                  👆
+                </Text>
+                <Text
+                  style={[styles.statusText, shortH && styles.statusTextShort]}
+                >
+                  {t(lang, "music.yourTurn")}
+                </Text>
               </View>
               <Pressable
                 testID="replay-button"
@@ -289,15 +311,23 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 style={({ pressed }) => [
                   styles.replayBtn,
                   shadows.soft,
+                  shortH && styles.replayBtnShort,
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.replayText}>🔊</Text>
+                <Text
+                  style={[styles.replayText, shortH && styles.replayTextShort]}
+                >
+                  🔊
+                </Text>
               </Pressable>
             </View>
           ))}
         {phase === "play" && !won && (
-          <View testID="tap-dot-row" style={styles.tapDotRow}>
+          <View
+            testID="tap-dot-row"
+            style={[styles.tapDotRow, shortH && styles.tapDotRowShort]}
+          >
             {tapDots}
           </View>
         )}
@@ -377,7 +407,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(232,86,79,0.12)",
   },
   statusEmoji: { fontSize: 30 },
+  statusEmojiShort: { fontSize: 24 },
   statusText: { fontFamily: fonts.display, fontSize: 18, color: colors.ink },
+  statusTextShort: { fontSize: 15 },
+  statusCardShort: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+  },
   replayBtn: {
     width: 72,
     height: 72,
@@ -386,7 +423,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  replayBtnShort: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
   replayText: { fontSize: 36 },
+  replayTextShort: { fontSize: 24 },
   bellRow: { flexDirection: "row", gap: 14, alignItems: "flex-end" },
   bell: {
     borderRadius: 20,
@@ -403,6 +446,7 @@ const styles = StyleSheet.create({
   bellText: { textAlign: "center" },
   pressed: { transform: [{ scale: 0.92 }] },
   tapDotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
+  tapDotRowShort: { marginTop: 0 },
   tapDot: {
     width: 16,
     height: 16,
