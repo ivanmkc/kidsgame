@@ -361,4 +361,8 @@ export const CMN: Table = {
   'color.pink': '粉色',
   'color.brown': '棕色',
   'color.gray': '灰色',
+  'shape.circle': '圆形',
+  'shape.square': '正方形',
+  'shape.triangle': '三角形',
+  'shape.star': '星形',
 };

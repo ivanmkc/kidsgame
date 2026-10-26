@@ -362,4 +362,8 @@ export const JA: Table = {
   'color.pink': 'ピンク',
   'color.brown': 'ちゃいろ',
   'color.gray': 'はいいろ',
+  'shape.circle': 'まる',
+  'shape.square': 'しかく',
+  'shape.triangle': 'さんかく',
+  'shape.star': 'ほし',
 };

@@ -23,7 +23,20 @@ export type ConceptMatchDeck =
   | "picture-spoken"
   | "color-word"
   | "numerals-han"
-  | "numerals-dots";
+  | "numerals-dots"
+  | "shapes-objects";
+
+export interface ShapePair {
+  shape: string;
+  object: string;
+}
+
+export const SHAPES: ShapePair[] = [
+  { shape: "circle", object: "clock" },
+  { shape: "square", object: "window" },
+  { shape: "triangle", object: "pizza_slice" },
+  { shape: "star", object: "starfish" },
+];
 
 export interface ColorEntry {
   id: string;
@@ -238,6 +251,29 @@ export function buildBoard(
           key: `${n}-dots`,
           conceptId: String(n),
           display: { type: "dots", count: n },
+          speech,
+        },
+      ];
+    });
+    return shuffle(rng, cards);
+  }
+
+  if (deck === "shapes-objects") {
+    const pool = shuffle(rng, SHAPES);
+    const chosen = pool.slice(0, pairs);
+    const cards: ConceptMatchCard[] = chosen.flatMap((entry) => {
+      const speech = t(lang, `shape.${entry.shape}` as UIKey);
+      return [
+        {
+          key: `${entry.shape}-shape`,
+          conceptId: entry.shape,
+          display: { type: "icon", icon: entry.shape },
+          speech,
+        },
+        {
+          key: `${entry.shape}-object`,
+          conceptId: entry.shape,
+          display: { type: "icon", icon: entry.object },
           speech,
         },
       ];
