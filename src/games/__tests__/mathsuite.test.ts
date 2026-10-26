@@ -16,6 +16,7 @@ import {
   comparisonPhrase,
   isFairPair,
   makeCompareRound,
+  plateAccessibilityLabel,
   plateCritterPos,
   plateCritterSize,
   roundComparisonPhrase,
@@ -454,6 +455,34 @@ describe('more or less: comparative feedback', () => {
         }
       }
     }
+  });
+
+  describe('plateAccessibilityLabel', () => {
+    it('formats localized count and critter name for all languages', () => {
+      expect(plateAccessibilityLabel(5, 'dog', 'en')).toBe('5 dog');
+      expect(plateAccessibilityLabel(5, 'dog', 'ja')).toBe('5 いぬ');
+      expect(plateAccessibilityLabel(5, 'dog', 'cmn')).toBe('5 狗');
+      expect(plateAccessibilityLabel(5, 'dog', 'yue')).toBe('5 狗');
+      expect(plateAccessibilityLabel(7, 'butterfly', 'en')).toBe('7 butterfly');
+      expect(plateAccessibilityLabel(7, 'butterfly', 'ja')).toBe('7 ちょうちょ');
+      expect(plateAccessibilityLabel(7, 'butterfly', 'cmn')).toBe('7 蝴蝶');
+      expect(plateAccessibilityLabel(7, 'butterfly', 'yue')).toBe('7 蝴蝶');
+    });
+
+    it('resolves all CRITTER_ICONS across all 4 supported languages', () => {
+      for (const icon of CRITTER_ICONS) {
+        for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+          const label = plateAccessibilityLabel(3, icon, lang);
+          expect(label).toMatch(/^3 \S+/);
+        }
+      }
+    });
+
+    it('throws loudly on unknown icon', () => {
+      expect(() => plateAccessibilityLabel(1, 'unicorn_pegasus', 'en')).toThrow(
+        /Unknown compare icon: unicorn_pegasus/,
+      );
+    });
   });
 });
 
