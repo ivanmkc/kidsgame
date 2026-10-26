@@ -18,9 +18,40 @@ import { sfx } from "../../sound";
 import * as highLowLogic from "./logic";
 import { HighLowGame } from "./HighLowGame";
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  if (window.visualViewport) {
+    Object.defineProperty(window.visualViewport, "width", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window.visualViewport, "height", {
+      value: height,
+      configurable: true,
+    });
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
 describe("HighLowGame UI", () => {
   afterEach(() => {
     cleanup();
+    setViewport(1024, 768);
     vi.restoreAllMocks();
   });
 
@@ -602,6 +633,38 @@ describe("HighLowGame UI", () => {
     fireEvent.click(screen.getByTestId("play-again"));
     expect(screen.queryByTestId("win-overlay")).toBeNull();
     expect(screen.getByTestId("melody-dot-0")).toBeDefined();
+
+    vi.useRealTimers();
+  });
+
+  it("renders responsive pick row and buttons fitting mobile portrait viewport (< 380px)", () => {
+    vi.useFakeTimers();
+    setViewport(360, 800);
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    const lowBtn = screen.getByTestId("highlow-low");
+    const replayBtn = screen.getByTestId("highlow-replay");
+    const pickRow = screen.getByTestId("highlow-pick-row");
+
+    expect(highBtn.style.minWidth).toBe("96px");
+    expect(lowBtn.style.minWidth).toBe("96px");
+    expect(replayBtn.style.width).toBe("56px");
+    expect(replayBtn.style.height).toBe("56px");
+    expect(pickRow.style.gap).toBe("10px");
 
     vi.useRealTimers();
   });

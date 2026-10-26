@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
@@ -26,6 +27,7 @@ import {
   isCorrect,
   getInstructionalFeedback,
   nextScoreValue,
+  highLowLayout,
 } from "./logic";
 
 interface Props {
@@ -35,6 +37,8 @@ interface Props {
 }
 
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
+  const { width } = useWindowDimensions();
+  const layout = highLowLayout(width);
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
@@ -321,14 +325,22 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
             </View>
           </View>
         ) : (
-          <View style={styles.pickRow}>
+          <View
+            testID="highlow-pick-row"
+            style={[styles.pickRow, { gap: layout.gap }]}
+          >
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
                 onPress={() => onPick("high")}
                 testID="highlow-high"
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: "#E3EEFB", borderColor: "#5DA9E8" },
+                  {
+                    backgroundColor: "#E3EEFB",
+                    borderColor: "#5DA9E8",
+                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                    minWidth: layout.pickBtnMinWidth,
+                  },
                   shadows.glowGold,
                   wrongPick === "high" && styles.wrong,
                   pressed && styles.pressed,
@@ -350,11 +362,23 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
               testID="highlow-replay"
               style={({ pressed }) => [
                 styles.replayBtn,
+                {
+                  width: layout.replaySize,
+                  height: layout.replaySize,
+                  borderRadius: layout.replaySize / 2,
+                },
                 shadows.soft,
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.replayText}>🔊</Text>
+              <Text
+                style={[
+                  styles.replayText,
+                  { fontSize: layout.replayFontSize },
+                ]}
+              >
+                🔊
+              </Text>
             </Pressable>
             <Animated.View style={{ transform: [{ scale: pickScale }] }}>
               <Pressable
@@ -362,7 +386,12 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 testID="highlow-low"
                 style={({ pressed }) => [
                   styles.pickBtn,
-                  { backgroundColor: "#FFF0E5", borderColor: "#E8874F" },
+                  {
+                    backgroundColor: "#FFF0E5",
+                    borderColor: "#E8874F",
+                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                    minWidth: layout.pickBtnMinWidth,
+                  },
                   shadows.glowGold,
                   wrongPick === "low" && styles.wrong,
                   pressed && styles.pressed,

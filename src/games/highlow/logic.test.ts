@@ -9,6 +9,7 @@ import {
   nextScoreValue,
   speechLines,
   HighLowRound,
+  highLowLayout,
 } from './logic';
 
 describe('highlow logic', () => {
@@ -96,5 +97,71 @@ describe('highlow logic', () => {
     expect(lines).toContain('更高');
     expect(lines).toContain('高咗');
     expect(lines).toContain('にばんめの おとは たかくなった？ ひくくなった？');
+  });
+
+  describe('highLowLayout', () => {
+    it('adapts layout for compact portrait viewports (< 380px) so buttons fit without clipping', () => {
+      const portrait360 = highLowLayout(360);
+      expect(portrait360.gap).toBe(10);
+      expect(portrait360.pickBtnPaddingHorizontal).toBe(12);
+      expect(portrait360.pickBtnMinWidth).toBe(96);
+      expect(portrait360.replaySize).toBe(56);
+      expect(portrait360.replayFontSize).toBe(28);
+
+      const viewports = [320, 360, 375];
+      for (const width of viewports) {
+        const layout = highLowLayout(width);
+        const containerWidth = width - 32;
+        const minRowWidth =
+          layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
+        expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+      }
+    });
+
+    it('adapts layout for ultra-compact 320px portrait viewport', () => {
+      const layout = highLowLayout(320);
+      expect(layout.gap).toBe(10);
+      expect(layout.pickBtnPaddingHorizontal).toBe(12);
+      expect(layout.pickBtnMinWidth).toBe(96);
+      expect(layout.replaySize).toBe(56);
+      expect(layout.replayFontSize).toBe(28);
+
+      const containerWidth = 320 - 32;
+      const minRowWidth =
+        layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
+      expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+    });
+
+    it('preserves spacious layout on standard mobile, tablets, and desktop (>= 380px)', () => {
+      const portrait380 = highLowLayout(380);
+      expect(portrait380.gap).toBe(12);
+      expect(portrait380.pickBtnPaddingHorizontal).toBe(16);
+      expect(portrait380.pickBtnMinWidth).toBe(130);
+      expect(portrait380.replaySize).toBe(72);
+      expect(portrait380.replayFontSize).toBe(36);
+
+      const tablet = highLowLayout(768);
+      expect(tablet.gap).toBe(12);
+      expect(tablet.pickBtnPaddingHorizontal).toBe(16);
+      expect(tablet.pickBtnMinWidth).toBe(130);
+      expect(tablet.replaySize).toBe(72);
+      expect(tablet.replayFontSize).toBe(36);
+
+      const desktop = highLowLayout(1024);
+      expect(desktop.gap).toBe(12);
+      expect(desktop.pickBtnPaddingHorizontal).toBe(16);
+      expect(desktop.pickBtnMinWidth).toBe(130);
+      expect(desktop.replaySize).toBe(72);
+      expect(desktop.replayFontSize).toBe(36);
+    });
+
+    it('falls back to default layout when width is unmeasured or zero', () => {
+      const fallback = highLowLayout(0);
+      expect(fallback.gap).toBe(12);
+      expect(fallback.pickBtnPaddingHorizontal).toBe(16);
+      expect(fallback.pickBtnMinWidth).toBe(130);
+      expect(fallback.replaySize).toBe(72);
+      expect(fallback.replayFontSize).toBe(36);
+    });
   });
 });
