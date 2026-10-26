@@ -36,6 +36,7 @@ import { makeRng, sample } from "../../rng";
 import { sfx, useSay, say } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { Find, coopDrawCount, countFor } from "./coop";
+import { hiddenLayout } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -205,9 +206,12 @@ export function HiddenGame({
   const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
   const ar = scene.w / scene.h;
 
-  // Checklist row (~86px) + header (+ co-op turn banner) — fit the scene into what's left.
-  const availH = height - 84 - 122 - (coop ? 56 : 0);
-  const sceneWidth = Math.min(width - 24, availH * ar, 1100);
+  const { isLandscape, sceneWidth, sidebarWidth } = hiddenLayout(
+    width,
+    height,
+    coop,
+    ar,
+  );
 
   const foundIds = finds.map((f) => f.id);
   const ringColors = coop
@@ -254,6 +258,64 @@ export function HiddenGame({
     return f && f.by !== null ? f.by : null;
   };
 
+  const turnBanner = coop ? (
+    <TurnBanner turn={turn} lang={lang} compact={isLandscape} />
+  ) : null;
+
+  const checklistChips = drawn.map((t) => {
+    const done = foundIds.includes(t.id);
+    const finder = coop && done ? finderFor(t.id) : null;
+    return (
+      <View
+        key={t.id}
+        style={[
+          styles.chip,
+          isLandscape && styles.chipLandscape,
+          shadows.soft,
+          done && styles.chipFound,
+        ]}
+        testID={`checklist-${t.id}`}
+      >
+        <Image
+          source={SCENE_IMAGES[t.thumb]}
+          style={styles.chipImg}
+          resizeMode="contain"
+        />
+        {done ? (
+          <View style={styles.chipCheck}>
+            <Text
+              style={[
+                styles.chipCheckText,
+                isLandscape && styles.chipCheckTextLandscape,
+              ]}
+            >
+              ✔️
+            </Text>
+          </View>
+        ) : null}
+        {finder !== null ? (
+          <View
+            style={[
+              styles.finderBadge,
+              isLandscape && styles.finderBadgeLandscape,
+              { borderColor: MP_PLAYERS[finder].color },
+            ]}
+            testID={`checklist-${t.id}-finder`}
+          >
+            <Text
+              style={[
+                styles.finderBadgeText,
+                isLandscape && styles.finderBadgeTextLandscape,
+              ]}
+            >
+              {MP_PLAYERS[finder].emoji}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+    );
+  });
+
   return (
     <GameShell
       title={t(lang, "shell.hidden.title")}
@@ -295,60 +357,52 @@ export function HiddenGame({
         </View>
       }
     >
-      {coop ? <TurnBanner turn={turn} lang={lang} /> : null}
-      <View style={styles.checklist} testID="hidden-checklist">
-        {drawn.map((t) => {
-          const done = foundIds.includes(t.id);
-          const finder = coop && done ? finderFor(t.id) : null;
-          return (
-            <View
-              key={t.id}
-              style={[styles.chip, shadows.soft, done && styles.chipFound]}
-              testID={`checklist-${t.id}`}
+      {!isLandscape && turnBanner}
+      {!isLandscape && (
+        <View style={styles.checklist} testID="hidden-checklist">
+          {checklistChips}
+        </View>
+      )}
+      <View style={[styles.main, isLandscape && styles.mainLandscape]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scroll,
+            isLandscape && styles.scrollLandscape,
+          ]}
+        >
+          <TapScene
+            source={SCENE_IMAGES[scene.image]}
+            sceneW={scene.w}
+            sceneH={scene.h}
+            displayWidth={sceneWidth}
+            boxes={boxes}
+            foundIds={foundIds}
+            ringColors={ringColors}
+            hintId={hintId}
+            onHit={onHit}
+            onMiss={() => {}}
+            testIDPrefix="hidden"
+            lang={lang}
+          />
+        </ScrollView>
+        {isLandscape && (
+          <View style={[styles.sidebar, { width: sidebarWidth }]}>
+            {turnBanner}
+            <ScrollView
+              style={styles.sidebarScroll}
+              contentContainerStyle={styles.sidebarScrollContent}
+              showsVerticalScrollIndicator={false}
             >
-              <Image
-                source={SCENE_IMAGES[t.thumb]}
-                style={styles.chipImg}
-                resizeMode="contain"
-              />
-              {done ? (
-                <View style={styles.chipCheck}>
-                  <Text style={styles.chipCheckText}>✔️</Text>
-                </View>
-              ) : null}
-              {finder !== null ? (
-                <View
-                  style={[
-                    styles.finderBadge,
-                    { borderColor: MP_PLAYERS[finder].color },
-                  ]}
-                  testID={`checklist-${t.id}-finder`}
-                >
-                  <Text style={styles.finderBadgeText}>
-                    {MP_PLAYERS[finder].emoji}
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          );
-        })}
+              <View
+                style={[styles.checklist, styles.checklistLandscape]}
+                testID="hidden-checklist"
+              >
+                {checklistChips}
+              </View>
+            </ScrollView>
+          </View>
+        )}
       </View>
-      <ScrollView contentContainerStyle={styles.scroll}>
-        <TapScene
-          source={SCENE_IMAGES[scene.image]}
-          sceneW={scene.w}
-          sceneH={scene.h}
-          displayWidth={sceneWidth}
-          boxes={boxes}
-          foundIds={foundIds}
-          ringColors={ringColors}
-          hintId={hintId}
-          onHit={onHit}
-          onMiss={() => {}}
-          testIDPrefix="hidden"
-          lang={lang}
-        />
-      </ScrollView>
       <WinOverlay
         visible={won}
         message={coop ? t(lang, "win.hiddenCoop") : t(lang, "win.hidden")}
@@ -365,7 +419,15 @@ export function HiddenGame({
   );
 }
 
-function TurnBanner({ turn, lang }: { turn: PlayerIx; lang: Lang }) {
+function TurnBanner({
+  turn,
+  lang,
+  compact,
+}: {
+  turn: PlayerIx;
+  lang: Lang;
+  compact?: boolean;
+}) {
   const p = MP_PLAYERS[turn];
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const prev = useRef(turn);
@@ -386,11 +448,12 @@ function TurnBanner({ turn, lang }: { turn: PlayerIx; lang: Lang }) {
       accessibilityLabel={turnLabel}
       style={[
         styles.banner,
+        compact && styles.bannerCompact,
         shadows.soft,
         { backgroundColor: p.color, transform: [{ scale: scaleAnim }] },
       ]}
     >
-      <Text style={styles.bannerText}>
+      <Text style={[styles.bannerText, compact && styles.bannerTextCompact]}>
         {p.emoji} {turnLabel}
       </Text>
     </Animated.View>
@@ -406,7 +469,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  bannerCompact: {
+    height: 38,
+    marginHorizontal: 0,
+    marginBottom: 6,
+    borderRadius: 12,
+    width: "100%",
+  },
   bannerText: { fontSize: 22, fontFamily: fonts.display, color: "#FFFFFF" },
+  bannerTextCompact: { fontSize: 15 },
+  main: { flex: 1 },
+  mainLandscape: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+    gap: 12,
+  },
+  sidebar: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    maxHeight: "100%",
+  },
+  sidebarScroll: {
+    flexGrow: 0,
+    maxHeight: "100%",
+  },
+  sidebarScrollContent: {
+    alignItems: "center",
+    paddingVertical: 2,
+  },
   checklist: {
     flexDirection: "row",
     justifyContent: "center",
@@ -414,6 +506,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 8,
     flexWrap: "wrap",
+  },
+  checklistLandscape: {
+    gap: 8,
+    paddingHorizontal: 0,
+    paddingBottom: 4,
   },
   chip: {
     width: 92,
@@ -424,6 +521,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     overflow: "hidden",
     padding: 5,
+  },
+  chipLandscape: {
+    width: 68,
+    height: 68,
+    borderRadius: 14,
+    borderWidth: 2.5,
+    padding: 4,
   },
   chipFound: { borderColor: colors.green },
   chipImg: { width: "100%", height: "100%" },
@@ -438,6 +542,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   chipCheckText: { fontSize: 24 },
+  chipCheckTextLandscape: { fontSize: 20 },
   finderBadge: {
     position: "absolute",
     right: 3,
@@ -450,12 +555,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  finderBadgeLandscape: {
+    right: 2,
+    bottom: 2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+  },
   finderBadgeText: { fontSize: 12, lineHeight: 15 },
+  finderBadgeTextLandscape: { fontSize: 11, lineHeight: 14 },
   scroll: {
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 12,
     paddingHorizontal: 12,
+  },
+  scrollLandscape: {
+    paddingBottom: 4,
+    paddingHorizontal: 4,
   },
 });
