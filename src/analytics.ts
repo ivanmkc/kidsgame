@@ -22,6 +22,7 @@ export function track(e: string, p: Record<string, string | number> = {}): void 
   if (Platform.OS !== 'web' || typeof window === 'undefined') return;
   try {
     const body = JSON.stringify({
+      kgb: true,
       e,
       p,
       sid: sessionId(),
