@@ -5,6 +5,7 @@ import {
   judgeTap,
   makeBellsRound,
   bellsLayout,
+  bellLabel,
   BellsRound,
 } from "../logic";
 
@@ -152,5 +153,16 @@ describe("bellsLayout", () => {
   it("clamps bellSize to accessible touch target on narrow viewports", () => {
     const tiny = bellsLayout(200, 200, 5);
     expect(tiny.bellSize).toBeGreaterThanOrEqual(44);
+  });
+});
+
+describe("bellLabel", () => {
+  it("formats bell accessibility label localized across languages", () => {
+    expect(bellLabel(0, "en")).toBe("Bell 1");
+    expect(bellLabel(1, "en")).toBe("Bell 2");
+    expect(bellLabel(0, "ja")).toBe("ベル 1");
+    expect(bellLabel(2, "ja")).toBe("ベル 3");
+    expect(bellLabel(0, "cmn")).toBe("铃铛 1");
+    expect(bellLabel(0, "yue")).toBe("鈴鐺 1");
   });
 });
