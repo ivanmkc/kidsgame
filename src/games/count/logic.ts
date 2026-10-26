@@ -190,6 +190,8 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
 
   if (v === state.round.answer) {
     deps.setLocked(true);
+    deps.clearTimeouts();
+    deps.setWrongPick(null);
     deps.sfx.good();
     const nextScore = state.score + 1;
     deps.setScore(nextScore);
