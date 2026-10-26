@@ -80,6 +80,7 @@ export function HiddenGame({
   const turnRef = useRef<PlayerIx>(0);
   const findsRef = useRef<Set<string>>(new Set());
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
+  const omittedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const settings = settingsFor(effDifficulty);
   const showTimer = settings.timer && !coop;
@@ -98,6 +99,7 @@ export function HiddenGame({
     setFinds([]);
     findsRef.current = new Set();
     setHintId(null);
+    if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
     if (sceneId) {
       // starting player alternates each scene
       const s = nextTurn(starterRef.current);
@@ -106,6 +108,13 @@ export function HiddenGame({
       setTurn(s);
     }
   }, [sceneId]);
+
+  useEffect(
+    () => () => {
+      if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
+    },
+    [],
+  );
 
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
   useSay(
@@ -193,7 +202,7 @@ export function HiddenGame({
     );
   }
 
-  const boxes = drawn.map((t) => ({ id: t.id, box: t }));
+  const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
   const ar = scene.w / scene.h;
 
   // Checklist row (~86px) + header (+ co-op turn banner) — fit the scene into what's left.
@@ -211,8 +220,24 @@ export function HiddenGame({
 
   const onHit = (id: string) => {
     if (won || mode === null) return;
+    const isDrawn = drawn.some((t) => t.id === id);
+    if (!isDrawn) {
+      sfx.tap();
+      say(t(lang, "hidden.prompt"));
+      setHintId(id);
+      if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
+      omittedHintTimer.current = setTimeout(() => {
+        setHintId((h) => (h === id ? null : h));
+      }, 1500);
+      return;
+    }
     if (findsRef.current.has(id)) return; // synchronous de-dupe under burst taps
     findsRef.current.add(id);
+    if (omittedHintTimer.current) {
+      clearTimeout(omittedHintTimer.current);
+      omittedHintTimer.current = null;
+      setHintId(null);
+    }
     sfx.good();
     // Attribution-by-turn: the turn holder gets credit for ANY find —
     // helping is the mechanic. Stamp before flipping the turn.
