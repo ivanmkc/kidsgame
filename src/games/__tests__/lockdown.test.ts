@@ -342,6 +342,25 @@ describe("buildGameSections", () => {
       .find((g) => g.id === "bingo");
     expect(jaBingo?.label).toBe(t("ja", "card.bingo.title"));
   });
+
+  it("derives section titles via t() and supports active language", () => {
+    const enSections = buildGameSections("en");
+    const jaSections = buildGameSections("ja");
+
+    expect(enSections.map((s) => s.title)).toEqual([
+      t("en", "menu.section.games"),
+      t("en", "menu.section.word"),
+      t("en", "menu.section.number"),
+      t("en", "menu.section.music"),
+    ]);
+
+    expect(jaSections.map((s) => s.title)).toEqual([
+      t("ja", "menu.section.games"),
+      t("ja", "menu.section.word"),
+      t("ja", "menu.section.number"),
+      t("ja", "menu.section.music"),
+    ]);
+  });
 });
 
 describe("countHidden", () => {
@@ -430,5 +449,9 @@ describe("LockdownSettings", () => {
       ),
     );
     expect(html).toContain(jaTitle);
+    expect(html).toContain(t("ja", "menu.section.games"));
+    expect(html).toContain(t("ja", "menu.section.word"));
+    expect(html).toContain(t("ja", "menu.section.number"));
+    expect(html).toContain(t("ja", "menu.section.music"));
   });
 });

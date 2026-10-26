@@ -113,28 +113,28 @@ export interface GameSection {
 export function buildGameSections(lang: Lang): GameSection[] {
   return [
     {
-      title: 'Games',
+      title: t(lang, 'menu.section.games'),
       games: GAME_CARDS.map((c) => ({
         id: c.route,
         label: t(lang, `card.${c.key}.title` as UIKey),
       })),
     },
     {
-      title: 'Word Games',
+      title: t(lang, 'menu.section.word'),
       games: WORD_CARDS.map((c) => ({
         id: c.route,
         label: t(lang, `card.${c.key}.title` as UIKey),
       })),
     },
     {
-      title: 'Number Games',
+      title: t(lang, 'menu.section.number'),
       games: NUMBER_CARDS.map((c) => ({
         id: c.route,
         label: t(lang, `card.${c.key}.title` as UIKey),
       })),
     },
     {
-      title: 'Music Games',
+      title: t(lang, 'menu.section.music'),
       games: MUSIC_CARDS.map((c) => ({
         id: c.route,
         label: t(lang, `card.${c.key}.title` as UIKey),
