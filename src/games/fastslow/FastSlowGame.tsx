@@ -36,6 +36,8 @@ interface Props {
   lang: Lang;
 }
 
+const LISTEN_DELAY_MS = 1000;
+
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const { width } = useWindowDimensions();
   const layout = fastSlowLayout(width);
@@ -78,7 +80,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) {
       setPhase("listen");
-      const timer = setTimeout(() => playRound(round), 400);
+      const timer = setTimeout(() => playRound(round), LISTEN_DELAY_MS);
       return () => {
         clearTimeout(timer);
         stopSequence();
@@ -176,7 +178,10 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       setWrongPick(null);
       setInstructionalTempo(null);
       setPhase("listen");
-      replayTimerRef.current = setTimeout(() => playRound(round), 400);
+      replayTimerRef.current = setTimeout(
+        () => playRound(round),
+        LISTEN_DELAY_MS,
+      );
     }
   };
 

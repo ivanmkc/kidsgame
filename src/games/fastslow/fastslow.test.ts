@@ -62,9 +62,9 @@ describe("FastSlowGame", () => {
       }),
     );
 
-    // Initially listen phase, waits 400ms to start sequence
+    // Initially listen phase, waits 1000ms to start sequence
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     expect(playSpy).toHaveBeenCalledTimes(1);
 
@@ -79,15 +79,15 @@ describe("FastSlowGame", () => {
     );
     fireEvent.click(btn);
 
-    // During the 1000ms delay + 400ms next round delay, nothing new plays
+    // During the 1000ms delay + 1000ms next round delay, nothing new plays
     act(() => {
       vi.advanceTimersByTime(1000);
     });
     expect(playSpy).toHaveBeenCalledTimes(1);
 
-    // After the new round is set, there's another 400ms before playSequence is called
+    // After the new round is set, there's another 1000ms before playSequence is called
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     expect(playSpy).toHaveBeenCalledTimes(2);
   });
@@ -119,9 +119,9 @@ describe("FastSlowGame", () => {
     expect(saySpy).toHaveBeenCalledWith("Listen...");
     expect(saySequenceSpy).not.toHaveBeenCalled();
 
-    // Advance 400ms so playRound starts playSequence
+    // Advance 1000ms so playRound starts playSequence
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     expect(playSpy).toHaveBeenCalledTimes(1);
 
@@ -143,11 +143,11 @@ describe("FastSlowGame", () => {
     fireEvent.click(screen.getByTestId("fastslow-replay"));
 
     expect(saySpy).toHaveBeenCalledWith("Listen...");
-    // playSequence is delayed by 400ms so narration isn't masked
+    // playSequence is delayed by 1000ms so narration isn't masked
     expect(playSpy).toHaveBeenCalledTimes(1);
 
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     expect(playSpy).toHaveBeenCalledTimes(2);
 
@@ -188,9 +188,9 @@ describe("FastSlowGame", () => {
 
     expect(saySpy).toHaveBeenCalledWith("きいてね…");
 
-    // Advance 400ms so playRound starts playSequence
+    // Advance 1000ms so playRound starts playSequence
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
 
     act(() => {
@@ -217,7 +217,7 @@ describe("FastSlowGame", () => {
     );
     expect(saySpy).toHaveBeenCalledWith("听一听…");
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     act(() => {
       if (playCb) playCb();
@@ -242,7 +242,7 @@ describe("FastSlowGame", () => {
     );
     expect(saySpy).toHaveBeenCalledWith("聽下…");
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     act(() => {
       if (playCb) playCb();
@@ -273,7 +273,7 @@ describe("FastSlowGame", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
     act(() => {
       if (playCb) playCb();
@@ -297,5 +297,64 @@ describe("FastSlowGame", () => {
     expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
       actualSpeed === "fast" ? "🐰 はやい" : "🐢 おそい",
     );
+  });
+
+  it("delays melody playback by 1000ms so opening narration ('Listen...') is not masked", () => {
+    vi.useFakeTimers();
+    let playCb: (() => void) | undefined;
+    const playSpy = vi
+      .spyOn(music, "playSequence")
+      .mockImplementation((_notes, _bpm, _inst, cb) => {
+        playCb = cb;
+        return () => {};
+      });
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+
+    render(
+      React.createElement(FastSlowGame, {
+        onHome: () => {},
+        difficulty: "easy",
+        lang: "en",
+      }),
+    );
+
+    expect(saySpy).toHaveBeenCalledWith("Listen...");
+    // At 400ms and 800ms, narration is still speaking; music sequence must not start yet
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSpy).not.toHaveBeenCalled();
+
+    // At 1000ms, narration has completed; music sequence starts
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    // Music finishes -> pick phase
+    act(() => {
+      if (playCb) playCb();
+    });
+
+    // Replay button also delays melody playback by 1000ms
+    saySpy.mockClear();
+    fireEvent.click(screen.getByTestId("fastslow-replay"));
+    expect(saySpy).toHaveBeenCalledWith("Listen...");
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(2);
   });
 });

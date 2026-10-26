@@ -108,7 +108,7 @@ describe("FastSlowGame UI interaction", () => {
     render(<FastSlowGame onHome={() => {}} difficulty="hard" lang="en" />);
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const playedSpeeds: ("fast" | "slow")[] = [];
@@ -130,7 +130,7 @@ describe("FastSlowGame UI interaction", () => {
         vi.advanceTimersByTime(1100);
       });
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
     }
 
@@ -151,7 +151,7 @@ describe("FastSlowGame UI interaction", () => {
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -178,7 +178,7 @@ describe("FastSlowGame UI interaction", () => {
       vi.advanceTimersByTime(1000);
     });
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     // Only one round transition should occur
@@ -205,7 +205,7 @@ describe("FastSlowGame UI interaction", () => {
     // Easy difficulty requires 8 rounds
     for (let i = 0; i < 8; i++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
@@ -232,7 +232,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Initial listen phase of new game
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
@@ -257,7 +257,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Advance through the initial listen phase so pick buttons appear
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const fastBtn = screen.getByTestId("fastslow-fast");
@@ -302,12 +302,12 @@ describe("FastSlowGame UI interaction", () => {
     );
     expect(within(activeWrongBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
 
-    // Advance through celebration (1000ms) and next round listen phase (450ms)
+    // Advance through celebration (1000ms) and next round listen phase (1050ms)
     act(() => {
       vi.advanceTimersByTime(1000);
     });
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     // In round 2 before any tap, neither button should show celebration sparkles
@@ -326,7 +326,7 @@ describe("FastSlowGame UI interaction", () => {
     // Play 7 rounds to reach the final round (easy requires 8 rounds)
     for (let i = 0; i < 7; i++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
@@ -342,7 +342,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Round 8: listen phase finishes, buttons ready
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
     const calls = vi.mocked(playSequence).mock.calls;
     const bpm = calls[calls.length - 1][1] as number;
@@ -387,7 +387,7 @@ describe("FastSlowGame UI interaction", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -418,7 +418,7 @@ describe("FastSlowGame UI interaction", () => {
     // Play 7 rounds to reach the final round (easy requires 8 rounds)
     for (let i = 0; i < 7; i++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
@@ -434,7 +434,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Round 8: listen phase finishes, buttons ready
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
     const calls = vi.mocked(playSequence).mock.calls;
     const bpm = calls[calls.length - 1][1] as number;
@@ -467,7 +467,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Fast-forward initial listen phase
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -520,7 +520,7 @@ describe("FastSlowGame UI interaction", () => {
       vi.advanceTimersByTime(1100);
     });
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     // Round 2 is loaded
@@ -536,7 +536,7 @@ describe("FastSlowGame UI interaction", () => {
 
     for (let roundIdx = 0; roundIdx < 8; roundIdx++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
 
       const calls = vi.mocked(playSequence).mock.calls;
@@ -599,7 +599,7 @@ describe("FastSlowGame UI interaction", () => {
     // First 3 rounds: correct on first try
     for (let i = 0; i < 3; i++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
@@ -617,7 +617,7 @@ describe("FastSlowGame UI interaction", () => {
     // Next 5 rounds: wrong pick first, then fallback pick
     for (let i = 3; i < 8; i++) {
       act(() => {
-        vi.advanceTimersByTime(450);
+        vi.advanceTimersByTime(1050);
       });
       const calls = vi.mocked(playSequence).mock.calls;
       const bpm = calls[calls.length - 1][1] as number;
@@ -653,7 +653,7 @@ describe("FastSlowGame UI interaction", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -688,7 +688,7 @@ describe("FastSlowGame UI interaction", () => {
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -747,7 +747,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Fast-forward initial listen delay to start round 1 melody
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -789,7 +789,7 @@ describe("FastSlowGame UI interaction", () => {
     });
     // Advance round 2 listen delay
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     // Capture calls after round 2 started
@@ -820,7 +820,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Fast-forward initial listen phase
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -884,7 +884,7 @@ describe("FastSlowGame UI interaction", () => {
 
     // Fast-forward initial listen phase
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const calls = vi.mocked(playSequence).mock.calls;
@@ -938,9 +938,9 @@ describe("FastSlowGame accessibility", () => {
     vi.useFakeTimers();
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-    // Fast-forward through the initial 400ms listen phase timer into the pick phase
+    // Fast-forward through the initial 1000ms listen phase timer into the pick phase
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(1050);
     });
 
     const fastBtn = screen.getByTestId("fastslow-fast");
@@ -963,7 +963,7 @@ describe("FastSlowGame accessibility", () => {
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="ja" />);
 
     act(() => {
-      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(1050);
     });
 
     const fastBtn = screen.getByTestId("fastslow-fast");
@@ -992,9 +992,9 @@ describe("FastSlowGame accessibility", () => {
 
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-    // Initial 400ms delay triggers playRound
+    // Initial 1000ms delay triggers playRound
     act(() => {
-      vi.advanceTimersByTime(400);
+      vi.advanceTimersByTime(1000);
     });
 
     // Complete playback so phase becomes 'pick'
@@ -1023,7 +1023,7 @@ describe("FastSlowGame accessibility", () => {
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(1050);
     });
 
     const fastBtn = screen.getByTestId("fastslow-fast");
@@ -1036,6 +1036,22 @@ describe("FastSlowGame accessibility", () => {
     expect(replayBtn.style.width).toBe("64px");
     expect(replayBtn.style.height).toBe("64px");
     expect(pickRow.style.gap).toBe("12px");
+
+    vi.useRealTimers();
+  });
+
+  it("clears listen timer and stops sequence when unmounted during listen phase", () => {
+    vi.useFakeTimers();
+
+    const { unmount } = render(
+      <FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
 
     vi.useRealTimers();
   });
