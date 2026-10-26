@@ -128,4 +128,56 @@ describe('SpotItGame language switch safety', () => {
     expect(vi.mocked(sound.sfx.good)).toHaveBeenCalled();
     expect(screen.getByTestId('spotit-score').textContent).not.toBe(scoreTextBefore);
   });
+
+  it('ignores rapid double tap on the correct symbol without skipping a round', () => {
+    const goodSpy = vi.spyOn(sound.sfx, 'good');
+
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} />);
+    fireEvent.pointerDown(document.body);
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+    expect(matchingId).toBeDefined();
+
+    const matchingButton = screen.getByTestId(`top-symbol-${matchingId}`);
+
+    goodSpy.mockClear();
+
+    act(() => {
+      fireEvent.click(matchingButton);
+      fireEvent.click(matchingButton);
+    });
+
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('spotit-score').textContent).toContain('1/10');
+
+    // The next round is now active and playable
+    const nextTopButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const nextBottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const nextTopSymbolIds = nextTopButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const nextBottomSymbolIds = nextBottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const nextMatchingId = nextTopSymbolIds.find((id) => nextBottomSymbolIds.includes(id));
+    expect(nextMatchingId).toBeDefined();
+
+    const nextMatchingButton = screen.getByTestId(`top-symbol-${nextMatchingId}`);
+    act(() => {
+      fireEvent.click(nextMatchingButton);
+    });
+
+    expect(goodSpy).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId('spotit-score').textContent).toContain('2/10');
+  });
 });
