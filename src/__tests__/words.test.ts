@@ -61,6 +61,9 @@ describe("words helpers", () => {
     const gift = WORDS.find((w) => w.icon === "gift")!;
     expect(soundsFor(gift)).toEqual(["puh", "guh"]);
 
+    const plane = WORDS.find((w) => w.icon === "plane")!;
+    expect(soundsFor(plane)).toEqual(["puh", "ah"]);
+
     const cat = WORDS.find((w) => w.icon === "cat")!;
     expect(soundsFor(cat)).toEqual(["kuh"]);
   });
