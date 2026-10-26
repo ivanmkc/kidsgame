@@ -18,8 +18,12 @@ const KEY = 'kgb.lang.v1';
 
 export function loadLang(): Lang {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    const v = window.localStorage?.getItem(KEY);
-    if (v === 'en' || v === 'ja' || v === 'cmn' || v === 'yue') return v;
+    try {
+      const v = window.localStorage?.getItem(KEY);
+      if (v === 'en' || v === 'ja' || v === 'cmn' || v === 'yue') return v;
+    } catch {
+      return 'en';
+    }
   }
   return 'en';
 }

@@ -67,6 +67,23 @@ describe('lang', () => {
       vi.unstubAllGlobals();
       expect(loadLang()).toBe('en');
     });
+
+    it('defaults to "en" when localStorage.getItem throws SecurityError', () => {
+      getItemMock.mockImplementation(() => {
+        throw new Error('SecurityError');
+      });
+      expect(loadLang()).toBe('en');
+    });
+
+    it('defaults to "en" when window.localStorage access throws SecurityError', () => {
+      const fakeWindow = {
+        get localStorage(): FakeStorage {
+          throw new Error('SecurityError');
+        },
+      };
+      vi.stubGlobal('window', fakeWindow);
+      expect(loadLang()).toBe('en');
+    });
   });
 
   describe('saveLang', () => {
