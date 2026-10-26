@@ -22,7 +22,7 @@ export function roundsToWin(d: Difficulty): number {
   return 12;
 }
 
-/** The kid hears note A then note B and taps 🐦 HIGH or 🐻 LOW for where
+/** The kid hears note A then note B and taps ↗️ HIGHER or ↘️ LOWER for where
  *  the SECOND note landed. The answer must therefore fall out of the two
  *  notes — never a coin flip, or the round is unwinnable by listening. */
 export function makeHighLowRound(rng: Rng, d: Difficulty): HighLowRound {

@@ -54,27 +54,47 @@ describe('highlow logic', () => {
     const highRound: HighLowRound = { noteA: 60, noteB: 72 };
     const lowRound: HighLowRound = { noteA: 72, noteB: 60 };
 
-    expect(getInstructionalFeedback(highRound, 'en')).toEqual(['High', 'Listen...']);
-    expect(getInstructionalFeedback(lowRound, 'en')).toEqual(['Low', 'Listen...']);
+    expect(getInstructionalFeedback(highRound, 'en')).toEqual(['Higher', 'Listen...']);
+    expect(getInstructionalFeedback(lowRound, 'en')).toEqual(['Lower', 'Listen...']);
 
-    expect(getInstructionalFeedback(highRound, 'ja')).toEqual(['たかい', 'きいてね…']);
-    expect(getInstructionalFeedback(lowRound, 'ja')).toEqual(['ひくい', 'きいてね…']);
+    expect(getInstructionalFeedback(highRound, 'ja')).toEqual(['たかくなった', 'きいてね…']);
+    expect(getInstructionalFeedback(lowRound, 'ja')).toEqual(['ひくくなった', 'きいてね…']);
 
-    expect(getInstructionalFeedback(highRound, 'cmn')).toEqual(['高', '听一听…']);
-    expect(getInstructionalFeedback(lowRound, 'cmn')).toEqual(['低', '听一听…']);
+    expect(getInstructionalFeedback(highRound, 'cmn')).toEqual(['更高', '听一听…']);
+    expect(getInstructionalFeedback(lowRound, 'cmn')).toEqual(['更低', '听一听…']);
 
-    expect(getInstructionalFeedback(highRound, 'yue')).toEqual(['高', '聽下…']);
-    expect(getInstructionalFeedback(lowRound, 'yue')).toEqual(['低', '聽下…']);
+    expect(getInstructionalFeedback(highRound, 'yue')).toEqual(['高咗', '聽下…']);
+    expect(getInstructionalFeedback(lowRound, 'yue')).toEqual(['低咗', '聽下…']);
+  });
+
+  it('correctly scores relative melodic direction for high soprano and low bass rounds', () => {
+    // High soprano drop (A4 440Hz -> F#4 370Hz)
+    const sopranoDrop: HighLowRound = { noteA: 69, noteB: 66 };
+    expect(correctAnswer(sopranoDrop)).toBe('low');
+    expect(isCorrect(sopranoDrop, 'low')).toBe(true);
+    expect(isCorrect(sopranoDrop, 'high')).toBe(false);
+    expect(getInstructionalFeedback(sopranoDrop, 'en')).toEqual(['Lower', 'Listen...']);
+    expect(getInstructionalFeedback(sopranoDrop, 'ja')).toEqual(['ひくくなった', 'きいてね…']);
+
+    // Low bass rise (F#3 185Hz -> C#4 277Hz)
+    const bassRise: HighLowRound = { noteA: 54, noteB: 61 };
+    expect(correctAnswer(bassRise)).toBe('high');
+    expect(isCorrect(bassRise, 'high')).toBe(true);
+    expect(isCorrect(bassRise, 'low')).toBe(false);
+    expect(getInstructionalFeedback(bassRise, 'en')).toEqual(['Higher', 'Listen...']);
+    expect(getInstructionalFeedback(bassRise, 'ja')).toEqual(['たかくなった', 'きいてね…']);
   });
 
   it('speechLines exports unique non-empty phrases spanning all languages', () => {
     const lines = speechLines();
     expect(lines.length).toBeGreaterThan(0);
     expect(new Set(lines).size).toBe(lines.length);
-    expect(lines).toContain('High');
-    expect(lines).toContain('Low');
+    expect(lines).toContain('Higher');
+    expect(lines).toContain('Lower');
     expect(lines).toContain('Listen...');
-    expect(lines).toContain('たかい');
-    expect(lines).toContain('高');
+    expect(lines).toContain('たかくなった');
+    expect(lines).toContain('更高');
+    expect(lines).toContain('高咗');
+    expect(lines).toContain('にばんめの おとは たかくなった？ ひくくなった？');
   });
 });
