@@ -6,14 +6,17 @@ import * as magic from '../magic';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../../../i18n';
 import { Lang } from '../../../lang';
-import { GestureResponderEvent, PanResponder, PanResponderCallbacks, PanResponderGestureState } from 'react-native';
 import { sfx } from '../../../sound';
+import {
+  GestureResponderEvent,
+  PanResponder,
+  type PanResponderCallbacks,
+  PanResponderGestureState,
+} from 'react-native';
 import { allSceneOptions } from '../../sceneOptions';
 import { StickerGame } from '../StickerGame';
 
-type FakeResponderEvent = Omit<Partial<GestureResponderEvent>, 'nativeEvent'> & {
-  nativeEvent?: Partial<GestureResponderEvent['nativeEvent']>;
-};
+type FakeResponderEvent = Partial<GestureResponderEvent>;
 type FakeGestureState = Partial<PanResponderGestureState>;
 
 // Intercept ScenePicker to verify props and simulate interactions
@@ -260,63 +263,166 @@ describe('StickerGame', () => {
     }
   });
 
-  it('handles tray item interactions including tap and drag/drop', () => {
+  it('handles tray item interactions including tap and drag/drop', async () => {
     const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
 
-    renderToString(<StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />);
+    const { container, unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
 
-    expect(configs.length).toBeGreaterThan(0);
-    const trayPan = configs[0];
-
-    const fakeEvent: FakeResponderEvent = {
-      nativeEvent: { pageX: 100, pageY: 100 },
-    };
-    const emptyEvent: FakeResponderEvent = {};
-    const emptyGesture: FakeGestureState = {};
-
-    // Verify shouldSetPanResponder
-    const callStart = trayPan.onStartShouldSetPanResponder as
-      ((e: FakeResponderEvent, g: FakeGestureState) => boolean) | undefined;
-    expect(callStart?.(emptyEvent, emptyGesture)).toBe(true);
-
-    const callRelease = trayPan.onPanResponderRelease as
-      ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-
-    // Tap release (< 6px) triggers onTap and addSticker (calling sfx.tap once)
-    expect(sfxTapSpy).toHaveBeenCalledTimes(0);
-    callRelease?.(fakeEvent, { dx: 2, dy: 2 });
-    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+    const trayItem = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    expect(trayItem).toBeDefined();
 
     // Trigger stage layout measurement (bounds: x: 10, y: 20, w: 300, h: 200)
     const stageProps = capturedViewProps['sticker-stage'];
     expect(stageProps).toBeDefined();
     stageProps?.onLayout?.({} as unknown);
 
-    // Drop release inside stage frame bounds triggers addSticker (sfx.tap called again)
-    const dropInEvent: FakeResponderEvent = {
-      nativeEvent: { pageX: 50, pageY: 50 },
-    };
-    callRelease?.(dropInEvent, { dx: 20, dy: 20 });
-    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
 
-    // Drop release outside stage frame bounds does not add sticker (sfx.tap count unchanged)
-    const dropOutEvent: FakeResponderEvent = {
-      nativeEvent: { pageX: 500, pageY: 500 },
+    const dispatchTouch = (type: 'start' | 'move' | 'end', x: number, y: number) => {
+      const touch = { pageX: x, pageY: y, clientX: x, clientY: y, identifier: 0, target: trayItem! };
+      if (type === 'start') {
+        fireEvent.touchStart(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else if (type === 'move') {
+        fireEvent.touchMove(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else {
+        fireEvent.touchEnd(trayItem!, { touches: [], changedTouches: [touch] });
+      }
     };
-    callRelease?.(dropOutEvent, { dx: 20, dy: 20 });
-    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
 
-    panSpy.mockRestore();
+    // 1. Tap: clicking tray item adds sticker to stage
+    expect(sfxTapSpy).toHaveBeenCalledTimes(0);
+    act(() => {
+      fireEvent.click(trayItem!);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+
+    // 2. Immediate vertical swipes (down or up without holding) do not claim responder, allowing drawer scroll
+    act(() => {
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('move', 100, 150);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+    act(() => {
+      dispatchTouch('end', 100, 150);
+    });
+
+    act(() => {
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('move', 100, 50);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+    act(() => {
+      dispatchTouch('end', 100, 50);
+    });
+
+    // Vertical swipe with ~20px horizontal drift (e.g. thumb arc) does not claim responder
+    act(() => {
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('move', 120, 180);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+    act(() => {
+      dispatchTouch('end', 120, 180);
+    });
+
+    // Touch movement > 8px (scroll swipe) before 200ms disarms long-press and cancels arming
+    act(() => {
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('move', 100, 130);
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 210));
+    });
+    expect(trayItem?.parentElement?.getAttribute('style') ?? '').not.toContain('scale(1.1)');
+    act(() => {
+      dispatchTouch('end', 100, 130);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+
+    // 3. Upward drag with long-press: arms visual lift, claims responder and spawns ghost
+    await act(async () => {
+      dispatchTouch('start', 500, 500);
+      await new Promise((r) => setTimeout(r, 210));
+    });
+    expect(trayItem?.parentElement?.getAttribute('style')).toContain('scale(1.1)');
+    act(() => {
+      dispatchTouch('move', 500, 450);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).not.toBeNull();
+    act(() => {
+      dispatchTouch('end', 500, 450);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+    expect(trayItem?.parentElement?.getAttribute('style') ?? '').not.toContain('scale(1.1)');
+    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+
+    // 4. Horizontal drag: claims responder immediately and spawns ghost
+    act(() => {
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('move', 130, 100);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).not.toBeNull();
+
+    // 5. Drop outside stage frame does not add sticker, clears ghost
+    act(() => {
+      dispatchTouch('move', 500, 500);
+      dispatchTouch('end', 500, 500);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+
+    // Horizontal drag then click must not call sfx.tap again
+    act(() => {
+      fireEvent.click(trayItem!);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(1);
+
+    // 6. Long-press then drag into stage bounds: survives tray scroll and drops sticker
+    await act(async () => {
+      dispatchTouch('start', 100, 100);
+      await new Promise((r) => setTimeout(r, 210));
+      dispatchTouch('move', 50, 50);
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).not.toBeNull();
+
+    // Scroll event on the tray must not terminate responder while dragging
+    const trayScroll = screen.getByTestId('sticker-tray-scroll');
+    act(() => {
+      fireEvent.scroll(trayScroll, { target: { scrollTop: 50 } });
+    });
+    expect(container.querySelector('[style*="z-index: 50"]')).not.toBeNull();
+
+    act(() => {
+      dispatchTouch('end', 50, 50);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('[style*="z-index: 50"]')).toBeNull();
+    expect(trayItem?.parentElement?.getAttribute('style') ?? '').not.toContain('scale(1.1)');
+
+    // 7. Long-press and release without moving adds sticker via onPressOut
+    await act(async () => {
+      dispatchTouch('start', 100, 100);
+      await new Promise((r) => setTimeout(r, 210));
+    });
+    expect(trayItem?.parentElement?.getAttribute('style')).toContain('scale(1.1)');
+    act(() => {
+      dispatchTouch('end', 100, 100);
+    });
+    expect(trayItem?.parentElement?.getAttribute('style') ?? '').not.toContain('scale(1.1)');
+    expect(sfxTapSpy).toHaveBeenCalledTimes(3);
+
+    // 8. Subsequent quick tap works on first try
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 60));
+      dispatchTouch('start', 100, 100);
+      dispatchTouch('end', 100, 100);
+      fireEvent.click(trayItem!);
+    });
+    expect(sfxTapSpy).toHaveBeenCalledTimes(4);
+
+    unmount();
   });
 
   it('renders a large, playable stage in mobile landscape viewports without collapsing', () => {
@@ -423,27 +529,14 @@ describe('StickerGame', () => {
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
     vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(c => c.onPanResponderRelease && (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')));
-    
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    if (release) {
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
       act(() => {
-        release({}, { dx: 0, dy: 0 });
+        fireEvent.click(trayBtn);
       });
     }
 
@@ -456,7 +549,6 @@ describe('StickerGame', () => {
     const toastText = await screen.findByText('まほうに しっぱいしちゃった — もういちど！');
     expect(toastText).toBeDefined();
 
-    panSpy.mockRestore();
     unmount();
   });
 
@@ -465,27 +557,14 @@ describe('StickerGame', () => {
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
     vi.spyOn(magic, 'callMagic').mockRejectedValue(new Error('network'));
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(c => c.onPanResponderRelease && (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')));
-    
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    if (release) {
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
       act(() => {
-        release({}, { dx: 0, dy: 0 });
+        fireEvent.click(trayBtn);
       });
     }
 
@@ -498,7 +577,25 @@ describe('StickerGame', () => {
     const toastText = await screen.findByText('まほうに しっぱいしちゃった — もういちど！');
     expect(toastText).toBeDefined();
 
-    panSpy.mockRestore();
+    unmount();
+  });
+
+  it('adds sticker to stage when tray item is tapped in the DOM', () => {
+    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayButtons = screen.getAllByRole('button');
+    const trayItem = trayButtons.find((btn) => btn.getAttribute('aria-label')?.includes('Add'));
+    expect(trayItem).toBeDefined();
+
+    if (trayItem) {
+      act(() => {
+        fireEvent.click(trayItem);
+      });
+      expect(sfxTapSpy).toHaveBeenCalled();
+    }
     unmount();
   });
 
@@ -513,30 +610,14 @@ describe('StickerGame', () => {
       });
     });
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(
-      c => c.onPanResponderRelease &&
-      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    if (release) {
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
       act(() => {
-        release({}, { dx: 0, dy: 0 });
+        fireEvent.click(trayBtn);
       });
     }
 
@@ -554,7 +635,6 @@ describe('StickerGame', () => {
     expect(screen.queryByTestId('magic-toast')).toBeNull();
     expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).toBeNull();
 
-    panSpy.mockRestore();
     unmount();
   });
 
@@ -569,9 +649,11 @@ describe('StickerGame', () => {
       });
     });
 
-    const configs: PanResponderCallbacks[] = [];
+    let placedConfig: PanResponderCallbacks | undefined;
     const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
+      if (config.onPanResponderRelease?.toString().includes('lastTap')) {
+        placedConfig = config;
+      }
       const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
         panHandlers: {
           onStartShouldSetResponder: () => true,
@@ -584,15 +666,10 @@ describe('StickerGame', () => {
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(
-      c => c.onPanResponderRelease &&
-      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    if (release) {
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
       act(() => {
-        release({}, { dx: 0, dy: 0 });
+        fireEvent.click(trayBtn);
       });
     }
 
@@ -602,10 +679,7 @@ describe('StickerGame', () => {
       fireEvent.click(magicBtn);
     });
 
-    const placedPan = configs.find(
-      c => c !== trayPan && c.onPanResponderRelease && c.onPanResponderRelease.toString().includes('lastTap'),
-    );
-    const placedRelease = placedPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
+    const placedRelease = placedConfig?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
 
     expect(placedRelease).toBeDefined();
     await act(async () => {
@@ -625,17 +699,6 @@ describe('StickerGame', () => {
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
     vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
@@ -643,16 +706,12 @@ describe('StickerGame', () => {
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(
-      c => c.onPanResponderRelease &&
-      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    expect(release).toBeDefined();
-    act(() => {
-      release!({}, { dx: 0, dy: 0 });
-    });
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => {
+        fireEvent.click(trayBtn);
+      });
+    }
 
     const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
 
@@ -678,7 +737,6 @@ describe('StickerGame', () => {
     expect(screen.queryByTestId('magic-toast')).toBeNull();
     expect(clearTimeoutSpy).toHaveBeenCalledWith(toastTimerId);
 
-    panSpy.mockRestore();
     unmount();
   });
 
@@ -687,17 +745,6 @@ describe('StickerGame', () => {
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
     vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
     const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
@@ -705,16 +752,12 @@ describe('StickerGame', () => {
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(
-      c => c.onPanResponderRelease &&
-      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    expect(release).toBeDefined();
-    act(() => {
-      release!({}, { dx: 0, dy: 0 });
-    });
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => {
+        fireEvent.click(trayBtn);
+      });
+    }
 
     const magicBtn = await screen.findByRole('button', { name: 'ほんものに する' });
 
@@ -731,7 +774,6 @@ describe('StickerGame', () => {
     unmount();
 
     expect(clearTimeoutSpy).toHaveBeenCalledWith(toastTimerId);
-    panSpy.mockRestore();
   });
 
   it('handles 90-second timeout by clearing pending state and displaying fizzle toast', async () => {
@@ -745,30 +787,14 @@ describe('StickerGame', () => {
       });
     });
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
 
-    const trayPan = configs.find(
-      c => c.onPanResponderRelease &&
-      (c.onPanResponderRelease.toString().includes('onTap()') || c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const release = trayPan?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-    if (release) {
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
       act(() => {
-        release({}, { dx: 0, dy: 0 });
+        fireEvent.click(trayBtn);
       });
     }
 
@@ -791,7 +817,6 @@ describe('StickerGame', () => {
     expect(screen.queryByTestId('magic-pending-1')).toBeNull();
     expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).not.toBeNull();
 
-    panSpy.mockRestore();
     unmount();
     vi.useRealTimers();
   });
@@ -804,38 +829,15 @@ describe('StickerGame', () => {
       image_b64: `b64_${args.item}`,
     }));
 
-    const configs: PanResponderCallbacks[] = [];
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      configs.push(config);
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
     );
 
-    const trayPans = configs.filter(
-      (c) =>
-        c.onPanResponderRelease &&
-        (c.onPanResponderRelease.toString().includes('onTap()') ||
-          c.onPanResponderRelease.toString().includes('onDrop')),
-    );
-
-    const releaseTray = (index: number) => {
-      const release = trayPans[index]?.onPanResponderRelease as
-        | ((e: FakeResponderEvent, g: FakeGestureState) => void)
-        | undefined;
-      release?.({}, { dx: 0, dy: 0 });
-    };
+    const trayBtns = screen.getAllByRole('button').filter(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
 
     // Place first sticker
     act(() => {
-      releaseTray(0);
+      fireEvent.click(trayBtns[0]);
     });
 
     expect(screen.getByTestId('sticker-placed-1')).not.toBeNull();
@@ -852,7 +854,7 @@ describe('StickerGame', () => {
 
     // Place second sticker
     act(() => {
-      releaseTray(1);
+      fireEvent.click(trayBtns[1]);
     });
 
     expect(screen.getByTestId('sticker-placed-2')).not.toBeNull();
@@ -870,7 +872,6 @@ describe('StickerGame', () => {
     expect(screen.getByTestId('sticker-placed-1')).not.toBeNull();
     expect(screen.getByTestId('magic-btn-1')).not.toBeNull();
 
-    panSpy.mockRestore();
     unmount();
   });
 

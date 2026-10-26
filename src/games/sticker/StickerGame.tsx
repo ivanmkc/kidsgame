@@ -333,6 +333,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
             })}
           </View>
           <ScrollView
+            testID="sticker-tray-scroll"
             style={styles.trayScroll}
             contentContainerStyle={styles.tray}
             showsVerticalScrollIndicator={false}
@@ -346,6 +347,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                 onDragMove={(px, py) => setGhost({ icon, x: px, y: py })}
                 onDrop={(px, py) => {
                   setGhost(null);
+                  if (px < 0 || py < 0) return;
                   const f = stageFrame.current;
                   if (px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h) {
                     addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 });
@@ -377,32 +379,100 @@ function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
 }) {
   const live = useRef({ onTap, onDragMove, onDrop });
   live.current = { onTap, onDragMove, onDrop };
+  const dragHandled = useRef(false);
+  const canDrag = useRef(false);
+  const [armed, setArmed] = useState(false);
+
   const responder = useRef<ReturnType<typeof PanResponder.create> | null>(null);
   if (!responder.current) {
+    const shouldClaim = (_e: unknown, g: { dx: number; dy: number }) => {
+      if (Math.abs(g.dx) > 15 && Math.abs(g.dx) > Math.abs(g.dy)) {
+        dragHandled.current = true;
+        return true;
+      }
+      if (canDrag.current && (Math.abs(g.dx) > 5 || Math.abs(g.dy) > 5)) {
+        dragHandled.current = true;
+        return true;
+      }
+      return false;
+    };
+
     responder.current = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: (e, g) => {
-        if (Math.abs(g.dx) + Math.abs(g.dy) > 6) {
-          live.current.onDragMove(e.nativeEvent.pageX, e.nativeEvent.pageY);
-        }
+      onStartShouldSetPanResponderCapture: () => {
+        dragHandled.current = false;
+        canDrag.current = false;
+        setArmed(false);
+        return false;
       },
-      onPanResponderRelease: (e, g) => {
-        if (Math.abs(g.dx) + Math.abs(g.dy) < 6) {
-          live.current.onTap();
-        } else {
-          live.current.onDrop(e.nativeEvent.pageX, e.nativeEvent.pageY);
-        }
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: shouldClaim,
+      onMoveShouldSetPanResponderCapture: shouldClaim,
+      onPanResponderTerminationRequest: () => false,
+      onPanResponderGrant: (e) => {
+        dragHandled.current = true;
+        live.current.onDragMove(e.nativeEvent.pageX, e.nativeEvent.pageY);
+      },
+      onPanResponderMove: (e) => {
+        live.current.onDragMove(e.nativeEvent.pageX, e.nativeEvent.pageY);
+      },
+      onPanResponderRelease: (e) => {
+        setArmed(false);
+        canDrag.current = false;
+        live.current.onDrop(e.nativeEvent.pageX, e.nativeEvent.pageY);
+        setTimeout(() => {
+          dragHandled.current = false;
+        }, 50);
+      },
+      onPanResponderTerminate: () => {
+        setArmed(false);
+        canDrag.current = false;
+        live.current.onDrop(-1, -1);
+        setTimeout(() => {
+          dragHandled.current = false;
+        }, 50);
       },
     });
   }
   return (
     <View
       {...responder.current.panHandlers}
-      testID={`sticker-tray-${icon}`}
-      accessibilityLabel={t(lang, 'sticker.a11yAdd', { icon: stickerLabel(icon, lang) })}
-      style={[styles.trayItem, shadows.soft]}
+      style={[
+        styles.trayItem,
+        shadows.soft,
+        armed && { transform: [{ scale: 1.1 }], borderColor: colors.gold },
+      ]}
     >
-      <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+      <Pressable
+        delayLongPress={150}
+        onLongPress={() => {
+          canDrag.current = true;
+          setArmed(true);
+        }}
+        onPressOut={() => {
+          if (canDrag.current && !dragHandled.current) {
+            live.current.onTap();
+          }
+          if (!dragHandled.current) {
+            canDrag.current = false;
+            setArmed(false);
+          }
+        }}
+        onPress={() => {
+          setArmed(false);
+          canDrag.current = false;
+          if (dragHandled.current) {
+            dragHandled.current = false;
+            return;
+          }
+          live.current.onTap();
+        }}
+        testID={`sticker-tray-${icon}`}
+        accessibilityLabel={t(lang, 'sticker.a11yAdd', { icon: stickerLabel(icon, lang) })}
+        accessibilityRole="button"
+        style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+      </Pressable>
     </View>
   );
 }
