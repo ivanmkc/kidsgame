@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as sound from '../../../sound';
 import { sfx } from '../../../sound';
 import { manifest, Story } from '../../../manifest';
+import { LangContext } from '../../../components/GameShell';
+import { Lang } from '../../../lang';
 import { StoryGame } from '../StoryGame';
 
 describe('StoryGame i18n', () => {
@@ -287,4 +289,57 @@ describe('StoryGame i18n', () => {
     fireEvent.click(choiceA);
     expect(saySpy).toHaveBeenCalledWith('跑去森林！ 🌲');
   });
+
+  it('does not replay failure sound effect when language is switched on a bad ending node', () => {
+    const badEndStory: Story = {
+      id: 'test-bad-end-lang-switch',
+      title: 'Bad Ending Story',
+      titleT: { ja: 'ざんねんな おはなし' },
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Oops! That path was blocked.',
+          t: { ja: 'おっと！ いきどまり だよ。' },
+          choices: [],
+          bad: true,
+        },
+      },
+    };
+    manifest.stories?.push(badEndStory);
+
+    const boingSpy = vi.spyOn(sfx, 'boing');
+    const saySeqSpy = vi.spyOn(sound, 'saySequence');
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>('en');
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === 'en' ? 'ja' : 'en')),
+          }}
+        >
+          <StoryGame
+            sceneId="test-bad-end-lang-switch"
+            onHome={noop}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    expect(boingSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).toHaveBeenCalledWith(['Oops! That path was blocked.']);
+
+    fireEvent.click(screen.getByTestId('lang-cycle'));
+
+    expect(boingSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).toHaveBeenCalledWith(['おっと！ いきどまり だよ。']);
+    expect(screen.getByText('おっと！ いきどまり だよ。')).toBeTruthy();
+  });
 });
+
