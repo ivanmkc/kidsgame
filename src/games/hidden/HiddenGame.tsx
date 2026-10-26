@@ -84,7 +84,7 @@ export function HiddenGame({
   const omittedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const settings = settingsFor(effDifficulty);
-  const showTimer = settings.timer && !coop;
+  const showTimer = mode !== null && settings.timer && !coop;
 
   const drawn = useMemo(() => {
     if (!scene) return [];
@@ -139,7 +139,8 @@ export function HiddenGame({
   // Gentle auto-hint: pulse one random unfound target after inactivity delay
   // ~2.5s. Resets on find/turn/scene. Disabled on Hard (hiddenHintSecs: Infinity).
   useEffect(() => {
-    if (!scene || won || !isFinite(settings.hiddenHintSecs)) return;
+    if (!scene || won || mode === null || !isFinite(settings.hiddenHintSecs))
+      return;
     setHintId(null);
     const timers: ReturnType<typeof setTimeout>[] = [];
     timers.push(
@@ -154,7 +155,7 @@ export function HiddenGame({
       }, settings.hiddenHintSecs * 1000),
     );
     return () => timers.forEach(clearTimeout);
-  }, [coop, scene, won, drawn, finds, turn, settings.hiddenHintSecs]);
+  }, [coop, scene, won, drawn, finds, turn, settings.hiddenHintSecs, mode]);
 
   const { width, height } = useWindowDimensions();
 
