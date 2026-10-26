@@ -398,6 +398,40 @@ describe("logic: applyPickAnswer", () => {
     expect(sfxSpy.wrong).toHaveBeenCalledTimes(1);
     expect(setWrongPick).toHaveBeenCalledWith(dummyRound.answer + 1);
   });
+
+  it("clears pending timeouts and resets wrong pick when correct answer is picked", () => {
+    const clearTimeouts = vi.fn();
+    const setWrongPick = vi.fn();
+    const state = {
+      won: false,
+      phase: "quiz",
+      locked: false,
+      score: 0,
+      round: dummyRound,
+      roundsToWin: 5,
+      lang: "en" as const,
+    };
+    const deps = {
+      sfx: { good: vi.fn(), wrong: vi.fn() },
+      say: vi.fn(),
+      sayThen: vi.fn(),
+      clearTimeouts,
+      setTimeout: vi.fn(),
+      makeNextRound: vi.fn(() => dummyRound),
+      setScore: vi.fn(),
+      setLocked: vi.fn(),
+      setRound: vi.fn(),
+      setRoundNo: vi.fn(),
+      setTapped: vi.fn(),
+      setPhase: vi.fn(),
+      setWrongPick,
+      setWon: vi.fn(),
+    };
+
+    applyPickAnswer(dummyRound.answer, state, deps);
+    expect(clearTimeouts).toHaveBeenCalledTimes(1);
+    expect(setWrongPick).toHaveBeenCalledWith(null);
+  });
 });
 
 describe("CountGame double-tap lock", () => {
