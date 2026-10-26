@@ -369,4 +369,9 @@ export const CMN: Table = {
   'shape.square': '正方形',
   'shape.triangle': '三角形',
   'shape.star': '星形',
+  'sound.dog': '汪汪',
+  'sound.cat': '喵',
+  'sound.lion': '吼',
+  'sound.frog': '呱呱',
+  'sound.pig': '哼哼',
 };

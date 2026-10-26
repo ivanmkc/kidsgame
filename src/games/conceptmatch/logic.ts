@@ -24,7 +24,10 @@ export type ConceptMatchDeck =
   | "color-word"
   | "numerals-han"
   | "numerals-dots"
-  | "shapes-objects";
+  | "shapes-objects"
+  | "animals-sounds";
+
+export const ANIMALS: string[] = ["dog", "cat", "lion", "frog", "pig"];
 
 export interface ShapePair {
   shape: string;
@@ -275,6 +278,34 @@ export function buildBoard(
           conceptId: entry.shape,
           display: { type: "icon", icon: entry.object },
           speech,
+        },
+      ];
+    });
+    return shuffle(rng, cards);
+  }
+
+  if (deck === "animals-sounds") {
+    const pool = shuffle(rng, ANIMALS);
+    const chosen = pool.slice(0, pairs);
+    const cards: ConceptMatchCard[] = chosen.flatMap((animal) => {
+      const entry = WORDS.find((w) => w.icon === animal);
+      if (!entry) {
+        throw new Error(`Unknown animal: ${animal}`);
+      }
+      const speech = wordFor(entry, lang).text;
+      const sound = t(lang, `sound.${animal}` as UIKey);
+      return [
+        {
+          key: `${animal}-icon`,
+          conceptId: animal,
+          display: { type: "icon", icon: animal },
+          speech,
+        },
+        {
+          key: `${animal}-sound`,
+          conceptId: animal,
+          display: { type: "audio", text: sound },
+          speech: sound,
         },
       ];
     });
