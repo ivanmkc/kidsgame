@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import * as music from "../../../music";
@@ -57,5 +57,58 @@ describe("CarModeGame unmount", () => {
     unmount();
 
     expect(stopNarrationSpy).toHaveBeenCalled();
+  });
+
+  it("clears reveal auto-advance timers when unmounted during reveal phase", () => {
+    vi.useFakeTimers();
+    const advanceSpy = vi.spyOn(logic, "advance");
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "reveal",
+      roundIdx: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
+
+    unmount();
+
+    // Fast-forward through all timers.
+    vi.runAllTimers();
+
+    expect(advanceSpy).not.toHaveBeenCalled();
+  });
+
+  it("clears replay timers when unmounted during boops prompt replay", () => {
+    vi.useFakeTimers();
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "gap",
+      roundIdx: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
+
+    // Advance past phase debounce
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    sayThenSpy.mockClear();
+
+    // Tap to trigger replay
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+
+    expect(sayThenSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    // Fast-forward through all timers.
+    vi.runAllTimers();
+
+    expect(sayThenSpy).not.toHaveBeenCalled();
   });
 });

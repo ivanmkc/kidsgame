@@ -18,6 +18,7 @@ import { fonts, shadows } from "../../theme";
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from "./packs";
 import {
   CarModeState,
+  advance,
   currentRound,
   isComplete,
   startState,
@@ -27,9 +28,12 @@ import {
   handleTapTimeout,
 } from "./logic";
 
+import { Difficulty, DifficultyFilter } from "../../difficulty";
+
 interface Props {
   onHome: () => void;
   lang: Lang;
+  difficulty?: Difficulty | DifficultyFilter;
 }
 
 const PACK_COLORS: Record<PackId, string> = {
@@ -43,12 +47,18 @@ const PACK_COLORS: Record<PackId, string> = {
 
 const TAP_WINDOW_MS = 600;
 const PHASE_DEBOUNCE_MS = 400;
+const REVEAL_AUTO_ADVANCE_MS = 3500;
+const REVEAL_SPEECH_CAP_MS = 4000;
 
-export function CarModeGame({ onHome, lang }: Props) {
+export function CarModeGame({ onHome, lang, difficulty }: Props) {
+  const activeDifficulty =
+    difficulty && difficulty !== "all" ? difficulty : undefined;
   const { isValid } = useLangEpoch(lang);
   const [packId, setPackId] = useState<PackId>("boops");
   const [state, setState] = useState<CarModeState>(() =>
-    startState("boops", Math.floor(Math.random() * 1e9)),
+    activeDifficulty
+      ? startState("boops", Math.floor(Math.random() * 1e9), activeDifficulty)
+      : startState("boops", Math.floor(Math.random() * 1e9)),
   );
   const [celebrate, setCelebrate] = useState(0);
   const [gameKey, setGameKey] = useState(0);
@@ -61,6 +71,9 @@ export function CarModeGame({ onHome, lang }: Props) {
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boopsTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const startRoundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revealCapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const round = currentRound(state);
 
@@ -76,6 +89,18 @@ export function CarModeGame({ onHome, lang }: Props) {
     if (startRoundTimerRef.current) {
       clearTimeout(startRoundTimerRef.current);
       startRoundTimerRef.current = null;
+    }
+    if (replayTimerRef.current) {
+      clearTimeout(replayTimerRef.current);
+      replayTimerRef.current = null;
+    }
+    if (revealTimerRef.current) {
+      clearTimeout(revealTimerRef.current);
+      revealTimerRef.current = null;
+    }
+    if (revealCapTimerRef.current) {
+      clearTimeout(revealCapTimerRef.current);
+      revealCapTimerRef.current = null;
     }
     boopsTimersRef.current.forEach(clearTimeout);
     boopsTimersRef.current = [];
@@ -105,6 +130,12 @@ export function CarModeGame({ onHome, lang }: Props) {
           clearTimeout(gapTimerRef.current);
           gapTimerRef.current = null;
         }
+        if (replayTimerRef.current) {
+          clearTimeout(replayTimerRef.current);
+          replayTimerRef.current = null;
+        }
+        boopsTimersRef.current.forEach(clearTimeout);
+        boopsTimersRef.current = [];
       }
 
       if (current.pendingTaps === 0 && next.pendingTaps === 1) {
@@ -140,7 +171,6 @@ export function CarModeGame({ onHome, lang }: Props) {
   );
 
   const playBoops = useCallback((n: number) => {
-    primeMusic();
     const PENTATONIC = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81];
     for (let i = 0; i < n; i++) {
       const t = setTimeout(
@@ -217,9 +247,94 @@ export function CarModeGame({ onHome, lang }: Props) {
     if (state.phase === "reveal" && round) {
       if (round.sfx === "boing") sfx.boing();
       else if (round.sfx === "good") sfx.good();
-      saySequence(round.reveal);
+
+      let scheduled = false;
+      const scheduleAdvance = () => {
+        if (scheduled) return;
+        scheduled = true;
+        if (revealCapTimerRef.current) {
+          clearTimeout(revealCapTimerRef.current);
+          revealCapTimerRef.current = null;
+        }
+        revealTimerRef.current = setTimeout(() => {
+          revealTimerRef.current = null;
+          if (!isValid()) return;
+          if (
+            stateRef.current.phase === "reveal" &&
+            currentRound(stateRef.current) === round
+          ) {
+            applyStateTransition(advance(stateRef.current));
+          }
+        }, REVEAL_AUTO_ADVANCE_MS);
+      };
+
+      saySequence(round.reveal, scheduleAdvance);
+      revealCapTimerRef.current = setTimeout(
+        scheduleAdvance,
+        REVEAL_SPEECH_CAP_MS,
+      );
     }
+    return () => {
+      if (revealTimerRef.current) {
+        clearTimeout(revealTimerRef.current);
+        revealTimerRef.current = null;
+      }
+      if (revealCapTimerRef.current) {
+        clearTimeout(revealCapTimerRef.current);
+        revealCapTimerRef.current = null;
+      }
+    };
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const replayPrompt = useCallback(
+    (r: Round) => {
+      stopNarration();
+      if (gapTimerRef.current) {
+        clearTimeout(gapTimerRef.current);
+        gapTimerRef.current = null;
+      }
+      if (replayTimerRef.current) {
+        clearTimeout(replayTimerRef.current);
+        replayTimerRef.current = null;
+      }
+      boopsTimersRef.current.forEach(clearTimeout);
+      boopsTimersRef.current = [];
+
+      const speakPrompt = () => {
+        sayThen(r.prompt, () => {
+          if (!isValid()) return;
+          if (
+            stateRef.current.phase === "gap" &&
+            currentRound(stateRef.current) === r
+          ) {
+            gapTimerRef.current = setTimeout(() => {
+              if (!isValid()) return;
+              applyStateTransition(toReveal(stateRef.current));
+            }, r.gapMs);
+          }
+        });
+      };
+
+      if (r.pack === "boops" && r.noteCount) {
+        playBoops(r.noteCount);
+        const boopsDuration = (r.noteCount - 1) * 400 + 800;
+        replayTimerRef.current = setTimeout(() => {
+          replayTimerRef.current = null;
+          if (!isValid()) return;
+          if (
+            stateRef.current.phase !== "gap" ||
+            currentRound(stateRef.current) !== r
+          ) {
+            return;
+          }
+          speakPrompt();
+        }, boopsDuration);
+      } else {
+        speakPrompt();
+      }
+    },
+    [applyStateTransition, isValid, playBoops],
+  );
 
   const onTap = useCallback(() => {
     if (Date.now() - phaseEnterTime.current < PHASE_DEBOUNCE_MS) {
@@ -238,9 +353,22 @@ export function CarModeGame({ onHome, lang }: Props) {
       return;
     }
 
+    if (current.phase === "gap") {
+      const r = currentRound(current);
+      if (r?.twoTapAnswer) {
+        const next = handleTap(current);
+        applyStateTransition(next);
+        return;
+      }
+      if (r) {
+        replayPrompt(r);
+        return;
+      }
+    }
+
     const next = handleTap(current);
     applyStateTransition(next);
-  }, [applyStateTransition]);
+  }, [applyStateTransition, replayPrompt]);
 
   const switchPack = useCallback(
     (id: PackId) => {
@@ -248,12 +376,14 @@ export function CarModeGame({ onHome, lang }: Props) {
       stopNarration();
       setPackId(id);
       setCelebrate(0);
-      const next = startState(id, Math.floor(Math.random() * 1e9));
+      const next = activeDifficulty
+        ? startState(id, Math.floor(Math.random() * 1e9), activeDifficulty)
+        : startState(id, Math.floor(Math.random() * 1e9));
       stateRef.current = next;
       setState(next);
       setGameKey((k) => k + 1);
     },
-    [clearTimers],
+    [clearTimers, activeDifficulty],
   );
 
   const langMountedRef = useRef(false);
