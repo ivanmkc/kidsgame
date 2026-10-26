@@ -494,6 +494,19 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("renders drum with accessibilityRole button and localized label", () => {
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+    const drum = screen.getByTestId("echobeat-drum");
+    expect(drum.getAttribute("role")).toBe("button");
+    expect(drum.getAttribute("aria-label")).toBe("Tap the rhythm you hear!");
+  });
+
+  it("localizes drum accessibility label when lang is ja", () => {
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    const drum = screen.getByTestId("echobeat-drum");
+    expect(drum.getAttribute("aria-label")).toBe("きこえた リズムを タップ！");
+  });
 });
 
 function setViewport(width: number, height: number) {

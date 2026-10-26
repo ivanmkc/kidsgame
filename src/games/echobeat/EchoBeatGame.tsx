@@ -331,6 +331,8 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
           <Pressable
             onPress={onTap}
             testID="echobeat-drum"
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, "shell.echobeat.sub")}
             disabled={!canTapDrum}
             style={({ pressed }) => [
               styles.drum,
