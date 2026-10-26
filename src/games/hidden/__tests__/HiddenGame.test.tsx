@@ -1,12 +1,18 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { t } from '../../../i18n';
-import { manifest } from '../../../manifest';
-import { HiddenGame } from '../HiddenGame';
+import React from "react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { t } from "../../../i18n";
+import { manifest } from "../../../manifest";
+import { HiddenGame } from "../HiddenGame";
 
-describe('HiddenGame localization', () => {
+describe("HiddenGame localization", () => {
   const noop = () => {};
 
   afterEach(() => {
@@ -14,7 +20,7 @@ describe('HiddenGame localization', () => {
     cleanup();
   });
 
-  it('renders TurnBanner with Japanese text and accessibilityLabel in 2P mode', () => {
+  it("renders TurnBanner with Japanese text and accessibilityLabel in 2P mode", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -28,16 +34,16 @@ describe('HiddenGame localization', () => {
     );
 
     // Enter 2-player mode via mode picker
-    fireEvent.click(screen.getByTestId('mp-choose-2p'));
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
 
-    const banner = screen.getByTestId('hidden-turn-banner');
+    const banner = screen.getByTestId("hidden-turn-banner");
     expect(banner).toBeDefined();
-    expect(banner.getAttribute('aria-label')).toBe('Foxyの ばん！');
+    expect(banner.getAttribute("aria-label")).toBe("Foxyの ばん！");
     expect(screen.getByText(/Foxyの ばん！/)).toBeDefined();
     expect(screen.queryByText(/Foxy's turn/)).toBeNull();
   });
 
-  it('renders TurnBanner with English text in en mode', () => {
+  it("renders TurnBanner with English text in en mode", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -50,15 +56,15 @@ describe('HiddenGame localization', () => {
       />,
     );
 
-    fireEvent.click(screen.getByTestId('mp-choose-2p'));
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
 
-    const banner = screen.getByTestId('hidden-turn-banner');
+    const banner = screen.getByTestId("hidden-turn-banner");
     expect(banner).toBeDefined();
-    expect(banner.getAttribute('aria-label')).toBe("Foxy's turn!");
+    expect(banner.getAttribute("aria-label")).toBe("Foxy's turn!");
     expect(screen.getByText(/Foxy's turn!/)).toBeDefined();
   });
 
-  it('renders TurnBanner in Chinese and Cantonese', () => {
+  it("renders TurnBanner in Chinese and Cantonese", () => {
     const { unmount: unmountCmn } = render(
       <HiddenGame
         onHome={noop}
@@ -70,7 +76,7 @@ describe('HiddenGame localization', () => {
         lang="cmn"
       />,
     );
-    fireEvent.click(screen.getByTestId('mp-choose-2p'));
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
     expect(screen.getByText(/轮到Foxy了！/)).toBeDefined();
     unmountCmn();
     cleanup();
@@ -86,17 +92,19 @@ describe('HiddenGame localization', () => {
         lang="yue"
       />,
     );
-    fireEvent.click(screen.getByTestId('mp-choose-2p'));
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
     expect(screen.getByText(/到Foxy喇！/)).toBeDefined();
   });
 
-  it('speaks localized narration cues for solo play and 2P turn changes', () => {
+  it("speaks localized narration cues for solo play and 2P turn changes", () => {
     const speakSpy = vi.fn();
     (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
       speak: speakSpy,
       cancel: vi.fn(),
     };
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
       text: string;
       constructor(text: string) {
         this.text = text;
@@ -114,7 +122,9 @@ describe('HiddenGame localization', () => {
         lang="ja"
       />,
     );
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: 'どこで さがす？' }));
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: "どこで さがす？" }),
+    );
     unmountPicker();
     cleanup();
     speakSpy.mockClear();
@@ -133,7 +143,7 @@ describe('HiddenGame localization', () => {
     );
     expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        text: 'かくれてる ものを ぜんぶ みつけよう！',
+        text: "かくれてる ものを ぜんぶ みつけよう！",
       }),
     );
     unmountSolo();
@@ -152,17 +162,21 @@ describe('HiddenGame localization', () => {
         lang="ja"
       />,
     );
-    fireEvent.click(screen.getByTestId('mp-choose-2p'));
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: 'Foxyの ばん！' }));
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: "Foxyの ばん！" }),
+    );
   });
 
-  it('does not speak intro prompts when mode is null (ModePicker is visible)', () => {
+  it("does not speak intro prompts when mode is null (ModePicker is visible)", () => {
     const speakSpy = vi.fn();
     (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
       speak: speakSpy,
       cancel: vi.fn(),
     };
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
       text: string;
       constructor(text: string) {
         this.text = text;
@@ -180,14 +194,20 @@ describe('HiddenGame localization', () => {
         lang="ja"
       />,
     );
-    expect(screen.getByTestId('mode-picker')).toBeDefined();
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'mp.title') }));
-    expect(speakSpy).not.toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'picker.hidden') }));
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "mp.title") }),
+    );
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "picker.hidden") }),
+    );
 
     // Choosing solo speaks the picker prompt
     speakSpy.mockClear();
-    fireEvent.click(screen.getByTestId('mp-choose-1p'));
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'picker.hidden') }));
+    fireEvent.click(screen.getByTestId("mp-choose-1p"));
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "picker.hidden") }),
+    );
 
     unmountPicker();
     cleanup();
@@ -205,17 +225,23 @@ describe('HiddenGame localization', () => {
         lang="ja"
       />,
     );
-    expect(screen.getByTestId('mode-picker')).toBeDefined();
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'mp.title') }));
-    expect(speakSpy).not.toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'hidden.prompt') }));
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "mp.title") }),
+    );
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "hidden.prompt") }),
+    );
 
     // Choosing solo speaks the game prompt
     speakSpy.mockClear();
-    fireEvent.click(screen.getByTestId('mp-choose-1p'));
-    expect(speakSpy).toHaveBeenCalledWith(expect.objectContaining({ text: t('ja', 'hidden.prompt') }));
+    fireEvent.click(screen.getByTestId("mp-choose-1p"));
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "hidden.prompt") }),
+    );
   });
 
-  it('renders TapScene targets with localized accessibilityLabel in active scene', () => {
+  it("renders TapScene targets with localized accessibilityLabel in active scene", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -228,17 +254,19 @@ describe('HiddenGame localization', () => {
       />,
     );
 
-    const targets = screen.getAllByRole('button').filter((el) =>
-      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
-    );
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
     expect(targets.length).toBeGreaterThan(0);
     for (const target of targets) {
-      expect(target.getAttribute('aria-label')).toBe(t('ja', 'a11y.target'));
+      expect(target.getAttribute("aria-label")).toBe(t("ja", "a11y.target"));
     }
   });
 });
 
-describe('HiddenGame gentle auto-hint', () => {
+describe("HiddenGame gentle auto-hint", () => {
   const noop = () => {};
 
   beforeEach(() => {
@@ -252,7 +280,7 @@ describe('HiddenGame gentle auto-hint', () => {
     cleanup();
   });
 
-  it('triggers a visual hint on an unfound target after 15 seconds of inactivity in solo mode', () => {
+  it("triggers a visual hint on an unfound target after 15 seconds of inactivity in solo mode", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -264,9 +292,11 @@ describe('HiddenGame gentle auto-hint', () => {
       />,
     );
 
-    const targets = screen.getAllByRole('button').filter((el) =>
-      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
-    );
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
     expect(targets.length).toBeGreaterThan(0);
     expect(targets.every((t) => t.children.length === 0)).toBe(true);
 
@@ -282,7 +312,7 @@ describe('HiddenGame gentle auto-hint', () => {
     expect(hinted.length).toBe(1);
   });
 
-  it('clears the hint after its 2.5-second duration', () => {
+  it("clears the hint after its 2.5-second duration", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -294,9 +324,11 @@ describe('HiddenGame gentle auto-hint', () => {
       />,
     );
 
-    const targets = screen.getAllByRole('button').filter((el) =>
-      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
-    );
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
 
     act(() => {
       vi.advanceTimersByTime(15000);
@@ -309,7 +341,7 @@ describe('HiddenGame gentle auto-hint', () => {
     expect(targets.every((t) => t.children.length === 0)).toBe(true);
   });
 
-  it('resets the 15-second inactivity timer when a target is found', () => {
+  it("resets the 15-second inactivity timer when a target is found", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -321,9 +353,11 @@ describe('HiddenGame gentle auto-hint', () => {
       />,
     );
 
-    const targets = screen.getAllByRole('button').filter((el) =>
-      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
-    );
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
     expect(targets.length).toBeGreaterThan(1);
 
     // Wait 10 seconds (no hint yet)
@@ -353,7 +387,7 @@ describe('HiddenGame gentle auto-hint', () => {
     expect(remaining.filter((t) => t.children.length > 0).length).toBe(1);
   });
 
-  it('does not trigger visual hints on hard difficulty after 15 seconds of inactivity', () => {
+  it("does not trigger visual hints on hard difficulty after 15 seconds of inactivity", () => {
     render(
       <HiddenGame
         onHome={noop}
@@ -366,9 +400,11 @@ describe('HiddenGame gentle auto-hint', () => {
       />,
     );
 
-    const targets = screen.getAllByRole('button').filter((el) =>
-      el.getAttribute('data-testid')?.startsWith('hidden-target-'),
-    );
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("hidden-target-"),
+      );
     expect(targets.length).toBeGreaterThan(0);
     expect(targets.every((t) => t.children.length === 0)).toBe(true);
 
@@ -376,5 +412,30 @@ describe('HiddenGame gentle auto-hint', () => {
       vi.advanceTimersByTime(15000);
     });
     expect(targets.every((t) => t.children.length === 0)).toBe(true);
+  });
+});
+
+describe("HiddenGame difficulty settings", () => {
+  const noop = () => {};
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("applies easy settings and hides timer when easy filter is selected even if parent difficulty is hard", () => {
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="hard"
+        filter="easy"
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.queryByTestId("hidden-timer")).toBeNull();
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
   });
 });
