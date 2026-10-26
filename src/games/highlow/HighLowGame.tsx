@@ -290,7 +290,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   },
                 ]}
               >
-                {instructionalDirection === "high" ? "🐦 " : "🐻 "}
+                {instructionalDirection === "high" ? "↗️ " : "↘️ "}
                 {t(
                   lang,
                   instructionalDirection === "high"
@@ -334,7 +334,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.pickEmoji}>🐦</Text>
+                <Text style={styles.pickEmoji}>↗️</Text>
                 <Text style={[styles.pickLabel, { color: "#5DA9E8" }]}>
                   {t(lang, "music.high" as never)}
                 </Text>
@@ -368,7 +368,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.pickEmoji}>🐻</Text>
+                <Text style={styles.pickEmoji}>↘️</Text>
                 <Text style={[styles.pickLabel, { color: "#E8874F" }]}>
                   {t(lang, "music.low" as never)}
                 </Text>
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   pickEmoji: { fontSize: 56 },
-  pickLabel: { fontFamily: fonts.display, fontSize: 22 },
+  pickLabel: { fontFamily: fonts.display, fontSize: 22, textAlign: "center" },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.12)" },
   pressed: { transform: [{ scale: 0.94 }] },
   replayBtn: {

@@ -15,6 +15,7 @@ import { t } from "../../i18n";
 import * as music from "../../music";
 import * as sound from "../../sound";
 import { sfx } from "../../sound";
+import * as highLowLogic from "./logic";
 import { HighLowGame } from "./HighLowGame";
 
 describe("HighLowGame UI", () => {
@@ -336,7 +337,7 @@ describe("HighLowGame UI", () => {
     const wrongBtn = screen.getByTestId(
       isHigh ? "highlow-low" : "highlow-high",
     );
-    const expectedDirection = isHigh ? "High" : "Low";
+    const expectedDirection = isHigh ? "Higher" : "Lower";
 
     // Click wrong direction
     fireEvent.click(wrongBtn);
@@ -487,7 +488,7 @@ describe("HighLowGame UI", () => {
         vi.advanceTimersByTime(500);
       });
       expect(sayThenSpy).toHaveBeenCalledWith(
-        [isHigh ? "High" : "Low", "Listen..."],
+        [isHigh ? "Higher" : "Lower", "Listen..."],
         expect.any(Function),
         3000,
       );
@@ -688,5 +689,147 @@ describe("HighLowGame language switch safety", () => {
 
     // Check score updated
     expect(screen.getByTestId("highlow-score").textContent).not.toBe(initialScore);
+  });
+});
+
+describe("HighLowGame melodic contour and relative direction", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("renders directional indicators (↗️ / ↘️) and relative labels without bird/bear metaphors", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    const { rerender } = render(
+      <HighLowGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    const lowBtn = screen.getByTestId("highlow-low");
+
+    expect(highBtn.textContent).toContain("↗️");
+    expect(highBtn.textContent).toContain("Higher");
+    expect(highBtn.textContent).not.toContain("🐦");
+
+    expect(lowBtn.textContent).toContain("↘️");
+    expect(lowBtn.textContent).toContain("Lower");
+    expect(lowBtn.textContent).not.toContain("🐻");
+
+    // Japanese prompt and labels
+    rerender(<HighLowGame onHome={noop} difficulty="easy" lang="ja" />);
+
+    expect(
+      screen.getByText("にばんめの おとは たかくなった？ ひくくなった？"),
+    ).toBeDefined();
+    expect(highBtn.textContent).toContain("たかくなった");
+    expect(lowBtn.textContent).toContain("ひくくなった");
+  });
+
+  it("scores descending high soprano notes as Lower (↘️) and provides directional feedback", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+      noteA: 69, // A4 (440Hz)
+      noteB: 66, // F#4 (370Hz) - descended
+    });
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Child taps Higher (highlow-high), which is wrong because note descended
+    fireEvent.click(screen.getByTestId("highlow-high"));
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Instructional cue and speech indicate melodic contour Lower (↘️), not bear
+    const cue = screen.getByTestId("highlow-instructional-direction");
+    expect(cue.textContent).toContain("↘️");
+    expect(cue.textContent).toContain("Lower");
+    expect(cue.textContent).not.toContain("🐻");
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["Lower", "Listen..."],
+      expect.any(Function),
+      3000,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+      onDoneCb?.();
+    });
+
+    // Second try: child taps Lower (highlow-low) -> round succeeds
+    fireEvent.click(screen.getByTestId("highlow-low"));
+    expect(screen.queryByTestId("highlow-instructional-direction")).toBeNull();
+  });
+
+  it("scores ascending low bass notes as Higher (↗️) and provides directional feedback in Japanese", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+      noteA: 54, // F#3 (185Hz)
+      noteB: 61, // C#4 (277Hz) - ascended
+    });
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="ja" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Child taps low, which is wrong because note ascended
+    fireEvent.click(screen.getByTestId("highlow-low"));
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Instructional cue and speech indicate melodic contour Higher (↗️ たかくなった)
+    const cue = screen.getByTestId("highlow-instructional-direction");
+    expect(cue.textContent).toContain("↗️");
+    expect(cue.textContent).toContain("たかくなった");
+    expect(cue.textContent).not.toContain("🐦");
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["たかくなった", "きいてね…"],
+      expect.any(Function),
+      3000,
+    );
   });
 });
