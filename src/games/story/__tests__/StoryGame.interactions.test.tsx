@@ -222,3 +222,137 @@ describe('StoryGame ScareSpot interactions', () => {
   });
 });
 
+describe('StoryGame choice navigation and redo history', () => {
+  const initialStoryCount = manifest.stories?.length ?? 0;
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+    vi.spyOn(sound, 'saySequence').mockImplementation(() => {});
+    vi.spyOn(sfx, 'tap').mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+    cleanup();
+    if (manifest.stories && manifest.stories.length > initialStoryCount) {
+      manifest.stories.splice(initialStoryCount);
+    }
+  });
+
+  it('clears redo stack when selecting a button choice after going back', () => {
+    const testStory: Story = {
+      id: 'test-button-redo-story',
+      title: 'Button Redo Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Where shall we go?',
+          choices: [
+            { label: 'Forest', next: 'forest' },
+            { label: 'Castle', next: 'castle' },
+          ],
+        },
+        forest: {
+          image: 'story/luna_start.jpg',
+          text: 'In the deep forest',
+          choices: [],
+        },
+        castle: {
+          image: 'story/luna_start.jpg',
+          text: 'At the castle gate',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStory);
+
+    render(
+      <StoryGame
+        sceneId="test-button-redo-story"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // 1. Advance to forest
+    fireEvent.click(screen.getByTestId('story-choice-forest'));
+    expect(screen.getByTestId('story-text-forest')).toBeDefined();
+
+    // 2. Go back with ArrowLeft
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // 3. Choose castle instead
+    fireEvent.click(screen.getByTestId('story-choice-castle'));
+    expect(screen.getByTestId('story-text-castle')).toBeDefined();
+
+    // 4. Press ArrowRight (redo) - should not jump back to forest
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    expect(screen.getByTestId('story-text-castle')).toBeDefined();
+    expect(screen.queryByTestId('story-text-forest')).toBeNull();
+  });
+
+  it('clears redo stack when selecting an icon tile choice after going back', () => {
+    const testIconStory: Story = {
+      id: 'test-icon-redo-story',
+      title: 'Icon Redo Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Pick an item',
+          choices: [
+            { label: 'Apple', next: 'apple', icon: 'story/luna_start_c0.png' },
+            { label: 'Berry', next: 'berry', icon: 'story/luna_start_c1.png' },
+          ],
+        },
+        apple: {
+          image: 'story/luna_start.jpg',
+          text: 'You chose the apple',
+          choices: [],
+        },
+        berry: {
+          image: 'story/luna_start.jpg',
+          text: 'You chose the berry',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testIconStory);
+
+    render(
+      <StoryGame
+        sceneId="test-icon-redo-story"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // 1. Advance to apple
+    fireEvent.click(screen.getByTestId('story-choice-apple'));
+    expect(screen.getByTestId('story-text-apple')).toBeDefined();
+
+    // 2. Go back with ArrowLeft
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // 3. Choose berry instead
+    fireEvent.click(screen.getByTestId('story-choice-berry'));
+    expect(screen.getByTestId('story-text-berry')).toBeDefined();
+
+    // 4. Press ArrowRight (redo) - should not jump back to apple
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    expect(screen.getByTestId('story-text-berry')).toBeDefined();
+    expect(screen.queryByTestId('story-text-apple')).toBeNull();
+  });
+});
+
