@@ -36,7 +36,7 @@ describe("SumsGame fast-tap", () => {
     vi.restoreAllMocks();
   });
 
-  it("queues the wrong-answer voice prompt only once when tapped rapidly", () => {
+  it("locks input and triggers error feedback only once when tapped rapidly", () => {
     render(<SumsGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     // Clear initial round saySequence calls.
@@ -47,11 +47,15 @@ describe("SumsGame fast-tap", () => {
       const tid = b.getAttribute("data-testid");
       return tid && tid.startsWith("sums-choice-") && !tid.endsWith("-answer");
     });
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    );
 
     const wrongButton = wrongButtons[0];
     expect(wrongButton).toBeDefined();
+    expect(correctBtn).toBeDefined();
 
-    // Tap rapidly 4 times
+    // Tap rapidly 4 times and try tapping correct choice while locked
     fireEvent.click(wrongButton);
     act(() => {
       vi.advanceTimersByTime(100);
@@ -60,25 +64,52 @@ describe("SumsGame fast-tap", () => {
     act(() => {
       vi.advanceTimersByTime(100);
     });
-    fireEvent.click(wrongButton);
+    fireEvent.click(correctBtn!);
     act(() => {
       vi.advanceTimersByTime(100);
     });
     fireEvent.click(wrongButton);
 
-    // Fast forward to just before the 500ms timeout of the last tap.
-    // The last tap occurred at T=300ms; its 500ms timeout expires at T=800ms.
+    // Initial tap triggered error sfx once; subsequent taps while locked are dropped
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(sound.sfx.good).not.toHaveBeenCalled();
+
+    // At 449ms from first tap: still locked and before 500ms voice timeout
     act(() => {
-      vi.advanceTimersByTime(499);
+      vi.advanceTimersByTime(149);
     });
     expect(sound.say).not.toHaveBeenCalled();
 
-    // Fast forward exactly to the 500ms mark of the last tap.
+    // At 450ms: wrong pick lock expires. At 500ms: voice prompt fires once
     act(() => {
-      vi.advanceTimersByTime(1);
+      vi.advanceTimersByTime(51);
     });
-
     expect(sound.say).toHaveBeenCalledTimes(1);
+
+    // Now unlocked, tapping correct choice succeeds
+    fireEvent.click(correctBtn!);
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears wrongPickTimer on unmount without throwing", () => {
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    vi.clearAllMocks();
+
+    const buttons = screen.getAllByRole("button");
+    const wrongBtn = buttons.find((b) => {
+      const tid = b.getAttribute("data-testid");
+      return tid && tid.startsWith("sums-choice-") && !tid.endsWith("-answer");
+    })!;
+
+    fireEvent.click(wrongBtn);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    unmount();
+    act(() => {
+      vi.runAllTimers();
+    });
   });
 
   it("ignores rapid double tap on the correct answer before state update", () => {

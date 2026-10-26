@@ -241,9 +241,9 @@ describe("SumsGame language switch safety", () => {
     fireEvent.click(wrongBtn);
     expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    // Immediately tap correct choice before 500ms voice timer fires
+    // Advance past 450ms wrong-pick lock before 500ms voice timer fires
     act(() => {
-      vi.advanceTimersByTime(100);
+      vi.advanceTimersByTime(460);
     });
     fireEvent.click(correctBtn);
     expect(goodSpy).toHaveBeenCalledTimes(1);
