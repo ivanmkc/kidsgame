@@ -56,6 +56,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   useWinLine(won, t(lang, "win.sums"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const wrongVoiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongPickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const clearBoingTimers = () => {
@@ -66,6 +67,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   useEffect(
     () => () => {
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
+      if (wrongPickTimer.current) clearTimeout(wrongPickTimer.current);
       clearBoingTimers();
     },
     [],
@@ -78,6 +80,12 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     if (wrongVoiceTimer.current) {
       clearTimeout(wrongVoiceTimer.current);
       wrongVoiceTimer.current = null;
+    }
+    if (wrongPickTimer.current) {
+      clearTimeout(wrongPickTimer.current);
+      wrongPickTimer.current = null;
+      setWrongPick(null);
+      lockedRef.current = false;
     }
     saySequence([
       numberWord(lang, round.a).t,
@@ -106,7 +114,14 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     if (v === round.sum) {
       lockedRef.current = true;
       clearBoingTimers();
-      if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
+      if (wrongVoiceTimer.current) {
+        clearTimeout(wrongVoiceTimer.current);
+        wrongVoiceTimer.current = null;
+      }
+      if (wrongPickTimer.current) {
+        clearTimeout(wrongPickTimer.current);
+        wrongPickTimer.current = null;
+      }
       sfx.good();
       const nextScore = score + 1;
       setScore(nextScore);
@@ -120,17 +135,33 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         }
       });
     } else {
+      lockedRef.current = true;
       sfx.wrong();
       setWrongPick(v);
-      setTimeout(() => setWrongPick((w) => (w === v ? null : w)), 450);
+      if (wrongPickTimer.current) clearTimeout(wrongPickTimer.current);
+      wrongPickTimer.current = setTimeout(() => {
+        lockedRef.current = false;
+        setWrongPick((w) => (w === v ? null : w));
+        wrongPickTimer.current = null;
+      }, 450);
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
-      wrongVoiceTimer.current = setTimeout(() => say(QUESTION[lang]), 500);
+      wrongVoiceTimer.current = setTimeout(() => {
+        say(QUESTION[lang]);
+        wrongVoiceTimer.current = null;
+      }, 500);
     }
   };
 
   const reset = () => {
     clearBoingTimers();
-    if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
+    if (wrongVoiceTimer.current) {
+      clearTimeout(wrongVoiceTimer.current);
+      wrongVoiceTimer.current = null;
+    }
+    if (wrongPickTimer.current) {
+      clearTimeout(wrongPickTimer.current);
+      wrongPickTimer.current = null;
+    }
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeSumsRound(rngRef.current, difficulty));
