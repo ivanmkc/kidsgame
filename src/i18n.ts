@@ -337,7 +337,9 @@ export type UIKey =
   // ── Colors ─────────────────────────────────────────────────────
   | 'color.red' | 'color.blue' | 'color.green' | 'color.yellow'
   | 'color.purple' | 'color.orange' | 'color.black' | 'color.white'
-  | 'color.pink' | 'color.brown' | 'color.gray';
+  | 'color.pink' | 'color.brown' | 'color.gray'
+  // ── Shapes ─────────────────────────────────────────────────────
+  | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star';
 
 export type Table = Record<UIKey, string>;
 
@@ -706,6 +708,10 @@ export const EN: Table = {
   'color.pink': 'pink',
   'color.brown': 'brown',
   'color.gray': 'gray',
+  'shape.circle': 'circle',
+  'shape.square': 'square',
+  'shape.triangle': 'triangle',
+  'shape.star': 'star',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };

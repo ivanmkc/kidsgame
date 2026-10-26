@@ -361,4 +361,8 @@ export const YUE: Table = {
   'color.pink': '粉紅色',
   'color.brown': '啡色',
   'color.gray': '灰色',
+  'shape.circle': '圓形',
+  'shape.square': '正方形',
+  'shape.triangle': '三角形',
+  'shape.star': '星形',
 };
