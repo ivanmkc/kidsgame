@@ -103,6 +103,10 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   useEffect(() => {
     if (!node) return;
     if (!node.choices?.length && node.bad) sfx.boing();
+  }, [node]);
+
+  useEffect(() => {
+    if (!node) return;
     const cs = node.choices ?? [];
     const menu = cs.map((c) => (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label);
     const hots = cs.length > 0 && cs.every((c) => c.hot);
