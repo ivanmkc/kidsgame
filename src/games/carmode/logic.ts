@@ -1,5 +1,6 @@
 // Car Mode round engine — pure logic, no React, no side effects.
 // Drives the prompt→gap→reveal→tap-advance loop for every pack.
+import { Difficulty, DifficultyFilter } from '../../difficulty';
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from './packs';
 
 export interface CarModeState {
@@ -10,8 +11,38 @@ export interface CarModeState {
   pendingTaps: number;
 }
 
-export function startState(pack: PackId, seed: number): CarModeState {
-  const rounds = shuffleRounds(ALL_PACKS[pack].rounds(), seed);
+export function filterRoundsByDifficulty(
+  rounds: Round[],
+  pack: PackId,
+  difficulty?: Difficulty | DifficultyFilter,
+): Round[] {
+  if (!difficulty || difficulty === 'all') return rounds;
+  if (pack === 'boops') {
+    if (difficulty === 'easy') {
+      return rounds.filter((r) => (r.noteCount ?? 0) <= 3);
+    }
+    if (difficulty === 'medium') {
+      return rounds.filter(
+        (r) => (r.noteCount ?? 0) >= 4 && (r.noteCount ?? 0) <= 6,
+      );
+    }
+    if (difficulty === 'hard') {
+      return rounds.filter(
+        (r) => (r.noteCount ?? 0) >= 7 && (r.noteCount ?? 0) <= 10,
+      );
+    }
+  }
+  return rounds;
+}
+
+export function startState(
+  pack: PackId,
+  seed: number,
+  difficulty?: Difficulty | DifficultyFilter,
+): CarModeState {
+  const all = ALL_PACKS[pack].rounds();
+  const filtered = filterRoundsByDifficulty(all, pack, difficulty);
+  const rounds = shuffleRounds(filtered, seed);
   return { pack, roundIdx: 0, rounds, phase: 'prompt', pendingTaps: 0 };
 }
 
@@ -46,7 +77,7 @@ export function handleTap(s: CarModeState): CarModeState {
       if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
       return toReveal(s);
     }
-    return toReveal(s);
+    return s;
   }
   
   if (s.phase === 'reveal') {

@@ -201,3 +201,43 @@ describe('handleTapTimeout pure transitions', () => {
     expect(next.pendingTaps).toBe(0);
   });
 });
+
+describe('difficulty filter in startState', () => {
+  it('limits boops to 1-3 on easy', () => {
+    const s = startState('boops', 42, 'easy');
+    expect(s.rounds.length).toBe(3);
+    for (const r of s.rounds) {
+      expect(r.noteCount).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it('limits boops to 4-6 on medium', () => {
+    const s = startState('boops', 42, 'medium');
+    expect(s.rounds.length).toBe(3);
+    for (const r of s.rounds) {
+      expect(r.noteCount).toBeGreaterThanOrEqual(4);
+      expect(r.noteCount).toBeLessThanOrEqual(6);
+    }
+  });
+
+  it('limits boops to 7-10 on hard', () => {
+    const s = startState('boops', 42, 'hard');
+    expect(s.rounds.length).toBe(4);
+    for (const r of s.rounds) {
+      expect(r.noteCount).toBeGreaterThanOrEqual(7);
+      expect(r.noteCount).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it('includes all 10 boops when difficulty is all', () => {
+    const s = startState('boops', 42, 'all');
+    expect(s.rounds.length).toBe(10);
+  });
+
+  it('gap phase tap stays in gap for standard packs to allow prompt replay', () => {
+    let s = startState('boops', 42);
+    s = toGap(s);
+    const next = handleTap(s);
+    expect(next.phase).toBe('gap');
+  });
+});
