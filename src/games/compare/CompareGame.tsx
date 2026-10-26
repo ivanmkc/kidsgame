@@ -26,6 +26,7 @@ import {
   Side,
   compareSettings,
   makeCompareRound,
+  plateAccessibilityLabel,
   plateCritterPos,
   plateCritterSize,
   roundComparisonPhrase,
@@ -213,6 +214,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
             onPress={() => pickSide("left")}
             testID={`compare-plate-left-${round.left.icon}-${round.left.count}${round.correctSide === "left" ? "-correct" : ""}`}
             badgeTestID="compare-badge-left"
+            lang={lang}
           />
           <Plate
             data={round.right}
@@ -224,6 +226,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
             onPress={() => pickSide("right")}
             testID={`compare-plate-right-${round.right.icon}-${round.right.count}${round.correctSide === "right" ? "-correct" : ""}`}
             badgeTestID="compare-badge-right"
+            lang={lang}
           />
         </View>
       </View>
@@ -249,6 +252,7 @@ interface PlateProps {
   onPress: () => void;
   testID: string;
   badgeTestID?: string;
+  lang: Lang;
 }
 
 function Plate({
@@ -261,6 +265,7 @@ function Plate({
   onPress,
   testID,
   badgeTestID,
+  lang,
 }: PlateProps) {
   const critterSize = plateCritterSize(data.count, width, height);
   return (
@@ -268,7 +273,7 @@ function Plate({
       onPress={onPress}
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={`${data.count} ${data.icon}`}
+      accessibilityLabel={plateAccessibilityLabel(data.count, data.icon, lang)}
       style={({ pressed }) => [
         styles.plate,
         shadows.soft,

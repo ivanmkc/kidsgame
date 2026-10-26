@@ -8,6 +8,7 @@ import {
   scatterPositions,
 } from "../count/logic";
 import { spriteLT } from "../quizround/logic";
+import { WORDS, wordFor } from "../../words";
 
 export interface Side {
   icon: string;
@@ -211,6 +212,17 @@ export function roundComparisonPhrase(lang: Lang, round: CompareRound): string {
   const winningSide = round.correctSide === 'left' ? round.left : round.right;
   const otherSide = round.correctSide === 'left' ? round.right : round.left;
   return comparisonPhrase(lang, round.ask, winningSide.count, otherSide.count);
+}
+
+/** Localized screen-reader label for a plate of items (e.g. "5 dog", "5 いぬ"). */
+export function plateAccessibilityLabel(
+  count: number,
+  icon: string,
+  lang: Lang,
+): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown compare icon: ${icon}`);
+  return `${count} ${wordFor(entry, lang).text}`;
 }
 
 /** Prompt/celebration lines for all four langs, plus all comparative feedback

@@ -268,7 +268,7 @@ describe("CompareGame prompt replay", () => {
   it("replays FEWER prompt when round asks for fewer on hard mode", () => {
     vi.spyOn(logic, "makeCompareRound").mockReturnValue({
       left: { icon: "star", count: 3, positions: [] },
-      right: { icon: "heart", count: 6, positions: [] },
+      right: { icon: "dog", count: 6, positions: [] },
       ask: "fewer",
       correctSide: "left",
     });
@@ -307,7 +307,7 @@ describe("CompareGame prompt replay", () => {
 
     vi.spyOn(logic, "makeCompareRound").mockReturnValue({
       left: { icon: "star", count: 6, positions: [] },
-      right: { icon: "heart", count: 2, positions: [] },
+      right: { icon: "dog", count: 2, positions: [] },
       ask: "more",
       correctSide: "left",
     });
@@ -357,7 +357,7 @@ describe("CompareGame prompt replay", () => {
 
     vi.spyOn(logic, "makeCompareRound").mockReturnValue({
       left: { icon: "star", count: 6, positions: [] },
-      right: { icon: "heart", count: 2, positions: [] },
+      right: { icon: "dog", count: 2, positions: [] },
       ask: "more",
       correctSide: "left",
     });
@@ -830,3 +830,101 @@ describe("CompareGame unmount safety", () => {
     expect(makeRoundSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("CompareGame plate accessibility labels", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("renders plates with localized accessibility labels across all languages", () => {
+    vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+      left: { icon: "dog", count: 5, positions: [] },
+      right: { icon: "star", count: 7, positions: [] },
+      ask: "more",
+      correctSide: "right",
+    });
+
+    render(<CompareGame onHome={noop} difficulty="easy" lang="en" />);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("5 dog");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("7 star");
+    cleanup();
+
+    render(<CompareGame onHome={noop} difficulty="easy" lang="ja" />);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("5 いぬ");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("7 ほし");
+    cleanup();
+
+    render(<CompareGame onHome={noop} difficulty="easy" lang="cmn" />);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("5 狗");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("7 星星");
+    cleanup();
+
+    render(<CompareGame onHome={noop} difficulty="easy" lang="yue" />);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("5 狗");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("7 星星");
+  });
+
+  it("updates plate accessibility labels when language is cycled", () => {
+    let roundIndex = 0;
+    const rounds: logic.CompareRound[] = [
+      {
+        left: { icon: "dog", count: 5, positions: [] },
+        right: { icon: "butterfly", count: 3, positions: [] },
+        ask: "more",
+        correctSide: "left",
+      },
+      {
+        left: { icon: "frog", count: 2, positions: [] },
+        right: { icon: "rabbit", count: 6, positions: [] },
+        ask: "more",
+        correctSide: "right",
+      },
+    ];
+    vi.spyOn(logic, "makeCompareRound").mockImplementation(
+      () => rounds[roundIndex++ % rounds.length],
+    );
+
+    render(<LangHarness initialLang="en" />);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("5 dog");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("3 butterfly");
+
+    // Cycle language to Japanese
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
+    ).toBe("2 かえる");
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
+    ).toBe("6 うさぎ");
+  });
+});
+
