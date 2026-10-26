@@ -269,48 +269,60 @@ function Plate({
 }: PlateProps) {
   const critterSize = plateCritterSize(data.count, width, height);
   return (
-    <Pressable
-      onPress={onPress}
-      testID={testID}
-      accessibilityRole="button"
-      accessibilityLabel={plateAccessibilityLabel(data.count, data.icon, lang)}
-      style={({ pressed }) => [
-        styles.plate,
-        shadows.soft,
-        { width, height },
-        wrong && styles.plateWrong,
-        isWinner && styles.plateWinner,
-        pressed && !showCount && styles.pressed,
-      ]}
-    >
-      {data.positions.map((p, i) => (
-        <Image
-          key={i}
-          source={SPOTIT_ICONS[data.icon]}
-          style={{
-            position: "absolute",
-            ...plateCritterPos(p, critterSize, width, height),
-            width: critterSize,
-            height: critterSize,
-          }}
-          resizeMode="contain"
-        />
-      ))}
-      {showCount ? (
-        <View style={styles.badgeContainer} pointerEvents="none">
-          <View
-            style={[styles.badge, shadows.soft, isWinner && styles.badgeWinner]}
-            testID={badgeTestID}
-          >
-            <Text
-              style={[styles.badgeText, isWinner && styles.badgeTextWinner]}
+    <View style={[styles.plateCol, { width }]}>
+      <Pressable
+        onPress={onPress}
+        testID={testID}
+        accessibilityRole="button"
+        accessibilityLabel={plateAccessibilityLabel(
+          data.count,
+          data.icon,
+          lang,
+        )}
+        style={({ pressed }) => [
+          styles.plate,
+          shadows.soft,
+          { width, height },
+          wrong && styles.plateWrong,
+          isWinner && styles.plateWinner,
+          pressed && !showCount && styles.pressed,
+        ]}
+      >
+        {data.positions.map((p, i) => (
+          <Image
+            key={i}
+            source={SPOTIT_ICONS[data.icon]}
+            style={{
+              position: "absolute",
+              ...plateCritterPos(p, critterSize, width, height),
+              width: critterSize,
+              height: critterSize,
+            }}
+            resizeMode="contain"
+          />
+        ))}
+      </Pressable>
+      <View style={styles.badgeSlot}>
+        {showCount ? (
+          <View style={styles.badgeContainer} pointerEvents="none">
+            <View
+              style={[
+                styles.badge,
+                shadows.soft,
+                isWinner && styles.badgeWinner,
+              ]}
+              testID={badgeTestID}
             >
-              {data.count}
-            </Text>
+              <Text
+                style={[styles.badgeText, isWinner && styles.badgeTextWinner]}
+              >
+                {data.count}
+              </Text>
+            </View>
           </View>
-        </View>
-      ) : null}
-    </Pressable>
+        ) : null}
+      </View>
+    </View>
   );
 }
 
@@ -348,6 +360,10 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
   },
   plates: { flexDirection: "row", justifyContent: "space-between" },
+  plateCol: {
+    alignItems: "center",
+    gap: 8,
+  },
   plate: {
     backgroundColor: colors.paper,
     borderRadius: 24,
@@ -364,11 +380,12 @@ const styles = StyleSheet.create({
     borderColor: colors.green,
     backgroundColor: "rgba(95,191,110,0.12)",
   },
+  badgeSlot: {
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   badgeContainer: {
-    position: "absolute",
-    bottom: 10,
-    left: 0,
-    right: 0,
     alignItems: "center",
     justifyContent: "center",
   },

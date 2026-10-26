@@ -479,6 +479,10 @@ describe("CompareGame badges and comparative feedback", () => {
     expect(leftBadge.textContent).toBe(String(leftCount));
     expect(rightBadge.textContent).toBe(String(rightCount));
 
+    // Badges are positioned outside plate buttons so critters are not obscured
+    expect(leftPlate!.contains(leftBadge)).toBe(false);
+    expect(rightPlate!.contains(rightBadge)).toBe(false);
+
     // Prompt retains promptFor(round)
     const prompt = screen.getByTestId(/^compare-prompt-/);
     expect(prompt.textContent).toContain("Tap the side with MORE!");
@@ -505,6 +509,47 @@ describe("CompareGame badges and comparative feedback", () => {
 
     expect(screen.queryByTestId("compare-badge-left")).toBeNull();
     expect(screen.queryByTestId("compare-badge-right")).toBeNull();
+  });
+
+  it("positions revealed count badges outside plate area so bottom critters remain unobstructed", () => {
+    let queuedCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      queuedCb = cb;
+    });
+
+    render(<CompareGame onHome={vi.fn()} difficulty="hard" lang="en" />);
+
+    const buttons = screen.getAllByRole("button");
+    const leftPlate = buttons.find((btn) =>
+      (btn.getAttribute("data-testid") || "").startsWith("compare-plate-left-"),
+    )!;
+    const rightPlate = buttons.find((btn) =>
+      (btn.getAttribute("data-testid") || "").startsWith(
+        "compare-plate-right-",
+      ),
+    )!;
+
+    const isLeftCorrect = (
+      leftPlate.getAttribute("data-testid") || ""
+    ).endsWith("-correct");
+    const correctPlate = isLeftCorrect ? leftPlate : rightPlate;
+
+    fireEvent.click(correctPlate);
+
+    const leftBadge = screen.getByTestId("compare-badge-left");
+    const rightBadge = screen.getByTestId("compare-badge-right");
+
+    // Badges must be rendered outside the plate buttons (as siblings in badgeSlot)
+    expect(leftPlate.contains(leftBadge)).toBe(false);
+    expect(rightPlate.contains(rightBadge)).toBe(false);
+
+    // Badges are not inside any plate element
+    expect(leftBadge.closest("[data-testid^='compare-plate-']")).toBeNull();
+    expect(rightBadge.closest("[data-testid^='compare-plate-']")).toBeNull();
+
+    act(() => {
+      queuedCb?.();
+    });
   });
 
   it("supports comparative feedback in Japanese (ja)", () => {
@@ -927,4 +972,3 @@ describe("CompareGame plate accessibility labels", () => {
     ).toBe("6 うさぎ");
   });
 });
-
