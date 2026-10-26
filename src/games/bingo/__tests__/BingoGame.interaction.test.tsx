@@ -490,4 +490,3 @@ describe("Bingo mid-game language switch stale callback bug", () => {
     expect(promptAfter.textContent).toContain("りんご");
   });
 });
-
