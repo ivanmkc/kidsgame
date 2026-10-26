@@ -3,6 +3,7 @@ import React from "react";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { Animated } from "react-native";
+import * as music from "../../../music";
 import { sfx } from "../../../sound";
 import { BellsGame } from "../BellsGame";
 import * as bellsLogic from "../logic";
@@ -82,5 +83,45 @@ describe("BellsGame", () => {
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
 
     vi.useRealTimers();
+  });
+
+  it("reserves persistent layout space for status row and tap-dot slot across listen and play phases", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    const { unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // In listen phase:
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+    expect(screen.queryByTestId("tap-dot-row")).toBeNull();
+
+    const statusRowListen = screen.getByTestId("bells-status-row");
+    const tapDotSlotListen = screen.getByTestId("tap-dot-slot");
+    expect(window.getComputedStyle(statusRowListen).minHeight).toBe("72px");
+    expect(window.getComputedStyle(tapDotSlotListen).height).toBe("28px");
+
+    // Advance to play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-row")).toBeTruthy();
+
+    const statusRowPlay = screen.getByTestId("bells-status-row");
+    const tapDotSlotPlay = screen.getByTestId("tap-dot-slot");
+    expect(window.getComputedStyle(statusRowPlay).minHeight).toBe("72px");
+    expect(window.getComputedStyle(tapDotSlotPlay).height).toBe("28px");
+
+    // tap-dot-row is contained within tap-dot-slot so total layout space remains constant
+    expect(tapDotSlotPlay.contains(screen.getByTestId("tap-dot-row"))).toBe(true);
+
+    vi.useRealTimers();
+    unmount();
   });
 });

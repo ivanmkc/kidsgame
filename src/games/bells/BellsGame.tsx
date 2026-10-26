@@ -252,84 +252,97 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       right={<ScoreChip label={`🔔 ${score}/${total}`} testID="bells-score" />}
     >
       <View style={[styles.board, { gap }]}>
-        {!won &&
-          (phase === "listen" ? (
+        {!won && (
+          <>
             <View
-              testID="bells-status"
-              style={[
-                styles.statusCard,
-                shadows.soft,
-                shortH && styles.statusCardShort,
-              ]}
+              testID="bells-status-row"
+              style={[styles.statusRow, shortH && styles.statusRowShort]}
             >
-              <Animated.Text
-                style={[
-                  styles.statusEmoji,
-                  shortH && styles.statusEmojiShort,
-                  { transform: [{ scale: earPulse }] },
-                ]}
-              >
-                👂
-              </Animated.Text>
-              <Text
-                style={[styles.statusText, shortH && styles.statusTextShort]}
-              >
-                {t(lang, "music.listen")}
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.statusRow}>
               <View
                 testID="bells-status"
                 style={[
                   styles.statusCard,
                   shadows.soft,
-                  styles.yourTurnCard,
+                  phase === "play" && styles.yourTurnCard,
                   wrongFlash && styles.wrongCard,
                   shortH && styles.statusCardShort,
                 ]}
               >
-                <Text
-                  style={[
-                    styles.statusEmoji,
-                    shortH && styles.statusEmojiShort,
-                  ]}
-                >
-                  👆
-                </Text>
+                {phase === "listen" ? (
+                  <Animated.Text
+                    style={[
+                      styles.statusEmoji,
+                      shortH && styles.statusEmojiShort,
+                      { transform: [{ scale: earPulse }] },
+                    ]}
+                  >
+                    👂
+                  </Animated.Text>
+                ) : (
+                  <Text
+                    style={[
+                      styles.statusEmoji,
+                      shortH && styles.statusEmojiShort,
+                    ]}
+                  >
+                    👆
+                  </Text>
+                )}
                 <Text
                   style={[styles.statusText, shortH && styles.statusTextShort]}
                 >
-                  {t(lang, "music.yourTurn")}
+                  {phase === "listen"
+                    ? t(lang, "music.listen")
+                    : t(lang, "music.yourTurn")}
                 </Text>
               </View>
-              <Pressable
-                testID="replay-button"
-                accessibilityRole="button"
-                accessibilityLabel={t(lang, "spell.hearAgain")}
-                onPress={replay}
-                style={({ pressed }) => [
-                  styles.replayBtn,
-                  shadows.soft,
-                  shortH && styles.replayBtnShort,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text
-                  style={[styles.replayText, shortH && styles.replayTextShort]}
+              {phase === "play" ? (
+                <Pressable
+                  testID="replay-button"
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, "spell.hearAgain")}
+                  onPress={replay}
+                  style={({ pressed }) => [
+                    styles.replayBtn,
+                    shadows.soft,
+                    shortH && styles.replayBtnShort,
+                    pressed && styles.pressed,
+                  ]}
                 >
-                  🔊
-                </Text>
-              </Pressable>
+                  <Text
+                    style={[
+                      styles.replayText,
+                      shortH && styles.replayTextShort,
+                    ]}
+                  >
+                    🔊
+                  </Text>
+                </Pressable>
+              ) : (
+                <View
+                  style={[
+                    styles.replayBtn,
+                    shortH && styles.replayBtnShort,
+                    styles.replayHidden,
+                  ]}
+                  aria-hidden={true}
+                />
+              )}
             </View>
-          ))}
-        {phase === "play" && !won && (
-          <View
-            testID="tap-dot-row"
-            style={[styles.tapDotRow, shortH && styles.tapDotRowShort]}
-          >
-            {tapDots}
-          </View>
+            <View
+              testID="tap-dot-slot"
+              style={[styles.tapDotSlot, shortH && styles.tapDotSlotShort]}
+            >
+              {phase === "play" && (
+                <View
+                  testID="tap-dot-row"
+                  style={[styles.tapDotRow, shortH && styles.tapDotRowShort]}
+                >
+                  {tapDots}
+                </View>
+              )}
+            </View>
+          </>
         )}
         <View style={styles.bellRow}>
           {round.bells.map((bell, i) => (
@@ -389,7 +402,15 @@ const styles = StyleSheet.create({
     gap: 28,
     paddingHorizontal: 16,
   },
-  statusRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 72,
+    gap: 12,
+  },
+  statusRowShort: {
+    minHeight: 48,
+  },
   statusCard: {
     backgroundColor: "#F7EDDA",
     borderRadius: 18,
@@ -428,6 +449,9 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
   },
+  replayHidden: {
+    opacity: 0,
+  },
   replayText: { fontSize: 36 },
   replayTextShort: { fontSize: 24 },
   bellRow: { flexDirection: "row", gap: 14, alignItems: "flex-end" },
@@ -445,6 +469,13 @@ const styles = StyleSheet.create({
   },
   bellText: { textAlign: "center" },
   pressed: { transform: [{ scale: 0.92 }] },
+  tapDotSlot: {
+    height: 28,
+    alignItems: "center",
+  },
+  tapDotSlotShort: {
+    height: 16,
+  },
   tapDotRow: { flexDirection: "row", gap: 10, marginTop: 12 },
   tapDotRowShort: { marginTop: 0 },
   tapDot: {
