@@ -65,6 +65,11 @@ describe('NumbersGame coverage', () => {
       // Tap the correct tile.
       fireEvent.click(correctTile!);
       expect(sound.sfx.good).toHaveBeenCalledTimes(round + 1);
+
+      // Advance timers past celebration lock between rounds.
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
     }
 
     // Now won should be true, so tapping a tile does nothing.

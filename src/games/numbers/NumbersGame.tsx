@@ -38,6 +38,8 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin } = numSettings;
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lockedRef = useRef(false);
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<NumberRound>(() =>
     makeNumberRound(rngRef.current, numSettings, lang),
@@ -55,9 +57,21 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
     }
+    if (lockTimerRef.current) {
+      clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = null;
+    }
+    lockedRef.current = false;
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+    };
+  }, []);
 
   // script toggle must re-skin the CURRENT round's tiles, not wait a round
   useEffect(() => {
@@ -75,10 +89,20 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (won) return;
+    if (won || lockedRef.current) return;
     if (round.tiles[i].isAnswer) {
+      lockedRef.current = true;
       sfx.good();
       setWrongIdx(null);
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = null;
+      }
+      if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = setTimeout(() => {
+        lockedRef.current = false;
+        lockTimerRef.current = null;
+      }, 300);
       const next = roundIdx + 1;
       setRoundIdx(next);
       if (next < roundsToWin) {
@@ -99,6 +123,15 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+    if (lockTimerRef.current) {
+      clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = null;
+    }
+    lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
