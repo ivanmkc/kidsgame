@@ -56,9 +56,30 @@ function mockAudioContext() {
   );
 }
 
+function mockSpeechSynthesis() {
+  (
+    window as unknown as { SpeechSynthesisUtterance: unknown }
+  ).SpeechSynthesisUtterance = class {
+    text: string;
+    onstart: (() => void) | null = null;
+    onend: (() => void) | null = null;
+    constructor(text: string) {
+      this.text = text;
+    }
+  };
+  (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+    speak: (u: { onstart?: () => void; onend?: () => void }) => {
+      u.onstart?.();
+      setTimeout(() => u.onend?.(), 200);
+    },
+    cancel: vi.fn(),
+  };
+}
+
 describe("EchoBeatGame", () => {
   beforeEach(() => {
     mockAudioContext();
+    mockSpeechSynthesis();
   });
 
   afterEach(() => {
@@ -249,15 +270,144 @@ describe("EchoBeatGame", () => {
   });
 
   it("speaks instruction prompt on mount", () => {
-    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
     render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
-    expect(saySpy).toHaveBeenCalledWith("Tap the rhythm you hear!");
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["Tap the rhythm you hear!"],
+      expect.any(Function),
+    );
   });
 
   it("speaks localized instruction prompt for selected language", () => {
-    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
     render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
-    expect(saySpy).toHaveBeenCalledWith("きこえた リズムを タップ！");
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["きこえた リズムを タップ！"],
+      expect.any(Function),
+    );
+  });
+
+  it("sequences demo rhythm after opening instruction completes on mount", () => {
+    let sayThenDone: (() => void) | undefined;
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_texts, done) => {
+        sayThenDone = done;
+      });
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["Tap the rhythm you hear!"],
+      expect.any(Function),
+    );
+    expect(playSeqSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("sequences demo rhythm after opening instruction when resetting on Play Again", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance past speech and demo
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+
+    const drum = screen.getByTestId("echobeat-drum");
+    for (let r = 0; r < 6; r++) {
+      act(() => {
+        fireEvent.click(drum);
+        fireEvent.click(drum);
+      });
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+    }
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    const playAgain = screen.getByTestId("play-again");
+    expect(playAgain).toBeTruthy();
+
+    let sayThenDone: (() => void) | undefined;
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_texts, done) => {
+        sayThenDone = done;
+      });
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+
+    act(() => {
+      fireEvent.click(playAgain);
+    });
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["Tap the rhythm you hear!"],
+      expect.any(Function),
+    );
+    expect(playSeqSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+
+  it("plays demo rhythm directly on round advance without repeating voice instruction", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Initial mount calls sayThen once
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+
+    // Advance past opening speech (200ms) and round 1 demo
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(1);
+
+    const drum = screen.getByTestId("echobeat-drum");
+    // Complete round 1
+    act(() => {
+      fireEvent.click(drum);
+      fireEvent.click(drum);
+    });
+
+    // Advance celebration timeout (800ms) to start round 2
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    // Round 2 should play demo directly without calling sayThen again
+    expect(sayThenSpy).toHaveBeenCalledTimes(1);
+    expect(playSeqSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
   });
 
   it("speechLines exports localized subtitles for all languages", () => {
@@ -268,6 +418,81 @@ describe("EchoBeatGame", () => {
     expect(lines).toContain("きこえた リズムを タップ！");
     expect(lines).toContain("拍出你听到的节拍！");
     expect(lines).toContain("撳出你聽到嘅節拍！");
+  });
+
+  it("cancels speech and pending demo on unmount", () => {
+    let sayThenDone: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      sayThenDone = done;
+    });
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+
+    const { unmount } = render(
+      <EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(playSeqSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalled();
+
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(playSeqSpy).not.toHaveBeenCalled();
+  });
+
+  it("handles mid-round language switch safely and resets phase to listen", () => {
+    vi.useFakeTimers();
+    let sayThenDone: (() => void) | undefined;
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_texts, done) => {
+        sayThenDone = done;
+      });
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+    const playDrumSpy = vi.spyOn(music, "playDrum");
+
+    const { rerender } = render(
+      <EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Opening speech completes, demo plays, transitions to tap phase
+    act(() => {
+      sayThenDone?.();
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Switch language to Japanese mid-round while in tap phase
+    rerender(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    expect(sayThenSpy).toHaveBeenLastCalledWith(
+      ["きこえた リズムを タップ！"],
+      expect.any(Function),
+    );
+
+    // Phase must immediately revert to listen while speech is active
+    expect(screen.getByText("きこえた リズムを タップ！")).toBeTruthy();
+    expect(screen.getByText("きいてね…")).toBeTruthy();
+
+    // Drum taps must be blocked during speech
+    act(() => {
+      fireEvent.click(drum);
+    });
+    expect(playDrumSpy).not.toHaveBeenCalled();
+
+    // Completing speech allows demo to run
+    act(() => {
+      sayThenDone?.();
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
   });
 });
 
