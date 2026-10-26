@@ -190,7 +190,7 @@ describe('numbers: quiz round', () => {
     expect(hanRound.useHan).toBe(true);
     expect(hanRound.targetN).toBe(round.targetN);
     expect(hanRound.targetKey).toBe(`h-${round.targetN}`);
-    expect(hanRound.displayText).toBe(hanNumeral(round.targetN));
+    expect(hanRound.displayText).toBe(String(round.targetN));
     expect(hanRound.answerIdx).toBe(round.answerIdx);
     expect(hanRound.promptLines).toEqual(round.promptLines);
     expect(hanRound.tiles.length).toBe(round.tiles.length);

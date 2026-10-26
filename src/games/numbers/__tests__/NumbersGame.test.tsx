@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
+import { hanNumeral } from "../../../lang";
 import { NumbersGame } from "../NumbersGame";
 
 describe("NumbersGame", () => {
@@ -47,6 +48,7 @@ describe("NumbersGame", () => {
     expect(toggledPromptEl.getAttribute("data-testid")).toBe(
       `numbers-prompt-h-${targetN}`,
     );
+    expect(toggledPromptEl.textContent).toContain(targetN);
 
     // All tiles should preserve their numbers in the same positions, re-skinned to Han.
     const hanTileLabels = [0, 1, 2, 3, 4].map((i) => {
@@ -99,5 +101,51 @@ describe("NumbersGame", () => {
     fireEvent.click(btn);
     expect(sound.sfx.tap).toHaveBeenCalled();
     expect(btn.textContent).toBe("一二三");
+  });
+
+  it("keeps prompt card as Arabic numeral across rounds after toggling to Han script", () => {
+    const onHome = vi.fn();
+    render(<NumbersGame onHome={onHome} difficulty="easy" lang="ja" />);
+
+    // Toggle script to Han.
+    const scriptBtn = screen.getByTestId("numbers-script");
+    fireEvent.click(scriptBtn);
+
+    // Initial round after toggle: prompt card displays Arabic numeral while tiles are Han.
+    const promptEl = screen.getByTestId(/^numbers-prompt-/);
+    const targetKey1 = promptEl
+      .getAttribute("data-testid")!
+      .replace("numbers-prompt-", "");
+    expect(targetKey1).toMatch(/^h-\d+$/);
+    const targetN1 = targetKey1.replace("h-", "");
+    expect(promptEl.textContent).toContain(targetN1);
+
+    // Tap the correct Han tile to advance to the next round.
+    const targetHan1 = hanNumeral(Number(targetN1));
+    let correctTile: HTMLElement | null = null;
+    for (let i = 0; i < 5; i++) {
+      const tile = screen.getByTestId(`numbers-tile-${i}`);
+      if (tile.getAttribute("aria-label") === targetHan1) {
+        correctTile = tile;
+      }
+    }
+    expect(correctTile).not.toBeNull();
+    fireEvent.click(correctTile!);
+
+    // Next round: prompt card remains Arabic numeral, and tiles remain Han numerals.
+    const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
+    const targetKey2 = nextPromptEl
+      .getAttribute("data-testid")!
+      .replace("numbers-prompt-", "");
+    expect(targetKey2).toMatch(/^h-\d+$/);
+    const targetN2 = targetKey2.replace("h-", "");
+    expect(nextPromptEl.textContent).toContain(targetN2);
+
+    const nextHanLabels = [0, 1, 2, 3, 4].map((i) =>
+      screen.getByTestId(`numbers-tile-${i}`).getAttribute("aria-label"),
+    );
+    for (const label of nextHanLabels) {
+      expect(label).toMatch(/^[一二三四五六七八九十]+$/);
+    }
   });
 });
