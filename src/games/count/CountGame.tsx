@@ -66,12 +66,18 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
-    if (won) return;
-    if (phase === "quiz") {
-      say(PROMPTS[lang]);
-    } else if (phase === "count") {
-      say(t(lang, "shell.count.sub"));
+    setWrongPick(null);
+    if (!won) {
+      if (phase === "quiz") {
+        say(PROMPTS[lang]);
+      } else if (phase === "count") {
+        say(t(lang, "shell.count.sub"));
+      }
     }
+    return () => {
+      wrongTimeoutsRef.current.forEach(clearTimeout);
+      wrongTimeoutsRef.current = [];
+    };
   }, [round, phase, lang, won]);
 
   const tapCritter = (i: number) => {
