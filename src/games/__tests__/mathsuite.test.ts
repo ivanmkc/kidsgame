@@ -389,67 +389,105 @@ describe("more or less: plate critter sizing and placement", () => {
       }
     }
   });
+
+  it("plate critters never overlap revealed count badges positioned outside the plate (1000 rounds)", () => {
+    const screens = [
+      { screenW: 390, screenH: 844 },
+      { screenW: 844, screenH: 390 },
+    ];
+
+    for (const { screenW, screenH } of screens) {
+      const totalW = Math.min(screenW - 32, 620);
+      const plateW = (totalW - 20) / 2;
+      const plateH = Math.min(screenH - 84 - 180, plateW * 1.05);
+
+      let overlapCount = 0;
+      for (let seed = 1; seed <= 1000; seed++) {
+        const rng = makeRng(seed);
+        const round = makeCompareRound(rng, "hard");
+
+        for (const side of [round.left, round.right]) {
+          const size = plateCritterSize(side.count, plateW, plateH);
+          for (const pos of side.positions) {
+            const { top } = plateCritterPos(pos, size, plateW, plateH);
+            const critterBottom = top + size;
+            // The badge is positioned in badgeSlot outside the plate area (y >= plateH)
+            if (critterBottom > plateH) {
+              overlapCount++;
+            }
+          }
+        }
+      }
+      expect(overlapCount).toBe(0);
+    }
+  });
 });
 
-describe('more or less: comparative feedback', () => {
-  it('formats comparisonPhrase across all supported languages for more and fewer', () => {
+describe("more or less: comparative feedback", () => {
+  it("formats comparisonPhrase across all supported languages for more and fewer", () => {
     // English
-    expect(comparisonPhrase('en', 'more', 5, 2)).toBe('5 is more than 2');
-    expect(comparisonPhrase('en', 'fewer', 2, 5)).toBe('2 is fewer than 5');
+    expect(comparisonPhrase("en", "more", 5, 2)).toBe("5 is more than 2");
+    expect(comparisonPhrase("en", "fewer", 2, 5)).toBe("2 is fewer than 5");
 
     // Japanese
-    expect(comparisonPhrase('ja', 'more', 5, 2)).toBe('5 は 2 より おおい');
-    expect(comparisonPhrase('ja', 'fewer', 2, 5)).toBe('2 は 5 より すくない');
+    expect(comparisonPhrase("ja", "more", 5, 2)).toBe("5 は 2 より おおい");
+    expect(comparisonPhrase("ja", "fewer", 2, 5)).toBe("2 は 5 より すくない");
 
     // Mandarin
-    expect(comparisonPhrase('cmn', 'more', 5, 2)).toBe('5比2多');
-    expect(comparisonPhrase('cmn', 'fewer', 2, 5)).toBe('2比5少');
+    expect(comparisonPhrase("cmn", "more", 5, 2)).toBe("5比2多");
+    expect(comparisonPhrase("cmn", "fewer", 2, 5)).toBe("2比5少");
 
     // Cantonese
-    expect(comparisonPhrase('yue', 'more', 5, 2)).toBe('5多過2');
-    expect(comparisonPhrase('yue', 'fewer', 2, 5)).toBe('2少過5');
+    expect(comparisonPhrase("yue", "more", 5, 2)).toBe("5多過2");
+    expect(comparisonPhrase("yue", "fewer", 2, 5)).toBe("2少過5");
   });
 
-  it('roundComparisonPhrase returns correct relation for both winning sides and ask conditions', () => {
+  it("roundComparisonPhrase returns correct relation for both winning sides and ask conditions", () => {
     const roundMoreLeft = {
-      left: { icon: 'dog', count: 5, positions: [] },
-      right: { icon: 'cat', count: 2, positions: [] },
-      ask: 'more' as const,
-      correctSide: 'left' as const,
+      left: { icon: "dog", count: 5, positions: [] },
+      right: { icon: "cat", count: 2, positions: [] },
+      ask: "more" as const,
+      correctSide: "left" as const,
     };
-    expect(roundComparisonPhrase('en', roundMoreLeft)).toBe('5 is more than 2');
+    expect(roundComparisonPhrase("en", roundMoreLeft)).toBe("5 is more than 2");
 
     const roundMoreRight = {
-      left: { icon: 'dog', count: 2, positions: [] },
-      right: { icon: 'cat', count: 5, positions: [] },
-      ask: 'more' as const,
-      correctSide: 'right' as const,
+      left: { icon: "dog", count: 2, positions: [] },
+      right: { icon: "cat", count: 5, positions: [] },
+      ask: "more" as const,
+      correctSide: "right" as const,
     };
-    expect(roundComparisonPhrase('en', roundMoreRight)).toBe('5 is more than 2');
+    expect(roundComparisonPhrase("en", roundMoreRight)).toBe(
+      "5 is more than 2",
+    );
 
     const roundFewerLeft = {
-      left: { icon: 'dog', count: 3, positions: [] },
-      right: { icon: 'cat', count: 7, positions: [] },
-      ask: 'fewer' as const,
-      correctSide: 'left' as const,
+      left: { icon: "dog", count: 3, positions: [] },
+      right: { icon: "cat", count: 7, positions: [] },
+      ask: "fewer" as const,
+      correctSide: "left" as const,
     };
-    expect(roundComparisonPhrase('en', roundFewerLeft)).toBe('3 is fewer than 7');
+    expect(roundComparisonPhrase("en", roundFewerLeft)).toBe(
+      "3 is fewer than 7",
+    );
 
     const roundFewerRight = {
-      left: { icon: 'dog', count: 7, positions: [] },
-      right: { icon: 'cat', count: 3, positions: [] },
-      ask: 'fewer' as const,
-      correctSide: 'right' as const,
+      left: { icon: "dog", count: 7, positions: [] },
+      right: { icon: "cat", count: 3, positions: [] },
+      ask: "fewer" as const,
+      correctSide: "right" as const,
     };
-    expect(roundComparisonPhrase('en', roundFewerRight)).toBe('3 is fewer than 7');
+    expect(roundComparisonPhrase("en", roundFewerRight)).toBe(
+      "3 is fewer than 7",
+    );
   });
 
-  it('every line roundComparisonPhrase can emit across all difficulties and langs is contained in speechLines()', () => {
+  it("every line roundComparisonPhrase can emit across all difficulties and langs is contained in speechLines()", () => {
     const lines = new Set(compareSpeechLines());
-    for (const d of ['easy', 'medium', 'hard'] as const) {
+    for (const d of ["easy", "medium", "hard"] as const) {
       for (let seed = 1; seed <= 500; seed++) {
         const round = makeCompareRound(makeRng(seed), d);
-        for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+        for (const lang of ["en", "ja", "cmn", "yue"] as const) {
           const spoken = roundComparisonPhrase(lang, round);
           expect(lines.has(spoken)).toBe(true);
         }
@@ -457,36 +495,38 @@ describe('more or less: comparative feedback', () => {
     }
   });
 
-  describe('plateAccessibilityLabel', () => {
-    it('formats localized count and critter name for all languages', () => {
-      expect(plateAccessibilityLabel(5, 'dog', 'en')).toBe('5 dog');
-      expect(plateAccessibilityLabel(5, 'dog', 'ja')).toBe('5 いぬ');
-      expect(plateAccessibilityLabel(5, 'dog', 'cmn')).toBe('5 狗');
-      expect(plateAccessibilityLabel(5, 'dog', 'yue')).toBe('5 狗');
-      expect(plateAccessibilityLabel(7, 'butterfly', 'en')).toBe('7 butterfly');
-      expect(plateAccessibilityLabel(7, 'butterfly', 'ja')).toBe('7 ちょうちょ');
-      expect(plateAccessibilityLabel(7, 'butterfly', 'cmn')).toBe('7 蝴蝶');
-      expect(plateAccessibilityLabel(7, 'butterfly', 'yue')).toBe('7 蝴蝶');
+  describe("plateAccessibilityLabel", () => {
+    it("formats localized count and critter name for all languages", () => {
+      expect(plateAccessibilityLabel(5, "dog", "en")).toBe("5 dog");
+      expect(plateAccessibilityLabel(5, "dog", "ja")).toBe("5 いぬ");
+      expect(plateAccessibilityLabel(5, "dog", "cmn")).toBe("5 狗");
+      expect(plateAccessibilityLabel(5, "dog", "yue")).toBe("5 狗");
+      expect(plateAccessibilityLabel(7, "butterfly", "en")).toBe("7 butterfly");
+      expect(plateAccessibilityLabel(7, "butterfly", "ja")).toBe(
+        "7 ちょうちょ",
+      );
+      expect(plateAccessibilityLabel(7, "butterfly", "cmn")).toBe("7 蝴蝶");
+      expect(plateAccessibilityLabel(7, "butterfly", "yue")).toBe("7 蝴蝶");
     });
 
-    it('resolves all CRITTER_ICONS across all 4 supported languages', () => {
+    it("resolves all CRITTER_ICONS across all 4 supported languages", () => {
       for (const icon of CRITTER_ICONS) {
-        for (const lang of ['en', 'ja', 'cmn', 'yue'] as const) {
+        for (const lang of ["en", "ja", "cmn", "yue"] as const) {
           const label = plateAccessibilityLabel(3, icon, lang);
           expect(label).toMatch(/^3 \S+/);
         }
       }
     });
 
-    it('throws loudly on unknown icon', () => {
-      expect(() => plateAccessibilityLabel(1, 'unicorn_pegasus', 'en')).toThrow(
+    it("throws loudly on unknown icon", () => {
+      expect(() => plateAccessibilityLabel(1, "unicorn_pegasus", "en")).toThrow(
         /Unknown compare icon: unicorn_pegasus/,
       );
     });
   });
 });
 
-describe('little sums', () => {
+describe("little sums", () => {
   for (const d of DIFFS) {
     const { maxSum } = sumsSettings(d);
     it(`${d}: a+b within cap ${maxSum}, choices unique and contain the sum (200 seeds)`, () => {
