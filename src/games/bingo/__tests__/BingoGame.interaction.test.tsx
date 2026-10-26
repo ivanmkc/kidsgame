@@ -32,7 +32,7 @@ test("tapping an incorrect tile after a correct one does not cancel the round ad
   });
 
   let prompt = screen.getByTestId("bingo-prompt");
-  let initialPrompt = prompt.textContent!;
+  let initialPrompt = prompt.getAttribute("aria-label")!;
 
   let icon = initialPrompt.replace("Find the ", "").replace("!", "");
 
@@ -58,7 +58,7 @@ test("tapping an incorrect tile after a correct one does not cancel the round ad
   prompt = screen.getByTestId("bingo-prompt");
   // At 100ms, the game should still be waiting for the confirmation audio to finish,
   // rather than having been prematurely canceled by the incorrect tap.
-  expect(prompt.textContent).toBe(initialPrompt);
+  expect(prompt.getAttribute("aria-label")).toBe(initialPrompt);
 
   // After the full duration (9s fallback in test env), it should advance properly.
   await act(async () => {
@@ -66,7 +66,7 @@ test("tapping an incorrect tile after a correct one does not cancel the round ad
   });
 
   prompt = screen.getByTestId("bingo-prompt");
-  expect(prompt.textContent).not.toBe(initialPrompt);
+  expect(prompt.getAttribute("aria-label")).not.toBe(initialPrompt);
 });
 
 test("rapid double-tap on correct tile only scores once and does not double-advance", async () => {
@@ -79,7 +79,7 @@ test("rapid double-tap on correct tile only scores once and does not double-adva
   });
 
   const prompt = screen.getByTestId("bingo-prompt");
-  const initialPrompt = prompt.textContent!;
+  const initialPrompt = prompt.getAttribute("aria-label")!;
   const icon = initialPrompt.replace("Find the ", "").replace("!", "");
 
   const cells = screen.queryAllByTestId(/bingo-cell-/);
@@ -137,7 +137,10 @@ test("unmounts with wrong timer running", async () => {
   });
 
   let prompt = screen.getByTestId("bingo-prompt");
-  let icon = prompt.textContent!.replace("Find the ", "").replace("!", "");
+  let icon = prompt
+    .getAttribute("aria-label")!
+    .replace("Find the ", "")
+    .replace("!", "");
 
   let cells = screen.queryAllByTestId(/bingo-cell-/);
   let incorrectCell = cells.find((c) => c.getAttribute("aria-label") !== icon);
@@ -166,7 +169,10 @@ test("plays through to win and resets", async () => {
 
     let prompt = screen.queryByTestId("bingo-prompt");
     if (!prompt) break;
-    let icon = prompt.textContent!.replace("Find the ", "").replace("!", "");
+    let icon = prompt
+      .getAttribute("aria-label")!
+      .replace("Find the ", "")
+      .replace("!", "");
     let cells = screen.queryAllByTestId(/bingo-cell-/);
     let correctCell = cells.find((c) => c.getAttribute("aria-label") === icon);
     if (!correctCell) break;
@@ -213,7 +219,10 @@ test("confetti remounts and triggers on subsequent correct answers", async () =>
 
   // Find and tap first correct tile
   let prompt = screen.getByTestId("bingo-prompt");
-  let icon = prompt.textContent!.replace("Find the ", "").replace("!", "");
+  let icon = prompt
+    .getAttribute("aria-label")!
+    .replace("Find the ", "")
+    .replace("!", "");
   let cells = screen.queryAllByTestId(/bingo-cell-/);
   let correctCell = cells.find((c) => c.getAttribute("aria-label") === icon);
 
@@ -232,7 +241,10 @@ test("confetti remounts and triggers on subsequent correct answers", async () =>
 
   // Find and tap second correct tile
   prompt = screen.getByTestId("bingo-prompt");
-  icon = prompt.textContent!.replace("Find the ", "").replace("!", "");
+  icon = prompt
+    .getAttribute("aria-label")!
+    .replace("Find the ", "")
+    .replace("!", "");
   cells = screen.queryAllByTestId(/bingo-cell-/);
   correctCell = cells.find((c) => c.getAttribute("aria-label") === icon);
 
