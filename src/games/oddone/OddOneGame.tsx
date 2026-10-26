@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SPOTIT_ICONS } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
+import { SparkleBurst } from "../../components/Sparkles";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
@@ -35,25 +36,38 @@ function oddSettings(d: Difficulty): { n: number } {
   return { n: 4 };
 }
 
+const CELEBRATION_MS = 600;
+
 export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const { n } = oddSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
+  const [roundKey, setRoundKey] = useState(0);
   const [round, setRound] = useState(() =>
     makeOddOneRound(rngRef.current, manifest.spotit.icons, n),
   );
   const [score, setScore] = useState(0);
+  const [celebratingIdx, setCelebratingIdx] = useState<number | null>(null);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [won, setWon] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
   useWinLine(won, t(lang, "win.oddone"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const roundClosedRef = useRef(false);
+  const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const prompt =
     CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
     t(lang, "oddone.defaultQuestion");
+
+  useEffect(() => {
+    return () => {
+      if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     roundClosedRef.current = false;
@@ -73,13 +87,24 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
       const next = score + 1;
       setScore(next);
       setWrongIdx(null);
-      if (next < roundsToWin) {
-        setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
-      }
+      setCelebratingIdx(idx);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
+      celebrateTimerRef.current = setTimeout(() => {
+        setCelebratingIdx(null);
+        if (next < roundsToWin) {
+          setRoundKey((k) => k + 1);
+          setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
+        } else {
+          roundClosedRef.current = false;
+          setWon(true);
+        }
+      }, CELEBRATION_MS);
     } else {
       sfx.wrong();
       setWrongIdx(idx);
-      setTimeout(() => {
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = setTimeout(() => {
         roundClosedRef.current = false;
         setWrongIdx((w) => (w === idx ? null : w));
       }, 450);
@@ -87,11 +112,16 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   };
 
   const reset = () => {
+    if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
+    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     setTimerKey((k) => k + 1);
     roundClosedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     setWrongIdx(null);
+    setCelebratingIdx(null);
+    setRoundKey((k) => k + 1);
     setRound(makeOddOneRound(rngRef.current, manifest.spotit.icons, n));
   };
 
@@ -155,7 +185,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
         >
           {round.items.map((icon, i) => (
             <Pressable
-              key={`${score}-${i}`}
+              key={`${roundKey}-${i}`}
               onPress={() => onPick(i)}
               testID={`oddone-item-${i}-${icon}${i === round.oddIndex ? "-odd" : ""}`}
               accessibilityLabel={icon}
@@ -164,6 +194,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
                 styles.tile,
                 shadows.soft,
                 { width: tile, height: tile },
+                celebratingIdx === i && styles.correct,
                 wrongIdx === i && styles.wrong,
                 pressed && styles.pressed,
               ]}
@@ -173,6 +204,9 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
                 style={{ width: "80%", height: "80%" }}
                 resizeMode="contain"
               />
+              {celebratingIdx === i ? (
+                <SparkleBurst trigger={score} count={6} size={14} />
+              ) : null}
             </Pressable>
           ))}
         </View>
@@ -220,6 +254,10 @@ const styles = StyleSheet.create({
     borderColor: colors.blush,
     alignItems: "center",
     justifyContent: "center",
+  },
+  correct: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.15)",
   },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
