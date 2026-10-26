@@ -73,6 +73,63 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByText("Your turn!")).toBeDefined();
   });
 
+  it("clears in-flight boop note timers when skipping prompt phase by tapping", () => {
+    vi.useFakeTimers();
+    const playNoteSpy = vi.spyOn(music, "playNote").mockReturnValue();
+    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
+
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "prompt",
+      rounds: [
+        {
+          id: "test-boops-5",
+          pack: "boops",
+          noteCount: 5,
+          prompt: ["boops.count5"],
+          reveal: ["boops.reveal5"],
+          sfx: "good",
+          gapMs: 3000,
+        },
+      ],
+      roundIdx: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Note 0 was scheduled with setTimeout(..., 0).
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
+    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+
+    // Advance 450ms: note 1 (at 400ms) plays; past PHASE_DEBOUNCE_MS (400ms).
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+
+    // Tap to skip prompt phase and advance to gap phase.
+    const tapBtn = screen.getByTestId("carmode-tap");
+    act(() => {
+      fireEvent.click(tapBtn);
+    });
+
+    expect(screen.getByText("Your turn!")).toBeDefined();
+
+    const callsAtGapEnter = playNoteSpy.mock.calls.length;
+
+    // Advance through gap and reveal duration.
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // In-flight boop note timers must NOT continue firing in gap or reveal phases.
+    expect(playNoteSpy).toHaveBeenCalledTimes(callsAtGapEnter);
+    expect(sayThenSpy).not.toHaveBeenCalled();
+  });
+
   it("advances round immediately on single tap during reveal phase for twoTapAnswer pack", () => {
     vi.spyOn(sound, "saySequence").mockReturnValue();
     vi.spyOn(sound, "sayThen").mockReturnValue();
