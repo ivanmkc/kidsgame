@@ -507,6 +507,53 @@ describe("EchoBeatGame", () => {
     const drum = screen.getByTestId("echobeat-drum");
     expect(drum.getAttribute("aria-label")).toBe("きこえた リズムを タップ！");
   });
+
+  it("keeps board children count stable and hides tap dots in listen phase", () => {
+    vi.useFakeTimers();
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const board = screen.getByTestId("echobeat-board");
+    const tapDots = screen.getByTestId("echobeat-tap-dots");
+
+    // In listen phase, the board has 3 children (statusCard, drum, tapDotRow)
+    // and tap dots are hidden with opacity 0 so vertical layout stays stable.
+    expect(board.children.length).toBe(3);
+    expect(window.getComputedStyle(tapDots).opacity).toBe("0");
+    expect(tapDots.getAttribute("aria-hidden")).toBe("true");
+
+    // Advance past speech and demo rhythm into tap phase
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    // In tap phase, board children count remains 3 and tap dots become visible
+    expect(board.children.length).toBe(3);
+    expect(window.getComputedStyle(tapDots).opacity).not.toBe("0");
+    expect(tapDots.getAttribute("aria-hidden")).toBeNull();
+
+    // Wrong rhythm triggers retry after evaluation timeout
+    const drum = screen.getByTestId("echobeat-drum");
+    act(() => {
+      fireEvent.click(drum);
+      vi.advanceTimersByTime(1200);
+    });
+    expect(screen.getAllByText("🔄").length).toBeGreaterThan(0);
+
+    // Advance retry timeout (1000ms) to replay demo
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByText("Listen...")).toBeTruthy();
+
+    // After retry, board children count is still 3 and tap dots are hidden again
+    expect(board.children.length).toBe(3);
+    expect(window.getComputedStyle(tapDots).opacity).toBe("0");
+    expect(tapDots.getAttribute("aria-hidden")).toBe("true");
+
+    vi.useRealTimers();
+  });
 });
 
 function setViewport(width: number, height: number) {
