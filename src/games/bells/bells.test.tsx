@@ -508,44 +508,84 @@ describe("BellsGame", () => {
     vi.useRealTimers();
   });
 
-  it('renders tapDot count matching sequence length for hard difficulty and updates on taps', () => {
+  it("renders tapDot count matching sequence length for hard difficulty and updates on taps", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, 'random').mockReturnValue(0);
-    vi.spyOn(music, 'playNote').mockImplementation(() => {});
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
 
     const { unmount } = render(
       <BellsGame onHome={() => {}} difficulty="hard" lang="en" />,
     );
 
     // In listen phase, dots are not rendered
-    expect(screen.queryByTestId('tap-dot-row')).toBeNull();
+    expect(screen.queryByTestId("tap-dot-row")).toBeNull();
 
     act(() => {
       vi.advanceTimersByTime(5000);
     });
 
     // In hard difficulty, sequence length is 5 dots, all empty
-    expect(screen.getByText('Your turn!')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-0')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-1')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-2')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-3')).toBeTruthy();
-    expect(screen.getByTestId('tap-dot-4')).toBeTruthy();
-    expect(screen.queryByTestId('tap-dot-5')).toBeNull();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-0")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-1")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-2")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-3")).toBeTruthy();
+    expect(screen.getByTestId("tap-dot-4")).toBeTruthy();
+    expect(screen.queryByTestId("tap-dot-5")).toBeNull();
 
-    const emptyClass = screen.getByTestId('tap-dot-0').className;
-    expect(screen.getByTestId('tap-dot-4').className).toBe(emptyClass);
+    const emptyClass = screen.getByTestId("tap-dot-0").className;
+    expect(screen.getByTestId("tap-dot-4").className).toBe(emptyClass);
 
-    const round = makeBellsRound(makeRng(0), 'hard');
+    const round = makeBellsRound(makeRng(0), "hard");
     const bellStep0 = screen.getByTestId(`bell-${round.sequence[0]}`);
     fireEvent.click(bellStep0);
-    expect(screen.getByTestId('tap-dot-0').className).not.toBe(emptyClass);
-    expect(screen.getByTestId('tap-dot-1').className).toBe(emptyClass);
+    expect(screen.getByTestId("tap-dot-0").className).not.toBe(emptyClass);
+    expect(screen.getByTestId("tap-dot-1").className).toBe(emptyClass);
 
     const bellStep1 = screen.getByTestId(`bell-${round.sequence[1]}`);
     fireEvent.click(bellStep1);
-    expect(screen.getByTestId('tap-dot-1').className).not.toBe(emptyClass);
-    expect(screen.getByTestId('tap-dot-2').className).toBe(emptyClass);
+    expect(screen.getByTestId("tap-dot-1").className).not.toBe(emptyClass);
+    expect(screen.getByTestId("tap-dot-2").className).toBe(emptyClass);
+
+    unmount();
+    vi.useRealTimers();
+  });
+
+  it('renders bell buttons with accessibilityRole="button" and localized accessibilityLabel', () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    const { rerender, unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    for (let i = 0; i < 3; i++) {
+      const bell = screen.getByTestId(`bell-${i}`);
+      expect(bell.getAttribute("role")).toBe("button");
+      expect(bell.getAttribute("aria-label")).toBe(`Bell ${i + 1}`);
+    }
+
+    rerender(<BellsGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    for (let i = 0; i < 3; i++) {
+      const bell = screen.getByTestId(`bell-${i}`);
+      expect(bell.getAttribute("role")).toBe("button");
+      expect(bell.getAttribute("aria-label")).toBe(`ベル ${i + 1}`);
+    }
+
+    rerender(<BellsGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    for (let i = 0; i < 3; i++) {
+      const bell = screen.getByTestId(`bell-${i}`);
+      expect(bell.getAttribute("role")).toBe("button");
+      expect(bell.getAttribute("aria-label")).toBe(`铃铛 ${i + 1}`);
+    }
+
+    rerender(<BellsGame onHome={() => {}} difficulty="easy" lang="yue" />);
+    for (let i = 0; i < 3; i++) {
+      const bell = screen.getByTestId(`bell-${i}`);
+      expect(bell.getAttribute("role")).toBe("button");
+      expect(bell.getAttribute("aria-label")).toBe(`鈴鐺 ${i + 1}`);
+    }
 
     unmount();
     vi.useRealTimers();

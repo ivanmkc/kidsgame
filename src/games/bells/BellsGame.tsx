@@ -26,6 +26,7 @@ import {
   canTap,
   judgeTap,
   bellsLayout,
+  bellLabel,
 } from "./logic";
 
 interface Props {
@@ -357,6 +358,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onBellTap(i)}
                 testID={`bell-${i}`}
+                accessibilityRole="button"
+                accessibilityLabel={bellLabel(i, lang)}
                 style={({ pressed }) => [
                   styles.bell,
                   {
