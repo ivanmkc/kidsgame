@@ -201,7 +201,7 @@ const RIDDLES: RiddleSpec[] = [
   { clues: ['I am black and white.', 'I waddle on the ice and love to swim.'], answer: 'A penguin!' },
   { clues: ['I have a big mane.', 'I am the king of the jungle.'], answer: 'A lion!' },
   { clues: ['I have eight legs.', 'I spin a sticky web.'], answer: 'A spider!' },
-  { clues: ['I am very slow.', 'I carry my house on my back.'], answer: 'A snail!' },
+  { clues: ['I am very slow.', 'I carry my house on my back.', 'I leave a shiny silver trail wherever I go.'], answer: 'A snail!' },
   { clues: ['I have stripes.', 'I look like a horse in pajamas!'], answer: 'A zebra!' },
   { clues: ['I am pink.', 'I stand on one leg in the water.'], answer: 'A flamingo!' },
   { clues: ['I am gray and wrinkly.', 'I have a very long nose called a trunk.'], answer: 'An elephant!' },

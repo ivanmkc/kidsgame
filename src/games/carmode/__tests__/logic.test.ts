@@ -132,6 +132,18 @@ describe('silly pack specifics', () => {
   });
 });
 
+describe('whoami pack specifics', () => {
+  const rounds = ALL_PACKS.whoami.rounds();
+
+  it('snail riddle includes a distinguishing clue not shared by a turtle', () => {
+    const snailRound = rounds.find((r) => r.reveal.includes('A snail!'));
+    expect(snailRound).toBeDefined();
+    expect(snailRound!.prompt).toContain(
+      'I leave a shiny silver trail wherever I go.',
+    );
+  });
+});
+
 describe('speechLines', () => {
   it('returns >50 lines', () => {
     const lines = speechLines();
