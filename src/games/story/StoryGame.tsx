@@ -318,7 +318,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               return c.icon ? (
                 <Pressable
                   key={c.next}
-                  onPress={() => { sfx.tap(); say(choiceLabel); hist.current.push(nodeId); setNodeId(c.next); }}
+                  onPress={() => { sfx.tap(); say(choiceLabel); advance(c.next); }}
                   testID={`story-choice-${c.next}`}
                   accessibilityLabel={choiceLabel}
                   accessibilityRole="button"
@@ -337,7 +337,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                   label={`${choiceLabel}`}
                   color={i === 0 ? colors.teal : colors.gold}
                   darkColor={darken(i === 0 ? colors.teal : colors.gold)}
-                  onPress={() => { sfx.tap(); say(choiceLabel); hist.current.push(nodeId); setNodeId(c.next); }}
+                  onPress={() => { sfx.tap(); say(choiceLabel); advance(c.next); }}
                   testID={`story-choice-${c.next}`}
                   minWidth={230}
                 />
