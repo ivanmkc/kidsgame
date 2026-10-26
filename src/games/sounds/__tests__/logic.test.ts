@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { soundsLayout } from '../logic';
+import { describe, expect, it } from "vitest";
+import { makeSoundsRound, soundsLayout } from "../logic";
 
-describe('soundsLayout', () => {
-  it('enlarges tiles to 1x4 row across mobile landscape screens', () => {
+describe("soundsLayout", () => {
+  it("enlarges tiles to 1x4 row across mobile landscape screens", () => {
     // Android landscape (780x360) with 4 tiles (Medium/Hard)
     const androidLandscape = soundsLayout(780, 360, 4);
     expect(androidLandscape.tile).toBe(139.5);
@@ -25,7 +25,7 @@ describe('soundsLayout', () => {
     expect(smallLandscape.gridWidth).toBe(466);
   });
 
-  it('preserves 2x2 grid with 170px tiles on tablet/desktop landscape', () => {
+  it("preserves 2x2 grid with 170px tiles on tablet/desktop landscape", () => {
     // iPad landscape (1024x768)
     const tabletLandscape = soundsLayout(1024, 768, 4);
     expect(tabletLandscape.tile).toBe(170);
@@ -37,14 +37,14 @@ describe('soundsLayout', () => {
     expect(desktopLandscape.gridWidth).toBe(354);
   });
 
-  it('preserves 2x2 grid with 170px tiles on mobile portrait', () => {
+  it("preserves 2x2 grid with 170px tiles on mobile portrait", () => {
     // iPhone portrait (390x844) with 4 tiles
     const iphonePortrait = soundsLayout(390, 844, 4);
     expect(iphonePortrait.tile).toBe(170);
     expect(iphonePortrait.gridWidth).toBe(354);
   });
 
-  it('sizes 3 tiles correctly across orientations', () => {
+  it("sizes 3 tiles correctly across orientations", () => {
     // Landscape (780x360) with 3 tiles (Easy)
     const landscape3 = soundsLayout(780, 360, 3);
     expect(landscape3.tile).toBe(146);
@@ -56,9 +56,22 @@ describe('soundsLayout', () => {
     expect(portrait3.gridWidth).toBe(358);
   });
 
-  it('keeps 2x2 grid with 170px tiles on square screen', () => {
+  it("keeps 2x2 grid with 170px tiles on square screen", () => {
     const square = soundsLayout(600, 600, 4);
     expect(square.tile).toBe(170);
     expect(square.gridWidth).toBe(354);
+  });
+});
+
+describe("makeSoundsRound", () => {
+  it('excludes plane as distractor when target sound is "ah"', () => {
+    // Plane can be called "airplane" ('ah'), so it must not be a distractor
+    // when prompting for 'ah' (e.g. apple).
+    const icons = ["apple", "plane", "rocket"];
+    const rng = () => 0;
+    const round = makeSoundsRound(rng, icons, "en", 3);
+    expect(round.target.icon).toBe("apple");
+    const tileIcons = round.tiles.map((t) => t.icon);
+    expect(tileIcons).not.toContain("plane");
   });
 });
