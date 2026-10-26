@@ -53,7 +53,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
 
   const prompt =
     CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
-    "Which one does not belong?";
+    t(lang, "oddone.defaultQuestion");
 
   useEffect(() => {
     roundClosedRef.current = false;

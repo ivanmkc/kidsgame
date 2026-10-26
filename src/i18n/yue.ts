@@ -260,6 +260,7 @@ export const YUE: Table = {
   'hidden.prompt': '搵出所有匿埋嘅嘢！',
   'shadow.hint': '撳呢個影對應嘅貼紙！',
   'shadow.hintTricky': '可能反轉或者轉咗 — 睇形狀！',
+  'oddone.defaultQuestion': '邊個唔係同一夥？',
   'rules.memoryCheck': '記憶挑戰！',
   'rules.ruleNumber': '規則 #{n}',
   'rules.doAgain': '再做一次規則 #{n} — 仲記得嗎？🤔',
