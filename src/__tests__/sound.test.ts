@@ -15,17 +15,19 @@ import { VOICE } from "../assets/voice";
 describe("sound sayThen", () => {
   let sound: typeof import("../sound");
   let lastAudio: HTMLAudioElement | null = null;
+  let playImpl: () => Promise<void>;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     vi.resetModules();
     lastAudio = null;
+    playImpl = () => Promise.resolve();
 
     const originalAudio = window.Audio;
     vi.spyOn(window, "Audio").mockImplementation(function () {
       const a = new originalAudio();
       lastAudio = a;
-      vi.spyOn(a, "play").mockImplementation(() => Promise.resolve());
+      vi.spyOn(a, "play").mockImplementation(() => playImpl());
       return a;
     });
 
@@ -35,6 +37,8 @@ describe("sound sayThen", () => {
 
   afterEach(() => {
     sound.stopNarration();
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
     vi.restoreAllMocks();
     vi.useRealTimers();
   });
@@ -120,6 +124,70 @@ describe("sound sayThen", () => {
   it("fires done immediately for empty texts", () => {
     const done = vi.fn();
     sound.sayThen([], done);
+
+    expect(done).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not prematurely resolve active sayThen on first gesture until audio ends", () => {
+    let unlocked = false;
+    playImpl = () =>
+      unlocked
+        ? Promise.resolve()
+        : Promise.reject(new Error("NotAllowedError"));
+
+    const done = vi.fn();
+    sound.sayThen(["A big egg!"], done);
+
+    expect(done).not.toHaveBeenCalled();
+
+    unlocked = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+
+    expect(done).not.toHaveBeenCalled();
+    expect(lastAudio).not.toBeNull();
+
+    lastAudio?.onended?.(new Event("ended"));
+    expect(done).toHaveBeenCalledTimes(1);
+  });
+
+  it("resolves active sayThen if superseded after first gesture replay starts", () => {
+    let unlocked = false;
+    playImpl = () =>
+      unlocked
+        ? Promise.resolve()
+        : Promise.reject(new Error("NotAllowedError"));
+
+    const done = vi.fn();
+    sound.sayThen(["A big egg!"], done);
+
+    unlocked = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+
+    // Call say while audio is playing
+    sound.say("A flamingo!");
+    expect(done).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs saySequence onDone callback when completed on first gesture", () => {
+    let unlocked = false;
+    playImpl = () =>
+      unlocked
+        ? Promise.resolve()
+        : Promise.reject(new Error("NotAllowedError"));
+
+    const done = vi.fn();
+    sound.saySequence(["A big egg!"], done);
+
+    expect(done).not.toHaveBeenCalled();
+
+    unlocked = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+
+    expect(done).not.toHaveBeenCalled();
+    lastAudio?.onended?.(new Event("ended"));
 
     expect(done).toHaveBeenCalledTimes(1);
   });
