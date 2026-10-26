@@ -15,15 +15,21 @@ import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
+  CRITTER_ICONS,
   PROMPTS,
   STAGE_PADDING,
   applyPickAnswer,
+  critterLabel,
   makeCountRound,
   stageCritterSize,
 } from "../logic";
+import { Lang } from "../../../lang";
 import { makeRng } from "../../../rng";
 
-const capturedPressables: Record<string, { onPress?: () => void }> = {};
+const capturedPressables: Record<
+  string,
+  { onPress?: () => void; accessibilityLabel?: string }
+> = {};
 
 vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -36,7 +42,10 @@ vi.mock("react-native", async (importOriginal) => {
       const testID =
         typeof props.testID === "string" ? props.testID : undefined;
       if (testID) {
-        capturedPressables[testID] = props as { onPress?: () => void };
+        capturedPressables[testID] = props as {
+          onPress?: () => void;
+          accessibilityLabel?: string;
+        };
       }
       return React.createElement(ActualPressable, props);
     },
@@ -140,6 +149,55 @@ describe("CountGame", () => {
     saySpy.mockClear();
     render(<CountGame onHome={noop} difficulty="easy" lang="yue" />);
     expect(saySpy).toHaveBeenCalledWith("撳每個朋友仔，然後話俾我聽有幾多個");
+  });
+
+  it("renders critters with localized accessibilityLabel following lang across all languages", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const lang of langs) {
+      render(<CountGame onHome={noop} difficulty="easy" lang={lang} />);
+      const stages = screen.getAllByTestId(/count-stage-/);
+      const stage = stages[stages.length - 1];
+      const match = stage
+        .getAttribute("data-testid")!
+        .match(/^count-stage-(.+)-(\d+)$/);
+      expect(match).not.toBeNull();
+      const [, icon, countStr] = match!;
+      const count = Number(countStr);
+      const expectedLabel = critterLabel(icon, lang);
+
+      for (let i = 0; i < count; i++) {
+        const critter = screen.getByTestId(`count-critter-${i}`);
+        expect(critter.getAttribute("aria-label")).toBe(expectedLabel);
+        expect(
+          capturedPressables[`count-critter-${i}`]?.accessibilityLabel,
+        ).toBe(expectedLabel);
+      }
+      cleanup();
+    }
+  });
+
+  it("updates critter accessibilityLabel immediately when language switches mid-round", () => {
+    const { rerender } = render(
+      <CountGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const match = stage
+      .getAttribute("data-testid")!
+      .match(/^count-stage-(.+)-(\d+)$/);
+    expect(match).not.toBeNull();
+    const [, icon] = match!;
+
+    const critter0 = screen.getByTestId("count-critter-0");
+    expect(critter0.getAttribute("aria-label")).toBe(critterLabel(icon, "en"));
+
+    rerender(<CountGame onHome={noop} difficulty="easy" lang="ja" />);
+
+    const critter0Ja = screen.getByTestId("count-critter-0");
+    expect(critter0Ja.getAttribute("aria-label")).toBe(critterLabel(icon, "ja"));
+    expect(capturedPressables["count-critter-0"]?.accessibilityLabel).toBe(
+      critterLabel(icon, "ja"),
+    );
   });
 
   it("speaks instructional prompt again upon advancing to next round", () => {
@@ -553,6 +611,35 @@ describe("CountGame stage critter positioning", () => {
         badgeCenterY - cornerRadius,
       ) + 11;
     expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
+  });
+});
+
+describe("critterLabel", () => {
+  it("returns localized critter name across all supported languages", () => {
+    expect(critterLabel("dog", "en")).toBe("dog");
+    expect(critterLabel("dog", "ja")).toBe("いぬ");
+    expect(critterLabel("dog", "cmn")).toBe("狗");
+    expect(critterLabel("dog", "yue")).toBe("狗");
+    expect(critterLabel("butterfly", "en")).toBe("butterfly");
+    expect(critterLabel("butterfly", "ja")).toBe("ちょうちょ");
+    expect(critterLabel("butterfly", "cmn")).toBe("蝴蝶");
+    expect(critterLabel("butterfly", "yue")).toBe("蝴蝶");
+  });
+
+  it("covers all CRITTER_ICONS in WORDS for every supported language", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const icon of CRITTER_ICONS) {
+      for (const lang of langs) {
+        const label = critterLabel(icon, lang);
+        expect(label).toBeTruthy();
+      }
+    }
+  });
+
+  it("fails loudly when an unknown critter icon is requested", () => {
+    expect(() => critterLabel("unknown_critter", "en")).toThrow(
+      "Unknown critter icon: unknown_critter",
+    );
   });
 });
 

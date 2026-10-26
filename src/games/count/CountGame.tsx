@@ -23,6 +23,7 @@ import {
   PROMPTS,
   applyTap,
   countSettings,
+  critterLabel,
   applyPickAnswer,
   makeCountRound,
   STAGE_PADDING,
@@ -206,6 +207,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               <Critter
                 key={`${roundNo}-${i}`}
                 icon={round.icon}
+                lang={lang}
                 tapped={tapped[i]}
                 size={critterSize}
                 left={left}
@@ -264,6 +266,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
 
 interface CritterProps {
   icon: string;
+  lang: Lang;
   tapped: boolean;
   size: number;
   left: number;
@@ -274,6 +277,7 @@ interface CritterProps {
 
 function Critter({
   icon,
+  lang,
   tapped,
   size,
   left,
@@ -299,7 +303,7 @@ function Critter({
       onPress={onTap}
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={icon}
+      accessibilityLabel={critterLabel(icon, lang)}
       style={{ position: "absolute", left, top, width: size, height: size }}
     >
       <Animated.View

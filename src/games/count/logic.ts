@@ -2,6 +2,7 @@ import { Difficulty } from "../../difficulty";
 import { t } from "../../i18n";
 import { Lang, numberWord } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../words";
 
 // Shared critter/treat pool for the math suite (Count/Compare/Sums).
 // Kept small on purpose — kids re-see the same familiar friends.
@@ -17,6 +18,13 @@ export const CRITTER_ICONS = [
   "star",
   "balloon",
 ];
+
+/** Localized screen-reader label for a count critter. */
+export function critterLabel(icon: string, lang: Lang): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown critter icon: ${icon}`);
+  return wordFor(entry, lang).text;
+}
 
 /** Position on the stage, in percent (0..100) of the card's width/height. */
 export interface Position {
