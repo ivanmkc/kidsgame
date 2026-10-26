@@ -96,7 +96,11 @@ function getNarration(): HTMLAudioElement | null {
 // opening narration would die silently. Remember what we tried to say and
 // replay it the moment the kid first touches the screen.
 let audioUnlocked = false;
-let pendingNarration: string[] | null = null;
+interface PendingNarration {
+  texts: string[];
+  onDone?: () => void;
+}
+let pendingNarration: PendingNarration | null = null;
 
 // 44-byte silent WAV (mono, 8kHz, 0 samples). Loading a real (empty) src
 // during the first gesture unlocks the singleton on iOS Safari — after
@@ -132,7 +136,7 @@ if (Platform.OS === 'web' && typeof window !== 'undefined') {
       // the intervening stopNarration/say bumps the token and this stale
       // queue must NOT speak on the wrong screen.
       const t = ++currentToken;
-      setTimeout(() => { if (t === currentToken) saySequence(p); }, 0);
+      setTimeout(() => { if (t === currentToken) playSequence(p.texts, p.onDone); }, 0);
     }
   };
   window.addEventListener('pointerdown', onFirstGesture, true);
@@ -176,6 +180,7 @@ export function stopNarration(): void {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return;
   cancelPendingSayThen();
   currentToken++;
+  pendingNarration = null;
   try { window.speechSynthesis?.cancel(); } catch { /* ok */ }
   const a = narration;
   if (!a || a.paused) return;
@@ -217,10 +222,23 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
     u.lang = speechLang === 'ja' ? 'ja-JP' : speechLang === 'cmn' ? 'zh-CN' : speechLang === 'yue' ? 'zh-HK' : 'en-US';
     u.rate = 1.0;
     u.pitch = 1.12;
-    u.onstart = () => { audioUnlocked = true; if (pendingNarration?.[0] === text) pendingNarration = null; };
+    u.onstart = () => { audioUnlocked = true; if (pendingNarration?.texts[0] === text) pendingNarration = null; };
     if (onEnded) u.onend = () => { if (token === currentToken) onEnded(); };
     window.speechSynthesis.speak(u);
   } catch { /* audio unavailable: stay silent */ }
+}
+
+function playSequence(texts: string[], onDone?: () => void): void {
+  const rest = texts.filter(Boolean);
+  if (!rest.length) { onDone?.(); return; }
+  currentToken++;
+  const myToken = currentToken;
+  const step = (i: number) => {
+    if (myToken !== currentToken) return;
+    if (i >= rest.length) { onDone?.(); return; }
+    playClip(rest[i], myToken, () => step(i + 1));
+  };
+  step(0);
 }
 
 /** Speak several lines in order (story text, then the spoken choice menu).
@@ -229,17 +247,10 @@ export function saySequence(texts: string[], onDone?: () => void): void {
   cancelPendingSayThen();
   const rest = texts.filter(Boolean);
   if (!rest.length) { onDone?.(); return; }
-  currentToken++;
-  const myToken = currentToken;
   if (!audioUnlocked && Platform.OS === 'web' && typeof window !== 'undefined' && !muted) {
-    pendingNarration = rest.slice();
+    pendingNarration = { texts: rest.slice(), onDone };
   }
-  const step = (i: number) => {
-    if (myToken !== currentToken) return;
-    if (i >= rest.length) { onDone?.(); return; }
-    playClip(rest[i], myToken, () => step(i + 1));
-  };
-  step(0);
+  playSequence(rest, onDone);
 }
 
 /** Speak lines, then run `done` exactly once — for round advances that
@@ -278,7 +289,7 @@ export function say(text: string, sequence?: string[]): void {
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined') return;
   cancelPendingSayThen();
   currentToken++;
-  if (!audioUnlocked) pendingNarration = sequence ?? [text];
+  if (!audioUnlocked) pendingNarration = { texts: sequence ?? [text] };
   playClip(text, currentToken);
 }
 
