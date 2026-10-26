@@ -57,9 +57,6 @@ export function DiffGame({
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
   const effDifficulty =
     filter === "all" && scene?.level ? scene.level : difficulty;
-  useEffect(() => {
-    say(diffPrompt(lang, !!scene));
-  }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const [found, setFound] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
@@ -74,6 +71,7 @@ export function DiffGame({
   const [hintAvailable, setHintAvailable] = useState(false);
   const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSceneIdRef = useRef<string | undefined | null>(null);
   const settings = settingsFor(effDifficulty);
 
   // The hint button stays hidden until the kid is genuinely stuck (~20s
@@ -137,6 +135,13 @@ export function DiffGame({
     };
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
   const won = found.length === total && total > 0;
+  useEffect(() => {
+    const sceneChanged = sceneId !== lastSceneIdRef.current;
+    lastSceneIdRef.current = sceneId;
+    if (sceneChanged || !won) {
+      say(diffPrompt(lang, !!scene));
+    }
+  }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const expectedAssets = 2 + overlaysA.length + overlaysB.length;
 
   // react-native-web's Image onLoad fires once the DIMENSIONS are known —
