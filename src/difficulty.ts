@@ -8,9 +8,13 @@ const KEY = 'kgb.filter.v1';
 const LEGACY_KEY = 'kgb.difficulty.v1';
 
 export function loadFilter(): DifficultyFilter {
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
-    const v = window.localStorage.getItem(KEY) ?? window.localStorage.getItem(LEGACY_KEY);
-    if (v === 'all' || v === 'easy' || v === 'medium' || v === 'hard') return v;
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    try {
+      const v = window.localStorage?.getItem(KEY) ?? window.localStorage?.getItem(LEGACY_KEY);
+      if (v === 'all' || v === 'easy' || v === 'medium' || v === 'hard') return v;
+    } catch {
+      return 'all';
+    }
   }
   return 'all';
 }
