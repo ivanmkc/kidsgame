@@ -228,4 +228,69 @@ describe("DiffGame", () => {
     expect(screen.queryByTestId("diff-hint-slot")).toBeNull();
     expect(screen.queryByTestId("diff-hint")).toBeNull();
   });
+
+  it("cancels hintTimer when scene changes or component unmounts", () => {
+    vi.useFakeTimers();
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
+    const { rerender, unmount } = render(
+      <DiffGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId={manifest.diff[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
+
+    const hintBtn = screen.getByTestId("diff-hint");
+    fireEvent.click(hintBtn);
+
+    const hintTimerCall = setTimeoutSpy.mock.results.find(
+      (_, idx) => setTimeoutSpy.mock.calls[idx][1] === 3200,
+    );
+    expect(hintTimerCall).toBeDefined();
+    const hintTimerId = hintTimerCall!.value;
+
+    clearTimeoutSpy.mockClear();
+
+    rerender(
+      <DiffGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId={manifest.diff[1].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(hintTimerId);
+
+    // Also verify unmount cleanup
+    act(() => {
+      vi.advanceTimersByTime(20000);
+    });
+    const nextHintBtn = screen.getByTestId("diff-hint");
+    fireEvent.click(nextHintBtn);
+
+    const nextHintTimerCall = [...setTimeoutSpy.mock.results]
+      .reverse()
+      .find((_, revIdx) => {
+        const idx = setTimeoutSpy.mock.results.length - 1 - revIdx;
+        return setTimeoutSpy.mock.calls[idx][1] === 3200;
+      });
+    expect(nextHintTimerCall).toBeDefined();
+    const nextHintTimerId = nextHintTimerCall!.value;
+
+    clearTimeoutSpy.mockClear();
+    unmount();
+
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(nextHintTimerId);
+  });
 });
