@@ -19,6 +19,7 @@ import {
   generateRound,
   getWordText,
   initGameState,
+  listenChooseLayout,
   speechLines,
   updateGameState,
 } from "./logic";
@@ -600,3 +601,71 @@ describe("game state with non-English languages", () => {
     }
   });
 });
+describe("listenChooseLayout", () => {
+  it("scales down elements on mobile landscape viewports (844x390, 667x375)", () => {
+    const landscape844 = listenChooseLayout(844, 390, 2);
+    expect(landscape844.shortH).toBe(true);
+    expect(landscape844.speakerSize).toBe(56);
+    expect(landscape844.speakerIconSize).toBe(26);
+    expect(landscape844.cardHeight).toBe(120);
+    expect(landscape844.cardWidth).toBe(120);
+    expect(landscape844.cardImageSize).toBe(56);
+    expect(landscape844.gap).toBe(10);
+
+    const landscape667 = listenChooseLayout(667, 375, 4);
+    expect(landscape667.shortH).toBe(true);
+    expect(landscape667.speakerSize).toBe(56);
+    expect(landscape667.speakerIconSize).toBe(26);
+    expect(landscape667.cardHeight).toBe(120);
+    expect(landscape667.cardWidth).toBe(120);
+    expect(landscape667.cardImageSize).toBe(56);
+    expect(landscape667.gap).toBe(10);
+  });
+
+  it("scales down elements across common mobile landscape heights", () => {
+    const screenHeights = [320, 360, 375, 390, 414, 428];
+    for (const height of screenHeights) {
+      const layout = listenChooseLayout(800, height, 4);
+      expect(layout.shortH).toBe(true);
+      expect(layout.speakerSize).toBe(56);
+      expect(layout.cardHeight).toBe(120);
+      expect(layout.cardWidth).toBe(120);
+    }
+  });
+
+  it("preserves standard dimensions on portrait viewports (390x844)", () => {
+    const portrait390 = listenChooseLayout(390, 844, 2);
+    expect(portrait390.shortH).toBe(false);
+    expect(portrait390.speakerSize).toBe(88);
+    expect(portrait390.speakerIconSize).toBe(42);
+    expect(portrait390.cardWidth).toBe(150);
+    expect(portrait390.cardHeight).toBe(170);
+    expect(portrait390.cardImageSize).toBe(96);
+    expect(portrait390.gap).toBe(20);
+
+    const portrait375 = listenChooseLayout(375, 667, 4);
+    expect(portrait375.shortH).toBe(false);
+    expect(portrait375.speakerSize).toBe(88);
+    expect(portrait375.cardWidth).toBe(150);
+    expect(portrait375.cardHeight).toBe(170);
+  });
+
+  it("preserves standard dimensions on tablets (1024x768)", () => {
+    const tablet = listenChooseLayout(1024, 768, 4);
+    expect(tablet.shortH).toBe(false);
+    expect(tablet.speakerSize).toBe(88);
+    expect(tablet.speakerIconSize).toBe(42);
+    expect(tablet.cardWidth).toBe(150);
+    expect(tablet.cardHeight).toBe(170);
+    expect(tablet.cardImageSize).toBe(96);
+    expect(tablet.gap).toBe(20);
+  });
+
+  it("clamps card width on narrow landscape viewports", () => {
+    const narrow = listenChooseLayout(360, 320, 4);
+    expect(narrow.shortH).toBe(true);
+    expect(narrow.cardWidth).toBeLessThanOrEqual(120);
+    expect(narrow.cardWidth).toBeGreaterThanOrEqual(72);
+  });
+});
+
