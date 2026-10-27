@@ -26,6 +26,9 @@ test("every music-category game is marked beta and renders the pill", () => {
 
   expect(html).toContain("BETA");
   expect(html).toContain('data-testid="menu-bells-beta"');
+  expect(html).toContain(
+    'aria-label="Melody Bells BETA — Repeat the tune on the bells!"',
+  );
 });
 
 test("sounds card title and blurb match whole-word matching in ja, cmn, and yue", () => {
