@@ -314,3 +314,89 @@ export function buildBoard(
 
   throw new Error(`Unsupported deck: ${deck}`);
 }
+
+export function updateCardLang(
+  card: ConceptMatchCard,
+  deck: ConceptMatchDeck,
+  lang: Lang,
+): ConceptMatchCard {
+  if (deck === "color-word") {
+    const word = t(lang, `color.${card.conceptId}` as UIKey);
+    return {
+      ...card,
+      display:
+        card.display.type === "text"
+          ? { type: "text", text: word }
+          : card.display,
+      speech: word,
+    };
+  }
+
+  if (deck === "picture-word" || deck === "picture-spoken") {
+    const entry = WORDS.find((w) => w.icon === card.conceptId);
+    if (!entry) {
+      throw new Error(`Word entry not found for concept: ${card.conceptId}`);
+    }
+    const word = wordFor(entry, lang).text;
+    return {
+      ...card,
+      display:
+        card.display.type === "text"
+          ? { type: "text", text: word }
+          : card.display,
+      speech: word,
+    };
+  }
+
+  if (deck === "numerals-han" || deck === "numerals-dots") {
+    const n = Number(card.conceptId);
+    if (!Number.isFinite(n)) {
+      throw new Error(`Invalid numeral concept ID: ${card.conceptId}`);
+    }
+    const speech = numberWord(lang, n).t;
+    return {
+      ...card,
+      speech,
+    };
+  }
+
+  if (deck === "shapes-objects") {
+    const speech = t(lang, `shape.${card.conceptId}` as UIKey);
+    return {
+      ...card,
+      speech,
+    };
+  }
+
+  if (deck === "animals-sounds") {
+    if (card.key.endsWith("-sound") || card.display.type === "audio") {
+      const sound = t(lang, `sound.${card.conceptId}` as UIKey);
+      return {
+        ...card,
+        display: { type: "audio", text: sound },
+        speech: sound,
+      };
+    }
+    const entry = WORDS.find((w) => w.icon === card.conceptId);
+    if (!entry) {
+      throw new Error(
+        `Word entry not found for animal concept: ${card.conceptId}`,
+      );
+    }
+    const speech = wordFor(entry, lang).text;
+    return {
+      ...card,
+      speech,
+    };
+  }
+
+  return card;
+}
+
+export function updateBoardLang(
+  board: ConceptMatchCard[],
+  deck: ConceptMatchDeck,
+  lang: Lang,
+): ConceptMatchCard[] {
+  return board.map((card) => updateCardLang(card, deck, lang));
+}
