@@ -154,14 +154,15 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const plateW = (totalW - 20) / 2;
   const plateH = Math.min(height - 84 - 180, plateW * 1.05);
 
+  const promptText = t(
+    lang,
+    round.ask === "more" ? "shell.compare.subMore" : "shell.compare.subFewer",
+  );
+
   return (
     <GameShell
       title={t(lang, "shell.compare.title")}
-      subtitle={
-        round.ask === "fewer"
-          ? t(lang, "shell.compare.subFewer")
-          : t(lang, "shell.compare.subMore")
-      }
+      subtitle={promptText}
       onBack={onHome}
       lang={lang}
       right={
@@ -191,7 +192,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
             say(promptFor(round));
           }}
           accessibilityRole="button"
-          accessibilityLabel={promptFor(round)}
+          accessibilityLabel={promptText}
           style={({ pressed }) => [
             styles.promptCard,
             shadows.soft,
@@ -200,7 +201,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
           ]}
           testID={`compare-prompt-${round.ask}`}
         >
-          <Text style={styles.promptText}>{promptFor(round)}</Text>
+          <Text style={styles.promptText}>{promptText}</Text>
           <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
         </Pressable>
         <View style={[styles.plates, { width: totalW }]}>
