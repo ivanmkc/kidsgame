@@ -1,8 +1,13 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, Text, useWindowDimensions } from 'react-native';
-import { prefersReducedMotion } from '../motion';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  useWindowDimensions,
+} from "react-native";
+import { prefersReducedMotion } from "../motion";
 
-const PIECES = ['🎉', '⭐', '🎈', '🎊', '✨'];
+const PIECES = ["🎉", "⭐", "🎈", "🎊", "✨"];
 
 // Lightweight celebratory rain — pieces fall & spin once when mounted.
 export function Confetti({ count = 18 }: { count?: number }) {
@@ -17,9 +22,17 @@ export function Confetti({ count = 18 }: { count?: number }) {
   );
 }
 
-function Piece({ index, screenW, screenH }: { index: number; screenW: number; screenH: number }) {
+function Piece({
+  index,
+  screenW,
+  screenH,
+}: {
+  index: number;
+  screenW: number;
+  screenH: number;
+}) {
   const t = useRef(new Animated.Value(0)).current;
-  const startX = ((index * 137) % 100) / 100 * screenW;
+  const startX = (((index * 137) % 100) / 100) * screenW;
   const drift = (((index * 61) % 40) - 20) * 3;
   const delay = (index % 6) * 180;
   const size = 20 + ((index * 53) % 18);
@@ -37,15 +50,33 @@ function Piece({ index, screenW, screenH }: { index: number; screenW: number; sc
   return (
     <Animated.Text
       pointerEvents="none"
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no"
+      aria-hidden={true}
       style={[
         styles.piece,
         {
           left: startX,
           fontSize: size,
           transform: [
-            { translateY: t.interpolate({ inputRange: [0, 1], outputRange: [-60, screenH + 60] }) },
-            { translateX: t.interpolate({ inputRange: [0, 1], outputRange: [0, drift] }) },
-            { rotate: t.interpolate({ inputRange: [0, 1], outputRange: ['0deg', `${((index % 2) * 2 - 1) * 360}deg` ] }) },
+            {
+              translateY: t.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-60, screenH + 60],
+              }),
+            },
+            {
+              translateX: t.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, drift],
+              }),
+            },
+            {
+              rotate: t.interpolate({
+                inputRange: [0, 1],
+                outputRange: ["0deg", `${((index % 2) * 2 - 1) * 360}deg`],
+              }),
+            },
           ],
         },
       ]}
@@ -56,5 +87,5 @@ function Piece({ index, screenW, screenH }: { index: number; screenW: number; sc
 }
 
 const styles = StyleSheet.create({
-  piece: { position: 'absolute', top: 0, zIndex: 20 },
+  piece: { position: "absolute", top: 0, zIndex: 20 },
 });
