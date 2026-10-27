@@ -345,7 +345,18 @@ export type UIKey =
   // ── Shapes ─────────────────────────────────────────────────────
   | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star'
   // ── Animals & Sounds ───────────────────────────────────────────
-  | 'sound.dog' | 'sound.cat' | 'sound.lion' | 'sound.frog' | 'sound.pig';
+  | 'sound.dog' | 'sound.cat' | 'sound.lion' | 'sound.frog' | 'sound.pig'
+  // ── Hidden scene names ──────────────────────────────────────────
+  | 'hidden.scene.jungle' | 'hidden.scene.ballroom' | 'hidden.scene.picnic' | 'hidden.scene.cabin'
+  | 'hidden.scene.treasure' | 'hidden.scene.kitchenb' | 'hidden.scene.workshop' | 'hidden.scene.space_station'
+  | 'hidden.scene.kitchen' | 'hidden.scene.fairy' | 'hidden.scene.toybox' | 'hidden.scene.dinonest'
+  | 'hidden.scene.orchard' | 'hidden.scene.fairground' | 'hidden.scene.shed' | 'hidden.scene.tent'
+  | 'hidden.scene.petshop' | 'hidden.scene.pond' | 'hidden.scene.depot' | 'hidden.scene.candyshop'
+  | 'hidden.scene.haunted_house' | 'hidden.scene.yokai_festival' | 'hidden.scene.robot_factory' | 'hidden.scene.wizard_library'
+  | 'hidden.scene.sky_market' | 'hidden.scene.coral_reef' | 'hidden.scene.spooky_graveyard' | 'hidden.scene.ice_palace'
+  | 'hidden.scene.monster_bedroom' | 'hidden.scene.treehouse_village' | 'hidden.scene.dragonfly_meadow' | 'hidden.scene.cloud_kingdom'
+  | 'hidden.scene.crystal_cavern' | 'hidden.scene.circus_backstage' | 'hidden.scene.mole_city' | 'hidden.scene.steampunk_airship'
+  | 'hidden.scene.giant_kitchen' | 'hidden.scene.witch_kitchen';
 
 export type Table = Record<UIKey, string>;
 
@@ -727,6 +738,27 @@ export const EN: Table = {
   'sound.lion': 'roar',
   'sound.frog': 'ribbit',
   'sound.pig': 'oink',
+
+  // Hidden scene names
+  'hidden.scene.jungle': 'Jungle', 'hidden.scene.ballroom': 'Princess Ballroom',
+  'hidden.scene.picnic': 'Beach Picnic', 'hidden.scene.cabin': 'Snowy Cabin',
+  'hidden.scene.treasure': 'Treasure Room', 'hidden.scene.kitchenb': 'Bakery Kitchen',
+  'hidden.scene.workshop': 'Toy Workshop', 'hidden.scene.space_station': 'Space Station',
+  'hidden.scene.kitchen': 'Kitchen', 'hidden.scene.fairy': 'Fairy Garden',
+  'hidden.scene.toybox': 'Toy Room', 'hidden.scene.dinonest': 'Dino Nest',
+  'hidden.scene.orchard': 'Apple Orchard', 'hidden.scene.fairground': 'Fairground',
+  'hidden.scene.shed': 'Garden Shed', 'hidden.scene.tent': 'Inside the Tent',
+  'hidden.scene.petshop': 'Pet Shop', 'hidden.scene.pond': 'Frog Pond',
+  'hidden.scene.depot': 'Train Depot', 'hidden.scene.candyshop': 'Candy Shop',
+  'hidden.scene.haunted_house': 'Haunted House', 'hidden.scene.yokai_festival': 'Yokai Festival',
+  'hidden.scene.robot_factory': 'Robot Factory', 'hidden.scene.wizard_library': 'Wizard\'s Library',
+  'hidden.scene.sky_market': 'Market in the Sky', 'hidden.scene.coral_reef': 'Coral Reef',
+  'hidden.scene.spooky_graveyard': 'Spooky Graveyard', 'hidden.scene.ice_palace': 'Ice Palace',
+  'hidden.scene.monster_bedroom': 'Monster\'s Bedroom', 'hidden.scene.treehouse_village': 'Treehouse Village',
+  'hidden.scene.dragonfly_meadow': 'Dragonfly Meadow', 'hidden.scene.cloud_kingdom': 'Cloud Kingdom',
+  'hidden.scene.crystal_cavern': 'Crystal Cavern', 'hidden.scene.circus_backstage': 'Circus Backstage',
+  'hidden.scene.mole_city': 'Underground Mole City', 'hidden.scene.steampunk_airship': 'Steampunk Airship',
+  'hidden.scene.giant_kitchen': 'Giant\'s Kitchen', 'hidden.scene.witch_kitchen': 'Witch\'s Kitchen',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };
