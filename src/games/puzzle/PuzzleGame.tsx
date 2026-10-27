@@ -135,12 +135,20 @@ export function PuzzleGame({
     if (won || perm.length === 0) return;
     const current = selectedRef.current;
     if (current === null) {
+      sfx.tap();
       selectedRef.current = pos;
       setSelected(pos);
     } else if (current === pos) {
+      sfx.tap();
       selectedRef.current = null;
       setSelected(null);
     } else {
+      const next = swap(perm, current, pos);
+      if (next[pos] === pos || next[current] === current) {
+        sfx.good();
+      } else {
+        sfx.flip();
+      }
       setPerm((p) => swap(p, current, pos));
       selectedRef.current = null;
       setSelected(null);
