@@ -6,11 +6,13 @@ import {
   fireEvent,
   render,
   screen,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LangContext } from "../../../components/GameShell";
 import { Difficulty } from "../../../difficulty";
 import { Lang } from "../../../lang";
+import { t } from "../../../i18n";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { CompareGame } from "../CompareGame";
@@ -253,10 +255,10 @@ describe("CompareGame prompt replay", () => {
 
     // The prompt card should have button role and prompt label
     const promptBtn = screen.getByRole("button", {
-      name: "Tap the side with MORE!",
+      name: "Tap the side with more",
     });
     expect(promptBtn).toBeDefined();
-    expect(screen.getByText("Tap the side with MORE!")).toBeDefined();
+    expect(within(promptBtn).getByText("Tap the side with more")).toBeDefined();
     expect(screen.getByText("🔊 Tap to hear again")).toBeDefined();
 
     // Clicking the prompt card replays the instruction and plays tap sfx
@@ -283,7 +285,9 @@ describe("CompareGame prompt replay", () => {
 
     const promptBtn = screen.getByTestId("compare-prompt-fewer");
     expect(promptBtn).toBeDefined();
-    expect(screen.getByText("Tap the side with FEWER!")).toBeDefined();
+    expect(
+      within(promptBtn).getByText("Tap the side with fewer"),
+    ).toBeDefined();
 
     fireEvent.click(promptBtn);
     expect(tapSpy).toHaveBeenCalledOnce();
@@ -406,7 +410,7 @@ describe("CompareGame badges and comparative feedback", () => {
     expect(screen.queryByTestId("compare-badge-left")).toBeNull();
     expect(screen.queryByTestId("compare-badge-right")).toBeNull();
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain("Tap the side with MORE!");
+    expect(prompt.textContent).toContain("Tap the side with more");
   });
 
   it("wrong plate tap plays wrong sound and keeps count badges hidden", () => {
@@ -483,9 +487,9 @@ describe("CompareGame badges and comparative feedback", () => {
     expect(leftPlate!.contains(leftBadge)).toBe(false);
     expect(rightPlate!.contains(rightBadge)).toBe(false);
 
-    // Prompt retains promptFor(round)
+    // Prompt retains prompt text from i18n
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain("Tap the side with MORE!");
+    expect(prompt.textContent).toContain("Tap the side with more");
 
     // sayThen receives the exact comparative line and praise
     const callArgs = vi.mocked(sound.sayThen).mock.calls[0][0];
@@ -595,7 +599,7 @@ describe("CompareGame badges and comparative feedback", () => {
     expect(rightBadge.textContent).toBe(String(rightCount));
 
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toContain("おおい ほうは どっち？");
+    expect(prompt.textContent).toContain("おおいほうを タップ");
 
     const callArgs = vi.mocked(sound.sayThen).mock.calls[0][0];
     const expectedJaFeedback = comparisonPhrase(
@@ -664,7 +668,7 @@ describe("CompareGame language switch safety", () => {
 
     // Prompt updated visually and spoken in Japanese
     const prompt = screen.getByTestId(/^compare-prompt-/);
-    expect(prompt.textContent).toMatch(/どっち？/);
+    expect(prompt.textContent).toMatch(/(おおい|すくない)ほうを タップ/);
     expect(saySpy).toHaveBeenCalledWith(
       expect.stringMatching(/(おおい|すくない) ほうは どっち？/),
     );
@@ -972,3 +976,57 @@ describe("CompareGame plate accessibility labels", () => {
     ).toBe("6 うさぎ");
   });
 });
+
+describe("CompareGame on-screen prompt localization", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => cb && cb());
+    vi.spyOn(sfx, "tap").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  const cases: {
+    lang: Lang;
+    ask: "more" | "fewer";
+    expectedKey: "shell.compare.subMore" | "shell.compare.subFewer";
+  }[] = [
+    { lang: "en", ask: "more", expectedKey: "shell.compare.subMore" },
+    { lang: "en", ask: "fewer", expectedKey: "shell.compare.subFewer" },
+    { lang: "ja", ask: "more", expectedKey: "shell.compare.subMore" },
+    { lang: "ja", ask: "fewer", expectedKey: "shell.compare.subFewer" },
+    { lang: "cmn", ask: "more", expectedKey: "shell.compare.subMore" },
+    { lang: "cmn", ask: "fewer", expectedKey: "shell.compare.subFewer" },
+    { lang: "yue", ask: "more", expectedKey: "shell.compare.subMore" },
+    { lang: "yue", ask: "fewer", expectedKey: "shell.compare.subFewer" },
+  ];
+
+  for (const { lang, ask, expectedKey } of cases) {
+    it(`routes prompt text through i18n table for ${lang} (${ask})`, () => {
+      vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+        left: { icon: "star", count: 3, positions: [] },
+        right: { icon: "dog", count: 6, positions: [] },
+        ask,
+        correctSide: ask === "more" ? "right" : "left",
+      });
+
+      const saySpy = vi.spyOn(sound, "say");
+      render(<CompareGame onHome={noop} difficulty="easy" lang={lang} />);
+
+      const expectedUI = t(lang, expectedKey);
+      const expectedSpoken =
+        ask === "more" ? logic.MORE_PROMPT[lang] : logic.FEWER_PROMPT[lang];
+
+      const promptBtn = screen.getByTestId(`compare-prompt-${ask}`);
+      expect(within(promptBtn).getByText(expectedUI)).toBeDefined();
+      expect(promptBtn.getAttribute("aria-label")).toBe(expectedUI);
+
+      // Verify spoken text uses conversational prompt from logic, not UI text
+      expect(saySpy).toHaveBeenCalledWith(expectedSpoken);
+    });
+  }
+});
+
