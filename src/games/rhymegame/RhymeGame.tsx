@@ -68,6 +68,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const lockedRef = useRef(false);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyRef = useRef<string[]>([]);
+  const prevLangRef = useRef(gameLang);
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RhymeRound | null>(() => {
     if (!playable) return null;
@@ -86,6 +87,8 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     };
   }, []);
   useEffect(() => {
+    if (prevLangRef.current === gameLang) return;
+    prevLangRef.current = gameLang;
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     setWrongIdx(null);
     lockedRef.current = false;
