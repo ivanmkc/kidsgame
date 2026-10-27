@@ -67,6 +67,7 @@ export function AdultGate({ onPass, onCancel, lang: propLang }: Props) {
 
   const onHoldStart = () => {
     resetIdle();
+    if (holdTimer.current) clearInterval(holdTimer.current);
     holdStart.current = Date.now();
     holdTimer.current = setInterval(() => {
       const elapsed = Date.now() - holdStart.current;
