@@ -327,7 +327,7 @@ describe("OddOneGame", () => {
 
     expect(say).toHaveBeenCalledTimes(1);
     const initialPrompt = vi.mocked(say).mock.calls[0][0];
-    expect(banner.textContent).toBe(initialPrompt);
+    expect(banner.textContent).toBe(`🔊 ${initialPrompt}`);
 
     act(() => {
       fireEvent.click(banner);
@@ -429,7 +429,44 @@ describe("OddOneGame", () => {
       '[data-testid^="oddone-question-"]',
     ) as HTMLElement;
     expect(banner).toBeTruthy();
-    expect(banner.textContent).toBe("ひとつだけ なかまじゃないのは？");
+    expect(banner.textContent).toBe("🔊 ひとつだけ なかまじゃないのは？");
     expect(say).toHaveBeenCalledWith("ひとつだけ なかまじゃないのは？");
+  });
+
+  it("displays speaker icon (🔊) in question card for pre-readers across languages", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementation(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["apple", "banana", "cat", "pizza"],
+      oddIndex: 2,
+    }));
+
+    const { container, rerender } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    let banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner.textContent).toBe("🔊 Which one is NOT food?");
+    expect(banner.textContent).toContain("🔊");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner.textContent).toBe("🔊 たべものじゃないのは？");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner.textContent).toBe("🔊 哪一个不是食物？");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="yue" />);
+    banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner.textContent).toBe("🔊 邊個唔係食物？");
   });
 });

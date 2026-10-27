@@ -178,7 +178,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
           ]}
           testID={`oddone-question-${round.baseCategory}`}
         >
-          <Text style={styles.questionText}>{prompt}</Text>
+          <Text style={styles.questionText}>🔊 {prompt}</Text>
         </Pressable>
         <View
           style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
