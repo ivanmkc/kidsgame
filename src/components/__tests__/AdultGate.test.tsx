@@ -117,6 +117,34 @@ describe("AdultGate i18n and interaction", () => {
     expect(screen.queryByPlaceholderText("Type the word here")).toBeNull();
   });
 
+  it("clears previous hold timer when hold starts again", () => {
+    const onPass = vi.fn();
+    const onCancel = vi.fn();
+    render(<AdultGate lang="en" onPass={onPass} onCancel={onCancel} />);
+
+    const holdBtn = screen.getByLabelText(
+      "Hold for 3 seconds to access parental controls",
+    );
+    // First hold starts via keyDown (Enter key)
+    fireEvent.keyDown(holdBtn, { key: "Enter" });
+
+    // Second hold starts via mouseDown before key is released
+    fireEvent.mouseDown(holdBtn);
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+
+    // Release inputs before 3 seconds
+    fireEvent.mouseUp(holdBtn);
+    fireEvent.keyUp(holdBtn, { key: "Enter" });
+
+    // Advance by 3000ms; if the first timer leaked, it would advance to the word phase
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.queryByPlaceholderText("Type the word here")).toBeNull();
+  });
+
   it("triggers idle timeout (onCancel) after 30 seconds without interaction", () => {
     const onPass = vi.fn();
     const onCancel = vi.fn();
