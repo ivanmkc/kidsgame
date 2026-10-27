@@ -18,7 +18,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
-import { say, saySequence, sfx } from "../../sound";
+import { say, saySequence, sfx, stopNarration } from "../../sound";
 import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from "./logic";
 import { useWinLine } from "../winlines";
 
@@ -79,6 +79,8 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, "win.rules"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  useEffect(() => () => stopNarration(), []);
 
   // Speak the game intro once, then every rule aloud — pre-readers play
   // entirely by ear here.
