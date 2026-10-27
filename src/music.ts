@@ -100,11 +100,16 @@ export function playSequence(
   let cancelled = false;
   const timers: ReturnType<typeof setTimeout>[] = [];
 
+  const seqGain = !muted && c && master ? c.createGain() : null;
+  if (seqGain && master) {
+    seqGain.connect(master);
+  }
+
   let offset = 0;
   for (let i = 0; i < notes.length; i++) {
     const noteTime = startTime + offset;
-    if (!muted && c && master) {
-      scheduleNote(c, master, notes[i].m, noteTime, 0.8);
+    if (seqGain && c) {
+      scheduleNote(c, seqGain, notes[i].m, noteTime, 0.8);
     }
     if (onNote) {
       const idx = i;
@@ -120,8 +125,10 @@ export function playSequence(
   }
 
   const cancel = () => {
+    if (cancelled) return;
     cancelled = true;
     for (const t of timers) clearTimeout(t);
+    seqGain?.disconnect();
   };
   seqCancel = cancel;
   return cancel;
@@ -188,10 +195,15 @@ export function playDrumSequence(
   const timers: ReturnType<typeof setTimeout>[] = [];
   const hitCount = gaps.length + 1;
 
+  const seqGain = !muted && c && master ? c.createGain() : null;
+  if (seqGain && master) {
+    seqGain.connect(master);
+  }
+
   let offset = 0;
   for (let i = 0; i < hitCount; i++) {
-    if (!muted && c && master) {
-      scheduleDrum(c, master, startTime + offset, 0.7);
+    if (seqGain && c) {
+      scheduleDrum(c, seqGain, startTime + offset, 0.7);
     }
     if (onHit) {
       const idx = i;
@@ -207,8 +219,10 @@ export function playDrumSequence(
   }
 
   const cancel = () => {
+    if (cancelled) return;
     cancelled = true;
     for (const t of timers) clearTimeout(t);
+    seqGain?.disconnect();
   };
   seqCancel = cancel;
   return cancel;
