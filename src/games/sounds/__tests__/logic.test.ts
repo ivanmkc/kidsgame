@@ -74,4 +74,15 @@ describe("makeSoundsRound", () => {
     const tileIcons = round.tiles.map((t) => t.icon);
     expect(tileIcons).not.toContain("plane");
   });
+
+  it('excludes ladybug as distractor when target sound is "buh"', () => {
+    // Ladybug can be called "bug" ('buh'), so it must not be a distractor
+    // when prompting for 'buh' (e.g. butterfly).
+    const icons = ["butterfly", "ladybug", "rocket"];
+    const rng = () => 0;
+    const round = makeSoundsRound(rng, icons, "en", 3);
+    expect(round.target.icon).toBe("butterfly");
+    const tileIcons = round.tiles.map((t) => t.icon);
+    expect(tileIcons).not.toContain("ladybug");
+  });
 });
