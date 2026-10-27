@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   act,
   cleanup,
@@ -8,6 +8,8 @@ import {
   screen,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { manifest } from "../../../manifest";
@@ -16,6 +18,32 @@ import { EscapeGame } from "../EscapeGame";
 
 describe("EscapeGame", () => {
   const noop = () => {};
+
+  function LangHarness({
+    initialLang = "en",
+    sceneId = "toyroom",
+  }: {
+    initialLang?: Lang;
+    sceneId?: string;
+  }) {
+    const [lang, setLang] = useState<Lang>(initialLang);
+    const cycleLang = () => {
+      setLang((l) =>
+        l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+      );
+    };
+    return (
+      <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+        <EscapeGame
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          sceneId={sceneId}
+          lang={lang}
+        />
+      </LangContext.Provider>
+    );
+  }
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -488,5 +516,61 @@ describe("EscapeGame", () => {
     // Collect key
     fireEvent.click(screen.getByTestId("escape-spot-pillow"));
     expect(sound.say).toHaveBeenCalledWith(jaLabel);
+  });
+
+  it("stops playing narration when language is switched via header button mid-game", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    render(<LangHarness initialLang="en" sceneId={room.id} />);
+
+    expect(sound.say).toHaveBeenCalledWith(room.intro);
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    // Switch language to ja via header chip
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // Old language speech must be halted
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+
+    // UI text translates to the new language
+    expect(screen.getByText(room.nameT?.ja ?? room.name)).toBeDefined();
+    expect(screen.getByText(t("ja", "shell.escape.subPlay"))).toBeDefined();
+
+    // Replay button is labeled in the new language and replays the new intro
+    vi.mocked(sound.say).mockClear();
+    const replayBtn = screen.getByTestId("escape-replay");
+    expect(replayBtn.getAttribute("aria-label")).toBe(
+      t("ja", "spell.hearAgain"),
+    );
+    fireEvent.click(replayBtn);
+    expect(sound.say).toHaveBeenCalledWith(room.t?.ja?.intro ?? room.intro);
+  });
+
+  it("halts win narration when language is switched during win overlay", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    render(<LangHarness initialLang="en" sceneId={room.id} />);
+
+    stopNarrationSpy.mockClear();
+
+    // Complete the room to win
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-pen"));
+
+    // Switch language while win overlay is active
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    expect(stopNarrationSpy).toHaveBeenCalled();
+    const jaWin = room.t?.ja?.winText ?? room.winText;
+    expect(screen.getByText(jaWin)).toBeDefined();
   });
 });
