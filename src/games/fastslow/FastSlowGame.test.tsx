@@ -934,6 +934,37 @@ describe("FastSlowGame UI interaction", () => {
 
     vi.useRealTimers();
   });
+
+  it("stops choice narration immediately upon picking an answer to prevent speech during celebration", () => {
+    vi.useFakeTimers();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward initial listen delay to enter pick phase
+    act(() => {
+      vi.advanceTimersByTime(1050);
+    });
+
+    expect(vi.mocked(saySequence)).toHaveBeenCalledWith([
+      "Is the music fast or slow?",
+      "Fast",
+      "Slow",
+    ]);
+
+    vi.mocked(stopNarration).mockClear();
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const correctBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
+    );
+
+    fireEvent.click(correctBtn);
+
+    expect(stopNarration).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
 });
 
 describe("FastSlowGame accessibility", () => {
