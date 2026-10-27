@@ -12,6 +12,8 @@ import {
   SHAPES,
   buildBoard,
   isMatch,
+  updateBoardLang,
+  updateCardLang,
 } from "../logic";
 
 describe("conceptmatch/logic", () => {
@@ -876,6 +878,136 @@ describe("conceptmatch/logic", () => {
       expect(() =>
         buildBoard(rng, "unsupported" as unknown as ConceptMatchDeck),
       ).toThrow("Unsupported deck: unsupported");
+    });
+  });
+
+  describe("updateBoardLang", () => {
+    it("updates text and speech for color-word deck", () => {
+      const card: ConceptMatchCard = {
+        key: "red-word",
+        conceptId: "red",
+        display: { type: "text", text: "red" },
+        speech: "red",
+      };
+      const updated = updateCardLang(card, "color-word", "ja");
+      expect(updated.speech).toBe("あか");
+      expect(updated.display).toEqual({ type: "text", text: "あか" });
+    });
+
+    it("updates speech for color swatch card in color-word deck", () => {
+      const card: ConceptMatchCard = {
+        key: "red-color",
+        conceptId: "red",
+        display: { type: "color", color: "#E53935" },
+        speech: "red",
+      };
+      const updated = updateCardLang(card, "color-word", "ja");
+      expect(updated.speech).toBe("あか");
+      expect(updated.display).toEqual({ type: "color", color: "#E53935" });
+    });
+
+    it("updates text and speech for picture-word deck", () => {
+      const card: ConceptMatchCard = {
+        key: "apple-word",
+        conceptId: "apple",
+        display: { type: "text", text: "apple" },
+        speech: "apple",
+      };
+      const updated = updateCardLang(card, "picture-word", "ja");
+      expect(updated.speech).toBe("りんご");
+      expect(updated.display).toEqual({ type: "text", text: "りんご" });
+    });
+
+    it("updates speech for numerals deck", () => {
+      const card: ConceptMatchCard = {
+        key: "3-arabic",
+        conceptId: "3",
+        display: { type: "text", text: "3" },
+        speech: "three",
+      };
+      const updated = updateCardLang(card, "numerals-han", "ja");
+      expect(updated.speech).toBe("さん");
+    });
+
+    it("updates speech for shapes-objects deck", () => {
+      const card: ConceptMatchCard = {
+        key: "circle-shape",
+        conceptId: "circle",
+        display: { type: "icon", icon: "circle" },
+        speech: "circle",
+      };
+      const updated = updateCardLang(card, "shapes-objects", "ja");
+      expect(updated.speech).toBe("まる");
+    });
+
+    it("updates sound text and speech for animals-sounds deck", () => {
+      const soundCard: ConceptMatchCard = {
+        key: "dog-sound",
+        conceptId: "dog",
+        display: { type: "audio", text: "woof" },
+        speech: "woof",
+      };
+      const updatedSound = updateCardLang(soundCard, "animals-sounds", "ja");
+      expect(updatedSound.speech).toBe("わんわん");
+      expect(updatedSound.display).toEqual({ type: "audio", text: "わんわん" });
+
+      const animalCard: ConceptMatchCard = {
+        key: "dog-icon",
+        conceptId: "dog",
+        display: { type: "icon", icon: "dog" },
+        speech: "dog",
+      };
+      const updatedAnimal = updateCardLang(animalCard, "animals-sounds", "ja");
+      expect(updatedAnimal.speech).toBe("いぬ");
+    });
+
+    it("maps over entire board with updateBoardLang", () => {
+      const board = buildBoard(makeRng(1), "color-word", "en", 2);
+      const updated = updateBoardLang(board, "color-word", "ja");
+      expect(updated).toHaveLength(board.length);
+      for (const card of updated) {
+        if (card.display.type === "text") {
+          expect(
+            /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(card.display.text),
+          ).toBe(true);
+        }
+      }
+    });
+
+    it("throws when word entry is missing for picture-word deck", () => {
+      const card: ConceptMatchCard = {
+        key: "unknown-word",
+        conceptId: "nonexistent_concept",
+        display: { type: "text", text: "unknown" },
+        speech: "unknown",
+      };
+      expect(() => updateCardLang(card, "picture-word", "ja")).toThrow(
+        "Word entry not found for concept: nonexistent_concept",
+      );
+    });
+
+    it("throws when numeral conceptId is not a valid number", () => {
+      const card: ConceptMatchCard = {
+        key: "invalid-arabic",
+        conceptId: "not-a-number",
+        display: { type: "text", text: "NaN" },
+        speech: "NaN",
+      };
+      expect(() => updateCardLang(card, "numerals-han", "ja")).toThrow(
+        "Invalid numeral concept ID: not-a-number",
+      );
+    });
+
+    it("throws when animal word entry is missing for animals-sounds deck", () => {
+      const animalCard: ConceptMatchCard = {
+        key: "unknown-icon",
+        conceptId: "nonexistent_animal",
+        display: { type: "icon", icon: "nonexistent_animal" },
+        speech: "unknown",
+      };
+      expect(() => updateCardLang(animalCard, "animals-sounds", "ja")).toThrow(
+        "Word entry not found for animal concept: nonexistent_animal",
+      );
     });
   });
 });
