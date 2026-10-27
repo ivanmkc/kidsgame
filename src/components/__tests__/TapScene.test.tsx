@@ -58,7 +58,6 @@ test("TapScene hint loop stops on unmount", () => {
 });
 
 describe("TapScene minimum touch target size", () => {
-
   const mockSource = { uri: "stub.png" } as unknown as number;
 
   it("enforces 44px minimum touch target size on small screens and centers it", () => {
@@ -208,5 +207,26 @@ describe("TapScene minimum touch target size", () => {
     expect(html).toContain("width:44px;height:44px");
     // Inner visual ring container retains exact raw dimensions (26x26px)
     expect(html).toContain("width:26px;height:26px");
+  });
+
+  it("sets aria-disabled on backdrop and targets when disabled is true", () => {
+    const html = renderToString(
+      <TapScene
+        source={mockSource}
+        sceneW={100}
+        sceneH={100}
+        displayWidth={100}
+        boxes={[{ id: "target1", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+        foundIds={[]}
+        onHit={() => {}}
+        onMiss={() => {}}
+        testIDPrefix="test"
+        disabled={true}
+      />,
+    );
+
+    expect(html).toContain('data-testid="test-backdrop"');
+    expect(html).toContain('data-testid="test-target-target1"');
+    expect(html).toContain('aria-disabled="true"');
   });
 });

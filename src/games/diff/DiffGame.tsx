@@ -308,6 +308,7 @@ export function DiffGame({
           onMiss={() => {}}
           testIDPrefix="left"
           lang={lang}
+          disabled={won}
         />
       </View>
       <View style={styles.sceneBlock}>
@@ -326,6 +327,7 @@ export function DiffGame({
           onMiss={() => {}}
           testIDPrefix="right"
           lang={lang}
+          disabled={won}
         />
       </View>
     </>

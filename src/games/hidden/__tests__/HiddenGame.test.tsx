@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { t } from "../../../i18n";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
+import { Animated } from "react-native";
 import { sfx } from "../../../sound";
 import { HiddenGame } from "../HiddenGame";
 
@@ -798,5 +799,43 @@ describe("HiddenGame mode picker on active scene", () => {
 
     // 2P coop mode does not show timer
     expect(screen.queryByTestId("hidden-timer")).toBeNull();
+  });
+
+  it("locks TapScene input and ignores backdrop taps when won", () => {
+    const scene = manifest.hidden[0];
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const sequenceSpy = vi.spyOn(Animated, "sequence");
+
+    // Before winning, backdrop tap triggers shake sequence
+    fireEvent.click(screen.getByTestId("hidden-backdrop"));
+    expect(sequenceSpy).toHaveBeenCalledTimes(1);
+    sequenceSpy.mockClear();
+
+    // Find all checklist targets to win
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const id of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${id}`));
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+
+    // After winning, backdrop taps must not trigger shake
+    fireEvent.click(screen.getByTestId("hidden-backdrop"));
+    expect(sequenceSpy).not.toHaveBeenCalled();
   });
 });

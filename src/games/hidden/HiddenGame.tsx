@@ -384,6 +384,7 @@ export function HiddenGame({
             onMiss={() => {}}
             testIDPrefix="hidden"
             lang={lang}
+            disabled={won}
           />
         </ScrollView>
         {isLandscape && (
