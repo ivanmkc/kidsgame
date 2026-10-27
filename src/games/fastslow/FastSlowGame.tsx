@@ -147,6 +147,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: "fast" | "slow") => {
     if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
+    stopNarration();
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
