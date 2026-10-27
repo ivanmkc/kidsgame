@@ -5,6 +5,8 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
 import { say, sfx } from "../../../sound";
+import { ICON_CATEGORIES } from "../../iconCategories";
+import { Lang } from "../../../lang";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
@@ -468,5 +470,81 @@ describe("OddOneGame", () => {
       '[data-testid^="oddone-question-"]',
     ) as HTMLElement;
     expect(banner.textContent).toBe("🔊 邊個唔係食物？");
+  });
+
+  it("localizes item tile accessibility labels according to lang", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementation(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "dog",
+      items: ["apple", "banana", "cat", "dog"],
+      oddIndex: 3,
+    }));
+
+    const { container, rerender } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+    const tilesJa = container.querySelectorAll('[data-testid^="oddone-item-"]');
+    expect(tilesJa).toHaveLength(4);
+    expect(tilesJa[0]?.getAttribute("aria-label")).toBe("りんご");
+    expect(tilesJa[1]?.getAttribute("aria-label")).toBe("バナナ");
+    expect(tilesJa[2]?.getAttribute("aria-label")).toBe("ねこ");
+    expect(tilesJa[3]?.getAttribute("aria-label")).toBe("いぬ");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    const tilesCmn = container.querySelectorAll(
+      '[data-testid^="oddone-item-"]',
+    );
+    expect(tilesCmn[0]?.getAttribute("aria-label")).toBe("苹果");
+    expect(tilesCmn[1]?.getAttribute("aria-label")).toBe("香蕉");
+    expect(tilesCmn[2]?.getAttribute("aria-label")).toBe("猫");
+    expect(tilesCmn[3]?.getAttribute("aria-label")).toBe("狗");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="yue" />);
+    const tilesYue = container.querySelectorAll(
+      '[data-testid^="oddone-item-"]',
+    );
+    expect(tilesYue[0]?.getAttribute("aria-label")).toBe("蘋果");
+    expect(tilesYue[1]?.getAttribute("aria-label")).toBe("香蕉");
+    expect(tilesYue[2]?.getAttribute("aria-label")).toBe("貓");
+    expect(tilesYue[3]?.getAttribute("aria-label")).toBe("狗");
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="en" />);
+    const tilesEn = container.querySelectorAll('[data-testid^="oddone-item-"]');
+    expect(tilesEn[0]?.getAttribute("aria-label")).toBe("apple");
+    expect(tilesEn[1]?.getAttribute("aria-label")).toBe("banana");
+    expect(tilesEn[2]?.getAttribute("aria-label")).toBe("cat");
+    expect(tilesEn[3]?.getAttribute("aria-label")).toBe("dog");
+  });
+
+  describe("itemLabel", () => {
+    it("returns localized icon name across all supported languages", () => {
+      expect(logic.itemLabel("dog", "en")).toBe("dog");
+      expect(logic.itemLabel("dog", "ja")).toBe("いぬ");
+      expect(logic.itemLabel("dog", "cmn")).toBe("狗");
+      expect(logic.itemLabel("dog", "yue")).toBe("狗");
+      expect(logic.itemLabel("apple", "en")).toBe("apple");
+      expect(logic.itemLabel("apple", "ja")).toBe("りんご");
+      expect(logic.itemLabel("apple", "cmn")).toBe("苹果");
+      expect(logic.itemLabel("apple", "yue")).toBe("蘋果");
+    });
+
+    it("covers all ICON_CATEGORIES members in WORDS for all supported languages", () => {
+      const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+      for (const icons of Object.values(ICON_CATEGORIES)) {
+        for (const icon of icons) {
+          for (const lang of langs) {
+            const label = logic.itemLabel(icon, lang);
+            expect(label).toBeTruthy();
+          }
+        }
+      }
+    });
+
+    it("fails loudly when an unknown oddone icon is requested", () => {
+      expect(() => logic.itemLabel("unknown_icon", "en")).toThrow(
+        "Unknown oddone icon: unknown_icon",
+      );
+    });
   });
 });

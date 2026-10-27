@@ -1,4 +1,6 @@
+import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../words";
 import {
   CATEGORY_CONFLICTS,
   CATEGORY_TEXT,
@@ -73,4 +75,11 @@ export function speechLines(): string[] {
     }
   }
   return [...lines];
+}
+
+/** Localized screen-reader label for an odd-one item icon. */
+export function itemLabel(icon: string, lang: Lang = "en"): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown oddone icon: ${icon}`);
+  return wordFor(entry, lang).text;
 }

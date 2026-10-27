@@ -20,7 +20,7 @@ import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, sfx } from "../../sound";
 import { CATEGORY_TEXT } from "../iconCategories";
-import { makeOddOneRound } from "./logic";
+import { itemLabel, makeOddOneRound } from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -188,7 +188,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
               key={`${roundKey}-${i}`}
               onPress={() => onPick(i)}
               testID={`oddone-item-${i}-${icon}${i === round.oddIndex ? "-odd" : ""}`}
-              accessibilityLabel={icon}
+              accessibilityLabel={itemLabel(icon, lang)}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.tile,
