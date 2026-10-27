@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   act,
@@ -9,6 +9,9 @@ import {
   screen,
 } from "@testing-library/react";
 import { EchoBeatGame } from "./EchoBeatGame";
+import { LangContext } from "../../components/GameShell";
+import { Difficulty } from "../../difficulty";
+import { Lang } from "../../lang";
 import * as sound from "../../sound";
 import * as music from "../../music";
 import * as logic from "./logic";
@@ -495,6 +498,31 @@ describe("EchoBeatGame", () => {
     vi.useRealTimers();
   });
 
+  it("stops drum sequence when switching language while opening speech is active", () => {
+    vi.useFakeTimers();
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+    const stopSeqSpy = vi.spyOn(music, "stopSequence");
+
+    const { rerender } = render(
+      <EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(playSeqSpy).not.toHaveBeenCalled();
+
+    rerender(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    expect(stopSeqSpy).toHaveBeenCalled();
+    expect(playSeqSpy).not.toHaveBeenCalled();
+    expect(screen.getByText("きこえた リズムを タップ！")).toBeTruthy();
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
+
   it("renders drum with accessibilityRole button and localized label", () => {
     render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
     const drum = screen.getByTestId("echobeat-drum");
@@ -554,7 +582,90 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("preserves round transition and advances to next round when language is switched mid-transition", () => {
+    vi.useFakeTimers();
+    let roundIndex = 0;
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => {
+      roundIndex++;
+      return roundIndex === 1
+        ? { gaps: [0.4], hitCount: 2 }
+        : { gaps: [0.3, 0.3], hitCount: 3 };
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    // Fast-forward initial speech and demo for round 1
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Tap the required 2 times for round 1
+    act(() => {
+      fireEvent.click(drum);
+      fireEvent.click(drum);
+    });
+
+    // Round 1 completed: score is 1/6, celebration is shown
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+
+    // Mid-transition (during the 800ms delay), tap the in-game language button
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Subtitle is now localized in Japanese
+    expect(screen.getByText("きこえた リズムを タップ！")).toBeTruthy();
+
+    // Advance the remaining 600ms of the 800ms transition
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    // Score remains 1/6 (not reset or prematurely incremented)
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
+
+    // Advance past round 2 demo rhythm
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Round 2 is now in tap phase with 3 tap dots (new pattern!)
+    expect(screen.getByText("きみの ばん！")).toBeTruthy();
+    const tapDots = screen.getByTestId("echobeat-tap-dots");
+    expect(tapDots.children.length).toBe(3);
+
+    vi.useRealTimers();
+  });
 });
+
+function LangHarness({
+  difficulty = "easy",
+  initialLang = "en",
+}: {
+  difficulty?: Difficulty;
+  initialLang?: Lang;
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <EchoBeatGame onHome={() => {}} difficulty={difficulty} lang={lang} />
+    </LangContext.Provider>
+  );
+}
 
 function setViewport(width: number, height: number) {
   Object.defineProperty(document.documentElement, "clientWidth", {
