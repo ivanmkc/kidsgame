@@ -13,8 +13,12 @@ import { colors, darken, fonts, shadows } from './theme';
 const KEY = 'kgb.twoPlayer.v1';
 
 export function loadTwoPlayer(): boolean {
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
-    return window.localStorage.getItem(KEY) === 'on';
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    try {
+      return window.localStorage?.getItem(KEY) === 'on';
+    } catch {
+      return false;
+    }
   }
   return false;
 }
