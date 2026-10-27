@@ -1,12 +1,21 @@
-import { sfx } from '../sound';
-import React, { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, Text } from 'react-native';
-import { fonts } from '../theme';
+import { sfx } from "../sound";
+import React, { useRef } from "react";
+import { Animated, Pressable, StyleSheet, Text } from "react-native";
+import { fonts } from "../theme";
 
 // Kid-app "chunky" 3D button: solid face on a darker base edge; pressing
 // squashes it onto the base, releasing springs back.
 export function ChunkyButton({
-  label, silent, color, darkColor, onPress, testID, minWidth = 200, fontSize = 19, paddingVertical = 13,
+  label,
+  silent,
+  color,
+  darkColor,
+  onPress,
+  testID,
+  minWidth = 200,
+  fontSize = 19,
+  paddingVertical = 13,
+  disabled,
 }: {
   label: string;
   silent?: boolean; // skip the built-in tap sfx
@@ -17,15 +26,32 @@ export function ChunkyButton({
   minWidth?: number;
   fontSize?: number;
   paddingVertical?: number;
+  disabled?: boolean;
 }) {
   const press = useRef(new Animated.Value(0)).current;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      onPressIn={() => Animated.timing(press, { toValue: 1, duration: 70, useNativeDriver: true }).start()}
-      onPressOut={() => Animated.spring(press, { toValue: 0, friction: 4, useNativeDriver: true }).start()}
-      onPress={() => { if (!silent) sfx.tap(); onPress(); }}
+      disabled={disabled}
+      onPressIn={() =>
+        Animated.timing(press, {
+          toValue: 1,
+          duration: 70,
+          useNativeDriver: true,
+        }).start()
+      }
+      onPressOut={() =>
+        Animated.spring(press, {
+          toValue: 0,
+          friction: 4,
+          useNativeDriver: true,
+        }).start()
+      }
+      onPress={() => {
+        if (!silent) sfx.tap();
+        onPress();
+      }}
       testID={testID}
       style={[styles.base, { backgroundColor: darkColor, minWidth }]}
     >
@@ -33,7 +59,16 @@ export function ChunkyButton({
         style={[
           styles.face,
           { backgroundColor: color, minWidth, paddingVertical },
-          { transform: [{ translateY: press.interpolate({ inputRange: [0, 1], outputRange: [-5, -1] }) }] },
+          {
+            transform: [
+              {
+                translateY: press.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-5, -1],
+                }),
+              },
+            ],
+          },
         ]}
       >
         <Text style={[styles.label, { fontSize }]}>{label}</Text>
@@ -48,8 +83,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 13,
     paddingHorizontal: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  label: { fontFamily: fonts.display, color: '#fff', letterSpacing: 0.3 },
+  label: { fontFamily: fonts.display, color: "#fff", letterSpacing: 0.3 },
 });
