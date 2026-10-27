@@ -556,5 +556,47 @@ describe("game state with non-English languages", () => {
       }
     }
   });
-});
 
+  it("expands non-English vocabulary across levels without starvation", () => {
+    const langs = ["ja", "cmn", "yue"] as const;
+    for (const lang of langs) {
+      const config1 = getLevelConfig(1, lang);
+      const config2 = getLevelConfig(2, lang);
+      const config3 = getLevelConfig(3, lang);
+
+      // Level 1 has 7 base translated words
+      expect(config1.words).toHaveLength(7);
+
+      // Level 2 adds 12 new translated words (previously added 0)
+      expect(config2.words).toHaveLength(19);
+      expect(config2.words.length).toBeGreaterThan(config1.words.length);
+
+      // Level 3 adds 12 new translated words (previously added 1)
+      expect(config3.words).toHaveLength(31);
+      expect(config3.words.length).toBeGreaterThan(config2.words.length);
+
+      // Previously unused translated words are present
+      const icons = config3.words.map((w) => w.icon);
+      for (const expected of [
+        "apple",
+        "banana",
+        "car",
+        "plane",
+        "fish",
+        "star",
+        "blossom",
+      ]) {
+        expect(icons).toContain(expected);
+      }
+    }
+  });
+
+  it("ensures all 31 words in WORDS are available in Level 3 for non-English languages", () => {
+    const allWordsIcons = WORDS.map((w) => w.icon).sort();
+    for (const lang of ["ja", "cmn", "yue"] as const) {
+      const config3 = getLevelConfig(3, lang);
+      const configIcons = config3.words.map((w) => w.icon).sort();
+      expect(configIcons).toEqual(allWordsIcons);
+    }
+  });
+});
