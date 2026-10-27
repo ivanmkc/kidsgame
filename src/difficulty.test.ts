@@ -208,6 +208,45 @@ describe('loadFilter and saveFilter', () => {
     expect(loadFilter()).toBe('all');
   });
 
+  it('returns all when window.localStorage is undefined', () => {
+    vi.stubGlobal('window', {});
+    expect(loadFilter()).toBe('all');
+  });
+
+  it('returns all when localStorage.getItem throws SecurityError', () => {
+    vi.stubGlobal('window', {
+      localStorage: {
+        getItem: () => {
+          throw new Error('SecurityError');
+        },
+        setItem: () => {},
+      },
+    });
+    expect(loadFilter()).toBe('all');
+  });
+
+  it('returns all when legacy localStorage.getItem throws SecurityError', () => {
+    vi.stubGlobal('window', {
+      localStorage: {
+        getItem: (k: string) => {
+          if (k === LEGACY_KEY) throw new Error('SecurityError');
+          return null;
+        },
+        setItem: () => {},
+      },
+    });
+    expect(loadFilter()).toBe('all');
+  });
+
+  it('returns all when window.localStorage access throws SecurityError', () => {
+    vi.stubGlobal('window', {
+      get localStorage() {
+        throw new Error('SecurityError');
+      },
+    });
+    expect(loadFilter()).toBe('all');
+  });
+
   it('saves filter to storage key', () => {
     saveFilter('hard');
     expect(mockStorage.get(KEY)).toBe('hard');
