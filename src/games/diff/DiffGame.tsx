@@ -98,6 +98,7 @@ export function DiffGame({
     return () => {
       clearTimeout(t);
       if (idleTimer.current) clearTimeout(idleTimer.current);
+      if (hintTimer.current) clearTimeout(hintTimer.current);
     };
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
