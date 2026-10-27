@@ -8,6 +8,8 @@ import {
   act,
   cleanup,
 } from "@testing-library/react";
+import { Lang } from "../../../lang";
+import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { MemoryGame } from "../MemoryGame";
@@ -46,6 +48,37 @@ function setViewport(width: number, height: number) {
   });
   window.dispatchEvent(new Event("resize"));
 }
+
+describe("cardLabel", () => {
+  it("localizes icon names to the requested language", () => {
+    expect(logic.cardLabel("star", "en")).toBe("star");
+    expect(logic.cardLabel("star", "ja")).toBe("ほし");
+    expect(logic.cardLabel("star", "cmn")).toBe("星星");
+    expect(logic.cardLabel("star", "yue")).toBe("星星");
+    expect(logic.cardLabel("butterfly", "en")).toBe("butterfly");
+    expect(logic.cardLabel("butterfly", "ja")).toBe("ちょうちょ");
+    expect(logic.cardLabel("ladybug", "ja")).toBe("てんとうむし");
+    expect(logic.cardLabel("blossom", "en")).toBe("flower");
+    expect(logic.cardLabel("blossom", "ja")).toBe("はな");
+  });
+
+  it("throws loudly when an icon is not in WORDS", () => {
+    expect(() => logic.cardLabel("nonexistent_icon", "en")).toThrow(
+      "Unknown memory icon: nonexistent_icon",
+    );
+  });
+
+  it("resolves all icons in manifest.spotit.icons across all supported languages", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const icon of manifest.spotit.icons) {
+      for (const lang of langs) {
+        const label = logic.cardLabel(icon, lang);
+        expect(label).toBeTruthy();
+        expect(typeof label).toBe("string");
+      }
+    }
+  });
+});
 
 describe("MemoryGame", () => {
   beforeEach(() => {
@@ -109,6 +142,57 @@ describe("MemoryGame", () => {
     for (const card of cards) {
       expect(card.getAttribute("aria-label")).toBe("うらがえしのカード");
     }
+  });
+
+  it("localizes face-up card accessibility labels in Japanese", async () => {
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "star" },
+      { key: 1, icon: "butterfly" },
+      { key: 2, icon: "star" },
+      { key: 3, icon: "butterfly" },
+    ]);
+
+    const onHome = vi.fn();
+    render(<MemoryGame onHome={onHome} difficulty="easy" lang="ja" />);
+
+    const starCard = screen.getByTestId("memory-card-0-star");
+    expect(starCard.getAttribute("aria-label")).toBe("うらがえしのカード");
+
+    await act(async () => {
+      fireEvent.click(starCard);
+    });
+
+    expect(starCard.getAttribute("aria-label")).toBe("ほし");
+    expect(starCard.getAttribute("aria-label")).not.toBe("star");
+  });
+
+  it("localizes face-up card accessibility labels in Mandarin and Cantonese", async () => {
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "banana" },
+      { key: 2, icon: "apple" },
+      { key: 3, icon: "banana" },
+    ]);
+
+    const onHome = vi.fn();
+    const { unmount } = render(
+      <MemoryGame onHome={onHome} difficulty="easy" lang="cmn" />,
+    );
+
+    const appleCardCmn = screen.getByTestId("memory-card-0-apple");
+    await act(async () => {
+      fireEvent.click(appleCardCmn);
+    });
+    expect(appleCardCmn.getAttribute("aria-label")).toBe("苹果");
+
+    unmount();
+
+    render(<MemoryGame onHome={onHome} difficulty="easy" lang="yue" />);
+    const appleCardYue = screen.getByTestId("memory-card-0-apple");
+    await act(async () => {
+      fireEvent.click(appleCardYue);
+    });
+    expect(appleCardYue.getAttribute("aria-label")).toBe("蘋果");
   });
 
   it("localizes intro blurb in solo mode and speaks it on mount", () => {
