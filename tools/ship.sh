@@ -103,7 +103,9 @@ assert '</head>' in html and 'rel="manifest"' not in html
 p.write_text(html.replace('</head>', tags + '</head>'))
 print('PWA tags injected')
 PYEOF
-npx gh-pages -d dist --nojekyll -m "deploy: ledger-verified content only" 2>&1 | tail -1
+# The publish replaces everything on gh-pages except checkpoints/, where the
+# factory publishes its checkpoint builds.
+npx gh-pages -d dist --nojekyll --remove '{!(checkpoints)/**,*}' -m "deploy: ledger-verified content only" 2>&1 | tail -1
 
 # restore full working manifest for generation to keep extending
 cp /tmp/kgb_manifest_full.json src/assets/manifest.json
