@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { manifest } from "../../../manifest";
 import { sfx } from "../../../sound";
 import { t } from "../../../i18n";
+import { Animated } from "react-native";
 import { DiffGame } from "../DiffGame";
 import { DiffHintButton } from "../DiffHintButton";
 
@@ -292,5 +293,38 @@ describe("DiffGame", () => {
     unmount();
 
     expect(clearTimeoutSpy).toHaveBeenCalledWith(nextHintTimerId);
+  });
+
+  it("locks TapScene input and ignores backdrop taps when won", () => {
+    const scene = manifest.diff[0];
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const sequenceSpy = vi.spyOn(Animated, "sequence");
+
+    // Before winning, backdrop tap triggers shake sequence
+    fireEvent.click(screen.getByTestId("left-backdrop"));
+    expect(sequenceSpy).toHaveBeenCalledTimes(1);
+    sequenceSpy.mockClear();
+
+    // Find all differences to win
+    const total = scene.diffs?.length ?? 4;
+    for (let i = 0; i < total; i++) {
+      fireEvent.click(screen.getByTestId(`left-target-${i}`));
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+
+    // After winning, backdrop taps must not trigger shake
+    fireEvent.click(screen.getByTestId("left-backdrop"));
+    fireEvent.click(screen.getByTestId("right-backdrop"));
+    expect(sequenceSpy).not.toHaveBeenCalled();
   });
 });

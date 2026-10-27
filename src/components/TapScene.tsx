@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
-import { Animated, Image, Pressable, StyleSheet, View } from 'react-native';
-import { Lang } from '../lang';
-import { t } from '../i18n';
-import { Box } from '../manifest';
-import { colors, shadows } from '../theme';
-import { SparkleBurst } from './Sparkles';
+import React, { useRef } from "react";
+import { Animated, Image, Pressable, StyleSheet, View } from "react-native";
+import { Lang } from "../lang";
+import { t } from "../i18n";
+import { Box } from "../manifest";
+import { colors, shadows } from "../theme";
+import { SparkleBurst } from "./Sparkles";
 interface Props {
   source: number; // require() ref
   sceneW: number; // intrinsic scene size from manifest
@@ -20,23 +20,55 @@ interface Props {
   onMiss: () => void;
   testIDPrefix: string;
   lang?: Lang;
+  disabled?: boolean;
 }
 
 // Scene image with exact invisible hitboxes from the asset manifest.
 // Found boxes get a celebratory ring; misses shake the whole frame.
 export function TapScene({
-  source, sceneW, sceneH, displayWidth, boxes, overlays, foundIds, ringColors, hintId, hintRegion, onHit, onMiss, testIDPrefix, lang = 'en',
+  source,
+  sceneW,
+  sceneH,
+  displayWidth,
+  boxes,
+  overlays,
+  foundIds,
+  ringColors,
+  hintId,
+  hintRegion,
+  onHit,
+  onMiss,
+  testIDPrefix,
+  lang = "en",
+  disabled = false,
 }: Props) {
   const scale = displayWidth / sceneW;
   const displayHeight = sceneH * scale;
   const shake = useRef(new Animated.Value(0)).current;
 
   const miss = () => {
+    if (disabled) return;
     Animated.sequence([
-      Animated.timing(shake, { toValue: 8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: -8, duration: 50, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 5, duration: 50, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 0, duration: 50, useNativeDriver: true }),
+      Animated.timing(shake, {
+        toValue: 8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: -8,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 5,
+        duration: 50,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 0,
+        duration: 50,
+        useNativeDriver: true,
+      }),
     ]).start();
     onMiss();
   };
@@ -46,15 +78,27 @@ export function TapScene({
 
   return (
     <Animated.View
-      style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight, transform: [{ translateX: shake }] }]}
+      style={[
+        styles.frame,
+        shadows.sticker,
+        {
+          width: displayWidth,
+          height: displayHeight,
+          transform: [{ translateX: shake }],
+        },
+      ]}
     >
-      <Image source={source} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+      <Image
+        source={source}
+        style={{ width: displayWidth, height: displayHeight }}
+        resizeMode="cover"
+      />
       {(overlays ?? []).map((o, i) => (
         <Image
           key={`ov${i}`}
           source={o.source}
           style={{
-            position: 'absolute',
+            position: "absolute",
             left: o.box.x * scale,
             top: o.box.y * scale,
             width: o.box.w * scale,
@@ -68,16 +112,20 @@ export function TapScene({
         <View
           pointerEvents="none"
           testID={`${testIDPrefix}-hint-region`}
-          style={[styles.hintRegion, {
-            left: hintRegion.x * scale,
-            top: hintRegion.y * scale,
-            width: hintRegion.w * scale,
-            height: hintRegion.h * scale,
-          }]}
+          style={[
+            styles.hintRegion,
+            {
+              left: hintRegion.x * scale,
+              top: hintRegion.y * scale,
+              width: hintRegion.w * scale,
+              height: hintRegion.h * scale,
+            },
+          ]}
         />
       ) : null}
       <Pressable
         style={StyleSheet.absoluteFill}
+        disabled={disabled}
         onPress={miss}
         testID={`${testIDPrefix}-backdrop`}
         accessibilityLabel="scene"
@@ -97,9 +145,18 @@ export function TapScene({
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
             accessibilityRole="button"
-            accessibilityLabel={t(lang, 'a11y.target')}
-            onPress={() => (found ? undefined : onHit(id))}
-            style={{ position: 'absolute', left, top, width: w, height: h, alignItems: 'center', justifyContent: 'center' }}
+            accessibilityLabel={t(lang, "a11y.target")}
+            disabled={disabled || found}
+            onPress={() => (disabled || found ? undefined : onHit(id))}
+            style={{
+              position: "absolute",
+              left,
+              top,
+              width: w,
+              height: h,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             {found ? (
               <View pointerEvents="none" style={{ width: rawW, height: rawH }}>
@@ -120,7 +177,11 @@ export function TapScene({
 function FoundRing({ color }: { color?: string }) {
   const pop = useRef(new Animated.Value(0)).current;
   React.useEffect(() => {
-    Animated.spring(pop, { toValue: 1, useNativeDriver: true, friction: 4 }).start();
+    Animated.spring(pop, {
+      toValue: 1,
+      useNativeDriver: true,
+      friction: 4,
+    }).start();
   }, [pop]);
   return (
     <>
@@ -129,7 +190,16 @@ function FoundRing({ color }: { color?: string }) {
         style={[
           styles.ring,
           { borderColor: color ?? colors.ring },
-          { transform: [{ scale: pop.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }] },
+          {
+            transform: [
+              {
+                scale: pop.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.3, 1],
+                }),
+              },
+            ],
+          },
         ]}
       />
       <SparkleBurst trigger="found" />
@@ -142,9 +212,17 @@ function HintRing() {
   React.useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 450, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 450, useNativeDriver: true }),
-      ])
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 0,
+          duration: 450,
+          useNativeDriver: true,
+        }),
+      ]),
     );
     loop.start();
     return () => loop.stop();
@@ -152,7 +230,15 @@ function HintRing() {
   return (
     <Animated.View
       pointerEvents="none"
-      style={[styles.hint, { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.9] }) }]}
+      style={[
+        styles.hint,
+        {
+          opacity: pulse.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.25, 0.9],
+          }),
+        },
+      ]}
     />
   );
 }
@@ -160,45 +246,45 @@ function HintRing() {
 const styles = StyleSheet.create({
   frame: {
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.card,
     borderWidth: 5,
     borderColor: colors.card,
-    shadowColor: '#8A5A3B',
+    shadowColor: "#8A5A3B",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.22,
     shadowRadius: 18,
     elevation: 8,
   },
   hairline: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: 'rgba(67,48,75,0.08)',
+    borderColor: "rgba(67,48,75,0.08)",
   },
   ring: {
     flex: 1,
     borderWidth: 5,
     borderColor: colors.ring,
     borderRadius: 999,
-    backgroundColor: 'rgba(95,191,110,0.16)',
+    backgroundColor: "rgba(95,191,110,0.16)",
   },
   hintRegion: {
-    position: 'absolute',
+    position: "absolute",
     borderRadius: 26,
     borderWidth: 5,
-    borderColor: 'rgba(255,194,75,0.95)',
-    backgroundColor: 'rgba(255,214,110,0.12)',
+    borderColor: "rgba(255,194,75,0.95)",
+    backgroundColor: "rgba(255,214,110,0.12)",
   },
   hint: {
     flex: 1,
     borderWidth: 5,
     borderColor: colors.gold,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,194,75,0.25)',
+    backgroundColor: "rgba(255,194,75,0.25)",
   },
 });
