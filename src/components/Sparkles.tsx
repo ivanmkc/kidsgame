@@ -24,6 +24,9 @@ function BurstPiece({ index, count, size }: { index: number; count: number; size
   const dist = 34 + (index % 3) * 10;
   return (
     <Animated.Text
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no"
+      aria-hidden={true}
       pointerEvents="none"
       style={[
         styles.burst,
@@ -76,6 +79,9 @@ function Twinkle({ index }: { index: number }) {
   const top = `${(index * 211 + 7) % 86 + 4}%`;
   return (
     <Animated.Text
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no"
+      aria-hidden={true}
       pointerEvents="none"
       style={[
         styles.twinkle,
