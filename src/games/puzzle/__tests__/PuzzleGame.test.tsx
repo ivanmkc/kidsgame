@@ -18,6 +18,8 @@ describe('PuzzleGame', () => {
     vi.spyOn(sound, 'say').mockImplementation(() => {});
     vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
     vi.spyOn(sound.sfx, 'win').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'flip').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -374,5 +376,61 @@ describe('PuzzleGame', () => {
     expect(screen.queryByTestId('puzzle-tile-1-piece-1')).not.toBeNull();
     expect(screen.getByTestId('puzzle-moves').textContent).toContain('1');
   });
+
+  it('plays tap sound on tile selection and deselection', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([1, 0, 2, 3, 4, 5]);
+    const tapSpy = vi.spyOn(sound.sfx, 'tap');
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const tile0 = screen.getByTestId('puzzle-tile-0-piece-1');
+
+    tapSpy.mockClear();
+    fireEvent.click(tile0);
+    expect(tapSpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(tile0);
+    expect(tapSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('plays good sound when a swapped piece lands in its solved index, and flip sound otherwise', () => {
+    vi.spyOn(logic, 'makePuzzle').mockReturnValue([2, 3, 0, 1, 4, 5]);
+    const goodSpy = vi.spyOn(sound.sfx, 'good');
+    const flipSpy = vi.spyOn(sound.sfx, 'flip');
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Swap tile 0 (piece 2) and tile 1 (piece 3) -> [3, 2, 0, 1, 4, 5], neither at solved index
+    fireEvent.click(screen.getByTestId('puzzle-tile-0-piece-2'));
+    fireEvent.click(screen.getByTestId('puzzle-tile-1-piece-3'));
+
+    expect(flipSpy).toHaveBeenCalledTimes(1);
+    expect(goodSpy).not.toHaveBeenCalled();
+
+    // Swap tile 2 (piece 0) and tile 0 (piece 3) -> [0, 2, 3, 1, 4, 5], piece 0 lands in solved index 0
+    fireEvent.click(screen.getByTestId('puzzle-tile-2-piece-0'));
+    fireEvent.click(screen.getByTestId('puzzle-tile-0-piece-3'));
+
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+  });
 });
+
 

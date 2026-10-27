@@ -15,7 +15,14 @@ vi.mock("../../sound", async (importOriginal) => {
   return {
     ...actual,
     say: vi.fn(),
-    sfx: { tap: vi.fn(), correct: vi.fn(), win: vi.fn() },
+    sfx: {
+      ...actual.sfx,
+      tap: vi.fn(),
+      good: vi.fn(),
+      flip: vi.fn(),
+      correct: vi.fn(),
+      win: vi.fn(),
+    },
   };
 });
 
