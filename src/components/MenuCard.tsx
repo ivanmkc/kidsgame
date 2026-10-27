@@ -1,9 +1,9 @@
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { CardDef } from '../menuCards';
-import { Lang } from '../lang';
-import { t } from '../i18n';
-import { colors, fonts, shadows } from '../theme';
+import React from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { CardDef } from "../menuCards";
+import { Lang } from "../lang";
+import { t } from "../i18n";
+import { colors, fonts, shadows } from "../theme";
 
 export function MenuCard(props: {
   g: CardDef;
@@ -59,12 +59,16 @@ function GameCard({
   width: number;
   beta?: boolean;
 }) {
+  const accessibilityLabel = beta
+    ? `${title} ${t(lang, "badge.beta")} — ${blurb}`
+    : `${title} — ${blurb}`;
+
   return (
     <Pressable
       onPress={onPress}
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={`${title} — ${blurb}`}
+      accessibilityLabel={accessibilityLabel}
       style={({ pressed }) => [
         styles.gameCard,
         shadows.sticker,
@@ -83,7 +87,7 @@ function GameCard({
       </View>
       {beta ? (
         <View style={styles.betaBadge} testID={`${testID}-beta`}>
-          <Text style={styles.betaBadgeText}>{t(lang, 'badge.beta')}</Text>
+          <Text style={styles.betaBadgeText}>{t(lang, "badge.beta")}</Text>
         </View>
       ) : null}
       <View style={styles.cardBody}>
@@ -91,7 +95,7 @@ function GameCard({
         <Text style={styles.gameBlurb}>{blurb}</Text>
       </View>
       <View style={[styles.playBadge, { backgroundColor: color }]}>
-        <Text style={styles.playBadgeText}>{t(lang, 'menu.play')}</Text>
+        <Text style={styles.playBadgeText}>{t(lang, "menu.play")}</Text>
       </View>
     </Pressable>
   );
@@ -102,15 +106,15 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     borderRadius: 26,
     borderWidth: 4,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
   previewWrap: { height: 104, backgroundColor: colors.blush },
   betaBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: 'rgba(60,45,70,0.85)',
+    backgroundColor: "rgba(60,45,70,0.85)",
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   playBadge: {
-    position: 'absolute',
+    position: "absolute",
     right: 14,
     bottom: 14,
     borderRadius: 14,
@@ -138,7 +142,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   playBadgeText: {
-    color: '#fff',
+    color: "#fff",
     fontFamily: fonts.display,
     fontSize: 15,
     letterSpacing: 1,
