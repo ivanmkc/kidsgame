@@ -273,6 +273,7 @@ export type UIKey =
   | 'rhyme.comingSoon'
   | 'bingo.prompt'
   | 'bingo.promptPhonics'
+  | 'bingo.confirmPhonics'
   | 'story.tryAgain'
   | 'story.startOver'
   | 'story.readAgain'
@@ -664,6 +665,7 @@ export const EN: Table = {
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
   'bingo.prompt': 'Find the {word}!',
   'bingo.promptPhonics': 'Find something that starts with {sound}!',
+  'bingo.confirmPhonics': '{word} starts with {sound}!',
   'story.tryAgain': 'Oops! Try another way ↩️',
   'story.startOver': 'Start over 📖',
   'story.readAgain': 'The End! Read again 📖',
