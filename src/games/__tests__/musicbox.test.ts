@@ -51,6 +51,19 @@ describe("musicbox v2 logic", () => {
     }
   });
 
+  it("free play visits every note in the pentatonic scale", () => {
+    let s = startState(null);
+    const seen = new Set<number>();
+    for (let i = 0; i < PENTATONIC.length; i++) {
+      seen.add(noteForTap(s));
+      s = advance(s);
+    }
+    expect(seen.size).toBe(PENTATONIC.length);
+    for (const note of PENTATONIC) {
+      expect(seen.has(note)).toBe(true);
+    }
+  });
+
   it("octaveOffset returns correct offsets by vertical zone", () => {
     expect(octaveOffset(0.1)).toBe(12); // top third
     expect(octaveOffset(0.5)).toBe(0); // middle

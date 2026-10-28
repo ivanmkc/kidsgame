@@ -18,7 +18,7 @@ export function startState(song: Song | null): BoxState {
  *  Always wraps — the melody loops forever. */
 export function noteForTap(s: BoxState): number {
   if (!s.song) {
-    return PENTATONIC[(s.idx * 3 + (s.idx % 2 ? 1 : 0)) % PENTATONIC.length];
+    return PENTATONIC[(s.idx * 3) % PENTATONIC.length];
   }
   return s.song.notes[s.idx % s.song.notes.length].m;
 }
