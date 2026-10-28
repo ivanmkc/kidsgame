@@ -130,6 +130,11 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
+  // Wait 1-beat pause before expecting the first tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
   // Tap 8 times on each beat (every 600ms, starting immediately when Your turn appears)
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -140,7 +145,7 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
     });
   }
 
-  // Advance time past totalTime (8 * 600 + 500 = 5300ms; currently elapsed in tap phase is 8 * 600 = 4800ms)
+  // Advance time past totalTime (9 * 600 + 500 = 5900ms; currently elapsed in tap phase is 5400ms)
   act(() => {
     vi.advanceTimersByTime(600);
   });
@@ -169,9 +174,9 @@ it("evaluates to 0 hits and does not increment score when no taps are made", () 
 
   expect(screen.getByText("Your turn!")).toBeTruthy();
 
-  // No taps made, advance past tap phase evaluation timer (8 * 600 + 500 = 5300ms)
+  // No taps made, advance past tap phase evaluation timer (9 * 600 + 500 = 5900ms)
   act(() => {
-    vi.advanceTimersByTime(5400);
+    vi.advanceTimersByTime(6000);
   });
 
   // Score should remain 0/4 and all 8 stars should be empty
@@ -427,7 +432,7 @@ it("clears round advance timeout on unmount during result phase", () => {
 
   // Advance past tap phase evaluation timer (5300ms) to enter result phase
   act(() => {
-    vi.advanceTimersByTime(5400);
+    vi.advanceTimersByTime(6000);
   });
 
   expect(screen.getAllByText("☆")).toHaveLength(8);
@@ -465,6 +470,11 @@ it("clears round advance timeout on unmount during result phase after passed rou
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
+  // Wait 1-beat pause before expecting the first tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
   // Tap 8 times on each beat to pass the round
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -475,7 +485,7 @@ it("clears round advance timeout on unmount during result phase after passed rou
     });
   }
 
-  // Advance past tap phase evaluation timer (8 * 600 + 500 = 5300ms total tap time; 4800ms elapsed + 600ms = 5400ms)
+  // Advance past tap phase evaluation timer (9 * 600 + 500 = 5900ms total tap time; 5400ms elapsed + 600ms = 6000ms)
   act(() => {
     vi.advanceTimersByTime(600);
   });
@@ -511,6 +521,11 @@ it("advances to next round after 1200ms result phase when round is passed", () =
   });
 
   const circle = screen.getByTestId("steadybeat-circle");
+  // Wait 1-beat pause before the first expected tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
   for (let i = 0; i < 8; i++) {
     act(() => {
       fireEvent.click(circle);
@@ -557,7 +572,7 @@ it("retries round after 1200ms result phase when round is failed", () => {
 
   // No taps, advance past tap phase evaluation timer (5300ms)
   act(() => {
-    vi.advanceTimersByTime(5400);
+    vi.advanceTimersByTime(6000);
   });
 
   expect(screen.getAllByText("☆")).toHaveLength(8);
@@ -633,6 +648,11 @@ it("scores all 8 hits when player taps along starting immediately on the downbea
 
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
+
+  // Wait 1-beat pause before the first expected tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
 
   // Player taps immediately at 2400ms (downbeat), then 7 more times every 600ms
   for (let i = 0; i < 8; i++) {
