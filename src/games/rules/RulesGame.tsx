@@ -80,7 +80,12 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   useWinLine(won, t(lang, "win.rules"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
 
-  useEffect(() => () => stopNarration(), []);
+  useEffect(() => {
+    return () => {
+      stopNarration();
+      if (remindTimer.current) clearTimeout(remindTimer.current);
+    };
+  }, []);
 
   // Speak the game intro once, then every rule aloud — pre-readers play
   // entirely by ear here.
@@ -112,6 +117,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         lockedRef.current = true;
         setCelebrate((c) => c + 1);
         const nextIdx = roundIdx + 1;
+        if (remindTimer.current) clearTimeout(remindTimer.current);
         setTimeout(() => {
           lockedRef.current = false;
           setRoundIdx(nextIdx);
