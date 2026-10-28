@@ -3,10 +3,8 @@ import { CMN } from './i18n/cmn';
 import { JA } from './i18n/ja';
 import { YUE } from './i18n/yue';
 
-// UI-text localization for the app chrome (menu + shared game surfaces).
-// Game-internal SPOKEN lines are localized elsewhere (via lang.ts /
-// per-game logic modules) and MUST stay in their own tables — this module
-// only owns what actually paints on screen.
+// UI-text and prompt carrier phrase localization for the app (per R1).
+// Vocabulary datasets (words, number names) are localized via lang.ts / words.ts.
 //
 // Contract:
 //   t(lang, key)        → returns the translated string for `lang`.
@@ -273,6 +271,9 @@ export type UIKey =
   | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
   | 'rhyme.ask'
   | 'rhyme.comingSoon'
+  | 'letters.find'
+  | 'letters.sound'
+  | 'letters.findKana'
   | 'bingo.prompt'
   | 'bingo.promptPhonics'
   | 'bingo.confirmPhonics'
@@ -667,6 +668,9 @@ export const EN: Table = {
   // non-EN pairs this fixed question clip with the target word clip.
   'rhyme.ask': 'Which one rhymes with {word}?',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
+  'letters.find': 'Find the letter {letter}!',
+  'letters.sound': 'Which letter says {sound}?',
+  'letters.findKana': 'Find the kana {kana}!',
   'bingo.prompt': 'Find the {word}!',
   'bingo.promptPhonics': 'Find something that starts with {sound}!',
   'bingo.confirmPhonics': '{word} starts with {sound}!',

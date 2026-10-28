@@ -93,6 +93,7 @@ const ALL_KEYS: UIKey[] = [
   'sticker.size.small', 'sticker.size.medium', 'sticker.size.large',
   'sticker.charactersEmpty',
   'memory.moves', 'memory.foundPair', 'rhyme.comingSoon',
+  'letters.find', 'letters.sound', 'letters.findKana',
   'story.tryAgain', 'story.startOver', 'story.readAgain', 'story.allStories',
   'carmode.tap', 'carmode.done',
   'feedback.chip', 'feedback.title', 'feedback.broken', 'feedback.idea',

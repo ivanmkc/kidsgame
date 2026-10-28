@@ -2,6 +2,7 @@
 // mode) + a JA kana hunt. Distractors bias toward visually confusable
 // shapes on M/H so the game teaches discrimination — but sound-mode picks
 // letters with UNIQUE sounds so a single prompt has one answer.
+import { t } from '../../i18n';
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
 import { RHYME_WORDS, WORDS } from '../../words';
@@ -122,7 +123,11 @@ export const KANA_POOL: { kana: string; romaji: string }[] = [
 function pickIndex(rng: Rng, n: number): number { return Math.floor(rng() * n); }
 
 export function makeLetterRound(
-  rng: Rng, tier: LetterTier, tileCount: number, avoidKey?: string,
+  rng: Rng,
+  tier: LetterTier,
+  tileCount: number,
+  avoidKey?: string,
+  lang: Lang = tier === 'kana' ? 'ja' : 'en',
 ): LetterRound {
   if (tier === 'kana') {
     const candidates = KANA_POOL.filter((k) => k.kana !== avoidKey);
@@ -159,7 +164,8 @@ export function makeLetterRound(
     ]);
     return {
       tier, targetKey: target.kana, targetDisplay: target.kana,
-      promptLine: `「${target.kana}」をさがして！`, romanCaption: target.romaji,
+      promptLine: t(lang, 'letters.findKana', { kana: target.kana }),
+      romanCaption: target.romaji,
       tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
     };
   }
@@ -177,7 +183,7 @@ export function makeLetterRound(
     ]);
     return {
       tier, targetKey: target.letter, targetDisplay: target.letter,
-      promptLine: `Which letter says ${target.sound}?`,
+      promptLine: t(lang, 'letters.sound', { sound: target.sound }),
       tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
     };
   }
@@ -224,7 +230,7 @@ export function makeLetterRound(
 
   return {
     tier, targetKey: key, targetDisplay: displayed,
-    promptLine: `Find the letter ${targetLetter}!`,
+    promptLine: t(lang, 'letters.find', { letter: targetLetter }),
     tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
   };
 }
@@ -233,12 +239,14 @@ export function makeLetterRound(
 // pipeline pre-renders these; runtime must match byte-for-byte.
 export function speechLines(): string[] {
   const lines = new Set<string>();
-  // upper + mixed prompts speak the LETTER NAME (case-agnostic).
-  for (const L of ALL_LETTERS) lines.add(`Find the letter ${L}!`);
-  // sound-mode prompts, one per unique sound.
-  for (const s of LETTER_SOUNDS) lines.add(`Which letter says ${s.sound}?`);
-  // kana prompts, one per hiragana in the pool.
-  for (const k of KANA_POOL) lines.add(`「${k.kana}」をさがして！`);
+  for (const lang of (['en', 'ja', 'cmn', 'yue'] as const)) {
+    // upper + mixed prompts speak the LETTER NAME (case-agnostic).
+    for (const L of ALL_LETTERS) lines.add(t(lang, 'letters.find', { letter: L }));
+    // sound-mode prompts, one per unique sound.
+    for (const s of LETTER_SOUNDS) lines.add(t(lang, 'letters.sound', { sound: s.sound }));
+    // kana prompts, one per hiragana in the pool.
+    for (const k of KANA_POOL) lines.add(t(lang, 'letters.findKana', { kana: k.kana }));
+  }
   return [...lines];
 }
 

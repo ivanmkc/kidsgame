@@ -142,3 +142,30 @@ describe("makeLetterRound: kana tier", () => {
     expect(confusableCount / total).toBeGreaterThan(0.65);
   });
 });
+
+describe("makeLetterRound: prompt line localization", () => {
+  it("localizes upper/mixed tier prompt across all languages", () => {
+    const rng = () => 0;
+    expect(makeLetterRound(rng, "upper", 6, undefined, "en").promptLine).toBe("Find the letter A!");
+    expect(makeLetterRound(rng, "upper", 6, undefined, "ja").promptLine).toBe("「A」をさがして！");
+    expect(makeLetterRound(rng, "upper", 6, undefined, "cmn").promptLine).toBe("找一找字母 A！");
+    expect(makeLetterRound(rng, "upper", 6, undefined, "yue").promptLine).toBe("搵一搵字母 A！");
+  });
+
+  it("localizes sound tier prompt across all languages", () => {
+    const idxA = LETTER_SOUNDS.findIndex((s) => s.letter === "A");
+    const rngA = () => (idxA + 0.5) / LETTER_SOUNDS.length;
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "en").promptLine).toBe("Which letter says aa?");
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "ja").promptLine).toBe("「aa」の おとの もじは どれ？");
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "cmn").promptLine).toBe("哪个字母发 aa 的音？");
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "yue").promptLine).toBe("邊個字母發 aa 嘅音？");
+  });
+
+  it("localizes kana tier prompt across all languages", () => {
+    const rng = () => 0;
+    expect(makeLetterRound(rng, "kana", 6, undefined, "ja").promptLine).toBe("「あ」をさがして！");
+    expect(makeLetterRound(rng, "kana", 6, undefined, "en").promptLine).toBe("Find the kana あ!");
+    expect(makeLetterRound(rng, "kana", 6, undefined, "cmn").promptLine).toBe("找一找假名 あ！");
+    expect(makeLetterRound(rng, "kana", 6, undefined, "yue").promptLine).toBe("搵一搵假名 あ！");
+  });
+});

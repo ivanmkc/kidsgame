@@ -561,4 +561,28 @@ describe("LettersGame", () => {
       expect(screen.getByTestId(`letters-tile-${i}`)).toBeTruthy();
     }
   });
+
+  it("speaks localized carrier phrase when playing alphabet hunt in Mandarin", () => {
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    expect(say).toHaveBeenCalledWith(
+      expect.stringMatching(/^找一找字母 [A-Za-z]！/),
+    );
+  });
+
+  it("speaks localized carrier phrase when playing alphabet hunt in Cantonese", () => {
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="yue" />);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    expect(say).toHaveBeenCalledWith(
+      expect.stringMatching(/^搵一搵字母 [A-Za-z]！/),
+    );
+  });
 });
