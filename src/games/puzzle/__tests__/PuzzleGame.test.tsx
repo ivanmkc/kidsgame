@@ -818,3 +818,63 @@ describe("PuzzleGame scene picker surprise", () => {
     }
   });
 });
+
+describe("PuzzleGame layout", () => {
+  const noop = () => {};
+
+  function setViewport(width: number, height: number) {
+    Object.defineProperty(window, "innerWidth", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: height,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: height,
+      configurable: true,
+    });
+    if (window.visualViewport) {
+      Object.defineProperty(window.visualViewport, "width", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(window.visualViewport, "height", {
+        value: height,
+        configurable: true,
+      });
+    }
+    window.dispatchEvent(new Event("resize"));
+  }
+
+  afterEach(() => {
+    cleanup();
+    setViewport(1024, 768);
+  });
+
+  it("clamps board dimensions to positive values on short viewport", () => {
+    setViewport(300, 100);
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId="d-farm"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    const firstTile = screen.getByTestId(/^puzzle-tile-0-piece-/);
+    const board = firstTile.parentElement;
+    const boardStyle = board?.getAttribute("style") ?? "";
+    expect(boardStyle).not.toContain("width: -");
+    expect(boardStyle).not.toContain("height: -");
+    expect(parseFloat(board?.style.width || "0")).toBeGreaterThanOrEqual(10);
+    expect(parseFloat(board?.style.height || "0")).toBeGreaterThanOrEqual(10);
+  });
+});

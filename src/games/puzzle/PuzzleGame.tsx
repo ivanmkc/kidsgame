@@ -120,7 +120,9 @@ export function PuzzleGame({
           onPick={onPickScene}
           onSurprise={() => {
             const surprisePool = options.length > 0 ? options : allOptions;
-            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+            onPickScene(
+              surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+            );
           }}
           filterChip={
             onFilter ? (
@@ -142,8 +144,8 @@ export function PuzzleGame({
     manifest.hidden.find((h) => `h-${h.id}` === picked.id);
   const ar = srcScene ? srcScene.w / srcScene.h : 16 / 9;
 
-  const availH = height - 150;
-  const boardW = Math.min(width - 28, availH * ar, 1000);
+  const availH = Math.max(10, height - 150);
+  const boardW = Math.max(10, Math.min(width - 28, availH * ar, 1000));
   const boardH = boardW / ar;
   const tileW = boardW / cols;
   const tileH = boardH / rows;
