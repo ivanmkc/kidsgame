@@ -93,16 +93,18 @@ export interface HighLowLayout {
   pickBtnMinWidth: number;
   replaySize: number;
   replayFontSize: number;
+  pickLabelFontSize: number;
 }
 
 export function highLowLayout(width: number): HighLowLayout {
-  if (width > 0 && width < 380) {
+  if (width > 0 && width < 430) {
     return {
       gap: 10,
-      pickBtnPaddingHorizontal: 12,
+      pickBtnPaddingHorizontal: 8,
       pickBtnMinWidth: 96,
       replaySize: 56,
       replayFontSize: 28,
+      pickLabelFontSize: 16,
     };
   }
   return {
@@ -111,5 +113,6 @@ export function highLowLayout(width: number): HighLowLayout {
     pickBtnMinWidth: 130,
     replaySize: 72,
     replayFontSize: 36,
+    pickLabelFontSize: 22,
   };
 }

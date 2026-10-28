@@ -637,9 +637,9 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("renders responsive pick row and buttons fitting mobile portrait viewport (< 380px)", () => {
+  it("renders responsive pick row and buttons fitting mobile portrait viewport (< 430px)", () => {
     vi.useFakeTimers();
-    setViewport(360, 800);
+    setViewport(390, 844);
     let onDoneCb: (() => void) | undefined;
     vi.spyOn(music, "playSequence").mockImplementation(
       (_notes, _bpm, _onNote, onDone) => {
@@ -665,6 +665,8 @@ describe("HighLowGame UI", () => {
     expect(replayBtn.style.width).toBe("56px");
     expect(replayBtn.style.height).toBe("56px");
     expect(pickRow.style.gap).toBe("10px");
+    // Verify the replay button is in its own row above the pick row
+    expect(within(pickRow).queryByTestId("highlow-replay")).toBeNull();
 
     vi.useRealTimers();
   });
