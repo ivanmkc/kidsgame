@@ -179,4 +179,38 @@ describe('ShadowGame', () => {
       vi.useRealTimers();
     }
   });
+
+  it('applies transform on round 1 (after exactly one warmup round) on hard difficulty', () => {
+    const origMakeShadowRound = logic.makeShadowRound;
+    const makeRoundSpy = vi
+      .spyOn(logic, 'makeShadowRound')
+      .mockImplementation((rng, icons, diff) => origMakeShadowRound(rng, icons, diff));
+
+    const { container } = render(<ShadowGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Round 0 (warmup)
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+    expect(makeRoundSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ choices: 5, categoryDistractors: true, transform: false }),
+    );
+
+    // Solve Round 0
+    const answerCard = container.querySelector('[data-testid^="shadow-answer-"]');
+    const answer = answerCard?.getAttribute('data-testid')?.replace('shadow-answer-', '');
+    const correctBtn = container.querySelector(`[data-testid="shadow-option-${answer}"]`) as HTMLElement;
+
+    act(() => {
+      fireEvent.click(correctBtn);
+    });
+
+    // Round 1 (mental rotation kicks in immediately after the single warmup round)
+    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+    expect(makeRoundSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ choices: 5, categoryDistractors: true, transform: true }),
+    );
+  });
 });
