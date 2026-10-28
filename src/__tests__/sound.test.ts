@@ -290,6 +290,57 @@ describe("sound module", () => {
     });
   });
 
+  describe("localStorage and muted state", () => {
+    it("loads saved muted state from localStorage on web", async () => {
+      vi.resetModules();
+      vi.stubGlobal("window", {
+        speechSynthesis: { speak: speakMock, cancel: cancelMock },
+        localStorage: {
+          getItem: vi.fn((key: string) =>
+            key === "kgb.sound.v1" ? "muted" : null,
+          ),
+          setItem: vi.fn(),
+        },
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      });
+      const s = await import("../sound");
+      expect(s.isMuted()).toBe(true);
+    });
+
+    it("defaults to false when localStorage.getItem throws SecurityError", async () => {
+      vi.resetModules();
+      vi.stubGlobal("window", {
+        speechSynthesis: { speak: speakMock, cancel: cancelMock },
+        localStorage: {
+          getItem: vi.fn(() => {
+            throw new Error("SecurityError");
+          }),
+          setItem: vi.fn(),
+        },
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      });
+      const s = await import("../sound");
+      expect(s.isMuted()).toBe(false);
+    });
+
+    it("defaults to false when window.localStorage access throws SecurityError", async () => {
+      vi.resetModules();
+      const fakeWindow = {
+        speechSynthesis: { speak: speakMock, cancel: cancelMock },
+        get localStorage(): Storage {
+          throw new Error("SecurityError");
+        },
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+      vi.stubGlobal("window", fakeWindow);
+      const s = await import("../sound");
+      expect(s.isMuted()).toBe(false);
+    });
+  });
+
   describe("escape room audio clip availability", () => {
     it("has pre-rendered voice clips in VOICE for all localized escape room lines", () => {
       const clean = (s: string) =>
