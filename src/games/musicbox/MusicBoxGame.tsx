@@ -6,6 +6,7 @@ import { t, UIKey } from "../../i18n";
 import { say } from "../../sound";
 import { MUSICBOX_IMAGES } from "../../assets/images";
 import { colors, fonts, shadows } from "../../theme";
+import { Difficulty, settingsFor } from "../../difficulty";
 import { SCENES, sceneById } from "./scenes";
 import { JourneyScene } from "./JourneyScene";
 
@@ -16,6 +17,7 @@ import { JourneyScene } from "./JourneyScene";
 
 interface Props {
   onHome: () => void;
+  difficulty?: Difficulty;
   sceneId?: string;
   onPickScene: (id: string) => void;
   onBackToPicker: () => void;
@@ -24,20 +26,27 @@ interface Props {
 
 export function MusicBoxGame({
   onHome,
+  difficulty = "medium",
   sceneId,
   onPickScene,
   onBackToPicker,
   lang,
 }: Props) {
   const scene = sceneId ? sceneById(sceneId) : undefined;
+  const settings = settingsFor(difficulty);
 
   useEffect(() => {
     if (scene) {
-      say(t(lang, "musicbox.intro"));
+      say(
+        t(
+          lang,
+          settings.musicboxFreePlay ? "musicbox.introFree" : "musicbox.intro",
+        ),
+      );
     } else {
       say(t(lang, "shell.musicbox.subPicker"));
     }
-  }, [scene?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scene?.id, settings.musicboxFreePlay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!scene) {
     return (
@@ -85,12 +94,22 @@ export function MusicBoxGame({
   return (
     <GameShell
       title={t(lang, `song.${scene.songId}` as UIKey)}
-      subtitle={t(lang, "shell.musicbox.subPlay")}
+      subtitle={t(
+        lang,
+        settings.musicboxFreePlay
+          ? "musicbox.introFree"
+          : "shell.musicbox.subPlay",
+      )}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
     >
-      <JourneyScene scene={scene} lang={lang} />
+      <JourneyScene
+        scene={scene}
+        freePlay={settings.musicboxFreePlay}
+        richChords={settings.musicboxChords}
+        lang={lang}
+      />
     </GameShell>
   );
 }

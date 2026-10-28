@@ -84,19 +84,36 @@ describe("musicbox v2 logic", () => {
     expect(harmonyOffsets(5, 60)).toEqual([0, 4, 7]); // capped at triad
   });
 
-  it("produces zero non-diatonic notes across all songs for multi-finger taps", () => {
+  it("harmonyOffsets diatonically harmonizes single-finger taps when richChords is enabled", () => {
+    // 1 finger with richChords plays diatonic thirds [0, third]
+    expect(harmonyOffsets(1, 60, true)).toEqual([0, 4]); // C + E
+    expect(harmonyOffsets(1, 62, true)).toEqual([0, 3]); // D + F (minor third)
+    expect(harmonyOffsets(1, 64, true)).toEqual([0, 3]); // E + G (minor third)
+    expect(harmonyOffsets(1, 65, true)).toEqual([0, 4]); // F + A
+    expect(harmonyOffsets(1, 67, true)).toEqual([0, 4]); // G + B
+    expect(harmonyOffsets(1, 69, true)).toEqual([0, 3]); // A + C (minor third)
+    expect(harmonyOffsets(1, 71, true)).toEqual([0, 3]); // B + D (minor third)
+
+    // multi-finger with richChords plays diatonic triad [0, third, fifth]
+    expect(harmonyOffsets(2, 60, true)).toEqual([0, 4, 7]);
+    expect(harmonyOffsets(2, 71, true)).toEqual([0, 3, 6]);
+  });
+
+  it("produces zero non-diatonic notes across all songs for multi-finger taps and richChords", () => {
     const C_MAJOR_PITCH_CLASSES = new Set([0, 2, 4, 5, 7, 9, 11]);
     for (const song of SONGS) {
       for (const note of song.notes) {
         for (const fingerCount of [1, 2, 3, 4]) {
-          const offsets = harmonyOffsets(fingerCount, note.m);
-          for (const offset of offsets) {
-            const playedMidi = note.m + offset;
-            const pitchClass = ((playedMidi % 12) + 12) % 12;
-            expect(
-              C_MAJOR_PITCH_CLASSES.has(pitchClass),
-              `Song ${song.id} note ${note.m} with ${fingerCount} fingers produced non-diatonic pitch class ${pitchClass}`,
-            ).toBe(true);
+          for (const richChords of [false, true]) {
+            const offsets = harmonyOffsets(fingerCount, note.m, richChords);
+            for (const offset of offsets) {
+              const playedMidi = note.m + offset;
+              const pitchClass = ((playedMidi % 12) + 12) % 12;
+              expect(
+                C_MAJOR_PITCH_CLASSES.has(pitchClass),
+                `Song ${song.id} note ${note.m} with ${fingerCount} fingers (richChords=${richChords}) produced non-diatonic pitch class ${pitchClass}`,
+              ).toBe(true);
+            }
           }
         }
       }
@@ -202,14 +219,18 @@ describe("musicbox v2 logic", () => {
     );
   });
 
-  it("speechLines covers intro and picker prompts across all languages, no duplicates", () => {
+  it("speechLines covers intro, free-play intro, and picker prompts across all languages, no duplicates", () => {
     const lines = speechLines();
-    expect(lines.length).toBe(8);
+    expect(lines.length).toBe(12);
     expect(new Set(lines).size).toBe(lines.length);
     expect(lines).toContain("Pick a song to play!");
     expect(lines).toContain("うたを えらんでね！");
     expect(lines).toContain("选一首歌吧！");
     expect(lines).toContain("揀一首歌啦！");
     expect(lines).toContain("Tap, tap, tap anywhere to play the song!");
+    expect(lines).toContain("Magic keys! Every tap makes a pretty note!");
+    expect(lines).toContain(
+      "まほうの けんばん！ タップすると きれいなおとが なるよ！",
+    );
   });
 });

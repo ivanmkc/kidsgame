@@ -62,11 +62,20 @@ const DIATONIC_CHORD_OFFSETS: readonly [number, number][] = [
 ];
 
 /** Multi-finger harmony: diatonic semitone offsets in C Major for simultaneous taps.
- *  1 finger = [0] (melody only). 2 = diatonic third. 3+ = diatonic triad. */
-export function harmonyOffsets(fingerCount: number, midi: number): number[] {
-  if (fingerCount <= 1) return [0];
+ *  1 finger = [0] (melody only). 2 = diatonic third. 3+ = diatonic triad.
+ *  When richChords is enabled (hard difficulty), single taps play a diatonic third
+ *  dyad [0, third] and multi-finger taps play a full diatonic triad [0, third, fifth]. */
+export function harmonyOffsets(
+  fingerCount: number,
+  midi: number,
+  richChords: boolean = false,
+): number[] {
   const pc = ((midi % 12) + 12) % 12;
   const [third, fifth] = DIATONIC_CHORD_OFFSETS[pc];
+  if (richChords) {
+    return fingerCount <= 1 ? [0, third] : [0, third, fifth];
+  }
+  if (fingerCount <= 1) return [0];
   if (fingerCount === 2) return [0, third];
   return [0, third, fifth];
 }
@@ -113,6 +122,7 @@ export function speechLines(): string[] {
   const out: string[] = [];
   for (const l of LANGS) {
     out.push(t(l.id, "musicbox.intro"));
+    out.push(t(l.id, "musicbox.introFree"));
     out.push(t(l.id, "shell.musicbox.subPicker"));
   }
   return [...new Set(out)];
