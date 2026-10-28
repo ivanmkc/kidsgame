@@ -14,6 +14,7 @@ import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { MemoryGame } from "../MemoryGame";
 import * as logic from "../logic";
+import { MP_PLAYERS } from "../../../multiplayer";
 
 vi.mock("../../../sound", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../../sound")>();
@@ -491,5 +492,127 @@ describe("MemoryGame", () => {
       expect(cards).not.toContain(card);
       expect(card.getAttribute("aria-label")).toBe("face-down card");
     }
+  });
+
+  it("speaks localized victory recap when player wins 2P duel in Japanese", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "banana" },
+      { key: 2, icon: "apple" },
+      { key: 3, icon: "banana" },
+    ]);
+
+    render(
+      <MemoryGame
+        onHome={vi.fn()}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    vi.mocked(sound.say).mockClear();
+
+    // Match all pairs as Player 0
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-0-apple"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-2-apple"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-1-banana"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-3-banana"));
+    });
+
+    expect(sound.say).toHaveBeenCalledWith(
+      t("ja", "win.memoryWinner", { name: MP_PLAYERS[0].name }),
+    );
+    expect(sound.say).not.toHaveBeenCalledWith(
+      expect.stringContaining("wins!"),
+    );
+  });
+
+  it("speaks localized victory recap when 2P duel ends in a tie in Japanese", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "banana" },
+      { key: 2, icon: "butterfly" },
+      { key: 3, icon: "star" },
+      { key: 4, icon: "apple" },
+      { key: 5, icon: "banana" },
+      { key: 6, icon: "butterfly" },
+      { key: 7, icon: "star" },
+    ]);
+
+    render(
+      <MemoryGame
+        onHome={vi.fn()}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="ja"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    // Player 0 matches apple (pair 1)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-0-apple"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-4-apple"));
+    });
+
+    // Player 0 matches banana (pair 2)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-1-banana"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-5-banana"));
+    });
+
+    // Player 0 misses: butterfly and star
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-2-butterfly"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-7-star"));
+    });
+
+    // Advance mismatch timeout (750ms) to switch turn to Player 1
+    act(() => {
+      vi.advanceTimersByTime(750);
+    });
+
+    vi.mocked(sound.say).mockClear();
+
+    // Player 1 matches butterfly (pair 1 for player 1)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-2-butterfly"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-6-butterfly"));
+    });
+
+    // Player 1 matches star (pair 2 for player 1)
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-3-star"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-7-star"));
+    });
+
+    expect(sound.say).toHaveBeenCalledWith(
+      t("ja", "win.memoryTie", { n: 2 }),
+    );
+    expect(sound.say).not.toHaveBeenCalledWith(
+      expect.stringContaining("It's a tie!"),
+    );
   });
 });

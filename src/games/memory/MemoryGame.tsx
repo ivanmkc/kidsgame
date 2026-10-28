@@ -9,7 +9,7 @@ import { Difficulty, settingsFor } from '../../difficulty';
 import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { manifest } from '../../manifest';
-import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx, nextTurn } from '../../multiplayer';
+import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { say, sfx, useSay } from '../../sound';
 import { colors, fonts } from '../../theme';
@@ -100,12 +100,11 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
   useEffect(() => {
     if (!won || !duel) return;
     const w = duelWinner(duelState);
-    if (w === 'tie') {
-      say(`It's a tie! You both found ${duelState.pairs[0]} pairs!`);
-    } else {
-      const l = nextTurn(w);
-      say(`${MP_PLAYERS[w].name} wins! ${MP_PLAYERS[w].name} found ${duelState.pairs[w]} pairs and ${MP_PLAYERS[l].name} found ${duelState.pairs[l]} pairs. Great game, both of you!`);
-    }
+    say(
+      w === 'tie'
+        ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
+        : t(lang, 'win.memoryWinner', { name: MP_PLAYERS[w].name })
+    );
   }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetGame = () => {
