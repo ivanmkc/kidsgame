@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
-import { EscapeRoom } from '../../manifest';
-import { EscapeState, isHotspotAvailable } from './logic';
+import React, { useCallback, useEffect, useRef } from "react";
+import { Platform } from "react-native";
+import { EscapeRoom } from "../../manifest";
+import { EscapeState, isHotspotAvailable } from "./logic";
 
 export interface SpriteAnim {
   hotspotId: string;
@@ -79,14 +79,15 @@ export function SpriteCanvas({
   const drawStatic = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const s = scaleRef.current;
     const rm = roomRef.current;
     const st = stateRef.current;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
+    const dpr =
+      (typeof window !== "undefined" ? window.devicePixelRatio : 1) || 1;
     ctx.scale(dpr, dpr);
 
     for (const h of rm.hotspots) {
@@ -169,15 +170,25 @@ export function SpriteCanvas({
     if (rafRef.current) return;
     lastTimeRef.current = 0;
     const tick = (timestamp: number) => {
-      const dt = lastTimeRef.current ? Math.min((timestamp - lastTimeRef.current) / 1000, 0.1) : 0;
+      const dt = lastTimeRef.current
+        ? Math.min((timestamp - lastTimeRef.current) / 1000, 0.1)
+        : 0;
       lastTimeRef.current = timestamp;
 
       let anyPlaying = false;
       let anyCompleted = false;
 
       for (const entry of entriesRef.current) {
-        const h = roomRef.current.hotspots.find((x) => x.id === entry.hotspotId);
-        if (!h?.sprite?.sheet || !h.sprite.cols || !h.sprite.frameCount || !h.sprite.fps) continue;
+        const h = roomRef.current.hotspots.find(
+          (x) => x.id === entry.hotspotId,
+        );
+        if (
+          !h?.sprite?.sheet ||
+          !h.sprite.cols ||
+          !h.sprite.frameCount ||
+          !h.sprite.fps
+        )
+          continue;
         const { fps, frameCount } = h.sprite;
         const sheet = sheetsRef.current[h.id];
         if (!sheet?.naturalWidth) {
@@ -209,7 +220,9 @@ export function SpriteCanvas({
       if (anyCompleted) {
         setAnimsRef.current((prev) =>
           prev.map((a) => {
-            const entry = entriesRef.current.find((e) => e.hotspotId === a.hotspotId);
+            const entry = entriesRef.current.find(
+              (e) => e.hotspotId === a.hotspotId,
+            );
             if (entry && entry.held) {
               return {
                 ...a,
@@ -257,7 +270,9 @@ export function SpriteCanvas({
         }
       }
       const validIds = new Set(anims.map((a) => a.hotspotId));
-      entriesRef.current = entriesRef.current.filter((e) => validIds.has(e.hotspotId));
+      entriesRef.current = entriesRef.current.filter((e) =>
+        validIds.has(e.hotspotId),
+      );
       if (added) startLoop();
       else needsRedrawRef.current = true;
     }
@@ -265,7 +280,7 @@ export function SpriteCanvas({
 
   useEffect(() => {
     needsRedrawRef.current = true;
-  }, [state.used.length, state.revealed.length]);
+  }, [state.used.length, state.revealed.length, scale]);
 
   useEffect(() => {
     if (!needsRedrawRef.current) return;
@@ -280,21 +295,22 @@ export function SpriteCanvas({
     [],
   );
 
-  if (Platform.OS !== 'web') return null;
+  if (Platform.OS !== "web") return null;
   const w = Math.round(1280 * scale);
   const h = Math.round(720 * scale);
-  const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
-  return React.createElement('canvas', {
+  const dpr =
+    (typeof window !== "undefined" ? window.devicePixelRatio : 1) || 1;
+  return React.createElement("canvas", {
     ref: canvasRef,
     width: Math.round(w * dpr),
     height: Math.round(h * dpr),
     style: {
-      position: 'absolute',
+      position: "absolute",
       top: 0,
       left: 0,
       width: w,
       height: h,
-      pointerEvents: 'none',
+      pointerEvents: "none",
     },
   });
 }
