@@ -119,6 +119,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
     lockedRef.current = false;
+    setPhase('listenA');
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
