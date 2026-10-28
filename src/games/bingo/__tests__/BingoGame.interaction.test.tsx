@@ -160,6 +160,39 @@ test("prompt button is disabled during round advance transition and spamming it 
   expect(prompt.getAttribute("aria-disabled")).toBeFalsy();
 });
 
+test("marked tiles have disabled accessibility state (aria-disabled) while unmarked tiles do not", async () => {
+  const onHome = vi.fn();
+  render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
+
+  await act(async () => {
+    vi.advanceTimersByTime(1000);
+  });
+
+  const prompt = screen.getByTestId("bingo-prompt");
+  const initialPrompt = prompt.getAttribute("aria-label")!;
+  const icon = initialPrompt.replace("Find the ", "").replace("!", "");
+
+  const cells = screen.queryAllByTestId(/bingo-cell-/);
+  const correctCell = cells.find((c) => c.getAttribute("aria-label") === icon)!;
+  const incorrectCell = cells.find(
+    (c) => c.getAttribute("aria-label") !== icon,
+  )!;
+
+  // Before being marked, tiles are not disabled
+  expect(correctCell.getAttribute("aria-disabled")).toBeFalsy();
+  expect(incorrectCell.getAttribute("aria-disabled")).toBeFalsy();
+
+  // Tap correct tile to mark it
+  await act(async () => {
+    fireEvent.click(correctCell);
+  });
+
+  // Marked tile now has aria-disabled set to true
+  expect(correctCell.getAttribute("aria-disabled")).toBe("true");
+  // Unmarked tile remains enabled
+  expect(incorrectCell.getAttribute("aria-disabled")).toBeFalsy();
+});
+
 test("changes language", async () => {
   const onHome = vi.fn();
   const { rerender } = render(
