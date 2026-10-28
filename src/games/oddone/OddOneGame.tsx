@@ -131,10 +131,13 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const cols = n <= 4 ? 2 : 3;
   const rows = Math.ceil(n / cols);
   const gap = 12;
-  const tile = Math.min(
-    (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
-    (height - 84 - 90 - (rows - 1) * gap) / rows,
-    150,
+  const tile = Math.max(
+    60,
+    Math.min(
+      (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
+      (height - 84 - 90 - (rows - 1) * gap) / rows,
+      150,
+    ),
   );
 
   const subtitle = t(lang, "shell.oddone.sub");
