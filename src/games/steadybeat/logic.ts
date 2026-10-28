@@ -43,7 +43,7 @@ export function scoreTaps(
   let hits = 0;
   const beatTimes: number[] = [];
   for (let i = 0; i < round.beatsPerRound; i++) {
-    beatTimes.push(startMs + (i + 1) * beatMs);
+    beatTimes.push(startMs + i * beatMs);
   }
   const used = new Set<number>();
   for (const tap of tapTimesMs) {

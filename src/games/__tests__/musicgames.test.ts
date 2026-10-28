@@ -416,32 +416,32 @@ describe("steady beat", () => {
     const r = makeSteadyBeatRound(rng, "easy");
     const beatMs = 60000 / r.bpm;
     const start = 1000;
-    const taps = Array.from({ length: 8 }, (_, i) => start + (i + 1) * beatMs);
+    const taps = Array.from({ length: 8 }, (_, i) => start + i * beatMs);
     const result = scoreTaps(r, taps, start, "easy");
     expect(result.hits).toBe(8);
     expect(result.total).toBe(8);
   });
 
-  it("expects first tap one beat after count-in ends, not at startMs", () => {
+  it("expects first tap on downbeat at startMs when Your turn appears", () => {
     const rng = makeRng(42);
     const r = makeSteadyBeatRound(rng, "hard");
     const beatMs = 60000 / r.bpm;
     const start = 1000;
-    // Tapping at startMs (count-in beat 4) misses beat 1 and loses the 8th tap
-    const prematureTaps = Array.from(
+    // Natural taps starting immediately on the downbeat at startMs score full marks
+    const downbeatTaps = Array.from(
       { length: 8 },
       (_, i) => start + i * beatMs,
     );
-    const simResult = scoreTaps(r, prematureTaps, start, "hard");
-    expect(simResult.hits).toBe(7);
+    const downbeatResult = scoreTaps(r, downbeatTaps, start, "hard");
+    expect(downbeatResult.hits).toBe(8);
 
-    // Natural taps starting 1 beat period after startMs score full marks
-    const naturalTaps = Array.from(
+    // Delayed taps starting 1 beat period after startMs miss beat 0 and lose the 8th tap
+    const delayedTaps = Array.from(
       { length: 8 },
       (_, i) => start + (i + 1) * beatMs,
     );
-    const naturalResult = scoreTaps(r, naturalTaps, start, "hard");
-    expect(naturalResult.hits).toBe(8);
+    const delayedResult = scoreTaps(r, delayedTaps, start, "hard");
+    expect(delayedResult.hits).toBe(7);
   });
   it("no taps score zero", () => {
     const rng = makeRng(42);

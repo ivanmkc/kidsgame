@@ -9,6 +9,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import * as sound from "../../sound";
+import * as music from "../../music";
 import { LangContext } from "../../components/GameShell";
 import { Lang } from "../../lang";
 import { SteadyBeatGame } from "./SteadyBeatGame";
@@ -129,13 +130,13 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Tap 8 times on each beat (every 600ms, starting one beat after the count-in)
+  // Tap 8 times on each beat (every 600ms, starting immediately when Your turn appears)
   for (let i = 0; i < 8; i++) {
     act(() => {
-      vi.advanceTimersByTime(600);
+      fireEvent.click(circle);
     });
     act(() => {
-      fireEvent.click(circle);
+      vi.advanceTimersByTime(600);
     });
   }
 
@@ -467,10 +468,10 @@ it("clears round advance timeout on unmount during result phase after passed rou
   // Tap 8 times on each beat to pass the round
   for (let i = 0; i < 8; i++) {
     act(() => {
-      vi.advanceTimersByTime(600);
+      fireEvent.click(circle);
     });
     act(() => {
-      fireEvent.click(circle);
+      vi.advanceTimersByTime(600);
     });
   }
 
@@ -512,10 +513,10 @@ it("advances to next round after 1200ms result phase when round is passed", () =
   const circle = screen.getByTestId("steadybeat-circle");
   for (let i = 0; i < 8; i++) {
     act(() => {
-      vi.advanceTimersByTime(600);
+      fireEvent.click(circle);
     });
     act(() => {
-      fireEvent.click(circle);
+      vi.advanceTimersByTime(600);
     });
   }
 
@@ -568,6 +569,89 @@ it("retries round after 1200ms result phase when round is failed", () => {
 
   // New round is generated for retry
   expect(roundSpy).toHaveBeenCalledTimes(2);
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("plays exactly 4 drum beats during count-in and does not play a 5th beat at transition to tap phase", () => {
+  vi.useFakeTimers();
+  const playDrumSpy = vi.spyOn(music, "playDrum");
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // At t=0: 1st drum beat
+  expect(playDrumSpy).toHaveBeenCalledTimes(1);
+
+  // At t=600: 2nd drum beat
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(playDrumSpy).toHaveBeenCalledTimes(2);
+
+  // At t=1200: 3rd drum beat
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(playDrumSpy).toHaveBeenCalledTimes(3);
+
+  // At t=1800: 4th drum beat
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(playDrumSpy).toHaveBeenCalledTimes(4);
+
+  // At t=2400: transition to tap phase ("Your turn!"), no 5th drum beat
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  expect(playDrumSpy).toHaveBeenCalledTimes(4);
+
+  roundSpy.mockRestore();
+  playDrumSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("scores all 8 hits when player taps along starting immediately on the downbeat when Your turn appears", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+  // Advance past 4-beat count-in (2400ms at 100 bpm)
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  const circle = screen.getByTestId("steadybeat-circle");
+
+  // Player taps immediately at 2400ms (downbeat), then 7 more times every 600ms
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+  }
+
+  // Advance past tap evaluation (5300ms)
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // All 8 taps on tempo starting on the downbeat are scored as hits
+  expect(screen.queryAllByText("☆")).toHaveLength(0);
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/6");
 
   roundSpy.mockRestore();
   vi.useRealTimers();
