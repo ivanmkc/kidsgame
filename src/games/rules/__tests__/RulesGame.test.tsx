@@ -10,11 +10,12 @@ import {
 } from "@testing-library/react";
 import { RulesGame } from "../RulesGame";
 import * as logic from "../logic";
-import { sfx } from "../../../sound";
+import { sfx, stopNarration } from "../../../sound";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
   saySequence: vi.fn(),
+  stopNarration: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
@@ -176,4 +177,18 @@ describe("RulesGame", () => {
       vi.useRealTimers();
     }
   });
+
+  describe("unmount and narration lifecycle", () => {
+    it("stops narration when unmounted so ghost instructions do not leak onto home menu", () => {
+      const { unmount } = render(
+        <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+      expect(stopNarration).not.toHaveBeenCalled();
+
+      unmount();
+
+      expect(stopNarration).toHaveBeenCalled();
+    });
+  });
 });
+
