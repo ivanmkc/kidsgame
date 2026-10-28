@@ -18,7 +18,7 @@ import { Difficulty } from "../../difficulty";
 import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
-import { sayThen, sfx } from "../../sound";
+import { sayThen, sfx, stopNarration } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { Word } from "./data";
 import {
@@ -71,6 +71,7 @@ export function ListenChooseGame({
 
   useEffect(() => {
     return () => {
+      stopNarration();
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
     };

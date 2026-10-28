@@ -769,4 +769,11 @@ describe("ListenChooseGame", () => {
       expect(cardStyle.height).toBe(170);
     }
   });
+
+  it("stops narration audio on unmount to prevent leaks", () => {
+    vi.spyOn(sound, "stopNarration").mockImplementation(() => {});
+    const { unmount } = render(<ListenChooseGame onHome={vi.fn()} />);
+    unmount();
+    expect(sound.stopNarration).toHaveBeenCalled();
+  });
 });
