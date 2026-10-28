@@ -346,6 +346,13 @@ export type UIKey =
   | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star'
   // ── Animals & Sounds ───────────────────────────────────────────
   | 'sound.dog' | 'sound.cat' | 'sound.lion' | 'sound.frog' | 'sound.pig'
+  // ── Diff scene names ─────────────────────────────────────────────
+  | 'diff.scene.farm' | 'diff.scene.ocean' | 'diff.scene.princess' | 'diff.scene.unicorn'
+  | 'diff.scene.dinos' | 'diff.scene.beach' | 'diff.scene.snow' | 'diff.scene.aquarium'
+  | 'diff.scene.playground' | 'diff.scene.savanna' | 'diff.scene.pirate' | 'diff.scene.trains'
+  | 'diff.scene.party' | 'diff.scene.construction' | 'diff.scene.candy' | 'diff.scene.tidepool'
+  | 'diff.scene.bakery' | 'diff.scene.bugs' | 'diff.scene.camping' | 'diff.scene.space'
+  | 'diff.scene.music'
   // ── Hidden scene names ──────────────────────────────────────────
   | 'hidden.scene.jungle' | 'hidden.scene.ballroom' | 'hidden.scene.picnic' | 'hidden.scene.cabin'
   | 'hidden.scene.treasure' | 'hidden.scene.kitchenb' | 'hidden.scene.workshop' | 'hidden.scene.space_station'
@@ -738,6 +745,19 @@ export const EN: Table = {
   'sound.lion': 'roar',
   'sound.frog': 'ribbit',
   'sound.pig': 'oink',
+
+  // Diff scene names
+  'diff.scene.farm': 'Farm', 'diff.scene.ocean': 'Ocean',
+  'diff.scene.princess': 'Princess Castle', 'diff.scene.unicorn': 'Unicorn Meadow',
+  'diff.scene.dinos': 'Dinosaur Valley', 'diff.scene.beach': 'Beach Day',
+  'diff.scene.snow': 'Snowy Village', 'diff.scene.aquarium': 'Aquarium',
+  'diff.scene.playground': 'Playground', 'diff.scene.savanna': 'Savanna',
+  'diff.scene.pirate': 'Pirate Cove', 'diff.scene.trains': 'Train Station',
+  'diff.scene.party': 'Party', 'diff.scene.construction': 'Construction Site',
+  'diff.scene.candy': 'Candy Land', 'diff.scene.tidepool': 'Tide Pool',
+  'diff.scene.bakery': 'Bakery', 'diff.scene.bugs': 'Bug Garden',
+  'diff.scene.camping': 'Campsite', 'diff.scene.space': 'Space',
+  'diff.scene.music': 'Music Room',
 
   // Hidden scene names
   'hidden.scene.jungle': 'Jungle', 'hidden.scene.ballroom': 'Princess Ballroom',

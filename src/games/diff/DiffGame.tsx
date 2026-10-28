@@ -191,7 +191,7 @@ export function DiffGame({
           lang={lang}
           options={manifest.diff.map((d) => ({
             id: d.id,
-            name: d.name,
+            name: d.nameT?.[lang] ?? d.name,
             image: baseImage(d),
             flagged: d.flagged,
             level: d.level,
@@ -336,7 +336,7 @@ export function DiffGame({
   return (
     <GameShell
       title={t(lang, "shell.diff.title")}
-      subtitle={t(lang, "shell.diff.subPlay", { name: scene.name, n: total })}
+      subtitle={t(lang, "shell.diff.subPlay", { name: scene.nameT?.[lang] ?? scene.name, n: total })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}

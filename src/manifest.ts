@@ -22,6 +22,7 @@ export interface PoolEntry extends Box {
 export interface DiffScene {
   id: string;
   name: string;
+  nameT?: Record<string, string>;
   flagged?: boolean;
   level?: 'easy' | 'medium' | 'hard';
   // legacy flat pair
@@ -163,6 +164,14 @@ const rawManifest = raw as unknown as Manifest;
 
 export const manifest: Manifest = {
   ...rawManifest,
+  diff: rawManifest.diff.map((scene) => ({
+    ...scene,
+    nameT: scene.nameT ?? {
+      ja: t('ja', `diff.scene.${scene.id}` as UIKey),
+      cmn: t('cmn', `diff.scene.${scene.id}` as UIKey),
+      yue: t('yue', `diff.scene.${scene.id}` as UIKey),
+    },
+  })),
   hidden: rawManifest.hidden.map((scene) => ({
     ...scene,
     nameT: scene.nameT ?? {
