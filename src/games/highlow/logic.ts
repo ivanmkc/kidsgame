@@ -1,24 +1,24 @@
-import { Rng, randInt } from '../../rng';
-import { Difficulty } from '../../difficulty';
-import { LANGS, Lang } from '../../lang';
-import { t } from '../../i18n';
+import { Rng, randInt } from "../../rng";
+import { Difficulty } from "../../difficulty";
+import { LANGS, Lang } from "../../lang";
+import { t } from "../../i18n";
 
 export interface HighLowRound {
-  noteA: number;  // midi — played first
-  noteB: number;  // midi — played second
+  noteA: number; // midi — played first
+  noteB: number; // midi — played second
 }
 
 const BASE_MIDI = 60; // middle C
 
 function intervalFor(d: Difficulty): number {
-  if (d === 'easy') return 12;
-  if (d === 'medium') return 7;
+  if (d === "easy") return 12;
+  if (d === "medium") return 7;
   return 3;
 }
 
 export function roundsToWin(d: Difficulty): number {
-  if (d === 'easy') return 8;
-  if (d === 'medium') return 10;
+  if (d === "easy") return 8;
+  if (d === "medium") return 10;
   return 12;
 }
 
@@ -36,12 +36,28 @@ export function makeHighLowRound(rng: Rng, d: Difficulty): HighLowRound {
 
 /** Derived from the notes, so a hand-built round can't disagree with what
  *  the ears heard. */
-export function correctAnswer(round: HighLowRound): 'high' | 'low' {
-  return round.noteB > round.noteA ? 'high' : 'low';
+export function correctAnswer(round: HighLowRound): "high" | "low" {
+  return round.noteB > round.noteA ? "high" : "low";
 }
 
-export function isCorrect(round: HighLowRound, picked: 'high' | 'low'): boolean {
+export function isCorrect(
+  round: HighLowRound,
+  picked: "high" | "low",
+): boolean {
   return picked === correctAnswer(round);
+}
+
+export const MELODY_DOT_OFFSET_Y = 20;
+
+/** Vertical offset for visual pitch representation. Higher pitch shifts up
+ *  (-Y), lower pitch shifts down (+Y), giving children playing with sound muted
+ *  an unambiguous visual cue matching the heard contour. */
+export function melodyDotOffsetY(round: HighLowRound, index: number): number {
+  const note = index === 0 ? round.noteA : round.noteB;
+  const other = index === 0 ? round.noteB : round.noteA;
+  if (note > other) return -MELODY_DOT_OFFSET_Y;
+  if (note < other) return MELODY_DOT_OFFSET_Y;
+  return 0;
 }
 
 export function getInstructionalFeedback(
@@ -49,8 +65,8 @@ export function getInstructionalFeedback(
   lang: Lang,
 ): string[] {
   const answer = correctAnswer(round);
-  const dirKey = answer === 'high' ? 'music.high' : 'music.low';
-  return [t(lang, dirKey), t(lang, 'music.listen')];
+  const dirKey = answer === "high" ? "music.high" : "music.low";
+  return [t(lang, dirKey), t(lang, "music.listen")];
 }
 
 export function nextScoreValue(
@@ -63,10 +79,10 @@ export function nextScoreValue(
 export function speechLines(): string[] {
   const out: string[] = [];
   for (const l of LANGS) {
-    out.push(t(l.id, 'shell.highlow.sub'));
-    out.push(t(l.id, 'music.listen'));
-    out.push(t(l.id, 'music.high'));
-    out.push(t(l.id, 'music.low'));
+    out.push(t(l.id, "shell.highlow.sub"));
+    out.push(t(l.id, "music.listen"));
+    out.push(t(l.id, "music.high"));
+    out.push(t(l.id, "music.low"));
   }
   return [...new Set(out)];
 }
@@ -97,4 +113,3 @@ export function highLowLayout(width: number): HighLowLayout {
     replayFontSize: 36,
   };
 }
-

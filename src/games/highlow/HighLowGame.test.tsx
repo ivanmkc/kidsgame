@@ -964,4 +964,74 @@ describe("HighLowGame accessibility", () => {
     expect(replayBtn.getAttribute("role")).toBe("button");
     expect(replayBtn.getAttribute("aria-label")).toBe("もういちどきく");
   });
+
+  describe("HighLowGame pitch visual cues (R3 accessibility)", () => {
+    it("renders ascending pitch contour with lower first dot and higher second dot", () => {
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 60,
+        noteB: 72,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      const dot0 = screen.getByTestId("melody-dot-0") as HTMLElement;
+      const dot1 = screen.getByTestId("melody-dot-1") as HTMLElement;
+
+      expect(dot0.style.transform).toBe("translateY(20px)");
+      expect(dot1.style.transform).toBe("translateY(-20px)");
+    });
+
+    it("renders descending pitch contour with higher first dot and lower second dot", () => {
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 72,
+        noteB: 60,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      const dot0 = screen.getByTestId("melody-dot-0") as HTMLElement;
+      const dot1 = screen.getByTestId("melody-dot-1") as HTMLElement;
+
+      expect(dot0.style.transform).toBe("translateY(-20px)");
+      expect(dot1.style.transform).toBe("translateY(20px)");
+    });
+
+    it("allows a child playing with muted sound to judge pitch correctly via dot positions", () => {
+      vi.useFakeTimers();
+      const goodSpy = vi.spyOn(sfx, "good");
+      let onDoneCb: (() => void) | undefined;
+      vi.spyOn(music, "playSequence").mockImplementation(
+        (_notes, _bpm, _onNote, onDone) => {
+          onDoneCb = onDone;
+          return () => {};
+        },
+      );
+
+      // Round where second note is higher
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 55,
+        noteB: 67,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      // During playback, observe vertical positions of the melody dots
+      const dot0 = screen.getByTestId("melody-dot-0") as HTMLElement;
+      const dot1 = screen.getByTestId("melody-dot-1") as HTMLElement;
+      expect(dot0.style.transform).toBe("translateY(20px)");
+      expect(dot1.style.transform).toBe("translateY(-20px)");
+
+      // Playback completes and pick phase starts
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      // Child selects "Higher" based on dot 1 being vertically higher
+      fireEvent.click(screen.getByTestId("highlow-high"));
+      expect(goodSpy).toHaveBeenCalledTimes(1);
+
+      vi.useRealTimers();
+    });
+  });
 });
