@@ -202,6 +202,7 @@ export const YUE: Table = {
   'shell.highlow.sub': '第二個音高咗定低咗？',
   'shell.bells.title': '旋律鈴鐺',
   'shell.bells.sub': '聽完旋律，跟住撳返！',
+  'bells.bell': '鈴鐺',
   'shell.echobeat.title': '回聲節拍',
   'shell.echobeat.sub': '撳出你聽到嘅節拍！',
   'shell.steadybeat.title': '穩定節拍',

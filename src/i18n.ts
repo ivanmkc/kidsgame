@@ -178,6 +178,7 @@ export type UIKey =
   | 'menu.music'
   | 'shell.highlow.title'   | 'shell.highlow.sub'
   | 'shell.bells.title'     | 'shell.bells.sub'
+  | 'bells.bell'
   | 'shell.echobeat.title'  | 'shell.echobeat.sub'
   | 'shell.steadybeat.title' | 'shell.steadybeat.sub'
   | 'shell.fastslow.title'  | 'shell.fastslow.sub'
@@ -537,6 +538,7 @@ export const EN: Table = {
   'shell.highlow.sub': 'Was the second note higher or lower?',
   'shell.bells.title': 'Melody Bells',
   'shell.bells.sub': 'Listen, then play the tune back!',
+  'bells.bell': 'Bell',
   'shell.echobeat.title': 'Echo Beat',
   'shell.echobeat.sub': 'Tap the rhythm you hear!',
   'shell.steadybeat.title': 'Steady Beat',

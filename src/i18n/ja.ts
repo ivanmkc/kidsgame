@@ -203,6 +203,7 @@ export const JA: Table = {
   'shell.highlow.sub': 'にばんめの おとは たかくなった？ ひくくなった？',
   'shell.bells.title': 'メロディベル',
   'shell.bells.sub': 'きいて、おなじように ならそう！',
+  'bells.bell': 'ベル',
   'shell.echobeat.title': 'エコービート',
   'shell.echobeat.sub': 'きこえた リズムを タップ！',
   'shell.steadybeat.title': 'ビートキーパー',
