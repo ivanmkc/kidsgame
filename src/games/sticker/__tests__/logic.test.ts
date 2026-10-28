@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { t } from '../../../i18n';
 import { Lang } from '../../../lang';
 import { manifest } from '../../../manifest';
-import { stickerLabel, stickerLayout } from '../logic';
+import { stickerLabel, stickerLayout, stickerPrompt } from '../logic';
 
 describe('stickerLayout', () => {
   describe('mobile landscape viewports', () => {
@@ -147,5 +148,28 @@ describe('stickerLabel', () => {
     expect(() => stickerLabel('unknown_custom_item', 'en')).toThrow(
       'Unknown sticker icon: unknown_custom_item',
     );
+  });
+});
+
+describe('stickerPrompt', () => {
+  const langs: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+
+  it('returns picker prompt when scene is not picked across all languages', () => {
+    for (const lang of langs) {
+      expect(stickerPrompt(lang, false)).toBe(t(lang, 'picker.sticker'));
+    }
+    expect(stickerPrompt('en', false)).toBe("Where's the party?");
+  });
+
+  it('returns decorating instruction when in scene across all languages', () => {
+    for (const lang of langs) {
+      expect(stickerPrompt(lang, true)).toBe(t(lang, 'card.sticker.blurb'));
+    }
+    expect(stickerPrompt('en', true)).toBe('Decorate scenes with silly stickers!');
+    expect(stickerPrompt('ja', true)).toBe('シールで えを かざろう！');
+  });
+
+  it('defaults to english and picker when called without arguments', () => {
+    expect(stickerPrompt()).toBe("Where's the party?");
   });
 });

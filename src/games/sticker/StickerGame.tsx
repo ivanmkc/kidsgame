@@ -7,7 +7,7 @@ import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
 import { manifest, SCENE_AR } from '../../manifest';
-import { stickerLabel, stickerLayout } from './logic';
+import { stickerLabel, stickerLayout, stickerPrompt } from './logic';
 import { allSceneOptions } from '../sceneOptions';
 import { ICON_CATEGORIES } from '../iconCategories';
 import { Touch2, pinchTransform } from './pinch';
@@ -201,7 +201,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     stageRef.current?.measureInWindow((x, y, w, h) => { stageFrame.current = { x, y, w, h }; });
   };
   const [ghost, setGhost] = useState<{ icon: string; x: number; y: number } | null>(null);
-  useSay(picked ? null : t(lang, 'picker.sticker'));
+  useSay(stickerPrompt(lang, !!picked));
 
   if (!picked) {
     return (

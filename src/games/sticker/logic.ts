@@ -92,3 +92,12 @@ export function stickerLabel(icon: string, lang: Lang = 'en'): string {
   }
   throw new Error(`Unknown sticker icon: ${icon}`);
 }
+
+/**
+ * Spoken prompt for Sticker Party: when choosing a scene, speaks the picker
+ * prompt; when entering or playing inside a scene, speaks the welcoming
+ * decorating instruction so pre-readers know to start placing stickers.
+ */
+export function stickerPrompt(lang: Lang = 'en', inScene: boolean = false): string {
+  return inScene ? t(lang, 'card.sticker.blurb') : t(lang, 'picker.sticker');
+}
