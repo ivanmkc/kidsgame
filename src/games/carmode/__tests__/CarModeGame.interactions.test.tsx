@@ -872,4 +872,131 @@ describe("CarModeGame interactions", () => {
     // Reaches reveal phase hands-free even with muted/stalled audio
     expect(screen.getByText("Tap!")).toBeDefined();
   });
+  it("plays correct feedback sound based on silly round answer", () => {
+    vi.useFakeTimers();
+    const goodSpy = vi.spyOn(sound.sfx, "good");
+    const boingSpy = vi.spyOn(sound.sfx, "boing");
+
+    const actual = logic.startState("silly", 42);
+    // Find a round where answer is true (1 tap) and false (2 taps)
+    const trueRoundIndex = actual.rounds.findIndex((r) => r.answer === true);
+    const falseRoundIndex = actual.rounds.findIndex((r) => r.answer === false);
+
+    // Test correct 1-tap answer
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: trueRoundIndex,
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn = screen.getByTestId("carmode-tap");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // 1 tap for true
+    fireEvent.click(tapBtn);
+
+    // Wait for TAP_WINDOW_MS timeout
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(goodSpy).toHaveBeenCalled();
+    expect(boingSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("carmode-emoji-right")).toBeDefined();
+    expect(screen.getByText("⭐️")).toBeDefined();
+
+    unmount();
+    goodSpy.mockClear();
+    boingSpy.mockClear();
+
+    // Test incorrect 1-tap answer (should be 2 taps)
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: falseRoundIndex, // answer is false (Silly), wants 2 taps
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    const { unmount: unmount2 } = render(
+      <CarModeGame onHome={noop} lang="en" />,
+    );
+    const tapBtn2 = screen.getByTestId("carmode-tap");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // 1 tap for false answer -> should play boing
+    fireEvent.click(tapBtn2);
+
+    // Wait for TAP_WINDOW_MS timeout
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    expect(boingSpy).toHaveBeenCalled();
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("carmode-emoji-wrong")).toBeDefined();
+    expect(screen.getByText("🔄")).toBeDefined();
+
+    unmount2();
+    goodSpy.mockClear();
+    boingSpy.mockClear();
+
+    // Test correct 2-tap answer for silly round
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: falseRoundIndex, // answer is false (Silly), wants 2 taps
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn3 = screen.getByTestId("carmode-tap");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // 2 taps for false answer
+    fireEvent.click(tapBtn3);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(tapBtn3);
+
+    expect(goodSpy).toHaveBeenCalled();
+    expect(boingSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("carmode-emoji-right")).toBeDefined();
+    expect(screen.getByText("⭐️")).toBeDefined();
+
+    cleanup();
+    goodSpy.mockClear();
+    boingSpy.mockClear();
+
+    // Test 0-tap timeout answer for silly round
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: falseRoundIndex,
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Advance through the entire gap time with 0 taps
+    act(() => {
+      vi.advanceTimersByTime(actual.rounds[falseRoundIndex].gapMs + 100);
+    });
+
+    expect(boingSpy).toHaveBeenCalled();
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("carmode-emoji-wrong")).toBeDefined();
+    expect(screen.getByText("🔄")).toBeDefined();
+  });
 });

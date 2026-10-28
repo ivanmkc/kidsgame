@@ -1,14 +1,15 @@
 // Car Mode round engine — pure logic, no React, no side effects.
 // Drives the prompt→gap→reveal→tap-advance loop for every pack.
-import { Difficulty, DifficultyFilter } from '../../difficulty';
-import { ALL_PACKS, PACK_ORDER, PackId, Round } from './packs';
+import { Difficulty, DifficultyFilter } from "../../difficulty";
+import { ALL_PACKS, PACK_ORDER, PackId, Round } from "./packs";
 
 export interface CarModeState {
   pack: PackId;
   roundIdx: number;
   rounds: Round[];
-  phase: 'prompt' | 'gap' | 'reveal' | 'done';
+  phase: "prompt" | "gap" | "reveal" | "done";
   pendingTaps: number;
+  playerAnswer?: boolean;
 }
 
 export function filterRoundsByDifficulty(
@@ -16,17 +17,17 @@ export function filterRoundsByDifficulty(
   pack: PackId,
   difficulty?: Difficulty | DifficultyFilter,
 ): Round[] {
-  if (!difficulty || difficulty === 'all') return rounds;
-  if (pack === 'boops') {
-    if (difficulty === 'easy') {
+  if (!difficulty || difficulty === "all") return rounds;
+  if (pack === "boops") {
+    if (difficulty === "easy") {
       return rounds.filter((r) => (r.noteCount ?? 0) <= 3);
     }
-    if (difficulty === 'medium') {
+    if (difficulty === "medium") {
       return rounds.filter(
         (r) => (r.noteCount ?? 0) >= 4 && (r.noteCount ?? 0) <= 6,
       );
     }
-    if (difficulty === 'hard') {
+    if (difficulty === "hard") {
       return rounds.filter(
         (r) => (r.noteCount ?? 0) >= 7 && (r.noteCount ?? 0) <= 10,
       );
@@ -43,44 +44,58 @@ export function startState(
   const all = ALL_PACKS[pack].rounds();
   const filtered = filterRoundsByDifficulty(all, pack, difficulty);
   const rounds = shuffleRounds(filtered, seed);
-  return { pack, roundIdx: 0, rounds, phase: 'prompt', pendingTaps: 0 };
+  return { pack, roundIdx: 0, rounds, phase: "prompt", pendingTaps: 0 };
 }
 
 export function currentRound(s: CarModeState): Round | null {
-  if (s.phase === 'done') return null;
+  if (s.phase === "done") return null;
   return s.rounds[s.roundIdx] ?? null;
 }
 
 export function toGap(s: CarModeState): CarModeState {
-  if (s.phase === 'gap') return s;
-  return { ...s, phase: 'gap', pendingTaps: 0 };
+  if (s.phase === "gap") return s;
+  return { ...s, phase: "gap", pendingTaps: 0, playerAnswer: undefined };
 }
 
-export function toReveal(s: CarModeState): CarModeState {
-  if (s.phase === 'reveal') return s;
-  return { ...s, phase: 'reveal', pendingTaps: 0 };
+export function toReveal(s: CarModeState, forceAnswer?: boolean): CarModeState {
+  if (s.phase === "reveal") return s;
+  let ans = forceAnswer;
+  if (ans === undefined) {
+    const r = currentRound(s);
+    if (r?.twoTapAnswer && s.pendingTaps === 1) {
+      ans = true;
+    }
+  }
+  return { ...s, phase: "reveal", pendingTaps: 0, playerAnswer: ans };
 }
 
 export function advance(s: CarModeState): CarModeState {
   const next = s.roundIdx + 1;
-  if (next >= s.rounds.length) return { ...s, phase: 'done', pendingTaps: 0 };
-  return { ...s, roundIdx: next, phase: 'prompt', pendingTaps: 0 };
+  if (next >= s.rounds.length)
+    return { ...s, phase: "done", pendingTaps: 0, playerAnswer: undefined };
+  return {
+    ...s,
+    roundIdx: next,
+    phase: "prompt",
+    pendingTaps: 0,
+    playerAnswer: undefined,
+  };
 }
 
 export function handleTap(s: CarModeState): CarModeState {
-  if (s.phase === 'prompt' || s.phase === 'done') return s;
-  
+  if (s.phase === "prompt" || s.phase === "done") return s;
+
   const r = currentRound(s);
-  
-  if (s.phase === 'gap') {
+
+  if (s.phase === "gap") {
     if (r?.twoTapAnswer) {
       if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
-      return toReveal(s);
+      return toReveal(s, false);
     }
     return s;
   }
-  
-  if (s.phase === 'reveal') {
+
+  if (s.phase === "reveal") {
     return advance(s);
   }
   return s;
@@ -88,13 +103,13 @@ export function handleTap(s: CarModeState): CarModeState {
 
 export function handleTapTimeout(s: CarModeState): CarModeState {
   if (s.pendingTaps === 0) return s;
-  if (s.phase === 'gap') return toReveal(s);
-  if (s.phase === 'reveal') return advance(s);
+  if (s.phase === "gap") return toReveal(s);
+  if (s.phase === "reveal") return advance(s);
   return { ...s, pendingTaps: 0 };
 }
 
 export function isComplete(s: CarModeState): boolean {
-  return s.phase === 'done';
+  return s.phase === "done";
 }
 
 export function progress(s: CarModeState): number {

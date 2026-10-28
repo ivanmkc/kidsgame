@@ -273,8 +273,14 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
 
   useEffect(() => {
     if (state.phase === "reveal" && round) {
-      if (round.sfx === "boing") sfx.boing();
-      else if (round.sfx === "good") sfx.good();
+      if (round.answer !== undefined) {
+        if (state.playerAnswer === round.answer) sfx.good();
+        else sfx.boing();
+      } else if (round.sfx === "boing") {
+        sfx.boing();
+      } else if (round.sfx === "good") {
+        sfx.good();
+      }
 
       let scheduled = false;
       const scheduleAdvance = () => {
@@ -462,6 +468,11 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const roundNum = state.roundIdx + 1;
   const totalRounds = state.rounds.length;
 
+  const isReveal = state.phase === "reveal";
+  const hasAnswer = round && round.answer !== undefined;
+  const isRight = isReveal && hasAnswer && state.playerAnswer === round?.answer;
+  const isWrong = isReveal && hasAnswer && state.playerAnswer !== round?.answer;
+
   return (
     <GameShell
       title={t(lang, "shell.carmode.title")}
@@ -497,16 +508,31 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                   transform: [{ scale: pulseAnim }],
                 },
                 boopFlash && styles.bigButtonFlash,
+                isRight && styles.bigButtonRight,
+                isWrong && styles.bigButtonWrong,
               ]}
             >
-              <Text style={styles.phaseEmoji}>
+              <Text
+                style={styles.phaseEmoji}
+                testID={
+                  isRight
+                    ? "carmode-emoji-right"
+                    : isWrong
+                      ? "carmode-emoji-wrong"
+                      : undefined
+                }
+              >
                 {boopFlash
                   ? "🎵"
                   : state.phase === "prompt"
                     ? "👂"
                     : state.phase === "gap"
                       ? "🤔"
-                      : "👆"}
+                      : isRight
+                        ? "⭐️"
+                        : isWrong
+                          ? "🔄"
+                          : "👆"}
               </Text>
               <Text style={styles.phaseText}>
                 {state.phase === "prompt"
@@ -573,6 +599,16 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
     borderWidth: 4,
     ...shadows.lifted,
+  },
+  bigButtonRight: {
+    backgroundColor: "rgba(100,255,100,0.6)",
+    borderColor: "#fff",
+    borderWidth: 4,
+  },
+  bigButtonWrong: {
+    backgroundColor: "rgba(255,100,100,0.6)",
+    borderColor: "#fff",
+    borderWidth: 4,
   },
   phaseEmoji: {
     fontSize: 64,
