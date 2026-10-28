@@ -72,6 +72,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RulesRound>(() => buildRound(0));
   const [tapped, setTapped] = useState<number[]>([]);
+  const tappedRef = useRef<number[]>([]);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [reminded, setReminded] = useState(false);
   const remindTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -117,11 +118,12 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (lockedRef.current || won || tapped.includes(i)) return;
+    if (lockedRef.current || won || tappedRef.current.includes(i)) return;
     if (round.tiles[i].isMatch) {
       sfx.good();
-      const next = [...tapped, i];
-      setTapped(next);
+      const next = [...tappedRef.current, i];
+      tappedRef.current = next;
+      setTapped((prev) => (prev.includes(i) ? prev : [...prev, i]));
       if (next.length === round.matchCount) {
         lockedRef.current = true;
         setCelebrate((c) => c + 1);
@@ -132,6 +134,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
           setRoundIdx(nextIdx);
           if (nextIdx < roundsToWin) {
             setRound(buildRound(nextIdx));
+            tappedRef.current = [];
             setTapped([]);
           }
         }, 550);
@@ -154,6 +157,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     rulesRef.current = makeRules(rngRef.current, roundsToWin);
     setRoundIdx(0);
     setRound(buildRound(0));
+    tappedRef.current = [];
     setTapped([]);
     setWrongIdx(null);
   };
