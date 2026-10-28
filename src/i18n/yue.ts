@@ -67,7 +67,7 @@ export const YUE: Table = {
   'card.sounds.title': '聽詞搵圖',
   'card.sounds.blurb': '撳你聽到嘅詞對應嘅圖',
   'card.rhyme.title': '押韻配對',
-  'card.rhyme.blurb': '英文押韻遊戲 — 揀啲押韻嘅圖！',
+  'card.rhyme.blurb': '押韻遊戲 — 揀啲押韻嘅圖！',
   'card.spell.title': '砌單字',
   'card.spell.blurb': '撳字母砌單字！',
   'card.listenchoose.title': '聽音揀圖',
