@@ -552,6 +552,66 @@ describe("PuzzleGame", () => {
     expect(screen.getByTestId("puzzle-moves").textContent).toContain("1");
   });
 
+  it("renders selection overlay without changing tile structural border width", () => {
+    vi.spyOn(logic, "makePuzzle").mockReturnValue([1, 0, 2, 3, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const tile0 = screen.getByTestId("puzzle-tile-0-piece-1");
+
+    // Initially no selection overlay exists and tile has 1px structural border
+    expect(screen.queryByTestId("puzzle-selected-overlay")).toBeNull();
+    expect(window.getComputedStyle(tile0).borderTopWidth).toBe("1px");
+    expect(window.getComputedStyle(tile0).borderTopColor).toBe(
+      "rgba(255, 255, 255, 0.50)",
+    );
+
+    // Select tile 0
+    fireEvent.click(tile0);
+
+    // Tile structural border remains 1px (preventing child Image layout jitter)
+    expect(window.getComputedStyle(tile0).borderTopWidth).toBe("1px");
+    expect(window.getComputedStyle(tile0).borderTopColor).toBe(
+      "rgba(255, 194, 75, 1.00)",
+    );
+    expect(window.getComputedStyle(tile0).zIndex).toBe("2");
+
+    // Inset selection overlay renders inside the selected tile with 3px gold border
+    const overlay = screen.getByTestId("puzzle-selected-overlay");
+    expect(overlay).toBeTruthy();
+    expect(tile0.contains(overlay)).toBe(true);
+    expect(window.getComputedStyle(overlay).borderTopWidth).toBe("3px");
+    expect(window.getComputedStyle(overlay).borderTopColor).toBe(
+      "rgba(255, 194, 75, 1.00)",
+    );
+    expect(window.getComputedStyle(overlay).pointerEvents).toBe("none");
+
+    // Deselect tile 0 by tapping it again
+    fireEvent.click(tile0);
+    expect(screen.queryByTestId("puzzle-selected-overlay")).toBeNull();
+    expect(window.getComputedStyle(tile0).borderTopWidth).toBe("1px");
+    expect(window.getComputedStyle(tile0).borderTopColor).toBe(
+      "rgba(255, 255, 255, 0.50)",
+    );
+
+    // Select tile 0 and then swap with tile 1
+    fireEvent.click(tile0);
+    expect(screen.getByTestId("puzzle-selected-overlay")).toBeTruthy();
+    const tile1 = screen.getByTestId("puzzle-tile-1-piece-0");
+    fireEvent.click(tile1);
+    expect(screen.queryByTestId("puzzle-selected-overlay")).toBeNull();
+    expect(window.getComputedStyle(tile0).borderTopWidth).toBe("1px");
+  });
+
   it("plays tap sound on tile selection and deselection", () => {
     vi.spyOn(logic, "makePuzzle").mockReturnValue([1, 0, 2, 3, 4, 5]);
     const tapSpy = vi.spyOn(sound.sfx, "tap");
