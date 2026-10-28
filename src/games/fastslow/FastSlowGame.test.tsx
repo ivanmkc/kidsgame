@@ -56,10 +56,20 @@ vi.mock("../../sound", () => ({
   }),
 }));
 
+const defaultPlaySequenceImpl = (
+  _notes?: unknown,
+  _bpm?: unknown,
+  _cb?: ((index: number) => void) | unknown,
+  onEnd?: () => void,
+) => {
+  if (onEnd) onEnd();
+  return () => {};
+};
+
 vi.mock("../../music", () => ({
-  playSequence: vi.fn((notes, bpm, cb, onEnd) => {
-    if (onEnd) onEnd();
-  }),
+  playSequence: vi.fn((notes, bpm, cb, onEnd) =>
+    defaultPlaySequenceImpl(notes, bpm, cb, onEnd),
+  ),
   stopSequence: vi.fn(),
 }));
 
@@ -102,6 +112,7 @@ afterEach(() => {
   }
   activeSayThenDone = null;
   vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
+  vi.mocked(playSequence).mockImplementation(defaultPlaySequenceImpl);
 });
 
 describe("FastSlowGame UI interaction", () => {
@@ -965,6 +976,108 @@ describe("FastSlowGame UI interaction", () => {
 
     vi.useRealTimers();
   });
+
+  it("provides visual tempo cues synchronized with note callbacks during playback (R3)", () => {
+    vi.useFakeTimers();
+    let onNoteCb: ((index: number) => void) | undefined;
+    let onDoneCb: (() => void) | undefined;
+    const origImpl = vi.mocked(playSequence).getMockImplementation();
+    vi.mocked(playSequence).mockImplementation(
+      (_notes, _bpm, onNote, onDone) => {
+        onNoteCb = onNote;
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    vi.mocked(playSequence).mockClear();
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In initial delay before playback starts, note pulse is not active
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("false");
+
+    // Advance 1000ms delay to start playback
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(playSequence).toHaveBeenCalledTimes(1);
+    expect(onNoteCb).toBeDefined();
+
+    // Trigger first note callback: note pulse activates
+    act(() => {
+      onNoteCb?.(0);
+    });
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("true");
+
+    // Advance timers past the note pulse duration: returns to inactive
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("false");
+
+    // Trigger second note callback: note pulse activates again
+    act(() => {
+      onNoteCb?.(1);
+    });
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("true");
+
+    // Complete playback: transitions to pick phase
+    act(() => {
+      onDoneCb?.();
+    });
+    expect(screen.queryByTestId("fastslow-note-pulse")).toBeNull();
+    expect(screen.getByTestId("fastslow-pick-row")).toBeTruthy();
+
+    if (origImpl) {
+      vi.mocked(playSequence).mockImplementation(origImpl);
+    }
+    vi.useRealTimers();
+  });
+
+  it("cleans up active note pulse timer when unmounted during playback", () => {
+    vi.useFakeTimers();
+    let onNoteCb: ((index: number) => void) | undefined;
+    const origImpl = vi.mocked(playSequence).getMockImplementation();
+    vi.mocked(playSequence).mockImplementation((_notes, _bpm, onNote) => {
+      onNoteCb = onNote;
+      return () => {};
+    });
+
+    const { unmount } = render(
+      <FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    act(() => {
+      onNoteCb?.(0);
+    });
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("true");
+
+    unmount();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    if (origImpl) {
+      vi.mocked(playSequence).mockImplementation(origImpl);
+    }
+    vi.useRealTimers();
+  });
 });
 
 describe("FastSlowGame accessibility", () => {
@@ -1139,10 +1252,12 @@ describe("FastSlowGame language switch safety", () => {
   it("switching language mid-listen cancels playing sequence, stops narration, speaks new prompt, and restarts playback after lead time", () => {
     vi.useFakeTimers();
     let onDoneCb: (() => void) | undefined;
-    vi.mocked(playSequence).mockImplementation((_notes, _bpm, _onNote, onDone) => {
-      onDoneCb = onDone;
-      return () => {};
-    });
+    vi.mocked(playSequence).mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
 
     render(<LangHarness initialLang="en" />);
 
