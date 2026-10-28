@@ -176,10 +176,13 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const cols = numSettings.tiles <= 6 ? 3 : numSettings.tiles <= 8 ? 4 : 3;
   const rows = Math.ceil(numSettings.tiles / cols);
   const gap = 12;
-  const tile = Math.min(
-    (Math.min(width - 32, 560) - (cols - 1) * gap) / cols,
-    (height - 84 - 130 - (rows - 1) * gap) / rows,
-    140,
+  const tile = Math.max(
+    60,
+    Math.min(
+      (Math.min(width - 32, 560) - (cols - 1) * gap) / cols,
+      (height - 84 - 130 - (rows - 1) * gap) / rows,
+      140,
+    ),
   );
   const caption = lang === "en" ? "" : numberWord(lang, round.targetN).r || "";
 
