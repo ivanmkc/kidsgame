@@ -243,7 +243,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               testID={`letters-prompt-${round.targetKey}`}
             >
               <Pressable
-                onPress={() => say(round.promptLine)}
+                onPress={() => {
+                  if (!won) say(round.promptLine);
+                }}
+                disabled={won}
                 testID="speaker-button"
                 accessibilityRole="button"
                 style={({ pressed }) => [
