@@ -26,6 +26,7 @@ import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, sfx, useSay } from "../../sound";
+import { SparkleBurst } from "../../components/Sparkles";
 import { isSolved, makePuzzle, swap } from "./logic";
 
 interface Props {
@@ -68,6 +69,7 @@ export function PuzzleGame({
   const [selected, setSelected] = useState<number | null>(null);
   const selectedRef = useRef<number | null>(null);
   const [moves, setMoves] = useState(0);
+  const [sparkles, setSparkles] = useState<Record<number, number>>({});
   // Peek: flash the finished picture over the board for a few seconds
   const [peek, setPeek] = useState(false);
   const peekTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,6 +89,7 @@ export function PuzzleGame({
       selectedRef.current = null;
       setMoves(0);
       setPeek(false);
+      setSparkles({});
     }
     return () => {
       if (peekTimer.current) clearTimeout(peekTimer.current);
@@ -120,7 +123,9 @@ export function PuzzleGame({
           onPick={onPickScene}
           onSurprise={() => {
             const surprisePool = options.length > 0 ? options : allOptions;
-            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+            onPickScene(
+              surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+            );
           }}
           filterChip={
             onFilter ? (
@@ -161,11 +166,27 @@ export function PuzzleGame({
       setSelected(null);
     } else {
       const next = swap(perm, current, pos);
-      if (next[pos] === pos || next[current] === current) {
+      const posCorrect = next[pos] === pos;
+      const currentCorrect = next[current] === current;
+      if (posCorrect || currentCorrect) {
         sfx.good();
       } else {
         sfx.flip();
       }
+      setSparkles((prev) => {
+        const nextSparkles = { ...prev };
+        if (posCorrect) {
+          nextSparkles[pos] = (prev[pos] ?? 0) + 1;
+        } else {
+          delete nextSparkles[pos];
+        }
+        if (currentCorrect) {
+          nextSparkles[current] = (prev[current] ?? 0) + 1;
+        } else {
+          delete nextSparkles[current];
+        }
+        return nextSparkles;
+      });
       setPerm((p) => swap(p, current, pos));
       selectedRef.current = null;
       setSelected(null);
@@ -251,6 +272,9 @@ export function PuzzleGame({
                     marginTop: -pRow * tileH,
                   }}
                 />
+                {sparkles[pos] ? (
+                  <SparkleBurst trigger={sparkles[pos]} />
+                ) : null}
               </Pressable>
             );
           })}
