@@ -14,10 +14,11 @@ import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import * as logic from "../logic";
 import { KANA_POOL } from "../logic";
-import { sfx, say } from "../../../sound";
+import { sfx, say, stopNarration } from "../../../sound";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
+  stopNarration: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
@@ -386,6 +387,59 @@ describe("LettersGame", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("stops narration when unmounted so audio does not leak onto home screen", () => {
+    const { unmount } = render(
+      <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarration).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarration).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops narration via useLangEpoch when language switches on win screen or mid-round", () => {
+    vi.spyOn(logic, "settingsForLetters").mockReturnValue({
+      rounds: 1,
+      tiles: 6,
+      tier: "upper",
+    });
+
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, "makeLetterRound").mockImplementation(
+      (rng, tier, tileCount, avoidKey) => {
+        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+        generatedRounds.push(res);
+        return res;
+      },
+    );
+
+    const { rerender } = render(
+      <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    const round1 = generatedRounds[0];
+    const correctTile = round1.tiles[round1.answerIdx];
+    const correctBtn = screen.getByLabelText(correctTile.label);
+
+    act(() => {
+      fireEvent.click(correctBtn);
+    });
+
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    vi.mocked(stopNarration).mockClear();
+
+    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    expect(stopNarration).toHaveBeenCalled();
   });
 
   it("shows glyph immediately when captions toggle is turned ON", () => {

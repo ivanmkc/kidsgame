@@ -11,11 +11,11 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sfx } from "../../sound";
+import { say, sfx, stopNarration } from "../../sound";
 import {
   LetterRound,
   makeLetterRound,
@@ -33,6 +33,7 @@ interface Props {
 // Letter Hunt: spoken letter (or kana / phonics sound) → tap the matching
 // tile. Pre-readers play entirely by ear; the tile is a huge Baloo glyph.
 export function LettersGame({ onHome, difficulty, lang }: Props) {
+  useLangEpoch(lang);
   const {
     rounds: roundsToWin,
     tiles: tileCount,
@@ -76,6 +77,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(
     () => () => {
+      stopNarration();
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
     },
     [],
