@@ -15,7 +15,7 @@ import { say, sfx, useSay } from '../../sound';
 import { colors, fonts } from '../../theme';
 import { duelWinner } from '../../components/memoryLogic';
 import { useMemoryLogic } from '../../components/useMemoryLogic';
-import { MemoryCard, buildBoard } from './logic';
+import { MemoryCard, buildBoard, cardLabel } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -137,7 +137,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
               matched={isMatched}
               ownerColor={owner !== undefined ? MP_PLAYERS[owner].color : undefined}
               onFlip={() => onFlip(card)}
-              accessibilityLabel={isUp ? card.icon : t(lang, 'memory.cardFaceDown')}
+              accessibilityLabel={isUp ? cardLabel(card.icon, lang) : t(lang, 'memory.cardFaceDown')}
               testID={`memory-card-${card.key}-${card.icon}`}
               sparkleTrigger={card.icon}
               renderCardFace={() => (
