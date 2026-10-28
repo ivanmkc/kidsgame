@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -87,6 +88,39 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) saySequence(round.promptLines);
   }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (won) {
+      pulse.setValue(1);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1.15,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    loop.start();
+    return () => {
+      loop.stop();
+      pulse.stopAnimation();
+    };
+  }, [pulse, won]);
+
+  const onReplayPrompt = () => {
+    if (won || lockedRef.current) return;
+    saySequence(round.promptLines);
+  };
 
   const onTile = (i: number) => {
     if (won || lockedRef.current) return;
@@ -209,13 +243,29 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       }
     >
       <View style={styles.board}>
-        <View
-          style={[styles.prompt, shadows.soft]}
+        <Pressable
+          onPress={onReplayPrompt}
+          disabled={won}
+          accessibilityRole="button"
+          accessibilityLabel={t(lang, "spell.hearAgain")}
+          style={({ pressed }) => [
+            styles.prompt,
+            shadows.soft,
+            pressed && styles.pressed,
+          ]}
           testID={`numbers-prompt-${round.targetKey}`}
         >
-          <Text style={styles.promptText}>{round.displayText}</Text>
-          {caption ? <Text style={styles.caption}>{caption}</Text> : null}
-        </View>
+          <Animated.Text
+            style={[styles.speakerIcon, { transform: [{ scale: pulse }] }]}
+            testID="speaker-icon"
+          >
+            🔊
+          </Animated.Text>
+          <View style={styles.promptTextContainer}>
+            <Text style={styles.promptText}>{round.displayText}</Text>
+            {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+          </View>
+        </Pressable>
         <View
           style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
         >
@@ -276,9 +326,19 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: colors.gold,
     paddingVertical: 8,
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
     minWidth: 96,
+  },
+  speakerIcon: {
+    fontSize: 24,
+  },
+  promptTextContainer: {
+    alignItems: "center",
+    justifyContent: "center",
   },
   promptText: {
     fontFamily: fonts.display,
