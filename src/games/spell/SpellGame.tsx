@@ -54,6 +54,12 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const langMounted = useRef(false);
   useEffect(() => {
     if (!langMounted.current) { langMounted.current = true; return; }
+    
+    // Evaluate won state early for the early return
+    const wordCount = gameWordsRef.current.length;
+    const isWon = wordCount > 0 && wordIdx >= wordCount;
+    if (isWon) return;
+
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
     wrongTimer.current = null;
     wrongIdRef.current = null;
