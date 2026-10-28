@@ -17,6 +17,7 @@ import { ListenChooseGame } from "../ListenChooseGame";
 import { LEVEL_1_WORDS, LEVEL_2_WORDS, LEVEL_3_WORDS, Word } from "../data";
 import { PressableProps, ScrollViewProps, StyleSheet } from "react-native";
 import { colors } from "../../../theme";
+import { t } from "../../../i18n";
 
 type FakePressableProps = Partial<PressableProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
@@ -775,5 +776,48 @@ describe("ListenChooseGame", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} />);
     unmount();
     expect(sound.stopNarration).toHaveBeenCalled();
+  });
+
+  it("speaks localized instructions on the start screen", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const onHome = vi.fn();
+    const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
+
+    // Start screen announces English blurb
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("en", "card.listenchoose.blurb") }),
+    );
+
+    // Switching language on start screen updates spoken blurb
+    speakSpy.mockClear();
+    rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "card.listenchoose.blurb") }),
+    );
+
+    speakSpy.mockClear();
+    rerender(<ListenChooseGame onHome={onHome} lang="cmn" />);
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("cmn", "card.listenchoose.blurb") }),
+    );
+
+    speakSpy.mockClear();
+    rerender(<ListenChooseGame onHome={onHome} lang="yue" />);
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("yue", "card.listenchoose.blurb") }),
+    );
   });
 });
