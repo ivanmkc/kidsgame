@@ -38,7 +38,7 @@ export function sumsLayout(
   total = 2,
 ): SumsLayout {
   const isLandscape = width > height && height < 500;
-  const rows = total >= 9 ? 3 : total >= 4 ? 2 : 1;
+  const rows = total >= 16 ? 4 : total >= 9 ? 3 : total >= 4 ? 2 : 1;
   const colsFactor = total <= 4 ? 5 : total <= 7 ? 6 : 7;
 
   if (isLandscape) {
@@ -49,7 +49,7 @@ export function sumsLayout(
     const critterSize = Math.round(
       Math.min(
         Math.max(38, Math.min(68, stageW / colsFactor)),
-        Math.max(30, stageH * (rows >= 3 ? 0.28 : 0.45)),
+        Math.max(30, stageH * (rows >= 4 ? 0.2 : rows >= 3 ? 0.28 : 0.45)),
       ),
     );
     return { isLandscape, stageW, stageH, critterSize };
@@ -62,7 +62,7 @@ export function sumsLayout(
   const critterSize = Math.round(
     Math.min(
       Math.max(40, Math.min(70, stageW / colsFactor)),
-      Math.max(30, stageH * (rows >= 3 ? 0.28 : 0.45)),
+      Math.max(30, stageH * (rows >= 4 ? 0.2 : rows >= 3 ? 0.28 : 0.45)),
     ),
   );
   return { isLandscape, stageW, stageH, critterSize };
