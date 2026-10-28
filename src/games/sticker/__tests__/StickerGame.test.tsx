@@ -923,4 +923,172 @@ describe('StickerGame', () => {
       unmount();
     }
   });
+
+  it('resets magic state when sceneId changes', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockReturnValue(new Promise(() => {}));
+
+    const { rerender, unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+    const magicBtn = await screen.findByTestId('magic-btn-1');
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+    expect(screen.queryByTestId('magic-pending-1')).not.toBeNull();
+
+    rerender(
+      <StickerGame sceneId="d-space" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    expect(screen.queryByTestId('magic-pending-1')).toBeNull();
+    unmount();
+  });
+
+  it('cleans up timers and abort controllers on unmount', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    let aborted = false;
+    vi.spyOn(magic, 'callMagic').mockImplementation((_args, init) => {
+      init?.signal?.addEventListener('abort', () => {
+        aborted = true;
+      });
+      return new Promise(() => {});
+    });
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+    const magicBtn = await screen.findByTestId('magic-btn-1');
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    expect(aborted).toBe(false);
+    unmount();
+    expect(aborted).toBe(true);
+  });
+
+  it('moves placed sticker via drag release', () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const placed = screen.getByTestId('sticker-placed-1');
+    expect(placed).toBeDefined();
+
+    const initialLeft = placed.style.left;
+    const initialTop = placed.style.top;
+
+    const touch = { pageX: 50, pageY: 50, clientX: 50, clientY: 50, identifier: 0, target: placed };
+    act(() => {
+      fireEvent.touchStart(placed, { touches: [touch], changedTouches: [touch] });
+      fireEvent.touchMove(placed, { touches: [{ ...touch, pageX: 150, pageY: 150 }], changedTouches: [{ ...touch, pageX: 150, pageY: 150 }] });
+      fireEvent.touchEnd(placed, { touches: [], changedTouches: [{ ...touch, pageX: 150, pageY: 150 }] });
+    });
+
+    const newLeft = placed.style.left;
+    const newTop = placed.style.top;
+    expect(newLeft !== initialLeft || newTop !== initialTop).toBe(true);
+
+    unmount();
+  });
+
+  it('transforms placed sticker via two-touch pinch/rotate gesture', () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const placed = screen.getByTestId('sticker-placed-1');
+    expect(placed).toBeDefined();
+
+    const initialStyle = placed.getAttribute('style');
+
+    const t1 = { pageX: 10, pageY: 10, clientX: 10, clientY: 10, identifier: 0, target: placed };
+    const t2 = { pageX: 100, pageY: 100, clientX: 100, clientY: 100, identifier: 1, target: placed };
+
+    act(() => {
+      fireEvent.touchStart(placed, { touches: [t1, t2], changedTouches: [t1, t2] });
+      fireEvent.touchMove(placed, {
+        touches: [
+          { ...t1, pageX: 10, pageY: 10 },
+          { ...t2, pageX: 100, pageY: 100 },
+        ],
+        changedTouches: [
+          { ...t1, pageX: 10, pageY: 10 },
+          { ...t2, pageX: 100, pageY: 100 },
+        ],
+      });
+      fireEvent.touchMove(placed, {
+        touches: [
+          { ...t1, pageX: 2, pageY: 2 },
+          { ...t2, pageX: 150, pageY: 150 },
+        ],
+        changedTouches: [
+          { ...t1, pageX: 2, pageY: 2 },
+          { ...t2, pageX: 150, pageY: 150 },
+        ],
+      });
+      fireEvent.touchEnd(placed, { touches: [], changedTouches: [t1, t2] });
+    });
+
+    const newStyle = placed.getAttribute('style');
+    expect(newStyle).not.toBe(initialStyle);
+
+    unmount();
+  });
+
+  it('uses cache and plays win sound on duplicate magic location', async () => {
+    const sfxWinSpy = vi.spyOn(sfx, 'win').mockReturnValue();
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    const callMagicSpy = vi.spyOn(magic, 'callMagic').mockResolvedValue({
+      ok: true,
+      image_b64: 'b64_data',
+    });
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayBtns = screen.getAllByRole('button').filter(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    act(() => {
+      fireEvent.click(trayBtns[0]);
+    });
+    const magicBtn1 = await screen.findByTestId('magic-btn-1');
+    await act(async () => {
+      fireEvent.click(magicBtn1);
+    });
+    expect(callMagicSpy).toHaveBeenCalledTimes(1);
+    expect(sfxWinSpy).toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.click(trayBtns[0]);
+    });
+    const magicBtn2 = await screen.findByTestId('magic-btn-2');
+    await act(async () => {
+      fireEvent.click(magicBtn2);
+    });
+    expect(callMagicSpy).toHaveBeenCalledTimes(1);
+
+    randomSpy.mockRestore();
+    unmount();
+  });
 });
