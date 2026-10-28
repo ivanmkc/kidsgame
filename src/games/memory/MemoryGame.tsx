@@ -1,21 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Image, StyleSheet, Text, View } from 'react-native';
-import { SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { FlipCard, MemoryBoard } from '../../components/MemoryBoard';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { MP_PLAYERS, ModePicker, PlayerChip, PlayerIx } from '../../multiplayer';
-import { makeRng } from '../../rng';
-import { say, sfx, useSay } from '../../sound';
-import { colors, fonts } from '../../theme';
-import { duelWinner } from '../../components/memoryLogic';
-import { useMemoryLogic } from '../../components/useMemoryLogic';
-import { MemoryCard, buildBoard, cardLabel } from './logic';
+import React, { useEffect, useRef, useState } from "react";
+import { Animated, Image, StyleSheet, Text, View } from "react-native";
+import { SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang, useLangEpoch } from "../../lang";
+import { useWinLine } from "../winlines";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import {
+  MP_PLAYERS,
+  ModePicker,
+  PlayerChip,
+  PlayerIx,
+} from "../../multiplayer";
+import { makeRng } from "../../rng";
+import { say, sfx, useSay } from "../../sound";
+import { colors, fonts } from "../../theme";
+import { duelWinner } from "../../components/memoryLogic";
+import { useMemoryLogic } from "../../components/useMemoryLogic";
+import { MemoryCard, buildBoard, cardLabel } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -24,15 +30,27 @@ interface Props {
   lang?: Lang;
 }
 
-export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }: Props) {
+export function MemoryGame({
+  onHome,
+  difficulty,
+  twoPlayerEnabled,
+  lang = "en",
+}: Props) {
+  useLangEpoch(lang);
   const settings = settingsFor(difficulty);
   const pairs = settings.memoryPairs;
   // All hooks unconditionally at top; ModePicker is conditional JSX in the
   // single return — never an early return (repo hard rule).
-  const [mode, setMode] = useState<'solo' | '2p' | null>(twoPlayerEnabled ? null : 'solo');
-  const duel = mode === '2p';
+  const [mode, setMode] = useState<"solo" | "2p" | null>(
+    twoPlayerEnabled ? null : "solo",
+  );
+  const duel = mode === "2p";
   const [board, setBoard] = useState<MemoryCard[]>(() =>
-    buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs)
+    buildBoard(
+      makeRng(Math.floor(Math.random() * 1e9)),
+      manifest.spotit.icons,
+      pairs,
+    ),
   );
   const {
     faceUp,
@@ -52,7 +70,11 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     onMatch: (_a, _b, scorer, isLastPair) => {
       sfx.good();
       if (duel && scorer !== undefined && !isLastPair) {
-        say(t(lang, 'memory.foundPair', { name: t(lang, MP_PLAYERS[scorer].name) }));
+        say(
+          t(lang, "memory.foundPair", {
+            name: t(lang, MP_PLAYERS[scorer].name),
+          }),
+        );
       }
     },
     onMismatch: () => {
@@ -60,14 +82,14 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     },
     onTurnChange: (next) => {
       if (duel) {
-        say(t(lang, 'hidden.turn', { name: t(lang, MP_PLAYERS[next].name) }));
+        say(t(lang, "hidden.turn", { name: t(lang, MP_PLAYERS[next].name) }));
       }
     },
   });
   const [timerKey, setTimerKey] = useState(0);
-  const showTimer = settingsFor(difficulty).timer && mode !== '2p';
-  useSay(mode === null || duel ? null : t(lang, 'card.memory.blurb'));
-  useEffect(() => { if (won && !duel) say(t(lang, 'win.memory')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  const showTimer = settingsFor(difficulty).timer && mode !== "2p";
+  useSay(mode === null || duel ? null : t(lang, "card.memory.blurb"));
+  useWinLine(won && !duel, t(lang, "win.memory"));
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
 
   // Turn halo pulse — restarted whenever the turn changes.
@@ -77,9 +99,17 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     halo.setValue(1);
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(halo, { toValue: 0.65, duration: 700, useNativeDriver: true }),
-        Animated.timing(halo, { toValue: 1, duration: 700, useNativeDriver: true }),
-      ])
+        Animated.timing(halo, {
+          toValue: 0.65,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+        Animated.timing(halo, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+        }),
+      ]),
     );
     loop.start();
     return () => loop.stop();
@@ -91,9 +121,16 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     // replace the board a frame after first paint (flicker + stale taps)
     if (prevPairs.current === pairs) return;
     prevPairs.current = pairs;
-    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
+    setBoard(
+      buildBoard(
+        makeRng(Math.floor(Math.random() * 1e9)),
+        manifest.spotit.icons,
+        pairs,
+      ),
+    );
     const starter = reset();
-    if (duel) say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[starter].name) }));
+    if (duel)
+      say(t(lang, "mp.starts", { name: t(lang, MP_PLAYERS[starter].name) }));
   }, [pairs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Kind spoken recap; the word "lose" never appears.
@@ -101,23 +138,34 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     if (!won || !duel) return;
     const w = duelWinner(duelState);
     say(
-      w === 'tie'
-        ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
-        : t(lang, 'win.memoryWinner', { name: t(lang, MP_PLAYERS[w].name) })
+      w === "tie"
+        ? t(lang, "win.memoryTie", { n: duelState.pairs[0] })
+        : t(lang, "win.memoryWinner", { name: t(lang, MP_PLAYERS[w].name) }),
     );
-  }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [won, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetGame = () => {
     setTimerKey((k) => k + 1);
-    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
+    setBoard(
+      buildBoard(
+        makeRng(Math.floor(Math.random() * 1e9)),
+        manifest.spotit.icons,
+        pairs,
+      ),
+    );
     const starter = reset();
-    if (duel) say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[starter].name) }));
+    if (duel)
+      say(t(lang, "mp.starts", { name: t(lang, MP_PLAYERS[starter].name) }));
   };
 
-  const handlePickMode = (picked: 'solo' | '2p') => {
+  const handlePickMode = (picked: "solo" | "2p") => {
     setMode(picked);
-    if (picked === '2p') {
-      say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[duelState.turn].name) }));
+    if (picked === "2p") {
+      say(
+        t(lang, "mp.starts", {
+          name: t(lang, MP_PLAYERS[duelState.turn].name),
+        }),
+      );
     }
   };
 
@@ -141,13 +189,23 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
               size={cardW}
               up={isUp}
               matched={isMatched}
-              ownerColor={owner !== undefined ? MP_PLAYERS[owner].color : undefined}
+              ownerColor={
+                owner !== undefined ? MP_PLAYERS[owner].color : undefined
+              }
               onFlip={() => onFlip(card)}
-              accessibilityLabel={isUp ? cardLabel(card.icon, lang) : t(lang, 'memory.cardFaceDown')}
+              accessibilityLabel={
+                isUp
+                  ? cardLabel(card.icon, lang)
+                  : t(lang, "memory.cardFaceDown")
+              }
               testID={`memory-card-${card.key}-${card.icon}`}
               sparkleTrigger={card.icon}
               renderCardFace={() => (
-                <Image source={SPOTIT_ICONS[card.icon]} style={styles.cardImage} resizeMode="contain" />
+                <Image
+                  source={SPOTIT_ICONS[card.icon]}
+                  style={styles.cardImage}
+                  resizeMode="contain"
+                />
               )}
             />
           );
@@ -158,14 +216,25 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
 
   return (
     <GameShell
-      title={t(lang, 'shell.memory.title')}
-      subtitle={t(lang, 'shell.memory.sub', { n: pairs })}
+      title={t(lang, "shell.memory.title")}
+      subtitle={t(lang, "shell.memory.sub", { n: pairs })}
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="memory-timer" /> : null}
-          <ScoreChip label={`🧠 ${matchedPairs}/${pairs}`} testID="memory-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="memory-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🧠 ${matchedPairs}/${pairs}`}
+            testID="memory-score"
+          />
         </View>
       }
     >
@@ -175,7 +244,9 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
             <Animated.View
               pointerEvents="none"
               testID="memory-turn-halo"
-              accessibilityLabel={t(lang, 'hidden.turn', { name: t(lang, turnPlayer.name) })}
+              accessibilityLabel={t(lang, "hidden.turn", {
+                name: t(lang, turnPlayer.name),
+              })}
               style={[
                 styles.halo,
                 {
@@ -192,21 +263,37 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
         )}
         {duel ? (
           <View style={styles.chipsRow}>
-            <PlayerChip player={0} count={duelState.pairs[0]} active={duelState.turn === 0 && !won} testID="memory-duel-chip-0" lang={lang} />
-            <PlayerChip player={1} count={duelState.pairs[1]} active={duelState.turn === 1 && !won} testID="memory-duel-chip-1" lang={lang} />
+            <PlayerChip
+              player={0}
+              count={duelState.pairs[0]}
+              active={duelState.turn === 0 && !won}
+              testID="memory-duel-chip-0"
+              lang={lang}
+            />
+            <PlayerChip
+              player={1}
+              count={duelState.pairs[1]}
+              active={duelState.turn === 1 && !won}
+              testID="memory-duel-chip-1"
+              lang={lang}
+            />
           </View>
         ) : (
-          <Text style={styles.moves} testID="memory-moves">{t(lang, 'memory.moves', { n: moves })}</Text>
+          <Text style={styles.moves} testID="memory-moves">
+            {t(lang, "memory.moves", { n: moves })}
+          </Text>
         )}
       </View>
       <WinOverlay
         visible={won}
         message={
           duel
-            ? winner === 'tie'
-              ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
-              : t(lang, 'win.memoryWinner', { name: t(lang, MP_PLAYERS[winner].name) })
-            : t(lang, 'win.memory')
+            ? winner === "tie"
+              ? t(lang, "win.memoryTie", { n: duelState.pairs[0] })
+              : t(lang, "win.memoryWinner", {
+                  name: t(lang, MP_PLAYERS[winner].name),
+                })
+            : t(lang, "win.memory")
         }
         lang={lang}
         stats={
@@ -214,25 +301,38 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
             <View style={styles.winStats} testID="memory-win-stats">
               {([0, 1] as PlayerIx[]).map((ix) => (
                 <View key={ix} style={styles.winStatCol}>
-                  <Text style={styles.crown}>{winner === ix || winner === 'tie' ? '👑' : ' '}</Text>
-                  <PlayerChip player={ix} count={duelState.pairs[ix]} active={winner === ix || winner === 'tie'} testID={`memory-win-chip-${ix}`} lang={lang} />
+                  <Text style={styles.crown}>
+                    {winner === ix || winner === "tie" ? "👑" : " "}
+                  </Text>
+                  <PlayerChip
+                    player={ix}
+                    count={duelState.pairs[ix]}
+                    active={winner === ix || winner === "tie"}
+                    testID={`memory-win-chip-${ix}`}
+                    lang={lang}
+                  />
                 </View>
               ))}
             </View>
           ) : undefined
         }
-        onNext={resetGame} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
+        onNext={resetGame}
+        nextLabel={
+          duel ? t(lang, "overlay.rematch") : t(lang, "overlay.nextRound")
+        }
         onHome={onHome}
       />
-      {twoPlayerEnabled && mode === null ? <ModePicker onPick={handlePickMode} lang={lang} /> : null}
+      {twoPlayerEnabled && mode === null ? (
+        <ModePicker onPick={handlePickMode} lang={lang} />
+      ) : null}
     </GameShell>
   );
 }
 
 const styles = StyleSheet.create({
-  boardWrap: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  boardWrap: { flex: 1, alignItems: "center", justifyContent: "center" },
   halo: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -245,18 +345,23 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   chipsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: 12,
   },
-  winStats: { flexDirection: 'row', gap: 22, alignItems: 'flex-end', justifyContent: 'center' },
-  winStatCol: { alignItems: 'center', gap: 4 },
+  winStats: {
+    flexDirection: "row",
+    gap: 22,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  winStatCol: { alignItems: "center", gap: 4 },
   crown: { fontSize: 24, height: 30 },
-  cardImage: { width: '78%', height: '78%' },
+  cardImage: { width: "78%", height: "78%" },
   moves: {
-    textAlign: 'center',
+    textAlign: "center",
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
     fontSize: 15,

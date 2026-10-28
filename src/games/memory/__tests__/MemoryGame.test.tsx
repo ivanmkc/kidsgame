@@ -12,6 +12,7 @@ import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
+import { LangContext } from "../../../components/GameShell";
 import { MemoryGame } from "../MemoryGame";
 import * as logic from "../logic";
 import { MP_PLAYERS } from "../../../multiplayer";
@@ -21,6 +22,7 @@ vi.mock("../../../sound", async (importOriginal) => {
   return {
     ...actual,
     say: vi.fn(),
+    stopNarration: vi.fn(),
     sfx: {
       ...actual.sfx,
       good: vi.fn(),
@@ -617,9 +619,7 @@ describe("MemoryGame", () => {
       fireEvent.click(screen.getByTestId("memory-card-7-star"));
     });
 
-    expect(sound.say).toHaveBeenCalledWith(
-      t("ja", "win.memoryTie", { n: 2 }),
-    );
+    expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memoryTie", { n: 2 }));
     expect(sound.say).not.toHaveBeenCalledWith(
       expect.stringContaining("It's a tie!"),
     );
@@ -668,6 +668,147 @@ describe("MemoryGame", () => {
 
     expect(sound.say).toHaveBeenCalledWith(
       t("en", "mp.starts", { name: t("en", MP_PLAYERS[1].name) }),
+    );
+  });
+
+  it("stops narration via useLangEpoch and updates board labels when language switches mid-game", async () => {
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MemoryGame onHome={vi.fn()} difficulty="easy" lang={lang} />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+    expect(sound.stopNarration).not.toHaveBeenCalled();
+
+    // Flip first card up so we can inspect accessibility label change
+    const firstCard = screen
+      .getAllByRole("button")
+      .find((btn) =>
+        btn.getAttribute("data-testid")?.startsWith("memory-card-"),
+      )!;
+    await act(async () => {
+      fireEvent.click(firstCard);
+    });
+
+    vi.mocked(sound.stopNarration).mockClear();
+
+    // Cycle language via in-game chip
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    expect(sound.stopNarration).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops narration and speaks localized win line when switching language on solo victory screen", async () => {
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "apple" },
+    ]);
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MemoryGame onHome={vi.fn()} difficulty="easy" lang={lang} />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    // Match the only pair to win
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-0-apple"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-1-apple"));
+    });
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(sound.say).toHaveBeenCalledWith(t("en", "win.memory"));
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sound.stopNarration).mockClear();
+
+    // Cycle language while win overlay is active
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    expect(sound.stopNarration).toHaveBeenCalledTimes(1);
+    expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memory"));
+  });
+
+  it("stops narration and speaks localized win recap when switching language on duel victory screen", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "apple" },
+    ]);
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MemoryGame
+            onHome={vi.fn()}
+            difficulty="easy"
+            twoPlayerEnabled={true}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    vi.mocked(sound.say).mockClear();
+
+    // Player 0 matches all pairs to win
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-0-apple"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("memory-card-1-apple"));
+    });
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(sound.say).toHaveBeenCalledWith(
+      t("en", "win.memoryWinner", { name: t("en", MP_PLAYERS[0].name) }),
+    );
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sound.stopNarration).mockClear();
+
+    // Cycle language while duel win overlay is active
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    expect(sound.stopNarration).toHaveBeenCalledTimes(1);
+    expect(sound.say).toHaveBeenCalledWith(
+      t("ja", "win.memoryWinner", { name: t("ja", MP_PLAYERS[0].name) }),
     );
   });
 });
