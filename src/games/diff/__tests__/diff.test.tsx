@@ -467,6 +467,47 @@ describe("DiffGame", () => {
     }
   });
 
+  it("clamps scene frame to non-negative dimensions on height-constrained viewports", () => {
+    const origW = window.innerWidth;
+    const origH = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", {
+      value: 800,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 65,
+      configurable: true,
+    });
+
+    try {
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={manifest.diff[0].id}
+          onPickScene={noop}
+          onBackToPicker={noop}
+        />,
+      );
+      const target = screen.getByTestId("left-target-0");
+      const sceneFrame = target.parentElement;
+      const frameStyle = sceneFrame?.getAttribute("style") ?? "";
+      expect(frameStyle).toContain("width: 160px");
+      expect(frameStyle).toContain("height: 90px");
+      expect(frameStyle).not.toContain("-176px");
+      expect(frameStyle).not.toContain("-99px");
+    } finally {
+      Object.defineProperty(window, "innerWidth", {
+        value: origW,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: origH,
+        configurable: true,
+      });
+    }
+  });
+
   it("bypasses image loading check on non-DOM platforms", () => {
     vi.useFakeTimers();
     const originalQuerySelectorAll = Element.prototype.querySelectorAll;

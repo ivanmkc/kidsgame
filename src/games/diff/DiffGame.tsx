@@ -31,7 +31,7 @@ import { baseImage, manifest } from "../../manifest";
 import { makeRng, sample } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { DiffHintButton } from "./DiffHintButton";
-import { diffPrompt } from "./logic";
+import { diffPrompt, diffSceneWidth } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -222,7 +222,9 @@ export function DiffGame({
           onPick={onPickScene}
           onSurprise={() => {
             const surprisePool = visible.length > 0 ? visible : manifest.diff;
-            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+            onPickScene(
+              surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+            );
           }}
           filterChip={
             onFilter ? (
@@ -239,24 +241,13 @@ export function DiffGame({
   }
 
   // Fit both pictures in the viewport — side by side in landscape,
-  // stacked in portrait — so no scrolling is needed on normal screens.
-  const headerAllowance = 84;
-  const labelAllowance = 26;
-  const availH = height - headerAllowance - (settings.diffHint ? 54 : 12);
-  let sceneWidth: number;
-  if (isLandscape) {
-    sceneWidth = Math.min(
-      (width - 44) / 2,
-      (availH - labelAllowance) * ar,
-      760,
-    );
-  } else {
-    sceneWidth = Math.min(
-      width - 24,
-      ((availH - 2 * labelAllowance - 8) / 2) * ar,
-      640,
-    );
-  }
+  // stacked in portrait — clamped to a minimum playable width.
+  const sceneWidth = diffSceneWidth(
+    width,
+    height,
+    Boolean(settings.diffHint),
+    ar,
+  );
 
   const onHit = (id: string) => {
     if (won) return;
