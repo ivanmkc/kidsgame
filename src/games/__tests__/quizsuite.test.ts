@@ -7,7 +7,7 @@ import { hanNumeral, Lang, numberWord } from '../../lang';
 import { manifest } from '../../manifest';
 import { makeRng } from '../../rng';
 import {
-  LETTER_CONFUSABLES, LETTER_SOUNDS, KANA_POOL, glyphTwinsOf,
+  LETTER_CONFUSABLES, LETTER_SOUNDS, KANA_POOL, KANA_CONFUSABLES, glyphTwinsOf,
   makeLetterRound, speechLines as letterSpeechLines,
 } from '../letters/logic';
 import {
@@ -102,6 +102,27 @@ describe('letters: quiz round', () => {
     for (const seed of SEEDS.slice(0, 100)) {
       const r = makeLetterRound(makeRng(seed), 'kana', 8);
       for (const t of r.tiles) expect(validKana.has(t.label)).toBe(true);
+    }
+  });
+
+  it('kana tier: confusable-group distractors appear for confusable targets on 8 and 12 tiles', () => {
+    for (const tiles of [8, 12] as const) {
+      let confusableTargets = 0;
+      let confusableDistractorsFound = 0;
+      for (const seed of SEEDS) {
+        const r = makeLetterRound(makeRng(seed), 'kana', tiles);
+        const group = KANA_CONFUSABLES.find((g) => g.includes(r.targetKey));
+        if (!group) continue;
+        confusableTargets++;
+        const distractors = r.tiles
+          .filter((t) => !t.isAnswer)
+          .map((t) => t.label);
+        if (distractors.some((d) => group.includes(d) && d !== r.targetKey)) {
+          confusableDistractorsFound++;
+        }
+      }
+      expect(confusableTargets).toBeGreaterThan(0);
+      expect(confusableDistractorsFound / confusableTargets).toBeGreaterThan(0.9);
     }
   });
 

@@ -35,9 +35,10 @@ export function settingsForLetters(
   lang: Lang,
 ): LetterSettings {
   if (lang === 'ja') {
-    // JA kana hunt: same round curve, but tier is always kana.
+    // JA kana hunt: 6 tiles (easy, dissimilar), 8 tiles (medium, confusables),
+    // 12 tiles (hard, high density 4x3 grid with confusable discrimination).
     if (difficulty === 'easy') return { rounds: 8, tiles: 6, tier: 'kana' };
-    if (difficulty === 'hard') return { rounds: 12, tiles: 8, tier: 'kana' };
+    if (difficulty === 'hard') return { rounds: 12, tiles: 12, tier: 'kana' };
     return { rounds: 10, tiles: 8, tier: 'kana' };
   }
   if (difficulty === 'easy') return { rounds: 8, tiles: 6, tier: 'upper' };
@@ -63,6 +64,21 @@ export const LETTER_CONFUSABLES: string[][] = [
 
 function confusableGroup(letter: string): string[] {
   return LETTER_CONFUSABLES.find((g) => g.includes(letter)) ?? [];
+}
+
+// Visually confusable kana groups — used as distractor bias on M/H and
+// forbidden on E (dissimilar distractors).
+export const KANA_CONFUSABLES: string[][] = [
+  ['さ', 'ち', 'き'], // mirror symmetry (さ/ち) & crossbar count (さ/き)
+  ['ぬ', 'ね'],       // looped right stem
+  ['あ', 'お'],       // round body + cross
+  ['い', 'こ'],       // parallel curved strokes
+  ['け', 'に'],       // vertical stem + right hooks
+  ['た', 'な'],       // cross stem + right marks
+];
+
+export function kanaConfusableGroup(kana: string): string[] {
+  return KANA_CONFUSABLES.find((g) => g.includes(kana)) ?? [];
 }
 
 // Labels that render as the SAME glyph in the display face (Baloo 2):
@@ -110,11 +126,36 @@ export function makeLetterRound(
 ): LetterRound {
   if (tier === 'kana') {
     const candidates = KANA_POOL.filter((k) => k.kana !== avoidKey);
-    const target = candidates[pickIndex(rng, candidates.length)];
-    const distractors = shuffle(rng, KANA_POOL.filter((k) => k.kana !== target.kana)).slice(0, tileCount - 1);
+    const confusableCandidates = candidates.filter(
+      (k) => kanaConfusableGroup(k.kana).length > 0,
+    );
+    // Hard mode (tileCount >= 10): prioritize confusable targets to test shape discrimination.
+    const targetPool =
+      tileCount >= 10 && confusableCandidates.length > 0 && rng() < 0.75
+        ? confusableCandidates
+        : candidates;
+    const target = targetPool[pickIndex(rng, targetPool.length)];
+
+    const forbidden = new Set(kanaConfusableGroup(target.kana));
+    const otherKana = KANA_POOL.filter((k) => k.kana !== target.kana);
+    const easyPool = otherKana.filter((k) => !forbidden.has(k.kana));
+    const confusablePool = otherKana.filter((k) => forbidden.has(k.kana));
+
+    let distractorKana: { kana: string; romaji: string }[];
+    if (tileCount <= 6) {
+      // E tier: dissimilar shapes; skip the confusable group entirely.
+      distractorKana = shuffle(rng, easyPool).slice(0, tileCount - 1);
+    } else {
+      // M/H tiers: prefer confusables so the game teaches shape discrimination.
+      distractorKana = [
+        ...shuffle(rng, confusablePool),
+        ...shuffle(rng, easyPool),
+      ].slice(0, tileCount - 1);
+    }
+
     const tiles: LetterTile[] = shuffle(rng, [
       { key: target.kana, label: target.kana, isAnswer: true },
-      ...distractors.map((d) => ({ key: d.kana, label: d.kana, isAnswer: false })),
+      ...distractorKana.map((d) => ({ key: d.kana, label: d.kana, isAnswer: false })),
     ]);
     return {
       tier, targetKey: target.kana, targetDisplay: target.kana,
