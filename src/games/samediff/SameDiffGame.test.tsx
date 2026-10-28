@@ -241,7 +241,7 @@ describe("SameDiffGame UI", () => {
 
     // Advance through the transition delay and playback for round 2
     act(() => {
-      vi.advanceTimersByTime(4200);
+      vi.advanceTimersByTime(4800);
     });
 
     // In round 2, picks are unlocked and advance score
@@ -267,7 +267,7 @@ describe("SameDiffGame UI", () => {
 
     for (let r = 0; r < 8; r++) {
       act(() => {
-        vi.advanceTimersByTime(4200);
+        vi.advanceTimersByTime(4800);
       });
       const sameBtn = screen.getByTestId("samediff-same");
       const diffBtn = screen.getByTestId("samediff-diff");
@@ -607,7 +607,7 @@ describe("SameDiffGame UI", () => {
     // Play through all 8 easy rounds
     for (let r = 0; r < 8; r++) {
       act(() => {
-        vi.advanceTimersByTime(4200);
+        vi.advanceTimersByTime(4800);
       });
       const sameBtn = screen.getByTestId("samediff-same");
       const diffBtn = screen.getByTestId("samediff-diff");
@@ -740,7 +740,7 @@ describe("SameDiffGame UI", () => {
 
     // Advance to round 2 pick phase
     act(() => {
-      vi.advanceTimersByTime(4200);
+      vi.advanceTimersByTime(4800);
     });
 
     const r2SameBtn = screen.getByTestId("samediff-same");
@@ -759,6 +759,54 @@ describe("SameDiffGame UI", () => {
     expect(r2SameBtn.textContent).toBe("👯Same");
     expect(r2DiffBtn.textContent).toContain("✨");
     expect(r2DiffBtn.textContent).toContain("⭐");
+
+    vi.useRealTimers();
+  });
+
+  it("delays round transition by 1000ms so 650ms sparkles finish without early unmount", () => {
+    vi.useFakeTimers();
+    const roundSame: SameDiffRound = {
+      phraseIdx: 0,
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: "same",
+    };
+    vi.spyOn(logic, "makeSameDiffRound")
+      .mockReturnValueOnce(roundSame)
+      .mockReturnValueOnce({ ...roundSame });
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    const sameBtn = screen.getByTestId("samediff-same");
+    act(() => {
+      fireEvent.click(sameBtn);
+    });
+
+    // Celebration sparkles appear immediately on the tapped button
+    expect(sameBtn.textContent).toContain("✨");
+
+    // Advance 700ms: past the old 400ms cutoff and past SparkleBurst's 650ms duration
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+
+    // The choice container and sparkles remain mounted through the full 650ms animation
+    expect(screen.getByTestId("samediff-same")).toBeTruthy();
+    expect(screen.queryByTestId("melody-dot-0")).toBeNull();
+
+    // Advance remaining 300ms to complete the 1000ms transition delay
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+
+    // At 1000ms, the next round's listening card mounts
+    expect(screen.queryByTestId("samediff-same")).toBeNull();
+    expect(screen.getByTestId("melody-dot-0")).toBeTruthy();
 
     vi.useRealTimers();
   });
