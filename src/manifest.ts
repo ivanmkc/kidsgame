@@ -1,5 +1,6 @@
 import raw from './assets/manifest.json';
 import { HIDDEN_LEVELS } from './hiddenLevels';
+import { t, UIKey } from './i18n';
 
 export interface Box {
   x: number;
@@ -43,6 +44,7 @@ export interface HiddenTarget extends Box {
 export interface HiddenScene {
   id: string;
   name: string;
+  nameT?: Record<string, string>;
   flagged?: boolean;
   level?: 'easy' | 'medium' | 'hard';
   image: string;
@@ -163,6 +165,11 @@ export const manifest: Manifest = {
   ...rawManifest,
   hidden: rawManifest.hidden.map((scene) => ({
     ...scene,
+    nameT: scene.nameT ?? {
+      ja: t('ja', `hidden.scene.${scene.id}` as UIKey),
+      cmn: t('cmn', `hidden.scene.${scene.id}` as UIKey),
+      yue: t('yue', `hidden.scene.${scene.id}` as UIKey),
+    },
     level: scene.level ?? HIDDEN_LEVELS[scene.id],
   })),
 };

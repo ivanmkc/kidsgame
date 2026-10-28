@@ -172,7 +172,7 @@ export function HiddenGame({
           lang={lang}
           options={manifest.hidden.map((h) => ({
             id: h.id,
-            name: h.name,
+            name: h.nameT?.[lang] ?? h.name,
             image: h.image,
             flagged: h.flagged,
             level: h.level,
@@ -320,7 +320,7 @@ export function HiddenGame({
   return (
     <GameShell
       title={t(lang, "shell.hidden.title")}
-      subtitle={t(lang, "shell.hidden.subPlay", { name: scene.name })}
+      subtitle={t(lang, "shell.hidden.subPlay", { name: scene.nameT?.[lang] ?? scene.name })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}

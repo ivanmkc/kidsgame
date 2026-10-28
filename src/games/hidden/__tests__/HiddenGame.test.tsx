@@ -838,4 +838,80 @@ describe("HiddenGame mode picker on active scene", () => {
     fireEvent.click(screen.getByTestId("hidden-backdrop"));
     expect(sequenceSpy).not.toHaveBeenCalled();
   });
+
+  it("displays localized scene names in ScenePicker cards and subtitle for non-English languages", () => {
+    // Japanese
+    const { unmount: unmountJa } = render(
+      <HiddenGame
+        onHome={noop}
+        lang="ja"
+        difficulty="medium"
+        filter="all"
+        twoPlayerEnabled={false}
+        sceneId={undefined}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByText("ジャングル")).toBeDefined();
+    unmountJa();
+
+    // In-game subtitle in Japanese
+    const { unmount: unmountSubJa } = render(
+      <HiddenGame
+        onHome={noop}
+        lang="ja"
+        difficulty="medium"
+        filter="all"
+        twoPlayerEnabled={false}
+        sceneId="jungle"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByText(/ジャングル/)).toBeDefined();
+    unmountSubJa();
+
+    // In-game subtitle in Mandarin
+    const { unmount: unmountSubCmn } = render(
+      <HiddenGame
+        onHome={noop}
+        lang="cmn"
+        difficulty="medium"
+        filter="all"
+        twoPlayerEnabled={false}
+        sceneId="jungle"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByText(/丛林/)).toBeDefined();
+    unmountSubCmn();
+
+    // In-game subtitle in Cantonese
+    const { unmount: unmountSubYue } = render(
+      <HiddenGame
+        onHome={noop}
+        lang="yue"
+        difficulty="medium"
+        filter="all"
+        twoPlayerEnabled={false}
+        sceneId="jungle"
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    expect(screen.getByText(/森林/)).toBeDefined();
+    unmountSubYue();
+  });
+
+  it("provides valid nameT translations in ja, cmn, and yue for all hidden scenes", () => {
+    expect(manifest.hidden.length).toBe(38);
+    for (const scene of manifest.hidden) {
+      expect(scene.nameT).toBeDefined();
+      expect(scene.nameT?.ja).toBeTruthy();
+      expect(scene.nameT?.cmn).toBeTruthy();
+      expect(scene.nameT?.yue).toBeTruthy();
+    }
+  });
 });
