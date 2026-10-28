@@ -1,21 +1,21 @@
-import { Lang } from '../../lang';
-import { Rng, shuffle } from '../../rng';
-import { sameCategory } from '../iconCategories';
+import { Lang } from "../../lang";
+import { Rng, shuffle } from "../../rng";
+import { sameCategory } from "../iconCategories";
 
 // Spoken prompt for Shadow Match across all four languages.
 // English preserves the exact pre-rendered clip string; non-English modes
 // provide localized instructions so speech fallback does not speak English.
 export const SHADOW_PROMPTS: Record<Lang, string> = {
-  en: 'Whose shadow is that? Match it!',
-  ja: 'このかげは だれ？ あててみよう！',
-  cmn: '这是谁的影子？配一配！',
-  yue: '呢個影係邊個嘅？配一配！',
+  en: "Whose shadow is that? Match it!",
+  ja: "このかげは だれ？ あててみよう！",
+  cmn: "这是谁的影子？配一配！",
+  yue: "呢個影係邊個嘅？配一配！",
 };
 
 /**
  * Return the spoken prompt for Shadow Match in the specified language.
  */
-export function shadowPrompt(lang: Lang = 'en'): string {
+export function shadowPrompt(lang: Lang = "en"): string {
   return SHADOW_PROMPTS[lang] ?? SHADOW_PROMPTS.en;
 }
 
@@ -40,11 +40,15 @@ export interface ShadowDifficulty {
 // Measured (and re-checked when the art regenerates) by
 // tools/shadow_confusability.py.
 export const SHADOW_TWINS: Record<string, string[]> = {
-  pig: ['panda'],
-  panda: ['pig'],
+  pig: ["panda"],
+  panda: ["pig"],
 };
 
-export function makeShadowRound(rng: Rng, icons: string[], d: ShadowDifficulty): ShadowRound {
+export function makeShadowRound(
+  rng: Rng,
+  icons: string[],
+  d: ShadowDifficulty,
+): ShadowRound {
   const answer = icons[Math.floor(rng() * icons.length)];
   const twins = new Set(SHADOW_TWINS[answer] ?? []);
   const eligible = (i: string) => i !== answer && !twins.has(i);
@@ -52,12 +56,20 @@ export function makeShadowRound(rng: Rng, icons: string[], d: ShadowDifficulty):
   if (d.categoryDistractors) {
     pool = sameCategory(answer).filter((i) => eligible(i) && icons.includes(i));
     if (pool.length < d.choices - 1) {
-      pool = pool.concat(shuffle(rng, icons.filter((i) => eligible(i) && !pool.includes(i))));
+      const needed = d.choices - 1 - pool.length;
+      const backfill = shuffle(
+        rng,
+        icons.filter((i) => eligible(i) && !pool.includes(i)),
+      ).slice(0, needed);
+      pool = pool.concat(backfill);
     }
   } else {
     pool = icons.filter(eligible);
   }
-  const options = shuffle(rng, [answer, ...shuffle(rng, pool).slice(0, d.choices - 1)]);
+  const options = shuffle(rng, [
+    answer,
+    ...shuffle(rng, pool).slice(0, d.choices - 1),
+  ]);
   return {
     answer,
     options,
