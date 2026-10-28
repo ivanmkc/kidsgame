@@ -44,8 +44,6 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
   const tapTimesRef = useRef(tapTimesMs);
   tapTimesRef.current = tapTimesMs;
-  const langRef = useRef(lang);
-  langRef.current = lang;
   const [startMs, setStartMs] = useState(0);
   const [hits, setHits] = useState(0);
   const [sparkKey, setSparkKey] = useState(0);
@@ -63,12 +61,6 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (!won) {
-      say(t(lang, "shell.steadybeat.sub"));
-    }
-  }, [lang, won]);
 
   const pulseAnim = useRef(new Animated.Value(0)).current;
 
@@ -108,7 +100,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           playDrum(0.5);
           setListenBeat(null);
           setPhase("tap");
-          say(t(langRef.current, "music.yourTurn" as never));
+          say(t(lang, "music.yourTurn" as never));
           setStartMs(performance.now());
           const tapBeatMs = 60000 / r.bpm;
           pulseAnim.setValue(0);
@@ -129,11 +121,12 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         listenPulse.setValue(1);
       };
     },
-    [listenPulse, pulseAnim],
+    [lang, listenPulse, pulseAnim],
   );
 
   useEffect(() => {
     if (!won) {
+      say(t(lang, "shell.steadybeat.sub"));
       setTapTimesMs([]);
       setHits(0);
       setFlash(false);
@@ -143,7 +136,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         pulseAnim.stopAnimation();
       };
     }
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (phase !== "tap") return;
