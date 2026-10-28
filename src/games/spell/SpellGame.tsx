@@ -243,6 +243,8 @@ function LetterTile({
 }) {
   const shake = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(1)).current;
+  const fontSize = Math.min(32, Math.round(size * 0.55));
+  const borderRadius = Math.min(16, Math.round(size * 0.22));
   useEffect(() => {
     if (!wobble) return;
     shake.setValue(0);
@@ -273,11 +275,11 @@ function LetterTile({
         style={({ pressed }) => [
           styles.tile,
           shadows.soft,
-          { width: size, height: size * 1.15 },
+          { width: size, height: size * 1.15, borderRadius },
           pressed && styles.pressed,
         ]}
       >
-        <Text style={styles.tileText}>{tile.char}</Text>
+        <Text style={[styles.tileText, { fontSize }]}>{tile.char}</Text>
       </Pressable>
     </Animated.View>
   );

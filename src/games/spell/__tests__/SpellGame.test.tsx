@@ -6,6 +6,7 @@ import {
   fireEvent,
   act,
   cleanup,
+  within,
 } from "@testing-library/react";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
@@ -13,6 +14,26 @@ import { sfx } from "../../../sound";
 import { t } from "../../../i18n";
 import { SpellGame } from "../SpellGame";
 import * as logic from "../logic";
+
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  window.dispatchEvent(new Event("resize"));
+}
 
 describe("SpellGame", () => {
   beforeEach(() => {
@@ -27,6 +48,7 @@ describe("SpellGame", () => {
   });
 
   afterEach(() => {
+    setViewport(1024, 768);
     act(() => {
       vi.runOnlyPendingTimers();
     });
@@ -597,6 +619,94 @@ describe("SpellGame", () => {
     fireEvent.click(speakerCard);
     expect(sfx.tap).not.toHaveBeenCalled();
     expect(sound.saySequence).not.toHaveBeenCalled();
+  });
+
+  it("scales tile font size and border radius proportionally on compact mobile viewport", () => {
+    setViewport(360, 640);
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "zebra",
+        lang: "en",
+        text: "ZEBRA",
+        chars: ["Z", "E", "B", "R", "A"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "zebra",
+        lang: "en",
+        text: "ZEBRA",
+        chars: ["Z", "E", "B", "R", "A"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["Z", "E", "B", "R", "A"],
+      decoys: ["X", "Y", "W"],
+      tiles: [
+        { id: 1, char: "Z" },
+        { id: 2, char: "E" },
+        { id: 3, char: "B" },
+        { id: 4, char: "R" },
+        { id: 5, char: "A" },
+        { id: 6, char: "X" },
+        { id: 7, char: "Y" },
+        { id: 8, char: "W" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    const tile = screen.getByTestId("spell-tile-1");
+    // With 360px viewport and 8 tiles, tileSize is 32.25px.
+    // borderRadius scales to Math.min(16, Math.round(32.25 * 0.22)) = 7px.
+    // fontSize scales to Math.min(32, Math.round(32.25 * 0.55)) = 18px.
+    expect(tile.style.width).toBe("32.25px");
+    expect(tile.style.borderRadius).toBe("7px");
+
+    const tileText = within(tile).getByText("Z");
+    expect(tileText.style.fontSize).toBe("18px");
+  });
+
+  it("caps tile font size and border radius at default maximums on wide viewport", () => {
+    setViewport(1024, 768);
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const tile = screen.getByTestId("spell-tile-1");
+    expect(tile.style.width).toBe("74px");
+    expect(tile.style.borderRadius).toBe("16px");
+
+    const tileText = within(tile).getByText("C");
+    expect(tileText.style.fontSize).toBe("32px");
   });
 });
 
