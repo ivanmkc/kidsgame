@@ -12,6 +12,7 @@ import { LangContext } from "../../../components/GameShell";
 import { Difficulty } from "../../../difficulty";
 import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
+import { Animated } from "react-native";
 import { BingoGame } from "../BingoGame";
 import * as logic from "../logic";
 
@@ -522,4 +523,40 @@ describe("Bingo mid-game language switch stale callback bug", () => {
     const promptAfter = screen.getByTestId("bingo-prompt");
     expect(promptAfter.textContent).toContain("りんご");
   });
+});
+
+test("switching language clears wrong tile wobble", async () => {
+  const sequenceSpy = vi.spyOn(Animated, "sequence");
+
+  const onHome = vi.fn();
+  const { rerender } = render(
+    <BingoGame onHome={onHome} difficulty="easy" lang="en" />,
+  );
+  await act(async () => {
+    vi.runAllTimers();
+  });
+
+  let prompt = screen.getByTestId("bingo-prompt");
+  let icon = prompt
+    .getAttribute("aria-label")!
+    .replace("Find the ", "")
+    .replace("!", "");
+  let cells = screen.queryAllByTestId(/bingo-cell-/);
+  let incorrectCell = cells.find((c) => c.getAttribute("aria-label") !== icon);
+
+  sequenceSpy.mockClear();
+
+  // Tap incorrect tile
+  await act(async () => {
+    fireEvent.click(incorrectCell!);
+  });
+
+  expect(sequenceSpy).toHaveBeenCalledTimes(1);
+  sequenceSpy.mockClear();
+
+  // Change language while timer is still running
+  rerender(<BingoGame onHome={onHome} difficulty="easy" lang="ja" />);
+
+  // Wobble effect should not leak to the new board
+  expect(sequenceSpy).not.toHaveBeenCalled();
 });

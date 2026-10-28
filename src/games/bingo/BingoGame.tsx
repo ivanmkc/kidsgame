@@ -83,6 +83,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCallIdx(0);
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
+    setWrongIdx(null);
     setCelebrate(0);
     lockedRef.current = false;
     setGameKey((k) => k + 1);
