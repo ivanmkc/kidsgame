@@ -204,6 +204,55 @@ describe("RulesGame", () => {
     }
   });
 
+  it("uses localized toddler-appropriate accessibility labels on grid tiles across languages", () => {
+    vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+      ruleNumber: 1,
+      rule: { category: "nature", label: "Tap the FLOWERS!" },
+      isRecall: false,
+      tiles: [
+        { icon: "blossom", isMatch: true },
+        { icon: "soccer", isMatch: false },
+        { icon: "icecream", isMatch: false },
+      ],
+      matchCount: 1,
+    });
+
+    const { rerender } = render(
+      <RulesGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+    expect(
+      screen.getByTestId("rules-tile-0-blossom-y").getAttribute("aria-label"),
+    ).toBe("はな");
+    expect(
+      screen.getByTestId("rules-tile-1-soccer-n").getAttribute("aria-label"),
+    ).toBe("ボール");
+    expect(
+      screen.getByTestId("rules-tile-2-icecream-n").getAttribute("aria-label"),
+    ).toBe("アイスクリーム");
+
+    rerender(<RulesGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(
+      screen.getByTestId("rules-tile-0-blossom-y").getAttribute("aria-label"),
+    ).toBe("花");
+    expect(
+      screen.getByTestId("rules-tile-1-soccer-n").getAttribute("aria-label"),
+    ).toBe("足球");
+    expect(
+      screen.getByTestId("rules-tile-2-icecream-n").getAttribute("aria-label"),
+    ).toBe("冰淇淋");
+
+    rerender(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(
+      screen.getByTestId("rules-tile-0-blossom-y").getAttribute("aria-label"),
+    ).toBe("flower");
+    expect(
+      screen.getByTestId("rules-tile-1-soccer-n").getAttribute("aria-label"),
+    ).toBe("ball");
+    expect(
+      screen.getByTestId("rules-tile-2-icecream-n").getAttribute("aria-label"),
+    ).toBe("ice cream");
+  });
+
   describe("unmount and narration lifecycle", () => {
     it("stops narration when unmounted so ghost instructions do not leak onto home menu", () => {
       const { unmount } = render(
@@ -258,7 +307,7 @@ describe("RulesGame", () => {
       const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
       try {
         const { unmount } = render(
-          <RulesGame onHome={() => {}} difficulty="hard" lang="en" />
+          <RulesGame onHome={() => {}} difficulty="hard" lang="en" />,
         );
 
         // Advance to recall round

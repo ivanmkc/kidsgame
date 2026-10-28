@@ -1,4 +1,6 @@
+import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../words";
 import {
   CATEGORY_CONFLICTS,
   CATEGORY_TEXT,
@@ -88,4 +90,11 @@ export function pickRuleIndex(
       ? validPool[Math.floor(rng() * validPool.length)]
       : Math.floor(rng() * introduced);
   return { ruleIdx, isRecall: true };
+}
+
+/** Localized screen-reader label for a rules tile icon. */
+export function tileLabel(icon: string, lang: Lang = "en"): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown rules icon: ${icon}`);
+  return wordFor(entry, lang).text;
 }

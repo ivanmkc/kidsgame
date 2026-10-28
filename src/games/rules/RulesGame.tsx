@@ -19,7 +19,13 @@ import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
 import { say, saySequence, sfx, stopNarration } from "../../sound";
-import { RulesRound, makeRules, makeRulesRound, pickRuleIndex } from "./logic";
+import {
+  RulesRound,
+  makeRules,
+  makeRulesRound,
+  pickRuleIndex,
+  tileLabel,
+} from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -228,7 +234,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
                 key={`${roundIdx}-${i}`}
                 onPress={() => onTile(i)}
                 testID={`rules-tile-${i}-${t.icon}-${t.isMatch ? "y" : "n"}`}
-                accessibilityLabel={t.icon}
+                accessibilityLabel={tileLabel(t.icon, lang)}
                 accessibilityRole="button"
                 style={({ pressed }) => [
                   styles.tile,

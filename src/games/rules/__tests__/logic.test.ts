@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import { makeRng } from "../../../rng";
-import { makeRules, makeRulesRound, pickRuleIndex } from "../logic";
+import { makeRules, makeRulesRound, pickRuleIndex, tileLabel } from "../logic";
 
 describe("pickRuleIndex", () => {
   it("easy difficulty never recalls and advances rule indices consecutively", () => {
@@ -219,5 +220,46 @@ describe("rule time logic", () => {
     expect(fallbackRes.isRecall).toBe(true);
     expect(fallbackRes.ruleIdx).toBeGreaterThanOrEqual(0);
     expect(fallbackRes.ruleIdx).toBeLessThanOrEqual(4);
+  });
+});
+
+describe("tileLabel", () => {
+  it("translates known icons across languages", () => {
+    expect(tileLabel("blossom", "en")).toBe("flower");
+    expect(tileLabel("blossom", "ja")).toBe("はな");
+    expect(tileLabel("blossom", "cmn")).toBe("花");
+    expect(tileLabel("blossom", "yue")).toBe("花");
+
+    expect(tileLabel("soccer", "en")).toBe("ball");
+    expect(tileLabel("soccer", "ja")).toBe("ボール");
+    expect(tileLabel("soccer", "cmn")).toBe("足球");
+    expect(tileLabel("soccer", "yue")).toBe("足球");
+
+    expect(tileLabel("icecream", "en")).toBe("ice cream");
+    expect(tileLabel("icecream", "ja")).toBe("アイスクリーム");
+    expect(tileLabel("icecream", "cmn")).toBe("冰淇淋");
+    expect(tileLabel("icecream", "yue")).toBe("雪糕");
+  });
+
+  it("defaults to en when lang is omitted", () => {
+    expect(tileLabel("blossom")).toBe("flower");
+    expect(tileLabel("soccer")).toBe("ball");
+  });
+
+  it("covers all spotit manifest icons in all supported languages", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const icon of manifest.spotit.icons) {
+      for (const lang of langs) {
+        const label = tileLabel(icon, lang);
+        expect(typeof label).toBe("string");
+        expect(label.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("throws loudly on unknown icon", () => {
+    expect(() => tileLabel("nonexistent_icon", "en")).toThrow(
+      "Unknown rules icon: nonexistent_icon",
+    );
   });
 });
