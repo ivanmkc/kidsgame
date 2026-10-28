@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   render,
   screen,
@@ -8,6 +8,9 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LangContext } from "../../../components/GameShell";
+import { t } from "../../../i18n";
+import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
 import { RhymeGame } from "../RhymeGame";
@@ -74,6 +77,26 @@ function setViewport(width: number, height: number) {
   window.dispatchEvent(new Event("resize"));
 }
 
+function LangHarness({
+  initialLang = "en",
+  difficulty = "easy",
+}: {
+  initialLang?: Lang;
+  difficulty?: "easy" | "medium" | "hard";
+}) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <RhymeGame onHome={() => {}} difficulty={difficulty} lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
 describe("RhymeGame", () => {
   const onHome = vi.fn();
   let goodSpy: ReturnType<typeof vi.spyOn>;
@@ -86,6 +109,7 @@ describe("RhymeGame", () => {
     sayThenDoneCallbacks = [];
     vi.restoreAllMocks();
     vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
     vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
       if (cb) sayThenDoneCallbacks.push(cb);
     });
@@ -461,5 +485,118 @@ describe("RhymeGame", () => {
       const tile = screen.getByTestId(`rhyme-tile-${i}`);
       expect(tile.getAttribute("aria-label")).toBe(enRound.tiles[i].word);
     }
+  });
+
+  it("drops pending sayThen callback on language switch mid-celebration and avoids double-advance", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+    render(<LangHarness initialLang="en" />);
+
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/8");
+
+    const firstRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const answerIdx = firstRound.answerIdx;
+
+    // Verify initial English prompt and speech
+    expect(saySequenceSpy).toHaveBeenCalledWith(firstRound.promptLines);
+    saySequenceSpy.mockClear();
+
+    // Tap correct tile to start celebration
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${answerIdx}`));
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/8");
+
+    // Change language mid-celebration
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // The new round is generated for Japanese
+    const jaRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+
+    // 1. Spoken text matches Japanese and only new language's speech fires
+    expect(saySequenceSpy).toHaveBeenCalledTimes(1);
+    expect(saySequenceSpy).toHaveBeenCalledWith(jaRound.promptLines);
+    expect(jaRound.promptLines[0]).toBe(t("ja", "rhyme.ask"));
+    saySequenceSpy.mockClear();
+
+    // 2. Prompt card visual text and testID match the new language round
+    const promptContainer = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
+    expect(promptContainer.getAttribute("data-testid")).toBe(
+      `rhyme-prompt-${jaRound.target.icon}`,
+    );
+    expect(promptContainer.textContent).toContain(jaRound.displayPrompt);
+    expect(promptContainer.textContent).toContain(t("ja", "rhyme.ask"));
+
+    // 3. Board tiles' aria-labels match the new Japanese round tiles
+    const currentTiles = screen.getAllByTestId(/^rhyme-tile-/);
+    expect(currentTiles).toHaveLength(jaRound.tiles.length);
+    const tileLabels = currentTiles.map((t) => t.getAttribute("aria-label"));
+    const expectedLabels = jaRound.tiles.map((t) => t.word || t.icon);
+    expect(tileLabels).toEqual(expectedLabels);
+
+    // Attempt to invoke the pending sayThen callback from the earlier language
+    const pendingCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      pendingCelebration();
+    });
+
+    // 4. Round counter agrees: remains 0/8, not double-advanced
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/8");
+
+    // 5. No speech fired from the stale English callback
+    expect(saySequenceSpy).not.toHaveBeenCalled();
+    expect(sound.say).not.toHaveBeenCalled();
+
+    // Advance all pending timers to ensure no trailing old timer fires
+    act(() => {
+      vi.runAllTimers();
+    });
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/8");
+    expect(saySequenceSpy).not.toHaveBeenCalled();
+
+    // 6. Board remains fully playable in the new language
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${jaRound.answerIdx}`));
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+    const jaCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      jaCelebration();
+    });
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 1/8");
+  });
+
+  it("does not drop sayThen callback or brick board when switching between languages that share effectiveLang", () => {
+    // When languages share effectiveLang 'en', gameLang stays 'en' across switch
+    vi.spyOn(logic, "effectiveLang").mockReturnValue("en");
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    render(<LangHarness initialLang="ja" />);
+
+    const firstRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const answerIdx = firstRound.answerIdx;
+
+    // Start celebration in round 0
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${answerIdx}`));
+    expect(sayThenDoneCallbacks).toHaveLength(1);
+
+    // Switch language from ja to cmn (both share effectiveLang 'en')
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // Celebration completes: because gameLang did not change, callback is valid
+    const finishCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishCelebration();
+    });
+
+    // Round advances and input unlocks instead of bricking
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 1/8");
+
+    // Board in round 1 accepts input without being stuck locked
+    const round1Tile = screen.getByTestId("rhyme-tile-0");
+    fireEvent.click(round1Tile);
+    expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
   });
 });

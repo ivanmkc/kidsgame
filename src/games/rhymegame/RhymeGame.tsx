@@ -15,7 +15,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
@@ -82,6 +82,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = playable && roundIdx >= roundsToWin;
   useWinLine(won, t(lang, "win.rhyme"));
+  const { isValid } = useLangEpoch(gameLang);
   useEffect(() => {
     return () => {
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
@@ -126,6 +127,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       const nextIdx = roundIdx + 1;
       sayThen(round.confirmLines, () => {
+        if (!isValid()) return;
         lockedRef.current = false;
         setCorrectIdx(null);
         setRoundIdx(nextIdx);
@@ -147,6 +149,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
       setWrongIdx(i);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       wrongTimerRef.current = setTimeout(() => {
+        if (!isValid()) return;
         setWrongIdx((w) => (w === i ? null : w));
       }, 450);
       saySequence(round.promptLines);
