@@ -170,6 +170,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     >
       <View style={[styles.board, shortH && { gap: 10 }]} key={gameKey}>
         <Pressable
+          disabled={won || placedIds.length === round.chars.length}
           onPress={() => { sfx.tap(); saySequence([linesForWord(round.word).ask, linesForWord(round.word).spell]); }}
           accessibilityLabel={t(lang, 'spell.hearAgain')}
           accessibilityRole="button"
