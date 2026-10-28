@@ -148,7 +148,12 @@ describe("RhymeGame", () => {
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
 
     const entries = availableEntries("en", manifest.spotit.icons);
-    const rhymeKeys = new Map(entries.map((e) => [e.icon, e.rhymeKey]));
+    const rhymeKeys = new Map(
+      entries.flatMap((e) => [
+        [e.icon, e.rhymeKey],
+        [e.word, e.rhymeKey],
+      ]),
+    );
     const promptEl = screen
       .getAllByTestId(/^rhyme-prompt-/)
       .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
@@ -409,4 +414,36 @@ describe("RhymeGame", () => {
       .value as logic.RhymeRound;
     expect(saySequenceSpy).toHaveBeenLastCalledWith(cmnRound.promptLines);
   });
+
+  it("sets localized accessibilityLabel on choice tiles across locales", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const { rerender } = render(
+      <RhymeGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+
+    const jaRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    for (let i = 0; i < jaRound.tiles.length; i++) {
+      const tile = screen.getByTestId(`rhyme-tile-${i}`);
+      expect(tile.getAttribute("aria-label")).toBe(jaRound.tiles[i].word);
+      expect(tile.getAttribute("role")).toBe("button");
+    }
+
+    rerender(<RhymeGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    const cmnRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    for (let i = 0; i < cmnRound.tiles.length; i++) {
+      const tile = screen.getByTestId(`rhyme-tile-${i}`);
+      expect(tile.getAttribute("aria-label")).toBe(cmnRound.tiles[i].word);
+    }
+
+    rerender(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+    const enRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    for (let i = 0; i < enRound.tiles.length; i++) {
+      const tile = screen.getByTestId(`rhyme-tile-${i}`);
+      expect(tile.getAttribute("aria-label")).toBe(enRound.tiles[i].word);
+    }
+  });
 });
+
