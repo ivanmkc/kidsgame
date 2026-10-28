@@ -603,4 +603,137 @@ describe("PuzzleGame", () => {
 
     expect(goodSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("resolves localized scene names in allSceneOptions for diff and hidden scenes", () => {
+    const enOptions = allSceneOptions("all", "en");
+    expect(enOptions.find((o) => o.id === "d-dinos")?.name).toBe(
+      "Dinosaur Valley",
+    );
+    expect(enOptions.find((o) => o.id === "h-jungle")?.name).toBe("Jungle");
+
+    const jaOptions = allSceneOptions("all", "ja");
+    expect(jaOptions.find((o) => o.id === "d-dinos")?.name).toBe(
+      "きょうりゅう の たに",
+    );
+    expect(jaOptions.find((o) => o.id === "h-jungle")?.name).toBe("ジャングル");
+
+    const cmnOptions = allSceneOptions("all", "cmn");
+    expect(cmnOptions.find((o) => o.id === "d-dinos")?.name).toBe("恐龙山谷");
+    expect(cmnOptions.find((o) => o.id === "h-jungle")?.name).toBe("丛林");
+
+    const yueOptions = allSceneOptions("all", "yue");
+    expect(yueOptions.find((o) => o.id === "d-dinos")?.name).toBe("恐龍山谷");
+    expect(yueOptions.find((o) => o.id === "h-jungle")?.name).toBe("森林");
+  });
+
+  it("displays localized scene names on picker cards and gameplay subtitle in ja, cmn, and yue", () => {
+    // 1. Scene picker cards show localized names and not English names
+    const { unmount: unmountPickerJa } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(screen.getByText("きょうりゅう の たに")).toBeTruthy();
+    expect(screen.getByText("ジャングル")).toBeTruthy();
+    expect(screen.queryByText("Dinosaur Valley")).toBeNull();
+    expect(screen.queryByText("Jungle")).toBeNull();
+    unmountPickerJa();
+
+    const { unmount: unmountPickerCmn } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="cmn"
+      />,
+    );
+    expect(screen.getByText("恐龙山谷")).toBeTruthy();
+    expect(screen.getByText("丛林")).toBeTruthy();
+    expect(screen.queryByText("Dinosaur Valley")).toBeNull();
+    expect(screen.queryByText("Jungle")).toBeNull();
+    unmountPickerCmn();
+
+    const { unmount: unmountPickerYue } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="yue"
+      />,
+    );
+    expect(screen.getByText("恐龍山谷")).toBeTruthy();
+    expect(screen.getByText("森林")).toBeTruthy();
+    expect(screen.queryByText("Dinosaur Valley")).toBeNull();
+    expect(screen.queryByText("Jungle")).toBeNull();
+    unmountPickerYue();
+
+    // 2. Gameplay header subtitle displays localized scene name
+    const { unmount: unmountGameJa } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId="d-dinos"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(
+      screen.getByText(
+        "きょうりゅう の たに — 2まいを タップして いれかえよう",
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.queryByText("Dinosaur Valley — 2まいを タップして いれかえよう"),
+    ).toBeNull();
+    unmountGameJa();
+
+    const { unmount: unmountGameCmn } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId="d-dinos"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="cmn"
+      />,
+    );
+    expect(screen.getByText("恐龙山谷 — 点两块交换位置")).toBeTruthy();
+    unmountGameCmn();
+
+    const { unmount: unmountGameYue } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId="d-dinos"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="yue"
+      />,
+    );
+    expect(screen.getByText("恐龍山谷 — 撳兩塊調位")).toBeTruthy();
+    unmountGameYue();
+
+    // Also verify hidden scene subtitle in ja
+    const { unmount: unmountHiddenJa } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId="h-jungle"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(
+      screen.getByText("ジャングル — 2まいを タップして いれかえよう"),
+    ).toBeTruthy();
+    unmountHiddenJa();
+  });
 });

@@ -49,8 +49,8 @@ export function PuzzleGame({
   onBackToPicker,
   lang = "en",
 }: Props) {
-  const options = allSceneOptions(filter);
-  const allOptions = allSceneOptions("all").map((o) => ({
+  const options = allSceneOptions(filter, lang);
+  const allOptions = allSceneOptions("all", lang).map((o) => ({
     ...o,
     dimmed: !options.some((v) => v.id === o.id),
   }));
