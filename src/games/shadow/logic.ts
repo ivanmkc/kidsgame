@@ -49,8 +49,16 @@ export function makeShadowRound(
   rng: Rng,
   icons: string[],
   d: ShadowDifficulty,
+  previousAnswer?: string,
 ): ShadowRound {
-  const answer = icons[Math.floor(rng() * icons.length)];
+  let eligibleAnswers = icons;
+  if (previousAnswer) {
+    const filtered = icons.filter((i) => i !== previousAnswer);
+    if (filtered.length > 0) {
+      eligibleAnswers = filtered;
+    }
+  }
+  const answer = eligibleAnswers[Math.floor(rng() * eligibleAnswers.length)];
   const twins = new Set(SHADOW_TWINS[answer] ?? []);
   const eligible = (i: string) => i !== answer && !twins.has(i);
   let pool: string[];

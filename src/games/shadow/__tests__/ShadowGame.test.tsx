@@ -326,6 +326,7 @@ describe("ShadowGame", () => {
         categoryDistractors: true,
         transform: true,
       }),
+      expect.anything(),
     );
   });
 

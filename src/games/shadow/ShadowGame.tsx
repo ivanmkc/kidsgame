@@ -79,7 +79,14 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
       setWrong(null);
       if (next < roundsToWin) {
         setTimeout(() => {
-          setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+          setRound(
+            makeShadowRound(
+              rngRef.current,
+              manifest.spotit.icons,
+              diff,
+              round.answer,
+            ),
+          );
         }, 1000);
       }
     } else {
