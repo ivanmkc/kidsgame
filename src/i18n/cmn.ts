@@ -370,6 +370,14 @@ export const CMN: Table = {
   'gate.wordPrompt': '请输入以下单词以继续',
   'gate.wordPlaceholder': '在此输入单词',
   'gate.continue': '继续',
+
+  'lockdown.title': '家长控制',
+  'lockdown.subtitle': '关闭游戏或语言以对孩子隐藏。',
+  'lockdown.languages': '语言',
+  'lockdown.warning': '至少需要保留一种可见语言。',
+  'lockdown.done': '完成',
+  'lockdown.doneHidden': '完成（已隐藏 {n} 项）',
+
   'color.red': '红色',
   'color.blue': '蓝色',
   'color.green': '绿色',

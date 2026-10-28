@@ -11,6 +11,7 @@ import { Lang, LANGS } from '../lang';
 import { colors, fonts, shadows } from '../theme';
 import { LangContext } from './GameShell';
 import { buildGameSections, countHidden } from '../menuCards';
+import { t } from '../i18n';
 
 interface Props {
   hiddenGames: string[];
@@ -45,9 +46,9 @@ export function LockdownSettings({
   return (
     <View style={styles.backdrop}>
       <View style={styles.panel}>
-        <Text style={styles.title}>Parental Controls</Text>
+        <Text style={styles.title}>{t(lang, 'lockdown.title')}</Text>
         <Text style={styles.subtitle}>
-          Toggle off games or languages to hide them from your child.
+          {t(lang, 'lockdown.subtitle')}
         </Text>
         <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
           {sections.map((section) => (
@@ -74,10 +75,10 @@ export function LockdownSettings({
           ))}
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Languages</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'lockdown.languages')}</Text>
             {langWarning && (
               <Text style={styles.warning}>
-                At least one language must remain visible.
+                {t(lang, 'lockdown.warning')}
               </Text>
             )}
             {LANGS.map((lang) => {
@@ -106,7 +107,9 @@ export function LockdownSettings({
           testID="lockdown-done"
         >
           <Text style={styles.doneText}>
-            Done{totalHidden > 0 ? ` (${totalHidden} hidden)` : ''}
+            {totalHidden > 0
+              ? t(lang, 'lockdown.doneHidden', { n: totalHidden })
+              : t(lang, 'lockdown.done')}
           </Text>
         </Pressable>
       </View>

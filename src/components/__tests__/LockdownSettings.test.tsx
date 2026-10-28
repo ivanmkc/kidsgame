@@ -3,6 +3,8 @@ import React from 'react';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { LockdownSettings } from '../LockdownSettings';
+import { LangContext } from '../GameShell';
+import { t } from '../../i18n';
 
 afterEach(cleanup);
 
@@ -64,6 +66,40 @@ describe('LockdownSettings Interactive', () => {
       vi.advanceTimersByTime(2600);
     });
     expect(screen.queryByText('At least one language must remain visible.')).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it('shows localized warning and titles in non-English mode', () => {
+    vi.useFakeTimers();
+    const onToggleLang = vi.fn().mockReturnValue(false);
+    render(
+      <LangContext.Provider value={{ lang: 'ja', onCycle: vi.fn() }}>
+        <LockdownSettings
+          hiddenGames={['bingo']}
+          hiddenLangs={[]}
+          onToggleGame={vi.fn()}
+          onToggleLang={onToggleLang}
+          onDone={vi.fn()}
+        />
+      </LangContext.Provider>,
+    );
+    expect(screen.getByText(t('ja', 'lockdown.title'))).toBeTruthy();
+    expect(screen.getByText(t('ja', 'lockdown.subtitle'))).toBeTruthy();
+    expect(screen.getByText(t('ja', 'lockdown.languages'))).toBeTruthy();
+    expect(screen.getByText(t('ja', 'lockdown.doneHidden', { n: 1 }))).toBeTruthy();
+
+    const inputs = screen.getAllByTestId('lock-lang-ja');
+    const input = inputs[0].querySelector('input');
+    fireEvent.click(input!);
+    expect(onToggleLang).toHaveBeenCalledWith('ja');
+    expect(screen.getByText(t('ja', 'lockdown.warning'))).toBeTruthy();
+    expect(screen.queryByText('At least one language must remain visible.')).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(2600);
+    });
+    expect(screen.queryByText(t('ja', 'lockdown.warning'))).toBeNull();
 
     vi.useRealTimers();
   });
