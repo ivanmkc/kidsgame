@@ -79,7 +79,9 @@ describe('SpotItDuel interaction and speech', () => {
         });
       }
 
-      expect(say).toHaveBeenLastCalledWith('🏆 Foxyのかち！  Bunnyは ⭐️0こ！ よくみたね！');
+      expect(say).toHaveBeenLastCalledWith('🏆 きつねのかち！  うさぎは ⭐️0こ！ よくみたね！');
+      expect(screen.getByTestId('duel-score-a').getAttribute('aria-label')).toBe('きつねは ⭐️3こ');
+      expect(screen.getByTestId('duel-score-b').getAttribute('aria-label')).toBe('うさぎは ⭐️0こ');
     } finally {
       vi.useRealTimers();
     }
@@ -125,6 +127,8 @@ describe('SpotItDuel interaction and speech', () => {
       }
 
       expect(say).toHaveBeenLastCalledWith('🏆 Foxy wins!  Bunny spotted 1 star — great eyes!');
+      expect(screen.getByTestId('duel-score-a').getAttribute('aria-label')).toBe('Foxy has 3 stars');
+      expect(screen.getByTestId('duel-score-b').getAttribute('aria-label')).toBe('Bunny has 1 stars');
     } finally {
       vi.useRealTimers();
     }

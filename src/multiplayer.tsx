@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native';
 import { ChunkyButton } from './components/ChunkyButton';
-import { t } from './i18n';
+import { t, UIKey } from './i18n';
 import { Lang } from './lang';
 import { useSay } from './sound';
 import { colors, darken, fonts, shadows } from './theme';
@@ -45,14 +45,14 @@ export type PlayerIx = 0 | 1;
 
 export interface MpPlayer {
   ix: PlayerIx;
-  name: string;
+  name: UIKey;
   emoji: string;
   color: string;
 }
 
 export const MP_PLAYERS: readonly [MpPlayer, MpPlayer] = [
-  { ix: 0, name: 'Foxy', emoji: '🦊', color: '#D66FA8' /* pink */ },
-  { ix: 1, name: 'Bunny', emoji: '🐰', color: '#3E9BB8' /* teal */ },
+  { ix: 0, name: 'mp.foxy', emoji: '🦊', color: '#D66FA8' /* pink */ },
+  { ix: 1, name: 'mp.bunny', emoji: '🐰', color: '#3E9BB8' /* teal */ },
 ] as const;
 
 export function nextTurn(t: PlayerIx): PlayerIx {
@@ -101,12 +101,17 @@ export function ModePicker({ onPick, lang }: { onPick: (mode: 'solo' | '2p') => 
 // ---------------------------------------------------------------------------
 
 export function PlayerChip({
-  player, count, active, testID,
+  player,
+  count,
+  active,
+  testID,
+  lang = 'en',
 }: {
   player: PlayerIx;
   count: number;
   active: boolean;
   testID: string;
+  lang?: Lang;
 }) {
   const p = MP_PLAYERS[player];
   const pulse = useRef(new Animated.Value(1)).current;
@@ -121,7 +126,7 @@ export function PlayerChip({
   return (
     <Animated.View
       testID={testID}
-      accessibilityLabel={`${p.name} has ${count}`}
+      accessibilityLabel={t(lang, 'mp.hasCount', { name: t(lang, p.name), count })}
       style={[
         styles.chip,
         shadows.soft,

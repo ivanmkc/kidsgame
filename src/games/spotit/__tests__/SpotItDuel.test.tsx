@@ -63,7 +63,9 @@ describe('SpotItDuel', () => {
     expect(html).toContain('data-testid="duel-countdown"');
     expect(html).toContain('3');
     expect(html).toContain('data-testid="duel-score-a"');
+    expect(html).toContain('aria-label="Foxy has 0 stars"');
     expect(html).toContain('data-testid="duel-score-b"');
+    expect(html).toContain('aria-label="Bunny has 0 stars"');
     expect(html).toContain('data-testid="mock-win-overlay"');
     expect(html).toContain('data-testid="duel-final-score-a"');
     expect(html).toContain('data-testid="duel-final-score-b"');
@@ -174,13 +176,19 @@ describe('SpotItDuel', () => {
     const htmlJa = renderToString(<SpotItDuel onHome={noop} difficulty="hard" seed={7} lang="ja" />);
     expect(htmlJa).toContain('いっしょさがし たいけつ');
     expect(htmlJa).toContain('まんなかのカードと じぶんのカードで あわせよう！');
+    expect(htmlJa).toContain('aria-label="きつねは ⭐️0こ"');
+    expect(htmlJa).toContain('aria-label="うさぎは ⭐️0こ"');
 
     const htmlCmn = renderToString(<SpotItDuel onHome={noop} difficulty="easy" seed={8} lang="cmn" />);
     expect(htmlCmn).toContain('找共同 对战');
     expect(htmlCmn).toContain('各自找出自己的牌和中间牌相同的图！');
+    expect(htmlCmn).toContain('aria-label="狐狸有 0 颗星"');
+    expect(htmlCmn).toContain('aria-label="兔子有 0 颗星"');
 
     const htmlYue = renderToString(<SpotItDuel onHome={noop} difficulty="medium" seed={9} lang="yue" />);
     expect(htmlYue).toContain('搵共通 對戰');
     expect(htmlYue).toContain('各自搵你嗰張牌同中間牌一樣嗰個圖！');
+    expect(htmlYue).toContain('aria-label="狐狸有 0 粒星"');
+    expect(htmlYue).toContain('aria-label="兔仔有 0 粒星"');
   });
 });

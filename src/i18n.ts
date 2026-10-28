@@ -98,9 +98,9 @@ export type UIKey =
   | 'picker.sticker'
   | 'picker.puzzle'
   // ── ModePicker ─────────────────────────────────────────────────
-  | 'mp.title'
-  | 'mp.solo'
-  | 'mp.duo'
+  | 'mp.title' | 'mp.solo' | 'mp.duo'
+  | 'mp.foxy' | 'mp.bunny' | 'mp.hasCount'
+  | 'mp.starts' | 'mp.hasStars'
   // ── GameShell titles + subtitles ───────────────────────────────
   | 'shell.levels'
   | 'shell.letters.title'
@@ -260,40 +260,15 @@ export type UIKey =
   | 'sticker.size.small' | 'sticker.size.medium' | 'sticker.size.large'
   | 'sticker.charactersEmpty'
   // ── Dress-up sticker item labels ────────────────────────────────
-  | 'sticker.item.dress_pink'
-  | 'sticker.item.dress_blue'
-  | 'sticker.item.tutu'
-  | 'sticker.item.crown'
-  | 'sticker.item.tiara'
-  | 'sticker.item.wizard_hat'
-  | 'sticker.item.sun_hat'
-  | 'sticker.item.wings_fairy'
-  | 'sticker.item.wings_butterfly'
-  | 'sticker.item.cape'
-  | 'sticker.item.sunglasses'
-  | 'sticker.item.bowtie'
-  | 'sticker.item.necklace'
-  | 'sticker.item.boots'
-  | 'sticker.item.wand'
-  | 'sticker.item.umbrella'
-  | 'sticker.item.dress_rainbow'
-  | 'sticker.item.dress_star'
-  | 'sticker.item.dress_flower'
-  | 'sticker.item.dress_snow'
-  | 'sticker.item.kimono'
-  | 'sticker.item.raincoat'
-  | 'sticker.item.party_hat'
-  | 'sticker.item.police_cap'
-  | 'sticker.item.fire_helmet'
-  | 'sticker.item.chef_hat'
-  | 'sticker.item.cowboy_hat'
-  | 'sticker.item.space_helmet'
-  | 'sticker.item.flower_crown'
-  | 'sticker.item.scarf'
-  | 'sticker.item.ballet_slippers'
-  | 'sticker.item.rain_boots'
-  | 'memory.moves'
-  | 'memory.cardFaceDown'
+  | 'sticker.item.dress_pink' | 'sticker.item.dress_blue' | 'sticker.item.tutu' | 'sticker.item.crown'
+  | 'sticker.item.tiara' | 'sticker.item.wizard_hat' | 'sticker.item.sun_hat' | 'sticker.item.wings_fairy'
+  | 'sticker.item.wings_butterfly' | 'sticker.item.cape' | 'sticker.item.sunglasses' | 'sticker.item.bowtie'
+  | 'sticker.item.necklace' | 'sticker.item.boots' | 'sticker.item.wand' | 'sticker.item.umbrella'
+  | 'sticker.item.dress_rainbow' | 'sticker.item.dress_star' | 'sticker.item.dress_flower' | 'sticker.item.dress_snow'
+  | 'sticker.item.kimono' | 'sticker.item.raincoat' | 'sticker.item.party_hat' | 'sticker.item.police_cap'
+  | 'sticker.item.fire_helmet' | 'sticker.item.chef_hat' | 'sticker.item.cowboy_hat' | 'sticker.item.space_helmet'
+  | 'sticker.item.flower_crown' | 'sticker.item.scarf' | 'sticker.item.ballet_slippers' | 'sticker.item.rain_boots'
+  | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
   | 'rhyme.ask'
   | 'rhyme.comingSoon'
   | 'bingo.prompt'
@@ -469,9 +444,11 @@ export const EN: Table = {
   'picker.story': 'Which story shall we read?',
   'picker.sticker': "Where's the party?",
   'picker.puzzle': 'Which picture do you want to solve?',
-  'mp.title': 'How many players?',
-  'mp.solo': '1 Player 🧒',
-  'mp.duo': '2 Players 👧👧',
+  'mp.title': 'How many players?', 'mp.solo': '1 Player 🧒', 'mp.duo': '2 Players 👧👧',
+  'mp.foxy': 'Foxy', 'mp.bunny': 'Bunny',
+  'mp.hasCount': '{name} has {count}',
+  'mp.starts': '{name} starts!',
+  'mp.hasStars': '{name} has {n} stars',
 
   'shell.letters.title': 'Letter Hunt',
   'shell.levels': 'Levels',
@@ -656,40 +633,24 @@ export const EN: Table = {
   'sticker.size.medium': 'Medium',
   'sticker.size.large': 'Large',
   'sticker.charactersEmpty': 'Characters coming soon! ✨',
-  'sticker.item.dress_pink': 'pink dress',
-  'sticker.item.dress_blue': 'blue dress',
-  'sticker.item.tutu': 'tutu',
-  'sticker.item.crown': 'crown',
-  'sticker.item.tiara': 'tiara',
-  'sticker.item.wizard_hat': 'wizard hat',
-  'sticker.item.sun_hat': 'sun hat',
-  'sticker.item.wings_fairy': 'fairy wings',
-  'sticker.item.wings_butterfly': 'butterfly wings',
-  'sticker.item.cape': 'cape',
-  'sticker.item.sunglasses': 'sunglasses',
-  'sticker.item.bowtie': 'bowtie',
-  'sticker.item.necklace': 'necklace',
-  'sticker.item.boots': 'boots',
-  'sticker.item.wand': 'wand',
-  'sticker.item.umbrella': 'umbrella',
-  'sticker.item.dress_rainbow': 'rainbow dress',
-  'sticker.item.dress_star': 'star dress',
-  'sticker.item.dress_flower': 'flower dress',
-  'sticker.item.dress_snow': 'snow dress',
-  'sticker.item.kimono': 'kimono',
-  'sticker.item.raincoat': 'raincoat',
-  'sticker.item.party_hat': 'party hat',
-  'sticker.item.police_cap': 'police cap',
-  'sticker.item.fire_helmet': 'fire helmet',
-  'sticker.item.chef_hat': 'chef hat',
-  'sticker.item.cowboy_hat': 'cowboy hat',
-  'sticker.item.space_helmet': 'space helmet',
-  'sticker.item.flower_crown': 'flower crown',
-  'sticker.item.scarf': 'scarf',
-  'sticker.item.ballet_slippers': 'ballet slippers',
-  'sticker.item.rain_boots': 'rain boots',
-  'memory.moves': 'Moves: {n}',
-  'memory.cardFaceDown': 'face-down card',
+  'sticker.item.dress_pink': 'pink dress', 'sticker.item.dress_blue': 'blue dress',
+  'sticker.item.tutu': 'tutu', 'sticker.item.crown': 'crown',
+  'sticker.item.tiara': 'tiara', 'sticker.item.wizard_hat': 'wizard hat',
+  'sticker.item.sun_hat': 'sun hat', 'sticker.item.wings_fairy': 'fairy wings',
+  'sticker.item.wings_butterfly': 'butterfly wings', 'sticker.item.cape': 'cape',
+  'sticker.item.sunglasses': 'sunglasses', 'sticker.item.bowtie': 'bowtie',
+  'sticker.item.necklace': 'necklace', 'sticker.item.boots': 'boots',
+  'sticker.item.wand': 'wand', 'sticker.item.umbrella': 'umbrella',
+  'sticker.item.dress_rainbow': 'rainbow dress', 'sticker.item.dress_star': 'star dress',
+  'sticker.item.dress_flower': 'flower dress', 'sticker.item.dress_snow': 'snow dress',
+  'sticker.item.kimono': 'kimono', 'sticker.item.raincoat': 'raincoat',
+  'sticker.item.party_hat': 'party hat', 'sticker.item.police_cap': 'police cap',
+  'sticker.item.fire_helmet': 'fire helmet', 'sticker.item.chef_hat': 'chef hat',
+  'sticker.item.cowboy_hat': 'cowboy hat', 'sticker.item.space_helmet': 'space helmet',
+  'sticker.item.flower_crown': 'flower crown', 'sticker.item.scarf': 'scarf',
+  'sticker.item.ballet_slippers': 'ballet slippers', 'sticker.item.rain_boots': 'rain boots',
+  'memory.moves': 'Moves: {n}', 'memory.cardFaceDown': 'face-down card',
+  'memory.foundPair': '{name} found a pair! Go again!',
   // Rhyme game prompts: EN interpolates {word} into the full sentence;
   // non-EN pairs this fixed question clip with the target word clip.
   'rhyme.ask': 'Which one rhymes with {word}?',
@@ -720,26 +681,11 @@ export const EN: Table = {
   'gate.wordPrompt': 'To continue, type the word',
   'gate.wordPlaceholder': 'Type the word here',
   'gate.continue': 'Continue',
-  'color.red': 'red',
-  'color.blue': 'blue',
-  'color.green': 'green',
-  'color.yellow': 'yellow',
-  'color.purple': 'purple',
-  'color.orange': 'orange',
-  'color.black': 'black',
-  'color.white': 'white',
-  'color.pink': 'pink',
-  'color.brown': 'brown',
-  'color.gray': 'gray',
-  'shape.circle': 'circle',
-  'shape.square': 'square',
-  'shape.triangle': 'triangle',
-  'shape.star': 'star',
-  'sound.dog': 'woof',
-  'sound.cat': 'meow',
-  'sound.lion': 'roar',
-  'sound.frog': 'ribbit',
-  'sound.pig': 'oink',
+  'color.red': 'red', 'color.blue': 'blue', 'color.green': 'green', 'color.yellow': 'yellow',
+  'color.purple': 'purple', 'color.orange': 'orange', 'color.black': 'black', 'color.white': 'white',
+  'color.pink': 'pink', 'color.brown': 'brown', 'color.gray': 'gray',
+  'shape.circle': 'circle', 'shape.square': 'square', 'shape.triangle': 'triangle', 'shape.star': 'star',
+  'sound.dog': 'woof', 'sound.cat': 'meow', 'sound.lion': 'roar', 'sound.frog': 'ribbit', 'sound.pig': 'oink',
 
   // Diff scene names
   'diff.scene.farm': 'Farm', 'diff.scene.ocean': 'Ocean',

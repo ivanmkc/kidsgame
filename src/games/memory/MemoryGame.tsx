@@ -52,7 +52,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     onMatch: (_a, _b, scorer, isLastPair) => {
       sfx.good();
       if (duel && scorer !== undefined && !isLastPair) {
-        say(`${MP_PLAYERS[scorer].name} found a pair! Go again!`);
+        say(t(lang, 'memory.foundPair', { name: t(lang, MP_PLAYERS[scorer].name) }));
       }
     },
     onMismatch: () => {
@@ -60,7 +60,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     },
     onTurnChange: (next) => {
       if (duel) {
-        say(`${MP_PLAYERS[next].name}'s turn!`);
+        say(t(lang, 'hidden.turn', { name: t(lang, MP_PLAYERS[next].name) }));
       }
     },
   });
@@ -93,7 +93,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     prevPairs.current = pairs;
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     const starter = reset();
-    if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
+    if (duel) say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[starter].name) }));
   }, [pairs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Kind spoken recap; the word "lose" never appears.
@@ -103,7 +103,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     say(
       w === 'tie'
         ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
-        : t(lang, 'win.memoryWinner', { name: MP_PLAYERS[w].name })
+        : t(lang, 'win.memoryWinner', { name: t(lang, MP_PLAYERS[w].name) })
     );
   }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -111,13 +111,13 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     setTimerKey((k) => k + 1);
     setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), manifest.spotit.icons, pairs));
     const starter = reset();
-    if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
+    if (duel) say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[starter].name) }));
   };
 
   const handlePickMode = (picked: 'solo' | '2p') => {
     setMode(picked);
     if (picked === '2p') {
-      say(`${MP_PLAYERS[duelState.turn].name} starts!`);
+      say(t(lang, 'mp.starts', { name: t(lang, MP_PLAYERS[duelState.turn].name) }));
     }
   };
 
@@ -175,7 +175,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
             <Animated.View
               pointerEvents="none"
               testID="memory-turn-halo"
-              accessibilityLabel={`${turnPlayer.name}'s turn`}
+              accessibilityLabel={t(lang, 'hidden.turn', { name: t(lang, turnPlayer.name) })}
               style={[
                 styles.halo,
                 {
@@ -192,8 +192,8 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
         )}
         {duel ? (
           <View style={styles.chipsRow}>
-            <PlayerChip player={0} count={duelState.pairs[0]} active={duelState.turn === 0 && !won} testID="memory-duel-chip-0" />
-            <PlayerChip player={1} count={duelState.pairs[1]} active={duelState.turn === 1 && !won} testID="memory-duel-chip-1" />
+            <PlayerChip player={0} count={duelState.pairs[0]} active={duelState.turn === 0 && !won} testID="memory-duel-chip-0" lang={lang} />
+            <PlayerChip player={1} count={duelState.pairs[1]} active={duelState.turn === 1 && !won} testID="memory-duel-chip-1" lang={lang} />
           </View>
         ) : (
           <Text style={styles.moves} testID="memory-moves">{t(lang, 'memory.moves', { n: moves })}</Text>
@@ -205,7 +205,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
           duel
             ? winner === 'tie'
               ? t(lang, 'win.memoryTie', { n: duelState.pairs[0] })
-              : t(lang, 'win.memoryWinner', { name: MP_PLAYERS[winner].name })
+              : t(lang, 'win.memoryWinner', { name: t(lang, MP_PLAYERS[winner].name) })
             : t(lang, 'win.memory')
         }
         lang={lang}
@@ -215,7 +215,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
               {([0, 1] as PlayerIx[]).map((ix) => (
                 <View key={ix} style={styles.winStatCol}>
                   <Text style={styles.crown}>{winner === ix || winner === 'tie' ? '👑' : ' '}</Text>
-                  <PlayerChip player={ix} count={duelState.pairs[ix]} active={winner === ix || winner === 'tie'} testID={`memory-win-chip-${ix}`} />
+                  <PlayerChip player={ix} count={duelState.pairs[ix]} active={winner === ix || winner === 'tie'} testID={`memory-win-chip-${ix}`} lang={lang} />
                 </View>
               ))}
             </View>
