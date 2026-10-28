@@ -121,11 +121,6 @@ export function makeSameDiffRound(
     const last = history[history.length - 1];
     available = available.filter((i) => i !== last);
   }
-  if (available.length === 0) {
-    const last = history.length > 0 ? history[history.length - 1] : undefined;
-    available = allIndices.filter((i) => i !== last);
-    if (available.length === 0) available = allIndices;
-  }
   const phraseIdx = available[randInt(rng, available.length)];
   const phraseA = BASE_PHRASES[phraseIdx].map((n) => ({ ...n }));
   const isSame = rng() < 0.5;
