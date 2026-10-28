@@ -23,7 +23,10 @@ vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-native")>();
   return {
     ...actual,
-    useWindowDimensions: () => ({ width: window.innerWidth || 800, height: window.innerHeight || 1000 }),
+    useWindowDimensions: () => ({
+      width: window.innerWidth || 800,
+      height: window.innerHeight || 1000,
+    }),
     View: (props: import("react-native").ViewProps) => {
       if (props.testID === "diff-wrap") {
         lastDiffWrapProps = props;
@@ -157,7 +160,7 @@ describe("DiffGame", () => {
     expect(screen.queryByTestId("diff-hint")).toBeNull();
   });
 
-  it("shows hint button inside hint slot after 20 seconds of inactivity", () => {
+  it("shows hint button inside hint slot after 10 seconds of inactivity", () => {
     vi.useFakeTimers();
     render(
       <DiffGame
@@ -172,7 +175,11 @@ describe("DiffGame", () => {
 
     expect(screen.queryByTestId("diff-hint")).toBeNull();
     act(() => {
-      vi.advanceTimersByTime(20000);
+      vi.advanceTimersByTime(9000);
+    });
+    expect(screen.queryByTestId("diff-hint")).toBeNull();
+    act(() => {
+      vi.advanceTimersByTime(1000);
     });
     const hintBtn = screen.getByTestId("diff-hint");
     expect(hintBtn).toBeDefined();
@@ -193,7 +200,7 @@ describe("DiffGame", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(20000);
+      vi.advanceTimersByTime(10000);
     });
     const hintBtn = screen.getByTestId("diff-hint");
     fireEvent.click(hintBtn);
@@ -247,7 +254,7 @@ describe("DiffGame", () => {
     );
 
     act(() => {
-      vi.advanceTimersByTime(20000);
+      vi.advanceTimersByTime(10000);
     });
 
     const hintBtn = screen.getByTestId("diff-hint");
@@ -276,7 +283,7 @@ describe("DiffGame", () => {
 
     // Also verify unmount cleanup
     act(() => {
-      vi.advanceTimersByTime(20000);
+      vi.advanceTimersByTime(10000);
     });
     const nextHintBtn = screen.getByTestId("diff-hint");
     fireEvent.click(nextHintBtn);
@@ -428,9 +435,15 @@ describe("DiffGame", () => {
   it("renders in landscape mode correctly", () => {
     const origW = window.innerWidth;
     const origH = window.innerHeight;
-    Object.defineProperty(window, "innerWidth", { value: 1000, configurable: true });
-    Object.defineProperty(window, "innerHeight", { value: 500, configurable: true });
-    
+    Object.defineProperty(window, "innerWidth", {
+      value: 1000,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 500,
+      configurable: true,
+    });
+
     try {
       render(
         <DiffGame
@@ -443,16 +456,25 @@ describe("DiffGame", () => {
       );
       expect(lastDiffWrapProps?.style).toBeDefined();
     } finally {
-      Object.defineProperty(window, "innerWidth", { value: origW, configurable: true });
-      Object.defineProperty(window, "innerHeight", { value: origH, configurable: true });
+      Object.defineProperty(window, "innerWidth", {
+        value: origW,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: origH,
+        configurable: true,
+      });
     }
   });
 
   it("bypasses image loading check on non-DOM platforms", () => {
     vi.useFakeTimers();
     const originalQuerySelectorAll = Element.prototype.querySelectorAll;
-    Object.defineProperty(Element.prototype, "querySelectorAll", { value: undefined, configurable: true });
-    
+    Object.defineProperty(Element.prototype, "querySelectorAll", {
+      value: undefined,
+      configurable: true,
+    });
+
     try {
       render(
         <DiffGame
@@ -468,7 +490,10 @@ describe("DiffGame", () => {
         vi.advanceTimersByTime(100);
       });
     } finally {
-      Object.defineProperty(Element.prototype, "querySelectorAll", { value: originalQuerySelectorAll, configurable: true });
+      Object.defineProperty(Element.prototype, "querySelectorAll", {
+        value: originalQuerySelectorAll,
+        configurable: true,
+      });
     }
     expect(screen.queryByTestId("diff-loading")).toBeNull();
   });
@@ -488,9 +513,15 @@ describe("DiffGame", () => {
     expect(screen.getByTestId("diff-loading")).toBeDefined();
 
     const imgs = document.querySelectorAll("img");
-    imgs.forEach(img => {
-      Object.defineProperty(img, "complete", { value: true, configurable: true });
-      Object.defineProperty(img, "naturalWidth", { value: 100, configurable: true });
+    imgs.forEach((img) => {
+      Object.defineProperty(img, "complete", {
+        value: true,
+        configurable: true,
+      });
+      Object.defineProperty(img, "naturalWidth", {
+        value: 100,
+        configurable: true,
+      });
     });
 
     act(() => {
@@ -518,23 +549,23 @@ describe("DiffGame", () => {
     for (let i = 0; i < total; i++) {
       fireEvent.click(screen.getByTestId(`left-target-${i}`));
     }
-    
+
     act(() => {
       vi.advanceTimersByTime(2000);
     });
-    
+
     const nextBtn = screen.getByTestId("play-again");
     fireEvent.click(nextBtn);
     expect(onPickScene).toHaveBeenCalled();
   });
 
   it("renders a legacy scene without pool", () => {
-    const legacyScene: typeof manifest.diff[0] = {
+    const legacyScene: (typeof manifest.diff)[0] = {
       id: "legacy",
       name: "Legacy",
       w: 800,
       h: 600,
-      diffs: [{ x: 0, y: 0, w: 10, h: 10, what: "test" }]
+      diffs: [{ x: 0, y: 0, w: 10, h: 10, what: "test" }],
     };
     manifest.diff.push(legacyScene);
     try {
@@ -551,6 +582,42 @@ describe("DiffGame", () => {
     } finally {
       manifest.diff.pop();
     }
+  });
+
+  it("renders visual progress slots and updates slots and score badge as differences are found", () => {
+    const scene = manifest.diff[0];
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("diff-progress")).toBeDefined();
+    expect(screen.getByTestId("diff-score").textContent).toBe("🔍 0/4");
+
+    const emptySlotsInitial = screen.getAllByTestId("diff-slot-empty");
+    expect(emptySlotsInitial).toHaveLength(4);
+    expect(screen.queryAllByTestId("diff-slot-filled")).toHaveLength(0);
+
+    // Find the first difference
+    fireEvent.click(screen.getByTestId("left-target-0"));
+
+    expect(screen.getByTestId("diff-score").textContent).toBe("🔍 1/4");
+    expect(screen.getAllByTestId("diff-slot-filled")).toHaveLength(1);
+    expect(screen.getAllByTestId("diff-slot-empty")).toHaveLength(3);
+
+    // Find remaining differences
+    fireEvent.click(screen.getByTestId("left-target-1"));
+    fireEvent.click(screen.getByTestId("left-target-2"));
+    fireEvent.click(screen.getByTestId("left-target-3"));
+
+    expect(screen.getByTestId("diff-score").textContent).toBe("🔍 4/4");
+    expect(screen.getAllByTestId("diff-slot-filled")).toHaveLength(4);
+    expect(screen.queryAllByTestId("diff-slot-empty")).toHaveLength(0);
   });
 });
 describe("DiffGame scene picker surprise fallback", () => {

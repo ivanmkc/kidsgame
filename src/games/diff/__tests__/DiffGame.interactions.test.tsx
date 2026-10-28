@@ -273,4 +273,130 @@ describe("DiffGame spoken prompt across scenes", () => {
     // Victory overlay displays translated message
     expect(screen.getByText(t("ja", "win.diff"))).toBeDefined();
   });
+
+  describe("prompt replay", () => {
+    it("renders prompt replay button with localized accessibilityLabel following lang", () => {
+      const scene1 = manifest.diff[0].id;
+      const { rerender } = render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={scene1}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="en"
+        />,
+      );
+
+      const replayBtn = screen.getByTestId("diff-replay");
+      expect(replayBtn).toBeDefined();
+      expect(replayBtn.getAttribute("role")).toBe("button");
+      expect(replayBtn.getAttribute("aria-label")).toBe(
+        t("en", "spell.hearAgain"),
+      );
+
+      rerender(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={scene1}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="ja"
+        />,
+      );
+      expect(screen.getByTestId("diff-replay").getAttribute("aria-label")).toBe(
+        t("ja", "spell.hearAgain"),
+      );
+    });
+
+    it("replays spoken prompt on tap and plays sfx.tap", () => {
+      const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+      const tapSpy = vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+      const scene1 = manifest.diff[0].id;
+
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={scene1}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="en"
+        />,
+      );
+
+      expect(saySpy).toHaveBeenCalledWith("Find all the sneaky changes!");
+      saySpy.mockClear();
+      tapSpy.mockClear();
+
+      fireEvent.click(screen.getByTestId("diff-replay"));
+
+      expect(tapSpy).toHaveBeenCalledOnce();
+      expect(saySpy).toHaveBeenCalledWith("Find all the sneaky changes!");
+    });
+
+    it("replays localized spoken prompt in non-English languages", () => {
+      const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+      const scene1 = manifest.diff[0].id;
+
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={scene1}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="ja"
+        />,
+      );
+
+      saySpy.mockClear();
+
+      fireEvent.click(screen.getByTestId("diff-replay"));
+
+      expect(saySpy).toHaveBeenCalledWith(
+        "こっそり ちがうところを ぜんぶ みつけよう！",
+      );
+    });
+
+    it("disables prompt replay button and does not replay audio when game is won", () => {
+      const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+      const tapSpy = vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+      const scene1 = manifest.diff[0].id;
+
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={scene1}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="en"
+        />,
+      );
+
+      // Complete all differences to trigger victory
+      const targets = screen
+        .getAllByRole("button")
+        .filter((el) =>
+          el.getAttribute("data-testid")?.startsWith("left-target-"),
+        );
+      for (const target of targets) {
+        fireEvent.click(target);
+      }
+
+      expect(screen.getByTestId("win-overlay")).toBeDefined();
+      saySpy.mockClear();
+      tapSpy.mockClear();
+
+      const replayBtn = screen.getByTestId("diff-replay");
+      expect(replayBtn.getAttribute("aria-disabled")).toBe("true");
+
+      fireEvent.click(replayBtn);
+
+      expect(tapSpy).not.toHaveBeenCalled();
+      expect(saySpy).not.toHaveBeenCalled();
+    });
+  });
 });
