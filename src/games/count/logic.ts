@@ -144,15 +144,17 @@ export function makeCountRound(rng: Rng, d: Difficulty): CountRound {
 }
 
 /**
- * Mark a critter as tapped. Returns the original array untouched if the critter
- * is already tapped or index is out of bounds, so React can skip re-rendering.
+ * Mark a critter as tapped with the next sequential ordinal count (1, 2, ...).
+ * Returns the original array untouched if the critter is already tapped or
+ * index is out of bounds, so React can skip re-rendering.
  */
-export function applyTap(tapped: boolean[], index: number): boolean[] {
-  if (index < 0 || index >= tapped.length || tapped[index]) {
+export function applyTap(tapped: number[], index: number): number[] {
+  if (index < 0 || index >= tapped.length || tapped[index] > 0) {
     return tapped;
   }
   const next = tapped.slice();
-  next[index] = true;
+  const nextCount = tapped.filter((n) => n > 0).length + 1;
+  next[index] = nextCount;
   return next;
 }
 
@@ -177,7 +179,7 @@ export interface PickDeps {
   setLocked: (l: boolean) => void;
   setRound: (r: CountRound) => void;
   setRoundNo: (updater: (prev: number) => number) => void;
-  setTapped: (t: boolean[]) => void;
+  setTapped: (t: number[]) => void;
   setPhase: (p: "count" | "quiz") => void;
   setWrongPick: (
     w: number | null | ((prev: number | null) => number | null),
@@ -202,7 +204,7 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
         const nr = deps.makeNextRound();
         deps.setRound(nr);
         deps.setRoundNo((r) => r + 1);
-        deps.setTapped(Array.from({ length: nr.n }, () => false));
+        deps.setTapped(Array.from({ length: nr.n }, () => 0));
         deps.setPhase("count");
         deps.setWrongPick(null);
       } else {

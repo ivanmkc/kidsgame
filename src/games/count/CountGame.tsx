@@ -50,8 +50,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     makeCountRound(rngRef.current, difficulty),
   );
   const [roundNo, setRoundNo] = useState(0);
-  const [tapped, setTapped] = useState<boolean[]>(() =>
-    Array.from({ length: round.n }, () => false),
+  const [tapped, setTapped] = useState<number[]>(() =>
+    Array.from({ length: round.n }, () => 0),
   );
   const tappedRef = useRef(tapped);
   tappedRef.current = tapped;
@@ -87,7 +87,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     if (next === tappedRef.current) return;
     tappedRef.current = next;
     setTapped((prev) => applyTap(prev, i));
-    const n = next.filter(Boolean).length;
+    const n = next.filter((x) => x > 0).length;
     sfx.tap();
     const line = numberWord(lang, n).t;
     if (n >= round.n) {
@@ -100,7 +100,9 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     }
   };
 
+  const [locked, setLocked] = useState(false);
   const lockedRef = useRef(false);
+  lockedRef.current = locked;
 
   const pickAnswer = (v: number) => {
     applyPickAnswer(
@@ -132,6 +134,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         setRoundNo,
         setLocked: (l: boolean) => {
           lockedRef.current = l;
+          setLocked(l);
         },
         setRound,
         setTapped,
@@ -145,11 +148,12 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     setTimerKey((k) => k + 1);
     lockedRef.current = false;
+    setLocked(false);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     const nr = makeCountRound(rngRef.current, difficulty);
     setRound(nr);
     setRoundNo((r) => r + 1);
-    setTapped(Array.from({ length: nr.n }, () => false));
+    setTapped(Array.from({ length: nr.n }, () => 0));
     setScore(0);
     setWon(false);
     setPhase("count");
@@ -160,11 +164,12 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 180, stageW * 0.85);
   const critterSize = stageCritterSize(round.n, stageW, stageH);
+  const promptText = t(lang, "shell.count.sub");
 
   return (
     <GameShell
       title={t(lang, "shell.count.title")}
-      subtitle={t(lang, "shell.count.sub")}
+      subtitle={promptText}
       onBack={onHome}
       lang={lang}
       right={
@@ -208,12 +213,13 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
                 key={`${roundNo}-${i}`}
                 icon={round.icon}
                 lang={lang}
-                tapped={tapped[i]}
+                order={tapped[i]}
                 size={critterSize}
                 left={left}
                 top={top}
                 onTap={() => tapCritter(i)}
-                testID={`count-critter-${i}${tapped[i] ? "-tapped" : ""}`}
+                testID={`count-critter-${i}${tapped[i] > 0 ? "-tapped" : ""}`}
+                badgeTestID={`count-badge-${i}`}
               />
             );
           })}
@@ -227,7 +233,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
                 say(PROMPTS[lang]);
               }}
               accessibilityRole="button"
-              accessibilityLabel={PROMPTS[lang]}
+              accessibilityLabel={promptText}
               style={({ pressed }) => [
                 styles.promptCard,
                 shadows.soft,
@@ -235,7 +241,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               ]}
               testID="count-prompt"
             >
-              <Text style={styles.promptText}>{PROMPTS[lang]}</Text>
+              <Text style={styles.promptText}>{promptText}</Text>
               <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
             </Pressable>
             <View style={styles.choiceRow}>
@@ -250,6 +256,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
                     styles.choice,
                     shadows.soft,
                     wrongPick === c && styles.choiceWrong,
+                    locked && c === round.answer && styles.choiceCorrect,
                     pressed && styles.pressed,
                   ]}
                 >
@@ -260,7 +267,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
           </View>
         ) : (
           <Text style={styles.hint} testID="count-progress">
-            {tapped.filter(Boolean).length} / {round.n}
+            {tapped.filter((x) => x > 0).length} / {round.n}
           </Text>
         )}
       </View>
@@ -279,28 +286,31 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
 interface CritterProps {
   icon: string;
   lang: Lang;
-  tapped: boolean;
+  order: number;
   size: number;
   left: number;
   top: number;
   onTap: () => void;
   testID: string;
+  badgeTestID?: string;
 }
 
 function Critter({
   icon,
   lang,
-  tapped,
+  order,
   size,
   left,
   top,
   onTap,
   testID,
+  badgeTestID,
 }: CritterProps) {
   const scale = useRef(new Animated.Value(1)).current;
   const wasTapped = useRef(false);
+  const isTapped = order > 0;
   useEffect(() => {
-    if (tapped && !wasTapped.current) {
+    if (isTapped && !wasTapped.current) {
       wasTapped.current = true;
       scale.setValue(1.35);
       Animated.spring(scale, {
@@ -309,7 +319,7 @@ function Critter({
         friction: 4,
       }).start();
     }
-  }, [tapped, scale]);
+  }, [isTapped, scale]);
   return (
     <Pressable
       onPress={onTap}
@@ -323,12 +333,16 @@ function Critter({
       >
         <Image
           source={SPOTIT_ICONS[icon]}
-          style={{ width: "100%", height: "100%", opacity: tapped ? 0.55 : 1 }}
+          style={{
+            width: "100%",
+            height: "100%",
+            opacity: isTapped ? 0.55 : 1,
+          }}
           resizeMode="contain"
         />
-        {tapped ? (
-          <View style={styles.check} pointerEvents="none">
-            <Text style={styles.checkText}>✓</Text>
+        {isTapped ? (
+          <View style={styles.badge} pointerEvents="none" testID={badgeTestID}>
+            <Text style={styles.badgeText}>{order}</Text>
           </View>
         ) : null}
       </Animated.View>
@@ -389,26 +403,31 @@ const styles = StyleSheet.create({
     borderColor: colors.red,
     backgroundColor: "rgba(232,86,79,0.14)",
   },
+  choiceCorrect: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.14)",
+  },
   choiceText: { fontFamily: fonts.display, fontSize: 34, color: colors.ink },
   pressed: { transform: [{ scale: 0.94 }] },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14 },
-  check: {
+  badge: {
     position: "absolute",
     right: -4,
     top: -4,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    minWidth: 24,
+    height: 24,
+    borderRadius: 12,
+    paddingHorizontal: 4,
     backgroundColor: colors.green,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
     borderColor: colors.paper,
   },
-  checkText: {
+  badgeText: {
     color: colors.paper,
-    fontFamily: fonts.body,
+    fontFamily: fonts.display,
     fontSize: 14,
-    lineHeight: 15,
+    lineHeight: 16,
   },
 });
