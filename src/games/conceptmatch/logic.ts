@@ -25,7 +25,8 @@ export type ConceptMatchDeck =
   | "numerals-han"
   | "numerals-dots"
   | "shapes-objects"
-  | "animals-sounds";
+  | "animals-sounds"
+  | "mixed";
 
 export const ANIMALS: string[] = ["dog", "cat", "lion", "frog", "pig"];
 
@@ -108,6 +109,7 @@ export function buildBoard(
   deck: ConceptMatchDeck = "letters",
   lang: Lang = "en",
   pairs = 2,
+  excludedConcepts?: ReadonlySet<string>,
 ): ConceptMatchCard[] {
   if (deck === "letters") {
     const pool = shuffle(rng, ALPHABET);
@@ -118,7 +120,7 @@ export function buildBoard(
       if (chosen.length >= pairs) {
         break;
       }
-      if (excluded.has(letter)) {
+      if (excluded.has(letter) || excludedConcepts?.has(letter)) {
         continue;
       }
       chosen.push(letter);
@@ -158,7 +160,11 @@ export function buildBoard(
         break;
       }
       const text = wordFor(entry, lang).text;
-      if (excludedIcons.has(entry.icon) || excludedWords.has(text)) {
+      if (
+        excludedIcons.has(entry.icon) ||
+        excludedWords.has(text) ||
+        excludedConcepts?.has(entry.icon)
+      ) {
         continue;
       }
       chosen.push(entry);
@@ -194,7 +200,9 @@ export function buildBoard(
 
   if (deck === "color-word") {
     const pool = shuffle(rng, COLORS);
-    const chosen = pool.slice(0, pairs);
+    const chosen = pool
+      .filter((entry) => !excludedConcepts?.has(entry.id))
+      .slice(0, pairs);
     const cards: ConceptMatchCard[] = chosen.flatMap((entry) => {
       const word = t(lang, `color.${entry.id}` as UIKey);
       return [
@@ -312,6 +320,47 @@ export function buildBoard(
     return shuffle(rng, cards);
   }
 
+  if (deck === "mixed") {
+    const availableDecks: ConceptMatchDeck[] = [
+      "letters",
+      "picture-word",
+      "picture-spoken",
+      "color-word",
+    ];
+    const shuffledDecks = shuffle(rng, availableDecks);
+    const numDecks = shuffledDecks.length;
+    const base = Math.floor(pairs / numDecks);
+    const remainder = pairs % numDecks;
+    const cards: ConceptMatchCard[] = [];
+    const usedConcepts = new Set<string>(excludedConcepts);
+
+    for (let i = 0; i < numDecks; i++) {
+      const count = base + (i < remainder ? 1 : 0);
+      if (count > 0) {
+        const deckCards = buildBoard(
+          rng,
+          shuffledDecks[i],
+          lang,
+          count,
+          usedConcepts,
+        );
+        cards.push(...deckCards);
+        for (const card of deckCards) {
+          usedConcepts.add(card.conceptId);
+          const glyphTwin = GLYPH_TWINS[card.conceptId];
+          if (glyphTwin) {
+            usedConcepts.add(glyphTwin);
+          }
+          const wordEntry = WORDS.find((w) => w.icon === card.conceptId);
+          for (const nameTwin of wordEntry?.nameTwins ?? []) {
+            usedConcepts.add(nameTwin);
+          }
+        }
+      }
+    }
+    return shuffle(rng, cards);
+  }
+
   throw new Error(`Unsupported deck: ${deck}`);
 }
 
@@ -388,6 +437,16 @@ export function updateCardLang(
       ...card,
       speech,
     };
+  }
+
+  if (deck === "mixed") {
+    if (COLORS.some((c) => c.id === card.conceptId)) {
+      return updateCardLang(card, "color-word", lang);
+    }
+    if (WORDS.some((w) => w.icon === card.conceptId)) {
+      return updateCardLang(card, "picture-word", lang);
+    }
+    return card;
   }
 
   return card;

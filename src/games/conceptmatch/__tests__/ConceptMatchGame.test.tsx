@@ -618,4 +618,46 @@ describe("ConceptMatchGame", () => {
     // Win message must replay in the new language
     expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memory"));
   });
+
+  it("renders a mixed deck game board and allows flipping cards", async () => {
+    const mixedBoard: logic.ConceptMatchCard[] = [
+      {
+        key: "A-upper",
+        conceptId: "A",
+        display: { type: "text", text: "A" },
+        speech: "A",
+      },
+      {
+        key: "A-lower",
+        conceptId: "A",
+        display: { type: "text", text: "a" },
+        speech: "A",
+      },
+      {
+        key: "red-color",
+        conceptId: "red",
+        display: { type: "color", color: "#E53935" },
+        speech: "red",
+      },
+      {
+        key: "red-word",
+        conceptId: "red",
+        display: { type: "text", text: "red" },
+        speech: "red",
+      },
+    ];
+    vi.spyOn(logic, "buildBoard").mockReturnValue(mixedBoard);
+
+    render(<ConceptMatchGame deck="mixed" pairs={2} lang="en" />);
+
+    expect(screen.getByTestId("concept-board")).toBeDefined();
+    expect(screen.getByTestId("concept-card-A-upper")).toBeDefined();
+    expect(screen.getByTestId("concept-card-red-color")).toBeDefined();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("concept-card-red-color"));
+    });
+    expect(sound.say).toHaveBeenCalledWith("red");
+    expect(screen.getByTestId("card-color-red-color")).toBeDefined();
+  });
 });
