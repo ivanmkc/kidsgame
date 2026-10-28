@@ -139,7 +139,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!won) {
-      const timer = setTimeout(() => playRound(round), 400);
+      const delay = phase === "transition" ? 1000 : 400;
+      const timer = setTimeout(() => playRound(round), delay);
       return () => {
         clearTimeout(timer);
         if (gapTimer.current) clearTimeout(gapTimer.current);
@@ -147,7 +148,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         stopSequence();
       };
     }
-  }, [round, won, playRound]);
+  }, [round, won, playRound]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "same" | "different") => {
     if (won || phase !== "pick" || lockedRef.current) return;
