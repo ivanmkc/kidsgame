@@ -36,6 +36,25 @@ describe('sumsLayout', () => {
     }
   });
 
+  it('sizes critters so 4 rows on higher difficulties (total >= 16) never vertically collide or overlap', () => {
+    const viewports = [
+      { w: 800, h: 360 },
+      { w: 667, h: 375 },
+      { w: 568, h: 320 },
+      { w: 844, h: 390 },
+      { w: 360, h: 800 },
+      { w: 320, h: 480 },
+      { w: 432, h: 450 },
+      { w: 320, h: 400 },
+    ];
+    for (const { w, h } of viewports) {
+      const layout = sumsLayout(w, h, 16);
+      // 4 rows of critters must fit within stageH with vertical clearance
+      expect(4 * layout.critterSize).toBeLessThan(layout.stageH);
+      expect(layout.critterSize).toBeGreaterThanOrEqual(30);
+    }
+  });
+
   it('uses standard vertical layout and preserves stage height on portrait screens', () => {
     const portrait360 = sumsLayout(360, 800, 5);
     expect(portrait360.isLandscape).toBe(false);
