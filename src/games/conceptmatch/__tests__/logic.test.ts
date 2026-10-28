@@ -873,6 +873,77 @@ describe("conceptmatch/logic", () => {
       });
     });
 
+    describe("mixed deck", () => {
+      it("defaults to 2 pairs (4 cards)", () => {
+        const rng = makeRng(42);
+        const board = buildBoard(rng, "mixed");
+        expect(board).toHaveLength(4);
+      });
+
+      it("returns 12 cards drawn from multiple decks for 6 pairs", () => {
+        const rng = makeRng(123);
+        const board = buildBoard(rng, "mixed", "en", 6);
+        expect(board).toHaveLength(12);
+
+        const displays = new Set(board.map((c) => c.display.type));
+        // Mixed deck should contain a mixture of display types (e.g. text, icon, color)
+        expect(displays.size).toBeGreaterThan(1);
+      });
+
+      it("contains a mixture of letters, vocabulary, and color pairs", () => {
+        const rng = makeRng(77);
+        const board = buildBoard(rng, "mixed", "en", 6);
+
+        // Check that pairs belong to at least 2 distinct decks
+        const hasLetter = board.some((c) => ALPHABET.includes(c.conceptId));
+        const hasColor = board.some((c) =>
+          COLORS.some((color) => color.id === c.conceptId),
+        );
+        const hasWord = board.some((c) =>
+          WORDS.some((w) => w.icon === c.conceptId),
+        );
+
+        // For 6 pairs across 4 subdecks, at least 2 of these categories must be present
+        const categoriesPresent = [hasLetter, hasColor, hasWord].filter(
+          Boolean,
+        ).length;
+        expect(categoriesPresent).toBeGreaterThanOrEqual(2);
+      });
+
+      it("produces exactly 2 matching cards for each conceptId", () => {
+        const rng = makeRng(555);
+        const board = buildBoard(rng, "mixed", "en", 6);
+        const counts = new Map<string, number>();
+        for (const card of board) {
+          counts.set(card.conceptId, (counts.get(card.conceptId) ?? 0) + 1);
+        }
+        for (const count of counts.values()) {
+          expect(count).toBe(2);
+        }
+      });
+
+      it("is reproducible with the same RNG seed", () => {
+        const board1 = buildBoard(makeRng(999), "mixed", "en", 6);
+        const board2 = buildBoard(makeRng(999), "mixed", "en", 6);
+        expect(board1).toEqual(board2);
+      });
+
+      it("produces different layouts with different RNG seeds", () => {
+        const board1 = buildBoard(makeRng(1), "mixed", "en", 6);
+        const board2 = buildBoard(makeRng(2), "mixed", "en", 6);
+        expect(board1).not.toEqual(board2);
+      });
+
+      it("produces unique keys for every card across multiple seeds", () => {
+        for (let seed = 0; seed < 100; seed++) {
+          const board = buildBoard(makeRng(seed), "mixed", "en", 6);
+          const keys = board.map((c) => c.key);
+          const uniqueKeys = new Set(keys);
+          expect(uniqueKeys.size).toBe(board.length);
+        }
+      });
+    });
+
     it("throws for unsupported decks", () => {
       const rng = makeRng(1);
       expect(() =>
@@ -1008,6 +1079,34 @@ describe("conceptmatch/logic", () => {
       expect(() => updateCardLang(animalCard, "animals-sounds", "ja")).toThrow(
         "Word entry not found for animal concept: nonexistent_animal",
       );
+    });
+
+    it("updates color and word cards while preserving letters in mixed deck", () => {
+      const board = buildBoard(makeRng(123), "mixed", "en", 6);
+      const updated = updateBoardLang(board, "mixed", "ja");
+      expect(updated).toHaveLength(board.length);
+
+      for (let i = 0; i < board.length; i++) {
+        const original = board[i];
+        const card = updated[i];
+        if (ALPHABET.includes(card.conceptId)) {
+          expect(card.speech).toBe(original.speech);
+          expect(card.display).toEqual(original.display);
+        } else if (COLORS.some((c) => c.id === card.conceptId)) {
+          const expectedWord = t("ja", `color.${card.conceptId}` as UIKey);
+          expect(card.speech).toBe(expectedWord);
+          if (card.display.type === "text") {
+            expect(card.display.text).toBe(expectedWord);
+          }
+        } else if (WORDS.some((w) => w.icon === card.conceptId)) {
+          const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+          const expectedWord = wordFor(entry, "ja").text;
+          expect(card.speech).toBe(expectedWord);
+          if (card.display.type === "text") {
+            expect(card.display.text).toBe(expectedWord);
+          }
+        }
+      }
     });
   });
 });
