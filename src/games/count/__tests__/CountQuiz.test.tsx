@@ -1,11 +1,19 @@
 // @vitest-environment happy-dom
-import React from 'react';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import * as sound from '../../../sound';
-import { CountGame } from '../CountGame';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import * as sound from "../../../sound";
+import { t } from "../../../i18n";
+import { CountGame } from "../CountGame";
+import { PROMPTS } from "../logic";
 
-describe('CountGame quiz phase', () => {
+describe("CountGame quiz phase", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -15,9 +23,9 @@ describe('CountGame quiz phase', () => {
     vi.restoreAllMocks();
   });
 
-  it('clears previous timeouts on double tap of wrong answer so audio does not stutter', () => {
-    const saySpy = vi.spyOn(sound, 'say').mockReturnValue();
-    vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => {
+  it("clears previous timeouts on double tap of wrong answer so audio does not stutter", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
       if (cb) cb();
     });
 
@@ -29,7 +37,9 @@ describe('CountGame quiz phase', () => {
     }
 
     const choices = screen.queryAllByTestId(/count-choice-/);
-    const wrongChoice = choices.find((c) => !c.getAttribute('data-testid')?.includes('-answer'));
+    const wrongChoice = choices.find(
+      (c) => !c.getAttribute("data-testid")?.includes("-answer"),
+    );
     expect(wrongChoice).toBeDefined();
 
     saySpy.mockClear();
@@ -44,11 +54,13 @@ describe('CountGame quiz phase', () => {
     expect(saySpy).toHaveBeenCalledTimes(1);
   });
 
-  it('clears pending wrong-answer timeout when correct answer is tapped immediately', () => {
-    const saySpy = vi.spyOn(sound, 'say').mockReturnValue();
-    const sayThenSpy = vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => {
-      if (cb) cb();
-    });
+  it("clears pending wrong-answer timeout when correct answer is tapped immediately", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_, cb) => {
+        if (cb) cb();
+      });
 
     render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -58,8 +70,12 @@ describe('CountGame quiz phase', () => {
     }
 
     const choices = screen.queryAllByTestId(/count-choice-/);
-    const wrongChoice = choices.find((c) => !c.getAttribute('data-testid')?.includes('-answer'));
-    const correctChoice = choices.find((c) => c.getAttribute('data-testid')?.includes('-answer'));
+    const wrongChoice = choices.find(
+      (c) => !c.getAttribute("data-testid")?.includes("-answer"),
+    );
+    const correctChoice = choices.find((c) =>
+      c.getAttribute("data-testid")?.includes("-answer"),
+    );
     expect(wrongChoice).toBeDefined();
     expect(correctChoice).toBeDefined();
 
@@ -78,13 +94,15 @@ describe('CountGame quiz phase', () => {
     expect(saySpy).not.toHaveBeenCalled();
   });
 
-  it('clears pending wrong-answer timeouts on unmount', () => {
-    const saySpy = vi.spyOn(sound, 'say').mockReturnValue();
-    vi.spyOn(sound, 'sayThen').mockImplementation((_, cb) => {
+  it("clears pending wrong-answer timeouts on unmount", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
       if (cb) cb();
     });
 
-    const { unmount } = render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+    const { unmount } = render(
+      <CountGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
 
     const critters = screen.queryAllByTestId(/count-critter/);
     for (const c of critters) {
@@ -92,7 +110,9 @@ describe('CountGame quiz phase', () => {
     }
 
     const choices = screen.queryAllByTestId(/count-choice-/);
-    const wrongChoice = choices.find((c) => !c.getAttribute('data-testid')?.includes('-answer'));
+    const wrongChoice = choices.find(
+      (c) => !c.getAttribute("data-testid")?.includes("-answer"),
+    );
     expect(wrongChoice).toBeDefined();
 
     saySpy.mockClear();
@@ -106,5 +126,92 @@ describe('CountGame quiz phase', () => {
 
     expect(saySpy).not.toHaveBeenCalled();
   });
-});
 
+  it("provides a tappable prompt card to replay audio and displays hear again hint", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      if (cb) cb();
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const critters = screen.queryAllByTestId(/count-critter/);
+    for (const c of critters) {
+      fireEvent.click(c);
+    }
+
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    saySpy.mockClear();
+
+    const promptBtn = screen.getByTestId("count-prompt");
+    expect(promptBtn.getAttribute("role")).toBe("button");
+    expect(promptBtn.getAttribute("aria-label")).toBe(PROMPTS.en);
+    expect(screen.getByText(t("en", "spell.hearAgain"))).toBeDefined();
+
+    fireEvent.click(promptBtn);
+    expect(saySpy).toHaveBeenCalledTimes(1);
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+  });
+
+  it("does not replay prompt audio when locked during transition", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    let queuedCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((lines, cb) => {
+      if (!queuedCb && lines.length === 1) {
+        cb?.();
+      } else {
+        queuedCb = cb;
+      }
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const critters = screen.queryAllByTestId(/count-critter/);
+    for (const c of critters) {
+      fireEvent.click(c);
+    }
+
+    saySpy.mockClear();
+    const promptBtn = screen.getByTestId("count-prompt");
+
+    const choices = screen.queryAllByTestId(/count-choice-/);
+    const correctChoice = choices.find((c) =>
+      c.getAttribute("data-testid")?.includes("-answer"),
+    );
+    expect(correctChoice).toBeDefined();
+    fireEvent.click(correctChoice!);
+
+    fireEvent.click(promptBtn);
+    expect(saySpy).not.toHaveBeenCalled();
+
+    act(() => {
+      queuedCb?.();
+    });
+  });
+
+  it("displays Japanese prompt and hearAgain hint, and replays Japanese prompt when tapped", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      if (cb) cb();
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    const critters = screen.queryAllByTestId(/count-critter/);
+    for (const c of critters) {
+      fireEvent.click(c);
+    }
+
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    saySpy.mockClear();
+
+    const promptBtn = screen.getByTestId("count-prompt");
+    expect(promptBtn.getAttribute("role")).toBe("button");
+    expect(promptBtn.getAttribute("aria-label")).toBe(PROMPTS.ja);
+    expect(screen.getByText(t("ja", "spell.hearAgain"))).toBeDefined();
+
+    fireEvent.click(promptBtn);
+    expect(saySpy).toHaveBeenCalledTimes(1);
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+  });
+});

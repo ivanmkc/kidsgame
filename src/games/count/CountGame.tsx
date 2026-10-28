@@ -220,12 +220,24 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         </View>
         {phase === "quiz" ? (
           <View style={styles.quiz}>
-            <View
-              style={[styles.promptCard, shadows.soft]}
+            <Pressable
+              disabled={won}
+              onPress={() => {
+                if (won || lockedRef.current) return;
+                say(PROMPTS[lang]);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={PROMPTS[lang]}
+              style={({ pressed }) => [
+                styles.promptCard,
+                shadows.soft,
+                pressed && styles.pressed,
+              ]}
               testID="count-prompt"
             >
               <Text style={styles.promptText}>{PROMPTS[lang]}</Text>
-            </View>
+              <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
+            </Pressable>
             <View style={styles.choiceRow}>
               {round.choices.map((c) => (
                 <Pressable
@@ -348,12 +360,19 @@ const styles = StyleSheet.create({
     borderColor: darken(colors.gold, 0.15),
     paddingVertical: 10,
     paddingHorizontal: 22,
+    alignItems: "center",
+    gap: 2,
   },
   promptText: {
     fontFamily: fonts.display,
     fontSize: 22,
     color: colors.ink,
     textAlign: "center",
+  },
+  hearHint: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 12,
+    color: colors.inkSoft,
   },
   choiceRow: { flexDirection: "row", gap: 14 },
   choice: {
