@@ -348,11 +348,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
           {round.bells.map((bell, i) => (
             <Animated.View
               key={i}
-              style={
+              style={[
+                { marginBottom: i * (bellSize * 0.2) },
                 phase === "play"
                   ? { transform: [{ scale: bellScale }] }
                   : undefined
-              }
+              ]}
             >
               <Pressable
                 onPress={() => onBellTap(i)}

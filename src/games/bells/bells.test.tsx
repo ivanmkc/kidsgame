@@ -49,7 +49,7 @@ describe("BellsGame", () => {
 
   it("replay button restarts demo and clears taps", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0]
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 1]
     const playNoteSpy = vi
       .spyOn(music, "playNote")
       .mockImplementation(() => {});
@@ -156,10 +156,12 @@ describe("BellsGame", () => {
     playNoteSpy.mockClear();
 
     const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
     // Rapidly tap bell-0 twice in the same tick / render cycle
     act(() => {
       fireEvent.click(bell0);
-      fireEvent.click(bell0);
+      
+      fireEvent.click(bell1);
     });
 
     expect(screen.getByTestId("bells-score").textContent).toContain("1/5");
@@ -184,12 +186,15 @@ describe("BellsGame", () => {
     playNoteSpy.mockClear();
 
     const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
     // Rapidly hammer 5 times when sequence length is 2
     act(() => {
       fireEvent.click(bell0);
+      
+      fireEvent.click(bell1);
       fireEvent.click(bell0);
-      fireEvent.click(bell0);
-      fireEvent.click(bell0);
+      
+      fireEvent.click(bell1);
       fireEvent.click(bell0);
     });
 
@@ -244,7 +249,7 @@ describe("BellsGame", () => {
 
   it("rapid wrong sequence plays wrong sfx and resets taps after delay", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence is [0, 0]
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence is [0, 1]
     vi.spyOn(music, "playNote").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
@@ -254,12 +259,11 @@ describe("BellsGame", () => {
     });
 
     const bell0 = screen.getByTestId("bell-0");
-    const bell1 = screen.getByTestId("bell-1");
 
-    // Rapid wrong taps: [0, 1] instead of [0, 0]
+    // Rapid wrong taps: [0, 0] instead of [0, 1]
     act(() => {
       fireEvent.click(bell0);
-      fireEvent.click(bell1);
+      fireEvent.click(bell0);
     });
 
     // Score should not increment
@@ -308,6 +312,7 @@ describe("BellsGame", () => {
       vi.advanceTimersByTime(5000);
     });
 
+    
     const bell1 = screen.getByTestId("bell-1");
     expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
 
@@ -367,7 +372,7 @@ describe("BellsGame", () => {
 
   it("correct sequence triggers success sound and advances round", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0] for easy
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 1] for easy
     const playNoteSpy = vi
       .spyOn(music, "playNote")
       .mockImplementation(() => {});
@@ -381,8 +386,10 @@ describe("BellsGame", () => {
     playNoteSpy.mockClear();
 
     const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
     fireEvent.click(bell0);
-    fireEvent.click(bell0);
+      
+      fireEvent.click(bell1);
 
     expect(goodSpy).toHaveBeenCalledTimes(1);
 
@@ -408,12 +415,14 @@ describe("BellsGame", () => {
 
     const bell0 = screen.getByTestId("bell-0");
     const bell1 = screen.getByTestId("bell-1");
+    
 
     // Click 1, 0, 0 in a single act() — wrong first tap must block subsequent taps
     act(() => {
       fireEvent.click(bell1);
       fireEvent.click(bell0);
-      fireEvent.click(bell0);
+      
+      fireEvent.click(bell1);
     });
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
@@ -436,6 +445,7 @@ describe("BellsGame", () => {
 
     const bell0 = screen.getByTestId("bell-0");
     const bell1 = screen.getByTestId("bell-1");
+    
 
     act(() => {
       fireEvent.click(bell0);
@@ -618,7 +628,7 @@ describe("BellsGame", () => {
 
   it("does not trigger sparkles on intermediate taps and keeps sparkles past 250ms on sequence completion", () => {
     vi.useFakeTimers();
-    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0] for easy
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 1] for easy
     vi.spyOn(music, "playNote").mockImplementation(() => {});
     vi.spyOn(sfx, "good").mockImplementation(() => {});
 
@@ -630,6 +640,7 @@ describe("BellsGame", () => {
     });
 
     const bell0 = screen.getByTestId("bell-0");
+    const bell1 = screen.getByTestId("bell-1");
 
     // Before any tap, no sparkles should be rendered
     expect(screen.queryAllByText(/[✨⭐]/)).toHaveLength(0);
@@ -655,7 +666,7 @@ describe("BellsGame", () => {
 
     // Second tap (completes sequence): triggers sparkles
     act(() => {
-      fireEvent.click(bell0);
+      fireEvent.click(bell1);
     });
 
     // Sparkles should now be rendered

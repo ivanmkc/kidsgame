@@ -86,7 +86,8 @@ describe("BellsGame", () => {
     expect(screen.queryByTestId("win-overlay")).toBeNull();
 
     // Tap second and final bell
-    fireEvent.click(bell0);
+    const bell1 = screen.getByTestId("bell-1");
+    fireEvent.click(bell1);
 
     // Immediate tick: sfx.good fires, but WinOverlay is deferred
     expect(goodSpy).toHaveBeenCalledTimes(1);
@@ -121,7 +122,7 @@ describe("BellsGame", () => {
 
     // In listen phase:
     expect(screen.getByText("Listen...")).toBeTruthy();
-    expect(screen.queryByTestId("replay-button")).toBeNull();
+    expect(screen.queryByTestId("replay-button")).toBeNull(); // it might not be null actually if tests changed
     expect(screen.queryByTestId("tap-dot-row")).toBeNull();
 
     const statusRowListen = screen.getByTestId("bells-status-row");

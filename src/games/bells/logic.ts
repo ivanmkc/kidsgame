@@ -53,8 +53,19 @@ export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
     bells.push({ midi: PENTATONIC[i], color: BELL_COLORS[i] });
   }
   const sequence: number[] = [];
-  for (let i = 0; i < len; i++) {
-    sequence.push(randInt(rng, n));
+  if (d === "easy") {
+    const isAscending = randInt(rng, 2) === 0;
+    if (isAscending) {
+      const start = randInt(rng, n - 1);
+      sequence.push(start, start + 1);
+    } else {
+      const start = randInt(rng, n - 1) + 1;
+      sequence.push(start, start - 1);
+    }
+  } else {
+    for (let i = 0; i < len; i++) {
+      sequence.push(randInt(rng, n));
+    }
   }
   return { bells, sequence };
 }
