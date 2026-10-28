@@ -258,6 +258,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const earPulse = useRef(new Animated.Value(1)).current;
   const drumGlow = useRef(new Animated.Value(0)).current;
   useEffect(() => {
+    let drumLoop: Animated.CompositeAnimation | null = null;
     if (phase === "listen") {
       drumGlow.setValue(0);
       Animated.loop(
@@ -280,7 +281,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       earPulse.stopAnimation();
       earPulse.setValue(1);
       if (phase === "tap") {
-        Animated.loop(
+        drumLoop = Animated.loop(
           Animated.sequence([
             Animated.timing(drumGlow, {
               toValue: 1,
@@ -295,11 +296,15 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
               useNativeDriver: true,
             }),
           ]),
-        ).start();
+        );
+        drumLoop.start();
       }
     }
     return () => {
       earPulse.stopAnimation();
+      if (drumLoop) {
+        drumLoop.stop();
+      }
       drumGlow.stopAnimation();
     };
   }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
