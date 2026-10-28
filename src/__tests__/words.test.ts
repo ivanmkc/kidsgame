@@ -102,4 +102,18 @@ describe("WORDS", () => {
     expect(apple?.sound).toBe("aa");
     expect(octopus?.sound).toBe("ah");
   });
+
+  it("assigns distinct cmnRhyme for apical vowel -zi (lion, monkey, rabbit) vs -i (plane, fox)", () => {
+    const lion = WORDS.find((w) => w.icon === "lion");
+    const monkey = WORDS.find((w) => w.icon === "monkey");
+    const rabbit = WORDS.find((w) => w.icon === "rabbit");
+    const plane = WORDS.find((w) => w.icon === "plane");
+    const fox = WORDS.find((w) => w.icon === "fox");
+
+    expect(lion?.cmnRhyme).toBe("zi");
+    expect(monkey?.cmnRhyme).toBe("zi");
+    expect(rabbit?.cmnRhyme).toBe("zi");
+    expect(plane?.cmnRhyme).toBe("i");
+    expect(fox?.cmnRhyme).toBe("i");
+  });
 });
