@@ -28,6 +28,7 @@ import {
   getInstructionalFeedback,
   nextScoreValue,
   highLowLayout,
+  melodyDotOffsetY,
 } from "./logic";
 
 interface Props {
@@ -309,6 +310,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   listenNote !== null &&
                     listenNote >= 0 &&
                     styles.melodyDotFilled,
+                  { transform: [{ translateY: melodyDotOffsetY(round, 0) }] },
                 ]}
               />
               <View
@@ -318,6 +320,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   listenNote !== null &&
                     listenNote >= 1 &&
                     styles.melodyDotFilled,
+                  { transform: [{ translateY: melodyDotOffsetY(round, 1) }] },
                 ]}
               />
             </View>
@@ -447,7 +450,13 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: colors.ink,
   },
-  melodyDotRow: { flexDirection: "row", gap: 12 },
+  melodyDotRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    height: 60,
+  },
   melodyDot: {
     width: 16,
     height: 16,
