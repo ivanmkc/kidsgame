@@ -6,7 +6,7 @@ import { GameShell, ScoreChip } from '../../components/GameShell';
 import { SparkleBurst } from '../../components/Sparkles';
 import { WinOverlay } from '../../components/WinOverlay';
 import { Difficulty } from '../../difficulty';
-import { Lang } from '../../lang';
+import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { makeRng } from '../../rng';
 import { say, sayThen, saySequence, sfx } from '../../sound';
@@ -15,7 +15,7 @@ import { useWinLine } from '../winlines';
 import {
   SpellRound, SpellTile,
   charLine, decoyAlphabetFor, decoysFor, linesForWord, makeRound,
-  pickGameWords, wordPool, wordsPerGame,
+  pickGameWords, wordPool,
 } from './logic';
 
 interface Props {
@@ -30,11 +30,11 @@ function iconFor(icon: string): number | undefined {
 }
 
 export function SpellGame({ onHome, difficulty, lang }: Props) {
+  const { isValid } = useLangEpoch(lang);
   // All hooks unconditionally at the top — no early returns.
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const pool = useMemo(() => wordPool(lang, SPOTIT_ICONS, RHYME_ICONS), [lang]);
   const alphabet = useMemo(() => decoyAlphabetFor(lang, pool), [lang, pool]);
-  const totalWords = wordsPerGame(difficulty);
   const decoys = decoysFor(difficulty);
 
   const [gameKey, setGameKey] = useState(0);           // bump on Play Again
@@ -58,6 +58,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     wrongTimer.current = null;
     wrongIdRef.current = null;
     setWrongId(null);
+    setCelebrate(0);
     gameWordsRef.current = pickGameWords(rngRef.current, pool, difficulty);
     setWordIdx(0);
     placedIdsRef.current = [];
@@ -82,6 +83,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   const onTile = (tile: SpellTile) => {
+    if (!isValid()) return;
     const placed = placedIdsRef.current;
     if (won || placed.includes(tile.id)) return;
     if (placed.length >= round.chars.length) return; // guarded during the 1s advance delay
@@ -104,6 +106,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
         setCelebrate((c) => c + 1);
         const { done } = linesForWord(round.word);
         sayThen([charLine(expected, round.word.lang), done], () => {
+          if (!isValid()) return;
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
             setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
@@ -121,6 +124,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       setWrongId(tile.id);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       wrongTimer.current = setTimeout(() => {
+        if (!isValid()) return;
         if (wrongIdRef.current === tile.id) {
           wrongIdRef.current = null;
         }

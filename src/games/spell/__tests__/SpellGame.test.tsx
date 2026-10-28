@@ -11,6 +11,8 @@ import {
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import { t } from "../../../i18n";
 import { SpellGame } from "../SpellGame";
 import * as logic from "../logic";
@@ -707,6 +709,256 @@ describe("SpellGame", () => {
 
     const tileText = within(tile).getByText("C");
     expect(tileText.style.fontSize).toBe("32px");
+  });
+
+  describe("language switch safety", () => {
+    function SpellGameTestHarness({
+      initialLang = "en",
+      difficulty = "easy",
+    }: {
+      initialLang?: Lang;
+      difficulty?: "easy" | "medium" | "hard";
+    }) {
+      const [lang, setLang] = React.useState<Lang>(initialLang);
+      const onCycle = () => {
+        setLang((prev) => (prev === "en" ? "ja" : prev === "ja" ? "cmn" : "en"));
+      };
+      return (
+        <LangContext.Provider value={{ lang, onCycle }}>
+          <SpellGame onHome={() => {}} difficulty={difficulty} lang={lang} />
+        </LangContext.Provider>
+      );
+    }
+
+    it("cancels pending wrong wobble timer when language switches mid-wobble", () => {
+      vi.spyOn(sound, "stopNarration");
+      vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, pool) => {
+        const lang = pool[0]?.lang ?? "en";
+        if (lang === "en") {
+          return [
+            {
+              icon: "cat",
+              lang: "en",
+              text: "CAT",
+              chars: ["C", "A", "T"],
+              roman: "",
+              source: "spotit",
+            },
+            {
+              icon: "dog",
+              lang: "en",
+              text: "DOG",
+              chars: ["D", "O", "G"],
+              roman: "",
+              source: "spotit",
+            },
+          ];
+        }
+        return [
+          {
+            icon: "inu",
+            lang: "ja",
+            text: "いぬ",
+            chars: ["い", "ぬ"],
+            roman: "inu",
+            source: "spotit",
+          },
+          {
+            icon: "neko",
+            lang: "ja",
+            text: "ねこ",
+            chars: ["ね", "こ"],
+            roman: "neko",
+            source: "spotit",
+          },
+        ];
+      });
+
+      vi.spyOn(logic, "makeRound").mockImplementation(
+        (_rng, word) => {
+          if (word.lang === "en") {
+            return {
+              word,
+              chars: word.chars,
+              decoys: ["Z"],
+              tiles: [
+                { id: 1, char: "C" },
+                { id: 2, char: "A" },
+                { id: 3, char: "T" },
+                { id: 4, char: "Z" },
+              ],
+            };
+          }
+          return {
+            word,
+            chars: word.chars,
+            decoys: ["き"],
+            tiles: [
+              { id: 10, char: "い" },
+              { id: 20, char: "ぬ" },
+              { id: 30, char: "き" },
+            ],
+          };
+        },
+      );
+
+      render(<SpellGameTestHarness initialLang="en" />);
+
+      expect(screen.getByTestId("spell-score").textContent).toBe("🔤 0/2");
+      expect(screen.getByTestId("spell-word-cat")).toBeTruthy();
+
+      // Tap wrong tile 'Z' (id 4)
+      fireEvent.click(screen.getByTestId("spell-tile-4"));
+      expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+      // Advance 200ms into the 500ms wrong timer
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+
+      // Switch language to Japanese mid-wobble
+      act(() => {
+        fireEvent.click(screen.getByTestId("lang-cycle"));
+      });
+
+      expect(sound.stopNarration).toHaveBeenCalled();
+      // Round rebuilt to Japanese word 0
+      expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+      expect(screen.getByTestId("spell-score").textContent).toBe("🔤 0/2");
+      expect(screen.getByTestId("spell-tile-10")).toBeTruthy();
+      expect(screen.queryByTestId("spell-tile-4")).toBeNull();
+
+      // Clear spy call history before advancing timer
+      vi.mocked(sound.say).mockClear();
+      vi.mocked(sound.saySequence).mockClear();
+
+      // Advance remaining 300ms + extra to ensure stale wobble timer was dropped
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(sound.say).not.toHaveBeenCalled();
+      expect(sound.saySequence).not.toHaveBeenCalled();
+
+      // Now tapping correct Japanese tile succeeds and updates placed state
+      fireEvent.click(screen.getByTestId("spell-tile-10"));
+      expect(sfx.good).toHaveBeenCalled();
+      expect(sound.say).toHaveBeenCalledWith("い！");
+    });
+
+    it("drops pending sayThen callback when language switches during word celebration", () => {
+      // Restore real sayThen so activeSayThen is registered
+      vi.spyOn(sound, "sayThen").mockRestore();
+      vi.spyOn(sound, "stopNarration");
+
+      vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, pool) => {
+        const lang = pool[0]?.lang ?? "en";
+        if (lang === "en") {
+          return [
+            {
+              icon: "cat",
+              lang: "en",
+              text: "CAT",
+              chars: ["C", "A", "T"],
+              roman: "",
+              source: "spotit",
+            },
+            {
+              icon: "dog",
+              lang: "en",
+              text: "DOG",
+              chars: ["D", "O", "G"],
+              roman: "",
+              source: "spotit",
+            },
+          ];
+        }
+        return [
+          {
+            icon: "inu",
+            lang: "ja",
+            text: "いぬ",
+            chars: ["い", "ぬ"],
+            roman: "inu",
+            source: "spotit",
+          },
+          {
+            icon: "neko",
+            lang: "ja",
+            text: "ねこ",
+            chars: ["ね", "こ"],
+            roman: "neko",
+            source: "spotit",
+          },
+        ];
+      });
+
+      vi.spyOn(logic, "makeRound").mockImplementation(
+        (_rng, word) => {
+          if (word.lang === "en") {
+            return {
+              word,
+              chars: word.chars,
+              decoys: [],
+              tiles: [
+                { id: 1, char: "C" },
+                { id: 2, char: "A" },
+                { id: 3, char: "T" },
+              ],
+            };
+          }
+          return {
+            word,
+            chars: word.chars,
+            decoys: [],
+            tiles: [
+              { id: 10, char: "い" },
+              { id: 20, char: "ぬ" },
+            ],
+          };
+        },
+      );
+
+      render(<SpellGameTestHarness initialLang="en" />);
+
+      expect(screen.getByTestId("spell-score").textContent).toBe("🔤 0/2");
+
+      // Place all letters of first English word
+      fireEvent.click(screen.getByTestId("spell-tile-1"));
+      fireEvent.click(screen.getByTestId("spell-tile-2"));
+      fireEvent.click(screen.getByTestId("spell-tile-3"));
+
+      // sayThen celebration is active (waiting for speech or cap timeout)
+      // Switch language to Japanese mid-celebration
+      vi.mocked(sound.saySequence).mockClear();
+      act(() => {
+        fireEvent.click(screen.getByTestId("lang-cycle"));
+      });
+
+      expect(sound.stopNarration).toHaveBeenCalled();
+
+      // Board has rebuilt to Japanese word 0 ('いぬ'), NOT advanced to English word 1 ('dog')
+      expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+      expect(screen.getByTestId("spell-score").textContent).toBe("🔤 0/2");
+      expect(sound.saySequence).toHaveBeenCalledWith([
+        "「いぬ」を つくってね！",
+        "い… ぬ！",
+      ]);
+
+      // Fast-forward past sayThen's cap timeout (9000ms)
+      vi.mocked(sound.saySequence).mockClear();
+      vi.mocked(sound.say).mockClear();
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
+
+      // The stale sayThen callback was dropped by !isValid():
+      // Score remains at 0/2 and board is still word 0
+      expect(screen.getByTestId("spell-score").textContent).toBe("🔤 0/2");
+      expect(screen.getByTestId("spell-word-inu")).toBeTruthy();
+      expect(sound.say).not.toHaveBeenCalled();
+      expect(sound.saySequence).not.toHaveBeenCalled();
+    });
   });
 });
 
