@@ -126,12 +126,6 @@ export function makeCountChoices(
     const cand = 1 + randInt(rng, upper);
     if (cand !== answer) others.add(cand);
   }
-  // extreme corner (max=1 with answer=1): pad with sequential fallbacks
-  let fallback = 2;
-  while (others.size < 2) {
-    if (fallback !== answer) others.add(fallback);
-    fallback++;
-  }
   return shuffle(rng, [answer, ...others]);
 }
 
