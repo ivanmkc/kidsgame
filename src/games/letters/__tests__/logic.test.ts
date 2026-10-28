@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { LETTER_SOUNDS, makeLetterRound, shouldShowGlyph } from "../logic";
+import { makeRng } from "../../../rng";
+import {
+  LETTER_SOUNDS,
+  kanaConfusableGroup,
+  makeLetterRound,
+  settingsForLetters,
+  shouldShowGlyph,
+} from "../logic";
 
 describe("shouldShowGlyph", () => {
   it("hides the glyph by default", () => {
@@ -38,5 +45,100 @@ describe("LETTER_SOUNDS phonics pool", () => {
     const roundO = makeLetterRound(rngO, "sound", 8);
     expect(roundO.targetKey).toBe("O");
     expect(roundO.promptLine).toBe("Which letter says ah?");
+  });
+});
+
+describe("settingsForLetters", () => {
+  it("scaffolds JA settings across easy, medium, and hard with distinct tile counts", () => {
+    const easy = settingsForLetters("easy", "ja");
+    const med = settingsForLetters("medium", "ja");
+    const hard = settingsForLetters("hard", "ja");
+
+    expect(easy).toEqual({ rounds: 8, tiles: 6, tier: "kana" });
+    expect(med).toEqual({ rounds: 10, tiles: 8, tier: "kana" });
+    expect(hard).toEqual({ rounds: 12, tiles: 12, tier: "kana" });
+
+    expect(hard.tiles).toBeGreaterThan(med.tiles);
+    expect(med.tiles).toBeGreaterThan(easy.tiles);
+  });
+
+  it("preserves EN settings", () => {
+    expect(settingsForLetters("easy", "en")).toEqual({
+      rounds: 8,
+      tiles: 6,
+      tier: "upper",
+    });
+    expect(settingsForLetters("medium", "en")).toEqual({
+      rounds: 10,
+      tiles: 8,
+      tier: "mixed",
+    });
+    expect(settingsForLetters("hard", "en")).toEqual({
+      rounds: 12,
+      tiles: 8,
+      tier: "sound",
+    });
+  });
+});
+
+describe("makeLetterRound: kana tier", () => {
+  it("excludes confusables on easy mode (tiles <= 6)", () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      const r = makeLetterRound(makeRng(seed), "kana", 6);
+      const group = kanaConfusableGroup(r.targetKey);
+      if (group.length === 0) continue;
+      const confusables = group.filter((k) => k !== r.targetKey);
+      const tileLabels = r.tiles.map((t) => t.label);
+      for (const confusable of confusables) {
+        expect(tileLabels).not.toContain(confusable);
+      }
+    }
+  });
+
+  it("prioritizes confusables on medium (8 tiles) and hard (12 tiles)", () => {
+    for (const tiles of [8, 12] as const) {
+      let confusableTargetCount = 0;
+      let confusableInDistractorsCount = 0;
+      for (let seed = 1; seed <= 200; seed++) {
+        const r = makeLetterRound(makeRng(seed), "kana", tiles);
+        const group = kanaConfusableGroup(r.targetKey);
+        if (group.length === 0) continue;
+        confusableTargetCount++;
+        const otherConfusables = group.filter((k) => k !== r.targetKey);
+        const distractorLabels = r.tiles
+          .filter((t) => !t.isAnswer)
+          .map((t) => t.label);
+        if (otherConfusables.some((c) => distractorLabels.includes(c))) {
+          confusableInDistractorsCount++;
+        }
+      }
+      expect(confusableTargetCount).toBeGreaterThan(0);
+      expect(
+        confusableInDistractorsCount / confusableTargetCount,
+      ).toBeGreaterThan(0.9);
+    }
+  });
+
+  it("produces 12 distinct tiles with single answer on hard mode", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const r = makeLetterRound(makeRng(seed), "kana", 12);
+      expect(r.tiles).toHaveLength(12);
+      expect(new Set(r.tiles.map((t) => t.key)).size).toBe(12);
+      expect(r.tiles[r.answerIdx].isAnswer).toBe(true);
+      expect(r.tiles.filter((t) => t.isAnswer)).toHaveLength(1);
+    }
+  });
+
+  it("hard mode (tiles >= 10) biases targets toward confusable kana", () => {
+    let confusableCount = 0;
+    const total = 200;
+    for (let seed = 1; seed <= total; seed++) {
+      const r = makeLetterRound(makeRng(seed), "kana", 12);
+      if (kanaConfusableGroup(r.targetKey).length > 0) {
+        confusableCount++;
+      }
+    }
+    // 13/25 is ~52% uniform; 75% bias pushes it well above 65%
+    expect(confusableCount / total).toBeGreaterThan(0.65);
   });
 });

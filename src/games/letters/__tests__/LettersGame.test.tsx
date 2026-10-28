@@ -494,4 +494,17 @@ describe("LettersGame", () => {
       expect(screen.getByLabelText(expectedLabel)).toBe(speakerBtn);
     },
   );
+
+  it("renders Japanese Hard mode with 12 tiles in a 4x3 layout and 12 rounds", () => {
+    render(<LettersGame onHome={() => {}} difficulty="hard" lang="ja" />);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    expect(screen.getByTestId("letters-score").textContent).toBe("🈶 0/12");
+    for (let i = 0; i < 12; i++) {
+      expect(screen.getByTestId(`letters-tile-${i}`)).toBeTruthy();
+    }
+  });
 });
