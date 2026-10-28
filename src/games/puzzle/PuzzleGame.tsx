@@ -28,6 +28,157 @@ import { colors, fonts, shadows } from "../../theme";
 import { say, sfx, useSay } from "../../sound";
 import { isSolved, makePuzzle, swap } from "./logic";
 
+export interface VignetteProps {
+  boardW: number;
+  boardH: number;
+  offsetX?: number;
+  offsetY?: number;
+  testID?: string;
+}
+
+export function PuzzleVignette({
+  boardW,
+  boardH,
+  offsetX = 0,
+  offsetY = 0,
+  testID,
+}: VignetteProps) {
+  // Asymmetric cross-platform diagonal light ramp and vignette:
+  // Top-left sun glow, bottom-right ambient shadow, and diagonal light shafts
+  // ensure every tile (including mirror-image and middle tiles on a 4x3 grid)
+  // has a distinct, clearly visible lighting signature that only aligns across
+  // seams in the solved state (R6).
+  const sunCenter = -boardH * 0.15;
+  const shadowCenter = boardW * 1.15;
+  const shadowCenterY = boardH * 1.15;
+
+  return (
+    <View
+      testID={testID}
+      pointerEvents="none"
+      style={[
+        styles.vignetteContainer,
+        {
+          width: boardW,
+          height: boardH,
+          marginLeft: offsetX,
+          marginTop: offsetY,
+        },
+      ]}
+    >
+      {/* Top-left asymmetric sun glow */}
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 1.6,
+            height: boardH * 1.6,
+            borderRadius: boardH * 0.8,
+            left: sunCenter - boardH * 0.8,
+            top: sunCenter - boardH * 0.8,
+            backgroundColor: "rgba(255, 255, 255, 0.08)",
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 1.2,
+            height: boardH * 1.2,
+            borderRadius: boardH * 0.6,
+            left: sunCenter - boardH * 0.6,
+            top: sunCenter - boardH * 0.6,
+            backgroundColor: "rgba(255, 255, 255, 0.14)",
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 0.8,
+            height: boardH * 0.8,
+            borderRadius: boardH * 0.4,
+            left: sunCenter - boardH * 0.4,
+            top: sunCenter - boardH * 0.4,
+            backgroundColor: "rgba(255, 255, 255, 0.22)",
+          },
+        ]}
+      />
+
+      {/* Diagonal ambient light shafts */}
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardW * 0.18,
+            height: boardH * 2.4,
+            left: boardW * 0.12,
+            top: -boardH * 0.6,
+            transform: [{ rotate: "35deg" }],
+            backgroundColor: "rgba(255, 255, 255, 0.14)",
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardW * 0.22,
+            height: boardH * 2.4,
+            left: boardW * 0.52,
+            top: -boardH * 0.6,
+            transform: [{ rotate: "35deg" }],
+            backgroundColor: "rgba(255, 255, 255, 0.10)",
+          },
+        ]}
+      />
+
+      {/* Bottom-right asymmetric ambient shadow */}
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 1.8,
+            height: boardH * 1.8,
+            borderRadius: boardH * 0.9,
+            left: shadowCenter - boardH * 0.9,
+            top: shadowCenterY - boardH * 0.9,
+            backgroundColor: "rgba(0, 0, 0, 0.08)",
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 1.3,
+            height: boardH * 1.3,
+            borderRadius: boardH * 0.65,
+            left: shadowCenter - boardH * 0.65,
+            top: shadowCenterY - boardH * 0.65,
+            backgroundColor: "rgba(0, 0, 0, 0.14)",
+          },
+        ]}
+      />
+      <View
+        style={[
+          styles.vignetteElement,
+          {
+            width: boardH * 0.8,
+            height: boardH * 0.8,
+            borderRadius: boardH * 0.4,
+            left: shadowCenter - boardH * 0.4,
+            top: shadowCenterY - boardH * 0.4,
+            backgroundColor: "rgba(0, 0, 0, 0.20)",
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
 interface Props {
   onHome: () => void;
   difficulty: Difficulty;
@@ -120,7 +271,9 @@ export function PuzzleGame({
           onPick={onPickScene}
           onSurprise={() => {
             const surprisePool = options.length > 0 ? options : allOptions;
-            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+            onPickScene(
+              surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+            );
           }}
           filterChip={
             onFilter ? (
@@ -142,8 +295,8 @@ export function PuzzleGame({
     manifest.hidden.find((h) => `h-${h.id}` === picked.id);
   const ar = srcScene ? srcScene.w / srcScene.h : 16 / 9;
 
-  const availH = height - 150;
-  const boardW = Math.min(width - 28, availH * ar, 1000);
+  const availH = Math.max(0, height - 150);
+  const boardW = Math.max(0, Math.min(width - 28, availH * ar, 1000));
   const boardH = boardW / ar;
   const tileW = boardW / cols;
   const tileH = boardH / rows;
@@ -251,18 +404,28 @@ export function PuzzleGame({
                     marginTop: -pRow * tileH,
                   }}
                 />
+                <PuzzleVignette
+                  testID={`puzzle-piece-vignette-${piece}`}
+                  boardW={boardW}
+                  boardH={boardH}
+                  offsetX={-pCol * tileW}
+                  offsetY={-pRow * tileH}
+                />
               </Pressable>
             );
           })}
           {peek ? (
-            <Image
-              source={SCENE_IMAGES[picked.image]}
-              style={[
-                StyleSheet.absoluteFill as object,
-                { width: boardW, height: boardH },
-              ]}
-              testID="puzzle-peek-overlay"
-            />
+            <>
+              <Image
+                source={SCENE_IMAGES[picked.image]}
+                style={[
+                  StyleSheet.absoluteFill as object,
+                  { width: boardW, height: boardH },
+                ]}
+                testID="puzzle-peek-overlay"
+              />
+              <PuzzleVignette boardW={boardW} boardH={boardH} />
+            </>
           ) : null}
         </View>
         <Text style={styles.hint}>{t(lang, "puzzle.hint")}</Text>
@@ -308,5 +471,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 8,
     textAlign: "center",
+  },
+  vignetteContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    pointerEvents: "none",
+    overflow: "hidden",
+  },
+  vignetteElement: {
+    position: "absolute",
+    pointerEvents: "none",
   },
 });
