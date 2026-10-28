@@ -6,7 +6,9 @@ import {
   makeRules,
   makeRulesRound,
   pickRuleIndex,
+  rulesIntroLine,
   rulesLayout,
+  rulesRecallLine,
   tileLabel,
 } from "../logic";
 
@@ -266,6 +268,44 @@ describe("tileLabel", () => {
   it("throws loudly on unknown icon", () => {
     expect(() => tileLabel("nonexistent_icon", "en")).toThrow(
       "Unknown rules icon: nonexistent_icon",
+    );
+  });
+});
+
+describe("rules spoken lines", () => {
+  it("rulesIntroLine returns English intro for en", () => {
+    expect(rulesIntroLine("en")).toBe(
+      "Rule Time! Do what the rule says as fast as you can.",
+    );
+    expect(rulesIntroLine()).toBe(
+      "Rule Time! Do what the rule says as fast as you can.",
+    );
+  });
+
+  it("rulesIntroLine returns localized title and subtitle for non-English languages", () => {
+    expect(rulesIntroLine("ja")).toBe("ルールタイム！ ルールどおりに はやく タップ！");
+    expect(rulesIntroLine("cmn")).toBe("规则时间！ 按规则尽快点对的图");
+    expect(rulesIntroLine("yue")).toBe("規則時間！ 跟住規則盡快撳啱嘅圖");
+  });
+
+  it("rulesRecallLine returns English prompt for en", () => {
+    expect(rulesRecallLine(1, "en")).toBe(
+      "Memory check! Do rule number 1 again. Do you remember it?",
+    );
+    expect(rulesRecallLine(5)).toBe(
+      "Memory check! Do rule number 5 again. Do you remember it?",
+    );
+  });
+
+  it("rulesRecallLine returns localized prompt for non-English languages", () => {
+    expect(rulesRecallLine(1, "ja")).toBe(
+      "きおくクイズ！ ルール #1 を もういちど — おぼえてる？ 🤔",
+    );
+    expect(rulesRecallLine(2, "cmn")).toBe(
+      "记忆挑战！ 再做一次规则 #2 — 还记得吗？🤔",
+    );
+    expect(rulesRecallLine(3, "yue")).toBe(
+      "記憶挑戰！ 再做一次規則 #3 — 仲記得嗎？🤔",
     );
   });
 });
