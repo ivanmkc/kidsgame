@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { LANGS } from "../../lang";
+import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { WORDS } from '../../curriculum/words';
 import { WORD_LEVELS as levelsData } from "../../curriculum/content";
@@ -499,6 +501,13 @@ describe("speechLines", () => {
     }
   });
 
+  it("includes introductory blurb for all supported languages", () => {
+    const lines = speechLines();
+    for (const l of LANGS) {
+      expect(lines).toContain(t(l.id, "card.listenchoose.blurb"));
+    }
+  });
+
   it("supports custom word pools without translations", () => {
     const customWord: Word = {
       icon: "test",
@@ -507,7 +516,10 @@ describe("speechLines", () => {
       sound: "tuh",
     };
     const lines = speechLines([customWord]);
-    expect(lines).toEqual(["testword"]);
+    expect(lines).toContain("testword");
+    for (const l of LANGS) {
+      expect(lines).toContain(t(l.id, "card.listenchoose.blurb"));
+    }
   });
 });
 

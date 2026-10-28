@@ -1,6 +1,7 @@
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { LANGS, Lang } from "../../lang";
 import { Rng, shuffle, sample } from "../../rng";
+import { t } from "../../i18n";
 import {
   LEVEL_1_WORDS,
   LEVEL_2_WORDS,
@@ -29,9 +30,12 @@ export function speechLines(
   ),
 ): string[] {
   const lines = new Set<string>();
+  for (const l of LANGS) {
+    lines.add(t(l.id, "card.listenchoose.blurb"));
+  }
   for (const w of words) {
-    for (const lang of ["en", "ja", "cmn", "yue"] as const) {
-      lines.add(getWordText(w, lang));
+    for (const l of LANGS) {
+      lines.add(getWordText(w, l.id));
     }
   }
   return [...lines];
