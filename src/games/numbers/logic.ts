@@ -1,9 +1,6 @@
-// Number Hunt round builder. EN speaks one line ("Find the number 5!");
-// JA/cmn/yue speak two ("さがしてね！" then the number word) so each spoken
-// asset stays short and reusable. Hard tier in JA/zh swaps arabic tiles
-// for han numerals (一..十) with numbers 1-10.
 import { hanNumeral, Lang, numberWord } from '../../lang';
 import { Rng, shuffle } from '../../rng';
+import { CURRICULUM } from '../../curriculum/content';
 
 export interface NumberTile {
   key: string;
@@ -48,9 +45,8 @@ export function settingsForNumbers(
   // Non-EN skips 0 — the number tables in lang.ts start at 1, so speaking
   // "0" would fall back to raw arabic.
   const min = lang === 'en' ? 0 : 1;
-  if (difficulty === 'easy')   return { rounds: 8,  tiles: 5, min: useHan ? 1 : min, max: 5,  useHan };
-  if (difficulty === 'hard')   return { rounds: 12, tiles: 9, min: useHan ? 1 : min, max: 20, useHan };
-  return                              { rounds: 10, tiles: 7, min: useHan ? 1 : min, max: 9,  useHan };
+  const settings = CURRICULUM.numbers.numbers[difficulty];
+  return { ...settings, min: useHan ? 1 : min, useHan };
 }
 
 function label(n: number, useHan: boolean): string {

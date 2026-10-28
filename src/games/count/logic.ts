@@ -4,20 +4,7 @@ import { Lang, numberWord } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
 import { WORDS, wordFor } from "../../words";
 
-// Shared critter/treat pool for the math suite (Count/Compare/Sums).
-// Kept small on purpose — kids re-see the same familiar friends.
-export const CRITTER_ICONS = [
-  "dog",
-  "cat",
-  "frog",
-  "rabbit",
-  "fish",
-  "butterfly",
-  "apple",
-  "strawberry",
-  "star",
-  "balloon",
-];
+import { CURRICULUM } from "../../curriculum/content";
 
 /** Localized screen-reader label for a count critter. */
 export function critterLabel(icon: string, lang: Lang): string {
@@ -69,9 +56,7 @@ export function countSettings(d: Difficulty): {
   min: number;
   max: number;
 } {
-  if (d === "hard") return { rounds: 8, min: 6, max: 10 };
-  if (d === "medium") return { rounds: 6, min: 4, max: 8 };
-  return { rounds: 5, min: 1, max: 5 };
+  return CURRICULUM.numbers.count[d];
 }
 
 /**
@@ -131,7 +116,7 @@ export function makeCountChoices(
 
 export function makeCountRound(rng: Rng, d: Difficulty): CountRound {
   const { min, max } = countSettings(d);
-  const icon = CRITTER_ICONS[randInt(rng, CRITTER_ICONS.length)];
+  const icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
   const n = min + randInt(rng, max - min + 1);
   const positions = scatterPositions(rng, n);
   const choices = makeCountChoices(rng, n, max);
