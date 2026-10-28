@@ -1,25 +1,54 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES } from '../../assets/images';
-import { GameShell } from '../../components/GameShell';
-import { BetaPill } from '../../components/BetaPill';
-import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
-import { WinOverlay } from '../../components/WinOverlay';
-import { SparkleBurst } from '../../components/Sparkles';
-import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId } from '../../difficulty';
-import { Lang, useLangEpoch } from '../../lang';
-import { t } from '../../i18n';
-import { say, sayThen, sfx } from '../../sound';
-import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
-import { colors, fonts, shadows } from '../../theme';
-import { EscapeState, applyTap, escapeHintMs, isHotspotAvailable, nextHint, selectItem, startState } from './logic';
-
-interface SpriteAnim {
-  hotspotId: string;
-  playing: boolean;
-  held: boolean;
-  frameIndex: number;
-}
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Image,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SCENE_IMAGES } from "../../assets/images";
+import { GameShell } from "../../components/GameShell";
+import { BetaPill } from "../../components/BetaPill";
+import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
+import { WinOverlay } from "../../components/WinOverlay";
+import { SparkleBurst } from "../../components/Sparkles";
+import {
+  Difficulty,
+  DifficultyFilter,
+  inFilter,
+  nextFilter,
+  nextSceneId,
+} from "../../difficulty";
+import { Lang, useLangEpoch } from "../../lang";
+import { t } from "../../i18n";
+import { say, sayThen, sfx } from "../../sound";
+import { EscapeHotspot, EscapeRoom, manifest } from "../../manifest";
+import { colors, fonts, shadows } from "../../theme";
+import {
+  EscapeState,
+  applyTap,
+  escapeHintMs,
+  isHotspotAvailable,
+  nextHint,
+  selectItem,
+  startState,
+} from "./logic";
+import { SpriteAnim, SpriteCanvas } from "./SpriteCanvas";
+import {
+  FeedbackEmoji,
+  FlyingEmoji,
+  PopBurst,
+  PulseRing,
+} from "./EscapeEffects";
 
 // Kid escape room: search the picture, collect up to three items in the
 // tray, tap an item then tap the thing it opens. Chains are 2-4 steps and
@@ -37,24 +66,35 @@ interface Props {
   lang: Lang;
 }
 
-function roomText(room: EscapeRoom, field: 'intro' | 'winText', lang: Lang): string {
+function roomText(
+  room: EscapeRoom,
+  field: "intro" | "winText",
+  lang: Lang,
+): string {
   return room.t?.[lang]?.[field] ?? room[field];
 }
 
-function hotText(h: EscapeHotspot, field: 'sayFound' | 'saySearch' | 'sayLocked', lang: Lang): string | undefined {
+function hotText(
+  h: EscapeHotspot,
+  field: "sayFound" | "saySearch" | "sayLocked",
+  lang: Lang,
+): string | undefined {
   const base = h[field];
   if (!base) return undefined;
   return h.t?.[lang]?.[field] ?? base;
 }
 
-function itemLabel(item: { label: string; t?: Record<string, string> }, lang: Lang): string {
+function itemLabel(
+  item: { label: string; t?: Record<string, string> },
+  lang: Lang,
+): string {
   return item.t?.[lang] ?? item.label;
 }
 
 export function EscapeGame({
   onHome,
-  difficulty = 'medium',
-  filter = 'all',
+  difficulty = "medium",
+  filter = "all",
   onFilter,
   sceneId,
   onPickScene,
@@ -66,17 +106,37 @@ export function EscapeGame({
   const room = rooms.find((r) => r.id === sceneId);
   const visible = rooms.filter((r) => inFilter(r.level, filter));
   const surprisePool = visible.length > 0 ? visible : rooms;
-  const effDifficulty = (filter === 'all' && room?.level) ? room.level : difficulty;
+  const effDifficulty =
+    filter === "all" && room?.level ? room.level : difficulty;
   const hintMs = escapeHintMs(effDifficulty);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
   const [spriteAnims, setSpriteAnims] = useState<SpriteAnim[]>([]);
-  const [flyingItems, setFlyingItems] = useState<Array<{
-    key: string; emoji: string; fromX: number; fromY: number;
-  }>>([]);
-  const [popBursts, setPopBursts] = useState<Array<{
-    key: string; source: number; cx: number; cy: number;
-  }>>([]);
+  const [flyingItems, setFlyingItems] = useState<
+    Array<{
+      key: string;
+      emoji: string;
+      fromX: number;
+      fromY: number;
+    }>
+  >([]);
+  const [popBursts, setPopBursts] = useState<
+    Array<{
+      key: string;
+      source: number;
+      cx: number;
+      cy: number;
+    }>
+  >([]);
+  const [feedbackBursts, setFeedbackBursts] = useState<
+    Array<{
+      key: string;
+      emoji: string;
+      cx: number;
+      cy: number;
+      hotspotId: string;
+    }>
+  >([]);
   const lastAction = useRef(Date.now());
   const framePos = useRef({ x: 0, y: 0 });
   const trayPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -90,11 +150,12 @@ export function EscapeGame({
     setHintSpot(null);
     setFlyingItems([]);
     setPopBursts([]);
+    setFeedbackBursts([]);
     lastAction.current = Date.now();
   }, [sceneId]);
 
   useEffect(() => {
-    if (room) say(roomText(room, 'intro', lang));
+    if (room) say(roomText(room, "intro", lang));
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Idle hint: after hintMs without progress, glow the next actionable spot
@@ -119,22 +180,37 @@ export function EscapeGame({
   // change is rendered as a sprite layer on top by the SpriteCanvas.
 
   const heldItems = useMemo(
-    () => (room ? state.inventory.map((id) => room.items.find((i) => i.id === id)!).filter(Boolean) : []),
+    () =>
+      room
+        ? state.inventory
+            .map((id) => room.items.find((i) => i.id === id)!)
+            .filter(Boolean)
+        : [],
     [room, state.inventory],
   );
 
   const startSprite = useCallback((hotspotId: string) => {
     setSpriteAnims((prev) => {
-      if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held))) return prev;
-      return [...prev, { hotspotId, playing: true, held: false, frameIndex: 0 }];
+      if (prev.some((a) => a.hotspotId === hotspotId && (a.playing || a.held)))
+        return prev;
+      return [
+        ...prev,
+        { hotspotId, playing: true, held: false, frameIndex: 0 },
+      ];
     });
   }, []);
 
   if (!sceneId || !room) {
     return (
-      <GameShell title={t(lang, 'shell.escape.title')} subtitle={t(lang, 'shell.escape.subPicker')} onBack={onHome} lang={lang} right={<BetaPill testID="escape-beta" lang={lang} />}>
+      <GameShell
+        title={t(lang, "shell.escape.title")}
+        subtitle={t(lang, "shell.escape.subPicker")}
+        onBack={onHome}
+        lang={lang}
+        right={<BetaPill testID="escape-beta" lang={lang} />}
+      >
         <ScenePicker
-          title={t(lang, 'picker.escape')}
+          title={t(lang, "picker.escape")}
           options={rooms.map((r) => ({
             id: r.id,
             name: r.nameT?.[lang] ?? r.name,
@@ -143,8 +219,21 @@ export function EscapeGame({
             dimmed: !inFilter(r.level, filter),
           }))}
           onPick={onPickScene}
-          onSurprise={() => surprisePool.length && onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id)}
-          filterChip={onFilter ? <FilterCycleChip filter={filter} onCycle={() => onFilter(nextFilter(filter))} lang={lang} /> : undefined}
+          onSurprise={() =>
+            surprisePool.length &&
+            onPickScene(
+              surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+            )
+          }
+          filterChip={
+            onFilter ? (
+              <FilterCycleChip
+                filter={filter}
+                onCycle={() => onFilter(nextFilter(filter))}
+                lang={lang}
+              />
+            ) : undefined
+          }
           lang={lang}
         />
       </GameShell>
@@ -159,55 +248,102 @@ export function EscapeGame({
     const { state: next, effect } = applyTap(room, currentState, hotspotId);
     stateRef.current = next;
     setState(next);
-    const locSay = (field: 'sayFound' | 'saySearch' | 'sayLocked') =>
+    const locSay = (field: "sayFound" | "saySearch" | "sayLocked") =>
       h ? hotText(h, field, lang) : undefined;
     const playAnim = () => {
       if (h?.sprite?.sheet) startSprite(hotspotId);
     };
+    const showFeedback = (emoji: string) => {
+      if (!h) return;
+      const cx = (h.box.x + h.box.w / 2) * scale;
+      const cy = (h.box.y + h.box.h / 2) * scale;
+      setFeedbackBursts((prev) => [
+        ...prev.filter((x) => x.hotspotId !== hotspotId),
+        { key: `fb-${hotspotId}-${Date.now()}`, emoji, cx, cy, hotspotId },
+      ]);
+    };
     switch (effect.kind) {
-      case 'revealed':
+      case "revealed":
         sfx.good();
         playAnim();
-        { const s = locSay('sayFound'); if (s) say(s); }
+        setFeedbackBursts((prev) =>
+          prev.filter((x) => x.hotspotId !== hotspotId),
+        );
+        {
+          const s = locSay("sayFound");
+          if (s) say(s);
+        }
         break;
-      case 'collected': {
+      case "collected": {
         sfx.good();
+        setFeedbackBursts((prev) =>
+          prev.filter((x) => x.hotspotId !== hotspotId),
+        );
         const item = room.items.find((i) => i.id === effect.item);
         if (item && h) {
           const box = h.itemBox ?? h.sprite?.itemBbox ?? h.box;
           const fromX = framePos.current.x + (box.x + box.w / 2) * scale;
           const fromY = framePos.current.y + (box.y + box.h / 2) * scale;
           if (h.pop && SCENE_IMAGES[h.pop]) {
-            setPopBursts((p) => [...p, {
-              key: `pop-${hotspotId}-${Date.now()}`,
-              source: SCENE_IMAGES[h.pop!],
-              cx: (box.x + box.w / 2) * scale,
-              cy: (box.y + box.h / 2) * scale,
-            }]);
+            setPopBursts((p) => [
+              ...p,
+              {
+                key: `pop-${hotspotId}-${Date.now()}`,
+                source: SCENE_IMAGES[h.pop!],
+                cx: (box.x + box.w / 2) * scale,
+                cy: (box.y + box.h / 2) * scale,
+              },
+            ]);
           }
-          setFlyingItems((f) => [...f, {
-            key: `${hotspotId}-${Date.now()}`, emoji: item.emoji, fromX, fromY,
-          }]);
+          setFlyingItems((f) => [
+            ...f,
+            {
+              key: `${hotspotId}-${Date.now()}`,
+              emoji: item.emoji,
+              fromX,
+              fromY,
+            },
+          ]);
         }
         if (item) say(itemLabel(item, lang));
         break;
       }
-      case 'unlocked':
+      case "unlocked":
         sfx.good();
         playAnim();
-        { const s = locSay('sayFound'); if (s) say(s); }
+        setFeedbackBursts((prev) =>
+          prev.filter((x) => x.hotspotId !== hotspotId),
+        );
+        {
+          const s = locSay("sayFound");
+          if (s) say(s);
+        }
         break;
-      case 'win':
+      case "win":
         playAnim();
-        sayThen([locSay('sayFound') ?? '', roomText(room, 'winText', lang)], () => {});
+        setFeedbackBursts((prev) =>
+          prev.filter((x) => x.hotspotId !== hotspotId),
+        );
+        sayThen(
+          [locSay("sayFound") ?? "", roomText(room, "winText", lang)],
+          () => {},
+        );
         break;
-      case 'locked':
+      case "locked":
         sfx.boing(0.4);
-        { const s = locSay('sayLocked'); if (s) say(s); }
+        showFeedback("❌");
+        {
+          const s = locSay("sayLocked");
+          if (s) say(s);
+        }
         break;
-      case 'flavor':
+      case "flavor":
         sfx.tap();
-        { const s = locSay('saySearch'); if (s) say(s); }
+        showFeedback("🔍");
+        {
+          const s = locSay("saySearch");
+          if (s) say(s);
+        }
         break;
       default:
         break;
@@ -227,13 +363,13 @@ export function EscapeGame({
     lastAction.current = Date.now();
     setHintSpot(null);
     sfx.tap();
-    say(roomText(room, 'intro', lang));
+    say(roomText(room, "intro", lang));
   };
 
   return (
     <GameShell
       title={room.nameT?.[lang] ?? room.name}
-      subtitle={t(lang, 'shell.escape.subPlay')}
+      subtitle={t(lang, "shell.escape.subPlay")}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
@@ -242,7 +378,7 @@ export function EscapeGame({
           <Pressable
             testID="escape-replay"
             accessibilityRole="button"
-            accessibilityLabel={t(lang, 'spell.hearAgain')}
+            accessibilityLabel={t(lang, "spell.hearAgain")}
             disabled={state.done}
             onPress={onReplay}
             style={({ pressed }) => [
@@ -260,55 +396,88 @@ export function EscapeGame({
     >
       <ScrollView contentContainerStyle={styles.wrap}>
         <View
-          onLayout={(e) => { framePos.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y }; }}
-          style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}
+          onLayout={(e) => {
+            framePos.current = {
+              x: e.nativeEvent.layout.x,
+              y: e.nativeEvent.layout.y,
+            };
+          }}
+          style={[
+            styles.frame,
+            shadows.sticker,
+            { width: displayWidth, height: displayHeight },
+          ]}
         >
-          <Image source={SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
-          <SpriteCanvas room={room} state={state} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
-          {Platform.OS === 'web' && room.hotspots.map((h) => {
-            if (!h.sprite?.itemLayer || !h.sprite.itemBbox) return null;
-            const revealed = state.revealed.includes(h.id);
-            const used = state.used.includes(h.id);
-            if (!revealed || used) return null;
-            const ib = h.sprite.itemBbox;
-            return React.createElement('img', {
-              key: `item-${h.id}`,
-              src: h.sprite.itemLayer,
-              style: {
-                position: 'absolute',
-                left: ib.x * scale,
-                top: ib.y * scale,
-                width: ib.w * scale,
-                height: ib.h * scale,
-                pointerEvents: 'none',
-              },
-            });
-          })}
+          <Image
+            source={SCENE_IMAGES[room.image]}
+            style={{ width: displayWidth, height: displayHeight }}
+            resizeMode="cover"
+          />
+          <SpriteCanvas
+            room={room}
+            state={state}
+            anims={spriteAnims}
+            setAnims={setSpriteAnims}
+            scale={scale}
+          />
+          {Platform.OS === "web" &&
+            room.hotspots.map((h) => {
+              if (!h.sprite?.itemLayer || !h.sprite.itemBbox) return null;
+              const revealed = state.revealed.includes(h.id);
+              const used = state.used.includes(h.id);
+              if (!revealed || used) return null;
+              const ib = h.sprite.itemBbox;
+              return React.createElement("img", {
+                key: `item-${h.id}`,
+                src: h.sprite.itemLayer,
+                style: {
+                  position: "absolute",
+                  left: ib.x * scale,
+                  top: ib.y * scale,
+                  width: ib.w * scale,
+                  height: ib.h * scale,
+                  pointerEvents: "none",
+                },
+              });
+            })}
           {room.hotspots.map((h) => {
             if (!isHotspotAvailable(room, state, h.id)) return null;
             const used = state.used.includes(h.id);
             const revealed = state.revealed.includes(h.id);
-            const actionable = !used && !revealed && (h.kind === 'search' || !h.needs || state.inventory.includes(h.needs));
-            const box = (revealed ? (h.itemBox ?? h.sprite?.itemBbox) : undefined) ?? h.box;
+            const actionable =
+              !used &&
+              !revealed &&
+              (h.kind === "search" ||
+                !h.needs ||
+                state.inventory.includes(h.needs));
+            const box =
+              (revealed ? (h.itemBox ?? h.sprite?.itemBbox) : undefined) ??
+              h.box;
             return (
               <Pressable
                 key={h.id}
                 testID={`escape-spot-${h.id}`}
                 disabled={used}
                 onPress={() => onSpot(h.id)}
-                accessibilityRole={used ? 'none' : 'button'}
+                accessibilityRole={used ? "none" : "button"}
                 accessibilityLabel={h.id}
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   left: (box.x - 8) * scale,
                   top: (box.y - 8) * scale,
                   width: (box.w + 16) * scale,
                   height: (box.h + 16) * scale,
-                  pointerEvents: used ? 'none' : 'auto',
+                  pointerEvents: used ? "none" : "auto",
                 }}
               >
                 {revealed && <PulseRing strong />}
-                {!used && !revealed && (hintSpot === h.id ? <PulseRing strong /> : h.kind !== 'search' ? <PulseRing dim={!actionable} /> : null)}
+                {!used &&
+                  !revealed &&
+                  (hintSpot === h.id ? (
+                    <PulseRing strong />
+                  ) : h.kind !== "search" ? (
+                    <PulseRing dim={!actionable} />
+                  ) : null)}
                 {used ? <SparkleBurst trigger="found" /> : null}
               </Pressable>
             );
@@ -319,7 +488,24 @@ export function EscapeGame({
               source={pb.source}
               cx={pb.cx}
               cy={pb.cy}
-              onDone={() => setPopBursts((p) => p.filter((x) => x.key !== pb.key))}
+              onDone={() =>
+                setPopBursts((p) => p.filter((x) => x.key !== pb.key))
+              }
+            />
+          ))}
+          {feedbackBursts.map((fb) => (
+            <FeedbackEmoji
+              key={fb.key}
+              emoji={fb.emoji}
+              cx={fb.cx}
+              cy={fb.cy}
+              isShake={fb.emoji === "❌"}
+              testID={`escape-feedback-${fb.hotspotId}`}
+              onDone={() =>
+                setFeedbackBursts((prev) =>
+                  prev.filter((x) => x.key !== fb.key),
+                )
+              }
             />
           ))}
         </View>
@@ -332,19 +518,24 @@ export function EscapeGame({
           testID="escape-tray"
         >
           {heldItems.length === 0 ? (
-            <Text style={styles.trayEmpty}>{t(lang, 'escape.trayEmpty')}</Text>
-          ) : heldItems.map((i) => (
-            <Pressable
-              key={i.id}
-              testID={`escape-item-${i.id}`}
-              onPress={() => onTray(i.id)}
-              accessibilityRole="button"
-              accessibilityLabel={itemLabel(i, lang)}
-              style={[styles.trayItem, state.selected === i.id && styles.trayItemOn]}
-            >
-              <Text style={styles.trayEmoji}>{i.emoji}</Text>
-            </Pressable>
-          ))}
+            <Text style={styles.trayEmpty}>{t(lang, "escape.trayEmpty")}</Text>
+          ) : (
+            heldItems.map((i) => (
+              <Pressable
+                key={i.id}
+                testID={`escape-item-${i.id}`}
+                onPress={() => onTray(i.id)}
+                accessibilityRole="button"
+                accessibilityLabel={itemLabel(i, lang)}
+                style={[
+                  styles.trayItem,
+                  state.selected === i.id && styles.trayItemOn,
+                ]}
+              >
+                <Text style={styles.trayEmoji}>{i.emoji}</Text>
+              </Pressable>
+            ))
+          )}
         </View>
         {flyingItems.map((fi) => (
           <FlyingEmoji
@@ -354,13 +545,15 @@ export function EscapeGame({
             fromY={fi.fromY}
             toX={trayPos.current.x + trayPos.current.w / 2}
             toY={trayPos.current.y + trayPos.current.h / 2}
-            onDone={() => setFlyingItems((f) => f.filter((x) => x.key !== fi.key))}
+            onDone={() =>
+              setFlyingItems((f) => f.filter((x) => x.key !== fi.key))
+            }
           />
         ))}
       </ScrollView>
       <WinOverlay
         visible={state.done}
-        message={roomText(room, 'winText', lang)}
+        message={roomText(room, "winText", lang)}
         onNext={() => {
           onPickScene(nextSceneId(rooms, visible, room.id));
         }}
@@ -371,397 +564,36 @@ export function EscapeGame({
   );
 }
 
-// Breathing glow ring — borrowed from StoryGame's ChoiceSpot feel: locks
-// glow softly all the time (they're the puzzle), hints glow hard.
-function PulseRing({ strong, dim }: { strong?: boolean; dim?: boolean }) {
-  const pulse = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: strong ? 450 : 1100, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: strong ? 450 : 1100, useNativeDriver: true }),
-      ]),
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [pulse, strong]);
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={[
-        styles.ring,
-        strong ? styles.ringStrong : null,
-        { opacity: pulse.interpolate({ inputRange: [0, 1], outputRange: dim ? [0.06, 0.2] : [0.25, strong ? 0.95 : 0.6] }) },
-      ]}
-    />
-  );
-}
-
-function FlyingEmoji({ emoji, fromX, fromY, toX, toY, onDone }: {
-  emoji: string; fromX: number; fromY: number;
-  toX: number; toY: number; onDone: () => void;
-}) {
-  const progress = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    Animated.spring(progress, {
-      toValue: 1, friction: 7, tension: 40, useNativeDriver: true,
-    }).start(({ finished }) => { if (finished) onDone(); });
-    return () => { progress.stopAnimation(); };
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
-  const dx = toX - fromX;
-  const dy = toY - fromY;
-  const arcPeak = -Math.min(80, Math.abs(dy) * 0.4);
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: fromX - 20,
-        top: fromY - 20,
-        width: 40,
-        height: 40,
-        zIndex: 100,
-        transform: [
-          { translateX: progress.interpolate({ inputRange: [0, 1], outputRange: [0, dx] }) },
-          { translateY: progress.interpolate({
-            inputRange: [0, 0.2, 0.5, 0.8, 1],
-            outputRange: [
-              0,
-              dy * 0.2 + arcPeak * 0.64,
-              dy * 0.5 + arcPeak,
-              dy * 0.8 + arcPeak * 0.64,
-              dy,
-            ],
-          }) },
-          { scale: progress.interpolate({ inputRange: [0, 0.3, 0.7, 1], outputRange: [1.4, 1.6, 1.2, 1] }) },
-        ],
-      }}
-    >
-      <Text style={{ fontSize: 36, textAlign: 'center' }}>{emoji}</Text>
-    </Animated.View>
-  );
-}
-
-function PopBurst({ source, cx, cy, onDone }: {
-  source: number; cx: number; cy: number; onDone: () => void;
-}) {
-  const pop = useRef(new Animated.Value(0)).current;
-  const fade = useRef(new Animated.Value(1)).current;
-  useEffect(() => {
-    Animated.spring(pop, {
-      toValue: 1, friction: 5, tension: 60, useNativeDriver: true,
-    }).start(() => {
-      Animated.timing(fade, {
-        toValue: 0, duration: 350, delay: 250, useNativeDriver: true,
-      }).start(({ finished }) => { if (finished) onDone(); });
-    });
-    return () => { pop.stopAnimation(); fade.stopAnimation(); };
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
-  const size = 120;
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: cx - size / 2,
-        top: cy - size / 2,
-        width: size,
-        height: size,
-        zIndex: 90,
-        opacity: fade,
-        transform: [{
-          scale: pop.interpolate({ inputRange: [0, 0.6, 1], outputRange: [0.2, 1.25, 1.0] }),
-        }],
-      }}
-    >
-      <Image source={source} style={{ width: size, height: size }} resizeMode="contain" />
-    </Animated.View>
-  );
-}
-
-interface SpriteEntry {
-  hotspotId: string;
-  playing: boolean;
-  held: boolean;
-  frameIndex: number;
-  accumulator: number;
-}
-
-function SpriteCanvas({ room, state, anims, setAnims, scale }: {
-  room: EscapeRoom;
-  state: EscapeState;
-  anims: SpriteAnim[];
-  setAnims: React.Dispatch<React.SetStateAction<SpriteAnim[]>>;
-  scale: number;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const sheetsRef = useRef<Record<string, HTMLImageElement>>({});
-  const restRef = useRef<Record<string, HTMLImageElement>>({});
-  // Item layers are rendered as DOM <img> elements, not on the canvas.
-  const rafRef = useRef<number>(0);
-  const entriesRef = useRef<SpriteEntry[]>([]);
-  const lastTimeRef = useRef<number>(0);
-  const roomRef = useRef(room);
-  roomRef.current = room;
-  const scaleRef = useRef(scale);
-  scaleRef.current = scale;
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const setAnimsRef = useRef(setAnims);
-  setAnimsRef.current = setAnims;
-  const needsRedrawRef = useRef(false);
-  const drawStaticRef = useRef<(() => void) | null>(null);
-
-  useEffect(() => {
-    sheetsRef.current = {};
-    restRef.current = {};
-
-    for (const h of room.hotspots) {
-      if (!h.sprite) continue;
-      if (h.sprite.sheet) {
-        const img = new window.Image();
-        img.src = h.sprite.sheet;
-        img.onload = () => {
-          needsRedrawRef.current = true;
-          if (!rafRef.current) drawStaticRef.current?.();
-        };
-        sheetsRef.current[h.id] = img;
-      }
-      if (h.sprite.rest) {
-        const img = new window.Image();
-        img.src = h.sprite.rest;
-        img.onload = () => {
-          needsRedrawRef.current = true;
-          if (!rafRef.current) drawStaticRef.current?.();
-        };
-        restRef.current[h.id] = img;
-      }
-    }
-  }, [room]);
-
-  const drawStatic = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const s = scaleRef.current;
-    const rm = roomRef.current;
-    const st = stateRef.current;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
-    ctx.scale(dpr, dpr);
-
-    for (const h of rm.hotspots) {
-      if (!h.sprite) continue;
-      if (!isHotspotAvailable(rm, st, h.id)) continue;
-      const sp = h.sprite;
-      const isUsed = st.used.includes(h.id);
-      const isRevealed = st.revealed.includes(h.id);
-      const hasRestLayer = Boolean(sp.rest && sp.restBbox);
-
-      if (hasRestLayer) {
-        // Clean-plate model: rest layer drawn for untouched hotspots,
-        // sprite last frame for revealed/used, item layer for revealed
-        const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
-
-        if (!isUsed && !isRevealed && !entry) {
-          const rest = restRef.current[h.id];
-          if (rest?.naturalWidth && sp.restBbox) {
-            ctx.drawImage(rest, sp.restBbox.x * s, sp.restBbox.y * s, sp.restBbox.w * s, sp.restBbox.h * s);
-          }
-          continue;
-        }
-
-        if (entry) {
-          if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
-          const sheet = sheetsRef.current[h.id];
-          if (!sheet?.naturalWidth) continue;
-          const frameW = sheet.naturalWidth / sp.cols;
-          const rows = Math.ceil(sp.frameCount / sp.cols);
-          const frameH = sheet.naturalHeight / rows;
-          const col = entry.frameIndex % sp.cols;
-          const row = Math.floor(entry.frameIndex / sp.cols);
-          ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
-            sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-        } else if ((isUsed || isRevealed) && sp.sheet) {
-          const sheet = sheetsRef.current[h.id];
-          if (sheet?.naturalWidth && sp.cols && sp.frameCount) {
-            const frameW = sheet.naturalWidth / sp.cols;
-            const rows = Math.ceil(sp.frameCount / sp.cols);
-            const frameH = sheet.naturalHeight / rows;
-            const lastIdx = sp.frameCount - 1;
-            const col = lastIdx % sp.cols;
-            const row = Math.floor(lastIdx / sp.cols);
-            ctx.drawImage(sheet, col * frameW, row * frameH, frameW, frameH,
-              sp.bbox.x * s, sp.bbox.y * s, sp.bbox.w * s, sp.bbox.h * s);
-          }
-        }
-
-        continue;
-      }
-    }
-  }, []);
-  drawStaticRef.current = drawStatic;
-
-  const startLoop = useCallback(() => {
-    if (rafRef.current) return;
-    lastTimeRef.current = 0;
-    const tick = (timestamp: number) => {
-      const dt = lastTimeRef.current
-        ? Math.min((timestamp - lastTimeRef.current) / 1000, 0.1)
-        : 0;
-      lastTimeRef.current = timestamp;
-
-      let anyPlaying = false;
-      let anyCompleted = false;
-
-      for (const entry of entriesRef.current) {
-        const h = roomRef.current.hotspots.find((x) => x.id === entry.hotspotId);
-        if (!h?.sprite?.sheet || !h.sprite.cols || !h.sprite.frameCount || !h.sprite.fps) continue;
-        const { fps, frameCount } = h.sprite;
-        const sheet = sheetsRef.current[h.id];
-        if (!sheet?.naturalWidth) {
-          if (entry.playing) anyPlaying = true;
-          continue;
-        }
-
-        if (entry.playing) {
-          if (dt > 0) {
-            const frameDuration = 1 / fps;
-            entry.accumulator += dt;
-            while (entry.accumulator >= frameDuration) {
-              entry.accumulator -= frameDuration;
-              entry.frameIndex++;
-            }
-            if (entry.frameIndex >= frameCount - 1) {
-              entry.frameIndex = frameCount - 1;
-              entry.playing = false;
-              entry.held = true;
-              anyCompleted = true;
-            }
-          }
-          if (entry.playing) anyPlaying = true;
-        }
-      }
-
-      drawStatic();
-
-      if (anyCompleted) {
-        setAnimsRef.current((prev) => prev.map((a) => {
-          const entry = entriesRef.current.find((e) => e.hotspotId === a.hotspotId);
-          if (entry && entry.held) {
-            return { ...a, playing: false, held: true, frameIndex: entry.frameIndex };
-          }
-          return a;
-        }));
-      }
-
-      if (anyPlaying) {
-        rafRef.current = requestAnimationFrame(tick);
-      } else {
-        rafRef.current = 0;
-      }
-    };
-    rafRef.current = requestAnimationFrame(tick);
-  }, [drawStatic]);
-
-  useEffect(() => {
-    if (anims.length === 0) {
-      entriesRef.current = [];
-      if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = 0; }
-      lastTimeRef.current = 0;
-      needsRedrawRef.current = true;
-    } else {
-      const existing = new Set(entriesRef.current.map((e) => e.hotspotId));
-      let added = false;
-      for (const a of anims) {
-        if (a.playing && !existing.has(a.hotspotId)) {
-          entriesRef.current.push({
-            hotspotId: a.hotspotId, playing: true, held: false,
-            frameIndex: 0, accumulator: 0,
-          });
-          added = true;
-        }
-      }
-      const validIds = new Set(anims.map((a) => a.hotspotId));
-      entriesRef.current = entriesRef.current.filter((e) => validIds.has(e.hotspotId));
-      if (added) startLoop();
-      else needsRedrawRef.current = true;
-    }
-  }, [anims, startLoop]);
-
-  useEffect(() => {
-    needsRedrawRef.current = true;
-  }, [state.used.length, state.revealed.length]);
-
-  useEffect(() => {
-    if (!needsRedrawRef.current) return;
-    needsRedrawRef.current = false;
-    if (!rafRef.current) drawStatic();
-  });
-
-  useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); }, []);
-
-  if (Platform.OS !== 'web') return null;
-  const w = Math.round(1280 * scale);
-  const h = Math.round(720 * scale);
-  const dpr = (typeof window !== 'undefined' ? window.devicePixelRatio : 1) || 1;
-  return React.createElement('canvas', {
-    ref: canvasRef,
-    width: Math.round(w * dpr),
-    height: Math.round(h * dpr),
-    style: { position: 'absolute', top: 0, left: 0, width: w, height: h, pointerEvents: 'none' },
-  });
-}
-
 // BETA pill now shared — see src/components/BetaPill.tsx.
 
 const styles = StyleSheet.create({
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 8 },
   replayBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
     backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   replayBtnDisabled: { opacity: 0.4 },
   replayText: { fontSize: 22 },
   pressed: { opacity: 0.7, transform: [{ scale: 0.94 }] },
-  wrap: { alignItems: 'center', paddingBottom: 20, gap: 12 },
+  wrap: { alignItems: "center", paddingBottom: 20, gap: 12 },
   frame: {
     borderRadius: 22,
-    overflow: 'hidden',
+    overflow: "hidden",
     backgroundColor: colors.card,
     borderWidth: 5,
     borderColor: colors.card,
   },
-  // Soft borderless halo — a bordered rect reads as a debug hitbox, not
-  // a magic-glow affordance (flagged 9x by the artifact judges).
-  ring: {
-    flex: 1,
-    margin: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,214,110,0.16)',
-    shadowColor: colors.gold,
-    shadowOpacity: 0.85,
-    shadowRadius: 26,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  ringStrong: {
-    backgroundColor: 'rgba(255,177,61,0.22)',
-    shadowColor: '#FFB13D',
-    shadowRadius: 34,
-  },
   tray: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 12,
     minHeight: 78,
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: "rgba(255,255,255,0.85)",
     borderRadius: 22,
     borderWidth: 3,
     borderColor: colors.blush,
@@ -774,14 +606,14 @@ const styles = StyleSheet.create({
     height: 62,
     borderRadius: 18,
     backgroundColor: colors.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 3,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   trayItemOn: {
     borderColor: colors.gold,
-    backgroundColor: '#FFF3D6',
+    backgroundColor: "#FFF3D6",
     transform: [{ scale: 1.1 }],
   },
   trayEmoji: { fontSize: 36 },
