@@ -1075,3 +1075,227 @@ describe("HiddenGame scene picker surprise", () => {
   });
 });
 
+describe("HiddenGame scene picker and filter navigation", () => {
+  const noop = () => {};
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("picks a scene when a scene card is pressed in solo mode", () => {
+    const onPickScene = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId(`scene-pick-${manifest.hidden[0].id}`));
+    expect(onPickScene).toHaveBeenCalledWith(manifest.hidden[0].id);
+  });
+
+  it("does not pick a scene card when mode is null in 2P mode", () => {
+    const onPickScene = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId(`scene-pick-${manifest.hidden[0].id}`));
+    expect(onPickScene).not.toHaveBeenCalled();
+  });
+
+  it("cycles difficulty filter when FilterCycleChip is pressed", () => {
+    const onFilter = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="easy"
+        onFilter={onFilter}
+        twoPlayerEnabled={false}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("difficulty-cycle"));
+    expect(onFilter).toHaveBeenCalledWith("medium");
+  });
+
+  it("navigates home when header back button is pressed on scene picker", () => {
+    const onHome = vi.fn();
+    render(
+      <HiddenGame
+        onHome={onHome}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("back-button"));
+    expect(onHome).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates back to picker when header back button is pressed during a scene", () => {
+    const onBackToPicker = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={onBackToPicker}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("back-button"));
+    expect(onBackToPicker).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("HiddenGame win overlay and progression", () => {
+  const noop = () => {};
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("advances to next scene when play-again is pressed on WinOverlay", () => {
+    const onPickScene = vi.fn();
+    const scene = manifest.hidden[0];
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const id of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${id}`));
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.click(screen.getByTestId("play-again"));
+    expect(onPickScene).toHaveBeenCalledTimes(1);
+  });
+
+  it("navigates home when win-home is pressed on WinOverlay", () => {
+    const onHome = vi.fn();
+    const scene = manifest.hidden[0];
+    render(
+      <HiddenGame
+        onHome={onHome}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const id of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${id}`));
+    }
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    fireEvent.click(screen.getByTestId("win-home"));
+    expect(onHome).toHaveBeenCalledTimes(1);
+  });
+
+  it("speaks win.hiddenCoop, displays co-op win message, and alternates starting turn on next scene in 2P mode", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    const scene = manifest.hidden[0];
+    const { rerender } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const banner = screen.getByTestId("hidden-turn-banner");
+    expect(banner.getAttribute("aria-label")).toBe("Foxy's turn!");
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    fireEvent.click(screen.getByTestId(`hidden-target-${targets[0]}`));
+    const finder0 = screen.getByTestId(`checklist-${targets[0]}-finder`);
+    expect(finder0).toBeDefined();
+
+    for (let i = 1; i < targets.length; i++) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${targets[i]}`));
+    }
+
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.hiddenCoop"));
+    expect(screen.getByText(t("en", "win.hiddenCoop"))).toBeDefined();
+
+    const nextScene = manifest.hidden[1];
+    rerender(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        sceneId={nextScene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    expect(
+      screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
+    ).toBe("Bunny's turn!");
+  });
+});
+
+
