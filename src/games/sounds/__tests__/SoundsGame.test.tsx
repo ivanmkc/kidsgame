@@ -418,3 +418,22 @@ describe("SoundsGame prompt replay affordance", () => {
     expect(saySeqSpy).not.toHaveBeenCalled();
   });
 });
+
+describe("SoundsGame narration cleanup", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("stops narration on unmount", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+
+    const onHome = vi.fn();
+    const { unmount } = render(
+      <SoundsGame onHome={onHome} difficulty="easy" lang="en" />
+    );
+    expect(saySequenceSpy).toHaveBeenCalledTimes(1);
+    unmount();
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+});
