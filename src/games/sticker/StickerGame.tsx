@@ -350,7 +350,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                   if (px < 0 || py < 0) return;
                   const f = stageFrame.current;
                   if (px >= f.x && px <= f.x + f.w && py >= f.y && py <= f.y + f.h) {
-                    addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 });
+                    addSticker(icon, { x: (px - f.x) / f.w - 0.045, y: (py - f.y) / f.h - 0.045 * (f.w / f.h) });
                   }
                 }}
               />
