@@ -87,7 +87,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCelebrate(0);
     lockedRef.current = false;
     setGameKey((k) => k + 1);
-  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const board = boardRef.current;
   const call = board.calls[callIdx];
