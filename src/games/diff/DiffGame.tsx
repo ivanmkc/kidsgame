@@ -2,6 +2,8 @@ import { say, sfx } from "../../sound";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,7 +11,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SCENE_IMAGES } from "../../assets/images";
-import { GameShell, ScoreChip } from "../../components/GameShell";
+import { GameShell } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
 import { TapScene } from "../../components/TapScene";
@@ -27,7 +29,7 @@ import { useWinLine } from "../winlines";
 import { t } from "../../i18n";
 import { baseImage, manifest } from "../../manifest";
 import { makeRng, sample } from "../../rng";
-import { colors, fonts } from "../../theme";
+import { colors, fonts, shadows } from "../../theme";
 import { DiffHintButton } from "./DiffHintButton";
 import { diffPrompt } from "./logic";
 
@@ -76,13 +78,13 @@ export function DiffGame({
   const lastSceneIdRef = useRef<string | undefined | null>(null);
   const settings = settingsFor(effDifficulty);
 
-  // The hint button stays hidden until the kid is genuinely stuck (~20s
+  // The hint button stays hidden until the kid is genuinely stuck (~10s
   // without a find), and hides again after each use — no hint spamming.
   const armHintTimer = () => {
     setHintAvailable(false);
     if (idleTimer.current) clearTimeout(idleTimer.current);
     if (settings.diffHint) {
-      idleTimer.current = setTimeout(() => setHintAvailable(true), 20000);
+      idleTimer.current = setTimeout(() => setHintAvailable(true), 10000);
     }
   };
 
@@ -95,6 +97,7 @@ export function DiffGame({
     setHintRegion(null);
     setReady(false);
     setForceReady(false);
+    prevFoundCount.current = 0;
     armHintTimer();
     const t = setTimeout(() => setForceReady(true), 8000);
     return () => {
@@ -138,6 +141,25 @@ export function DiffGame({
     };
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
   const won = found.length === total && total > 0;
+  const progressPulse = useRef(new Animated.Value(1)).current;
+  const prevFoundCount = useRef(0);
+  useEffect(() => {
+    if (found.length > prevFoundCount.current) {
+      progressPulse.setValue(1.35);
+      Animated.spring(progressPulse, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }).start();
+    }
+    prevFoundCount.current = found.length;
+  }, [found.length, progressPulse]);
+
+  const onReplay = () => {
+    if (won) return;
+    sfx.tap();
+    say(diffPrompt(lang, true));
+  };
   useEffect(() => {
     const sceneChanged = sceneId !== lastSceneIdRef.current;
     lastSceneIdRef.current = sceneId;
@@ -345,7 +367,22 @@ export function DiffGame({
       backKind="picker"
       lang={lang}
       right={
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <View style={styles.headerRight}>
+          <Pressable
+            testID="diff-replay"
+            accessibilityRole="button"
+            accessibilityLabel={t(lang, "spell.hearAgain")}
+            disabled={won}
+            onPress={onReplay}
+            style={({ pressed }) => [
+              styles.replayBtn,
+              shadows.soft,
+              won && styles.replayBtnDisabled,
+              pressed && !won && styles.pressed,
+            ]}
+          >
+            <Text style={styles.replayText}>🔊</Text>
+          </Pressable>
           {showTimer ? (
             <TimerRing
               elapsed={elapsed}
@@ -355,10 +392,41 @@ export function DiffGame({
               testID="diff-timer"
             />
           ) : null}
-          <ScoreChip
-            label={`🔍 ${found.length}/${total}`}
-            testID="diff-score"
-          />
+          <Animated.View
+            style={[
+              styles.progressChip,
+              shadows.soft,
+              { transform: [{ scale: progressPulse }] },
+            ]}
+            testID="diff-progress"
+            accessibilityRole="text"
+            accessibilityLabel={`${found.length}/${total}`}
+          >
+            <View style={styles.slotsRow} testID="diff-slots">
+              {Array.from({ length: total }).map((_, i) => {
+                const isFilled = i < found.length;
+                return (
+                  <View
+                    key={i}
+                    testID={`diff-slot-${i}`}
+                    style={[styles.slot, isFilled && styles.slotFilled]}
+                  >
+                    <View
+                      testID={isFilled ? "diff-slot-filled" : "diff-slot-empty"}
+                      style={styles.slotInner}
+                    >
+                      {isFilled ? (
+                        <Text style={styles.slotStar}>⭐</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+            <Text style={styles.scoreText} testID="diff-score">
+              {`🔍 ${found.length}/${total}`}
+            </Text>
+          </Animated.View>
         </View>
       }
     >
@@ -441,5 +509,71 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
+  },
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  replayBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.card,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  replayBtnDisabled: {
+    opacity: 0.4,
+  },
+  replayText: {
+    fontSize: 22,
+  },
+  pressed: {
+    opacity: 0.7,
+    transform: [{ scale: 0.94 }],
+  },
+  progressChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.card,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderWidth: 1.5,
+    borderColor: "rgba(0,0,0,0.06)",
+  },
+  slotsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  slot: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#D4C5A9",
+    backgroundColor: colors.paper,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  slotFilled: {
+    borderColor: colors.gold,
+    backgroundColor: "#FFF8E7",
+  },
+  slotInner: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  slotStar: {
+    fontSize: 11,
+    lineHeight: 13,
+  },
+  scoreText: {
+    fontFamily: fonts.display,
+    fontSize: 15,
+    color: colors.ink,
   },
 });
