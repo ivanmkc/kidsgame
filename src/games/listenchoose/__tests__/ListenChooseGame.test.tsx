@@ -317,7 +317,7 @@ describe("ListenChooseGame", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
-    const { distractorBtn } = getRoundChoices();
+    const { distractorBtn, distractorWord } = getRoundChoices();
     vi.mocked(sound.sayThen).mockClear();
 
     // Rapid tapping on wrong choice in the same event turn
@@ -326,6 +326,19 @@ describe("ListenChooseGame", () => {
       fireEvent.click(distractorBtn);
       fireEvent.click(distractorBtn);
     });
+
+    const captures = capturedPressableMap[`choice-${distractorWord.icon}`];
+    expect(captures).toBeDefined();
+    const wobbleCaptures = captures.filter((capture) => {
+      const styleProp = capture.style;
+      const rawStyle =
+        typeof styleProp === "function"
+          ? styleProp({ pressed: false })
+          : styleProp;
+      const resolved = StyleSheet.flatten(rawStyle);
+      return resolved.borderColor === colors.red;
+    });
+    expect(wobbleCaptures.length).toBe(1);
 
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
