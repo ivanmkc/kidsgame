@@ -400,4 +400,66 @@ describe("NumbersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("calls stopNarration and handles language switch safely on victory screen", () => {
+    vi.useFakeTimers();
+    try {
+      const stopSpy = vi.spyOn(sound, "stopNarration");
+
+      function VictoryLangWrapper() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        return (
+          <LangContext.Provider
+            value={{
+              lang,
+              onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+            }}
+          >
+            <NumbersGame
+              onHome={vi.fn()}
+              difficulty="easy"
+              lang={lang}
+            />
+          </LangContext.Provider>
+        );
+      }
+
+      render(<VictoryLangWrapper />);
+
+      // Fast-forward rounds to win (easy requires 8 rounds)
+      for (let round = 0; round < 8; round++) {
+        const promptEl = screen.getByTestId(/^numbers-prompt-/);
+        const targetKey = promptEl
+          .getAttribute("data-testid")!
+          .replace("numbers-prompt-", "");
+        const targetN = targetKey.replace(/^[a-z]-/, "");
+        let correctTile: HTMLElement | null = null;
+        for (let i = 0; i < 5; i++) {
+          const tile = screen.getByTestId(`numbers-tile-${i}`);
+          const label = tile.getAttribute("aria-label");
+          if (label === targetN || label === hanNumeral(Number(targetN))) {
+            correctTile = tile;
+            break;
+          }
+        }
+        expect(correctTile).not.toBeNull();
+        fireEvent.click(correctTile!);
+        vi.advanceTimersByTime(300);
+      }
+
+      vi.advanceTimersByTime(600);
+
+      // Win overlay is now displayed
+      expect(screen.queryByTestId("win-overlay")).not.toBeNull();
+
+      // Switch language mid-victory
+      stopSpy.mockClear();
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+
+      // stopNarration must be called via useLangEpoch layout effect
+      expect(stopSpy).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
