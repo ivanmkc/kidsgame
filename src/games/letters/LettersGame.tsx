@@ -16,7 +16,12 @@ import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, sfx } from "../../sound";
-import { LetterRound, makeLetterRound, settingsForLetters, shouldShowGlyph } from "./logic";
+import {
+  LetterRound,
+  makeLetterRound,
+  settingsForLetters,
+  shouldShowGlyph,
+} from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -36,7 +41,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  
+
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(false);
   const [misses, setMisses] = useState(0);
@@ -56,7 +61,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
   const langMounted = useRef(false);
   useEffect(() => {
-    if (!langMounted.current) { langMounted.current = true; return; }
+    if (!langMounted.current) {
+      langMounted.current = true;
+      return;
+    }
     if (errorTimerRef.current) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
@@ -66,9 +74,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setWrongIdx(null);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => {
-    if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+    },
+    [],
+  );
 
   const pulse = useRef(new Animated.Value(1)).current;
 
@@ -76,9 +87,17 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     if (!started) return;
     const loop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulse, { toValue: 1.1, duration: 400, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 1, duration: 400, useNativeDriver: true }),
-      ])
+        Animated.timing(pulse, {
+          toValue: 1.1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]),
     );
     loop.start();
     return () => loop.stop();
@@ -141,14 +160,14 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   );
 
   const chipEmoji = tier === "kana" ? "🈶" : tier === "sound" ? "👂" : "🔤";
+  const title =
+    tier === "kana"
+      ? t(lang, "shell.letters.titleKana")
+      : t(lang, "shell.letters.title");
 
   return (
     <GameShell
-      title={
-        tier === "kana"
-          ? t(lang, "shell.letters.titleKana")
-          : t(lang, "shell.letters.title")
-      }
+      title={title}
       subtitle={
         tier === "sound"
           ? t(lang, "shell.letters.subSound")
@@ -177,47 +196,75 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         {!started ? (
           <View style={styles.startScreen}>
-            <Text style={styles.startTitle}>{t(lang, "card.letters.title")}</Text>
-            <Text style={styles.startBlurb}>{t(lang, "card.letters.blurb")}</Text>
+            <Text style={styles.startTitle}>{title}</Text>
+            <Text style={styles.startBlurb}>
+              {t(lang, "card.letters.blurb")}
+            </Text>
             <Pressable
               onPress={() => setStarted(true)}
               testID="play-button"
               accessibilityRole="button"
               accessibilityLabel={t(lang, "listenchoose.play")}
-              style={({ pressed }) => [styles.playButton, shadows.soft, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.playButton,
+                shadows.soft,
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.playButtonText}>{t(lang, "listenchoose.play")}</Text>
+              <Text style={styles.playButtonText}>
+                {t(lang, "listenchoose.play")}
+              </Text>
             </Pressable>
             <Pressable
               onPress={() => setCaptions((c) => !c)}
               testID="captions-toggle"
               accessibilityRole="button"
-              style={({ pressed }) => [styles.captionsToggle, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.captionsToggle,
+                pressed && styles.pressed,
+              ]}
             >
               <Text style={styles.captionsToggleText}>
-                💬 {t(lang, "listenchoose.captions")}: {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
+                💬 {t(lang, "listenchoose.captions")}:{" "}
+                {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
               </Text>
             </Pressable>
           </View>
         ) : (
           <>
             <View
-              style={[styles.prompt, shadows.soft, shouldShowGlyph(misses, captions) ? null : styles.promptAudioOnly]}
+              style={[
+                styles.prompt,
+                shadows.soft,
+                shouldShowGlyph(misses, captions)
+                  ? null
+                  : styles.promptAudioOnly,
+              ]}
               testID={`letters-prompt-${round.targetKey}`}
             >
               <Pressable
                 onPress={() => say(round.promptLine)}
                 testID="speaker-button"
                 accessibilityRole="button"
-                style={({ pressed }) => [styles.speakerButton, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.speakerButton,
+                  pressed && styles.pressed,
+                ]}
               >
-                <Animated.Text style={[styles.speakerIcon, { transform: [{ scale: pulse }] }]}>
+                <Animated.Text
+                  style={[
+                    styles.speakerIcon,
+                    { transform: [{ scale: pulse }] },
+                  ]}
+                >
                   🔊
                 </Animated.Text>
               </Pressable>
               {shouldShowGlyph(misses, captions) && (
                 <View style={styles.promptGlyphContainer}>
-                  <Text style={styles.promptGlyph} testID="letters-glyph">{round.targetDisplay}</Text>
+                  <Text style={styles.promptGlyph} testID="letters-glyph">
+                    {round.targetDisplay}
+                  </Text>
                   {round.romanCaption ? (
                     <Text style={styles.caption}>{round.romanCaption}</Text>
                   ) : null}
@@ -225,7 +272,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               )}
             </View>
             <View
-              style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+              style={[
+                styles.grid,
+                { width: cols * tile + (cols - 1) * gap, gap },
+              ]}
             >
               {round.tiles.map((t, i) => (
                 <Pressable
