@@ -168,12 +168,12 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const stageW = Math.min(width - 32, 560);
   const stageH = Math.min(height - 84 - 180, stageW * 0.85);
   const critterSize = stageCritterSize(round.n, stageW, stageH);
-  const promptText = t(lang, "shell.count.sub");
+  const promptText = t(lang, "shell.count.prompt");
 
   return (
     <GameShell
       title={t(lang, "shell.count.title")}
-      subtitle={promptText}
+      subtitle={t(lang, "shell.count.sub")}
       onBack={onHome}
       lang={lang}
       right={

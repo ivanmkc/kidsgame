@@ -59,7 +59,7 @@ const ALL_KEYS: UIKey[] = [
   'shell.sounds.titleEn', 'shell.sounds.titleWords', 'shell.sounds.subEn', 'shell.sounds.subWord',
   'shell.rhyme.title', 'shell.rhyme.sub',
   'shell.spell.title', 'shell.spell.sub', 'spell.hearAgain',
-  'shell.count.title', 'shell.count.sub',
+  'shell.count.title', 'shell.count.sub', 'shell.count.prompt',
   'shell.compare.title', 'shell.compare.subMore', 'shell.compare.subFewer',
   'shell.sums.title', 'shell.sums.sub',
   'shell.spotit.title', 'shell.spotit.sub',

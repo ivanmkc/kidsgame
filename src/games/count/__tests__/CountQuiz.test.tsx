@@ -147,10 +147,10 @@ describe("CountGame quiz phase", () => {
     const promptBtn = screen.getByTestId("count-prompt");
     expect(promptBtn.getAttribute("role")).toBe("button");
     expect(promptBtn.getAttribute("aria-label")).toBe(
-      t("en", "shell.count.sub"),
+      t("en", "shell.count.prompt"),
     );
     expect(
-      within(promptBtn).getByText(t("en", "shell.count.sub")),
+      within(promptBtn).getByText(t("en", "shell.count.prompt")),
     ).toBeDefined();
     expect(screen.getByText(t("en", "spell.hearAgain"))).toBeDefined();
 
@@ -214,10 +214,10 @@ describe("CountGame quiz phase", () => {
     const promptBtn = screen.getByTestId("count-prompt");
     expect(promptBtn.getAttribute("role")).toBe("button");
     expect(promptBtn.getAttribute("aria-label")).toBe(
-      t("ja", "shell.count.sub"),
+      t("ja", "shell.count.prompt"),
     );
     expect(
-      within(promptBtn).getByText(t("ja", "shell.count.sub")),
+      within(promptBtn).getByText(t("ja", "shell.count.prompt")),
     ).toBeDefined();
     expect(screen.getByText(t("ja", "spell.hearAgain"))).toBeDefined();
 
@@ -293,5 +293,30 @@ describe("CountGame quiz phase", () => {
     fireEvent.click(wrongChoice!);
     expect(wrongSfx).toHaveBeenCalledTimes(1);
   });
+
+  it.each(["en", "ja", "cmn", "yue"] as const)(
+    "displays localized prompt from translation table for %s",
+    (lang) => {
+      vi.spyOn(sound, "say").mockReturnValue();
+      vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+        if (cb) cb();
+      });
+
+      render(<CountGame onHome={() => {}} difficulty="easy" lang={lang} />);
+
+      const critters = screen.queryAllByTestId(/count-critter/);
+      for (const c of critters) {
+        fireEvent.click(c);
+      }
+
+      const promptBtn = screen.getByTestId("count-prompt");
+      expect(promptBtn.getAttribute("aria-label")).toBe(
+        t(lang, "shell.count.prompt"),
+      );
+      expect(
+        within(promptBtn).getByText(t(lang, "shell.count.prompt")),
+      ).toBeDefined();
+    },
+  );
 });
 

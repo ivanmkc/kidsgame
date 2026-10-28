@@ -732,7 +732,7 @@ describe("CountGame language switch mid-quiz", () => {
     // Quiz phase is now active. Verify the initial English prompt.
     const promptCard = screen.getByTestId("count-prompt");
     expect(
-      within(promptCard).getByText(t("en", "shell.count.sub")),
+      within(promptCard).getByText(t("en", "shell.count.prompt")),
     ).toBeDefined();
     expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
 
@@ -771,7 +771,7 @@ describe("CountGame language switch mid-quiz", () => {
     expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
     const promptCardJa = screen.getByTestId("count-prompt");
     expect(
-      within(promptCardJa).getByText(t("ja", "shell.count.sub")),
+      within(promptCardJa).getByText(t("ja", "shell.count.prompt")),
     ).toBeDefined();
     expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/5");
 
@@ -786,7 +786,7 @@ describe("CountGame language switch mid-quiz", () => {
     expect(saySpy).not.toHaveBeenCalledWith(PROMPTS.en);
     expect(saySpy).not.toHaveBeenCalled();
     expect(
-      within(promptCardJa).getByText(t("ja", "shell.count.sub")),
+      within(promptCardJa).getByText(t("ja", "shell.count.prompt")),
     ).toBeDefined();
   });
 });
@@ -882,7 +882,7 @@ describe("CountGame affordances, prompt replay and ordinal badges", () => {
     const promptCard = screen.getByTestId("count-prompt");
     expect(promptCard.getAttribute("role")).toBe("button");
     expect(
-      within(promptCard).getByText(t("en", "shell.count.sub")),
+      within(promptCard).getByText(t("en", "shell.count.prompt")),
     ).toBeDefined();
     expect(screen.getByText(t("en", "spell.hearAgain"))).toBeDefined();
 
@@ -913,7 +913,7 @@ describe("CountGame affordances, prompt replay and ordinal badges", () => {
 
     const promptCard = screen.getByTestId("count-prompt");
     expect(
-      within(promptCard).getByText(t("ja", "shell.count.sub")),
+      within(promptCard).getByText(t("ja", "shell.count.prompt")),
     ).toBeDefined();
     expect(screen.getByText(t("ja", "spell.hearAgain"))).toBeDefined();
 
