@@ -26,6 +26,7 @@ export interface RhymeTile {
   icon: string;
   bucket: 'spotit' | 'rhyme';
   isAnswer: boolean;
+  word: string;
 }
 
 export interface RhymeRound {
@@ -237,7 +238,7 @@ export function makeRhymeRound(
   // are the correct-family partner + distinct other-family distractors.
   const tileEntries = shuffle(rng, [correct, ...distractors]).slice(0, tileCount);
   const tiles: RhymeTile[] = tileEntries.map((e) => ({
-    key: e.icon, icon: e.icon, bucket: e.bucket, isAnswer: e.icon === correct.icon,
+    key: e.icon, icon: e.icon, bucket: e.bucket, isAnswer: e.icon === correct.icon, word: e.word,
   }));
 
   const { promptLines, displayPrompt, caption, confirmLines } = buildLines(lang, target, correct);

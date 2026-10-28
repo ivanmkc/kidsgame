@@ -84,4 +84,22 @@ describe('makeRhymeRound', () => {
     expect(distractorIcons).toContain('tower');
     expect(distractorIcons).toHaveLength(2);
   });
+
+  it('attaches localized word to each RhymeTile in the round', () => {
+    const entries: import('../logic').RhymeEntry[] = [
+      { icon: 'blossom', en: 'flower', word: 'はな', roman: 'hana', rhymeKey: 'A', bucket: 'spotit' },
+      { icon: 'frog', en: 'frog', word: 'かえる', roman: 'kaeru', rhymeKey: 'A', bucket: 'spotit' },
+      { icon: 'cat', en: 'cat', word: 'ねこ', roman: 'neko', rhymeKey: 'B', bucket: 'spotit' },
+      { icon: 'dog', en: 'dog', word: 'いぬ', roman: 'inu', rhymeKey: 'B', bucket: 'spotit' },
+    ];
+    const rng = () => 0;
+    const round = makeRhymeRound(rng, entries, 3, 'ja');
+    expect(round.tiles).toHaveLength(3);
+    for (const tile of round.tiles) {
+      const matchingEntry = entries.find((e) => e.icon === tile.icon);
+      expect(matchingEntry).toBeDefined();
+      expect(tile.word).toBe(matchingEntry!.word);
+    }
+  });
 });
+

@@ -259,7 +259,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
                       key={`${roundIdx}-${i}-${t.icon}`}
                       onPress={() => onTile(i)}
                       testID={`rhyme-tile-${i}`}
-                      accessibilityLabel={t.icon}
+                      accessibilityLabel={t.word || t.icon}
                       accessibilityRole="button"
                       style={({ pressed }) => [
                         styles.tile,
