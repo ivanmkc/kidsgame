@@ -274,6 +274,7 @@ export type UIKey =
   | 'sticker.item.flower_crown' | 'sticker.item.scarf' | 'sticker.item.ballet_slippers' | 'sticker.item.rain_boots'
   | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
   | 'rhyme.ask'
+  | 'rhyme.confirm'
   | 'rhyme.comingSoon'
   | 'letters.find'
   | 'letters.sound'
@@ -675,6 +676,7 @@ export const EN: Table = {
   // Rhyme game prompts: EN interpolates {word} into the full sentence;
   // non-EN pairs this fixed question clip with the target word clip.
   'rhyme.ask': 'Which one rhymes with {word}?',
+  'rhyme.confirm': 'They rhyme!',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
   'letters.find': 'Find the letter {letter}!',
   'letters.sound': 'Which letter says {sound}?',

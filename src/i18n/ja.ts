@@ -350,6 +350,7 @@ export const JA: Table = {
   'memory.cardFaceDown': 'うらがえしのカード',
   'memory.foundPair': '{name}が ペアを みつけたよ！ もういっかい！',
   'rhyme.ask': 'おなじ おとで おわるのは どれ？',
+  'rhyme.confirm': 'おなじ おと！',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
   'letters.find': '「{letter}」をさがして！',
   'letters.sound': '「{sound}」の おとの もじは どれ？',
