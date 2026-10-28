@@ -28,6 +28,7 @@ import {
   initGameState,
   listenChooseLayout,
   updateGameState,
+  ROUNDS_TO_WIN,
 } from "./logic";
 import { useWinLine } from "../winlines";
 
@@ -175,7 +176,10 @@ export function ListenChooseGame({
       onBack={handleHome}
       lang={lang}
       right={
-        <ScoreChip label={`⭐ ${state.streak}`} testID="listenchoose-streak" />
+        <ScoreChip
+          label={`⭐ ${state.streak} / ${ROUNDS_TO_WIN}`}
+          testID="listenchoose-streak"
+        />
       }
     >
       <ScrollView

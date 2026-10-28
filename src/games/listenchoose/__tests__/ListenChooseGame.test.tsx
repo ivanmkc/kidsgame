@@ -210,7 +210,9 @@ describe("ListenChooseGame", () => {
       [targetWord.en],
       expect.any(Function),
     );
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 0 / 12",
+    );
     expect(targetBtn.getAttribute("aria-selected")).toBe("false");
 
     // Advance timer past wobble duration
@@ -236,13 +238,17 @@ describe("ListenChooseGame", () => {
       vi.advanceTimersByTime(800);
     });
 
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 1 / 12",
+    );
 
     const nextChoices = getRoundChoices();
     fireEvent.click(nextChoices.distractorBtn);
 
     expect(sfx.wrong).not.toHaveBeenCalled();
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 1 / 12",
+    );
   });
 
   it("handles correct pick by playing good sfx, celebrating, incrementing streak, and advancing", () => {
@@ -252,7 +258,9 @@ describe("ListenChooseGame", () => {
     const { targetBtn, targetWord } = getRoundChoices();
     vi.mocked(sound.sayThen).mockClear();
 
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 0 / 12",
+    );
 
     // Click correct answer
     fireEvent.click(targetBtn);
@@ -266,7 +274,9 @@ describe("ListenChooseGame", () => {
       vi.advanceTimersByTime(800);
     });
 
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 1 / 12",
+    );
 
     // Next round loaded: sayThen is called with the next target word
     expect(sound.sayThen).toHaveBeenCalled();
@@ -295,7 +305,9 @@ describe("ListenChooseGame", () => {
       vi.advanceTimersByTime(800);
     });
 
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 1");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 1 / 12",
+    );
     // Exactly one round transition and speech happened
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
   });
@@ -315,7 +327,9 @@ describe("ListenChooseGame", () => {
     });
 
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("listenchoose-streak").textContent).toBe("⭐ 0");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
+      "⭐ 0 / 12",
+    );
   });
 
   it("ignores rapid repeat taps during celebration animation", () => {
@@ -479,12 +493,12 @@ describe("ListenChooseGame", () => {
     }
   });
 
-  it("wins the game and shows WinOverlay when streak reaches 30", () => {
+  it("wins the game and shows WinOverlay when streak reaches 12", () => {
     vi.useFakeTimers();
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 12; i++) {
       const { targetBtn } = getRoundChoices();
       fireEvent.click(targetBtn);
       act(() => {
@@ -624,7 +638,7 @@ describe("ListenChooseGame", () => {
     expect(sound.sayThen).not.toHaveBeenCalled();
     expect(screen.queryByTestId("speaker-button")).toBeNull();
     expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
-      "⭐ 0",
+      "⭐ 0 / 12",
     );
   });
 
