@@ -41,7 +41,10 @@ export function makeOddOneRound(
   const eligible = Object.entries(ICON_CATEGORIES)
     .map(
       ([name, members]) =>
-        [name, members.filter((m) => icons.includes(m))] as const,
+        [
+          name,
+          members.filter((m) => icons.includes(m) && !baseMembers.includes(m)),
+        ] as const,
     )
     .filter(([name, members]) => name !== baseCategory && members.length > 0);
   // Defensive: a future conflict table could rule out every other category.
