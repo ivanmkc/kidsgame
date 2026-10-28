@@ -225,4 +225,73 @@ describe("CountGame quiz phase", () => {
     expect(saySpy).toHaveBeenCalledTimes(1);
     expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
   });
+
+  it("stops narration via useLangEpoch when language switches mid-game", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { rerender } = render(
+      <CountGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    rerender(<CountGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("unlocks input and clears pending timeouts when language switches", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    vi.spyOn(sound, "sayThen").mockImplementation((lines, cb) => {
+      if (lines.length === 1) {
+        cb?.();
+      }
+    });
+
+    const { rerender } = render(
+      <CountGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    const critters = screen.queryAllByTestId(/count-critter/);
+    for (const c of critters) {
+      fireEvent.click(c);
+    }
+
+    const choices = screen.queryAllByTestId(/count-choice-/);
+    const correctChoice = choices.find((c) =>
+      c.getAttribute("data-testid")?.includes("-answer"),
+    );
+    expect(correctChoice).toBeDefined();
+
+    const wrongChoice = choices.find(
+      (c) => !c.getAttribute("data-testid")?.includes("-answer"),
+    );
+    expect(wrongChoice).toBeDefined();
+
+    const wrongSfx = vi.spyOn(sound.sfx, "wrong");
+
+    // Tap correct answer while sayThen is pending: game becomes locked
+    fireEvent.click(correctChoice!);
+
+    const promptBtn = screen.getByTestId("count-prompt");
+    saySpy.mockClear();
+    fireEvent.click(promptBtn);
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // Subsequent choice tap is also ignored while locked
+    fireEvent.click(wrongChoice!);
+    expect(wrongSfx).not.toHaveBeenCalled();
+
+    // Switch language mid-lock
+    rerender(<CountGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    // Prompt replay and inputs are unlocked
+    saySpy.mockClear();
+    fireEvent.click(promptBtn);
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+
+    // Choices are also interactive again
+    fireEvent.click(wrongChoice!);
+    expect(wrongSfx).toHaveBeenCalledTimes(1);
+  });
 });
+

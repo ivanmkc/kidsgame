@@ -13,7 +13,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord } from "../../lang";
+import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
@@ -44,6 +44,7 @@ interface Props {
  * answer buttons are just glyphs to match the ones they hear.
  */
 export function CountGame({ onHome, difficulty, lang }: Props) {
+  useLangEpoch(lang);
   const { rounds: roundsToWin } = countSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<CountRound>(() =>
@@ -59,6 +60,9 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<"count" | "quiz">("count");
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [locked, setLocked] = useState(false);
+  const lockedRef = useRef(false);
+  lockedRef.current = locked;
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const [won, setWon] = useState(false);
@@ -68,6 +72,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
     setWrongPick(null);
+    lockedRef.current = false;
+    setLocked(false);
     if (!won) {
       if (phase === "quiz") {
         say(PROMPTS[lang]);
@@ -78,6 +84,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     return () => {
       wrongTimeoutsRef.current.forEach(clearTimeout);
       wrongTimeoutsRef.current = [];
+      lockedRef.current = false;
+      setLocked(false);
     };
   }, [round, phase, lang, won]);
 
@@ -99,10 +107,6 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
       say(line);
     }
   };
-
-  const [locked, setLocked] = useState(false);
-  const lockedRef = useRef(false);
-  lockedRef.current = locked;
 
   const pickAnswer = (v: number) => {
     applyPickAnswer(
