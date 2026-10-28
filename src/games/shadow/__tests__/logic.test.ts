@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { LANGS, Lang } from "../../../lang";
+import { manifest } from "../../../manifest";
 import { makeRng } from "../../../rng";
 import { ICON_CATEGORIES } from "../../iconCategories";
-import { SHADOW_PROMPTS, makeShadowRound, shadowPrompt } from "../logic";
+import {
+  SHADOW_PROMPTS,
+  makeShadowRound,
+  shadowOptionLabel,
+  shadowPrompt,
+} from "../logic";
 
 describe("shadow prompt localization", () => {
   it("uses English baseline string in en mode", () => {
@@ -71,5 +77,40 @@ describe("makeShadowRound", () => {
         }
       }
     }
+  });
+});
+
+describe("shadowOptionLabel", () => {
+  it("localizes icon names to the requested language", () => {
+    expect(shadowOptionLabel("dog", "en")).toBe("dog");
+    expect(shadowOptionLabel("dog", "ja")).toBe("いぬ");
+    expect(shadowOptionLabel("dog", "cmn")).toBe("狗");
+    expect(shadowOptionLabel("dog", "yue")).toBe("狗");
+    expect(shadowOptionLabel("fox", "ja")).toBe("きつね");
+    expect(shadowOptionLabel("soccer", "ja")).toBe("ボール");
+    expect(shadowOptionLabel("soccer", "cmn")).toBe("足球");
+    expect(shadowOptionLabel("icecream", "ja")).toBe("アイスクリーム");
+    expect(shadowOptionLabel("icecream", "yue")).toBe("雪糕");
+  });
+
+  it("defaults to English when language is omitted", () => {
+    expect(shadowOptionLabel("dog")).toBe("dog");
+    expect(shadowOptionLabel("fox")).toBe("fox");
+  });
+
+  it("covers all icons in manifest.spotit across all supported languages", () => {
+    for (const icon of manifest.spotit.icons) {
+      for (const { id: lang } of LANGS) {
+        const label = shadowOptionLabel(icon, lang);
+        expect(label).toBeTruthy();
+        expect(typeof label).toBe("string");
+      }
+    }
+  });
+
+  it("throws loudly when an icon is not in WORDS", () => {
+    expect(() => shadowOptionLabel("unknown_icon", "en")).toThrow(
+      "Unknown shadow icon: unknown_icon",
+    );
   });
 });

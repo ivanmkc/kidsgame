@@ -1,5 +1,6 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../words";
 import { sameCategory } from "../iconCategories";
 
 // Spoken prompt for Shadow Match across all four languages.
@@ -76,4 +77,11 @@ export function makeShadowRound(
     rotation: d.transform ? Math.round((rng() - 0.5) * 2 * 70) : 0,
     mirrored: d.transform ? rng() > 0.5 : false,
   };
+}
+
+/** Localized screen-reader label for a shadow match option icon. */
+export function shadowOptionLabel(icon: string, lang: Lang = "en"): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown shadow icon: ${icon}`);
+  return wordFor(entry, lang).text;
 }
