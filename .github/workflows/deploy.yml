@@ -8,10 +8,12 @@ on:
     branches: [master]
   workflow_dispatch:
 
-# Merges land several times an hour; only the newest master needs to ship.
+# Merges land several times an hour and a deploy takes ~20 min, so cancelling
+# the running deploy would starve the site. Let it finish; GitHub keeps only the
+# newest waiting run, so the latest master ships next.
 concurrency:
   group: deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: write
