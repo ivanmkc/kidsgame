@@ -33,6 +33,11 @@ export function filterRoundsByDifficulty(
       );
     }
   }
+
+  if (rounds.some(r => r.level)) {
+    return rounds.filter((r) => r.level === difficulty);
+  }
+
   return rounds;
 }
 
