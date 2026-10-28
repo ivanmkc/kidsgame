@@ -49,7 +49,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<LetterRound>(() =>
-    makeLetterRound(rngRef.current, tier, tileCount),
+    makeLetterRound(rngRef.current, tier, tileCount, undefined, lang),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
@@ -70,7 +70,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
     }
-    setRound(makeLetterRound(rngRef.current, tier, tileCount));
+    setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
     setMisses(0);
     setWrongIdx(null);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -126,7 +126,13 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       setRoundIdx(next);
       if (next < roundsToWin) {
         setRound(
-          makeLetterRound(rngRef.current, tier, tileCount, round.targetKey),
+          makeLetterRound(
+            rngRef.current,
+            tier,
+            tileCount,
+            round.targetKey,
+            lang,
+          ),
         );
       }
     } else {
@@ -148,7 +154,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
     setMisses(0);
-    setRound(makeLetterRound(rngRef.current, tier, tileCount));
+    setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
     setWrongIdx(null);
   };
 
