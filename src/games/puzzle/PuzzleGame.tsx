@@ -12,6 +12,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { FilterCycleChip, ScenePicker } from "../../components/ScenePicker";
 import { allSceneOptions } from "../sceneOptions";
+import { useWinLine } from "../winlines";
 import { WinOverlay } from "../../components/WinOverlay";
 import {
   Difficulty,
@@ -25,7 +26,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sfx, useSay } from "../../sound";
+import { sfx, useSay } from "../../sound";
 import { SparkleBurst } from "../../components/Sparkles";
 import { isSolved, makePuzzle, swap } from "./logic";
 
@@ -103,9 +104,7 @@ export function PuzzleGame({
   const showTimer = settings.timer;
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
-  useEffect(() => {
-    if (won) say(t(lang, "win.puzzle"));
-  }, [won]);
+  useWinLine(won, t(lang, "win.puzzle"));
   const { width, height } = useWindowDimensions();
 
   if (!picked) {

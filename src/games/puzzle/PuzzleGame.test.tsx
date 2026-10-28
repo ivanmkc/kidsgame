@@ -9,6 +9,8 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { PuzzleGame } from "./PuzzleGame";
+import { say } from "../../sound";
+import { t } from "../../i18n";
 
 vi.mock("../../sound", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../sound")>();
@@ -148,5 +150,66 @@ describe("PuzzleGame", () => {
     // if timer was not cleared, it might error after unmount. Since it's cleaned up, it won't.
     vi.runAllTimers();
     vi.useRealTimers();
+  });
+
+  it("re-speaks the win line when language changes on the victory screen", () => {
+    const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.12345);
+    const { rerender } = render(
+      <PuzzleGame
+        onHome={() => {}}
+        onBackToPicker={() => {}}
+        onPickScene={() => {}}
+        difficulty="easy"
+        sceneId="d-farm"
+        lang="en"
+      />,
+    );
+
+    const getPieces = () => {
+      const arr: number[] = [];
+      for (const t of screen.getAllByTestId(/puzzle-tile-\d+-piece-\d+/)) {
+        const testId = t.getAttribute("data-testid");
+        if (!testId) continue;
+        const match = testId.match(/puzzle-tile-(\d+)-piece-(\d+)/);
+        if (match) {
+          arr[Number(match[1])] = Number(match[2]);
+        }
+      }
+      return arr;
+    };
+
+    vi.mocked(say).mockClear();
+
+    for (let i = 0; i < 9; i++) {
+      let arr = getPieces();
+      if (arr[i] !== i) {
+        const targetPos = arr.indexOf(i);
+        const tile1 = screen.getByTestId(`puzzle-tile-${i}-piece-${arr[i]}`);
+        const tile2 = screen.getByTestId(
+          `puzzle-tile-${targetPos}-piece-${arr[targetPos]}`,
+        );
+        fireEvent.click(tile1);
+        fireEvent.click(tile2);
+      }
+    }
+
+    expect(say).toHaveBeenCalledWith(t("en", "win.puzzle"));
+    
+    vi.mocked(say).mockClear();
+
+    rerender(
+      <PuzzleGame
+        onHome={() => {}}
+        onBackToPicker={() => {}}
+        onPickScene={() => {}}
+        difficulty="easy"
+        sceneId="d-farm"
+        lang="ja"
+      />,
+    );
+
+    expect(say).toHaveBeenCalledWith(t("ja", "win.puzzle"));
+
+    randomSpy.mockRestore();
   });
 });
