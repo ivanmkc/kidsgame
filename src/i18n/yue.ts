@@ -282,6 +282,7 @@ export const YUE: Table = {
   'puzzle.peek': '🖼️ 偷睇',
   'puzzle.peekA11y': '偷睇砌好嘅圖',
   'puzzle.hint': '撳一塊，再撳另一塊，就會調位！',
+  'puzzle.tileA11y': '砌圖碎片 第 {row} 行，第 {col} 列',
   'sticker.clear': '🧹 清除',
   'sticker.magicFizzled': '魔法失敗咗 — 再試一次啦！',
   'sticker.magicPending': '施展緊魔法… ✨',

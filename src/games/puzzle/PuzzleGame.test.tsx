@@ -72,6 +72,15 @@ describe("PuzzleGame", () => {
 
     const tiles = screen.getAllByTestId(/puzzle-tile-\d+-piece-\d+/);
     expect(tiles).toHaveLength(9);
+    for (let pos = 0; pos < 9; pos++) {
+      const tile = screen.getByTestId(new RegExp(`^puzzle-tile-${pos}-`));
+      const col = (pos % 3) + 1;
+      const row = Math.floor(pos / 3) + 1;
+      expect(tile.getAttribute("role")).toBe("button");
+      expect(tile.getAttribute("aria-label")).toBe(
+        `Puzzle piece row ${row}, column ${col}`,
+      );
+    }
 
     fireEvent.click(tiles[0]);
     fireEvent.click(tiles[1]);
