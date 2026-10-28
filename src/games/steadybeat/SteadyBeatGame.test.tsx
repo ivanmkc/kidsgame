@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, it, vi } from "vitest";
-import React from "react";
+import React, { useState } from "react";
 import {
   render,
   screen,
@@ -9,6 +9,8 @@ import {
   cleanup,
 } from "@testing-library/react";
 import * as sound from "../../sound";
+import { LangContext } from "../../components/GameShell";
+import { Lang } from "../../lang";
 import { SteadyBeatGame } from "./SteadyBeatGame";
 import * as logic from "./logic";
 
@@ -299,7 +301,14 @@ it("speaks in the updated language when lang changes during listen phase", () =>
   expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
   saySpy.mockClear();
 
-  // Advance remaining time for the listen phase (1200ms more to reach 2400ms = 4 beats)
+  // After 1200ms (elapsed time for old timer), old interval was cancelled and round restarted
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+  expect(saySpy).not.toHaveBeenCalledWith("きみの ばん！");
+  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+
+  // Advance remaining 1200ms to complete the restarted listen phase (2400ms = 4 beats)
   act(() => {
     vi.advanceTimersByTime(1200);
   });
@@ -307,6 +316,88 @@ it("speaks in the updated language when lang changes during listen phase", () =>
   // Should speak "Your turn!" in Japanese, not English
   expect(saySpy).toHaveBeenCalledWith("きみの ばん！");
   expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+
+  roundSpy.mockRestore();
+  saySpy.mockRestore();
+  vi.useRealTimers();
+});
+
+function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const cycleLang = () => {
+    setLang((l) =>
+      l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+    );
+  };
+  return (
+    <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+      <SteadyBeatGame onHome={() => {}} difficulty="easy" lang={lang} />
+    </LangContext.Provider>
+  );
+}
+
+it("restarts round and speaks new subtitle when language button is clicked mid-round", () => {
+  vi.useFakeTimers();
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<LangHarness initialLang="en" />);
+
+  // Mount speaks initial subtitle in English
+  expect(saySpy).toHaveBeenCalledWith("Tap along with the beat!");
+  saySpy.mockClear();
+
+  // Initially in listen phase: 1 filled dot, 3 empty dots
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
+
+  // Advance 2 beats into the listen phase (1200ms at 100 bpm)
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(3);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(1);
+
+  // Click the in-game language cycle button mid-round
+  const langBtn = screen.getByTestId("lang-cycle");
+  act(() => {
+    fireEvent.click(langBtn);
+  });
+
+  // Round restarts: new subtitle is spoken in Japanese
+  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
+  saySpy.mockClear();
+
+  // Subtitle header updates to Japanese
+  expect(screen.getByText("ビートに あわせて タップ！")).toBeTruthy();
+
+  // Metronome has restarted from beat 0: dots reset to 1 filled, 3 empty
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
+
+  // Advance 1200ms (when the old interval would have fired if not cancelled)
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // Old interval was cleared: no speech fired yet, still in listen phase
+  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+  expect(saySpy).not.toHaveBeenCalledWith("きみの ばん！");
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(3);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(1);
+
+  // Advance remaining 1200ms (2400ms total after language switch)
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // Restarted round enters tap phase and speaks in Japanese
+  expect(saySpy).toHaveBeenCalledWith("きみの ばん！");
+  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+  expect(screen.getByText("きみの ばん！")).toBeTruthy();
 
   roundSpy.mockRestore();
   saySpy.mockRestore();
