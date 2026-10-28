@@ -1,8 +1,31 @@
+// @vitest-environment happy-dom
 import { renderToString } from "react-dom/server";
 import React from "react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { MenuCard } from "../components/MenuCard";
 import { CardDef } from "../menuCards";
-import { expect, test, vi } from "vitest";
+import { afterEach, expect, test, vi } from "vitest";
+
+vi.mock("expo-font", () => ({
+  useFonts: () => [true, null],
+}));
+
+vi.mock("../analytics", () => ({
+  track: vi.fn(),
+}));
+
+vi.mock("../sound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../sound")>();
+  return {
+    ...actual,
+    say: vi.fn(),
+  };
+});
+
+vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+  ok: true,
+  json: () => Promise.resolve({}),
+}));
 
 test("MenuCard shows beta badge only for beta cards", () => {
   const betaCard: CardDef = {
@@ -64,3 +87,21 @@ test("MenuCard shows beta badge only for beta cards", () => {
     'aria-label="Spot It! — Find the matching picture on both cards"',
   );
 });
+
+afterEach(() => {
+  cleanup();
+  window.location.hash = "";
+});
+
+test.each([
+  ["cm-numdots"],
+  ["cm-numhan"],
+  ["cm-shapes"],
+  ["cm-animals"],
+])("App routes to ConceptMatchGame for %s", async (route) => {
+  window.location.hash = `#/${route}`;
+  const { default: App } = await import("../../App");
+  render(<App />);
+  expect(screen.getByTestId("concept-board")).toBeTruthy();
+});
+

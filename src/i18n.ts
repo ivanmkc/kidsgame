@@ -85,6 +85,10 @@ export type UIKey =
   | 'card.steadybeat.title' | 'card.steadybeat.blurb'
   | 'card.fastslow.title' | 'card.fastslow.blurb'
   | 'card.samediff.title' | 'card.samediff.blurb'
+  | 'card.cm-numdots.title' | 'card.cm-numdots.blurb'
+  | 'card.cm-numhan.title'  | 'card.cm-numhan.blurb'
+  | 'card.cm-shapes.title'  | 'card.cm-shapes.blurb'
+  | 'card.cm-animals.title' | 'card.cm-animals.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -461,6 +465,14 @@ export const EN: Table = {
   'card.fastslow.blurb': 'Was that music fast or slow?',
   'card.samediff.title': 'Same or Different',
   'card.samediff.blurb': 'Do the two tunes sound the same?',
+  'card.cm-numdots.title': 'Number Dots',
+  'card.cm-numdots.blurb': 'Match numbers to the dots!',
+  'card.cm-numhan.title': 'Han Numbers',
+  'card.cm-numhan.blurb': 'Match numbers to Han characters!',
+  'card.cm-shapes.title': 'Shape Match',
+  'card.cm-shapes.blurb': 'Match shapes to everyday objects!',
+  'card.cm-animals.title': 'Animal Sounds',
+  'card.cm-animals.blurb': 'Match each animal to its sound!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',
