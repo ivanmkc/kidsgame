@@ -521,5 +521,83 @@ describe("SpellGame", () => {
       expect.any(Function),
     );
   });
+
+  it("disables word card speaker button during celebration delay and victory screen", () => {
+    let completionCallback: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
+      completionCallback = cb;
+    });
+
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const speakerCard = screen.getByTestId("spell-word-cat");
+
+    // Initially active - tapping speaks the prompt
+    expect(speakerCard.getAttribute("aria-disabled")).not.toBe("true");
+    vi.mocked(sound.saySequence).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+    fireEvent.click(speakerCard);
+    expect(sfx.tap).toHaveBeenCalledTimes(1);
+    expect(sound.saySequence).toHaveBeenCalledTimes(1);
+
+    // Place first two tiles - still active
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    expect(speakerCard.getAttribute("aria-disabled")).not.toBe("true");
+
+    // Place final tile - completion delay begins
+    fireEvent.click(screen.getByTestId("spell-tile-3"));
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    expect(speakerCard.getAttribute("aria-disabled")).toBe("true");
+
+    // Tapping during celebration delay does NOT trigger audio replay
+    vi.mocked(sound.saySequence).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+    fireEvent.click(speakerCard);
+    expect(sfx.tap).not.toHaveBeenCalled();
+    expect(sound.saySequence).not.toHaveBeenCalled();
+
+    // Now trigger the sayThen callback to transition to victory screen
+    act(() => {
+      completionCallback?.();
+    });
+
+    // On victory screen, speaker card remains disabled
+    expect(speakerCard.getAttribute("aria-disabled")).toBe("true");
+    vi.mocked(sound.saySequence).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+    fireEvent.click(speakerCard);
+    expect(sfx.tap).not.toHaveBeenCalled();
+    expect(sound.saySequence).not.toHaveBeenCalled();
+  });
 });
+
 
