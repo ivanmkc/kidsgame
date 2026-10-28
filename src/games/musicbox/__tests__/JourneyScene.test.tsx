@@ -254,6 +254,82 @@ describe("JourneyScene accessibility", () => {
     unmount();
   });
 
+  it("spawns objects directly at touch coordinate without offset initially and during in-flight scrolling", () => {
+    let capturedScrollX: Animated.Value | null = null;
+    vi.spyOn(Animated, "spring").mockImplementation((value, config) => {
+      if (config.friction === 14 && config.tension === 50) {
+        capturedScrollX = value as Animated.Value;
+      }
+      return {
+        start: vi.fn(),
+        stop: vi.fn(),
+        reset: vi.fn(),
+      } as unknown as Animated.CompositeAnimation;
+    });
+
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    const getVisualCenterX = (button: HTMLElement) => {
+      const parent = button.parentElement as HTMLElement;
+      const left = parseFloat(parent.style.left);
+      const width = parseFloat(parent.style.width);
+      const match = parent.style.transform.match(
+        /translateX\((-?\d+(?:\.\d+)?)px\)/,
+      );
+      const translateX = match ? parseFloat(match[1]) : 0;
+      return left + width / 2 + translateX;
+    };
+
+    // Tap 1: initial tap at x=200 while scrollX is 0
+    fireEvent.pointerDown(stage, {
+      pointerId: 1,
+      offsetX: 200,
+      offsetY: 150,
+    });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    const notes1 = screen.getAllByRole("button", { name: "Music note" });
+    expect(notes1).toHaveLength(1);
+    expect(getVisualCenterX(notes1[0])).toBe(200);
+
+    // Simulate scrollX animating in-flight to 16px before Tap 2
+    expect(capturedScrollX).not.toBeNull();
+    capturedScrollX!.setValue(16);
+
+    // Tap 2 at x=200 while scrollX is in-flight at 16px
+    fireEvent.pointerDown(stage, {
+      pointerId: 2,
+      offsetX: 200,
+      offsetY: 150,
+    });
+    fireEvent.pointerUp(stage, { pointerId: 2 });
+
+    const notes2 = screen.getAllByRole("button", { name: "Music note" });
+    expect(notes2).toHaveLength(2);
+    expect(getVisualCenterX(notes2[1])).toBe(200);
+    expect(getVisualCenterX(notes2[0])).toBe(184);
+
+    // Simulate scrollX animating in-flight to 32px before Tap 3
+    capturedScrollX!.setValue(32);
+
+    // Tap 3 at x=200 while scrollX is in-flight at 32px
+    fireEvent.pointerDown(stage, {
+      pointerId: 3,
+      offsetX: 200,
+      offsetY: 150,
+    });
+    fireEvent.pointerUp(stage, { pointerId: 3 });
+
+    const notes3 = screen.getAllByRole("button", { name: "Music note" });
+    expect(notes3).toHaveLength(3);
+    expect(getVisualCenterX(notes3[2])).toBe(200);
+    expect(getVisualCenterX(notes3[1])).toBe(184);
+    expect(getVisualCenterX(notes3[0])).toBe(168);
+
+    unmount();
+  });
+
   it("wraps parallax layers modulo 1280 during extended play so scenery never scrolls off-screen", () => {
     // At scrollX = 3840 (80 taps * 48px), without modulo the foreground would scroll to
     // translateX(-3840px), completely past the 2560px container into an empty void.

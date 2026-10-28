@@ -43,6 +43,7 @@ export function JourneyScene({ scene, lang }: Props) {
   const nextId = useRef(1);
   const scrollX = useRef(new Animated.Value(0)).current;
   const scrollTotal = useRef(0);
+  const currentScrollX = useRef(0);
   const vehicleBounce = useRef(new Animated.Value(0)).current;
   const vehicleIdle = useRef(new Animated.Value(0)).current;
   const stageSize = useRef({ w: 1, h: 1 });
@@ -51,10 +52,21 @@ export function JourneyScene({ scene, lang }: Props) {
   stateRef.current = state;
 
   useEffect(() => {
+    const id = scrollX.addListener(({ value }) => {
+      currentScrollX.current =
+        typeof value === "number" ? value : Number(value);
+    });
+    return () => {
+      scrollX.removeListener(id);
+    };
+  }, [scrollX]);
+
+  useEffect(() => {
     setState(startState(song));
     setSpawns([]);
     scrollX.setValue(0);
     scrollTotal.current = 0;
+    currentScrollX.current = 0;
     activePointers.current.clear();
 
     const loop = Animated.loop(
@@ -78,6 +90,7 @@ export function JourneyScene({ scene, lang }: Props) {
   const doTap = useCallback(
     (x: number, y: number, fingerCount: number) => {
       primeMusic();
+      const scrollAtSpawn = currentScrollX.current;
       const yFrac = y / Math.max(1, stageSize.current.h);
       const offset = octaveOffset(yFrac);
       const s = stateRef.current;
@@ -111,7 +124,6 @@ export function JourneyScene({ scene, lang }: Props) {
       const activeKeys = spawnsRef.current.map((s) => s.spriteKey);
       const spriteKey = pickSpawnSprite(pool, nextId.current, activeKeys);
       const id = nextId.current++;
-      const scrollAtSpawn = scrollTotal.current;
       setSpawns((prev) => [
         ...prev.slice(-(MAX_SPAWNS - 1)),
         {
