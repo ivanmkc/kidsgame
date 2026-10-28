@@ -234,14 +234,16 @@ describe("SameDiffGame UI", () => {
     act(() => {
       fireEvent.click(sameBtn);
     });
+    let expectedScore = 1;
     if (screen.getByTestId("samediff-score").textContent?.includes("0/")) {
+      expectedScore = 0;
       act(() => {
         vi.advanceTimersByTime(500);
         fireEvent.click(diffBtn);
       });
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain("1/");
+    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
 
     // Pick buttons remain mounted during transition so visual cues play
     expect(screen.getByTestId("samediff-same")).toBeTruthy();
@@ -252,7 +254,7 @@ describe("SameDiffGame UI", () => {
       fireEvent.click(sameBtn);
       fireEvent.click(diffBtn);
     });
-    expect(screen.getByTestId("samediff-score").textContent).toContain("1/");
+    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
 
     // Advance through the transition delay and playback for round 2
     act(() => {
@@ -265,13 +267,15 @@ describe("SameDiffGame UI", () => {
     act(() => {
       fireEvent.click(round2Same);
     });
-    if (screen.getByTestId("samediff-score").textContent?.includes("1/")) {
+    if (screen.getByTestId("samediff-score").textContent?.includes(`${expectedScore}/`)) {
       act(() => {
         vi.advanceTimersByTime(500);
         fireEvent.click(round2Diff);
       });
+    } else {
+      expectedScore++;
     }
-    expect(screen.getByTestId("samediff-score").textContent).toContain("2/");
+    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
 
     vi.useRealTimers();
   });
@@ -280,6 +284,7 @@ describe("SameDiffGame UI", () => {
     vi.useFakeTimers();
     render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
 
+    let currentScore = 0;
     for (let r = 0; r < 8; r++) {
       act(() => {
         vi.advanceTimersByTime(4800);
@@ -289,15 +294,17 @@ describe("SameDiffGame UI", () => {
       act(() => {
         fireEvent.click(sameBtn);
       });
-      if (screen.getByTestId("samediff-score").textContent?.includes(`${r}/`)) {
+      if (screen.getByTestId("samediff-score").textContent?.includes(`${currentScore}/`)) {
         act(() => {
           vi.advanceTimersByTime(500);
           fireEvent.click(diffBtn);
         });
+      } else {
+        currentScore++;
       }
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain("8/8");
+    expect(screen.getByTestId("samediff-score").textContent).toContain(`${currentScore}/8`);
     act(() => {
       vi.advanceTimersByTime(700);
     });
@@ -527,7 +534,7 @@ describe("SameDiffGame UI", () => {
       fireEvent.click(sameBtn);
     });
     expect(goodSpy).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("samediff-score").textContent).toContain("1/");
+    expect(screen.getByTestId("samediff-score").textContent).toContain("0/");
 
     vi.useRealTimers();
   });
@@ -619,6 +626,7 @@ describe("SameDiffGame UI", () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0][2]).toBeUndefined();
 
+    let currentScore = 0;
     // Play through all 8 easy rounds
     for (let r = 0; r < 8; r++) {
       act(() => {
@@ -629,15 +637,17 @@ describe("SameDiffGame UI", () => {
       act(() => {
         fireEvent.click(sameBtn);
       });
-      if (screen.getByTestId("samediff-score").textContent?.includes(`${r}/`)) {
+      if (screen.getByTestId("samediff-score").textContent?.includes(`${currentScore}/`)) {
         act(() => {
           vi.advanceTimersByTime(500);
           fireEvent.click(diffBtn);
         });
+      } else {
+        currentScore++;
       }
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain("8/8");
+    expect(screen.getByTestId("samediff-score").textContent).toContain(`${currentScore}/8`);
     // Exactly 8 rounds were generated for the 8 rounds
     expect(spy).toHaveBeenCalledTimes(8);
 

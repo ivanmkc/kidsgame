@@ -154,6 +154,13 @@ export function isCorrect(
   return picked === round.answer;
 }
 
+export function nextScoreValue(
+  currentScore: number,
+  isFirstTry: boolean,
+): number {
+  return isFirstTry ? currentScore + 1 : currentScore;
+}
+
 /**
  * Compute normalized pitch positions [0..1] for a phrase given the round's min and max MIDI pitches.
  * Returns 0.5 if all notes in the round have identical pitch.
