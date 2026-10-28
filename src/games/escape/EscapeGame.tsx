@@ -7,7 +7,7 @@ import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
 import { WinOverlay } from '../../components/WinOverlay';
 import { SparkleBurst } from '../../components/Sparkles';
 import { Difficulty, DifficultyFilter, inFilter, nextFilter, nextSceneId } from '../../difficulty';
-import { Lang } from '../../lang';
+import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { say, sayThen, sfx } from '../../sound';
 import { EscapeHotspot, EscapeRoom, manifest } from '../../manifest';
@@ -61,6 +61,7 @@ export function EscapeGame({
   onBackToPicker,
   lang,
 }: Props) {
+  useLangEpoch(lang);
   const rooms = manifest.escape ?? [];
   const room = rooms.find((r) => r.id === sceneId);
   const visible = rooms.filter((r) => inFilter(r.level, filter));
@@ -82,7 +83,6 @@ export function EscapeGame({
   const { width } = useWindowDimensions();
   const stateRef = useRef(state);
   stateRef.current = state;
-
   // ALL hooks above the early returns (repo hard rule).
   useEffect(() => {
     setState(startState());
