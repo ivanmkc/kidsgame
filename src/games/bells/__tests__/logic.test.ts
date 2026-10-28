@@ -188,4 +188,30 @@ describe("makeBellsRound", () => {
     expect(round.sequence.length).toBe(2);
     expect(round.sequence[1]).toBe(round.sequence[0] - 1);
   });
+
+  it("avoids regenerating the exact same sequence", () => {
+    // With rng=0, the sequence is [2, 3] (or something like that).
+    // Let's explicitly pass round1.sequence as previousSequence and mock rng
+    // to return the exact same values on the first try.
+    let callCount = 0;
+    const mockRng = () => {
+      callCount++;
+      if (callCount === 1) return 0.1; // isAscending = true
+      if (callCount === 2) return 0.1; // start = 0 -> [0, 1]
+
+      if (callCount === 3) return 0.1; // isAscending = true
+      if (callCount === 4) return 0.1; // start = 0 -> [0, 1] (MATCH, should regenerate)
+
+      if (callCount === 5) return 0.6; // isAscending = false
+      if (callCount === 6) return 0.9; // start = 2 -> [2, 1]
+      return 0.5;
+    };
+
+    const roundA = makeBellsRound(mockRng, "easy");
+    expect(roundA.sequence).toEqual([0, 1]);
+
+    const roundB = makeBellsRound(mockRng, "easy", roundA.sequence);
+    expect(roundB.sequence).toEqual([2, 1]);
+    expect(callCount).toBe(6);
+  });
 });
