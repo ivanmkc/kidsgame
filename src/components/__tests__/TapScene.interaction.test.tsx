@@ -59,7 +59,9 @@ describe('TapScene interactions', () => {
       />,
     );
 
-    fireEvent.click(screen.getByTestId('test-target-box1'));
+    const target = screen.getByTestId('test-target-box1');
+    expect(target.getAttribute('aria-label')).toBe('Target');
+    fireEvent.click(target);
     expect(onHit).toHaveBeenCalledWith('box1');
     expect(onMiss).not.toHaveBeenCalled();
   });
@@ -132,7 +134,9 @@ describe('TapScene interactions', () => {
       />,
     );
 
-    fireEvent.click(screen.getByTestId('test-target-box1'));
+    const target = screen.getByTestId('test-target-box1');
+    expect(target.getAttribute('aria-label')).toBe('Target, found');
+    fireEvent.click(target);
     expect(onHit).not.toHaveBeenCalled();
   });
 });
