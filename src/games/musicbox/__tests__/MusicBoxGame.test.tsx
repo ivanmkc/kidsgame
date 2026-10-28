@@ -383,8 +383,8 @@ describe("MusicBoxGame rendering", () => {
 
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
-    // Second note in free play is 81 (pentatonic 69 + 12), whereas standard Twinkle note 2 is 72 (60 + 12)
-    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 81, 1);
+    // Second note in free play is 79 (pentatonic 67 + 12), whereas standard Twinkle note 2 is 72 (60 + 12)
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 79, 1);
 
     unmount();
   });

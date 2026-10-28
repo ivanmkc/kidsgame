@@ -462,8 +462,8 @@ describe("JourneyScene accessibility", () => {
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     // Tap 1: pentatonic 60 + 12 = 72
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
-    // Tap 2: free play plays PENTATONIC[4] (69 + 12 = 81), differing from Twinkle's note 1 (72)
-    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 81, 1);
+    // Tap 2: free play plays PENTATONIC[3] (67 + 12 = 79), differing from Twinkle's note 1 (72)
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 79, 1);
 
     unmount();
   });
