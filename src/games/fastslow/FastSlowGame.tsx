@@ -52,6 +52,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
   const firstTryRef = useRef(true);
+  const notePulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notePulse = useRef(new Animated.Value(1)).current;
+  const [activeNote, setActiveNote] = useState<number | null>(null);
   const [history, setHistory] = useState<("fast" | "slow")[]>([]);
   const [round, setRound] = useState<FastSlowRound>(() =>
     makeFastSlowRound(rngRef.current, difficulty, []),
@@ -66,18 +69,61 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.fastslow" as never));
 
-  const playRound = useCallback((r: FastSlowRound) => {
-    stopSequence();
-    setPhase("listen");
-    const epoch = roundEpochRef.current;
-    playSequence(r.notes, r.bpm, undefined, () => {
-      if (roundEpochRef.current === epoch) {
-        setInstructionalTempo(null);
-        lockedRef.current = false;
-        setPhase("pick");
-      }
-    });
-  }, []);
+  const stopNotePulse = useCallback(() => {
+    if (notePulseTimerRef.current) {
+      clearTimeout(notePulseTimerRef.current);
+      notePulseTimerRef.current = null;
+    }
+    setActiveNote(null);
+    notePulse.stopAnimation();
+    notePulse.setValue(1);
+  }, [notePulse]);
+
+  const playRound = useCallback(
+    (r: FastSlowRound) => {
+      stopSequence();
+      stopNotePulse();
+      setPhase("listen");
+      const epoch = roundEpochRef.current;
+      playSequence(
+        r.notes,
+        r.bpm,
+        (index) => {
+          if (roundEpochRef.current === epoch) {
+            setActiveNote(index);
+            notePulse.stopAnimation();
+            notePulse.setValue(1.3);
+            Animated.spring(notePulse, {
+              toValue: 1,
+              friction: 4,
+              useNativeDriver: true,
+            }).start();
+            if (notePulseTimerRef.current) {
+              clearTimeout(notePulseTimerRef.current);
+            }
+            const noteBeats = r.notes[index]?.b ?? 1;
+            const noteMs = noteBeats * (60000 / r.bpm);
+            const pulseMs = Math.min(180, Math.floor(noteMs / 2));
+            notePulseTimerRef.current = setTimeout(() => {
+              if (roundEpochRef.current === epoch) {
+                setActiveNote(null);
+                notePulseTimerRef.current = null;
+              }
+            }, pulseMs);
+          }
+        },
+        () => {
+          if (roundEpochRef.current === epoch) {
+            stopNotePulse();
+            setInstructionalTempo(null);
+            lockedRef.current = false;
+            setPhase("pick");
+          }
+        },
+      );
+    },
+    [notePulse, stopNotePulse],
+  );
 
   useEffect(() => {
     if (!won) {
@@ -91,10 +137,11 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
           clearTimeout(listenTimerRef.current);
           listenTimerRef.current = null;
         }
+        stopNotePulse();
         stopSequence();
       };
     }
-  }, [round, won, playRound]);
+  }, [round, won, playRound, stopNotePulse]);
 
   useEffect(() => {
     if (epoch === 0 || won) return;
@@ -107,6 +154,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
         clearTimeout(replayTimerRef.current);
         replayTimerRef.current = null;
       }
+      stopNotePulse();
       stopSequence();
       stopNarration();
       roundEpochRef.current++;
@@ -192,6 +240,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     return () => {
       roundEpochRef.current++;
       feedbackSpeechRef.current = null;
+      if (notePulseTimerRef.current) clearTimeout(notePulseTimerRef.current);
       if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
@@ -204,6 +253,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const replay = () => {
     if (!isValid() || phase !== "pick") return;
     stopSequence();
+    stopNotePulse();
     if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
@@ -223,6 +273,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     stopSequence();
     stopNarration();
+    stopNotePulse();
     roundEpochRef.current++;
     feedbackSpeechRef.current = null;
     lockedRef.current = false;
@@ -236,30 +287,12 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));
   };
 
-  const earPulse = useRef(new Animated.Value(1)).current;
   const pickGlow = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (phase === "listen") {
+      pickGlow.stopAnimation();
       pickGlow.setValue(0);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(earPulse, {
-            toValue: 1.18,
-            duration: 600,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(earPulse, {
-            toValue: 1,
-            duration: 600,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
     } else {
-      earPulse.stopAnimation();
-      earPulse.setValue(1);
       Animated.loop(
         Animated.sequence([
           Animated.timing(pickGlow, {
@@ -278,10 +311,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       ).start();
     }
     return () => {
-      earPulse.stopAnimation();
       pickGlow.stopAnimation();
     };
-  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   const pickScale = pickGlow.interpolate({
     inputRange: [0, 1],
@@ -300,11 +332,22 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     >
       <View style={styles.board}>
         {phase === "listen" ? (
-          <View style={[styles.listenCard, shadows.soft]}>
+          <View
+            style={[
+              styles.listenCard,
+              shadows.soft,
+              activeNote !== null && styles.listenCardActive,
+            ]}
+          >
             <Animated.Text
-              style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
+              testID="fastslow-note-pulse"
+              aria-selected={activeNote !== null}
+              style={[
+                styles.listenEmoji,
+                { transform: [{ scale: notePulse }] },
+              ]}
             >
-              👂
+              🎶
             </Animated.Text>
             {instructionalTempo ? (
               <Text
@@ -446,6 +489,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     alignItems: "center",
     gap: 12,
+  },
+  listenCardActive: {
+    borderColor: "#E8874F",
+    ...shadows.glowGold,
   },
   listenEmoji: { fontSize: 56 },
   listenText: { fontFamily: fonts.display, fontSize: 22, color: colors.ink },

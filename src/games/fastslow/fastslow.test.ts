@@ -357,4 +357,42 @@ describe("FastSlowGame", () => {
     });
     expect(playSpy).toHaveBeenCalledTimes(2);
   });
+
+  it("provides visual note cues during muted playback without dropping tempo feedback (R3)", () => {
+    vi.useFakeTimers();
+    sound.setMuted(true);
+
+    render(
+      React.createElement(FastSlowGame, {
+        onHome: () => {},
+        difficulty: "easy",
+        lang: "en",
+      }),
+    );
+
+    const pulseEl = screen.getByTestId("fastslow-note-pulse");
+    expect(pulseEl.getAttribute("aria-selected")).toBe("false");
+
+    // Advance 1000ms delay to start sequence
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // In playSequence, note 0 is scheduled at t=50ms
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    expect(
+      screen.getByTestId("fastslow-note-pulse").getAttribute("aria-selected"),
+    ).toBe("true");
+
+    // Fast-forward through playback
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    // Playback finishes and enters pick phase
+    expect(screen.getByTestId("fastslow-pick-row")).toBeTruthy();
+    expect(screen.queryByTestId("fastslow-note-pulse")).toBeNull();
+  });
 });
