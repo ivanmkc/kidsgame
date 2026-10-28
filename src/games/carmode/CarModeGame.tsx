@@ -13,7 +13,7 @@ import { Confetti } from "../../components/Confetti";
 import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { saySequence, sayThen, sfx, stopNarration } from "../../sound";
-import { playNote, primeMusic } from "../../music";
+import { playSequence, primeMusic, SeqNote, stopSequence } from "../../music";
 import { fonts, shadows } from "../../theme";
 import { ALL_PACKS, PACK_ORDER, PackId, Round } from "./packs";
 import {
@@ -63,17 +63,18 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const [celebrate, setCelebrate] = useState(0);
   const [gameKey, setGameKey] = useState(0);
 
+  const [boopFlash, setBoopFlash] = useState(false);
+
   const stateRef = useRef(state);
   stateRef.current = state;
 
   const phaseEnterTime = useRef(0);
   const gapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const boopsTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const startRoundTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const revealCapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
   const round = currentRound(state);
 
@@ -86,14 +87,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
       clearTimeout(tapTimerRef.current);
       tapTimerRef.current = null;
     }
-    if (startRoundTimerRef.current) {
-      clearTimeout(startRoundTimerRef.current);
-      startRoundTimerRef.current = null;
-    }
-    if (replayTimerRef.current) {
-      clearTimeout(replayTimerRef.current);
-      replayTimerRef.current = null;
-    }
     if (revealTimerRef.current) {
       clearTimeout(revealTimerRef.current);
       revealTimerRef.current = null;
@@ -102,8 +95,12 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
       clearTimeout(revealCapTimerRef.current);
       revealCapTimerRef.current = null;
     }
-    boopsTimersRef.current.forEach(clearTimeout);
-    boopsTimersRef.current = [];
+    if (flashTimerRef.current) {
+      clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = null;
+    }
+    setBoopFlash(false);
+    stopSequence();
   }, []);
 
   const applyStateTransition = useCallback(
@@ -134,12 +131,12 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
           clearTimeout(gapTimerRef.current);
           gapTimerRef.current = null;
         }
-        if (replayTimerRef.current) {
-          clearTimeout(replayTimerRef.current);
-          replayTimerRef.current = null;
+        if (flashTimerRef.current) {
+          clearTimeout(flashTimerRef.current);
+          flashTimerRef.current = null;
         }
-        boopsTimersRef.current.forEach(clearTimeout);
-        boopsTimersRef.current = [];
+        setBoopFlash(false);
+        stopSequence();
       }
 
       if (current.pendingTaps === 0 && next.pendingTaps === 1) {
@@ -174,29 +171,56 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
     [clearTimers],
   );
 
-  const playBoops = useCallback((n: number) => {
-    const PENTATONIC = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81];
-    for (let i = 0; i < n; i++) {
-      const t = setTimeout(
-        () => playNote(PENTATONIC[i % PENTATONIC.length]),
-        i * 400,
-      );
-      boopsTimersRef.current.push(t);
+  const triggerVisualBoop = useCallback(() => {
+    setBoopFlash(true);
+    pulseAnim.setValue(1.15);
+    Animated.spring(pulseAnim, {
+      toValue: 1,
+      friction: 4,
+      useNativeDriver: true,
+    }).start();
+    if (flashTimerRef.current) {
+      clearTimeout(flashTimerRef.current);
     }
-  }, []);
+    flashTimerRef.current = setTimeout(() => {
+      setBoopFlash(false);
+    }, 200);
+  }, [pulseAnim]);
+
+  const playBoops = useCallback(
+    (n: number, onDone?: () => void) => {
+      stopSequence();
+      const PENTATONIC = [60, 62, 64, 67, 69, 72, 74, 76, 79, 81];
+      const notes: SeqNote[] = Array.from({ length: n }, (_, i) => ({
+        m: PENTATONIC[i % PENTATONIC.length],
+        b: 1,
+      }));
+      playSequence(
+        notes,
+        150,
+        () => {
+          triggerVisualBoop();
+        },
+        () => {
+          setBoopFlash(false);
+          onDone?.();
+        },
+      );
+    },
+    [triggerVisualBoop],
+  );
 
   const startRound = useCallback(
     (r: Round) => {
       if (r.pack === "boops" && r.noteCount) {
-        playBoops(r.noteCount);
-        const boopsDuration = (r.noteCount - 1) * 400 + 800;
-        startRoundTimerRef.current = setTimeout(() => {
+        playBoops(r.noteCount, () => {
           if (!isValid()) return;
           if (
             stateRef.current.phase !== "prompt" ||
             currentRound(stateRef.current) !== r
-          )
+          ) {
             return;
+          }
           sayThen(r.prompt, () => {
             if (!isValid()) return;
             if (
@@ -206,7 +230,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
               applyStateTransition(toGap(stateRef.current));
             }
           });
-        }, boopsDuration);
+        });
       } else {
         sayThen(r.prompt, () => {
           if (!isValid()) return;
@@ -297,12 +321,12 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
         clearTimeout(gapTimerRef.current);
         gapTimerRef.current = null;
       }
-      if (replayTimerRef.current) {
-        clearTimeout(replayTimerRef.current);
-        replayTimerRef.current = null;
+      if (flashTimerRef.current) {
+        clearTimeout(flashTimerRef.current);
+        flashTimerRef.current = null;
       }
-      boopsTimersRef.current.forEach(clearTimeout);
-      boopsTimersRef.current = [];
+      setBoopFlash(false);
+      stopSequence();
 
       const speakPrompt = () => {
         sayThen(r.prompt, () => {
@@ -320,10 +344,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
       };
 
       if (r.pack === "boops" && r.noteCount) {
-        playBoops(r.noteCount);
-        const boopsDuration = (r.noteCount - 1) * 400 + 800;
-        replayTimerRef.current = setTimeout(() => {
-          replayTimerRef.current = null;
+        playBoops(r.noteCount, () => {
           if (!isValid()) return;
           if (
             stateRef.current.phase !== "gap" ||
@@ -332,7 +353,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
             return;
           }
           speakPrompt();
-        }, boopsDuration);
+        });
       } else {
         speakPrompt();
       }
@@ -414,7 +435,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const { width, height } = useWindowDimensions();
   const buttonSize = Math.min(width, height) * 0.5;
 
-  const pulseAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (state.phase === "gap" || state.phase === "reveal") {
       const loop = Animated.loop(
@@ -468,6 +488,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
             testID="carmode-tap"
           >
             <Animated.View
+              testID={boopFlash ? "carmode-boop-flash" : undefined}
               style={[
                 styles.bigButton,
                 {
@@ -476,14 +497,17 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                   borderRadius: buttonSize / 2,
                   transform: [{ scale: pulseAnim }],
                 },
+                boopFlash && styles.bigButtonFlash,
               ]}
             >
               <Text style={styles.phaseEmoji}>
-                {state.phase === "prompt"
-                  ? "👂"
-                  : state.phase === "gap"
-                    ? "🤔"
-                    : "👆"}
+                {boopFlash
+                  ? "🎵"
+                  : state.phase === "prompt"
+                    ? "👂"
+                    : state.phase === "gap"
+                      ? "🤔"
+                      : "👆"}
               </Text>
               <Text style={styles.phaseText}>
                 {state.phase === "prompt"
@@ -542,6 +566,12 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.3)",
     alignItems: "center",
     justifyContent: "center",
+    ...shadows.lifted,
+  },
+  bigButtonFlash: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderColor: "#fff",
+    borderWidth: 4,
     ...shadows.lifted,
   },
   phaseEmoji: {
