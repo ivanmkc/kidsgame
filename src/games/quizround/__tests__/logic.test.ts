@@ -248,6 +248,53 @@ describe("makeQuizRound", () => {
       expect(new Set(keys).size).toBe(3);
     }
   });
+
+  it("samples target uniformly by unique key rather than raw pool items", () => {
+    interface WordItem {
+      word: string;
+      letter: string;
+    }
+    const skewedPool: WordItem[] = [
+      { word: "apple", letter: "a" },
+      { word: "ant", letter: "a" },
+      { word: "axe", letter: "a" },
+      { word: "alligator", letter: "a" },
+      { word: "anchor", letter: "a" },
+      { word: "arrow", letter: "a" },
+      { word: "astronaut", letter: "a" },
+      { word: "acorn", letter: "a" },
+      { word: "airplane", letter: "a" },
+      { word: "bear", letter: "b" },
+      { word: "cat", letter: "c" },
+      { word: "dog", letter: "d" },
+    ];
+
+    const targetKeyCounts: Record<string, number> = { a: 0, b: 0, c: 0, d: 0 };
+    const aWords = new Set<string>();
+    const totalRuns = 200;
+    for (let seed = 1; seed <= totalRuns; seed++) {
+      const rng = makeRng(seed);
+      const round = makeQuizRound(
+        rng,
+        skewedPool,
+        3,
+        (item) => ({ key: item.letter, label: item.word }),
+        (item) => item.letter,
+      );
+      targetKeyCounts[round.target.letter]++;
+      if (round.target.letter === "a") {
+        aWords.add(round.target.word);
+      }
+    }
+
+    // Over 200 runs across 4 unique keys, each key should be sampled ~50 times.
+    for (const key of ["a", "b", "c", "d"]) {
+      expect(targetKeyCounts[key]).toBeGreaterThan(20);
+      expect(targetKeyCounts[key]).toBeLessThan(80);
+    }
+    // Multiple distinct words for the over-represented key should be sampled as target.
+    expect(aWords.size).toBeGreaterThan(1);
+  });
 });
 
 describe("spriteLT", () => {
