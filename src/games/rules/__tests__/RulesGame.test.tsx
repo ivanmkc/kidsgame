@@ -11,6 +11,7 @@ import {
 import { RulesGame } from "../RulesGame";
 import * as logic from "../logic";
 import { sfx, stopNarration } from "../../../sound";
+import { t } from "../../../i18n";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
@@ -178,6 +179,31 @@ describe("RulesGame", () => {
     }
   });
 
+  it("uses localized accessibility label on recall remind button in non-English locales", () => {
+    vi.useFakeTimers();
+    try {
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="ja" />);
+
+      // Play through rounds 0..4 to reach recall round 5
+      for (let r = 0; r < 5; r++) {
+        const matchTiles = screen.getAllByTestId(/-y$/);
+        for (const tile of matchTiles) {
+          fireEvent.click(tile);
+        }
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      const remindBtn = screen.getByTestId("rules-remind");
+      expect(remindBtn.getAttribute("aria-label")).toBe(
+        t("ja", "rules.remind"),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   describe("unmount and narration lifecycle", () => {
     it("stops narration when unmounted so ghost instructions do not leak onto home menu", () => {
       const { unmount } = render(
@@ -191,4 +217,3 @@ describe("RulesGame", () => {
     });
   });
 });
-
