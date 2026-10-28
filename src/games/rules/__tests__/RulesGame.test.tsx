@@ -427,7 +427,7 @@ describe("RulesGame", () => {
 
         expect(screen.getByText("Memory check!")).toBeTruthy();
         expect(say).toHaveBeenCalledWith(
-          expect.stringMatching(/^Memory check! Do rule number \d+ again\./),
+          expect.stringMatching(/^Memory check! Do Rule #\d+ again — remember it\? 🤔/),
         );
       } finally {
         vi.useRealTimers();
