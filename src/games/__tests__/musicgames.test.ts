@@ -175,9 +175,36 @@ describe("melody bells", () => {
 
   it("unmounts during listen phase and cancels demo timers", () => {
     vi.useFakeTimers();
-    const playNoteSpy = vi
-      .spyOn(music, "playNote")
-      .mockImplementation(() => {});
+    let notesPlayed = 0;
+    let mockCancel: (() => void) | null = null;
+    const playSequenceSpy = vi
+      .spyOn(music, "playSequence")
+      .mockImplementation((notes, bpm, onNote, onDone) => {
+        let time = 0;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        for (let i = 0; i < notes.length; i++) {
+          timers.push(
+            setTimeout(() => {
+              notesPlayed++;
+              onNote?.(i);
+            }, time),
+          );
+          time += ((notes[i].b * 60) / bpm) * 1000;
+        }
+        timers.push(setTimeout(() => onDone?.(), time));
+        mockCancel = () => {
+          timers.forEach(clearTimeout);
+        };
+        return mockCancel;
+      });
+    const stopSequenceSpy = vi
+      .spyOn(music, "stopSequence")
+      .mockImplementation(() => {
+        if (mockCancel) {
+          mockCancel();
+          mockCancel = null;
+        }
+      });
 
     type FakeNode = {
       nodeName: string;
@@ -263,15 +290,14 @@ describe("melody bells", () => {
         capturedReset?.();
       });
 
-      // After 1050ms, initial 500ms delay plays note 1, then at 1000ms
-      // the glow clears and step is scheduled for note 2 at 1200ms.
+      // After 500ms, note 1 (at 0ms) has played, but note 2 (at ~706ms) has not.
       act(() => {
-        vi.advanceTimersByTime(1050);
+        vi.advanceTimersByTime(500);
       });
       // We played 1 note in this demo
-      expect(playNoteSpy).toHaveBeenCalledTimes(1);
+      expect(notesPlayed).toBe(1);
 
-      // Unmount mid-demo during the listen phase (before note 2 plays at 1200ms)
+      // Unmount mid-demo during the listen phase (before note 2 plays at ~706ms)
       act(() => {
         root.unmount();
       });
@@ -282,13 +308,14 @@ describe("melody bells", () => {
       });
 
       // No further notes should have played
-      expect(playNoteSpy).toHaveBeenCalledTimes(1);
+      expect(notesPlayed).toBe(1);
     } finally {
       g.window = origWindow;
       g.document = origDocument;
       g.HTMLIFrameElement = origHTMLIFrameElement;
       g.IS_REACT_ACT_ENVIRONMENT = origAct;
-      playNoteSpy.mockRestore();
+      playSequenceSpy.mockRestore();
+      stopSequenceSpy.mockRestore();
       vi.useRealTimers();
     }
   });

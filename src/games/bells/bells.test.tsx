@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
 import {
   render,
   screen,
@@ -20,6 +20,31 @@ describe("BellsGame", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+  });
+
+  beforeEach(() => {
+    let mockCancel: (() => void) | null = null;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, bpm, onNote, onDone) => {
+        let time = 0;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        for (let i = 0; i < notes.length; i++) {
+          timers.push(setTimeout(() => onNote?.(i), time));
+          time += ((notes[i].b * 60) / bpm) * 1000;
+        }
+        timers.push(setTimeout(() => onDone?.(), time));
+        mockCancel = () => {
+          timers.forEach(clearTimeout);
+        };
+        return mockCancel;
+      },
+    );
+    vi.spyOn(music, "stopSequence").mockImplementation(() => {
+      if (mockCancel) {
+        mockCancel();
+        mockCancel = null;
+      }
+    });
   });
 
   it("replay button restarts demo and clears taps", () => {
@@ -177,12 +202,9 @@ describe("BellsGame", () => {
   it("rapid triple taps accumulate correctly and score in medium difficulty", () => {
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
-    const playedMidis: number[] = [];
     const playNoteSpy = vi
       .spyOn(music, "playNote")
-      .mockImplementation((midi) => {
-        playedMidis.push(midi);
-      });
+      .mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="medium" lang="en" />);
 
@@ -200,7 +222,9 @@ describe("BellsGame", () => {
       67: 3,
       69: 4,
     };
-    const seqBellIndices = playedMidis.map((m) => midiToBellIndex[m]);
+    const playSeqCalls = vi.mocked(music.playSequence).mock.calls;
+    const lastSeq = playSeqCalls[playSeqCalls.length - 1][0];
+    const seqBellIndices = lastSeq.map((n) => midiToBellIndex[n.m]);
     expect(seqBellIndices).toHaveLength(3);
 
     playNoteSpy.mockClear();
@@ -650,10 +674,7 @@ describe("BellsGame", () => {
   it("resets sparkKey so sparkles do not display before first completion in a new game", () => {
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0);
-    const playedMidis: number[] = [];
-    vi.spyOn(music, "playNote").mockImplementation((midi) => {
-      playedMidis.push(midi);
-    });
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
     vi.spyOn(sfx, "good").mockImplementation(() => {});
 
     render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
@@ -668,11 +689,12 @@ describe("BellsGame", () => {
 
     // Win the game (5 rounds for easy)
     for (let round = 0; round < 5; round++) {
-      playedMidis.length = 0;
       act(() => {
         vi.advanceTimersByTime(5000);
       });
-      const seq = playedMidis.map((m) => midiToBellIndex[m]);
+      const playSeqCalls = vi.mocked(music.playSequence).mock.calls;
+      const lastSeq = playSeqCalls[playSeqCalls.length - 1][0];
+      const seq = lastSeq.map((n) => midiToBellIndex[n.m]);
       act(() => {
         for (const idx of seq) {
           fireEvent.click(screen.getByTestId(`bell-${idx}`));

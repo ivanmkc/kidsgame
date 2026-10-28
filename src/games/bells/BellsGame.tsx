@@ -17,7 +17,7 @@ import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { sfx } from "../../sound";
-import { playNote, stopSequence } from "../../music";
+import { playNote, playSequence, SeqNote, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
   makeBellsRound,
@@ -66,25 +66,23 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       setGlowIdx(null);
       stopSequence();
       setPhase("listen");
-      let i = 0;
-      const step = () => {
-        if (i >= r.sequence.length) {
+      const seq: SeqNote[] = r.sequence.map((bellIdx) => ({
+        m: r.bells[bellIdx].midi,
+        b: 1,
+      }));
+      playSequence(
+        seq,
+        85,
+        (i) => {
+          setGlowIdx(r.sequence[i]);
+          if (glowTimer.current) clearTimeout(glowTimer.current);
+          glowTimer.current = setTimeout(() => setGlowIdx(null), 500);
+        },
+        () => {
           setGlowIdx(null);
           setPhase("play");
-          return;
-        }
-        const bellIdx = r.sequence[i];
-        setGlowIdx(bellIdx);
-        playNote(r.bells[bellIdx].midi, 0.8);
-        i++;
-        demoTimers.current.push(
-          setTimeout(() => {
-            setGlowIdx(null);
-            demoTimers.current.push(setTimeout(step, 200));
-          }, 500),
-        );
-      };
-      demoTimers.current.push(setTimeout(step, 500));
+        },
+      );
     },
     [clearDemo],
   );
