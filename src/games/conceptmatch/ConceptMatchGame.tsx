@@ -10,6 +10,7 @@ import { Lang } from "../../lang";
 import { makeRng } from "../../rng";
 import { say, sfx, useSay } from "../../sound";
 import { colors, fonts } from "../../theme";
+import { Difficulty } from "../../difficulty";
 import {
   ConceptMatchCard,
   ConceptMatchDeck,
@@ -23,17 +24,27 @@ export interface ConceptMatchGameProps {
   onHome?: () => void;
   lang?: Lang;
   pairs?: number;
+  difficulty?: Difficulty;
 }
 
 export function ConceptMatchGame({
   deck = "letters",
   onHome,
   lang = "en",
-  pairs = 2,
+  pairs,
+  difficulty = "medium",
 }: ConceptMatchGameProps) {
+  const activePairs =
+    pairs ?? (difficulty === "easy" ? 3 : difficulty === "hard" ? 5 : 4);
+
   const [roundKey, setRoundKey] = useState(0);
   const [board, setBoard] = useState<ConceptMatchCard[]>(() =>
-    buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
+    buildBoard(
+      makeRng(Math.floor(Math.random() * 1e9)),
+      deck,
+      lang,
+      activePairs,
+    ),
   );
 
   const { faceUp, matched, moves, lockRef, onFlip, reset, won, matchedPairs } =
@@ -48,21 +59,26 @@ export function ConceptMatchGame({
   useSay(won ? null : t(lang, "card.memory.blurb"));
 
   const prevDeck = useRef(deck);
-  const prevPairs = useRef(pairs);
+  const prevPairs = useRef(activePairs);
   const prevLang = useRef(lang);
 
   useEffect(() => {
     const deckChanged = prevDeck.current !== deck;
-    const pairsChanged = prevPairs.current !== pairs;
+    const pairsChanged = prevPairs.current !== activePairs;
     const langChanged = prevLang.current !== lang;
 
     prevDeck.current = deck;
-    prevPairs.current = pairs;
+    prevPairs.current = activePairs;
     prevLang.current = lang;
 
     if (deckChanged || pairsChanged) {
       setBoard(
-        buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
+        buildBoard(
+          makeRng(Math.floor(Math.random() * 1e9)),
+          deck,
+          lang,
+          activePairs,
+        ),
       );
       reset();
       return;
@@ -71,7 +87,7 @@ export function ConceptMatchGame({
     if (langChanged) {
       setBoard((currentBoard) => updateBoardLang(currentBoard, deck, lang));
     }
-  }, [deck, lang, pairs, reset]);
+  }, [deck, lang, activePairs, reset]);
 
   useEffect(() => {
     if (won) {
@@ -82,10 +98,15 @@ export function ConceptMatchGame({
   const resetGame = useCallback(() => {
     setRoundKey((k) => k + 1);
     setBoard(
-      buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
+      buildBoard(
+        makeRng(Math.floor(Math.random() * 1e9)),
+        deck,
+        lang,
+        activePairs,
+      ),
     );
     reset();
-  }, [deck, lang, pairs, reset]);
+  }, [deck, lang, activePairs, reset]);
 
   const handleFlip = useCallback(
     (card: ConceptMatchCard) => {

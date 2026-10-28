@@ -660,4 +660,18 @@ describe("ConceptMatchGame", () => {
     expect(sound.say).toHaveBeenCalledWith("red");
     expect(screen.getByTestId("card-color-red-color")).toBeDefined();
   });
+
+  it("adjusts pair count based on difficulty prop", () => {
+    const buildBoardSpy = vi.spyOn(logic, "buildBoard");
+    const { rerender } = render(
+      <ConceptMatchGame deck="letters" difficulty="easy" lang="en" />
+    );
+    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 3);
+    
+    rerender(<ConceptMatchGame deck="letters" difficulty="medium" lang="en" />);
+    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 4);
+    
+    rerender(<ConceptMatchGame deck="letters" difficulty="hard" lang="en" />);
+    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 5);
+  });
 });
