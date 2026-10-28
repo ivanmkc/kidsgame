@@ -158,7 +158,7 @@ function buildLines(lang: Lang, target: RhymeEntry, correct: RhymeEntry): {
     const line = t(lang, 'rhyme.ask', { word: tU });
     return {
       promptLines: [line], displayPrompt: line,
-      confirmLines: [`${tU}... ${cU}!`, 'They rhyme!'],
+      confirmLines: [`${tU}... ${cU}!`, t(lang, 'rhyme.confirm')],
     };
   }
   const ask = t(lang, 'rhyme.ask');
@@ -167,9 +167,9 @@ function buildLines(lang: Lang, target: RhymeEntry, correct: RhymeEntry): {
   const promptLines = [ask, target.word];
   const displayPrompt = `${ask} ${target.word}`;
   let confirmLines: string[];
-  if (lang === 'ja') confirmLines = [`${target.word}、${correct.word}！おなじ おと！`];
-  else if (lang === 'cmn') confirmLines = [`${target.word}，${correct.word}！押韵！`];
-  else confirmLines = [`${target.word}，${correct.word}！好啱音！`]; // yue
+  if (lang === 'ja') confirmLines = [`${target.word}、${correct.word}！${t(lang, 'rhyme.confirm')}`];
+  else if (lang === 'cmn') confirmLines = [`${target.word}，${correct.word}！${t(lang, 'rhyme.confirm')}`];
+  else confirmLines = [`${target.word}，${correct.word}！${t(lang, 'rhyme.confirm')}`]; // yue
   return { promptLines, displayPrompt, caption: target.roman || undefined, confirmLines };
 }
 
