@@ -1,5 +1,7 @@
 import { t } from "../../i18n";
 import { Lang } from "../../lang";
+import { DiffScene } from "../../manifest";
+import { sample } from "../../rng";
 
 // Spoken prompt for the scene play screen across all four languages.
 // English preserves the exact pre-rendered clip string; non-English modes
@@ -51,4 +53,29 @@ export function diffSceneWidth(
     );
   }
   return Math.max(MIN_DIFF_SCENE_W, sceneWidth);
+}
+
+export function buildDiffRound(rng: () => number, scene: DiffScene | null, diffDraw: number) {
+  const round =
+    scene?.pool && scene.image
+      ? sample(rng, scene.pool, diffDraw).map((p) => ({
+          box: p,
+          patch: p.patch as string | undefined,
+          patchOnA: rng() < 0.5,
+        }))
+      : (scene?.diffs ?? []).map((d) => ({
+          box: d,
+          patch: undefined as string | undefined,
+          patchOnA: false,
+        }));
+  return {
+    total: round.length,
+    boxes: round.map((r, i) => ({ id: String(i), box: r.box })),
+    overlaysA: round
+      .filter((r) => r.patch && r.patchOnA)
+      .map((r) => ({ box: r.box, source: r.patch! })),
+    overlaysB: round
+      .filter((r) => r.patch && !r.patchOnA)
+      .map((r) => ({ box: r.box, source: r.patch! })),
+  };
 }

@@ -103,3 +103,58 @@ describe("diffSceneWidth", () => {
     expect(diffSceneWidth(800, 250, true)).toBe(160);
   });
 });
+
+import { makeRng } from "../../../rng";
+import { buildDiffRound } from "../logic";
+import { DiffScene } from "../../../manifest";
+
+describe("buildDiffRound", () => {
+  it("generates deterministic round from pool using rng", () => {
+    const scene: DiffScene = {
+      id: "test_scene",
+      name: "Test",
+      image: "test_base.png", w: 100, h: 100,
+      pool: [
+        { x: 10, y: 10, w: 20, h: 20, patch: "patch1.png", name: "p1", kind: "recolor" },
+        { x: 30, y: 30, w: 20, h: 20, patch: "patch2.png", name: "p2", kind: "recolor" },
+        { x: 50, y: 50, w: 20, h: 20, patch: "patch3.png", name: "p3", kind: "remove" },
+      ]
+    };
+    
+    // Test with diffDraw 2
+    const round1 = buildDiffRound(makeRng(12345), scene, 2);
+    expect(round1.total).toBe(2);
+    expect(round1.boxes.length).toBe(2);
+    
+    // Ensure overlays are split between A and B
+    expect(round1.overlaysA.length + round1.overlaysB.length).toBe(2);
+    expect(round1.overlaysA[0]?.source ?? round1.overlaysB[0]?.source).toBeDefined();
+  });
+
+  it("handles legacy fixed-diff scenes", () => {
+    const scene: DiffScene = {
+      id: "legacy_scene",
+      name: "Legacy",
+      imageA: "testA.png", w: 100, h: 100,
+      imageB: "testB.png",
+      diffs: [
+        { x: 10, y: 10, w: 20, h: 20, what: "thing1" },
+        { x: 30, y: 30, w: 20, h: 20, what: "thing2" }
+      ]
+    };
+
+    const round = buildDiffRound(makeRng(12345), scene, 2);
+    expect(round.total).toBe(2);
+    expect(round.boxes.length).toBe(2);
+    
+    // Legacy scenes do not use patch overlays
+    expect(round.overlaysA.length).toBe(0);
+    expect(round.overlaysB.length).toBe(0);
+  });
+
+  it("handles null scene gracefully", () => {
+    const round = buildDiffRound(makeRng(12345), null, 2);
+    expect(round.total).toBe(0);
+    expect(round.boxes.length).toBe(0);
+  });
+});
