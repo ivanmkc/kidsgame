@@ -192,6 +192,8 @@ export function evaluateGuess(round: Round, guessIcon: string): boolean {
  * - Correct: increments streak, resets wrongGuesses and highlightCorrect, advances to a new round.
  * - Incorrect: keeps streak, increments wrongGuesses, sets highlightCorrect if wrongGuesses >= 2, keeps round.
  */
+export const ROUNDS_TO_WIN = 12;
+
 export function updateGameState(
   state: GameState,
   guessIcon: string,
@@ -203,13 +205,13 @@ export function updateGameState(
   if (isCorrect) {
     const nextStreak = state.streak + 1;
     let nextLevel = difficulty === "hard" ? 3 : difficulty === "medium" ? 2 : 1;
-    if (nextStreak >= 20) {
+    if (nextStreak >= 8) {
       nextLevel = 3;
-    } else if (nextStreak >= 10) {
+    } else if (nextStreak >= 4) {
       nextLevel = Math.max(nextLevel, 2);
     }
 
-    const won = nextStreak >= 30;
+    const won = nextStreak >= ROUNDS_TO_WIN;
     const config = getLevelConfig(nextLevel, lang);
 
     return {

@@ -339,39 +339,39 @@ describe("updateGameState", () => {
   it("maintains streak and level on wrong guess", () => {
     const rng = makeRng(100);
     let state = initGameState(rng);
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 3; i++) {
       state = updateGameState(state, state.currentRound.target.icon, rng);
     }
-    expect(state.streak).toBe(10);
-    expect(state.level).toBe(2);
+    expect(state.streak).toBe(3);
+    expect(state.level).toBe(1);
     state = updateGameState(state, state.currentRound.distractor.icon, rng);
-    expect(state.streak).toBe(10);
-    expect(state.level).toBe(2);
+    expect(state.streak).toBe(3);
+    expect(state.level).toBe(1);
     state = updateGameState(state, state.currentRound.target.icon, rng);
-    expect(state.streak).toBe(11);
+    expect(state.streak).toBe(4);
     expect(state.level).toBe(2);
   });
 
-  it("advances level to 2 at streak 10 and to 3 at streak 20", () => {
+  it("advances level to 2 at streak 4 and to 3 at streak 8", () => {
     const rng = makeRng(100);
     let state = initGameState(rng);
 
-    for (let i = 1; i <= 9; i++) {
+    for (let i = 1; i <= 3; i++) {
       state = updateGameState(state, state.currentRound.target.icon, rng);
       expect(state.level).toBe(1);
     }
 
     state = updateGameState(state, state.currentRound.target.icon, rng);
-    expect(state.streak).toBe(10);
+    expect(state.streak).toBe(4);
     expect(state.level).toBe(2);
 
-    for (let i = 11; i <= 19; i++) {
+    for (let i = 5; i <= 7; i++) {
       state = updateGameState(state, state.currentRound.target.icon, rng);
       expect(state.level).toBe(2);
     }
 
     state = updateGameState(state, state.currentRound.target.icon, rng);
-    expect(state.streak).toBe(20);
+    expect(state.streak).toBe(8);
     expect(state.level).toBe(3);
   });
 
@@ -424,18 +424,18 @@ describe("updateGameState", () => {
     expect(state.currentRound).not.toEqual(initialRound);
   });
 
-  it("sets won to true at streak 30 and maintains currentRound", () => {
+  it("sets won to true at streak 12 and maintains currentRound", () => {
     const rng = makeRng(100);
     let state = initGameState(rng);
 
-    for (let i = 1; i < 30; i++) {
+    for (let i = 1; i < 12; i++) {
       state = updateGameState(state, state.currentRound.target.icon, rng);
       expect(state.won).toBe(false);
     }
 
     const roundBeforeWin = state.currentRound;
     state = updateGameState(state, state.currentRound.target.icon, rng);
-    expect(state.streak).toBe(30);
+    expect(state.streak).toBe(12);
     expect(state.won).toBe(true);
     expect(state.currentRound).toEqual(roundBeforeWin);
   });
@@ -668,4 +668,3 @@ describe("listenChooseLayout", () => {
     expect(narrow.cardWidth).toBeGreaterThanOrEqual(72);
   });
 });
-
