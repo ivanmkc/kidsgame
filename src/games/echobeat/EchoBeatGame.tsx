@@ -63,12 +63,50 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const won = score >= total;
   useWinLine(won, t(lang, "win.echobeat" as never));
 
+  const tempoPulseAnim = useRef(new Animated.Value(0)).current;
+  const tempoPulseLoop = useRef<Animated.CompositeAnimation | null>(null);
+
+  const stopTempoPulse = useCallback(() => {
+    if (tempoPulseLoop.current) {
+      tempoPulseLoop.current.stop();
+      tempoPulseLoop.current = null;
+    }
+    tempoPulseAnim.setValue(0);
+  }, [tempoPulseAnim]);
+
+  const startTempoPulse = useCallback(
+    (bpm: number) => {
+      stopTempoPulse();
+      const beatMs = 60000 / bpm;
+      tempoPulseLoop.current = Animated.loop(
+        Animated.sequence([
+          Animated.timing(tempoPulseAnim, {
+            toValue: 1,
+            duration: beatMs * 0.5,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(tempoPulseAnim, {
+            toValue: 0,
+            duration: beatMs * 0.5,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      tempoPulseLoop.current.start();
+    },
+    [stopTempoPulse, tempoPulseAnim],
+  );
+
   const playDemo = useCallback(
     (r: EchoBeatRound) => {
       stopSequence();
+      stopTempoPulse();
       if (flashTimer.current) clearTimeout(flashTimer.current);
       setFlash(null);
       setPhase("listen");
+      startTempoPulse(r.bpm ?? 120);
       playDrumSequence(
         r.gaps,
         (i) => {
@@ -88,7 +126,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         },
       );
     },
-    [pulseAnim],
+    [pulseAnim, startTempoPulse, stopTempoPulse],
   );
 
   useEffect(() => {
@@ -104,6 +142,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     if (resultTimer.current) clearTimeout(resultTimer.current);
     stopNarration();
     stopSequence();
+    stopTempoPulse();
     setFlash(null);
     tapTimesRef.current = [];
     tapCountRef.current = 0;
@@ -127,6 +166,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       if (resultTimer.current) clearTimeout(resultTimer.current);
       stopNarration();
       stopSequence();
+      stopTempoPulse();
     };
   }, [lang, round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -134,6 +174,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     (times: number[]) => {
       const res = checkEcho(round, times, difficulty);
       if (res.countCorrect && res.timingCorrect) {
+        stopTempoPulse();
         sfx.good();
         setSparkKey((k) => k + 1);
         setResult("good");
@@ -147,6 +188,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
           }, 800);
         }
       } else {
+        stopTempoPulse();
         sfx.wrong();
         setResult("bad");
         resultTimer.current = setTimeout(() => {
@@ -158,7 +200,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         }, 1000);
       }
     },
-    [difficulty, playDemo, round, score, total],
+    [difficulty, playDemo, round, score, stopTempoPulse, total],
   );
 
   const onTap = () => {
@@ -190,6 +232,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     if (transitionTimer.current) clearTimeout(transitionTimer.current);
     stopNarration();
     stopSequence();
+    stopTempoPulse();
     setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
@@ -266,6 +309,11 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1, 1.06],
   });
 
+  const tempoPulseScale = tempoPulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.25],
+  });
+
   const canTapDrum = canTap(round, tapCount, phase, won, result);
   const tapDots = [];
   const expectedHits = round.gaps.length + 1;
@@ -309,6 +357,13 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             <Text style={[styles.statusText, shortH && styles.statusTextShort]}>
               {t(lang, "music.listen" as never)}
             </Text>
+            <Animated.View
+              testID="echobeat-tempo-pulse"
+              style={[
+                styles.tempoPulseDot,
+                { transform: [{ scale: tempoPulseScale }] },
+              ]}
+            />
           </View>
         ) : (
           <View
@@ -332,12 +387,24 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
                   ? "🔄"
                   : t(lang, "music.yourTurn" as never)}
             </Text>
+            <Animated.View
+              testID="echobeat-tempo-pulse"
+              style={[
+                styles.tempoPulseDot,
+                styles.tempoPulseDotTap,
+                { transform: [{ scale: tempoPulseScale }] },
+              ]}
+            />
           </View>
         )}
         <Animated.View
           style={
             phase === "tap" && canTapDrum
-              ? { transform: [{ scale: drumScale }] }
+              ? {
+                  transform: [
+                    { scale: Animated.multiply(drumScale, tempoPulseScale) },
+                  ],
+                }
               : undefined
           }
         >
@@ -458,5 +525,15 @@ const styles = StyleSheet.create({
   },
   tapDotFilled: {
     backgroundColor: "#E8874F",
+  },
+  tempoPulseDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.gold,
+    marginLeft: 4,
+  },
+  tempoPulseDotTap: {
+    backgroundColor: colors.green,
   },
 });

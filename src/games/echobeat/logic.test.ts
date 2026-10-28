@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { canTap, echoBeatLayout, evaluationDelayMs } from "./logic";
+import { makeRng } from "../../rng";
+import {
+  canTap,
+  checkEcho,
+  echoBeatLayout,
+  evaluationDelayMs,
+  makeEchoBeatRound,
+} from "./logic";
 
 describe("echoBeatLayout", () => {
   it("scales down drum and gaps on mobile landscape viewports (667x375, 568x320)", () => {
@@ -100,5 +107,142 @@ describe("evaluationDelayMs", () => {
     expect(evaluationDelayMs(round, 0)).toBe(1200);
     expect(evaluationDelayMs(round, 1)).toBe(1200);
     expect(evaluationDelayMs(round, 2)).toBe(1200);
+  });
+});
+
+describe("makeEchoBeatRound", () => {
+  it("generates musical rhythmic patterns with quantized musical durations and bpm metronome tempo", () => {
+    const validIntervals = [0.25, 0.5, 0.6, 0.75, 1.0, 1 / 3];
+    for (let seed = 1; seed <= 50; seed++) {
+      for (const d of ["easy", "medium", "hard"] as const) {
+        const round = makeEchoBeatRound(makeRng(seed), d);
+        expect(round.hitCount).toBe(round.gaps.length + 1);
+        expect(round.bpm).toBeGreaterThanOrEqual(100);
+        expect(round.bpm).toBeLessThanOrEqual(120);
+        for (const gap of round.gaps) {
+          const matchesKnownInterval = validIntervals.some(
+            (v) => Math.abs(v - gap) < 1e-4,
+          );
+          expect(matchesKnownInterval).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("respects difficulty hitCount ranges", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const easyRound = makeEchoBeatRound(makeRng(seed), "easy");
+      expect(easyRound.hitCount).toBeGreaterThanOrEqual(2);
+      expect(easyRound.hitCount).toBeLessThanOrEqual(3);
+
+      const medRound = makeEchoBeatRound(makeRng(seed), "medium");
+      expect(medRound.hitCount).toBeGreaterThanOrEqual(3);
+      expect(medRound.hitCount).toBeLessThanOrEqual(5);
+
+      const hardRound = makeEchoBeatRound(makeRng(seed), "hard");
+      expect(hardRound.hitCount).toBeGreaterThanOrEqual(4);
+      expect(hardRound.hitCount).toBeLessThanOrEqual(6);
+    }
+  });
+});
+
+describe("checkEcho", () => {
+  it("passes when tapping rhythm with exact relative ratios at 30% slower tempo on hard (repro F1db861)", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const round = makeEchoBeatRound(makeRng(seed), "hard");
+      let time = 0;
+      const taps = [time];
+      for (const gap of round.gaps) {
+        time += gap * 1.3 * 1000;
+        taps.push(time);
+      }
+      const result = checkEcho(round, taps, "hard");
+      expect(result.countCorrect).toBe(true);
+      expect(result.timingCorrect).toBe(true);
+    }
+  });
+
+  it("passes when tapping rhythm with exact relative ratios at 30% faster tempo on hard", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const round = makeEchoBeatRound(makeRng(seed), "hard");
+      let time = 0;
+      const taps = [time];
+      for (const gap of round.gaps) {
+        time += gap * 0.7 * 1000;
+        taps.push(time);
+      }
+      const result = checkEcho(round, taps, "hard");
+      expect(result.countCorrect).toBe(true);
+      expect(result.timingCorrect).toBe(true);
+    }
+  });
+
+  it("tolerates child motor timing jitter on 250ms eighth notes", () => {
+    const round = { gaps: [0.25, 0.25, 0.5], hitCount: 4 };
+    // +70ms jitter on first note, -60ms on second
+    const taps = [0, 320, 510, 1010];
+    const result = checkEcho(round, taps, "hard");
+    expect(result.countCorrect).toBe(true);
+    expect(result.timingCorrect).toBe(true);
+  });
+
+  it("rejects wrong rhythm proportions even when tap count matches", () => {
+    // Expected: eighth, eighth, quarter (1:1:2 ratio)
+    const round = { gaps: [0.25, 0.25, 0.5], hitCount: 4 };
+    // Player taps uniform quarter notes (1:1:1 ratio)
+    const taps = [0, 333, 666, 1000];
+    const result = checkEcho(round, taps, "hard");
+    expect(result.countCorrect).toBe(true);
+    expect(result.timingCorrect).toBe(false);
+  });
+
+  it("rejects inverted rhythm patterns", () => {
+    // Expected: eighth, quarter (1:2 ratio)
+    const round = { gaps: [0.25, 0.5], hitCount: 3 };
+    // Player taps inverted: quarter, eighth (2:1 ratio)
+    const taps = [0, 500, 750];
+    const result = checkEcho(round, taps, "medium");
+    expect(result.countCorrect).toBe(true);
+    expect(result.timingCorrect).toBe(false);
+  });
+
+  it("rejects accidental double-taps under 50ms", () => {
+    const round = { gaps: [0.25, 0.5], hitCount: 3 };
+    const taps = [0, 20, 520];
+    const result = checkEcho(round, taps, "medium");
+    expect(result.countCorrect).toBe(true);
+    expect(result.timingCorrect).toBe(false);
+  });
+
+  it("rejects extreme tempo drift outside 0.4x to 2.5x range", () => {
+    const round = { gaps: [0.5, 0.5], hitCount: 3 };
+    // 3.5x slower (3.5s total instead of 1.0s)
+    const slowTaps = [0, 1750, 3500];
+    expect(checkEcho(round, slowTaps, "medium").timingCorrect).toBe(false);
+
+    // 0.2x faster (0.2s total instead of 1.0s)
+    const fastTaps = [0, 100, 200];
+    expect(checkEcho(round, fastTaps, "medium").timingCorrect).toBe(false);
+  });
+
+  it("evaluates rhythm on easy difficulty with generous tolerance and rejects double-taps", () => {
+    const round = { gaps: [0.5, 0.5], hitCount: 3, bpm: 120 };
+    // Matching steady rhythm passes
+    expect(checkEcho(round, [0, 500, 1000], "easy").timingCorrect).toBe(true);
+
+    // Rhythm at 30% slower tempo with exact relative ratios passes on easy
+    expect(checkEcho(round, [0, 650, 1300], "easy").timingCorrect).toBe(true);
+
+    // Accidental double-taps (<= 50ms) are rejected on easy
+    expect(checkEcho(round, [0, 10, 500], "easy").timingCorrect).toBe(false);
+
+    // Extreme irregular timing is rejected on easy
+    expect(checkEcho(round, [0, 80, 2500], "easy").timingCorrect).toBe(false);
+  });
+
+  it("evaluates single gap rounds against tolerance window", () => {
+    const round = { gaps: [0.5], hitCount: 2 };
+    expect(checkEcho(round, [0, 520], "medium").timingCorrect).toBe(true);
+    expect(checkEcho(round, [0, 900], "hard").timingCorrect).toBe(false);
   });
 });

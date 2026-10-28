@@ -6,16 +6,57 @@ import { t } from "../../i18n";
 export interface EchoBeatRound {
   gaps: number[]; // inter-onset intervals in seconds
   hitCount: number; // gaps.length + 1
+  bpm?: number; // metronome tempo in beats per minute
 }
 
-function hitRange(d: Difficulty): [number, number] {
-  if (d === "easy") return [2, 3];
-  if (d === "medium") return [3, 5];
-  return [4, 6];
+interface PatternDef {
+  gaps: number[];
+  bpm: number;
 }
+
+// Quantized musical rhythmic patterns (quarter notes = 0.5s, eighth notes = 0.25s,
+// triplets = 1/3s, dotted quarters = 0.75s, half notes = 1.0s at standard 120 BPM).
+const RHYTHM_PATTERNS: Record<Difficulty, PatternDef[]> = {
+  easy: [
+    { gaps: [0.5], bpm: 120 },
+    { gaps: [0.6], bpm: 100 },
+    { gaps: [0.5, 0.5], bpm: 120 },
+    { gaps: [0.6, 0.6], bpm: 100 },
+    { gaps: [0.5, 1.0], bpm: 120 },
+  ],
+  medium: [
+    { gaps: [0.5, 0.5], bpm: 120 },
+    { gaps: [0.25, 0.5], bpm: 120 },
+    { gaps: [0.5, 0.25], bpm: 120 },
+    { gaps: [0.25, 0.25], bpm: 120 },
+    { gaps: [0.5, 0.5, 0.5], bpm: 120 },
+    { gaps: [0.25, 0.25, 0.5], bpm: 120 },
+    { gaps: [0.5, 0.25, 0.25], bpm: 120 },
+    { gaps: [0.25, 0.5, 0.25], bpm: 120 },
+    { gaps: [0.5, 0.5, 0.5, 0.5], bpm: 120 },
+    { gaps: [0.25, 0.25, 0.5, 0.5], bpm: 120 },
+    { gaps: [0.5, 0.25, 0.25, 0.5], bpm: 120 },
+    { gaps: [0.5, 0.5, 0.25, 0.25], bpm: 120 },
+  ],
+  hard: [
+    { gaps: [0.25, 0.25, 0.5], bpm: 120 },
+    { gaps: [0.25, 0.5, 0.25], bpm: 120 },
+    { gaps: [0.75, 0.25, 0.5], bpm: 120 },
+    { gaps: [1 / 3, 1 / 3, 1 / 3], bpm: 120 },
+    { gaps: [0.25, 0.25, 0.25, 0.25], bpm: 120 },
+    { gaps: [0.25, 0.5, 0.25, 0.5], bpm: 120 },
+    { gaps: [0.75, 0.25, 0.5, 0.5], bpm: 120 },
+    { gaps: [1 / 3, 1 / 3, 1 / 3, 0.5], bpm: 120 },
+    { gaps: [0.5, 1 / 3, 1 / 3, 1 / 3], bpm: 120 },
+    { gaps: [0.25, 0.25, 0.5, 0.25, 0.25], bpm: 120 },
+    { gaps: [0.5, 0.25, 0.25, 0.5, 0.25], bpm: 120 },
+    { gaps: [1 / 3, 1 / 3, 1 / 3, 0.25, 0.25], bpm: 120 },
+    { gaps: [0.25, 0.25, 1 / 3, 1 / 3, 1 / 3], bpm: 120 },
+  ],
+};
 
 export function tolerancePct(d: Difficulty): number {
-  if (d === "easy") return 1.0; // count-only: any timing accepted
+  if (d === "easy") return 0.50; // generous tolerance for young children
   if (d === "medium") return 0.35;
   return 0.25;
 }
@@ -27,17 +68,11 @@ export function roundsToWin(d: Difficulty): number {
 }
 
 export function makeEchoBeatRound(rng: Rng, d: Difficulty): EchoBeatRound {
-  const [lo, hi] = hitRange(d);
-  const hitCount = lo + randInt(rng, hi - lo + 1);
-  const gaps: number[] = [];
-  for (let i = 0; i < hitCount - 1; i++) {
-    if (d === "easy") {
-      gaps.push(0.4 + rng() * 0.3);
-    } else {
-      gaps.push(0.25 + rng() * 0.55);
-    }
-  }
-  return { gaps, hitCount };
+  const pool = RHYTHM_PATTERNS[d];
+  const idx = randInt(rng, pool.length);
+  const pattern = pool[idx];
+  const gaps = [...pattern.gaps];
+  return { gaps, hitCount: gaps.length + 1, bpm: pattern.bpm };
 }
 
 export interface TapResult {
@@ -51,24 +86,54 @@ export function checkEcho(
   d: Difficulty,
 ): TapResult {
   const countCorrect = tapTimes.length === round.hitCount;
-  if (d === "easy") {
-    return { countCorrect, timingCorrect: true };
-  }
   if (!countCorrect) return { countCorrect, timingCorrect: false };
-  const tol = tolerancePct(d);
-  const playerGaps = [];
+
+  const playerGaps: number[] = [];
   for (let i = 1; i < tapTimes.length; i++) {
     playerGaps.push((tapTimes[i] - tapTimes[i - 1]) / 1000);
   }
+
+  // Reject accidental double-taps or sensor bounces (<= 50ms) across all difficulties.
+  for (const gap of playerGaps) {
+    if (gap <= 0.05) return { countCorrect, timingCorrect: false };
+  }
+
+  const tol = tolerancePct(d);
+  const minWindow = d === "easy" ? 0.20 : d === "medium" ? 0.12 : 0.08;
+
+  if (round.gaps.length === 1) {
+    const err = Math.abs(playerGaps[0] - round.gaps[0]);
+    const allowedErr = Math.max(round.gaps[0] * tol, minWindow);
+    return { countCorrect, timingCorrect: err <= allowedErr };
+  }
+
+  const expectedTotal = round.gaps.reduce((a, b) => a + b, 0);
+  const playerTotal = playerGaps.reduce((a, b) => a + b, 0);
+  if (expectedTotal <= 0 || playerTotal <= 0) {
+    return { countCorrect, timingCorrect: false };
+  }
+
+  // Evaluate rhythm using relative beat proportions: normalize player tempo.
+  // Tempo scale must fall within a reasonable musical range (0.3x-3.0x on easy, 0.4x-2.5x on med/hard).
+  const minScale = d === "easy" ? 0.3 : 0.4;
+  const maxScale = d === "easy" ? 3.0 : 2.5;
+  const tempoScale = playerTotal / expectedTotal;
+  if (tempoScale < minScale || tempoScale > maxScale) {
+    return { countCorrect, timingCorrect: false };
+  }
+
   let timingCorrect = true;
   for (let i = 0; i < round.gaps.length; i++) {
     const expected = round.gaps[i];
-    const actual = playerGaps[i];
-    if (Math.abs(actual - expected) / expected > tol) {
+    const actualNormalized = playerGaps[i] / tempoScale;
+    const err = Math.abs(actualNormalized - expected);
+    const allowedErr = Math.max(expected * tol, minWindow);
+    if (err > allowedErr) {
       timingCorrect = false;
       break;
     }
   }
+
   return { countCorrect, timingCorrect };
 }
 
