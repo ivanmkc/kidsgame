@@ -6,7 +6,7 @@ import { Confetti } from '../../components/Confetti';
 import { SparkleBurst } from '../../components/Sparkles';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
-import { Lang } from '../../lang';
+import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
 import { say, saySequence, sfx, useSay } from '../../sound';
@@ -254,6 +254,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 scare={node.scare}
                 reveal={(lang !== 'en' ? node.scare.t?.[lang] : undefined) ?? node.scare.reveal}
                 scale={imgW / 1280}
+                lang={lang}
               />
             ) : null}
             {(node.fx ?? []).map((f, i) => (
@@ -444,7 +445,8 @@ function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
 // The dare-spot: a soft shimmer marks the region; tapping it makes the
 // surprise SPRING out with a sting, then (after the story's beat) the
 // spoken reveal lands. Re-tappable forever — that's the toy.
-function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: string; scale: number }) {
+function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; reveal?: string; scale: number; lang?: Lang }) {
+  const { isValid } = useLangEpoch(lang);
   const [popped, setPopped] = useState(false);
   const spring = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
@@ -473,7 +475,7 @@ function ScareSpot({ scare, reveal, scale }: { scare: StoryScare; reveal?: strin
       animating.current = false;
     });
     revealTimer.current = setTimeout(() => {
-      say(latestReveal.current);
+      if (isValid()) say(latestReveal.current);
       revealTimer.current = null;
     }, scare.delay);
   };
