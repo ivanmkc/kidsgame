@@ -154,7 +154,7 @@ export function evaluationDelayMs(
   round: EchoBeatRound,
   tapCount: number,
 ): number {
-  return tapCount >= round.hitCount ? 0 : 1200;
+  return tapCount >= round.hitCount ? 0 : 3000;
 }
 
 export interface EchoBeatLayout {

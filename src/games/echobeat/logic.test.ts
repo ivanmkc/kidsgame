@@ -103,10 +103,10 @@ describe("evaluationDelayMs", () => {
     expect(evaluationDelayMs(round, 4)).toBe(0);
   });
 
-  it("returns 1200ms when sequence is incomplete to await further taps", () => {
-    expect(evaluationDelayMs(round, 0)).toBe(1200);
-    expect(evaluationDelayMs(round, 1)).toBe(1200);
-    expect(evaluationDelayMs(round, 2)).toBe(1200);
+  it("returns 3000ms when sequence is incomplete to await further taps", () => {
+    expect(evaluationDelayMs(round, 0)).toBe(3000);
+    expect(evaluationDelayMs(round, 1)).toBe(3000);
+    expect(evaluationDelayMs(round, 2)).toBe(3000);
   });
 });
 
