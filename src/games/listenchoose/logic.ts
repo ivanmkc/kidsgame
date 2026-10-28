@@ -37,6 +37,50 @@ export function speechLines(
   return [...lines];
 }
 
+export interface ListenChooseLayout {
+  shortH: boolean;
+  speakerSize: number;
+  speakerIconSize: number;
+  cardWidth: number;
+  cardHeight: number;
+  cardImageSize: number;
+  gap: number;
+}
+
+export function listenChooseLayout(
+  width: number,
+  height: number,
+  numChoices: number = 2,
+): ListenChooseLayout {
+  const shortH = height < 500;
+  if (shortH) {
+    const gap = 10;
+    const maxCardByWidth =
+      (Math.min(width - 32, 600) - (numChoices - 1) * gap) /
+      Math.max(1, numChoices);
+    const cardWidth = Math.max(72, Math.min(120, Math.floor(maxCardByWidth)));
+    return {
+      shortH: true,
+      speakerSize: 56,
+      speakerIconSize: 26,
+      cardWidth,
+      cardHeight: 120,
+      cardImageSize: 56,
+      gap,
+    };
+  }
+
+  return {
+    shortH: false,
+    speakerSize: 88,
+    speakerIconSize: 42,
+    cardWidth: 150,
+    cardHeight: 170,
+    cardImageSize: 96,
+    gap: 20,
+  };
+}
+
 export interface Round {
   target: Word;
   distractor: Word;

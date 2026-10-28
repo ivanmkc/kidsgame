@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SPOTIT_ICONS, RHYME_SPRITES } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
@@ -22,8 +23,10 @@ import { colors, fonts, shadows } from "../../theme";
 import { Word } from "./data";
 import {
   GameState,
+  ListenChooseLayout,
   getWordText,
   initGameState,
+  listenChooseLayout,
   updateGameState,
 } from "./logic";
 import { useWinLine } from "../winlines";
@@ -55,6 +58,13 @@ export function ListenChooseGame({
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wobbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedRef = useRef(false);
+
+  const { width, height } = useWindowDimensions();
+  const layout = listenChooseLayout(
+    width,
+    height,
+    state.currentRound.choices.length,
+  );
 
   useWinLine(state.won, t(lang, "win.soundsWords"));
 
@@ -171,10 +181,17 @@ export function ListenChooseGame({
       <ScrollView
         testID="listenchoose-scrollview"
         style={{ flex: 1 }}
-        contentContainerStyle={styles.board}
+        contentContainerStyle={
+          layout.shortH ? styles.boardShort : styles.board
+        }
       >
         {!started ? (
-          <View style={styles.startScreen}>
+          <View
+            style={[
+              styles.startScreen,
+              layout.shortH && styles.startScreenShort,
+            ]}
+          >
             <Text style={styles.startTitle}>
               {t(lang, "shell.listenchoose.title")}
             </Text>
@@ -222,7 +239,12 @@ export function ListenChooseGame({
                 <SparkleBurst trigger={state.streak} count={8} size={28} />
               </View>
             )}
-            <View style={styles.speakerArea}>
+            <View
+              style={[
+                styles.speakerArea,
+                layout.shortH && styles.speakerAreaShort,
+              ]}
+            >
               <Pressable
                 onPress={onReplay}
                 testID="speaker-button"
@@ -230,14 +252,33 @@ export function ListenChooseGame({
                 accessibilityLabel={t(lang, "spell.hearAgain")}
                 style={({ pressed }) => [
                   styles.speakerButton,
+                  layout.shortH && styles.speakerButtonShort,
+                  {
+                    width: layout.speakerSize,
+                    height: layout.speakerSize,
+                    borderRadius: layout.speakerSize / 2,
+                  },
                   shadows.soft,
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.speakerIcon}>🔊</Text>
+                <Text
+                  style={[
+                    styles.speakerIcon,
+                    layout.shortH && styles.speakerIconShort,
+                  ]}
+                >
+                  🔊
+                </Text>
               </Pressable>
               {captions && (
-                <Text style={styles.caption} testID="listenchoose-caption">
+                <Text
+                  style={[
+                    styles.caption,
+                    layout.shortH && styles.captionShort,
+                  ]}
+                  testID="listenchoose-caption"
+                >
                   {getWordText(state.currentRound.target, lang)}
                 </Text>
               )}
@@ -248,16 +289,27 @@ export function ListenChooseGame({
                 hitSlop={12}
                 style={({ pressed }) => [
                   styles.captionsToggleMini,
+                  layout.shortH && styles.captionsToggleMiniShort,
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.captionsToggleMiniText}>
+                <Text
+                  style={[
+                    styles.captionsToggleMiniText,
+                    layout.shortH && styles.captionsToggleMiniTextShort,
+                  ]}
+                >
                   💬 {t(lang, "listenchoose.captions")}:{" "}
                   {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
                 </Text>
               </Pressable>
             </View>
-            <View style={styles.choicesContainer}>
+            <View
+              style={[
+                styles.choicesContainer,
+                { gap: layout.gap },
+              ]}
+            >
               {state.currentRound.choices.map((choice, i) => (
                 <ChoiceCard
                   key={`${state.streak}-${choice.icon}`}
@@ -270,6 +322,7 @@ export function ListenChooseGame({
                   }
                   wobble={wobbleIcon === choice.icon}
                   onPress={() => onPick(choice)}
+                  layout={layout}
                 />
               ))}
             </View>
@@ -303,6 +356,7 @@ function ChoiceCard({
   highlight,
   wobble,
   onPress,
+  layout = listenChooseLayout(0, 800),
 }: {
   choice: Word;
   index: number;
@@ -310,6 +364,7 @@ function ChoiceCard({
   highlight: boolean;
   wobble: boolean;
   onPress: () => void;
+  layout?: ListenChooseLayout;
 }) {
   const shake = useRef(new Animated.Value(0)).current;
 
@@ -364,6 +419,8 @@ function ChoiceCard({
         aria-selected={highlight}
         style={({ pressed }) => [
           styles.choiceCard,
+          layout.shortH && styles.choiceCardShort,
+          { width: layout.cardWidth, height: layout.cardHeight },
           shadows.soft,
           highlight && styles.highlightChoice,
           wobble && styles.wrongChoice,
@@ -372,10 +429,17 @@ function ChoiceCard({
       >
         <Image
           source={wordImage(choice.icon)}
-          style={styles.choiceImage}
+          style={[
+            styles.choiceImage,
+            { width: layout.cardImageSize, height: layout.cardImageSize },
+          ]}
           resizeMode="contain"
         />
-        <Text style={styles.choiceLabel}>{label}</Text>
+        <Text
+          style={[styles.choiceLabel, layout.shortH && styles.choiceLabelShort]}
+        >
+          {label}
+        </Text>
       </Pressable>
     </Animated.View>
   );
@@ -389,12 +453,24 @@ const styles = StyleSheet.create({
     gap: 20,
     paddingHorizontal: 16,
   },
+  boardShort: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
   startScreen: {
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
     maxWidth: 420,
     padding: 24,
+  },
+  startScreenShort: {
+    gap: 10,
+    padding: 12,
   },
   startTitle: {
     fontFamily: fonts.display,
@@ -444,14 +520,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 2,
   },
+  captionsToggleMiniShort: {
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    marginTop: 0,
+  },
   captionsToggleMiniText: {
     fontFamily: fonts.body,
     fontSize: 12,
     color: colors.inkSoft,
   },
+  captionsToggleMiniTextShort: {
+    fontSize: 11,
+  },
   speakerArea: {
     alignItems: "center",
     gap: 8,
+  },
+  speakerAreaShort: {
+    gap: 4,
   },
   speakerButton: {
     width: 88,
@@ -463,13 +550,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  speakerButtonShort: {
+    borderWidth: 2.5,
+  },
   speakerIcon: {
     fontSize: 42,
+  },
+  speakerIconShort: {
+    fontSize: 26,
   },
   caption: {
     fontFamily: fonts.displayMed,
     fontSize: 18,
     color: colors.inkSoft,
+  },
+  captionShort: {
+    fontSize: 15,
   },
   choicesContainer: {
     flexDirection: "row",
@@ -489,6 +585,11 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 8,
   },
+  choiceCardShort: {
+    borderRadius: 18,
+    padding: 8,
+    gap: 4,
+  },
   choiceImage: {
     width: 96,
     height: 96,
@@ -498,6 +599,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.ink,
     textAlign: "center",
+  },
+  choiceLabelShort: {
+    fontSize: 15,
   },
   highlightChoice: {
     borderColor: colors.green,

@@ -22,6 +22,36 @@ type FakePressableProps = Partial<PressableProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
 const capturedScrollViewProps: ScrollViewProps[] = [];
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  if (window.visualViewport) {
+    Object.defineProperty(window.visualViewport, "width", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window.visualViewport, "height", {
+      value: height,
+      configurable: true,
+    });
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
 vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable =
@@ -77,6 +107,7 @@ describe("ListenChooseGame", () => {
     });
     vi.useRealTimers();
     cleanup();
+    setViewport(1024, 768);
   });
 
   function getRoundChoices(): {
@@ -644,5 +675,69 @@ describe("ListenChooseGame", () => {
       vi.runAllTimers();
     });
     expect(sound.sayThen).not.toHaveBeenCalled();
+  });
+
+  it("adapts layout on mobile landscape viewports (844x390) so choices fit without clipping", () => {
+    setViewport(844, 390);
+    render(<ListenChooseGame onHome={vi.fn()} />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // Speaker button should be scaled down to 56x56
+    const speakerCaptures = capturedPressableMap["speaker-button"];
+    expect(speakerCaptures).toBeDefined();
+    const speakerStyle = StyleSheet.flatten(
+      typeof speakerCaptures[0]?.style === "function"
+        ? speakerCaptures[0]?.style({ pressed: false })
+        : speakerCaptures[0]?.style,
+    );
+    expect(speakerStyle.width).toBe(56);
+    expect(speakerStyle.height).toBe(56);
+
+    // Choice cards should be scaled down to 120px height
+    const { targetWord, distractorWord } = getRoundChoices();
+    for (const icon of [targetWord.icon, distractorWord.icon]) {
+      const cardCaptures = capturedPressableMap[`choice-${icon}`];
+      expect(cardCaptures).toBeDefined();
+      const cardStyle = StyleSheet.flatten(
+        typeof cardCaptures[0]?.style === "function"
+          ? cardCaptures[0]?.style({ pressed: false })
+          : cardCaptures[0]?.style,
+      );
+      expect(cardStyle.height).toBe(120);
+      expect(cardStyle.width).toBeLessThanOrEqual(120);
+    }
+
+    // Text labels are present
+    expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(distractorWord.en)).toBeTruthy();
+  });
+
+  it("uses standard larger sizing on portrait viewports (390x844)", () => {
+    setViewport(390, 844);
+    render(<ListenChooseGame onHome={vi.fn()} />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // Speaker button is full 88x88 size
+    const speakerCaptures = capturedPressableMap["speaker-button"];
+    const speakerStyle = StyleSheet.flatten(
+      typeof speakerCaptures[0]?.style === "function"
+        ? speakerCaptures[0]?.style({ pressed: false })
+        : speakerCaptures[0]?.style,
+    );
+    expect(speakerStyle.width).toBe(88);
+    expect(speakerStyle.height).toBe(88);
+
+    // Choice cards are full 150x170 size
+    const { targetWord, distractorWord } = getRoundChoices();
+    for (const icon of [targetWord.icon, distractorWord.icon]) {
+      const cardCaptures = capturedPressableMap[`choice-${icon}`];
+      const cardStyle = StyleSheet.flatten(
+        typeof cardCaptures[0]?.style === "function"
+          ? cardCaptures[0]?.style({ pressed: false })
+          : cardCaptures[0]?.style,
+      );
+      expect(cardStyle.width).toBe(150);
+      expect(cardStyle.height).toBe(170);
+    }
   });
 });
