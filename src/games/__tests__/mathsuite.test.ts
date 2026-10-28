@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeRng } from "../../rng";
 import {
-  CRITTER_ICONS,
   applyTap,
   countSettings,
   gridFor,
@@ -10,6 +9,7 @@ import {
   scatterPositions,
   speechLines as countSpeechLines,
 } from "../count/logic";
+import { CURRICULUM } from "../../curriculum/content";
 import {
   PLATE_PADDING,
   compareSettings,
@@ -80,7 +80,7 @@ describe("count with me", () => {
             MIN_SEP,
           );
         expect(round.icon).toBeTruthy();
-        expect(CRITTER_ICONS).toContain(round.icon);
+        expect(CURRICULUM.critters).toContain(round.icon);
         expect(round.choices).toHaveLength(3);
         expect(new Set(round.choices).size).toBe(3);
         expect(round.choices).toContain(round.answer);
@@ -518,8 +518,8 @@ describe("more or less: comparative feedback", () => {
       expect(plateAccessibilityLabel(7, "butterfly", "yue")).toBe("7 蝴蝶");
     });
 
-    it("resolves all CRITTER_ICONS across all 4 supported languages", () => {
-      for (const icon of CRITTER_ICONS) {
+    it("resolves all CURRICULUM.critters across all 4 supported languages", () => {
+      for (const icon of CURRICULUM.critters) {
         for (const lang of ["en", "ja", "cmn", "yue"] as const) {
           const label = plateAccessibilityLabel(3, icon, lang);
           expect(label).toMatch(/^3 \S+/);
@@ -554,7 +554,7 @@ describe("little sums", () => {
         expect(r.choices).toHaveLength(3);
         expect(new Set(r.choices).size).toBe(3);
         expect(r.choices).toContain(r.sum);
-        expect(CRITTER_ICONS).toContain(r.icon);
+        expect(CURRICULUM.critters).toContain(r.icon);
       }
     });
   }

@@ -2,13 +2,13 @@ import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
 import {
-  CRITTER_ICONS,
   Position,
   gridFor,
   scatterPositions,
 } from "../count/logic";
 import { spriteLT } from "../quizround/logic";
 import { WORDS, wordFor } from "../../words";
+import { CURRICULUM } from "../../curriculum/content";
 
 export interface Side {
   icon: string;
@@ -42,29 +42,7 @@ export function compareSettings(d: Difficulty): {
   minRatio: number;
   fewerFraction: number;
 } {
-  if (d === "hard")
-    return {
-      rounds: 10,
-      range: [3, 10],
-      minGap: 1,
-      minRatio: 1.25,
-      fewerFraction: 0.3,
-    };
-  if (d === "medium")
-    return {
-      rounds: 8,
-      range: [1, 9],
-      minGap: 2,
-      minRatio: 1.25,
-      fewerFraction: 0,
-    };
-  return {
-    rounds: 6,
-    range: [1, 7],
-    minGap: 3,
-    minRatio: 1.25,
-    fewerFraction: 0,
-  };
+  return CURRICULUM.numbers.compare[d];
 }
 
 /** Both halves of the pair rule: far enough apart in absolute terms AND in
@@ -121,7 +99,7 @@ export function makeCompareRound(rng: Rng, d: Difficulty): CompareRound {
 }
 
 function pickTwoIcons(rng: Rng): [string, string] {
-  const pool = shuffle(rng, CRITTER_ICONS);
+  const pool = shuffle(rng, CURRICULUM.critters);
   return [pool[0], pool[1]];
 }
 

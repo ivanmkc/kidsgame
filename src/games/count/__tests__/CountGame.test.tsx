@@ -16,7 +16,6 @@ import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
-  CRITTER_ICONS,
   PROMPTS,
   STAGE_PADDING,
   applyPickAnswer,
@@ -25,6 +24,7 @@ import {
   makeCountRound,
   stageCritterSize,
 } from "../logic";
+import { CURRICULUM } from "../../../curriculum/content";
 import { Lang } from "../../../lang";
 import { makeRng } from "../../../rng";
 
@@ -681,9 +681,9 @@ describe("critterLabel", () => {
     expect(critterLabel("butterfly", "yue")).toBe("蝴蝶");
   });
 
-  it("covers all CRITTER_ICONS in WORDS for every supported language", () => {
+  it("covers all CURRICULUM.critters in WORDS for every supported language", () => {
     const langs: Lang[] = ["en", "ja", "cmn", "yue"];
-    for (const icon of CRITTER_ICONS) {
+    for (const icon of CURRICULUM.critters) {
       for (const lang of langs) {
         const label = critterLabel(icon, lang);
         expect(label).toBeTruthy();

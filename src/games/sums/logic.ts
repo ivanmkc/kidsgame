@@ -1,7 +1,8 @@
 import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
-import { CRITTER_ICONS, Position, scatterPositions } from "../count/logic";
+import { Position, scatterPositions } from "../count/logic";
+import { CURRICULUM } from "../../curriculum/content";
 
 export interface SumsRound {
   icon: string;
@@ -71,9 +72,7 @@ export function sumsSettings(d: Difficulty): {
   rounds: number;
   maxSum: number;
 } {
-  if (d === "hard") return { rounds: 8, maxSum: 10 };
-  if (d === "medium") return { rounds: 6, maxSum: 7 };
-  return { rounds: 5, maxSum: 5 };
+  return CURRICULUM.numbers.sums[d];
 }
 
 /** Three unique choices in [1..upper], answer always included. */
@@ -104,7 +103,7 @@ export function makeSumsRound(rng: Rng, d: Difficulty): SumsRound {
   const sum = 2 + randInt(rng, maxSum - 1);
   const a = 1 + randInt(rng, sum - 1);
   const b = sum - a;
-  const icon = CRITTER_ICONS[randInt(rng, CRITTER_ICONS.length)];
+  const icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
   // one scatter for all sum critters then split — keeps them from stacking
   const all = scatterPositions(rng, sum);
   const aPositions = all.slice(0, a);
