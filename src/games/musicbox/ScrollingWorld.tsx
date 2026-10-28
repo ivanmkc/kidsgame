@@ -5,7 +5,7 @@ import { SceneDef } from './scenes';
 
 // Three parallax layers at different scroll rates. Each layer is a
 // pre-generated panoramic PNG strip (1280x400) that tiles horizontally.
-// Two copies side by side give seamless scrolling.
+// Three copies side by side give seamless scrolling on wide screens.
 //
 // The bg (sky) is fully opaque and fills the entire stage. The mid
 // (mountains) and fg (meadow) strips have transparent tops that let the
@@ -40,10 +40,11 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { top: 0, height: TALL, width: STRIP_W * 2,
+          { top: 0, height: TALL, width: STRIP_W * 3,
             transform: [{ translateX: bgTranslate }] },
         ]}
       >
+        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
         <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
         <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
       </Animated.View>
@@ -52,11 +53,12 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, height: 650, width: STRIP_W * 2,
+          { bottom: 0, height: 650, width: STRIP_W * 3,
             backgroundColor: 'transparent',
             transform: [{ translateX: midTranslate }] },
         ]}
       >
+        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
         <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
         <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
       </Animated.View>
@@ -65,11 +67,12 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, height: 380, width: STRIP_W * 2,
+          { bottom: 0, height: 380, width: STRIP_W * 3,
             backgroundColor: 'transparent',
             transform: [{ translateX: fgTranslate }] },
         ]}
       >
+        <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
         <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
         <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
       </Animated.View>

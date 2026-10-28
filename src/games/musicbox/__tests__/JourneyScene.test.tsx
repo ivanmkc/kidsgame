@@ -373,6 +373,32 @@ describe("JourneyScene accessibility", () => {
     extUnmount();
   });
 
+  it("renders three image strips per layer spanning 3840px to prevent gaps on wide screens", () => {
+    const scrollX = new Animated.Value(1279);
+    const { container, unmount } = render(
+      <ScrollingWorld scrollX={scrollX} scene={SCENES[0]} />,
+    );
+
+    const root = container.firstChild as HTMLElement;
+    const layers = Array.from(root.children) as HTMLElement[];
+    expect(layers).toHaveLength(3);
+
+    for (const layer of layers) {
+      expect(layer.style.width).toBe("3840px");
+      expect(layer.children).toHaveLength(3);
+    }
+
+    // Right before wrap on 1x layer (translateX = -1279px), layer span extends to 2561px,
+    // comfortably covering an iPad Pro 12.9" (1366px) or any viewport up to 2560px.
+    const fgLayer = layers[2];
+    expect(fgLayer.style.transform).toBe("translateX(-1279px)");
+    const fgWidth = parseFloat(fgLayer.style.width);
+    const rightmostPixel = fgWidth - 1279;
+    expect(rightmostPixel).toBeGreaterThanOrEqual(1366);
+
+    unmount();
+  });
+
   it("plays diatonic harmony on multi-touch without chromatic sharps", () => {
     // Twinkle notes: 0: C(60), 1: C(60), 2: G(67), 3: G(67), 4: A(69), 5: A(69)
     const playNoteSpy = vi.spyOn(music, "playNote");
