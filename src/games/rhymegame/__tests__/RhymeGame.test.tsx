@@ -381,4 +381,32 @@ describe("RhymeGame", () => {
       vi.advanceTimersByTime(500);
     });
   });
+
+  it("generates only one round and narrates prompt once on initial mount", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+
+    const { rerender } = render(
+      <RhymeGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(makeRhymeRoundSpy).toHaveBeenCalledTimes(1);
+    expect(saySequenceSpy).toHaveBeenCalledTimes(1);
+    const initialRound = makeRhymeRoundSpy.mock.results[0]
+      .value as logic.RhymeRound;
+    expect(saySequenceSpy).toHaveBeenLastCalledWith(initialRound.promptLines);
+
+    // Rerender with same language: does not regenerate round or duplicate prompt
+    rerender(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(makeRhymeRoundSpy).toHaveBeenCalledTimes(1);
+    expect(saySequenceSpy).toHaveBeenCalledTimes(1);
+
+    // Language change: regenerates round for new language and narrates its prompt
+    rerender(<RhymeGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(makeRhymeRoundSpy).toHaveBeenCalledTimes(2);
+    expect(saySequenceSpy).toHaveBeenCalledTimes(2);
+    const cmnRound = makeRhymeRoundSpy.mock.results[1]
+      .value as logic.RhymeRound;
+    expect(saySequenceSpy).toHaveBeenLastCalledWith(cmnRound.promptLines);
+  });
 });
