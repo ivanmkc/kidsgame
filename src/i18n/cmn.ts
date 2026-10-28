@@ -201,6 +201,7 @@ export const CMN: Table = {
   'shell.highlow.sub': '第二个音更高还是更低？',
   'shell.bells.title': '旋律铃铛',
   'shell.bells.sub': '听完旋律，按顺序敲响！',
+  'bells.bell': '铃铛',
   'shell.echobeat.title': '回声节拍',
   'shell.echobeat.sub': '拍出你听到的节拍！',
   'shell.steadybeat.title': '稳定节拍',

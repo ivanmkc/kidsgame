@@ -1,20 +1,13 @@
 import { Rng, randInt } from "../../rng";
 import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
+import { t } from "../../i18n";
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
 const BELL_COLORS = ["#E8564F", "#FFC24B", "#5FBF6E", "#2FB8AC", "#9B7EDE"];
 
-const BELL_NAMES: Record<Lang, string> = {
-  en: "Bell",
-  ja: "ベル",
-  cmn: "铃铛",
-  yue: "鈴鐺",
-};
-
 export function bellLabel(index: number, lang: Lang): string {
-  const name = BELL_NAMES[lang] ?? BELL_NAMES.en;
-  return `${name} ${index + 1}`;
+  return `${t(lang, "bells.bell")} ${index + 1}`;
 }
 
 export interface Bell {
