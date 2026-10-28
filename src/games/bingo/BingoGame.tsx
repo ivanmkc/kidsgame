@@ -325,6 +325,7 @@ function BingoTile({
         testID={testID}
         accessibilityLabel={label}
         accessibilityRole="button"
+        disabled={marked}
         style={({ pressed }) => [
           styles.tile,
           shadows.soft,
