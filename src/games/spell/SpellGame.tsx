@@ -97,14 +97,13 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       setWrongId(null);
 
       sfx.good();
-      say(charLine(expected, round.word.lang));
       const nextPlaced = [...placed, tile.id];
       placedIdsRef.current = nextPlaced;
       setPlacedIds(nextPlaced);
       if (nextPlaced.length === round.chars.length) {
         setCelebrate((c) => c + 1);
         const { done } = linesForWord(round.word);
-        sayThen([done], () => {
+        sayThen([charLine(expected, round.word.lang), done], () => {
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
             setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
@@ -113,6 +112,8 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
           }
           setWordIdx(nextI);
         });
+      } else {
+        say(charLine(expected, round.word.lang));
       }
     } else {
       sfx.wrong();

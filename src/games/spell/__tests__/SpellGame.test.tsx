@@ -426,4 +426,100 @@ describe("SpellGame", () => {
     expect(jaTile.getAttribute("aria-label")).toBe("ね");
     expect(jaTile.getAttribute("aria-label")).not.toContain("Letter");
   });
+
+  it("pronounces earlier characters via say and sequences final character with done in sayThen", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sound.sayThen).mockClear();
+
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+    expect(sound.say).toHaveBeenCalledWith("C!");
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+    expect(sound.say).toHaveBeenCalledWith("A!");
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId("spell-tile-3"));
+    expect(sound.say).not.toHaveBeenCalledWith("T!");
+    expect(sound.sayThen).toHaveBeenCalledWith(
+      ["T!", "You spelled cat!"],
+      expect.any(Function),
+    );
+  });
+
+  it("sequences final character in non-English words into sayThen", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+      chars: ["ね", "こ"],
+      decoys: [],
+      tiles: [
+        { id: 10, char: "ね" },
+        { id: 20, char: "こ" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sound.sayThen).mockClear();
+
+    fireEvent.click(screen.getByTestId("spell-tile-10"));
+    expect(sound.say).toHaveBeenCalledWith("ね！");
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId("spell-tile-20"));
+    expect(sound.say).not.toHaveBeenCalledWith("こ！");
+    expect(sound.sayThen).toHaveBeenCalledWith(
+      ["こ！", "できた！ねこ！"],
+      expect.any(Function),
+    );
+  });
 });
+
