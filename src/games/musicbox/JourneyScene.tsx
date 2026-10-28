@@ -69,7 +69,9 @@ export function JourneyScene({
   }, [scrollX]);
 
   useEffect(() => {
-    setState(startState(freePlay ? null : songById(scene.songId)));
+    const initial = startState(freePlay ? null : songById(scene.songId));
+    stateRef.current = initial;
+    setState(initial);
     setSpawns([]);
     scrollX.setValue(0);
     scrollTotal.current = 0;
@@ -107,7 +109,9 @@ export function JourneyScene({
         playNote(midi + h, offsets.length > 1 ? 0.7 : 1);
       }
       const big = beatsForTap(s) > 1;
-      setState(advance(s));
+      const nextS = advance(s);
+      stateRef.current = nextS;
+      setState(nextS);
 
       const scrollAmount =
         fingerCount > 1 ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;

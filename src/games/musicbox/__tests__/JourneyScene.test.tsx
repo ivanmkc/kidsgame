@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { render, screen, cleanup, fireEvent } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import { Animated } from "react-native";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SCENES } from "../scenes";
@@ -479,6 +485,63 @@ describe("JourneyScene accessibility", () => {
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 0.7);
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, 76, 0.7);
+
+    unmount();
+  });
+
+  it("plays sequential melody notes and advances state across simultaneous multi-touch taps", () => {
+    // SCENES[1] is 'row': notes are [60, 60, 60, 62, 64, 64, 62, ...]
+    const rowScene = SCENES[1];
+    const playNoteSpy = vi.spyOn(music, "playNote");
+
+    const { unmount } = render(<JourneyScene scene={rowScene} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Advance 2 notes with single taps first: plays note 0 (60) and note 1 (60)
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    playNoteSpy.mockClear();
+
+    // Now at note 2 (60). Next notes in Row are: note 2 = 60, note 3 = 62, note 4 = 64.
+    // Tap with 3 fingers simultaneously in a single event batch before render:
+    act(() => {
+      fireEvent.pointerDown(stage, { pointerId: 1 });
+      fireEvent.pointerDown(stage, { pointerId: 2 });
+      fireEvent.pointerDown(stage, { pointerId: 3 });
+    });
+
+    // Notes played across the 3 simultaneous taps:
+    // Tap 1 (1 finger): note 2 root (60 + 12 = 72)
+    // Tap 2 (2 fingers): note 3 root (62 + 12 = 74) + harmony (77)
+    // Tap 3 (3 fingers): note 4 root (64 + 12 = 76) + harmony (79, 83)
+    const simultaneousMidis = playNoteSpy.mock.calls.map((call) => call[0]);
+    expect(simultaneousMidis).toEqual([72, 74, 77, 76, 79, 83]);
+
+    // 2 initial taps + 3 simultaneous taps = 5 spawned objects
+    expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
+      5,
+    );
+
+    // Release all 3 fingers
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 2 });
+    fireEvent.pointerUp(stage, { pointerId: 3 });
+
+    playNoteSpy.mockClear();
+
+    // Follow-up single tap: must play note 5 (64 + 12 = 76), proving state advanced 3 steps
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(76, 1);
+
+    // Subsequent single tap: plays note 6 (62 + 12 = 74)
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(74, 1);
 
     unmount();
   });
