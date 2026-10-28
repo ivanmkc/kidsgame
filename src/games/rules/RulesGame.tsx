@@ -24,7 +24,9 @@ import {
   makeRules,
   makeRulesRound,
   pickRuleIndex,
+  rulesIntroLine,
   rulesLayout,
+  rulesRecallLine,
   tileLabel,
 } from "./logic";
 import { useWinLine } from "../winlines";
@@ -100,19 +102,19 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   useEffect(() => {
     if (won) return;
     const line = round.isRecall
-      ? `Memory check! Do rule number ${round.ruleNumber} again. Do you remember it?`
+      ? rulesRecallLine(round.ruleNumber, lang)
       : round.rule.label;
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
       saySequence([
-        "Rule Time! Do what the rule says as fast as you can.",
+        rulesIntroLine(lang),
         line,
       ]);
     } else {
       say(line);
     }
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
     if (lockedRef.current || won || tapped.includes(i)) return;

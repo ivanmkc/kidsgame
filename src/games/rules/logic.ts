@@ -6,6 +6,7 @@ import {
   CATEGORY_TEXT,
   ICON_CATEGORIES,
 } from "../iconCategories";
+import { t } from "../../i18n";
 
 export interface Rule {
   category: string;
@@ -97,6 +98,22 @@ export function tileLabel(icon: string, lang: Lang = "en"): string {
   const entry = WORDS.find((w) => w.icon === icon);
   if (!entry) throw new Error(`Unknown rules icon: ${icon}`);
   return wordFor(entry, lang).text;
+}
+
+/** Localized spoken intro line for RulesGame. */
+export function rulesIntroLine(lang: Lang = "en"): string {
+  if (lang === "en") {
+    return "Rule Time! Do what the rule says as fast as you can.";
+  }
+  return `${t(lang, "shell.rules.title")} ${t(lang, "shell.rules.sub")}`;
+}
+
+/** Localized spoken memory check line for RulesGame recall rounds. */
+export function rulesRecallLine(ruleNumber: number, lang: Lang = "en"): string {
+  if (lang === "en") {
+    return `Memory check! Do rule number ${ruleNumber} again. Do you remember it?`;
+  }
+  return `${t(lang, "rules.memoryCheck")} ${t(lang, "rules.doAgain", { n: ruleNumber })}`;
 }
 
 export interface RulesLayout {

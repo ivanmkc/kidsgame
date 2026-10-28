@@ -10,7 +10,7 @@ import {
 } from "@testing-library/react";
 import { RulesGame } from "../RulesGame";
 import * as logic from "../logic";
-import { sfx, stopNarration } from "../../../sound";
+import { say, saySequence, sfx, stopNarration } from "../../../sound";
 import { t } from "../../../i18n";
 
 vi.mock("../../../sound", () => ({
@@ -254,6 +254,79 @@ describe("RulesGame", () => {
   });
 
   describe("unmount and narration lifecycle", () => {
+    it("speaks English intro line on mount when lang is en", () => {
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+      expect(saySequence).toHaveBeenCalledWith([
+        "Rule Time! Do what the rule says as fast as you can.",
+        expect.any(String),
+      ]);
+    });
+
+    it("speaks localized intro line on mount for Japanese and Chinese locales", () => {
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="ja" />);
+      expect(saySequence).toHaveBeenCalledWith([
+        "ルールタイム！ ルールどおりに はやく タップ！",
+        expect.any(String),
+      ]);
+      expect(saySequence).not.toHaveBeenCalledWith([
+        "Rule Time! Do what the rule says as fast as you can.",
+        expect.any(String),
+      ]);
+    });
+
+    it("speaks localized memory check prompt on recall round in non-English locales", () => {
+      vi.useFakeTimers();
+      try {
+        render(<RulesGame onHome={() => {}} difficulty="hard" lang="ja" />);
+
+        // Advance to recall round (round 5 is memory check)
+        for (let r = 0; r < 5; r++) {
+          const matchTiles = screen.getAllByTestId(/-y$/);
+          for (const tile of matchTiles) {
+            fireEvent.click(tile);
+          }
+          act(() => {
+            vi.advanceTimersByTime(600);
+          });
+        }
+
+        expect(screen.getByText("きおくクイズ！")).toBeTruthy();
+        expect(say).toHaveBeenCalledWith(
+          expect.stringContaining("きおくクイズ！"),
+        );
+        expect(say).not.toHaveBeenCalledWith(
+          expect.stringMatching(/Memory check!/),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("speaks English memory check prompt on recall round when lang is en", () => {
+      vi.useFakeTimers();
+      try {
+        render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+        // Advance to recall round (round 5 is memory check)
+        for (let r = 0; r < 5; r++) {
+          const matchTiles = screen.getAllByTestId(/-y$/);
+          for (const tile of matchTiles) {
+            fireEvent.click(tile);
+          }
+          act(() => {
+            vi.advanceTimersByTime(600);
+          });
+        }
+
+        expect(screen.getByText("Memory check!")).toBeTruthy();
+        expect(say).toHaveBeenCalledWith(
+          expect.stringMatching(/^Memory check! Do rule number \d+ again\./),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it("stops narration when unmounted so ghost instructions do not leak onto home menu", () => {
       const { unmount } = render(
         <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
