@@ -59,11 +59,59 @@ describe("musicbox v2 logic", () => {
     expect(octaveOffset(0.66)).toBe(0); // boundary -> middle
   });
 
-  it("harmonyOffsets layers notes for multi-finger taps", () => {
-    expect(harmonyOffsets(1)).toEqual([0]);
-    expect(harmonyOffsets(2)).toEqual([0, 4]);
-    expect(harmonyOffsets(3)).toEqual([0, 4, 7]);
-    expect(harmonyOffsets(5)).toEqual([0, 4, 7]); // capped at triad
+  it("harmonyOffsets diatonically harmonizes C Major scale degrees", () => {
+    // 1 finger is melody only across all degrees
+    expect(harmonyOffsets(1, 60)).toEqual([0]);
+    expect(harmonyOffsets(1, 62)).toEqual([0]);
+
+    // 2 fingers: major thirds (+4) on C, F, G; minor thirds (+3) on D, E, A, B
+    expect(harmonyOffsets(2, 60)).toEqual([0, 4]); // C + E
+    expect(harmonyOffsets(2, 62)).toEqual([0, 3]); // D + F
+    expect(harmonyOffsets(2, 64)).toEqual([0, 3]); // E + G
+    expect(harmonyOffsets(2, 65)).toEqual([0, 4]); // F + A
+    expect(harmonyOffsets(2, 67)).toEqual([0, 4]); // G + B
+    expect(harmonyOffsets(2, 69)).toEqual([0, 3]); // A + C
+    expect(harmonyOffsets(2, 71)).toEqual([0, 3]); // B + D
+
+    // 3+ fingers: diatonic triads (diminished fifth +6 on B; perfect fifth +7 elsewhere)
+    expect(harmonyOffsets(3, 60)).toEqual([0, 4, 7]); // C major: C, E, G
+    expect(harmonyOffsets(3, 62)).toEqual([0, 3, 7]); // D minor: D, F, A
+    expect(harmonyOffsets(3, 64)).toEqual([0, 3, 7]); // E minor: E, G, B
+    expect(harmonyOffsets(3, 65)).toEqual([0, 4, 7]); // F major: F, A, C
+    expect(harmonyOffsets(3, 67)).toEqual([0, 4, 7]); // G major: G, B, D
+    expect(harmonyOffsets(3, 69)).toEqual([0, 3, 7]); // A minor: A, C, E
+    expect(harmonyOffsets(3, 71)).toEqual([0, 3, 6]); // B diminished: B, D, F
+    expect(harmonyOffsets(5, 60)).toEqual([0, 4, 7]); // capped at triad
+  });
+
+  it("produces zero non-diatonic notes across all songs for multi-finger taps", () => {
+    const C_MAJOR_PITCH_CLASSES = new Set([0, 2, 4, 5, 7, 9, 11]);
+    for (const song of SONGS) {
+      for (const note of song.notes) {
+        for (const fingerCount of [1, 2, 3, 4]) {
+          const offsets = harmonyOffsets(fingerCount, note.m);
+          for (const offset of offsets) {
+            const playedMidi = note.m + offset;
+            const pitchClass = ((playedMidi % 12) + 12) % 12;
+            expect(
+              C_MAJOR_PITCH_CLASSES.has(pitchClass),
+              `Song ${song.id} note ${note.m} with ${fingerCount} fingers produced non-diatonic pitch class ${pitchClass}`,
+            ).toBe(true);
+          }
+        }
+      }
+    }
+  });
+
+  it("avoids previously dissonant intervals on nursery song notes", () => {
+    // Twinkle 'lit-tle' (midi 69, A): 2-finger harmony plays A (69) + C (72), not C# (73)
+    expect(harmonyOffsets(2, 69)).toEqual([0, 3]);
+    // Twinkle 'won-der' / Jingle opening (midi 64, E): 2-finger plays E (64) + G (67), not G# (68)
+    expect(harmonyOffsets(2, 64)).toEqual([0, 3]);
+    // Row 'merrily' (midi 62, D): 2-finger plays D (62) + F (65), not F# (66)
+    expect(harmonyOffsets(2, 62)).toEqual([0, 3]);
+    // MacDonald (midi 71, B): 3-finger plays B (71) + D (74) + F (77), not D# (75) or F# (78)
+    expect(harmonyOffsets(3, 71)).toEqual([0, 3, 6]);
   });
 
   it("spawnZone maps vertical position to object pool", () => {

@@ -82,7 +82,7 @@ export function JourneyScene({ scene, lang }: Props) {
       const offset = octaveOffset(yFrac);
       const s = stateRef.current;
       const midi = noteForTap(s) + offset;
-      const offsets = harmonyOffsets(fingerCount);
+      const offsets = harmonyOffsets(fingerCount, midi);
       for (const h of offsets) {
         playNote(midi + h, fingerCount > 1 ? 0.7 : 1);
       }

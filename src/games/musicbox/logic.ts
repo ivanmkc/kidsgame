@@ -42,12 +42,33 @@ export function octaveOffset(yFrac: number): number {
   return 0;
 }
 
-/** Multi-finger harmony: additional semitone offsets for simultaneous taps.
- *  1 finger = [0] (melody only). 2 = major third. 3+ = triad. */
-export function harmonyOffsets(fingerCount: number): number[] {
+/** Diatonic intervals (third and fifth semitone offsets) above each pitch class in C Major.
+ *  Scale degrees D (2), E (4), A (9), and B (11) use minor thirds (+3);
+ *  C (0), F (5), and G (7) use major thirds (+4).
+ *  B (11) uses a diminished fifth (+6); other degrees use a perfect fifth (+7). */
+const DIATONIC_CHORD_OFFSETS: readonly [number, number][] = [
+  /* 0: C */ [4, 7],
+  /* 1: C# */ [4, 7],
+  /* 2: D */ [3, 7],
+  /* 3: D# */ [3, 7],
+  /* 4: E */ [3, 7],
+  /* 5: F */ [4, 7],
+  /* 6: F# */ [4, 7],
+  /* 7: G */ [4, 7],
+  /* 8: G# */ [4, 7],
+  /* 9: A */ [3, 7],
+  /* 10: A# */ [3, 7],
+  /* 11: B */ [3, 6],
+];
+
+/** Multi-finger harmony: diatonic semitone offsets in C Major for simultaneous taps.
+ *  1 finger = [0] (melody only). 2 = diatonic third. 3+ = diatonic triad. */
+export function harmonyOffsets(fingerCount: number, midi: number): number[] {
   if (fingerCount <= 1) return [0];
-  if (fingerCount === 2) return [0, 4];
-  return [0, 4, 7];
+  const pc = ((midi % 12) + 12) % 12;
+  const [third, fifth] = DIATONIC_CHORD_OFFSETS[pc];
+  if (fingerCount === 2) return [0, third];
+  return [0, third, fifth];
 }
 
 /** Vertical zone determines which object pool to draw from.
