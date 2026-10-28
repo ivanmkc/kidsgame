@@ -186,6 +186,29 @@ describe("TapScene minimum touch target size", () => {
     }
   });
 
+  it("updates accessibilityLabel to targetFound when target is found across all supported languages", () => {
+    const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+    for (const lang of langs) {
+      const html = renderToString(
+        <TapScene
+          source={mockSource}
+          sceneW={100}
+          sceneH={100}
+          displayWidth={100}
+          boxes={[{ id: "small", box: { x: 10, y: 10, w: 10, h: 10 } }]}
+          foundIds={["small"]}
+          onHit={() => {}}
+          onMiss={() => {}}
+          testIDPrefix="left"
+          lang={lang}
+        />,
+      );
+
+      expect(html).toContain('role="button"');
+      expect(html).toContain(`aria-label="${t(lang, "a11y.targetFound")}"`);
+    }
+  });
+
   it("sizes the visual ring to raw dimensions rather than stretching to the enlarged touch target", () => {
     // rawW = (10 + 16) * 1 = 26px, rawH = (10 + 16) * 1 = 26px.
     // Touch target is enlarged to 44x44px.

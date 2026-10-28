@@ -145,7 +145,10 @@ export function TapScene({
             key={id}
             testID={`${testIDPrefix}-target-${id}`}
             accessibilityRole="button"
-            accessibilityLabel={t(lang, "a11y.target")}
+            accessibilityLabel={t(
+              lang,
+              found ? "a11y.targetFound" : "a11y.target",
+            )}
             disabled={disabled || found}
             onPress={() => (disabled || found ? undefined : onHit(id))}
             style={{
