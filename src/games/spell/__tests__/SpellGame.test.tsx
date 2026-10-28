@@ -960,6 +960,56 @@ describe("SpellGame", () => {
       expect(sound.saySequence).not.toHaveBeenCalled();
     });
   });
+
+  it("remounts confetti on subsequent words", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      { icon: "a", lang: "en", text: "A", chars: ["A"], roman: "", source: "spotit" },
+      { icon: "b", lang: "en", text: "B", chars: ["B"], roman: "", source: "spotit" },
+    ]);
+    vi.spyOn(logic, "makeRound").mockImplementation((_rng, gw) => {
+      if (gw.text === "A") {
+        return {
+          word: gw,
+          chars: ["A"],
+          decoys: [],
+          tiles: [{ id: 1, char: "A" }, { id: 2, char: "X" }],
+        };
+      }
+      return {
+        word: gw,
+        chars: ["B"],
+        decoys: [],
+        tiles: [{ id: 3, char: "B" }, { id: 4, char: "Y" }],
+      };
+    });
+
+    render(
+      <LangContext.Provider value={{ lang: "en", onCycle: () => {} }}>
+        <SpellGame
+          difficulty="easy"
+          onHome={() => {}}
+          lang="en"
+        />
+      </LangContext.Provider>
+    );
+
+    // Complete first word
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+    
+    act(() => { vi.runAllTimers(); });
+    
+    const confetti1 = screen.getAllByText("🎉")[0];
+    expect(confetti1).toBeDefined();
+
+    // Complete second word
+    fireEvent.click(screen.getByTestId("spell-tile-3"));
+    
+    act(() => { vi.runAllTimers(); });
+
+    const confetti2 = screen.getAllByText("🎉")[0];
+    expect(confetti2).toBeDefined();
+    expect(confetti2).not.toBe(confetti1);
+  });
 });
 
 

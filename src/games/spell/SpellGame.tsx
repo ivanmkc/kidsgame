@@ -223,7 +223,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
           })}
         </View>
       </View>
-      {celebrate ? <Confetti count={22} /> : null}
+      {celebrate ? <Confetti key={celebrate} count={22} /> : null}
       <WinOverlay
         visible={won}
         message={t(lang, 'win.spell', { n: wordCount })}
