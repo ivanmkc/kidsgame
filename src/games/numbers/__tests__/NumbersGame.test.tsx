@@ -325,4 +325,79 @@ describe("NumbersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("renders prompt card as button with speaker icon and replays audio on click", () => {
+    const onHome = vi.fn();
+    render(<NumbersGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    // Prompt badge is rendered as an accessible button with the speaker icon.
+    const promptEl = screen.getByTestId(/^numbers-prompt-/);
+    expect(promptEl.getAttribute("role")).toBe("button");
+    expect(promptEl.getAttribute("aria-label")).toBe(
+      t("en", "spell.hearAgain"),
+    );
+    expect(promptEl.textContent).toContain("🔊");
+    expect(screen.getByTestId("speaker-icon")).toBeDefined();
+
+    // Initial mount spoke the prompt line once.
+    expect(sound.saySequence).toHaveBeenCalledTimes(1);
+
+    // Clicking the prompt card replays spoken prompt audio.
+    fireEvent.click(promptEl);
+    expect(sound.saySequence).toHaveBeenCalledTimes(2);
+
+    // Another click replays again.
+    fireEvent.click(promptEl);
+    expect(sound.saySequence).toHaveBeenCalledTimes(3);
+  });
+
+  it.each(["ja", "cmn", "yue"] as const)(
+    "localizes prompt card replay accessibility label in %s",
+    (lang) => {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang={lang} />);
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      expect(promptEl.getAttribute("role")).toBe("button");
+      expect(promptEl.getAttribute("aria-label")).toBe(
+        t(lang, "spell.hearAgain"),
+      );
+      expect(promptEl.textContent).toContain("🔊");
+    },
+  );
+
+  it("does not replay prompt while locked", () => {
+    vi.useFakeTimers();
+    try {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN) {
+          correctTile = tile;
+          break;
+        }
+      }
+      expect(correctTile).not.toBeNull();
+
+      // Tap correct tile to start lock
+      fireEvent.click(correctTile!);
+      vi.mocked(sound.saySequence).mockClear();
+
+      // Within the 300ms celebration lock, tapping prompt does not replay
+      const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
+      fireEvent.click(nextPromptEl);
+      expect(sound.saySequence).not.toHaveBeenCalled();
+
+      // Past celebration lock, tapping prompt replays
+      vi.advanceTimersByTime(300);
+      fireEvent.click(nextPromptEl);
+      expect(sound.saySequence).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
