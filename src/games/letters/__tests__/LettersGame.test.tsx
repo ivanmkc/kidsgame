@@ -21,6 +21,7 @@ vi.mock("../../../sound", () => ({
     good: vi.fn(),
     wrong: vi.fn(),
     tap: vi.fn(),
+    win: vi.fn(),
   },
 }));
 
@@ -433,5 +434,49 @@ describe("LettersGame", () => {
     rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
     expect(screen.getAllByText("Letter Hunt")).toHaveLength(2);
     expect(screen.queryByText("かなさがし")).toBeNull();
+  });
+
+  it("disables speaker button and ignores taps when game is won", () => {
+    vi.spyOn(logic, "settingsForLetters").mockReturnValue({
+      rounds: 1,
+      tiles: 6,
+      tier: "upper",
+    });
+
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, "makeLetterRound").mockImplementation(
+      (rng, tier, tileCount, avoidKey) => {
+        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+        generatedRounds.push(res);
+        return res;
+      },
+    );
+
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    const round1 = generatedRounds[0];
+    const correctTile = round1.tiles[round1.answerIdx];
+    const correctBtn = screen.getByLabelText(correctTile.label);
+
+    act(() => {
+      fireEvent.click(correctBtn);
+    });
+
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    const speakerBtn = screen.getByTestId("speaker-button");
+    expect(speakerBtn.getAttribute("aria-disabled")).toBe("true");
+
+    vi.mocked(say).mockClear();
+    act(() => {
+      fireEvent.click(speakerBtn);
+    });
+
+    expect(say).not.toHaveBeenCalled();
   });
 });
