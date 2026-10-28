@@ -124,6 +124,7 @@ export function PuzzleGame({
               <FilterCycleChip
                 filter={filter}
                 onCycle={() => onFilter(nextFilter(filter))}
+                lang={lang}
               />
             ) : undefined
           }
