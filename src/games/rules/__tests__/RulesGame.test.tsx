@@ -215,5 +215,77 @@ describe("RulesGame", () => {
 
       expect(stopNarration).toHaveBeenCalled();
     });
+
+    it("clears the remind timer when advancing round to prevent state updates", () => {
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      try {
+        render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+        // Advance to recall round (round 5 is memory check)
+        for (let r = 0; r < 5; r++) {
+          const matchTiles = screen.getAllByTestId(/-y$/);
+          for (const tile of matchTiles) {
+            fireEvent.click(tile);
+          }
+          act(() => {
+            vi.advanceTimersByTime(600);
+          });
+        }
+
+        clearTimeoutSpy.mockClear();
+
+        // We are on round 5 (Memory check)
+        const remindBtn = screen.getByTestId("rules-remind");
+        fireEvent.click(remindBtn);
+
+        // Complete the round quickly (before 2600ms)
+        const recallMatches = screen.getAllByTestId(/-y$/);
+        for (const tile of recallMatches) {
+          fireEvent.click(tile);
+        }
+
+        // The remind timer should be cleared immediately upon completing the match count
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        vi.useRealTimers();
+      }
+    });
+
+    it("clears the remind timer when unmounting to prevent state updates", () => {
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      try {
+        const { unmount } = render(
+          <RulesGame onHome={() => {}} difficulty="hard" lang="en" />
+        );
+
+        // Advance to recall round
+        for (let r = 0; r < 5; r++) {
+          const matchTiles = screen.getAllByTestId(/-y$/);
+          for (const tile of matchTiles) {
+            fireEvent.click(tile);
+          }
+          act(() => {
+            vi.advanceTimersByTime(600);
+          });
+        }
+
+        clearTimeoutSpy.mockClear();
+
+        // Trigger remind timer
+        const remindBtn = screen.getByTestId("rules-remind");
+        fireEvent.click(remindBtn);
+
+        // Unmount while the timer is still active
+        unmount();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        vi.useRealTimers();
+      }
+    });
   });
 });
