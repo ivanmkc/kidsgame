@@ -11,7 +11,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord } from "../../lang";
+import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
@@ -47,13 +47,11 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
 
+  const { epoch, isValid } = useLangEpoch(lang);
+
   // Lang switch: rebuild the active round so prompt lines and tiles match the new language.
-  const langMounted = useRef(false);
   useEffect(() => {
-    if (!langMounted.current) {
-      langMounted.current = true;
-      return;
-    }
+    if (epoch === 0) return;
     if (errorTimerRef.current) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
@@ -65,7 +63,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     lockedRef.current = false;
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
-  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -134,6 +132,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       }
       if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
       lockTimerRef.current = setTimeout(() => {
+        if (!isValid()) return;
         lockedRef.current = false;
         lockTimerRef.current = null;
       }, 300);
@@ -149,6 +148,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       setWrongIdx(i);
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
       errorTimerRef.current = setTimeout(() => {
+        if (!isValid()) return;
         setWrongIdx((w) => (w === i ? null : w));
         errorTimerRef.current = null;
       }, 450);
