@@ -4,9 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 type RampMethods = 'setValueAtTime' | 'linearRampToValueAtTime' | 'exponentialRampToValueAtTime';
 type FakeAudioParam = Pick<AudioParam, 'value'> & Pick<AudioParam, RampMethods>;
 
-type FakeGainNode = Omit<Partial<GainNode>, 'gain'> & {
+type FakeGainNode = Omit<Partial<GainNode>, 'gain' | 'disconnect'> & {
   gain: FakeAudioParam;
   connectedTo: unknown[];
+  disconnect: ReturnType<typeof vi.fn>;
 };
 
 type FakeOscillatorNode = Omit<Partial<OscillatorNode>, 'frequency'> & {
@@ -59,6 +60,9 @@ function createFakeGain(): FakeGainNode {
       connectedTo.push(t);
       return t as AudioNode;
     }) as unknown as GainNode['connect'],
+    disconnect: vi.fn(() => {
+      connectedTo.length = 0;
+    }),
   };
 }
 
@@ -318,16 +322,26 @@ describe('music', () => {
 
   it('cancels playSequence before timers trigger and supports stopSequence', () => {
     vi.useFakeTimers();
-    setupWebAudio();
+    const fake = setupWebAudio();
     const onNote = vi.fn();
 
     const cancel = music.playSequence([{ m: 60, b: 1 }], 120, onNote);
+    const seqGain1 = fake.gains[1];
+    expect(seqGain1.connectedTo).toContain(fake.gains[0]);
+    expect(fake.gains[2].connectedTo).toContain(seqGain1);
+
     cancel();
+    expect(seqGain1.disconnect).toHaveBeenCalledTimes(1);
+    expect(seqGain1.connectedTo).toHaveLength(0);
     vi.advanceTimersByTime(2000);
     expect(onNote).not.toHaveBeenCalled();
 
     music.playSequence([{ m: 60, b: 1 }], 120, onNote);
+    const seqGain2 = fake.gains[5];
+    expect(seqGain2.connectedTo).toContain(fake.gains[0]);
     music.stopSequence();
+    expect(seqGain2.disconnect).toHaveBeenCalledTimes(1);
+    expect(seqGain2.connectedTo).toHaveLength(0);
     music.stopSequence();
     vi.advanceTimersByTime(2000);
     expect(onNote).not.toHaveBeenCalled();
@@ -383,15 +397,26 @@ describe('music', () => {
 
   it('cancels playDrumSequence through returned cancel and stopSequence', () => {
     vi.useFakeTimers();
-    setupWebAudio();
+    const fake = setupWebAudio();
     const onHit = vi.fn();
     const cancel = music.playDrumSequence([0.2], onHit);
+    const seqGain1 = fake.gains[1];
+    expect(seqGain1.connectedTo).toContain(fake.gains[0]);
+    expect(fake.gains[2].connectedTo).toContain(seqGain1);
+    expect(fake.gains[3].connectedTo).toContain(seqGain1);
+
     cancel();
+    expect(seqGain1.disconnect).toHaveBeenCalledTimes(1);
+    expect(seqGain1.connectedTo).toHaveLength(0);
     vi.advanceTimersByTime(1000);
     expect(onHit).not.toHaveBeenCalled();
 
     music.playDrumSequence([0.2], onHit);
+    const seqGain2 = fake.gains[6];
+    expect(seqGain2.connectedTo).toContain(fake.gains[0]);
     music.stopSequence();
+    expect(seqGain2.disconnect).toHaveBeenCalledTimes(1);
+    expect(seqGain2.connectedTo).toHaveLength(0);
     vi.advanceTimersByTime(1000);
     expect(onHit).not.toHaveBeenCalled();
   });

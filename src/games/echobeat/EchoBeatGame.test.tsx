@@ -31,6 +31,7 @@ function mockAudioContext() {
         linearRampToValueAtTime: vi.fn(),
       },
       connect: vi.fn(),
+      disconnect: vi.fn(),
     }),
     createOscillator: () => ({
       type: "sine",
