@@ -337,4 +337,63 @@ describe("RulesGame", () => {
       }
     });
   });
+
+  describe("layout responsiveness", () => {
+    function setViewport(width: number, height: number) {
+      Object.defineProperty(window, "innerWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: height,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: height,
+        configurable: true,
+      });
+      if (window.visualViewport) {
+        Object.defineProperty(window.visualViewport, "width", {
+          value: width,
+          configurable: true,
+        });
+        Object.defineProperty(window.visualViewport, "height", {
+          value: height,
+          configurable: true,
+        });
+      }
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    it("renders side-by-side landscape layout with 77px tiles on 667x375 viewport", () => {
+      setViewport(667, 375);
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+      const tiles = screen.getAllByTestId(/^rules-tile-\d+-.*-[yn]$/);
+      expect(tiles[0].style.width).toBe("77px");
+      expect(tiles[0].style.height).toBe("77px");
+    });
+
+    it("renders landscape layout with 82px tiles on 844x390 viewport", () => {
+      setViewport(844, 390);
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+      const tiles = screen.getAllByTestId(/^rules-tile-\d+-.*-[yn]$/);
+      expect(tiles[0].style.width).toBe("82px");
+      expect(tiles[0].style.height).toBe("82px");
+    });
+
+    it("renders portrait layout with >=110px tiles on 390x844 viewport", () => {
+      setViewport(390, 844);
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+      const tiles = screen.getAllByTestId(/^rules-tile-\d+-.*-[yn]$/);
+      expect(parseFloat(tiles[0].style.width)).toBeGreaterThanOrEqual(110);
+    });
+  });
 });
+
