@@ -7,8 +7,12 @@ import { Platform } from 'react-native';
 
 const KEY = 'kgb.sound.v1';
 let muted = false;
-if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
-  muted = window.localStorage.getItem(KEY) === 'muted';
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  try {
+    muted = window.localStorage?.getItem(KEY) === 'muted';
+  } catch {
+    muted = false;
+  }
 }
 
 export function isMuted(): boolean {
