@@ -623,6 +623,49 @@ describe("SpellGame", () => {
     expect(sound.saySequence).not.toHaveBeenCalled();
   });
 
+  it("clamps slot and tile sizes on narrow viewport to avoid negative dimensions", () => {
+    setViewport(90, 600);
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "zebra",
+        lang: "en",
+        text: "ZEBRA",
+        chars: ["Z", "E", "B", "R", "A"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "zebra",
+        lang: "en",
+        text: "ZEBRA",
+        chars: ["Z", "E", "B", "R", "A"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["Z", "E", "B", "R", "A"],
+      decoys: ["X", "Y", "W"],
+      tiles: [
+        { id: 1, char: "Z" },
+        { id: 2, char: "E" },
+        { id: 3, char: "B" },
+        { id: 4, char: "R" },
+        { id: 5, char: "A" },
+        { id: 6, char: "X" },
+        { id: 7, char: "Y" },
+        { id: 8, char: "W" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    const tile = screen.getByTestId("spell-tile-1");
+    expect(tile.style.width).toBe("28px");
+    const slot = screen.getByTestId("spell-slot-0");
+    expect(slot.style.width).toBe("24px");
+  });
+
   it("scales tile font size and border radius proportionally on compact mobile viewport", () => {
     setViewport(360, 640);
     vi.spyOn(logic, "pickGameWords").mockReturnValue([

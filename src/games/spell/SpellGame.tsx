@@ -153,8 +153,8 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const { width, height } = useWindowDimensions();
   const slotCount = round.chars.length;
   const tileCount = round.tiles.length;
-  const slot = Math.min((Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount, 68);
-  const tileSize = Math.min((Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount, 74);
+  const slot = Math.max(24, Math.min((Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount, 68));
+  const tileSize = Math.max(28, Math.min((Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount, 74));
   const shortH = height < 480;
   const bigIcon = Math.max(56, Math.min(
     width * 0.4,
