@@ -1006,6 +1006,35 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('constrains sticker dragging bounds to keep it and its UI fully inside the stage', () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const placed = screen.getByTestId('sticker-placed-1');
+    expect(placed).toBeDefined();
+
+    const touch = { pageX: 50, pageY: 50, clientX: 50, clientY: 50, identifier: 0, target: placed };
+    act(() => {
+      fireEvent.touchStart(placed, { touches: [touch], changedTouches: [touch] });
+      fireEvent.touchMove(placed, { touches: [{ ...touch, pageX: 9999, pageY: -9999 }], changedTouches: [{ ...touch, pageX: 9999, pageY: -9999 }] });
+      fireEvent.touchEnd(placed, { touches: [], changedTouches: [{ ...touch, pageX: 9999, pageY: -9999 }] });
+    });
+
+    const newLeft = parseFloat(placed.style.left);
+    const newTop = parseFloat(placed.style.top);
+
+    expect(newTop).toBeCloseTo(14, 1);
+    expect(newLeft).toBeLessThan(2000);
+    expect(newLeft).toBeGreaterThan(0);
+
+    unmount();
+  });
+
   it('transforms placed sticker via two-touch pinch/rotate gesture', () => {
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
