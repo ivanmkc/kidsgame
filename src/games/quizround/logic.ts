@@ -36,7 +36,12 @@ export function makeQuizRound<T>(
     ? pool.filter((x) => keyOf(x) !== avoidTargetKey)
     : pool;
   const candidates = filtered.length > 0 ? filtered : pool;
-  const target = candidates[Math.floor(rng() * candidates.length)];
+  const uniqueCandidateKeys = Array.from(new Set(candidates.map(keyOf)));
+  const targetKey =
+    uniqueCandidateKeys[Math.floor(rng() * uniqueCandidateKeys.length)];
+  const matchingCandidates = candidates.filter((x) => keyOf(x) === targetKey);
+  const target =
+    matchingCandidates[Math.floor(rng() * matchingCandidates.length)];
   const others = pool.filter((x) => keyOf(x) !== keyOf(target));
   const preferred = confusable
     ? others.filter((x) => confusable(target, x))
