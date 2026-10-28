@@ -282,6 +282,7 @@ export const CMN: Table = {
   'puzzle.peek': '🖼️ 偷看',
   'puzzle.peekA11y': '偷看拼好的图片',
   'puzzle.hint': '点一块，再点另一块，就能交换！',
+  'puzzle.tileA11y': '拼图碎片 第 {row} 行，第 {col} 列',
   'sticker.clear': '🧹 清除',
   'sticker.magicFizzled': '魔法失败了 — 再试一次！',
   'sticker.magicPending': '正在施展魔法… ✨',

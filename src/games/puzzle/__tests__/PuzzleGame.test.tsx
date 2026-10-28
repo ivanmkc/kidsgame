@@ -190,6 +190,15 @@ describe("PuzzleGame", () => {
     );
     expect(screen.getAllByTestId(/^puzzle-tile-/)).toHaveLength(9);
     expect(screen.getByTestId("puzzle-timer")).toBeTruthy();
+    for (let pos = 0; pos < 9; pos++) {
+      const tile = screen.getByTestId(new RegExp(`^puzzle-tile-${pos}-`));
+      const col = (pos % 3) + 1;
+      const row = Math.floor(pos / 3) + 1;
+      expect(tile.getAttribute("role")).toBe("button");
+      expect(tile.getAttribute("aria-label")).toBe(
+        t("en", "puzzle.tileA11y", { row, col }),
+      );
+    }
   });
 
   it("allows swapping tiles and increments moves counter", () => {
@@ -267,6 +276,11 @@ describe("PuzzleGame", () => {
     expect(peekBtn.getAttribute("aria-label")).toBe(
       "かんせいした えを ちらっとみる",
     );
+    const tile0 = screen.getByTestId(/^puzzle-tile-0-/);
+    expect(tile0.getAttribute("role")).toBe("button");
+    expect(tile0.getAttribute("aria-label")).toBe(
+      t("ja", "puzzle.tileA11y", { row: 1, col: 1 }),
+    );
     unmount();
   });
 
@@ -284,6 +298,9 @@ describe("PuzzleGame", () => {
     expect(screen.getByTestId("puzzle-peek").getAttribute("aria-label")).toBe(
       t("cmn", "puzzle.peekA11y"),
     );
+    expect(
+      screen.getByTestId(/^puzzle-tile-0-/).getAttribute("aria-label"),
+    ).toBe(t("cmn", "puzzle.tileA11y", { row: 1, col: 1 }));
     unmountCmn();
 
     const { unmount: unmountYue } = render(
@@ -299,6 +316,9 @@ describe("PuzzleGame", () => {
     expect(screen.getByTestId("puzzle-peek").getAttribute("aria-label")).toBe(
       t("yue", "puzzle.peekA11y"),
     );
+    expect(
+      screen.getByTestId(/^puzzle-tile-0-/).getAttribute("aria-label"),
+    ).toBe(t("yue", "puzzle.tileA11y", { row: 1, col: 1 }));
     unmountYue();
   });
 

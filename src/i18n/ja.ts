@@ -283,6 +283,7 @@ export const JA: Table = {
   'puzzle.peek': '🖼️ ちらみ',
   'puzzle.peekA11y': 'かんせいした えを ちらっとみる',
   'puzzle.hint': '1まい タップして、もう1まい タップして いれかえよう！',
+  'puzzle.tileA11y': 'パズルのピース {row}ぎょうめ、{col}れつめ',
   'sticker.clear': '🧹 けす',
   'sticker.magicFizzled': 'まほうに しっぱいしちゃった — もういちど！',
   'sticker.magicPending': 'まほうを かけているよ… ✨',

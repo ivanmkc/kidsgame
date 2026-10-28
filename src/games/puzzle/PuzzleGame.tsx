@@ -221,6 +221,11 @@ export function PuzzleGame({
               <Pressable
                 key={pos}
                 testID={`puzzle-tile-${pos}-piece-${piece}`}
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, "puzzle.tileA11y", {
+                  row: row + 1,
+                  col: col + 1,
+                })}
                 onPress={() => onTile(pos)}
                 style={[
                   styles.tile,
