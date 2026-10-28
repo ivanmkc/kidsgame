@@ -1,7 +1,8 @@
-import React from 'react';
-import { Animated, Image, StyleSheet, View } from 'react-native';
-import { MUSICBOX_IMAGES } from '../../assets/images';
-import { SceneDef } from './scenes';
+import React from "react";
+import { Animated, Image, StyleSheet, View } from "react-native";
+import { MUSICBOX_IMAGES } from "../../assets/images";
+import { SceneDef } from "./scenes";
+import { ZONE_PARALLAX_SPEEDS } from "./logic";
 
 // Three parallax layers at different scroll rates. Each layer is a
 // pre-generated panoramic PNG strip (1280x400) that tiles horizontally.
@@ -30,9 +31,9 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
   const midSrc = MUSICBOX_IMAGES[`${scene.id}/mid`];
   const fgSrc = MUSICBOX_IMAGES[`${scene.id}/fg`];
 
-  const bgTranslate = parallaxTranslate(scrollX, 0.2);
-  const midTranslate = parallaxTranslate(scrollX, 0.5);
-  const fgTranslate = parallaxTranslate(scrollX, 1);
+  const bgTranslate = parallaxTranslate(scrollX, ZONE_PARALLAX_SPEEDS.sky);
+  const midTranslate = parallaxTranslate(scrollX, ZONE_PARALLAX_SPEEDS.mid);
+  const fgTranslate = parallaxTranslate(scrollX, ZONE_PARALLAX_SPEEDS.ground);
 
   return (
     <View style={styles.container} pointerEvents="none">
@@ -40,22 +41,42 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { top: 0, height: TALL, width: STRIP_W * 3,
-            transform: [{ translateX: bgTranslate }] },
+          {
+            top: 0,
+            height: TALL,
+            width: STRIP_W * 3,
+            transform: [{ translateX: bgTranslate }],
+          },
         ]}
       >
-        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
-        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
-        <Image source={bgSrc} style={{ width: STRIP_W, height: TALL }} resizeMode="stretch" />
+        <Image
+          source={bgSrc}
+          style={{ width: STRIP_W, height: TALL }}
+          resizeMode="stretch"
+        />
+        <Image
+          source={bgSrc}
+          style={{ width: STRIP_W, height: TALL }}
+          resizeMode="stretch"
+        />
+        <Image
+          source={bgSrc}
+          style={{ width: STRIP_W, height: TALL }}
+          resizeMode="stretch"
+        />
       </Animated.View>
 
       {/* Midground mountains: stretches up above the meadow so peaks show */}
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, height: 650, width: STRIP_W * 3,
-            backgroundColor: 'transparent',
-            transform: [{ translateX: midTranslate }] },
+          {
+            bottom: 0,
+            height: 650,
+            width: STRIP_W * 3,
+            backgroundColor: "transparent",
+            transform: [{ translateX: midTranslate }],
+          },
         ]}
       >
         <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
@@ -67,9 +88,13 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
       <Animated.View
         style={[
           styles.row,
-          { bottom: 0, height: 380, width: STRIP_W * 3,
-            backgroundColor: 'transparent',
-            transform: [{ translateX: fgTranslate }] },
+          {
+            bottom: 0,
+            height: 380,
+            width: STRIP_W * 3,
+            backgroundColor: "transparent",
+            transform: [{ translateX: fgTranslate }],
+          },
         ]}
       >
         <Image source={fgSrc} style={styles.fgImg} resizeMode="cover" />
@@ -83,21 +108,21 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
 const styles = StyleSheet.create({
   container: {
     ...(StyleSheet.absoluteFill as object),
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   row: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   midImg: {
     width: STRIP_W,
     height: 650,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   fgImg: {
     width: STRIP_W,
     height: 380,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
 });
