@@ -245,6 +245,17 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByText("きみの ばん！")).toBeDefined();
   });
 
+  it("exposes localized phase text to screen readers on main button without hardcoded English label", () => {
+    render(<CarModeGame onHome={noop} lang="ja" />);
+
+    expect(
+      screen.queryByRole("button", { name: "Tap to continue" }),
+    ).toBeNull();
+    const tapBtn = screen.getByRole("button", { name: /きいてね/ });
+    expect(tapBtn).toBeDefined();
+    expect(tapBtn.getAttribute("data-testid")).toBe("carmode-tap");
+  });
+
   it.each([
     { lang: "ja", expected: "タップ！" },
     { lang: "cmn", expected: "点一点！" },

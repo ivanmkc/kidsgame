@@ -484,7 +484,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
             onPress={onTap}
             style={styles.tapArea}
             accessibilityRole="button"
-            accessibilityLabel="Tap to continue"
             testID="carmode-tap"
           >
             <Animated.View

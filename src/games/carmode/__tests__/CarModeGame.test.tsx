@@ -1,18 +1,18 @@
-import React from 'react';
-import { renderToString } from 'react-dom/server';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Pressable } from 'react-native';
-import * as sound from '../../../sound';
-import { sfx } from '../../../sound';
-import * as music from '../../../music';
-import * as logic from '../logic';
-import { ALL_PACKS, PACK_ORDER } from '../packs';
-import { CarModeGame } from '../CarModeGame';
+import React from "react";
+import { renderToString } from "react-dom/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { Pressable } from "react-native";
+import * as sound from "../../../sound";
+import { sfx } from "../../../sound";
+import * as music from "../../../music";
+import * as logic from "../logic";
+import { ALL_PACKS, PACK_ORDER } from "../packs";
+import { CarModeGame } from "../CarModeGame";
 
 type PressableFake = Partial<
   Pick<
     React.ComponentProps<typeof Pressable>,
-    'disabled' | 'accessibilityRole' | 'accessibilityLabel' | 'testID' | 'style'
+    "disabled" | "accessibilityRole" | "accessibilityLabel" | "testID" | "style"
   >
 > & {
   onPress?: () => void;
@@ -20,13 +20,16 @@ type PressableFake = Partial<
 
 const capturedPressables: Record<string, PressableFake> = {};
 
-vi.mock('react-native', async (importOriginal) => {
+vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
-  const ActualPressable = actual.Pressable as React.ComponentType<Record<string, unknown>>;
+  const ActualPressable = actual.Pressable as React.ComponentType<
+    Record<string, unknown>
+  >;
   return {
     ...actual,
     Pressable: (props: Record<string, unknown>) => {
-      const testID = typeof props.testID === 'string' ? props.testID : undefined;
+      const testID =
+        typeof props.testID === "string" ? props.testID : undefined;
       if (testID) {
         capturedPressables[testID] = props as PressableFake;
       }
@@ -35,7 +38,7 @@ vi.mock('react-native', async (importOriginal) => {
   };
 });
 
-describe('CarModeGame', () => {
+describe("CarModeGame", () => {
   const noop = () => {};
 
   beforeEach(() => {
@@ -49,22 +52,22 @@ describe('CarModeGame', () => {
     vi.useRealTimers();
   });
 
-  it('renders initial prompt phase with listen affordance and score chip', () => {
-    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, 'primeMusic').mockReturnValue();
+  it("renders initial prompt phase with listen affordance and score chip", () => {
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
 
     const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    expect(html).toContain('Car Mode');
-    expect(html).toContain('Listen, answer, and tap!');
-    expect(html).toContain('1/10');
-    expect(html).toContain('👂');
-    expect(html).toContain('Listen...');
+    expect(html).toContain("Car Mode");
+    expect(html).toContain("Listen, answer, and tap!");
+    expect(html).toContain("1/10");
+    expect(html).toContain("👂");
+    expect(html).toContain("Listen...");
 
-    const tapBtn = capturedPressables['carmode-tap'];
+    const tapBtn = capturedPressables["carmode-tap"];
     expect(tapBtn).toBeDefined();
-    expect(tapBtn.accessibilityRole).toBe('button');
-    expect(tapBtn.accessibilityLabel).toBe('Tap to continue');
+    expect(tapBtn.accessibilityRole).toBe("button");
+    expect(tapBtn.accessibilityLabel).toBeUndefined();
 
     // Tapping during prompt phase plays sound and primes music, but advances to the gap phase.
     tapBtn.onPress?.();
@@ -72,13 +75,13 @@ describe('CarModeGame', () => {
     expect(primeMusicSpy).toHaveBeenCalledOnce();
   });
 
-  it('navigates home when the back button is pressed', () => {
+  it("navigates home when the back button is pressed", () => {
     const onHomeSpy = vi.fn();
-    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
 
     renderToString(<CarModeGame onHome={onHomeSpy} lang="en" />);
 
-    const backBtn = capturedPressables['back-button'];
+    const backBtn = capturedPressables["back-button"];
     expect(backBtn).toBeDefined();
     backBtn.onPress?.();
 
@@ -86,49 +89,49 @@ describe('CarModeGame', () => {
     expect(onHomeSpy).toHaveBeenCalledOnce();
   });
 
-  it('renders localized shell titles, subtitles, and instructions in supported languages', () => {
+  it("renders localized shell titles, subtitles, and instructions in supported languages", () => {
     const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
-    expect(htmlJa).toContain('くるまモード');
-    expect(htmlJa).toContain('きいて こたえて タップ！');
-    expect(htmlJa).toContain('きいてね…');
+    expect(htmlJa).toContain("くるまモード");
+    expect(htmlJa).toContain("きいて こたえて タップ！");
+    expect(htmlJa).toContain("きいてね…");
 
     const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
-    expect(htmlCmn).toContain('车载模式');
-    expect(htmlCmn).toContain('听，回答，点一点！');
-    expect(htmlCmn).toContain('听一听…');
+    expect(htmlCmn).toContain("车载模式");
+    expect(htmlCmn).toContain("听，回答，点一点！");
+    expect(htmlCmn).toContain("听一听…");
 
     const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
-    expect(htmlYue).toContain('車載模式');
-    expect(htmlYue).toContain('聽，答，撳一撳！');
-    expect(htmlYue).toContain('聽下…');
+    expect(htmlYue).toContain("車載模式");
+    expect(htmlYue).toContain("聽，答，撳一撳！");
+    expect(htmlYue).toContain("聽下…");
   });
 
-  it('renders localized phase instructions during gap phase across languages', () => {
-    const actual = logic.startState('boops', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({ ...actual, phase: 'gap' });
+  it("renders localized phase instructions during gap phase across languages", () => {
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "gap" });
 
     const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
-    expect(htmlJa).toContain('きみの ばん！');
+    expect(htmlJa).toContain("きみの ばん！");
 
     const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
-    expect(htmlCmn).toContain('轮到你了！');
+    expect(htmlCmn).toContain("轮到你了！");
 
     const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
-    expect(htmlYue).toContain('到你喇！');
+    expect(htmlYue).toContain("到你喇！");
   });
 
-  it('renders gap phase and plays sounds when tapped', () => {
-    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, 'primeMusic').mockReturnValue();
-    const actual = logic.startState('boops', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({ ...actual, phase: 'gap' });
+  it("renders gap phase and plays sounds when tapped", () => {
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "gap" });
 
     const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    expect(html).toContain('🤔');
-    expect(html).toContain('Your turn!');
+    expect(html).toContain("🤔");
+    expect(html).toContain("Your turn!");
 
-    const tapBtn = capturedPressables['carmode-tap'];
+    const tapBtn = capturedPressables["carmode-tap"];
     expect(tapBtn).toBeDefined();
     tapBtn.onPress?.();
 
@@ -136,23 +139,23 @@ describe('CarModeGame', () => {
     expect(primeMusicSpy).toHaveBeenCalledOnce();
   });
 
-  it('renders reveal phase and transitions to prompt on single tap for standard packs', () => {
-    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, 'primeMusic').mockReturnValue();
-    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
+  it("renders reveal phase and transitions to prompt on single tap for standard packs", () => {
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration").mockReturnValue();
 
-    const actual = logic.startState('boops', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
       ...actual,
-      phase: 'reveal',
+      phase: "reveal",
     });
 
     const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    expect(html).toContain('👆');
-    expect(html).toContain('Tap!');
+    expect(html).toContain("👆");
+    expect(html).toContain("Tap!");
 
-    const tapBtn = capturedPressables['carmode-tap'];
+    const tapBtn = capturedPressables["carmode-tap"];
     expect(tapBtn).toBeDefined();
     tapBtn.onPress?.();
 
@@ -161,43 +164,45 @@ describe('CarModeGame', () => {
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
-  it('handles twoTapAnswer rounds by advancing immediately on single tap in reveal phase', () => {
-    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
-    const actual = logic.startState('silly', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({
+  it("handles twoTapAnswer rounds by advancing immediately on single tap in reveal phase", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration").mockReturnValue();
+    const actual = logic.startState("silly", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
       ...actual,
-      phase: 'reveal',
+      phase: "reveal",
       pendingTaps: 0,
     });
 
     renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    const tapBtn = capturedPressables['carmode-tap'];
+    const tapBtn = capturedPressables["carmode-tap"];
     expect(tapBtn).toBeDefined();
 
     tapBtn.onPress?.();
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
-  it('renders completion screen with pack chooser and switches packs', () => {
-    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration').mockReturnValue();
-    const actual = logic.startState('boops', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({ ...actual, phase: 'done' });
+  it("renders completion screen with pack chooser and switches packs", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration").mockReturnValue();
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "done" });
 
     const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    expect(html).toContain('All done!');
-    expect(capturedPressables['carmode-tap']).toBeUndefined();
+    expect(html).toContain("All done!");
+    expect(capturedPressables["carmode-tap"]).toBeUndefined();
 
     // Verify all pack buttons are rendered with appropriate labels and styles
     for (const packId of PACK_ORDER) {
       const btn = capturedPressables[`carmode-pack-${packId}`];
       expect(btn).toBeDefined();
-      expect(btn.accessibilityRole).toBe('button');
+      expect(btn.accessibilityRole).toBe("button");
       expect(btn.accessibilityLabel).toBe(ALL_PACKS[packId].name);
 
-      type StyleFn = (state: { pressed: boolean }) => Array<Record<string, unknown>>;
-      if (typeof btn?.style === 'function') {
+      type StyleFn = (state: {
+        pressed: boolean;
+      }) => Array<Record<string, unknown>>;
+      if (typeof btn?.style === "function") {
         const styleFn = btn.style as StyleFn;
         const unpressed = styleFn({ pressed: false });
         const pressed = styleFn({ pressed: true });
@@ -207,35 +212,34 @@ describe('CarModeGame', () => {
     }
 
     // Selecting a new pack switches packs and stops narration
-    const rhymeBtn = capturedPressables['carmode-pack-rhyme'];
+    const rhymeBtn = capturedPressables["carmode-pack-rhyme"];
     expect(rhymeBtn).toBeDefined();
     rhymeBtn.onPress?.();
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
-  it('ignores taps when already complete', () => {
-    const sfxTapSpy = vi.spyOn(sfx, 'tap').mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, 'primeMusic').mockReturnValue();
-    const advanceSpy = vi.spyOn(logic, 'advance');
+  it("ignores taps when already complete", () => {
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
+    const advanceSpy = vi.spyOn(logic, "advance");
 
     // Render with phase reveal to capture the tap button
-    const actual = logic.startState('boops', 42);
-    vi.spyOn(logic, 'startState').mockReturnValue({
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
       ...actual,
-      phase: 'reveal',
+      phase: "reveal",
     });
     renderToString(<CarModeGame onHome={noop} lang="en" />);
 
-    const tapBtn = capturedPressables['carmode-tap'];
+    const tapBtn = capturedPressables["carmode-tap"];
     expect(tapBtn).toBeDefined();
 
     // Now mock isComplete to return true
-    vi.spyOn(logic, 'isComplete').mockReturnValue(true);
+    vi.spyOn(logic, "isComplete").mockReturnValue(true);
     tapBtn.onPress?.();
 
     expect(sfxTapSpy).toHaveBeenCalledOnce();
     expect(primeMusicSpy).toHaveBeenCalledOnce();
     expect(advanceSpy).not.toHaveBeenCalled();
   });
-
 });
