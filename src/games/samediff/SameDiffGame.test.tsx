@@ -603,6 +603,87 @@ describe('SameDiffGame UI', () => {
 
     vi.useRealTimers();
   });
+
+  it('does not trigger SparkleBurst on choice buttons before a tap and sparkles only the correct button on tap', () => {
+    vi.useFakeTimers();
+    const roundSame: SameDiffRound = {
+      phraseIdx: 0,
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: 'same',
+    };
+    const roundDiff: SameDiffRound = {
+      phraseIdx: 1,
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 64, b: 1 }],
+      answer: 'different',
+    };
+    vi.spyOn(logic, 'makeSameDiffRound')
+      .mockReturnValueOnce(roundSame)
+      .mockReturnValueOnce(roundDiff);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const sameBtn = screen.getByTestId('samediff-same');
+    const diffBtn = screen.getByTestId('samediff-diff');
+
+    // Before any tap, neither button should contain sparkle emojis
+    expect(sameBtn.textContent).toBe('👯Same');
+    expect(diffBtn.textContent).toBe('🙅Different');
+
+    // Wrong pick: tapping 'different' when answer is 'same'
+    act(() => {
+      fireEvent.click(diffBtn);
+    });
+
+    // Neither button should sparkle on wrong pick
+    expect(sameBtn.textContent).toBe('👯Same');
+    expect(diffBtn.textContent).toBe('🙅Different');
+
+    // Wait for wrong penalty timer
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Correct pick: tapping 'same'
+    act(() => {
+      fireEvent.click(sameBtn);
+    });
+
+    // During transition, only the correct button has celebration sparkles
+    expect(sameBtn.textContent).toContain('✨');
+    expect(sameBtn.textContent).toContain('⭐');
+    expect(diffBtn.textContent).toBe('🙅Different');
+
+    // Advance to round 2 pick phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const r2SameBtn = screen.getByTestId('samediff-same');
+    const r2DiffBtn = screen.getByTestId('samediff-diff');
+
+    // In round 2 before tap, neither button should sparkle
+    expect(r2SameBtn.textContent).toBe('👯Same');
+    expect(r2DiffBtn.textContent).toBe('🙅Different');
+
+    // Correct pick for round 2: tapping 'different'
+    act(() => {
+      fireEvent.click(r2DiffBtn);
+    });
+
+    // Only 'different' sparkles in round 2 transition
+    expect(r2SameBtn.textContent).toBe('👯Same');
+    expect(r2DiffBtn.textContent).toContain('✨');
+    expect(r2DiffBtn.textContent).toContain('⭐');
+
+    vi.useRealTimers();
+  });
 });
 
 

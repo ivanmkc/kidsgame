@@ -28,6 +28,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<'listenA' | 'listenB' | 'pick' | 'transition'>('listenA');
   const [activeNote, setActiveNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<'same' | 'different' | null>(null);
+  const [correctPick, setCorrectPick] = useState<'same' | 'different' | null>(null);
   const [sparkKeys, setSparkKeys] = useState({ same: 0, different: 0 });
   const gapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -39,6 +40,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     stopSequence();
     if (gapTimer.current) clearTimeout(gapTimer.current);
     setActiveNote(null);
+    setCorrectPick(null);
     setPhase('listenA');
     playSequence(
       r.phraseA,
@@ -86,6 +88,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     if (isCorrect(round, picked)) {
       setPhase('transition');
       sfx.good();
+      setCorrectPick(picked);
       setSparkKeys((keys) => ({ ...keys, [picked]: keys[picked] + 1 }));
       const next = score + 1;
       setScore(next);
@@ -119,6 +122,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWrongPick(null);
+    setCorrectPick(null);
+    setSparkKeys({ same: 0, different: 0 });
     setActiveNote(null);
     const firstRound = makeSameDiffRound(rngRef.current, difficulty);
     historyRef.current = [firstRound.phraseIdx];
@@ -273,7 +278,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   <Text style={[styles.pickLabel, { color: '#5FBF6E' }]}>
                     {t(lang, 'music.same' as never)}
                   </Text>
-                  <SparkleBurst trigger={sparkKeys.same} count={5} size={14} />
+                  {phase === 'transition' &&
+                  correctPick === 'same' &&
+                  sparkKeys.same > 0 ? (
+                    <SparkleBurst trigger={sparkKeys.same} count={5} size={14} />
+                  ) : null}
                 </Pressable>
               </Animated.View>
               <Animated.View style={[{ transform: [{ scale: pickScale }] }, styles.pickBtnWrapper]}>
@@ -294,7 +303,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   <Text style={[styles.pickLabel, { color: '#E89B4F' }]}>
                     {t(lang, 'music.different' as never)}
                   </Text>
-                  <SparkleBurst trigger={sparkKeys.different} count={5} size={14} />
+                  {phase === 'transition' &&
+                  correctPick === 'different' &&
+                  sparkKeys.different > 0 ? (
+                    <SparkleBurst trigger={sparkKeys.different} count={5} size={14} />
+                  ) : null}
                 </Pressable>
               </Animated.View>
             </View>
