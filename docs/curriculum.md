@@ -92,5 +92,5 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
   - **Path:** Follows `letters` and leads to `spell`.
 
 - **Sentence Builder (Languages EN/JA/ZH - Level 2):**
-  - **Spec:** A game focusing on constructing simple sentences using vocabulary learned.
-  - **Path:** Follows `carmode` and leads to more advanced storytelling.
+  - **Spec:** A game focusing on constructing simple sentences using vocabulary learned. The child drags word tiles into slots to build a descriptive sentence (e.g. "Dog eats apple"). [Detailed Design](sentence-builder-design.md)
+  - **Path:** Follows `carmode` and leads to `story`.
