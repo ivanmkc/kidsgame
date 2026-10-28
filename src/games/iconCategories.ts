@@ -10,32 +10,32 @@ export const ICON_CATEGORIES: Record<string, string[]> = {
   things: ['balloon', 'car', 'plane', 'rocket', 'soccer', 'gift'],
 };
 
-import { Lang } from '../lang';
+import { UIKey } from '../i18n';
 
 // One home for how each category is worded to kids — Rule Time's "tap"
 // labels and Odd One Out's "which is not" questions must describe the same
 // membership, so they live next to it.
 // `tap` stays English (Rule Time is an English-phonics game by design).
-// `not` is a per-lang Record so Odd One Out renders in the active UI language.
-export const CATEGORY_TEXT: Record<string, { tap: string; not: Record<Lang, string> }> = {
+// `not` stores the i18n key so Odd One Out renders via t(lang, key).
+export const CATEGORY_TEXT: Record<string, { tap: string; not: UIKey }> = {
   animals: {
     tap: 'Tap all the ANIMALS! 🐾',
-    not: { en: 'Which one is NOT an animal?', ja: 'どうぶつじゃないのは？', cmn: '哪一个不是动物？', yue: '邊個唔係動物？' },
+    not: 'oddone.not.animals',
   },
   nature: {
     tap: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
-    not: { en: 'Which one is NOT a flower, rainbow or star?', ja: 'おはな・にじ・ほしじゃないのは？', cmn: '哪一个不是花、彩虹或星星？', yue: '邊個唔係花、彩虹或星星？' },
+    not: 'oddone.not.nature',
   },
   food: {
     tap: 'Tap all the YUMMY FOOD! 🍎',
-    not: { en: 'Which one is NOT food?', ja: 'たべものじゃないのは？', cmn: '哪一个不是食物？', yue: '邊個唔係食物？' },
+    not: 'oddone.not.food',
   },
   things: {
     // The present is a member too, so both wordings name it — "NOT a toy
     // or vehicle" made the gift a second right answer in Odd One Out, and
     // an untappable match in Rule Time.
     tap: 'Tap the TOYS, VEHICLES & PRESENTS! 🚗',
-    not: { en: 'Which one is NOT a toy, vehicle or present?', ja: 'おもちゃ・のりもの・プレゼントじゃないのは？', cmn: '哪一个不是玩具、车辆或礼物？', yue: '邊個唔係玩具、車或者禮物？' },
+    not: 'oddone.not.things',
   },
 };
 

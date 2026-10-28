@@ -263,6 +263,7 @@ describe("odd one out (which does not belong)", () => {
   it("every category the round builder can pick has a spoken question in all four langs", async () => {
     const { CATEGORY_TEXT, ICON_CATEGORIES } =
       await import("../iconCategories");
+    const { t } = await import("../../i18n");
     // The generic "Which one does not belong?" fallback tells a kid nothing
     // about WHICH group the board is built from, so no category may reach it.
     expect(Object.keys(CATEGORY_TEXT).sort()).toEqual(
@@ -271,7 +272,7 @@ describe("odd one out (which does not belong)", () => {
     for (const [name, text] of Object.entries(CATEGORY_TEXT)) {
       expect(text.tap, name).toBeTruthy();
       for (const lang of ["en", "ja", "cmn", "yue"] as const) {
-        expect(text.not[lang], `${name}/${lang}`).toBeTruthy();
+        expect(t(lang, text.not), `${name}/${lang}`).toBeTruthy();
       }
     }
   });

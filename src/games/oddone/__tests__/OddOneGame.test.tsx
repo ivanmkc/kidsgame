@@ -5,7 +5,7 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
 import { say, sfx, stopNarration } from "../../../sound";
-import { ICON_CATEGORIES } from "../../iconCategories";
+import { CATEGORY_TEXT, ICON_CATEGORIES } from "../../iconCategories";
 import { Lang } from "../../../lang";
 import { LangContext } from "../../../components/GameShell";
 import { t } from "../../../i18n";
@@ -404,6 +404,41 @@ describe("OddOneGame", () => {
     }));
     render(<OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />);
     expect(say).toHaveBeenCalledWith("どうぶつじゃないのは？");
+  });
+
+  it("resolves category prompt question from centralized i18n table", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementationOnce(() => ({
+      baseCategory: "animals",
+      oddCategory: "food",
+      odd: "apple",
+      items: ["dog", "cat", "lion", "apple"],
+      oddIndex: 3,
+    }));
+    const { container, rerender } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    const banner = container.querySelector(
+      '[data-testid^="oddone-question-"]',
+    ) as HTMLElement;
+    expect(banner.textContent).toBe(`🔊 ${t("en", "oddone.not.animals")}`);
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    expect(banner.textContent).toBe(`🔊 ${t("ja", "oddone.not.animals")}`);
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(banner.textContent).toBe(`🔊 ${t("cmn", "oddone.not.animals")}`);
+
+    rerender(<OddOneGame onHome={() => {}} difficulty="easy" lang="yue" />);
+    expect(banner.textContent).toBe(`🔊 ${t("yue", "oddone.not.animals")}`);
+  });
+
+  it("stores centralized UIKey references in CATEGORY_TEXT", () => {
+    for (const [catName, { not }] of Object.entries(CATEGORY_TEXT)) {
+      expect(not).toBe(`oddone.not.${catName}`);
+      for (const l of ["en", "ja", "cmn", "yue"] as const) {
+        expect(t(l, not)).toBeTruthy();
+      }
+    }
   });
 
   describe("speechLines", () => {

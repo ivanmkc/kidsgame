@@ -86,6 +86,7 @@ const ALL_KEYS: UIKey[] = [
   'diff.pictureA', 'diff.pictureB', 'diff.hint',
   'hidden.turn', 'hidden.prompt',
   'shadow.hint', 'shadow.hintTricky', 'oddone.defaultQuestion',
+  'oddone.not.animals', 'oddone.not.nature', 'oddone.not.food', 'oddone.not.things',
   'rules.memoryCheck', 'rules.ruleNumber', 'rules.doAgain', 'rules.remind', 'rules.progress',
   'puzzle.peek', 'puzzle.peekA11y', 'puzzle.hint',
   'sticker.clear', 'sticker.hint',

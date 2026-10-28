@@ -59,9 +59,10 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const prompt =
-    CATEGORY_TEXT[round.baseCategory]?.not[lang] ??
-    t(lang, "oddone.defaultQuestion");
+  const categoryKey = CATEGORY_TEXT[round.baseCategory]?.not;
+  const prompt = categoryKey
+    ? t(lang, categoryKey)
+    : t(lang, "oddone.defaultQuestion");
 
   useEffect(() => {
     return () => {
