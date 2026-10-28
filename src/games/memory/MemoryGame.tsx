@@ -114,6 +114,13 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
     if (duel) say(`${MP_PLAYERS[starter].name} starts!`);
   };
 
+  const handlePickMode = (picked: 'solo' | '2p') => {
+    setMode(picked);
+    if (picked === '2p') {
+      say(`${MP_PLAYERS[duelState.turn].name} starts!`);
+    }
+  };
+
   const turnPlayer = MP_PLAYERS[duelState.turn];
   const winner = duelWinner(duelState);
 
@@ -217,7 +224,7 @@ export function MemoryGame({ onHome, difficulty, twoPlayerEnabled, lang = 'en' }
         onNext={resetGame} nextLabel={duel ? t(lang, 'overlay.rematch') : t(lang, 'overlay.nextRound')}
         onHome={onHome}
       />
-      {twoPlayerEnabled && mode === null ? <ModePicker onPick={setMode} lang={lang} /> : null}
+      {twoPlayerEnabled && mode === null ? <ModePicker onPick={handlePickMode} lang={lang} /> : null}
     </GameShell>
   );
 }

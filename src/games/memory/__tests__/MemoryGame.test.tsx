@@ -615,4 +615,46 @@ describe("MemoryGame", () => {
       expect.stringContaining("It's a tie!"),
     );
   });
+
+  it("announces starting player when starting 2-Player mode from the ModePicker", async () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    const onHome = vi.fn();
+    const { unmount } = render(
+      <MemoryGame
+        onHome={onHome}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="en"
+      />,
+    );
+
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(sound.say).not.toHaveBeenCalledWith(
+      expect.stringContaining("starts!"),
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    });
+
+    expect(sound.say).toHaveBeenCalledWith(`${MP_PLAYERS[0].name} starts!`);
+
+    unmount();
+
+    vi.spyOn(Math, "random").mockReturnValue(0.9);
+    render(
+      <MemoryGame
+        onHome={onHome}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="en"
+      />,
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    });
+
+    expect(sound.say).toHaveBeenCalledWith(`${MP_PLAYERS[1].name} starts!`);
+  });
 });
