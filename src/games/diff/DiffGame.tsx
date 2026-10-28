@@ -65,7 +65,6 @@ export function DiffGame({
   const [ready, setReady] = useState(false);
   const [forceReady, setForceReady] = useState(false);
   const wrapRef = useRef<View>(null);
-  const [hintId, setHintId] = useState<string | null>(null);
   const [hintRegion, setHintRegion] = useState<{
     x: number;
     y: number;
@@ -93,7 +92,6 @@ export function DiffGame({
   // and give the difference away. Timeout guard: never blank the game forever.
   useEffect(() => {
     setFound([]);
-    setHintId(null);
     setHintRegion(null);
     setReady(false);
     setForceReady(false);
@@ -262,7 +260,6 @@ export function DiffGame({
     if (won) return;
     sfx.good();
     setFound((f) => (f.includes(id) ? f : [...f, id]));
-    if (hintId === id) setHintId(null);
     setHintRegion(null);
     armHintTimer();
   };
@@ -325,7 +322,6 @@ export function DiffGame({
           displayWidth={sceneWidth}
           boxes={boxes}
           foundIds={found}
-          hintId={hintId}
           hintRegion={hintRegion}
           onHit={onHit}
           onMiss={() => {}}
@@ -344,7 +340,6 @@ export function DiffGame({
           displayWidth={sceneWidth}
           boxes={boxes}
           foundIds={found}
-          hintId={hintId}
           hintRegion={hintRegion}
           onHit={onHit}
           onMiss={() => {}}
