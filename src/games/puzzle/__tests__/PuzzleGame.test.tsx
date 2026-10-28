@@ -322,6 +322,67 @@ describe("PuzzleGame", () => {
     unmountYue();
   });
 
+  it("renders FilterCycleChip with localized text and accessibility label in scene picker", () => {
+    const onFilter = vi.fn();
+    const { unmount: unmountJa } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        onFilter={onFilter}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const jaFilterBtn = screen.getByTestId("difficulty-cycle");
+    expect(jaFilterBtn.textContent).toBe(`😊 ${t("ja", "filter.easy")}`);
+    expect(jaFilterBtn.textContent).toBe("😊 やさしい");
+    expect(jaFilterBtn.getAttribute("aria-label")).toBe(
+      "むずかしさ: やさしい。タップでかえる",
+    );
+    fireEvent.click(jaFilterBtn);
+    expect(onFilter).toHaveBeenCalledWith("medium");
+    unmountJa();
+
+    const { unmount: unmountCmn } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        onFilter={onFilter}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="cmn"
+      />,
+    );
+    const cmnFilterBtn = screen.getByTestId("difficulty-cycle");
+    expect(cmnFilterBtn.textContent).toBe(`😊 ${t("cmn", "filter.easy")}`);
+    expect(cmnFilterBtn.getAttribute("aria-label")).toBe(
+      t("cmn", "a11y.diffCycle", { name: t("cmn", "filter.easy") }),
+    );
+    unmountCmn();
+
+    const { unmount: unmountYue } = render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        onFilter={onFilter}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="yue"
+      />,
+    );
+    const yueFilterBtn = screen.getByTestId("difficulty-cycle");
+    expect(yueFilterBtn.textContent).toBe(`😊 ${t("yue", "filter.easy")}`);
+    expect(yueFilterBtn.getAttribute("aria-label")).toBe(
+      t("yue", "a11y.diffCycle", { name: t("yue", "filter.easy") }),
+    );
+    unmountYue();
+  });
+
   it("plays tap sound when peek button is clicked", () => {
     const tapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
     const { unmount } = render(
