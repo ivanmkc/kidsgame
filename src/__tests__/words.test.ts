@@ -62,7 +62,7 @@ describe("words helpers", () => {
     expect(soundsFor(gift)).toEqual(["puh", "guh"]);
 
     const plane = WORDS.find((w) => w.icon === "plane")!;
-    expect(soundsFor(plane)).toEqual(["puh", "ah"]);
+    expect(soundsFor(plane)).toEqual(["puh", "aa"]);
 
     const ladybug = WORDS.find((w) => w.icon === "ladybug")!;
     expect(soundsFor(ladybug)).toEqual(["lll", "buh"]);
@@ -94,5 +94,12 @@ describe("WORDS", () => {
     expect(pig?.cmnRhyme).toBe("u");
     expect(gift?.cmnRhyme).toBe("u");
     expect(car?.cmnRhyme).toBeUndefined();
+  });
+
+  it("differentiates short-a in apple from short-o in octopus", () => {
+    const apple = WORDS.find((w) => w.icon === "apple");
+    const octopus = WORDS.find((w) => w.icon === "octopus");
+    expect(apple?.sound).toBe("aa");
+    expect(octopus?.sound).toBe("ah");
   });
 });

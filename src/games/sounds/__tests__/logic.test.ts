@@ -64,9 +64,9 @@ describe("soundsLayout", () => {
 });
 
 describe("makeSoundsRound", () => {
-  it('excludes plane as distractor when target sound is "ah"', () => {
-    // Plane can be called "airplane" ('ah'), so it must not be a distractor
-    // when prompting for 'ah' (e.g. apple).
+  it('excludes plane as distractor when target sound is "aa"', () => {
+    // Plane can be called "airplane" ('aa'), so it must not be a distractor
+    // when prompting for 'aa' (e.g. apple).
     const icons = ["apple", "plane", "rocket"];
     const rng = () => 0;
     const round = makeSoundsRound(rng, icons, "en", 3);
