@@ -328,6 +328,28 @@ describe("speechLines", () => {
       }
     }
   });
+
+  it("maps phonics call lines for apple to pre-rendered voice clips in VOICE", () => {
+    const b = boardWith(1, 3, "phonics");
+    const appleCall = b.calls.find(
+      (c) => b.cells[c.answerIdx].icon === "apple",
+    );
+    expect(appleCall).toBeDefined();
+    expect(appleCall!.sound).toBe("aa");
+    expect(appleCall!.promptLines).toEqual([
+      "Find something that starts with ah!",
+    ]);
+    expect(appleCall!.confirmLines).toEqual([
+      "Apple!",
+      "Apple starts with ah!",
+    ]);
+    for (const line of appleCall!.promptLines) {
+      expect(VOICE[line]).toBeDefined();
+    }
+    for (const line of appleCall!.confirmLines) {
+      expect(VOICE[line]).toBeDefined();
+    }
+  });
 });
 
 describe("bingoShout", () => {

@@ -128,8 +128,25 @@ function nameConfirmLines(icon: string, lang: Lang): string[] {
   return [`${w.text}！`];
 }
 
+function phonicsVoiceSound(sound: string): string {
+  // Pre-rendered phonics audio clips were generated using 'ah' for apple's
+  // short-a /æ/ sound before words.ts differentiated apple ('aa') from
+  // octopus ('ah'). Map 'aa' to 'ah' for voice playback so Bingo plays
+  // the human pre-rendered clips instead of falling back to robotic TTS.
+  return sound === "aa" ? "ah" : sound;
+}
+
+function phonicsSoundsFor(w: WordEntry): string[] {
+  const sounds = soundsFor(w);
+  const voiceSound = phonicsVoiceSound(w.sound);
+  if (voiceSound !== w.sound && !sounds.includes(voiceSound)) {
+    return [...sounds, voiceSound];
+  }
+  return sounds;
+}
+
 function phonicsPromptLines(sound: string): string[] {
-  return [t("en", "bingo.promptPhonics", { sound })];
+  return [t("en", "bingo.promptPhonics", { sound: phonicsVoiceSound(sound) })];
 }
 
 function phonicsConfirmLines(icon: string): string[] {
@@ -139,7 +156,7 @@ function phonicsConfirmLines(icon: string): string[] {
     `${capitalize(entry.en)}!`,
     t("en", "bingo.confirmPhonics", {
       word: capitalize(entry.en),
-      sound: entry.sound,
+      sound: phonicsVoiceSound(entry.sound),
     }),
   ];
 }
@@ -180,7 +197,7 @@ export function makeBoard(
     selected = [];
     for (const w of byPickiness) {
       if (selected.length >= cellCount) break;
-      const sounds = soundsFor(w);
+      const sounds = phonicsSoundsFor(w);
       if (sounds.some((snd) => claimed.has(snd))) continue;
       sounds.forEach((snd) => claimed.add(snd));
       selected.push(w);
@@ -189,14 +206,17 @@ export function makeBoard(
       // Pool too thin for a fully clean board: fall back to canonical-sound
       // uniqueness (the pre-existing guarantee) rather than shipping a
       // short board.
-      const canonical = new Set(selected.map((w) => w.sound));
+      const canonical = new Set(
+        selected.map((w) => phonicsVoiceSound(w.sound)),
+      );
       for (const w of shuffle(
         rng,
         pool.filter((w) => !selected.includes(w)),
       )) {
         if (selected.length >= cellCount) break;
-        if (canonical.has(w.sound)) continue;
-        canonical.add(w.sound);
+        const sound = phonicsVoiceSound(w.sound);
+        if (canonical.has(sound)) continue;
+        canonical.add(sound);
         selected.push(w);
       }
     }
@@ -291,9 +311,10 @@ export function speechLines(): string[] {
   }
   const seenSound = new Set<string>();
   for (const w of WORDS) {
-    if (!seenSound.has(w.sound)) {
-      seenSound.add(w.sound);
-      for (const l of phonicsPromptLines(w.sound)) s.add(l);
+    const sound = phonicsVoiceSound(w.sound);
+    if (!seenSound.has(sound)) {
+      seenSound.add(sound);
+      for (const l of phonicsPromptLines(sound)) s.add(l);
     }
     for (const l of phonicsConfirmLines(w.icon)) s.add(l);
   }
