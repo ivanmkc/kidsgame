@@ -181,11 +181,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
 
   const earPulse = useRef(new Animated.Value(1)).current;
   const bellBounce = useRef(new Animated.Value(0)).current;
+  const loopRef = useRef<Animated.CompositeAnimation | null>(null);
   useEffect(() => {
     if (won) return;
     if (phase === "listen") {
       bellBounce.setValue(0);
-      Animated.loop(
+      loopRef.current = Animated.loop(
         Animated.sequence([
           Animated.timing(earPulse, {
             toValue: 1.18,
@@ -200,11 +201,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
             useNativeDriver: true,
           }),
         ]),
-      ).start();
+      );
+      loopRef.current.start();
     } else {
       earPulse.stopAnimation();
       earPulse.setValue(1);
-      Animated.loop(
+      loopRef.current = Animated.loop(
         Animated.sequence([
           Animated.timing(bellBounce, {
             toValue: 1,
@@ -219,9 +221,14 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
             useNativeDriver: true,
           }),
         ]),
-      ).start();
+      );
+      loopRef.current.start();
     }
     return () => {
+      if (loopRef.current) {
+        loopRef.current.stop();
+        loopRef.current = null;
+      }
       earPulse.stopAnimation();
       bellBounce.stopAnimation();
     };
@@ -352,7 +359,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 { marginBottom: i * (bellSize * 0.2) },
                 phase === "play"
                   ? { transform: [{ scale: bellScale }] }
-                  : undefined
+                  : undefined,
               ]}
             >
               <Pressable

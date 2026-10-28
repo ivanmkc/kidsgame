@@ -152,4 +152,41 @@ describe("BellsGame", () => {
     vi.useRealTimers();
     unmount();
   });
+
+  it("stops active Animated.loop on phase transition and unmount", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const stopSpies: ReturnType<typeof vi.fn>[] = [];
+    vi.spyOn(Animated, "loop").mockImplementation(() => {
+      const stop = vi.fn();
+      stopSpies.push(stop);
+      return {
+        start: vi.fn(),
+        stop,
+        reset: vi.fn(),
+      } as unknown as Animated.CompositeAnimation;
+    });
+
+    const { unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(stopSpies).toHaveLength(1);
+    expect(stopSpies[0]).not.toHaveBeenCalled();
+
+    // Advance demo to transition from "listen" to "play" phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(stopSpies[0]).toHaveBeenCalledTimes(1);
+    expect(stopSpies).toHaveLength(2);
+    expect(stopSpies[1]).not.toHaveBeenCalled();
+
+    // Unmount stops active "play" loop
+    unmount();
+    expect(stopSpies[1]).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+  });
 });
