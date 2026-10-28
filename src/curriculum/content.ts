@@ -1,4 +1,7 @@
+import { ICON_CATEGORIES } from '../games/iconCategories';
+
 export const CURRICULUM = {
+  categories: ICON_CATEGORIES,
   critters: [
     'dog',
     'cat',

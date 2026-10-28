@@ -9,7 +9,7 @@ import { t, UIKey } from '../../i18n';
 import { manifest, SCENE_AR } from '../../manifest';
 import { stickerLabel, stickerLayout } from './logic';
 import { allSceneOptions } from '../sceneOptions';
-import { ICON_CATEGORIES } from '../iconCategories';
+import { CURRICULUM } from '../../curriculum/content';
 import { Touch2, pinchTransform } from './pinch';
 import { sfx, useSay } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
@@ -218,7 +218,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   }
 
   const { isLandscape, stageW, stageH } = stickerLayout(width, height);
-  const trayItems: string[] = tab === 'dressup' ? (manifest.dressup ?? []) : (ICON_CATEGORIES[tab] ?? []);
+  const trayItems: string[] = tab === 'dressup' ? (manifest.dressup ?? []) : (CURRICULUM.categories[tab] ?? []);
 
   const addSticker = (icon: string, at?: { x: number; y: number }) => {
     sfx.tap();

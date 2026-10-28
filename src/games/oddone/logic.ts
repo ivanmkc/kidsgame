@@ -5,8 +5,8 @@ import { WORDS, wordFor } from "../../words";
 import {
   CATEGORY_CONFLICTS,
   CATEGORY_TEXT,
-  ICON_CATEGORIES,
 } from "../iconCategories";
+import { CURRICULUM } from "../../curriculum/content";
 
 export interface OddOneRound {
   baseCategory: string;
@@ -25,7 +25,7 @@ export function makeOddOneRound(
   icons: string[],
   n: number,
 ): OddOneRound {
-  const cats = Object.entries(ICON_CATEGORIES)
+  const cats = Object.entries(CURRICULUM.categories)
     .map(
       ([name, members]) =>
         [name, members.filter((m) => icons.includes(m))] as const,
@@ -38,7 +38,7 @@ export function makeOddOneRound(
   // pairing a bad intruder here — asked which one is NOT a flower, rainbow
   // or star, a kid who counts the butterfly as nature has nowhere to go.
   const conflicts = new Set(CATEGORY_CONFLICTS[baseCategory] ?? []);
-  const eligible = Object.entries(ICON_CATEGORIES)
+  const eligible = Object.entries(CURRICULUM.categories)
     .map(
       ([name, members]) =>
         [name, members.filter((m) => icons.includes(m))] as const,

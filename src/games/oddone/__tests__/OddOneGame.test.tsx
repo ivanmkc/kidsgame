@@ -5,7 +5,8 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
 import { say, sfx, stopNarration } from "../../../sound";
-import { CATEGORY_TEXT, ICON_CATEGORIES } from "../../iconCategories";
+import { CATEGORY_TEXT } from "../../iconCategories";
+import { CURRICULUM } from "../../../curriculum/content";
 import { Lang } from "../../../lang";
 import { LangContext } from "../../../components/GameShell";
 import { t } from "../../../i18n";
@@ -569,7 +570,7 @@ describe("OddOneGame", () => {
 
     it("covers all ICON_CATEGORIES members in WORDS for all supported languages", () => {
       const langs: Lang[] = ["en", "ja", "cmn", "yue"];
-      for (const icons of Object.values(ICON_CATEGORIES)) {
+      for (const icons of Object.values(CURRICULUM.categories)) {
         for (const icon of icons) {
           for (const lang of langs) {
             const label = logic.itemLabel(icon, lang);

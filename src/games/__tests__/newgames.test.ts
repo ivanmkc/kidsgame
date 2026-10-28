@@ -195,12 +195,13 @@ describe("shadow match", () => {
 describe("odd one out (which does not belong)", () => {
   it("n-1 same-category items + one intruder at oddIndex", async () => {
     const { makeOddOneRound } = await import("../oddone/logic");
-    const { categoryOf, ICON_CATEGORIES } = await import("../iconCategories");
+    const { categoryOf } = await import("../iconCategories");
+    const { CURRICULUM } = await import("../../curriculum/content");
     for (let seed = 1; seed <= 40; seed++) {
       for (const n of [4, 6, 9]) {
         const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
         expect(r.items).toHaveLength(n);
-        const available = ICON_CATEGORIES[r.baseCategory].length;
+        const available = CURRICULUM.categories[r.baseCategory].length;
         expect(new Set(r.items).size).toBe(Math.min(available, n - 1) + 1);
         expect(r.items[r.oddIndex]).toBe(r.odd);
         expect(categoryOf(r.odd)).toBe(r.oddCategory);
@@ -215,13 +216,13 @@ describe("odd one out (which does not belong)", () => {
 
   it("hard difficulty (n=9) selects diverse base categories across rounds", async () => {
     const { makeOddOneRound } = await import("../oddone/logic");
-    const { ICON_CATEGORIES } = await import("../iconCategories");
+    const { CURRICULUM } = await import("../../curriculum/content");
     const seenBases = new Set<string>();
     for (let seed = 1; seed <= 100; seed++) {
       const r = makeOddOneRound(makeRng(seed), manifest.spotit.icons, 9);
       seenBases.add(r.baseCategory);
     }
-    expect(seenBases).toEqual(new Set(Object.keys(ICON_CATEGORIES)));
+    expect(seenBases).toEqual(new Set(Object.keys(CURRICULUM.categories)));
   });
 
   it("the intruder never comes from a category that conflicts with the base", async () => {
@@ -261,13 +262,13 @@ describe("odd one out (which does not belong)", () => {
   });
 
   it("every category the round builder can pick has a spoken question in all four langs", async () => {
-    const { CATEGORY_TEXT, ICON_CATEGORIES } =
-      await import("../iconCategories");
+    const { CATEGORY_TEXT } = await import("../iconCategories");
+    const { CURRICULUM } = await import("../../curriculum/content");
     const { t } = await import("../../i18n");
     // The generic "Which one does not belong?" fallback tells a kid nothing
     // about WHICH group the board is built from, so no category may reach it.
     expect(Object.keys(CATEGORY_TEXT).sort()).toEqual(
-      Object.keys(ICON_CATEGORIES).sort(),
+      Object.keys(CURRICULUM.categories).sort(),
     );
     for (const [name, text] of Object.entries(CATEGORY_TEXT)) {
       expect(text.tap, name).toBeTruthy();
@@ -281,7 +282,7 @@ describe("odd one out (which does not belong)", () => {
 describe("rule time", () => {
   it("rounds have the right matches and recall flag", async () => {
     const { makeRules, makeRulesRound } = await import("../rules/logic");
-    const { ICON_CATEGORIES } = await import("../iconCategories");
+    const { CURRICULUM } = await import("../../curriculum/content");
     for (let seed = 1; seed <= 30; seed++) {
       const rng = makeRng(seed);
       const rules = makeRules(rng, 5);
@@ -300,7 +301,7 @@ describe("rule time", () => {
         expect(matches.length).toBe(round.matchCount);
         expect(matches.length).toBeGreaterThanOrEqual(2);
         for (const t of round.tiles) {
-          const inCat = ICON_CATEGORIES[round.rule.category].includes(t.icon);
+          const inCat = CURRICULUM.categories[round.rule.category].includes(t.icon);
           expect(t.isMatch).toBe(inCat);
         }
         expect(round.isRecall).toBe(idx === 3);
