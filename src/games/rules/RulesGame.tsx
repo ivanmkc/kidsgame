@@ -200,7 +200,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
             <Pressable
               onPress={remind}
               testID="rules-remind"
-              accessibilityLabel="Remind me of the rule"
+              accessibilityLabel={t(lang, "rules.remind")}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.remindBtn,
