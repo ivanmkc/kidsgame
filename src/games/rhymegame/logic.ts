@@ -262,6 +262,13 @@ export function speechLines(spotitIcons: string[] = manifest.spotit.icons): stri
     const entries = availableEntries(lang, spotitIcons);
     const families = playableFamilies(entries);
     if (lang !== 'en' && Object.keys(families).length < 3) continue;
+    
+    // Every entry in a playable family can appear as a distractor tile,
+    // so its word will be spoken if the child taps it wrongly.
+    for (const entry of entries) {
+      if (families[entry.rhymeKey]) s.add(entry.word);
+    }
+    
     for (const family of Object.values(families)) {
       for (const target of family) {
         for (const correct of family) {

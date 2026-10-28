@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { manifest } from '../../manifest';
-import { availableEntries, makeRhymeRound, playableFamilies, rhymeLayout } from './logic';
+import { manifest } from '../../../manifest';
+import {
+  availableEntries,
+  makeRhymeRound,
+  playableFamilies,
+  rhymeLayout,
+  speechLines,
+} from '../logic';
 
 describe('rhymeLayout', () => {
   it('prioritizes answer tiles on mobile landscape viewports (844x390, 667x375)', () => {
@@ -66,7 +72,7 @@ describe('rhymeLayout', () => {
 
 describe('makeRhymeRound', () => {
   it('filters out distractors that share a nameTwin with target or correct answer', () => {
-    const entries: import('./logic').RhymeEntry[] = [
+    const entries: import('../logic').RhymeEntry[] = [
       {
         icon: 'blossom',
         en: 'blossom',
@@ -131,7 +137,7 @@ describe('makeRhymeRound', () => {
   });
 
   it('attaches localized word to each RhymeTile in the round', () => {
-    const entries: import('./logic').RhymeEntry[] = [
+    const entries: import('../logic').RhymeEntry[] = [
       {
         icon: 'blossom',
         en: 'flower',
@@ -191,5 +197,23 @@ describe('Mandarin rhyme families', () => {
     expect(uRound.target.icon).toBe('pig');
     expect(uRound.tiles[uRound.answerIdx].icon).toBe('gift');
     expect(uRound.confirmLines).toEqual(['猪，礼物！押韵！']);
+  });
+});
+
+describe('speechLines', () => {
+  it('includes every entry word for playable families, as they can be spoken on wrong taps', () => {
+    const lines = speechLines(manifest.spotit.icons);
+
+    // Pick an English playable entry and verify its word is in speechLines
+    const enEntries = availableEntries('en', manifest.spotit.icons);
+    const enPlayable = playableFamilies(enEntries);
+    const someEnEntry = Object.values(enPlayable)[0][0];
+    expect(lines).toContain(someEnEntry.word);
+
+    // Pick a Japanese playable entry and verify its word is in speechLines
+    const jaEntries = availableEntries('ja', manifest.spotit.icons);
+    const jaPlayable = playableFamilies(jaEntries);
+    const someJaEntry = Object.values(jaPlayable)[0][0];
+    expect(lines).toContain(someJaEntry.word);
   });
 });
