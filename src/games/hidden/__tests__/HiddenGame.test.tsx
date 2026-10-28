@@ -980,3 +980,98 @@ describe("HiddenGame mode picker on active scene", () => {
     }
   });
 });
+
+describe("HiddenGame scene picker surprise", () => {
+  const noop = () => {};
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("picks a scene from visible pool when filter matches scenes", () => {
+    const onPickScene = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="easy"
+        twoPlayerEnabled={false}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("scene-surprise"));
+    expect(onPickScene).toHaveBeenCalledTimes(1);
+    const pickedId = onPickScene.mock.calls[0][0];
+    const pickedScene = manifest.hidden.find((h) => h.id === pickedId);
+    expect(pickedScene?.level).toBe("easy");
+  });
+
+  it("falls back to manifest.hidden when filter matches no scenes", () => {
+    const onPickScene = vi.fn();
+    const originalHidden = manifest.hidden;
+    manifest.hidden = [
+      {
+        ...originalHidden[0],
+        level: "easy",
+      },
+    ];
+    try {
+      render(
+        <HiddenGame
+          onHome={noop}
+          difficulty="medium"
+          filter="hard"
+          twoPlayerEnabled={false}
+          onPickScene={onPickScene}
+          onBackToPicker={noop}
+        />,
+      );
+      fireEvent.click(screen.getByTestId("scene-surprise"));
+      expect(onPickScene).toHaveBeenCalledWith(originalHidden[0].id);
+    } finally {
+      manifest.hidden = originalHidden;
+    }
+  });
+
+  it("does not crash or pick when manifest.hidden is empty", () => {
+    const onPickScene = vi.fn();
+    const originalHidden = manifest.hidden;
+    manifest.hidden = [];
+    try {
+      render(
+        <HiddenGame
+          onHome={noop}
+          difficulty="medium"
+          filter="hard"
+          twoPlayerEnabled={false}
+          onPickScene={onPickScene}
+          onBackToPicker={noop}
+        />,
+      );
+      expect(() => {
+        fireEvent.click(screen.getByTestId("scene-surprise"));
+      }).not.toThrow();
+      expect(onPickScene).not.toHaveBeenCalled();
+    } finally {
+      manifest.hidden = originalHidden;
+    }
+  });
+
+  it("does not pick on surprise when mode is null in 2P mode", () => {
+    const onPickScene = vi.fn();
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("scene-surprise"));
+    expect(onPickScene).not.toHaveBeenCalled();
+  });
+});
+

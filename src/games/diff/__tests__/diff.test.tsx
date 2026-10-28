@@ -553,3 +553,31 @@ describe("DiffGame", () => {
     }
   });
 });
+describe("DiffGame scene picker surprise fallback", () => {
+  const noop = () => {};
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("falls back to manifest.diff when filter matches no scenes", () => {
+    const onPickScene = vi.fn();
+    const originalDiff = manifest.diff;
+    manifest.diff = [{ ...originalDiff[0], level: "easy" }];
+    try {
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          filter="hard"
+          onPickScene={onPickScene}
+          onBackToPicker={noop}
+        />,
+      );
+      fireEvent.click(screen.getByTestId("scene-surprise"));
+      expect(onPickScene).toHaveBeenCalledTimes(1);
+    } finally {
+      manifest.diff = originalDiff;
+    }
+  });
+});

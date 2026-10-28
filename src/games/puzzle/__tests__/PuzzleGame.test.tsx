@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { manifest } from "../../../manifest";
 import React, { useState } from "react";
 import { LangContext } from "../../../components/GameShell";
 import { Lang } from "../../../lang";
@@ -783,5 +784,37 @@ describe("PuzzleGame", () => {
     // useSay should be called with null when won is true, not the gameplay hint
     expect(useSaySpy).toHaveBeenCalledWith(null);
     expect(saySpy).not.toHaveBeenCalledWith(t("ja", "puzzle.hint"));
+  });
+});
+describe("PuzzleGame scene picker surprise", () => {
+  const noop = () => {};
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it("falls back to all options when filter matches no scenes", () => {
+    const onPickScene = vi.fn();
+    const originalDiff = manifest.diff;
+    const originalHidden = manifest.hidden;
+    manifest.diff = [{ ...originalDiff[0], level: "easy" }];
+    manifest.hidden = [];
+    try {
+      render(
+        <PuzzleGame
+          onHome={noop}
+          difficulty="medium"
+          filter="hard"
+          onPickScene={onPickScene}
+          onBackToPicker={noop}
+        />,
+      );
+      fireEvent.click(screen.getByTestId("scene-surprise"));
+      expect(onPickScene).toHaveBeenCalledTimes(1);
+    } finally {
+      manifest.diff = originalDiff;
+      manifest.hidden = originalHidden;
+    }
   });
 });

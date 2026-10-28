@@ -198,9 +198,10 @@ export function DiffGame({
             dimmed: !inFilter(d.level, filter),
           }))}
           onPick={onPickScene}
-          onSurprise={() =>
-            onPickScene(visible[Math.floor(Math.random() * visible.length)].id)
-          }
+          onSurprise={() => {
+            const surprisePool = visible.length > 0 ? visible : manifest.diff;
+            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+          }}
           filterChip={
             onFilter ? (
               <FilterCycleChip
