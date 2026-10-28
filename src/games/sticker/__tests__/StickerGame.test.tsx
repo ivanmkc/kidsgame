@@ -1091,4 +1091,39 @@ describe('StickerGame', () => {
     randomSpy.mockRestore();
     unmount();
   });
+
+  it('sends vertically aspect-ratio-corrected cy coordinate to AI model', async () => {
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    const callMagicSpy = vi.spyOn(magic, 'callMagic').mockResolvedValue({
+      ok: true,
+      image_b64: 'b64_data',
+    });
+    // With Math.random() = 0.5:
+    // y = 0.3 + 0.5 * 0.35 = 0.475
+    // size = 0.09 + 0.5 * 0.03 = 0.105
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayBtns = screen.getAllByRole('button').filter(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    act(() => {
+      fireEvent.click(trayBtns[0]);
+    });
+    const magicBtn = await screen.findByTestId('magic-btn-1');
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    const expectedCy = 0.475 + (0.105 * (16 / 9)) / 2;
+    expect(callMagicSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ y: expectedCy }),
+      expect.anything()
+    );
+
+    randomSpy.mockRestore();
+    unmount();
+  });
 });

@@ -6,7 +6,7 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { SparkleBurst } from '../../components/Sparkles';
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
-import { manifest } from '../../manifest';
+import { manifest, SCENE_AR } from '../../manifest';
 import { stickerLabel, stickerLayout } from './logic';
 import { allSceneOptions } from '../sceneOptions';
 import { ICON_CATEGORIES } from '../iconCategories';
@@ -147,7 +147,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     // Center of the sticker in scene-relative coords — that's where the
     // model should paint the wearable onto whoever's standing there.
     const cx = Math.min(0.99, Math.max(0.01, sticker.x + sticker.size / 2));
-    const cy = Math.min(0.99, Math.max(0.01, sticker.y + sticker.size / 2));
+    const cy = Math.min(0.99, Math.max(0.01, sticker.y + (sticker.size * SCENE_AR) / 2));
     const key = cacheKey(picked.id, sticker.icon, cx, cy);
 
     const applySuccess = (dataUrl: string) => {
