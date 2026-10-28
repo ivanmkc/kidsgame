@@ -78,7 +78,9 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
       setScore(next);
       setWrong(null);
       if (next < roundsToWin) {
-        setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+        setTimeout(() => {
+          setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, diff));
+        }, 1000);
       }
     } else {
       sfx.wrong();

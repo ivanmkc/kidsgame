@@ -118,13 +118,25 @@ describe("ShadowGame", () => {
     ) as HTMLElement;
     expect(correctBtn).toBeTruthy();
 
-    act(() => {
-      fireEvent.click(correctBtn);
-      fireEvent.click(correctBtn);
-    });
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        fireEvent.click(correctBtn);
+        fireEvent.click(correctBtn);
+      });
+      
+      // Verify transition is delayed
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+      
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
 
-    expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
-    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+      expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
+      expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
     expect(
       container.querySelector('[data-testid="shadow-score"]')?.textContent,
     ).toContain("1/10");
@@ -197,6 +209,13 @@ describe("ShadowGame", () => {
         ) as HTMLElement;
         act(() => {
           fireEvent.click(correctBtn);
+        });
+        if (i < 9) {
+          const currentAnswer = container.querySelector('[data-testid^="shadow-answer-"]')?.getAttribute("data-testid")?.replace("shadow-answer-", "");
+          expect(currentAnswer).toBe(answer);
+        }
+        act(() => {
+          vi.advanceTimersByTime(1000);
         });
       }
 
@@ -281,12 +300,24 @@ describe("ShadowGame", () => {
       `[data-testid="shadow-option-${answer}"]`,
     ) as HTMLElement;
 
-    act(() => {
-      fireEvent.click(correctBtn);
-    });
+    vi.useFakeTimers();
+    try {
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+      
+      // Verify transition is delayed
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
 
-    // Round 1 (mental rotation kicks in immediately after the single warmup round)
-    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      // Round 1 (mental rotation kicks in immediately after the single warmup round)
+      expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
     expect(makeRoundSpy).toHaveBeenLastCalledWith(
       expect.anything(),
       expect.anything(),
