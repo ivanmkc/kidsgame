@@ -288,9 +288,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                   styles.instructionalText,
                   {
                     color:
-                      instructionalDirection === "high"
-                        ? "#5DA9E8"
-                        : "#E8874F",
+                      instructionalDirection === "high" ? "#5DA9E8" : "#E8874F",
                   },
                 ]}
               >
@@ -333,6 +331,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick("high")}
                 testID="highlow-high"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, "music.high")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   {
@@ -360,6 +360,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
             <Pressable
               onPress={replay}
               testID="highlow-replay"
+              accessibilityRole="button"
+              accessibilityLabel={t(lang, "music.replay")}
               style={({ pressed }) => [
                 styles.replayBtn,
                 {
@@ -372,10 +374,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
               ]}
             >
               <Text
-                style={[
-                  styles.replayText,
-                  { fontSize: layout.replayFontSize },
-                ]}
+                style={[styles.replayText, { fontSize: layout.replayFontSize }]}
               >
                 🔊
               </Text>
@@ -384,6 +383,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
               <Pressable
                 onPress={() => onPick("low")}
                 testID="highlow-low"
+                accessibilityRole="button"
+                accessibilityLabel={t(lang, "music.low")}
                 style={({ pressed }) => [
                   styles.pickBtn,
                   {

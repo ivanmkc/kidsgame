@@ -672,11 +672,7 @@ describe("HighLowGame UI", () => {
 
 const noop = () => {};
 
-function LangHarness({
-  initialLang = "en",
-}: {
-  initialLang?: Lang;
-}) {
+function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
   const [lang, setLang] = useState<Lang>(initialLang);
   const cycleLang = () => {
     setLang((l) =>
@@ -731,7 +727,7 @@ describe("HighLowGame language switch safety", () => {
 
     // Labels should update to Japanese
     expect(highBtn.textContent).toContain(t("ja", "music.high" as never));
-    
+
     // Score should not reset
     expect(screen.getByTestId("highlow-score").textContent).toBe(initialScore);
 
@@ -751,7 +747,9 @@ describe("HighLowGame language switch safety", () => {
     fireEvent.click(correctBtn);
 
     // Check score updated
-    expect(screen.getByTestId("highlow-score").textContent).not.toBe(initialScore);
+    expect(screen.getByTestId("highlow-score").textContent).not.toBe(
+      initialScore,
+    );
   });
 });
 
@@ -894,5 +892,76 @@ describe("HighLowGame melodic contour and relative direction", () => {
       expect.any(Function),
       3000,
     );
+  });
+});
+
+describe("HighLowGame accessibility", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('renders pick and replay buttons with accessibilityRole="button" and localized labels in English', () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    expect(highBtn.getAttribute("role")).toBe("button");
+    expect(highBtn.getAttribute("aria-label")).toBe("Higher");
+
+    const lowBtn = screen.getByTestId("highlow-low");
+    expect(lowBtn.getAttribute("role")).toBe("button");
+    expect(lowBtn.getAttribute("aria-label")).toBe("Lower");
+
+    const replayBtn = screen.getByTestId("highlow-replay");
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("Replay");
+  });
+
+  it("renders localized accessibility labels in Japanese", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="ja" />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    expect(highBtn.getAttribute("role")).toBe("button");
+    expect(highBtn.getAttribute("aria-label")).toBe("たかくなった");
+
+    const lowBtn = screen.getByTestId("highlow-low");
+    expect(lowBtn.getAttribute("role")).toBe("button");
+    expect(lowBtn.getAttribute("aria-label")).toBe("ひくくなった");
+
+    const replayBtn = screen.getByTestId("highlow-replay");
+    expect(replayBtn.getAttribute("role")).toBe("button");
+    expect(replayBtn.getAttribute("aria-label")).toBe("もういちどきく");
   });
 });
