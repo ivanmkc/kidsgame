@@ -74,7 +74,7 @@ describe("NumbersGame coverage", () => {
 
       // Advance timers past celebration lock between rounds.
       act(() => {
-        vi.advanceTimersByTime(300);
+        vi.advanceTimersByTime(400);
       });
     }
 

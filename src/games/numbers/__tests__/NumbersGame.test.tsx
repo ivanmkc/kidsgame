@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
@@ -11,6 +11,44 @@ import { NumbersGame } from "../NumbersGame";
 import * as logic from "../logic";
 
 describe("NumbersGame", () => {
+
+  it("highlights the correct tile on tap before advancing the round", () => {
+    vi.useFakeTimers();
+    try {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN) {
+          correctTile = tile;
+        }
+      }
+      expect(correctTile).not.toBeNull();
+
+      const initialClass = correctTile!.className;
+
+      // Tap correct tile
+      fireEvent.click(correctTile!);
+
+      // Visual success feedback is applied immediately (style/class changes)
+      expect(correctTile!.className).not.toBe(initialClass);
+
+      // Advance timer by SUCCESS_DELAY_MS
+      act(() => { vi.advanceTimersByTime(400); });
+
+      // After round advances, the tile at this index resets its highlight
+      const resetTile = screen.getByTestId(correctTile!.getAttribute("data-testid")!);
+      expect(resetTile.className).toBe(initialClass);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
@@ -107,48 +145,54 @@ describe("NumbersGame", () => {
   });
 
   it("keeps prompt card as Arabic numeral across rounds after toggling to Han script", () => {
-    const onHome = vi.fn();
-    render(<NumbersGame onHome={onHome} difficulty="easy" lang="ja" />);
+    vi.useFakeTimers();
+    try {
+      const onHome = vi.fn();
+      render(<NumbersGame onHome={onHome} difficulty="easy" lang="ja" />);
 
-    // Toggle script to Han.
-    const scriptBtn = screen.getByTestId("numbers-script");
-    fireEvent.click(scriptBtn);
+      // Toggle script to Han.
+      const scriptBtn = screen.getByTestId("numbers-script");
+      fireEvent.click(scriptBtn);
 
-    // Initial round after toggle: prompt card displays Arabic numeral while tiles are Han.
-    const promptEl = screen.getByTestId(/^numbers-prompt-/);
-    const targetKey1 = promptEl
-      .getAttribute("data-testid")!
-      .replace("numbers-prompt-", "");
-    expect(targetKey1).toMatch(/^h-\d+$/);
-    const targetN1 = targetKey1.replace("h-", "");
-    expect(promptEl.textContent).toContain(targetN1);
+      // Initial round after toggle: prompt card displays Arabic numeral while tiles are Han.
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetKey1 = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-", "");
+      expect(targetKey1).toMatch(/^h-\d+$/);
+      const targetN1 = targetKey1.replace("h-", "");
+      expect(promptEl.textContent).toContain(targetN1);
 
-    // Tap the correct Han tile to advance to the next round.
-    const targetHan1 = hanNumeral(Number(targetN1));
-    let correctTile: HTMLElement | null = null;
-    for (let i = 0; i < 5; i++) {
-      const tile = screen.getByTestId(`numbers-tile-${i}`);
-      if (tile.getAttribute("aria-label") === targetHan1) {
-        correctTile = tile;
+      // Tap the correct Han tile to advance to the next round.
+      const targetHan1 = hanNumeral(Number(targetN1));
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetHan1) {
+          correctTile = tile;
+        }
       }
-    }
-    expect(correctTile).not.toBeNull();
-    fireEvent.click(correctTile!);
+      expect(correctTile).not.toBeNull();
+      fireEvent.click(correctTile!);
+      act(() => { vi.advanceTimersByTime(400); });
 
-    // Next round: prompt card remains Arabic numeral, and tiles remain Han numerals.
-    const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
-    const targetKey2 = nextPromptEl
-      .getAttribute("data-testid")!
-      .replace("numbers-prompt-", "");
-    expect(targetKey2).toMatch(/^h-\d+$/);
-    const targetN2 = targetKey2.replace("h-", "");
-    expect(nextPromptEl.textContent).toContain(targetN2);
+      // Next round: prompt card remains Arabic numeral, and tiles remain Han numerals.
+      const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetKey2 = nextPromptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-", "");
+      expect(targetKey2).toMatch(/^h-\d+$/);
+      const targetN2 = targetKey2.replace("h-", "");
+      expect(nextPromptEl.textContent).toContain(targetN2);
 
-    const nextHanLabels = [0, 1, 2, 3, 4].map((i) =>
-      screen.getByTestId(`numbers-tile-${i}`).getAttribute("aria-label"),
-    );
-    for (const label of nextHanLabels) {
-      expect(label).toMatch(/^[一二三四五六七八九十]+$/);
+      const nextHanLabels = [0, 1, 2, 3, 4].map((i) =>
+        screen.getByTestId(`numbers-tile-${i}`).getAttribute("aria-label"),
+      );
+      for (const label of nextHanLabels) {
+        expect(label).toMatch(/^[一二三四五六七八九十]+$/);
+      }
+    } finally {
+      vi.useRealTimers();
     }
   });
 
@@ -260,6 +304,7 @@ describe("NumbersGame", () => {
       );
       fireEvent.click(correctBtn2);
       expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+      act(() => { vi.advanceTimersByTime(400); });
       expect(screen.getByTestId("numbers-score").textContent).toContain("1/8");
     } finally {
       vi.useRealTimers();
@@ -286,37 +331,38 @@ describe("NumbersGame", () => {
       }
       expect(correctTile).not.toBeNull();
 
-      // First tap on the correct tile advances round and locks input
+      // First tap on the correct tile starts transition feedback and locks input
       fireEvent.click(correctTile!);
       expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+      // Trailing tap 80ms later (within celebration lock window) must be ignored
+      const otherTile =
+        screen.getByTestId("numbers-tile-0") === correctTile
+          ? screen.getByTestId("numbers-tile-1")
+          : screen.getByTestId("numbers-tile-0");
+      vi.advanceTimersByTime(80);
+      fireEvent.click(otherTile);
+
+      expect(sound.sfx.wrong).not.toHaveBeenCalled();
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+      // Advance past celebration lock delay (remaining 320ms of 400ms)
+      vi.advanceTimersByTime(320);
 
       // Identify distractor and answer tiles in the newly mounted round
       const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
       const nextTargetN = nextPromptEl
         .getAttribute("data-testid")!
         .replace("numbers-prompt-n-", "");
-      let nextWrongTile: HTMLElement | null = null;
       let nextCorrectTile: HTMLElement | null = null;
       for (let i = 0; i < 5; i++) {
         const tile = screen.getByTestId(`numbers-tile-${i}`);
-        if (tile.getAttribute("aria-label") !== nextTargetN) {
-          nextWrongTile = tile;
-        } else {
+        if (tile.getAttribute("aria-label") === nextTargetN) {
           nextCorrectTile = tile;
+          break;
         }
       }
-      expect(nextWrongTile).not.toBeNull();
       expect(nextCorrectTile).not.toBeNull();
-
-      // Trailing tap 80ms later (within celebration lock window) must be ignored
-      vi.advanceTimersByTime(80);
-      fireEvent.click(nextWrongTile!);
-
-      expect(sound.sfx.wrong).not.toHaveBeenCalled();
-      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
-
-      // Advance past celebration lock delay (remaining 220ms of 300ms)
-      vi.advanceTimersByTime(220);
 
       // Next round now accepts input
       fireEvent.click(nextCorrectTile!);
@@ -387,15 +433,16 @@ describe("NumbersGame", () => {
       fireEvent.click(correctTile!);
       vi.mocked(sound.saySequence).mockClear();
 
-      // Within the 300ms celebration lock, tapping prompt does not replay
-      const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
-      fireEvent.click(nextPromptEl);
+      // Within the 400ms celebration lock, tapping prompt does not replay
+      const lockedPromptEl = screen.getByTestId(/^numbers-prompt-/);
+      fireEvent.click(lockedPromptEl);
       expect(sound.saySequence).not.toHaveBeenCalled();
 
       // Past celebration lock, tapping prompt replays
-      vi.advanceTimersByTime(300);
+      act(() => { vi.advanceTimersByTime(400); });
+      const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
       fireEvent.click(nextPromptEl);
-      expect(sound.saySequence).toHaveBeenCalledTimes(1);
+      expect(sound.saySequence).toHaveBeenCalledTimes(2);
     } finally {
       vi.useRealTimers();
     }
@@ -444,7 +491,7 @@ describe("NumbersGame", () => {
         }
         expect(correctTile).not.toBeNull();
         fireEvent.click(correctTile!);
-        vi.advanceTimersByTime(300);
+        act(() => { vi.advanceTimersByTime(400); });
       }
 
       vi.advanceTimersByTime(600);
