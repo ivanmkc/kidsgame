@@ -156,6 +156,7 @@ describe("EchoBeatGame", () => {
     // Tap drum twice (correct sequence for hitCount 2)
     act(() => {
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
     });
     expect(playDrumSpy).toHaveBeenCalledTimes(2);
@@ -235,7 +236,9 @@ describe("EchoBeatGame", () => {
     // Enter all 3 required taps to fill all dots
     act(() => {
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
     });
     expect(playDrumSpy).toHaveBeenCalledTimes(3);
@@ -332,6 +335,7 @@ describe("EchoBeatGame", () => {
     for (let r = 0; r < 6; r++) {
       act(() => {
         fireEvent.click(drum);
+        vi.advanceTimersByTime(400);
         fireEvent.click(drum);
       });
       act(() => {
@@ -399,6 +403,7 @@ describe("EchoBeatGame", () => {
     // Complete round 1
     act(() => {
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
     });
 
@@ -607,6 +612,7 @@ describe("EchoBeatGame", () => {
     // Tap the required 2 times for round 1
     act(() => {
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
     });
 
@@ -696,6 +702,7 @@ describe("EchoBeatGame", () => {
     // Complete round 1 in Japanese
     act(() => {
       fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
       fireEvent.click(drum);
     });
     expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
@@ -729,6 +736,54 @@ describe("EchoBeatGame", () => {
     expect(screen.getByText("轮到你了！")).toBeTruthy();
     const tapDots = screen.getByTestId("echobeat-tap-dots");
     expect(tapDots.children.length).toBe(3);
+
+    vi.useRealTimers();
+  });
+
+  it("renders visual tempo pulse indicator and pulses at round tempo", () => {
+    vi.useFakeTimers();
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In listen phase, tempo pulse element is present
+    const tempoPulse = screen.getByTestId("echobeat-tempo-pulse");
+    expect(tempoPulse).toBeTruthy();
+
+    // Advance to tap phase
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    // In tap phase, tempo pulse element is still present
+    expect(screen.getByTestId("echobeat-tempo-pulse")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it("synchronizes visual tempo pulse with demo sequence playback after instruction speech", () => {
+    vi.useFakeTimers();
+    let sayThenDone: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      sayThenDone = done;
+    });
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In listen phase during initial speech, tempo pulse indicator is present
+    expect(screen.getByTestId("echobeat-tempo-pulse")).toBeTruthy();
+
+    // Opening instruction speech completes -> demo and synchronized tempo pulse begin
+    act(() => {
+      sayThenDone?.();
+    });
+
+    // Advance through demo into tap phase
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getByTestId("echobeat-tempo-pulse")).toBeTruthy();
 
     vi.useRealTimers();
   });
