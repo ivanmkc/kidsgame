@@ -237,6 +237,9 @@ describe('SameDiffGame UI', () => {
     });
 
     expect(screen.getByTestId('samediff-score').textContent).toContain('0/8');
+    // Listening card renders immediately upon reset rather than flashing unresponsive choice buttons
+    expect(screen.getByTestId('melody-dot-0')).toBeTruthy();
+    expect(screen.queryByTestId('samediff-same')).toBeNull();
 
     act(() => {
       vi.advanceTimersByTime(2000);
