@@ -16,6 +16,15 @@ import { manifest } from "../../../manifest";
 import { t } from "../../../i18n";
 import { EscapeGame } from "../EscapeGame";
 
+vi.mock("../../../assets/images", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    SCENE_IMAGES: new Proxy({}, { get: (_, prop) => ({ uri: `highres-${String(prop)}` }) }),
+    SCENE_THUMBS: new Proxy({}, { get: (_, prop) => ({ uri: `thumb-${String(prop)}` }) }),
+  };
+});
+
 describe("EscapeGame", () => {
   const noop = () => {};
 
@@ -572,5 +581,24 @@ describe("EscapeGame", () => {
     expect(stopNarrationSpy).toHaveBeenCalled();
     const jaWin = room.t?.ja?.winText ?? room.winText;
     expect(screen.getByText(jaWin)).toBeDefined();
+  });
+
+  it("renders high-resolution scene image as background instead of thumbnail", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    const { container } = render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="en"
+      />,
+    );
+
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toBe(`highres-${room.image}`);
+    expect(img?.getAttribute("src")).not.toContain("thumb");
   });
 });

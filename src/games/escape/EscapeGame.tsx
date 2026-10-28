@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SCENE_IMAGES, SCENE_THUMBS } from '../../assets/images';
+import { SCENE_IMAGES } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { BetaPill } from '../../components/BetaPill';
 import { FilterCycleChip, ScenePicker } from '../../components/ScenePicker';
@@ -263,7 +263,7 @@ export function EscapeGame({
           onLayout={(e) => { framePos.current = { x: e.nativeEvent.layout.x, y: e.nativeEvent.layout.y }; }}
           style={[styles.frame, shadows.sticker, { width: displayWidth, height: displayHeight }]}
         >
-          <Image source={SCENE_THUMBS[room.image] ?? SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
+          <Image source={SCENE_IMAGES[room.image]} style={{ width: displayWidth, height: displayHeight }} resizeMode="cover" />
           <SpriteCanvas room={room} state={state} anims={spriteAnims} setAnims={setSpriteAnims} scale={scale} />
           {Platform.OS === 'web' && room.hotspots.map((h) => {
             if (!h.sprite?.itemLayer || !h.sprite.itemBbox) return null;
