@@ -46,7 +46,7 @@ export function MusicBoxGame({
     } else {
       say(t(lang, "shell.musicbox.subPicker"));
     }
-  }, [scene?.id, settings.musicboxFreePlay]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, scene?.id, settings.musicboxFreePlay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!scene) {
     return (
