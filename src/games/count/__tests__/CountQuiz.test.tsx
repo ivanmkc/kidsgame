@@ -6,6 +6,7 @@ import {
   fireEvent,
   act,
   cleanup,
+  within,
 } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import * as sound from "../../../sound";
@@ -145,7 +146,12 @@ describe("CountGame quiz phase", () => {
 
     const promptBtn = screen.getByTestId("count-prompt");
     expect(promptBtn.getAttribute("role")).toBe("button");
-    expect(promptBtn.getAttribute("aria-label")).toBe(PROMPTS.en);
+    expect(promptBtn.getAttribute("aria-label")).toBe(
+      t("en", "shell.count.sub"),
+    );
+    expect(
+      within(promptBtn).getByText(t("en", "shell.count.sub")),
+    ).toBeDefined();
     expect(screen.getByText(t("en", "spell.hearAgain"))).toBeDefined();
 
     fireEvent.click(promptBtn);
@@ -207,7 +213,12 @@ describe("CountGame quiz phase", () => {
 
     const promptBtn = screen.getByTestId("count-prompt");
     expect(promptBtn.getAttribute("role")).toBe("button");
-    expect(promptBtn.getAttribute("aria-label")).toBe(PROMPTS.ja);
+    expect(promptBtn.getAttribute("aria-label")).toBe(
+      t("ja", "shell.count.sub"),
+    );
+    expect(
+      within(promptBtn).getByText(t("ja", "shell.count.sub")),
+    ).toBeDefined();
     expect(screen.getByText(t("ja", "spell.hearAgain"))).toBeDefined();
 
     fireEvent.click(promptBtn);

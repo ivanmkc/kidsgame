@@ -117,14 +117,23 @@ describe("count with me", () => {
   });
 
   it("applyTap marks an uncounted item as tapped without mutating original", () => {
-    const initial = [false, false, false];
+    const initial = [0, 0, 0];
     const next = applyTap(initial, 1);
-    expect(next).toEqual([false, true, false]);
-    expect(initial).toEqual([false, false, false]);
+    expect(next).toEqual([0, 1, 0]);
+    expect(initial).toEqual([0, 0, 0]);
+  });
+
+  it("applyTap assigns sequential ordinal numbers based on tap count", () => {
+    const first = applyTap([0, 0, 0], 2);
+    expect(first).toEqual([0, 0, 1]);
+    const second = applyTap(first, 0);
+    expect(second).toEqual([2, 0, 1]);
+    const third = applyTap(second, 1);
+    expect(third).toEqual([2, 3, 1]);
   });
 
   it("applyTap returns original array reference when tapping already-tapped or out of bounds", () => {
-    const tapped = [true, false, true];
+    const tapped = [1, 0, 2];
     expect(applyTap(tapped, 0)).toBe(tapped);
     expect(applyTap(tapped, 2)).toBe(tapped);
     expect(applyTap(tapped, -1)).toBe(tapped);

@@ -9,6 +9,7 @@ import {
   screen,
   act,
   cleanup,
+  within,
 } from "@testing-library/react";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
@@ -194,7 +195,9 @@ describe("CountGame", () => {
     rerender(<CountGame onHome={noop} difficulty="easy" lang="ja" />);
 
     const critter0Ja = screen.getByTestId("count-critter-0");
-    expect(critter0Ja.getAttribute("aria-label")).toBe(critterLabel(icon, "ja"));
+    expect(critter0Ja.getAttribute("aria-label")).toBe(
+      critterLabel(icon, "ja"),
+    );
     expect(capturedPressables["count-critter-0"]?.accessibilityLabel).toBe(
       critterLabel(icon, "ja"),
     );
@@ -709,7 +712,10 @@ describe("CountGame language switch mid-quiz", () => {
     }
 
     // Quiz phase is now active. Verify the initial English prompt.
-    expect(screen.getByText(PROMPTS.en)).toBeDefined();
+    const promptCard = screen.getByTestId("count-prompt");
+    expect(
+      within(promptCard).getByText(t("en", "shell.count.sub")),
+    ).toBeDefined();
     expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
 
     // Find and tap a wrong answer choice.
@@ -745,7 +751,10 @@ describe("CountGame language switch mid-quiz", () => {
 
     // Spoken prompt and display text should immediately reflect Japanese.
     expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
-    expect(screen.getByText(PROMPTS.ja)).toBeDefined();
+    const promptCardJa = screen.getByTestId("count-prompt");
+    expect(
+      within(promptCardJa).getByText(t("ja", "shell.count.sub")),
+    ).toBeDefined();
     expect(screen.getByTestId("count-score").textContent).toBe("🔢 0/5");
 
     saySpy.mockClear();
@@ -758,6 +767,198 @@ describe("CountGame language switch mid-quiz", () => {
     // The stale English prompt must NOT be spoken.
     expect(saySpy).not.toHaveBeenCalledWith(PROMPTS.en);
     expect(saySpy).not.toHaveBeenCalled();
-    expect(screen.getByText(PROMPTS.ja)).toBeDefined();
+    expect(
+      within(promptCardJa).getByText(t("ja", "shell.count.sub")),
+    ).toBeDefined();
+  });
+});
+
+describe("CountGame affordances, prompt replay and ordinal badges", () => {
+  let sayThenDoneCallbacks: Array<() => void> = [];
+
+  beforeEach(() => {
+    cleanup();
+    sayThenDoneCallbacks = [];
+    vi.restoreAllMocks();
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      if (done) sayThenDoneCallbacks.push(done);
+    });
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+  });
+
+  it("places sequential ordinal number badges on critters in tap order", () => {
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    expect(n).toBeGreaterThanOrEqual(1);
+
+    // Initially no critters have badges
+    for (let i = 0; i < n; i++) {
+      expect(screen.queryByTestId(`count-badge-${i}`)).toBeNull();
+    }
+
+    // Tap critter 0 first -> gets ordinal badge "1"
+    fireEvent.click(screen.getByTestId("count-critter-0"));
+    const badge0 = screen.getByTestId("count-badge-0");
+    expect(badge0).toBeDefined();
+    expect(badge0.textContent).toBe("1");
+
+    // If there is more than 1 critter, tap critter 1 second -> gets ordinal badge "2"
+    if (n > 1) {
+      fireEvent.click(screen.getByTestId("count-critter-1"));
+      const badge1 = screen.getByTestId("count-badge-1");
+      expect(badge1).toBeDefined();
+      expect(badge1.textContent).toBe("2");
+      // Critter 0 badge remains "1"
+      expect(screen.getByTestId("count-badge-0").textContent).toBe("1");
+    }
+
+    // Tapping critter 0 again does not change its badge or tap count
+    fireEvent.click(screen.getByTestId("count-critter-0-tapped"));
+    expect(screen.getByTestId("count-badge-0").textContent).toBe("1");
+
+    // Tap remaining critters
+    for (let i = 2; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+      expect(screen.getByTestId(`count-badge-${i}`).textContent).toBe(
+        String(i + 1),
+      );
+    }
+
+    // Complete speech transition to quiz
+    const finishSpeech = sayThenDoneCallbacks.pop();
+    if (finishSpeech) {
+      act(() => {
+        finishSpeech();
+      });
+    }
+
+    // In quiz phase, all ordinal badges remain on stage for cardinality confirmation
+    for (let i = 0; i < n; i++) {
+      expect(screen.getByTestId(`count-badge-${i}`)).toBeDefined();
+      expect(screen.getByTestId(`count-badge-${i}`).textContent).toBe(
+        String(i + 1),
+      );
+    }
+  });
+
+  it("makes promptCard an accessible button displaying spell.hearAgain and replays audio on tap", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    const finishSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishSpeech();
+    });
+
+    const promptCard = screen.getByTestId("count-prompt");
+    expect(promptCard.getAttribute("role")).toBe("button");
+    expect(
+      within(promptCard).getByText(t("en", "shell.count.sub")),
+    ).toBeDefined();
+    expect(screen.getByText(t("en", "spell.hearAgain"))).toBeDefined();
+
+    saySpy.mockClear();
+    fireEvent.click(promptCard);
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(promptCard);
+    expect(saySpy).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows spell.hearAgain in other languages and replays localized prompt", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    const finishSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishSpeech();
+    });
+
+    const promptCard = screen.getByTestId("count-prompt");
+    expect(
+      within(promptCard).getByText(t("ja", "shell.count.sub")),
+    ).toBeDefined();
+    expect(screen.getByText(t("ja", "spell.hearAgain"))).toBeDefined();
+
+    saySpy.mockClear();
+    fireEvent.click(promptCard);
+    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+  });
+
+  it("highlights winning choice with choiceCorrect during praise audio and guards prompt replay while locked", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const stages = screen.getAllByTestId(/count-stage-/);
+    const stage = stages[stages.length - 1];
+    const n = Number(stage.getAttribute("data-testid")!.split("-").pop());
+    for (let i = 0; i < n; i++) {
+      fireEvent.click(screen.getByTestId(`count-critter-${i}`));
+    }
+
+    const finishSpeech = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishSpeech();
+    });
+
+    const answerChoices = screen.getAllByTestId(/count-choice-.*-answer/);
+    const answerChoice = answerChoices[answerChoices.length - 1];
+    const answerTid = answerChoice.getAttribute("data-testid")!;
+
+    const getAnswerStyles = () => {
+      const p = capturedPressables[answerTid] as {
+        style?: (s: { pressed: boolean }) => unknown[];
+      };
+      return typeof p?.style === "function" ? p.style({ pressed: false }) : [];
+    };
+
+    // Before picking answer, winning button does not have choiceCorrect
+    expect(getAnswerStyles()).not.toContainEqual(
+      expect.objectContaining({ borderColor: "#5FBF6E" }),
+    );
+
+    // Pick the correct answer
+    fireEvent.click(answerChoice);
+
+    // During praise audio (locked), winning button receives green choiceCorrect style
+    expect(getAnswerStyles()).toContainEqual(
+      expect.objectContaining({
+        borderColor: "#5FBF6E",
+        backgroundColor: "rgba(95,191,110,0.14)",
+      }),
+    );
+
+    // Prompt tap is guarded during locked celebration
+    saySpy.mockClear();
+    fireEvent.click(screen.getByTestId("count-prompt"));
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // Finish celebration audio and advance to round 2
+    const advanceRound = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      advanceRound();
+    });
+
+    // In round 2, back to count phase
+    expect(screen.getByTestId("count-progress")).toBeDefined();
   });
 });
