@@ -443,6 +443,33 @@ describe("steady beat", () => {
     const delayedResult = scoreTaps(r, delayedTaps, start, "hard");
     expect(delayedResult.hits).toBe(7);
   });
+
+  it("spamming extra taps penalizes the score", () => {
+    const rng = makeRng(42);
+    const r = makeSteadyBeatRound(rng, "easy");
+    const beatMs = 60000 / r.bpm;
+    const start = 1000;
+    const taps = Array.from({ length: 8 }, (_, i) => start + i * beatMs);
+    
+    // Add 3 extra wild taps
+    taps.push(start + 1.5 * beatMs);
+    taps.push(start + 2.5 * beatMs);
+    taps.push(start + 3.5 * beatMs);
+    
+    const result = scoreTaps(r, taps, start, "easy");
+    expect(result.hits).toBe(5); // 8 hits minus 3 extra taps
+  });
+
+  it("wildly mashing the button drops the score to zero", () => {
+    const rng = makeRng(42);
+    const r = makeSteadyBeatRound(rng, "easy");
+    const start = 1000;
+    const taps = Array.from({ length: 20 }, (_, i) => start + i * 100);
+    
+    const result = scoreTaps(r, taps, start, "easy");
+    expect(result.hits).toBe(0); // Way too many extra taps
+  });
+
   it("no taps score zero", () => {
     const rng = makeRng(42);
     const r = makeSteadyBeatRound(rng, "easy");
