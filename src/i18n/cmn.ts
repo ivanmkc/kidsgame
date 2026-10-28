@@ -67,7 +67,7 @@ export const CMN: Table = {
   'card.sounds.title': '听词找图',
   'card.sounds.blurb': '点你听到的词对应的图',
   'card.rhyme.title': '押韵配对',
-  'card.rhyme.blurb': '英语押韵游戏 — 找出押韵的图！',
+  'card.rhyme.blurb': '押韵游戏 — 找出押韵的图！',
   'card.spell.title': '拼单词',
   'card.spell.blurb': '点字母拼出单词！',
   'card.listenchoose.title': '听音选图',
