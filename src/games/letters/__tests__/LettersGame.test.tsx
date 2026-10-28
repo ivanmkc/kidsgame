@@ -10,6 +10,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LettersGame } from "../LettersGame";
 import { LangContext } from "../../../components/GameShell";
+import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import * as logic from "../logic";
 import { KANA_POOL } from "../logic";
@@ -479,4 +480,18 @@ describe("LettersGame", () => {
 
     expect(say).not.toHaveBeenCalled();
   });
+
+  it.each(["en", "ja", "cmn", "yue"] as const)(
+    "speaker button has localized accessibilityLabel for screen readers in %s",
+    (locale) => {
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang={locale} />);
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+      const expectedLabel = t(locale, "spell.hearAgain");
+      const speakerBtn = screen.getByTestId("speaker-button");
+      expect(speakerBtn.getAttribute("aria-label")).toBe(expectedLabel);
+      expect(screen.getByLabelText(expectedLabel)).toBe(speakerBtn);
+    },
+  );
 });

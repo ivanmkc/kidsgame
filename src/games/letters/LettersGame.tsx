@@ -249,6 +249,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                 disabled={won}
                 testID="speaker-button"
                 accessibilityRole="button"
+                accessibilityLabel={t(lang, "spell.hearAgain")}
                 style={({ pressed }) => [
                   styles.speakerButton,
                   pressed && styles.pressed,
