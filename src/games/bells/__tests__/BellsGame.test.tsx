@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { Animated } from "react-native";
 import * as music from "../../../music";
@@ -11,6 +11,31 @@ import * as bellsLogic from "../logic";
 describe("BellsGame", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  beforeEach(() => {
+    let mockCancel: (() => void) | null = null;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, bpm, onNote, onDone) => {
+        let time = 0;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        for (let i = 0; i < notes.length; i++) {
+          timers.push(setTimeout(() => onNote?.(i), time));
+          time += ((notes[i].b * 60) / bpm) * 1000;
+        }
+        timers.push(setTimeout(() => onDone?.(), time));
+        mockCancel = () => {
+          timers.forEach(clearTimeout);
+        };
+        return mockCancel;
+      },
+    );
+    vi.spyOn(music, "stopSequence").mockImplementation(() => {
+      if (mockCancel) {
+        mockCancel();
+        mockCancel = null;
+      }
+    });
   });
 
   it("halts animations when won", () => {
@@ -119,7 +144,9 @@ describe("BellsGame", () => {
     expect(window.getComputedStyle(tapDotSlotPlay).height).toBe("28px");
 
     // tap-dot-row is contained within tap-dot-slot so total layout space remains constant
-    expect(tapDotSlotPlay.contains(screen.getByTestId("tap-dot-row"))).toBe(true);
+    expect(tapDotSlotPlay.contains(screen.getByTestId("tap-dot-row"))).toBe(
+      true,
+    );
 
     vi.useRealTimers();
     unmount();
