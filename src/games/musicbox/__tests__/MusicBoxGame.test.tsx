@@ -1,9 +1,17 @@
 // @vitest-environment happy-dom
-import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import React, { useState } from "react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import * as music from "../../../music";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import { MusicBoxGame } from "../MusicBoxGame";
 
 vi.mock("../../assets/images", () => {
@@ -22,6 +30,8 @@ vi.mock("../../assets/images", () => {
 
 describe("MusicBoxGame rendering", () => {
   afterEach(() => {
+    vi.useRealTimers();
+    sound.stopNarration();
     cleanup();
     vi.restoreAllMocks();
   });
@@ -241,6 +251,110 @@ describe("MusicBoxGame rendering", () => {
     expect(saySpy).toHaveBeenCalledWith(
       "まほうの けんばん！ タップすると きれいなおとが なるよ！",
     );
+    unmount();
+  });
+
+  it("re-speaks intro prompt when language is switched mid-session", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say");
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    function TestHarness() {
+      const [lang, setLang] = useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MusicBoxGame
+            onHome={onHome}
+            difficulty="easy"
+            sceneId="twinkle"
+            onPickScene={onPickScene}
+            onBackToPicker={onBackToPicker}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    const { unmount } = render(<TestHarness />);
+
+    expect(saySpy).toHaveBeenLastCalledWith(
+      "Magic keys! Every tap makes a pretty note!",
+    );
+    expect(
+      screen.getByText("Magic keys! Every tap makes a pretty note!"),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    expect(saySpy).toHaveBeenLastCalledWith(
+      "まほうの けんばん！ タップすると きれいなおとが なるよ！",
+    );
+    expect(
+      screen.getByText(
+        "まほうの けんばん！ タップすると きれいなおとが なるよ！",
+      ),
+    ).toBeTruthy();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(saySpy).toHaveBeenCalledTimes(2);
+    expect(saySpy).toHaveBeenLastCalledWith(
+      "まほうの けんばん！ タップすると きれいなおとが なるよ！",
+    );
+    unmount();
+  });
+
+  it("re-speaks picker prompt when language is switched on song picker screen", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say");
+    const onHome = vi.fn();
+    const onPickScene = vi.fn();
+    const onBackToPicker = vi.fn();
+
+    function TestHarness() {
+      const [lang, setLang] = useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MusicBoxGame
+            onHome={onHome}
+            onPickScene={onPickScene}
+            onBackToPicker={onBackToPicker}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    const { unmount } = render(<TestHarness />);
+
+    expect(saySpy).toHaveBeenLastCalledWith("Pick a song to play!");
+    expect(screen.getByText("Pick a song to play!")).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    expect(saySpy).toHaveBeenLastCalledWith("うたを えらんでね！");
+    expect(screen.getByText("うたを えらんでね！")).toBeTruthy();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(saySpy).toHaveBeenCalledTimes(2);
+    expect(saySpy).toHaveBeenLastCalledWith("うたを えらんでね！");
     unmount();
   });
 
