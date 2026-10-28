@@ -136,31 +136,85 @@ export function pairsForDifficulty(
   }
 }
 
+export const CONFUSING_LETTER_GROUPS: string[][] = [
+  ["B", "D", "P", "Q"],
+  ["M", "N", "W"],
+  ["O", "Q", "C", "G"],
+  ["E", "F"],
+  ["U", "V"],
+];
+
+export function rhymeKeyFor(entry: WordEntry, lang: Lang): string | undefined {
+  if (lang === "en") return entry.rhymeKey;
+  if (lang === "ja") return entry.jaRhyme;
+  if (lang === "cmn") return entry.cmnRhyme;
+  return entry.yueRhyme;
+}
+
 export function buildBoard(
   rng: Rng,
   deck: ConceptMatchDeck = "letters",
   lang: Lang = "en",
   pairs = 2,
   excludedConcepts?: ReadonlySet<string>,
+  groupSimilar = false,
 ): ConceptMatchCard[] {
   if (deck === "letters") {
-    const pool = shuffle(rng, ALPHABET);
     const chosen: string[] = [];
     const excluded = new Set<string>();
 
-    for (const letter of pool) {
-      if (chosen.length >= pairs) {
-        break;
-      }
-      if (excluded.has(letter) || excludedConcepts?.has(letter)) {
-        continue;
-      }
+    const isAvailable = (letter: string) =>
+      !chosen.includes(letter) &&
+      !excluded.has(letter) &&
+      !excludedConcepts?.has(letter);
+
+    const addLetter = (letter: string) => {
       chosen.push(letter);
       const twin = GLYPH_TWINS[letter];
       if (twin) {
         excluded.add(twin);
       }
+    };
+
+    if (groupSimilar) {
+      const shuffledGroups = shuffle(rng, CONFUSING_LETTER_GROUPS);
+      for (const group of shuffledGroups) {
+        if (chosen.length >= pairs) {
+          break;
+        }
+        const available = group.filter(isAvailable);
+        if (available.length === 0) {
+          continue;
+        }
+        if (available.length < 2 && pairs - chosen.length >= 2) {
+          continue;
+        }
+        const shuffledGroup = shuffle(rng, available);
+        for (const letter of shuffledGroup) {
+          if (chosen.length >= pairs) {
+            break;
+          }
+          if (!isAvailable(letter)) {
+            continue;
+          }
+          addLetter(letter);
+        }
+      }
     }
+
+    if (chosen.length < pairs) {
+      const pool = shuffle(rng, ALPHABET);
+      for (const letter of pool) {
+        if (chosen.length >= pairs) {
+          break;
+        }
+        if (!isAvailable(letter)) {
+          continue;
+        }
+        addLetter(letter);
+      }
+    }
+
     const cards: ConceptMatchCard[] = chosen.flatMap((letter) => [
       {
         key: `${letter}-upper`,
@@ -179,31 +233,81 @@ export function buildBoard(
   }
 
   if (deck === "picture-word" || deck === "picture-spoken") {
-    const pool = shuffle(
-      rng,
-      WORDS.filter((entry) => Boolean(wordFor(entry, lang).text)),
+    const validWords = WORDS.filter((entry) =>
+      Boolean(wordFor(entry, lang).text),
     );
     const chosen: WordEntry[] = [];
     const excludedIcons = new Set<string>();
     const excludedWords = new Set<string>();
 
-    for (const entry of pool) {
-      if (chosen.length >= pairs) {
-        break;
-      }
+    const isAvailable = (entry: WordEntry) => {
       const text = wordFor(entry, lang).text;
-      if (
-        excludedIcons.has(entry.icon) ||
-        excludedWords.has(text) ||
-        excludedConcepts?.has(entry.icon)
-      ) {
-        continue;
-      }
+      return (
+        !excludedIcons.has(entry.icon) &&
+        !excludedWords.has(text) &&
+        !excludedConcepts?.has(entry.icon)
+      );
+    };
+
+    const addWord = (entry: WordEntry) => {
       chosen.push(entry);
       excludedIcons.add(entry.icon);
-      excludedWords.add(text);
+      excludedWords.add(wordFor(entry, lang).text);
       for (const twin of entry.nameTwins ?? []) {
         excludedIcons.add(twin);
+      }
+    };
+
+    if (groupSimilar) {
+      const rhymeGroups = new Map<string, WordEntry[]>();
+      for (const entry of validWords) {
+        const key = rhymeKeyFor(entry, lang);
+        if (key) {
+          const list = rhymeGroups.get(key) ?? [];
+          list.push(entry);
+          rhymeGroups.set(key, list);
+        }
+      }
+
+      const multiWordGroups = Array.from(rhymeGroups.values()).filter(
+        (group) => group.length >= 2,
+      );
+      const shuffledGroups = shuffle(rng, multiWordGroups);
+
+      for (const group of shuffledGroups) {
+        if (chosen.length >= pairs) {
+          break;
+        }
+        const available = group.filter(isAvailable);
+        if (available.length === 0) {
+          continue;
+        }
+        if (available.length < 2 && pairs - chosen.length >= 2) {
+          continue;
+        }
+        const shuffledGroup = shuffle(rng, available);
+        for (const entry of shuffledGroup) {
+          if (chosen.length >= pairs) {
+            break;
+          }
+          if (!isAvailable(entry)) {
+            continue;
+          }
+          addWord(entry);
+        }
+      }
+    }
+
+    if (chosen.length < pairs) {
+      const pool = shuffle(rng, validWords);
+      for (const entry of pool) {
+        if (chosen.length >= pairs) {
+          break;
+        }
+        if (!isAvailable(entry)) {
+          continue;
+        }
+        addWord(entry);
       }
     }
 
@@ -375,6 +479,7 @@ export function buildBoard(
           lang,
           count,
           usedConcepts,
+          groupSimilar,
         );
         cards.push(...deckCards);
         for (const card of deckCards) {
