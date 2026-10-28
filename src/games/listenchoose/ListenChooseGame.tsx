@@ -18,7 +18,7 @@ import { Difficulty } from "../../difficulty";
 import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
-import { sayThen, sfx, stopNarration } from "../../sound";
+import { sayThen, sfx, stopNarration, useSay } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { Word } from "./data";
 import {
@@ -66,6 +66,8 @@ export function ListenChooseGame({
     height,
     state.currentRound.choices.length,
   );
+
+  useSay(!started ? t(lang, "card.listenchoose.blurb") : null);
 
   useWinLine(state.won, t(lang, "win.soundsWords"));
 
