@@ -396,34 +396,47 @@ describe("ListenChooseGame", () => {
     expect(sound.sayThen).not.toHaveBeenCalled();
   });
 
-  it("supports captions toggle, defaults to ON for sound-off play, and translates ON/OFF", () => {
+  it("supports captions toggle, defaults to OFF to test auditory discrimination, and translates ON/OFF", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
 
     const captionsToggle = screen.getByTestId("captions-toggle");
-    // Captions are ON by default for R3 sound-off accessibility
-    expect(captionsToggle.textContent).toContain("ON");
-
-    fireEvent.click(captionsToggle);
+    // Captions default to OFF so auditory listening is tested
     expect(captionsToggle.textContent).toContain("OFF");
 
     fireEvent.click(screen.getByTestId("play-button"));
+    // Spoken word caption is omitted by default
     expect(screen.queryByTestId("listenchoose-caption")).toBeNull();
 
-    // Toggle back ON during gameplay
+    // Toggle ON during gameplay
     const gameToggle = screen.getByTestId("captions-toggle");
+    expect(gameToggle.textContent).toContain("OFF");
     fireEvent.click(gameToggle);
+    expect(gameToggle.textContent).toContain("ON");
     const spokenTarget = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     expect(screen.getByTestId("listenchoose-caption").textContent).toBe(
       spokenTarget,
     );
+
+    // Toggle back OFF during gameplay
+    fireEvent.click(gameToggle);
+    expect(gameToggle.textContent).toContain("OFF");
+    expect(screen.queryByTestId("listenchoose-caption")).toBeNull();
     unmount();
 
-    // Verify non-English (Japanese) localization of toggle
+    // Verify toggling ON on start screen preserves caption into round
+    const preToggle = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("captions-toggle"));
+    expect(screen.getByTestId("captions-toggle").textContent).toContain("ON");
+    fireEvent.click(screen.getByTestId("play-button"));
+    expect(screen.getByTestId("listenchoose-caption")).toBeTruthy();
+    preToggle.unmount();
+
+    // Verify non-English (Japanese) localization of toggle (defaults to オフ)
     render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
     const jaToggle = screen.getByTestId("captions-toggle");
-    expect(jaToggle.textContent).toContain("オン");
-    fireEvent.click(jaToggle);
     expect(jaToggle.textContent).toContain("オフ");
+    fireEvent.click(jaToggle);
+    expect(jaToggle.textContent).toContain("オン");
 
     // Verify hitSlop is applied to the toggles
     const captures = capturedPressableMap["captions-toggle"];
@@ -439,9 +452,7 @@ describe("ListenChooseGame", () => {
 
     // Play 25 rounds to reach level 3
     for (let i = 0; i < 25; i++) {
-      // Find the target text from the caption
-      const caption = screen.getByTestId("listenchoose-caption");
-      const targetText = caption.textContent;
+      const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
       expect(targetText).toBeTruthy();
 
       // Check all choices on screen
@@ -491,8 +502,7 @@ describe("ListenChooseGame", () => {
 
     // Complete 30 rounds
     for (let i = 0; i < 30; i++) {
-      const caption = screen.getByTestId("listenchoose-caption");
-      const targetText = caption.textContent;
+      const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
       const correctBtn = screen.getByRole("button", { name: targetText! });
       fireEvent.click(correctBtn);
       act(() => {
@@ -564,7 +574,9 @@ describe("ListenChooseGame", () => {
     expect(screen.queryByTestId("speaker-button")).toBeNull();
     const playBtn = screen.getByTestId("play-button");
     expect(playBtn).toBeTruthy();
-    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(screen.getByText("ことばを きいて えを えらぼう！")).toBeTruthy();
     expect(screen.getByText("あそぶ")).toBeTruthy();
 
@@ -588,8 +600,7 @@ describe("ListenChooseGame", () => {
     fireEvent.click(screen.getByTestId("play-button"));
 
     // Pick correct answer to trigger celebration
-    const caption = screen.getByTestId("listenchoose-caption");
-    const targetText = caption.textContent;
+    const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     const correctBtn = screen.getByRole("button", { name: targetText! });
     fireEvent.click(correctBtn);
 
@@ -612,7 +623,9 @@ describe("ListenChooseGame", () => {
     // Old celebration callback does not advance round or speak next word
     expect(sound.sayThen).not.toHaveBeenCalled();
     expect(screen.queryByTestId("speaker-button")).toBeNull();
-    expect(screen.getByTestId("listenchoose-streak").textContent).toContain("⭐ 0");
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 0",
+    );
   });
 
   it("cancels pending wobble timer and resets cleanly when language switches mid-wobble", () => {
@@ -667,7 +680,9 @@ describe("ListenChooseGame", () => {
     expect(screen.queryByTestId("speaker-button")).toBeNull();
     const playBtn = screen.getByTestId("play-button");
     expect(playBtn).toBeTruthy();
-    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(screen.getByText("ことばを きいて えを えらぼう！")).toBeTruthy();
     expect(screen.getByText("あそぶ")).toBeTruthy();
 

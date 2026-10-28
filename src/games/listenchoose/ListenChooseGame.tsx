@@ -48,7 +48,7 @@ export function ListenChooseGame({
 }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
   const [started, setStarted] = useState(false);
-  const [captions, setCaptions] = useState(true);
+  const [captions, setCaptions] = useState(false);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [state, setGameState] = useState<GameState>(() =>
     initGameState(rngRef.current, difficulty, lang),
@@ -181,9 +181,7 @@ export function ListenChooseGame({
       <ScrollView
         testID="listenchoose-scrollview"
         style={{ flex: 1 }}
-        contentContainerStyle={
-          layout.shortH ? styles.boardShort : styles.board
-        }
+        contentContainerStyle={layout.shortH ? styles.boardShort : styles.board}
       >
         {!started ? (
           <View
@@ -273,10 +271,7 @@ export function ListenChooseGame({
               </Pressable>
               {captions && (
                 <Text
-                  style={[
-                    styles.caption,
-                    layout.shortH && styles.captionShort,
-                  ]}
+                  style={[styles.caption, layout.shortH && styles.captionShort]}
                   testID="listenchoose-caption"
                 >
                   {getWordText(state.currentRound.target, lang)}
@@ -304,12 +299,7 @@ export function ListenChooseGame({
                 </Text>
               </Pressable>
             </View>
-            <View
-              style={[
-                styles.choicesContainer,
-                { gap: layout.gap },
-              ]}
-            >
+            <View style={[styles.choicesContainer, { gap: layout.gap }]}>
               {state.currentRound.choices.map((choice, i) => (
                 <ChoiceCard
                   key={`${state.streak}-${choice.icon}`}
