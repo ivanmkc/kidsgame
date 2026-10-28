@@ -13,7 +13,7 @@ import { SparkleBurst } from "../../components/Sparkles";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
@@ -39,6 +39,7 @@ function oddSettings(d: Difficulty): { n: number } {
 const CELEBRATION_MS = 600;
 
 export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
+  useLangEpoch(lang);
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const { n } = oddSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));

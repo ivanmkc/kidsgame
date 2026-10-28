@@ -4,12 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
-import { say, sfx } from "../../../sound";
+import { say, sfx, stopNarration } from "../../../sound";
 import { ICON_CATEGORIES } from "../../iconCategories";
 import { Lang } from "../../../lang";
+import { LangContext } from "../../../components/GameShell";
+import { t } from "../../../i18n";
 
 vi.mock("../../../sound", () => ({
   say: vi.fn(),
+  stopNarration: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
@@ -545,6 +548,129 @@ describe("OddOneGame", () => {
       expect(() => logic.itemLabel("unknown_icon", "en")).toThrow(
         "Unknown oddone icon: unknown_icon",
       );
+    });
+  });
+
+  describe("language switch safety", () => {
+    it("cancels old-language speech via stopNarration when switching language on victory screen", () => {
+      vi.useFakeTimers();
+      try {
+        function Harness() {
+          const [lang, setLang] = React.useState<Lang>("en");
+          return (
+            <LangContext.Provider
+              value={{
+                lang,
+                onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+              }}
+            >
+              <OddOneGame onHome={() => {}} difficulty="easy" lang={lang} />
+            </LangContext.Provider>
+          );
+        }
+
+        const { container } = render(<Harness />);
+
+        // Play 10 rounds to reach victory (easy spotitRounds = 10)
+        for (let r = 0; r < 10; r++) {
+          const correctBtn = container.querySelector(
+            '[data-testid$="-odd"]',
+          ) as HTMLElement;
+          expect(correctBtn).toBeTruthy();
+          act(() => {
+            fireEvent.click(correctBtn);
+          });
+          act(() => {
+            vi.advanceTimersByTime(600);
+          });
+        }
+
+        expect(
+          container.querySelector('[data-testid="win-overlay"]'),
+        ).toBeTruthy();
+        expect(say).toHaveBeenCalledWith(t("en", "win.oddone"));
+
+        vi.mocked(say).mockClear();
+        vi.mocked(stopNarration).mockClear();
+
+        // Cycle language via in-game header button while on victory screen
+        const langBtn = container.querySelector(
+          '[data-testid="lang-cycle"]',
+        ) as HTMLElement;
+        expect(langBtn).toBeTruthy();
+        act(() => {
+          fireEvent.click(langBtn);
+        });
+
+        // useLangEpoch calls stopNarration to halt in-flight victory audio
+        expect(stopNarration).toHaveBeenCalledTimes(1);
+
+        // Spoken victory message updates to Japanese
+        expect(say).toHaveBeenCalledWith(t("ja", "win.oddone"));
+
+        // Victory overlay displays translated message
+        expect(
+          container.querySelector('[data-testid="win-overlay"]')?.textContent,
+        ).toContain(t("ja", "win.oddone"));
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("halts old narration and speaks localized prompt when switching language mid-round", () => {
+      vi.spyOn(logic, "makeOddOneRound").mockImplementation(() => ({
+        baseCategory: "animals",
+        oddCategory: "food",
+        odd: "apple",
+        items: ["dog", "cat", "lion", "apple"],
+        oddIndex: 3,
+      }));
+
+      function Harness() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        return (
+          <LangContext.Provider
+            value={{
+              lang,
+              onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+            }}
+          >
+            <OddOneGame onHome={() => {}} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      const { container } = render(<Harness />);
+
+      expect(say).toHaveBeenCalledWith("Which one is NOT an animal?");
+      vi.mocked(say).mockClear();
+      vi.mocked(stopNarration).mockClear();
+
+      // Switch language to Japanese mid-round
+      const langBtn = container.querySelector(
+        '[data-testid="lang-cycle"]',
+      ) as HTMLElement;
+      expect(langBtn).toBeTruthy();
+      act(() => {
+        fireEvent.click(langBtn);
+      });
+
+      // Old narration halted via useLangEpoch
+      expect(stopNarration).toHaveBeenCalledTimes(1);
+
+      // Prompt re-spoken in Japanese
+      expect(say).toHaveBeenCalledWith("どうぶつじゃないのは？");
+
+      // Banner text updated to Japanese
+      const banner = container.querySelector(
+        '[data-testid^="oddone-question-"]',
+      ) as HTMLElement;
+      expect(banner.textContent).toBe("🔊 どうぶつじゃないのは？");
+
+      // Tile accessibility labels updated to Japanese
+      const tiles = container.querySelectorAll('[data-testid^="oddone-item-"]');
+      expect(tiles[0]?.getAttribute("aria-label")).toBe("いぬ");
+      expect(tiles[3]?.getAttribute("aria-label")).toBe("りんご");
     });
   });
 });
