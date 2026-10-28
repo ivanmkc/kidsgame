@@ -142,6 +142,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     } else {
       lockedRef.current = true;
       sfx.wrong();
+      say(tileLabel(round.tiles[i].icon, lang));
       setWrongIdx(i);
       setTimeout(() => {
         lockedRef.current = false;

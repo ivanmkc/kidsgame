@@ -144,6 +144,39 @@ describe("RulesGame", () => {
     }
   });
 
+  it("plays the spoken name of a distractor object when tapped concurrently with the error sound", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+        ruleNumber: 1,
+        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        isRecall: false,
+        tiles: [
+          { icon: "blossom", isMatch: true },
+          { icon: "soccer", isMatch: false },
+        ],
+        matchCount: 1,
+      });
+
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      // Clear intro saySequence calls
+      vi.mocked(saySequence).mockClear();
+      vi.mocked(say).mockClear();
+
+      const wrongTile = screen.getByTestId("rules-tile-1-soccer-n");
+      
+      act(() => {
+        fireEvent.click(wrongTile);
+      });
+
+      expect(sfx.wrong).toHaveBeenCalledTimes(1);
+      expect(say).toHaveBeenCalledWith("ball");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("preserves simultaneous multi-touch taps on correct tiles and completes the round", () => {
     vi.useFakeTimers();
     try {
