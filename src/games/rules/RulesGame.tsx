@@ -76,6 +76,8 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [reminded, setReminded] = useState(false);
   const remindTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const winTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const remind = () => {
     sfx.tap();
     say(round.rule.label);
@@ -94,6 +96,8 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     return () => {
       stopNarration();
       if (remindTimer.current) clearTimeout(remindTimer.current);
+      if (winTimer.current) clearTimeout(winTimer.current);
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
     };
   }, []);
 
@@ -129,7 +133,8 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         setCelebrate((c) => c + 1);
         const nextIdx = roundIdx + 1;
         if (remindTimer.current) clearTimeout(remindTimer.current);
-        setTimeout(() => {
+        if (winTimer.current) clearTimeout(winTimer.current);
+        winTimer.current = setTimeout(() => {
           lockedRef.current = false;
           setRoundIdx(nextIdx);
           if (nextIdx < roundsToWin) {
@@ -143,7 +148,8 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
       lockedRef.current = true;
       sfx.wrong();
       setWrongIdx(i);
-      setTimeout(() => {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongTimer.current = setTimeout(() => {
         lockedRef.current = false;
         setWrongIdx((w) => (w === i ? null : w));
       }, 450);

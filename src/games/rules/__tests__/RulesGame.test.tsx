@@ -516,6 +516,56 @@ describe("RulesGame", () => {
         vi.useRealTimers();
       }
     });
+
+    it("clears the win timer when unmounting to prevent state leaks", () => {
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      try {
+        const { unmount } = render(
+          <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
+        );
+
+        clearTimeoutSpy.mockClear();
+
+        // Trigger win timer by tapping all correct tiles
+        const matchTiles = screen.getAllByTestId(/-y$/);
+        for (const tile of matchTiles) {
+          fireEvent.click(tile);
+        }
+
+        // Unmount while the timer is still active (before 550ms)
+        unmount();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        vi.useRealTimers();
+      }
+    });
+
+    it("clears the wrong timer when unmounting to prevent state leaks", () => {
+      vi.useFakeTimers();
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      try {
+        const { unmount } = render(
+          <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
+        );
+
+        clearTimeoutSpy.mockClear();
+
+        // Trigger wrong timer by tapping a wrong tile
+        const wrongTiles = screen.getAllByTestId(/-n$/);
+        fireEvent.click(wrongTiles[0]);
+
+        // Unmount while the timer is still active (before 450ms)
+        unmount();
+
+        expect(clearTimeoutSpy).toHaveBeenCalled();
+      } finally {
+        clearTimeoutSpy.mockRestore();
+        vi.useRealTimers();
+      }
+    });
   });
 
   describe("layout responsiveness", () => {
