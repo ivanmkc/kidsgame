@@ -17,7 +17,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sayThen, saySequence, sfx } from "../../sound";
+import { sayThen, saySequence, sfx, stopNarration } from "../../sound";
 import {
   SoundsRound,
   makeSoundsRound,
@@ -55,6 +55,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
 
   const prompts = resolveSoundsPrompts(round.target, lang);
 
+  useEffect(() => stopNarration, []);
   useEffect(() => {
     if (!won) saySequence(prompts.promptLines);
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
