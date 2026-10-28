@@ -330,6 +330,23 @@ describe("RhymeGame", () => {
     expect(goodSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("shows correct style on the tapped answer tile during celebration", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const currentRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const correctTile = screen.getByTestId(
+      `rhyme-tile-${currentRound.answerIdx}`,
+    );
+
+    const before = correctTile.className;
+    fireEvent.click(correctTile);
+    const after = correctTile.className;
+
+    expect(after).not.toEqual(before);
+  });
+
   it("resets wrongIdx and clears wrong timer when language changes mid-round", () => {
     const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
     const { rerender } = render(
@@ -446,4 +463,3 @@ describe("RhymeGame", () => {
     }
   });
 });
-

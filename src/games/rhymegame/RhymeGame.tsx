@@ -77,6 +77,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     return r;
   });
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [correctIdx, setCorrectIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = playable && roundIdx >= roundsToWin;
@@ -91,6 +92,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     prevLangRef.current = gameLang;
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     setWrongIdx(null);
+    setCorrectIdx(null);
     lockedRef.current = false;
     historyRef.current = [];
     if (playable) {
@@ -119,11 +121,13 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     if (round.tiles[i].isAnswer) {
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       setWrongIdx(null);
+      setCorrectIdx(i);
       lockedRef.current = true;
       sfx.good();
       const nextIdx = roundIdx + 1;
       sayThen(round.confirmLines, () => {
         lockedRef.current = false;
+        setCorrectIdx(null);
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           const r = makeRhymeRound(
@@ -170,6 +174,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
       setRound(null);
     }
     setWrongIdx(null);
+    setCorrectIdx(null);
   };
 
   const cols = tileCount;
@@ -266,6 +271,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
                         shadows.soft,
                         { width: tile, height: tile },
                         wrongIdx === i && styles.wrong,
+                        correctIdx === i && styles.correct,
                         pressed && styles.pressed,
                       ]}
                     >
@@ -354,5 +360,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
+  correct: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.15)",
+  },
   pressed: { transform: [{ scale: 0.94 }] },
 });
