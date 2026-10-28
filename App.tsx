@@ -53,6 +53,7 @@ import { FastSlowGame } from './src/games/fastslow/FastSlowGame';
 import { SameDiffGame } from './src/games/samediff/SameDiffGame';
 import { RulesGame } from './src/games/rules/RulesGame';
 import { SpotItGame } from './src/games/spotit/SpotItGame';
+import { ConceptMatchGame } from './src/games/conceptmatch/ConceptMatchGame';
 import { previewFor } from './src/components/MenuPreviews';
 import { KGB_BUILD } from './src/assets/build';
 import { DifficultyFilter, difficultyOf, loadFilter, nextFilter, saveFilter } from './src/difficulty';
@@ -140,7 +141,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff', 'cm-numdots', 'cm-numhan', 'cm-shapes', 'cm-animals'];
   // A stale/mistyped hash must never strand a kid on a blank page — nor
   // must a link to a game this deploy holds back.
   const knownScreen = KNOWN.includes(parts.screen) && (parts.screen !== 'escape' || ESCAPE_SHIPPED) ? parts.screen : 'menu';
@@ -257,6 +258,10 @@ export default function App() {
           lang={lang}
         />
       )}
+      {screen === 'cm-numdots' && <ConceptMatchGame deck="numerals-dots" onHome={goHome} lang={lang} />}
+      {screen === 'cm-numhan' && <ConceptMatchGame deck="numerals-han" onHome={goHome} lang={lang} />}
+      {screen === 'cm-shapes' && <ConceptMatchGame deck="shapes-objects" onHome={goHome} lang={lang} />}
+      {screen === 'cm-animals' && <ConceptMatchGame deck="animals-sounds" onHome={goHome} lang={lang} />}
       </LangContext.Provider>
     </SafeAreaView>
   );

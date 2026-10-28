@@ -36,7 +36,11 @@ export type CardKey =
   | 'echobeat'
   | 'steadybeat'
   | 'fastslow'
-  | 'samediff';
+  | 'samediff'
+  | 'cm-numdots'
+  | 'cm-numhan'
+  | 'cm-shapes'
+  | 'cm-animals';
 
 export interface CardDef {
   route: string;
@@ -59,6 +63,8 @@ export const NUMBER_CARDS: CardDef[] = [
   { route: 'numbers', color: '#3E9BB8', key: 'numbers', preview: 'icons8' },
   { route: 'compare', color: '#D66FA8', key: 'compare', preview: 'icons13' },
   { route: 'sums', color: '#7A6FD6', key: 'sums', preview: 'icons20' },
+  { route: 'cm-numdots', color: '#4FB06D', key: 'cm-numdots', preview: 'icons8' },
+  { route: 'cm-numhan', color: '#E85D75', key: 'cm-numhan', preview: 'icons8' },
 ];
 
 // tools/ship.sh holds Little Escapes' rooms back while its clean plates fail
@@ -78,6 +84,8 @@ export const GAME_CARDS: CardDef[] = [
   { route: 'sticker', color: '#D66FA8', key: 'sticker', preview: 'icons0' },
   { route: 'story', color: '#7A6FD6', key: 'story', preview: 'story' },
   { route: 'bingo', color: '#D66FA8', key: 'bingo', preview: 'bingo' },
+  { route: 'cm-shapes', color: colors.teal, key: 'cm-shapes', preview: 'icons8' },
+  { route: 'cm-animals', color: '#E8874F', key: 'cm-animals', preview: 'icons8' },
   // musicbox hidden pending redesign — v1 missed the Sago Mini interaction
   // model (route stays live for dev via #/musicbox deep link).
   // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },
