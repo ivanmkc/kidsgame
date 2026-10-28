@@ -751,6 +751,262 @@ describe("HighLowGame language switch safety", () => {
       initialScore,
     );
   });
+
+  it("cancels stale instructional feedback speech and speaks in new language when language switches mid-feedback", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+      noteA: 60,
+      noteB: 72, // ascending -> correctAnswer is "high"
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    // Complete initial melody listen
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Tap wrong answer ("low")
+    const lowBtn = screen.getByTestId("highlow-low");
+    fireEvent.click(lowBtn);
+
+    // Advance 500ms to trigger wrong feedback in English
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["Higher", "Listen..."],
+      expect.any(Function),
+      3000,
+    );
+    expect(
+      screen.getByTestId("highlow-instructional-direction").textContent,
+    ).toContain("Higher");
+
+    sayThenSpy.mockClear();
+    stopNarrationSpy.mockClear();
+
+    // Cycle language to Japanese while instructional speech is active
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Stale speech stopped immediately
+    expect(stopNarrationSpy).toHaveBeenCalled();
+
+    // Re-speaks instructional feedback in Japanese
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["たかくなった", "きいてね…"],
+      expect.any(Function),
+      3000,
+    );
+    expect(
+      screen.getByTestId("highlow-instructional-direction").textContent,
+    ).toContain("たかくなった");
+
+    // Advance 3000ms for Japanese speech to finish
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    // Notes sequence finishes
+    act(() => {
+      onDoneCb?.();
+    });
+
+    // Pick phase restored with Japanese labels and unlocked input
+    const highBtn = screen.getByTestId("highlow-high");
+    expect(highBtn.textContent).toContain("たかくなった");
+    expect(screen.queryByTestId("highlow-instructional-direction")).toBeNull();
+
+    // Player can now tap the correct answer in Japanese
+    fireEvent.click(highBtn);
+    expect(screen.getByTestId("highlow-score").textContent).toContain("0/8");
+  });
+
+  it("cancels pending wrong delay timer and speaks instructional feedback in new language when language switches during error flash", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+      noteA: 72,
+      noteB: 60, // descending -> correctAnswer is "low"
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    // Complete initial melody listen
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Tap wrong answer ("high")
+    const highBtn = screen.getByTestId("highlow-high");
+    fireEvent.click(highBtn);
+
+    // Advance only 200ms into the 500ms error flash
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+
+    expect(sayThenSpy).not.toHaveBeenCalled();
+
+    // Switch language to Japanese mid-flash
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Instructional feedback starts in Japanese, NOT English
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      ["ひくくなった", "きいてね…"],
+      expect.any(Function),
+      3000,
+    );
+    expect(sayThenSpy).not.toHaveBeenCalledWith(
+      ["Lower", "Listen..."],
+      expect.any(Function),
+      expect.any(Number),
+    );
+  });
+
+  it("stops playing sequence and restarts melody cleanly when language switches mid-listen", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    const playSpy = vi
+      .spyOn(music, "playSequence")
+      .mockImplementation((_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      });
+    const stopSeqSpy = vi.spyOn(music, "stopSequence");
+
+    render(<LangHarness initialLang="en" />);
+
+    // Advance 400ms to start playback
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    stopSeqSpy.mockClear();
+
+    // Switch language while sequence is playing
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    expect(stopSeqSpy).toHaveBeenCalled();
+
+    // After 400ms restart delay, melody plays again
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(playSpy).toHaveBeenCalledTimes(2);
+
+    // Sequence finishes and transitions to pick phase with Japanese buttons
+    act(() => {
+      onDoneCb?.();
+    });
+    expect(screen.getByTestId("highlow-high").textContent).toContain(
+      "たかくなった",
+    );
+    expect(screen.getByTestId("highlow-low").textContent).toContain(
+      "ひくくなった",
+    );
+  });
+
+  it("does not re-enter instructional feedback when switching language in subsequent rounds after an earlier wrong pick", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    let roundCount = 0;
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockImplementation(() => {
+      roundCount++;
+      return roundCount === 1
+        ? { noteA: 60, noteB: 72 } // round 1: ascending -> "high"
+        : { noteA: 72, noteB: 60 }; // round 2: descending -> "low"
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    // Round 1 start: complete initial melody listen
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Make an incorrect pick on Round 1
+    const lowBtnR1 = screen.getByTestId("highlow-low");
+    fireEvent.click(lowBtnR1);
+
+    // Error flash delay fires and instructional feedback plays
+    act(() => {
+      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(3000);
+      onDoneCb?.();
+    });
+
+    // Now complete Round 1 with the correct pick
+    const highBtnR1 = screen.getByTestId("highlow-high");
+    fireEvent.click(highBtnR1);
+
+    // Advance celebration (1000ms) to load Round 2
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Round 2 start: complete melody playback and reach pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    expect(screen.getByTestId("highlow-high")).toBeDefined();
+    sayThenSpy.mockClear();
+
+    // In Round 2 pick phase, switch language to Japanese
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Language switch must NOT re-enter instructional feedback
+    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("highlow-instructional-direction")).toBeNull();
+
+    // Round 2 remains in pick phase with updated Japanese labels
+    const highBtnR2 = screen.getByTestId("highlow-high");
+    const lowBtnR2 = screen.getByTestId("highlow-low");
+    expect(highBtnR2.textContent).toContain("たかくなった");
+    expect(lowBtnR2.textContent).toContain("ひくくなった");
+  });
 });
 
 describe("HighLowGame melodic contour and relative direction", () => {
