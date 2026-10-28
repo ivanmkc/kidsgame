@@ -24,6 +24,7 @@ export const CMN: Table = {
   'a11y.backMenu': '返回菜单',
   'a11y.backPicker': '返回关卡选择',
   'a11y.target': '目标',
+  'a11y.targetFound': '目标，已找到',
   'grownups.install': '📲 添加到主屏幕',
   'grownups.share': '📤 分享给家长',
   'grownups.copied': '✅ 已复制链接！',
