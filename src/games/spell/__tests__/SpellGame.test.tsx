@@ -1010,6 +1010,115 @@ describe("SpellGame", () => {
     expect(confetti2).toBeDefined();
     expect(confetti2).not.toBe(confetti1);
   });
+
+  it("renders faint ghost character previews in unfilled slots and replaces them with placed letters", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    const { rerender } = render(
+      <SpellGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    const slot0 = screen.getByTestId("spell-slot-0");
+    const slot1 = screen.getByTestId("spell-slot-1");
+    const slot2 = screen.getByTestId("spell-slot-2");
+
+    // All slots initially show ghost letters with faint opacity
+    const ghost0 = within(slot0).getByText("C");
+    const ghost1 = within(slot1).getByText("A");
+    const ghost2 = within(slot2).getByText("T");
+
+    expect(window.getComputedStyle(ghost0).opacity).toBe("0.28");
+    expect(window.getComputedStyle(ghost1).opacity).toBe("0.28");
+    expect(window.getComputedStyle(ghost2).opacity).toBe("0.28");
+
+    // Tap first tile 'C'
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+
+    // Slot 0 is now filled with placed char 'C' (not ghost opacity)
+    const filled0 = within(slot0).getByText("C");
+    expect(window.getComputedStyle(filled0).opacity).not.toBe("0.28");
+
+    // Slots 1 and 2 still show faint ghost letters
+    expect(window.getComputedStyle(within(slot1).getByText("A")).opacity).toBe(
+      "0.28",
+    );
+    expect(window.getComputedStyle(within(slot2).getByText("T")).opacity).toBe(
+      "0.28",
+    );
+
+    // Tap second tile 'A'
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+
+    const filled1 = within(slot1).getByText("A");
+    expect(window.getComputedStyle(filled1).opacity).not.toBe("0.28");
+    expect(window.getComputedStyle(within(slot2).getByText("T")).opacity).toBe(
+      "0.28",
+    );
+
+    // Japanese word also renders kana ghost scaffolding
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "ja",
+        text: "ねこ",
+        chars: ["ね", "こ"],
+        roman: "neko",
+        source: "spotit",
+      },
+      chars: ["ね", "こ"],
+      decoys: [],
+      tiles: [
+        { id: 10, char: "ね" },
+        { id: 20, char: "こ" },
+      ],
+    });
+
+    rerender(<SpellGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    const jaSlot0 = screen.getByTestId("spell-slot-0");
+    const jaSlot1 = screen.getByTestId("spell-slot-1");
+    const jaGhost0 = within(jaSlot0).getByText("ね");
+    const jaGhost1 = within(jaSlot1).getByText("こ");
+
+    expect(window.getComputedStyle(jaGhost0).opacity).toBe("0.28");
+    expect(window.getComputedStyle(jaGhost1).opacity).toBe("0.28");
+  });
 });
 
 
