@@ -23,6 +23,7 @@ vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-native")>();
   return {
     ...actual,
+    useWindowDimensions: () => ({ width: window.innerWidth || 800, height: window.innerHeight || 1000 }),
     View: (props: import("react-native").ViewProps) => {
       if (props.testID === "diff-wrap") {
         lastDiffWrapProps = props;
@@ -392,6 +393,163 @@ describe("DiffGame", () => {
       expect(scene.nameT?.ja).toBeTruthy();
       expect(scene.nameT?.cmn).toBeTruthy();
       expect(scene.nameT?.yue).toBeTruthy();
+    }
+  });
+
+  it("picks a random scene when surprise button is clicked", () => {
+    const onPickScene = vi.fn();
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("scene-surprise"));
+    expect(onPickScene).toHaveBeenCalled();
+  });
+
+  it("calls onFilter when filter chip is clicked", () => {
+    const onFilter = vi.fn();
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        onFilter={onFilter}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("difficulty-cycle"));
+    expect(onFilter).toHaveBeenCalled();
+  });
+
+  it("renders in landscape mode correctly", () => {
+    const origW = window.innerWidth;
+    const origH = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", { value: 1000, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 500, configurable: true });
+    
+    try {
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={manifest.diff[0].id}
+          onPickScene={noop}
+          onBackToPicker={noop}
+        />,
+      );
+      expect(lastDiffWrapProps?.style).toBeDefined();
+    } finally {
+      Object.defineProperty(window, "innerWidth", { value: origW, configurable: true });
+      Object.defineProperty(window, "innerHeight", { value: origH, configurable: true });
+    }
+  });
+
+  it("bypasses image loading check on non-DOM platforms", () => {
+    vi.useFakeTimers();
+    const originalQuerySelectorAll = Element.prototype.querySelectorAll;
+    Object.defineProperty(Element.prototype, "querySelectorAll", { value: undefined, configurable: true });
+    
+    try {
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId={manifest.diff[0].id}
+          onPickScene={noop}
+          onBackToPicker={noop}
+        />,
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+    } finally {
+      Object.defineProperty(Element.prototype, "querySelectorAll", { value: originalQuerySelectorAll, configurable: true });
+    }
+    expect(screen.queryByTestId("diff-loading")).toBeNull();
+  });
+
+  it("becomes ready when all images are loaded", () => {
+    vi.useFakeTimers();
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={manifest.diff[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("diff-loading")).toBeDefined();
+
+    const imgs = document.querySelectorAll("img");
+    imgs.forEach(img => {
+      Object.defineProperty(img, "complete", { value: true, configurable: true });
+      Object.defineProperty(img, "naturalWidth", { value: 100, configurable: true });
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(screen.queryByTestId("diff-loading")).toBeNull();
+  });
+
+  it("advances to next scene when next button is clicked on win overlay", () => {
+    vi.useFakeTimers();
+    const onPickScene = vi.fn();
+    const scene = manifest.diff[0];
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={scene.id}
+        onPickScene={onPickScene}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const total = scene.pool ? 4 : (scene.diffs?.length ?? 4);
+    for (let i = 0; i < total; i++) {
+      fireEvent.click(screen.getByTestId(`left-target-${i}`));
+    }
+    
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    
+    const nextBtn = screen.getByTestId("play-again");
+    fireEvent.click(nextBtn);
+    expect(onPickScene).toHaveBeenCalled();
+  });
+
+  it("renders a legacy scene without pool", () => {
+    const legacyScene: typeof manifest.diff[0] = {
+      id: "legacy",
+      name: "Legacy",
+      w: 800,
+      h: 600,
+      diffs: [{ x: 0, y: 0, w: 10, h: 10, what: "test" }]
+    };
+    manifest.diff.push(legacyScene);
+    try {
+      render(
+        <DiffGame
+          onHome={noop}
+          difficulty="medium"
+          sceneId="legacy"
+          onPickScene={noop}
+          onBackToPicker={noop}
+        />,
+      );
+      expect(screen.getByTestId("left-target-0")).toBeDefined();
+    } finally {
+      manifest.diff.pop();
     }
   });
 });

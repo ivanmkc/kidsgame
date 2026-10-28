@@ -145,6 +145,7 @@ describe("SoundsGame language switch safety", () => {
   });
 
   it("re-speaks prompt in current language on incorrect tile tap after language switch", () => {
+    vi.useFakeTimers();
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const wrongSpy = vi.spyOn(sound.sfx, "wrong");
 
@@ -168,6 +169,11 @@ describe("SoundsGame language switch safety", () => {
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
     expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    vi.useRealTimers();
   });
 });
 
