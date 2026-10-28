@@ -191,9 +191,9 @@ describe("EchoBeatGame", () => {
     });
     expect(playDrumSpy).toHaveBeenCalledTimes(3);
 
-    // Wait for evaluation timer (1200ms)
+    // Wait for evaluation timer (3000ms)
     act(() => {
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(3000);
     });
 
     // Retry phase active
@@ -254,6 +254,61 @@ describe("EchoBeatGame", () => {
     expect(playDrumSpy).toHaveBeenCalledTimes(3);
     expect(screen.queryByText("🔄")).toBeNull();
     expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+
+    vi.useRealTimers();
+  });
+
+  it("allows pauses between taps without premature timeout on easy mode", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.5, 0.5],
+      hitCount: 3,
+    }));
+    const wrongSpy = vi.spyOn(sound.sfx, "wrong");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Wait for demo rhythm to finish playing
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Tap 1
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    // Pause 1.25s (1250ms) - should not fail or trigger retry
+    act(() => {
+      vi.advanceTimersByTime(1250);
+    });
+    expect(wrongSpy).not.toHaveBeenCalled();
+    expect(screen.queryByText("🔄")).toBeNull();
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    // Tap 2
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    // Pause 1.25s again
+    act(() => {
+      vi.advanceTimersByTime(1250);
+    });
+    expect(wrongSpy).not.toHaveBeenCalled();
+    expect(screen.queryByText("🔄")).toBeNull();
+
+    // Tap 3 (completes round)
+    act(() => {
+      fireEvent.click(drum);
+    });
+
+    // Evaluates immediately on completing hitCount
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
 
     vi.useRealTimers();
   });
@@ -571,7 +626,7 @@ describe("EchoBeatGame", () => {
     const drum = screen.getByTestId("echobeat-drum");
     act(() => {
       fireEvent.click(drum);
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(3000);
     });
     expect(screen.getAllByText("🔄").length).toBeGreaterThan(0);
 
