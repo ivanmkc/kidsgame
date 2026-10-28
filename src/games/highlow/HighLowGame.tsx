@@ -12,7 +12,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
 import { SparkleBurst } from "../../components/Sparkles";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
@@ -38,6 +38,7 @@ interface Props {
 }
 
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
+  const { epoch, isValid } = useLangEpoch(lang);
   const { width } = useWindowDimensions();
   const layout = highLowLayout(width);
   const total = roundsToWin(difficulty);
@@ -45,6 +46,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const lockedRef = useRef(false);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
   const firstTryRef = useRef(true);
@@ -68,9 +70,22 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     return () => {
       roundEpochRef.current++;
       feedbackSpeechRef.current = null;
-      if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
-      if (winTimerRef.current) clearTimeout(winTimerRef.current);
+      if (listenTimerRef.current) {
+        clearTimeout(listenTimerRef.current);
+        listenTimerRef.current = null;
+      }
+      if (advanceTimerRef.current) {
+        clearTimeout(advanceTimerRef.current);
+        advanceTimerRef.current = null;
+      }
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
+      if (winTimerRef.current) {
+        clearTimeout(winTimerRef.current);
+        winTimerRef.current = null;
+      }
       stopSequence();
       stopNarration();
     };
@@ -106,9 +121,15 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     if (!won) {
       setPhase("listen");
       setListenNote(null);
-      const timer = setTimeout(() => playRound(round), 400);
+      listenTimerRef.current = setTimeout(() => {
+        listenTimerRef.current = null;
+        playRound(round);
+      }, 400);
       return () => {
-        clearTimeout(timer);
+        if (listenTimerRef.current) {
+          clearTimeout(listenTimerRef.current);
+          listenTimerRef.current = null;
+        }
         stopSequence();
       };
     }
@@ -123,17 +144,57 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       sayThen(
         feedback,
         () => {
-          if (roundEpochRef.current === currentEpoch) {
+          if (roundEpochRef.current === currentEpoch && isValid()) {
             playRound(round);
           }
         },
         3000,
       );
     }
-  }, [phase, won, playRound, round]);
+  }, [phase, won, playRound, round, isValid]);
+
+  useEffect(() => {
+    if (epoch === 0 || won) return;
+    if (listenTimerRef.current) {
+      clearTimeout(listenTimerRef.current);
+      listenTimerRef.current = null;
+    }
+    stopSequence();
+    stopNarration();
+    const currentEpoch = ++roundEpochRef.current;
+    if (
+      wrongPick !== null ||
+      wrongTimerRef.current !== null ||
+      (phase === "listen" && instructionalDirection !== null)
+    ) {
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
+      setWrongPick(null);
+      setInstructionalDirection(correctAnswer(round));
+      setPhase("listen");
+      setListenNote(null);
+      const feedback = getInstructionalFeedback(round, lang);
+      sayThen(
+        feedback,
+        () => {
+          if (roundEpochRef.current === currentEpoch && isValid()) {
+            playRound(round);
+          }
+        },
+        3000,
+      );
+    } else if (phase === "listen") {
+      listenTimerRef.current = setTimeout(() => {
+        listenTimerRef.current = null;
+        playRound(round);
+      }, 400);
+    }
+  }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "high" | "low") => {
-    if (won || phase !== "pick" || lockedRef.current) return;
+    if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
@@ -146,16 +207,24 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       setRoundIndex(nextRoundIndex);
       setPhase("celebrate");
       if (nextRoundIndex < total) {
-        if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+        if (advanceTimerRef.current) {
+          clearTimeout(advanceTimerRef.current);
+          advanceTimerRef.current = null;
+        }
         advanceTimerRef.current = setTimeout(() => {
+          advanceTimerRef.current = null;
           lockedRef.current = false;
           firstTryRef.current = true;
           roundEpochRef.current++;
           setRound(makeHighLowRound(rngRef.current, difficulty));
         }, 1000);
       } else {
-        if (winTimerRef.current) clearTimeout(winTimerRef.current);
+        if (winTimerRef.current) {
+          clearTimeout(winTimerRef.current);
+          winTimerRef.current = null;
+        }
         winTimerRef.current = setTimeout(() => {
+          winTimerRef.current = null;
           lockedRef.current = false;
           setWon(true);
         }, 1000);
@@ -167,9 +236,13 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
       const trueDir = correctAnswer(round);
-      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
       wrongTimerRef.current = setTimeout(() => {
-        if (roundEpochRef.current !== currentEpoch) return;
+        wrongTimerRef.current = null;
+        if (roundEpochRef.current !== currentEpoch || !isValid()) return;
         setWrongPick(null);
         setInstructionalDirection(trueDir);
         feedbackSpeechRef.current = getInstructionalFeedback(round, lang);
@@ -182,9 +255,22 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     roundEpochRef.current++;
     feedbackSpeechRef.current = null;
-    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
-    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
-    if (winTimerRef.current) clearTimeout(winTimerRef.current);
+    if (listenTimerRef.current) {
+      clearTimeout(listenTimerRef.current);
+      listenTimerRef.current = null;
+    }
+    if (advanceTimerRef.current) {
+      clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
+    if (winTimerRef.current) {
+      clearTimeout(winTimerRef.current);
+      winTimerRef.current = null;
+    }
     stopSequence();
     stopNarration();
     lockedRef.current = false;
@@ -203,7 +289,14 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     if (phase === "pick" && !lockedRef.current) {
       stopSequence();
       stopNarration();
-      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      if (listenTimerRef.current) {
+        clearTimeout(listenTimerRef.current);
+        listenTimerRef.current = null;
+      }
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
       setWrongPick(null);
       setInstructionalDirection(null);
       setPhase("listen");
