@@ -385,13 +385,13 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             >
               {result === "good" ? "🎉" : result === "bad" ? "🔄" : "👆"}
             </Text>
-            <Text style={[styles.statusText, shortH && styles.statusTextShort]}>
-              {result === "good"
-                ? "🎉"
-                : result === "bad"
-                  ? "🔄"
-                  : t(lang, "music.yourTurn" as never)}
-            </Text>
+            {result === null && (
+              <Text
+                style={[styles.statusText, shortH && styles.statusTextShort]}
+              >
+                {t(lang, "music.yourTurn" as never)}
+              </Text>
+            )}
             <Animated.View
               testID="echobeat-tempo-pulse"
               style={[
@@ -479,6 +479,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: 10,
   },
   statusCardShort: {

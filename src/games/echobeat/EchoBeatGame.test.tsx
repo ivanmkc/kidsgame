@@ -787,6 +787,60 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("renders a single emoji in status card during celebration and retry without duplicating emojis", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward demo rhythm into tap phase
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(screen.getAllByText("👆")).toHaveLength(1);
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Enter correct 2 taps to trigger celebration
+    act(() => {
+      fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
+      fireEvent.click(drum);
+    });
+
+    // During celebration, only a single celebration emoji is rendered in status card
+    expect(screen.getAllByText("🎉")).toHaveLength(1);
+    expect(screen.queryByText("Your turn!")).toBeNull();
+
+    // Advance past celebration (800ms) to start round 2
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByText("Listen...")).toBeTruthy();
+
+    // Advance past round 2 demo into tap phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    // Tap once (incorrect rhythm) and wait for evaluation delay (1200ms)
+    act(() => {
+      fireEvent.click(drum);
+      vi.advanceTimersByTime(1200);
+    });
+
+    // During retry, only a single retry emoji is rendered in status card
+    expect(screen.getAllByText("🔄")).toHaveLength(1);
+    expect(screen.queryByText("Your turn!")).toBeNull();
+
+    vi.useRealTimers();
+  });
 });
 
 function LangHarness({
