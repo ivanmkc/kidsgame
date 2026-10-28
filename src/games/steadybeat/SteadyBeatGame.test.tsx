@@ -312,3 +312,172 @@ it("speaks in the updated language when lang changes during listen phase", () =>
   saySpy.mockRestore();
   vi.useRealTimers();
 });
+
+it("clears round advance timeout on unmount during result phase", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  const { unmount } = render(
+    <SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+  );
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+
+  // Advance past tap phase evaluation timer (5300ms) to enter result phase
+  act(() => {
+    vi.advanceTimersByTime(5400);
+  });
+
+  expect(screen.getAllByText("☆")).toHaveLength(8);
+
+  unmount();
+
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("clears round advance timeout on unmount during result phase after passed round", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  const { unmount } = render(
+    <SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+  );
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  const circle = screen.getByTestId("steadybeat-circle");
+
+  // Tap 8 times on each beat to pass the round
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    act(() => {
+      fireEvent.click(circle);
+    });
+  }
+
+  // Advance past tap phase evaluation timer (8 * 600 + 500 = 5300ms total tap time; 4800ms elapsed + 600ms = 5400ms)
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+
+  unmount();
+
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("advances to next round after 1200ms result phase when round is passed", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    act(() => {
+      fireEvent.click(circle);
+    });
+  }
+
+  // Advance past tap evaluation
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+
+  // Advance past 1200ms result phase
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // Next round is generated and started
+  expect(roundSpy).toHaveBeenCalledTimes(2);
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("retries round after 1200ms result phase when round is failed", () => {
+  vi.useFakeTimers();
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  // No taps, advance past tap phase evaluation timer (5300ms)
+  act(() => {
+    vi.advanceTimersByTime(5400);
+  });
+
+  expect(screen.getAllByText("☆")).toHaveLength(8);
+
+  // Advance past 1200ms result phase
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  // New round is generated for retry
+  expect(roundSpy).toHaveBeenCalledTimes(2);
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});

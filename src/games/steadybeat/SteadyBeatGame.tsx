@@ -51,9 +51,19 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const [sparkKey, setSparkKey] = useState(0);
   const [flash, setFlash] = useState(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listenPulse = useRef(new Animated.Value(1)).current;
   const won = score >= total;
   useWinLine(won, t(lang, "win.steadybeat" as never));
+  useEffect(() => {
+    return () => {
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (!won) {
       say(t(lang, "shell.steadybeat.sub"));
@@ -151,14 +161,14 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         const nextScore = score + 1;
         setScore(nextScore);
         if (nextScore < total) {
-          setTimeout(
+          transitionTimerRef.current = setTimeout(
             () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
             1200,
           );
         }
       } else {
         sfx.wrong();
-        setTimeout(
+        transitionTimerRef.current = setTimeout(
           () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
           1200,
         );
