@@ -21,6 +21,7 @@ import {
   STAGE_PADDING,
   applyPickAnswer,
   critterLabel,
+  gridFor,
   makeCountRound,
   stageCritterSize,
 } from "../logic";
@@ -592,6 +593,23 @@ describe("stageCritterSize", () => {
     expect(2 * size).toBeLessThanOrEqual(innerH);
     expect(size).toBeGreaterThanOrEqual(30);
     expect(size).toBeLessThanOrEqual(72);
+  });
+
+  it("sizes critters for 9 and 10 items so three rows never vertically overlap", () => {
+    // Landscape stage (844x390 viewport => stageW=560, stageH=126)
+    const stageW = 560;
+    const stageH = 126;
+    const innerH = stageH - 2 * STAGE_PADDING; // 94px
+    for (const n of [9, 10]) {
+      const { rows } = gridFor(n);
+      expect(rows).toBe(3);
+      const size = stageCritterSize(n, stageW, stageH);
+
+      // Three rows of critters must fit within the inner usable height
+      expect(rows * size).toBeLessThanOrEqual(innerH);
+      expect(size).toBeGreaterThanOrEqual(30);
+      expect(size).toBeLessThanOrEqual(72);
+    }
   });
 });
 
