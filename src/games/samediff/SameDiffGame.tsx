@@ -22,6 +22,7 @@ import {
   makeSameDiffRound,
   roundsToWin,
   isCorrect,
+  nextScoreValue,
   SameDiffRound,
   phrasePitchRatios,
   getInstructionalFeedback,
@@ -58,7 +59,9 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const replayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const lockedRef = useRef(false);
-  const won = score >= total;
+  const [roundIndex, setRoundIndex] = useState(0);
+  const firstTryRef = useRef(true);
+  const won = roundIndex >= total;
   useWinLine(won, t(lang, "win.samediff" as never));
 
   useEffect(() => {
@@ -159,10 +162,13 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       setCorrectPick(picked);
       setSparkKeys((keys) => ({ ...keys, [picked]: keys[picked] + 1 }));
-      const next = score + 1;
-      setScore(next);
+      const nextScore = nextScoreValue(score, firstTryRef.current);
+      setScore(nextScore);
       setWrongPick(null);
-      if (next < total) {
+      const nextRoundIndex = roundIndex + 1;
+      setRoundIndex(nextRoundIndex);
+      if (nextRoundIndex < total) {
+        firstTryRef.current = true;
         const nextRound = makeSameDiffRound(rngRef.current, difficulty, [
           ...historyRef.current,
         ]);
@@ -171,6 +177,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
+      firstTryRef.current = false;
       setWrongPick(picked);
       setCorrectPick(round.answer);
       saySequence(getInstructionalFeedback(round, lang));
@@ -200,9 +207,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     if (replayTimer.current) clearTimeout(replayTimer.current);
     if (gapTimer.current) clearTimeout(gapTimer.current);
     lockedRef.current = false;
+    firstTryRef.current = true;
     setPhase("listenA");
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setRoundIndex(0);
     setWrongPick(null);
     setCorrectPick(null);
     setSparkKeys({ same: 0, different: 0 });
