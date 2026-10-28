@@ -327,4 +327,71 @@ describe("DiffGame", () => {
     fireEvent.click(screen.getByTestId("right-backdrop"));
     expect(sequenceSpy).not.toHaveBeenCalled();
   });
+
+  it("renders localized scene names in Japanese, Mandarin, and Cantonese", () => {
+    // Scene picker card in Japanese
+    const { unmount: unmountPickerJa } = render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(screen.getByText("ぼくじょう")).toBeDefined();
+    unmountPickerJa();
+
+    // In-game subtitle in Japanese
+    const { unmount: unmountSubJa } = render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId="farm"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+    expect(screen.getByText(/ぼくじょう/)).toBeDefined();
+    unmountSubJa();
+
+    // In-game subtitle in Mandarin
+    const { unmount: unmountSubCmn } = render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId="farm"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="cmn"
+      />,
+    );
+    expect(screen.getByText(/农场/)).toBeDefined();
+    unmountSubCmn();
+
+    // In-game subtitle in Cantonese
+    const { unmount: unmountSubYue } = render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId="farm"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="yue"
+      />,
+    );
+    expect(screen.getByText(/農場/)).toBeDefined();
+    unmountSubYue();
+  });
+
+  it("provides valid nameT translations in ja, cmn, and yue for all diff scenes", () => {
+    expect(manifest.diff.length).toBe(21);
+    for (const scene of manifest.diff) {
+      expect(scene.nameT).toBeDefined();
+      expect(scene.nameT?.ja).toBeTruthy();
+      expect(scene.nameT?.cmn).toBeTruthy();
+      expect(scene.nameT?.yue).toBeTruthy();
+    }
+  });
 });
