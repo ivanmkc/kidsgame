@@ -59,7 +59,6 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  const prevLangRef = useRef(lang);
   const speechEpoch = useRef(0);
   const won = score >= total;
   useWinLine(won, t(lang, "win.echobeat" as never));
@@ -93,8 +92,19 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   );
 
   useEffect(() => {
-    if (won) return;
+    return () => {
+      if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (won || result === "good") return;
     const epoch = ++speechEpoch.current;
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (resultTimer.current) clearTimeout(resultTimer.current);
+    stopNarration();
+    stopSequence();
+    setFlash(null);
     tapTimesRef.current = [];
     tapCountRef.current = 0;
     setTapCount(0);
@@ -115,41 +125,10 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
       speechEpoch.current++;
       if (flashTimer.current) clearTimeout(flashTimer.current);
       if (resultTimer.current) clearTimeout(resultTimer.current);
-      if (transitionTimer.current) clearTimeout(transitionTimer.current);
       stopNarration();
       stopSequence();
     };
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (prevLangRef.current === lang) return;
-    prevLangRef.current = lang;
-    if (won || result === "good") return;
-
-    const epoch = ++speechEpoch.current;
-    if (flashTimer.current) clearTimeout(flashTimer.current);
-    if (resultTimer.current) clearTimeout(resultTimer.current);
-    stopNarration();
-    stopSequence();
-    setFlash(null);
-    tapTimesRef.current = [];
-    tapCountRef.current = 0;
-    setTapCount(0);
-    setResult(null);
-    setPhase("listen");
-
-    sayThen([t(lang, "shell.echobeat.sub")], () => {
-      if (speechEpoch.current === epoch) {
-        playDemo(round);
-      }
-    });
-
-    return () => {
-      speechEpoch.current++;
-      stopNarration();
-      stopSequence();
-    };
-  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const evaluate = useCallback(
     (times: number[]) => {
@@ -163,6 +142,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
         if (nextScore < total) {
           transitionTimer.current = setTimeout(() => {
             transitionTimer.current = null;
+            setResult(null);
             setRound(makeEchoBeatRound(rngRef.current, difficulty));
           }, 800);
         }

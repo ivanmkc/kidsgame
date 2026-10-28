@@ -646,6 +646,92 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("restarts demo cleanly when switching language during listen phase", () => {
+    vi.useFakeTimers();
+    let roundIndex = 0;
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => {
+      roundIndex++;
+      return roundIndex === 1
+        ? { gaps: [0.4], hitCount: 2 }
+        : { gaps: [0.3, 0.3], hitCount: 3 };
+    });
+    const playSeqSpy = vi.spyOn(music, "playDrumSequence");
+    const stopSeqSpy = vi.spyOn(music, "stopSequence");
+    const sayThenSpy = vi.spyOn(sound, "sayThen");
+
+    render(<LangHarness initialLang="en" />);
+
+    // Round 1 opening speech completes (200ms) and demo rhythm begins playing
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByText("Listen...")).toBeTruthy();
+    expect(playSeqSpy).toHaveBeenCalledTimes(1);
+
+    // Switch language mid-demo during listen phase
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Running demo sequence is stopped immediately
+    expect(stopSeqSpy).toHaveBeenCalled();
+    expect(screen.getByText("きこえた リズムを タップ！")).toBeTruthy();
+    expect(screen.getByText("きいてね…")).toBeTruthy();
+
+    // Opening instruction in Japanese completes (200ms) and restarts demo
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(playSeqSpy).toHaveBeenCalledTimes(2);
+
+    // Advance past restarted demo to tap phase
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText("きみの ばん！")).toBeTruthy();
+
+    const drum = screen.getByTestId("echobeat-drum");
+    // Complete round 1 in Japanese
+    act(() => {
+      fireEvent.click(drum);
+      fireEvent.click(drum);
+    });
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("1/6");
+
+    // Advance celebration timeout (800ms) to start round 2
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByText("きいてね…")).toBeTruthy();
+    expect(playSeqSpy).toHaveBeenCalledTimes(3);
+
+    // Round 2 demo is now playing in listen phase.
+    // Reset sayThen spy call count to verify round 2 language switch behavior.
+    sayThenSpy.mockClear();
+
+    // Switch language during round 2 listen phase (Japanese -> Mandarin)
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // In round 2 (score > 0), demo restarts directly without repeating voice instruction
+    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(stopSeqSpy).toHaveBeenCalled();
+    expect(playSeqSpy).toHaveBeenCalledTimes(4);
+    expect(screen.getByText("听一听…")).toBeTruthy();
+
+    // Advance past round 2 restarted demo rhythm
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(screen.getByText("轮到你了！")).toBeTruthy();
+    const tapDots = screen.getByTestId("echobeat-tap-dots");
+    expect(tapDots.children.length).toBe(3);
+
+    vi.useRealTimers();
+  });
 });
 
 function LangHarness({
