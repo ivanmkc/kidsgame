@@ -8,7 +8,7 @@ import {
   fireEvent,
   within,
 } from "@testing-library/react";
-import { describe, expect, it, vi, afterEach } from "vitest";
+import { describe, expect, it, vi, afterEach, beforeEach } from "vitest";
 import { LangContext } from "../../../components/GameShell";
 import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
@@ -19,6 +19,52 @@ import { CarModeGame } from "../CarModeGame";
 const noop = () => {};
 
 describe("CarModeGame interactions", () => {
+  let activeCancel: (() => void) | null = null;
+
+  beforeEach(() => {
+    activeCancel = null;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, bpm, onNote, onDone) => {
+        const beatSec = 60 / bpm;
+        const timers: ReturnType<typeof setTimeout>[] = [];
+        let cancelled = false;
+        let offset = 0;
+        for (let i = 0; i < notes.length; i++) {
+          if (onNote) {
+            const idx = i;
+            const ms = Math.max(0, (0.05 + offset) * 1000);
+            timers.push(
+              setTimeout(() => {
+                if (!cancelled) onNote(idx);
+              }, ms),
+            );
+          }
+          offset += notes[i].b * beatSec;
+        }
+        if (onDone) {
+          const endMs = Math.max(0, (0.05 + offset) * 1000);
+          timers.push(
+            setTimeout(() => {
+              if (!cancelled) onDone();
+            }, endMs),
+          );
+        }
+        const cancel = () => {
+          cancelled = true;
+          for (const t of timers) clearTimeout(t);
+        };
+        activeCancel = cancel;
+        return cancel;
+      },
+    );
+    vi.spyOn(music, "stopSequence").mockImplementation(() => {
+      if (activeCancel) {
+        activeCancel();
+        activeCancel = null;
+      }
+    });
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
     vi.useRealTimers();
@@ -73,10 +119,10 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByText("Your turn!")).toBeDefined();
   });
 
-  it("clears in-flight boop note timers when skipping prompt phase by tapping", () => {
+  it("clears in-flight boop notes and visual flash when skipping prompt phase by tapping", () => {
     vi.useFakeTimers();
-    const playNoteSpy = vi.spyOn(music, "playNote").mockReturnValue();
     const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
+    const stopSequenceSpy = vi.spyOn(music, "stopSequence");
 
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({
@@ -98,17 +144,25 @@ describe("CarModeGame interactions", () => {
 
     render(<CarModeGame onHome={noop} lang="en" />);
 
-    // Note 0 was scheduled with setTimeout(..., 0).
+    // At t = 50ms: note 0 fires, visual flash cue is active with 🎵
     act(() => {
-      vi.advanceTimersByTime(0);
+      vi.advanceTimersByTime(50);
     });
-    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
+    expect(screen.getByText("🎵")).toBeDefined();
 
-    // Advance 450ms: note 1 (at 400ms) plays; past PHASE_DEBOUNCE_MS (400ms).
+    // At t = 250ms: flash has cleared between notes
     act(() => {
-      vi.advanceTimersByTime(450);
+      vi.advanceTimersByTime(200);
     });
-    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
+    expect(screen.getByText("👂")).toBeDefined();
+
+    // Advance 200ms more (t = 450ms): note 1 fires; past PHASE_DEBOUNCE_MS (400ms).
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
 
     // Tap to skip prompt phase and advance to gap phase.
     const tapBtn = screen.getByTestId("carmode-tap");
@@ -117,8 +171,8 @@ describe("CarModeGame interactions", () => {
     });
 
     expect(screen.getByText("Your turn!")).toBeDefined();
-
-    const callsAtGapEnter = playNoteSpy.mock.calls.length;
+    expect(stopSequenceSpy).toHaveBeenCalled();
+    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
 
     // Advance through gap and reveal duration.
     act(() => {
@@ -126,7 +180,7 @@ describe("CarModeGame interactions", () => {
     });
 
     // In-flight boop note timers must NOT continue firing in gap or reveal phases.
-    expect(playNoteSpy).toHaveBeenCalledTimes(callsAtGapEnter);
+    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
     expect(sayThenSpy).not.toHaveBeenCalled();
   });
 
@@ -655,7 +709,6 @@ describe("CarModeGame interactions", () => {
 
   it("replays boops notes and prompt when tapped during gap phase for boops pack", () => {
     vi.useFakeTimers();
-    const playNoteSpy = vi.spyOn(music, "playNote").mockReturnValue();
     const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
     const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
 
@@ -675,7 +728,6 @@ describe("CarModeGame interactions", () => {
       vi.advanceTimersByTime(400);
     });
 
-    playNoteSpy.mockClear();
     sayThenSpy.mockClear();
     stopNarrationSpy.mockClear();
 
@@ -685,16 +737,23 @@ describe("CarModeGame interactions", () => {
     expect(stopNarrationSpy).toHaveBeenCalled();
     expect(sayThenSpy).not.toHaveBeenCalled();
 
-    // Advance 400ms for second note
+    // Advance 50ms: note 0 fires, visual flash triggers
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
+    expect(sayThenSpy).not.toHaveBeenCalled();
+
+    // Advance 400ms: note 1 fires
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    expect(playNoteSpy).toHaveBeenCalledTimes(2);
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
     expect(sayThenSpy).not.toHaveBeenCalled();
 
-    // Advance remaining boopsDuration: (2 - 1) * 400 + 800 = 1200ms total (800ms more)
+    // Advance 400ms: sequence completes (onDone), prompt is spoken
     act(() => {
-      vi.advanceTimersByTime(800);
+      vi.advanceTimersByTime(400);
     });
 
     expect(sayThenSpy).toHaveBeenCalledWith(
@@ -702,6 +761,73 @@ describe("CarModeGame interactions", () => {
       expect.any(Function),
     );
     expect(screen.getByText("Your turn!")).toBeDefined();
+  });
+
+  it("calls playSequence with pentatonic notes at 150 BPM for boops pack", () => {
+    vi.useFakeTimers();
+    const playSequenceSpy = vi.spyOn(music, "playSequence");
+    const actual = logic.startState("boops", 42);
+    const testRounds = [...actual.rounds];
+    testRounds[0] = { ...testRounds[0], noteCount: 3 };
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      rounds: testRounds,
+      phase: "prompt",
+      roundIdx: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    expect(playSequenceSpy).toHaveBeenCalledWith(
+      [
+        { m: 60, b: 1 },
+        { m: 62, b: 1 },
+        { m: 64, b: 1 },
+      ],
+      150,
+      expect.any(Function),
+      expect.any(Function),
+    );
+  });
+
+  it("renders visual boop cues when muted satisfying R3 constraint", () => {
+    vi.useFakeTimers();
+    sound.setMuted(true);
+
+    const actual = logic.startState("boops", 42);
+    const testRounds = [...actual.rounds];
+    testRounds[0] = { ...testRounds[0], noteCount: 2 };
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      rounds: testRounds,
+      phase: "prompt",
+      roundIdx: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Note 0 visual cue at 50ms
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
+    expect(screen.getByText("🎵")).toBeDefined();
+
+    // Cue clears between notes
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
+    expect(screen.getByText("👂")).toBeDefined();
+
+    // Note 1 visual cue at 450ms
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
+    expect(screen.getByText("🎵")).toBeDefined();
+
+    sound.setMuted(false);
   });
 
   it("advances to reveal after gap tap even when audio is muted or sayThen completes via fallback", () => {
