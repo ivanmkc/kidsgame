@@ -12,7 +12,12 @@ import { CarModeGame } from "../CarModeGame";
 type PressableFake = Partial<
   Pick<
     React.ComponentProps<typeof Pressable>,
-    "disabled" | "accessibilityRole" | "accessibilityLabel" | "testID" | "style"
+    | "disabled"
+    | "accessibilityRole"
+    | "accessibilityLabel"
+    | "accessibilityState"
+    | "testID"
+    | "style"
   >
 > & {
   onPress?: () => void;
@@ -198,6 +203,7 @@ describe("CarModeGame", () => {
       expect(btn).toBeDefined();
       expect(btn.accessibilityRole).toBe("button");
       expect(btn.accessibilityLabel).toBe(ALL_PACKS[packId].name);
+      expect(btn.accessibilityState).toEqual({ selected: packId === "boops" });
 
       type StyleFn = (state: {
         pressed: boolean;

@@ -534,6 +534,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                     pressed && { opacity: 0.7 },
                   ]}
                   accessibilityRole="button"
+                  accessibilityState={{ selected: id === packId }}
                   accessibilityLabel={ALL_PACKS[id].name}
                   testID={`carmode-pack-${id}`}
                 >
