@@ -59,8 +59,9 @@ export function makeQuizRound<T>(
       distractors.push(item);
     }
   }
-  const tiles = shuffle([target, ...distractors]).map(toTile);
-  const answerIdx = tiles.findIndex((t) => t.key === keyOf(target));
+  const items = shuffle([target, ...distractors]);
+  const answerIdx = items.indexOf(target);
+  const tiles = items.map(toTile);
   return { target, tiles, answerIdx };
 }
 

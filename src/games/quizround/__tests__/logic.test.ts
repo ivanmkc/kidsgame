@@ -66,6 +66,34 @@ describe("makeQuizRound", () => {
     }
   });
 
+  it("evaluates answerIdx correctly when toTile key differs from keyOf", () => {
+    interface FruitItem {
+      id: string;
+      word: string;
+      icon: string;
+    }
+    const fruitPool: FruitItem[] = [
+      { id: "item_1", word: "Apple", icon: "apple" },
+      { id: "item_2", word: "Banana", icon: "banana" },
+      { id: "item_3", word: "Cherry", icon: "cherry" },
+      { id: "item_4", word: "Date", icon: "date" },
+    ];
+    for (let seed = 1; seed <= 50; seed++) {
+      const rng = makeRng(seed);
+      const round = makeQuizRound(
+        rng,
+        fruitPool,
+        3,
+        (item) => ({ key: item.icon, label: item.word }),
+        (item) => item.id,
+      );
+      expect(round.answerIdx).toBeGreaterThanOrEqual(0);
+      expect(round.answerIdx).toBeLessThan(round.tiles.length);
+      expect(round.tiles[round.answerIdx].key).toBe(round.target.icon);
+      expect(round.tiles[round.answerIdx].label).toBe(round.target.word);
+    }
+  });
+
   it("respects avoidTargetKey by never picking the avoided key as target", () => {
     const avoid = "a";
     for (let seed = 1; seed <= 100; seed++) {
