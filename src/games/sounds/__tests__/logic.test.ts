@@ -61,6 +61,22 @@ describe("soundsLayout", () => {
     expect(square.tile).toBe(170);
     expect(square.gridWidth).toBe(354);
   });
+
+  it("clamps tile size to 0 on short or narrow screens where dimensions would be negative", () => {
+    // Screen height less than 214px (e.g. 210px or 200px)
+    const shortLandscape4 = soundsLayout(800, 210, 4);
+    expect(shortLandscape4.tile).toBe(0);
+
+    const shortLandscape3 = soundsLayout(800, 200, 3);
+    expect(shortLandscape3.tile).toBe(0);
+
+    // Narrow screen (e.g. width < 32px)
+    const narrowScreen = soundsLayout(20, 600, 4);
+    expect(narrowScreen.tile).toBe(0);
+
+    const tinyScreen = soundsLayout(20, 100, 4);
+    expect(tinyScreen.tile).toBe(0);
+  });
 });
 
 describe("makeSoundsRound", () => {
