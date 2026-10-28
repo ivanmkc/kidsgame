@@ -7,6 +7,7 @@ import {
   fireEvent,
   act,
   cleanup,
+  within,
 } from "@testing-library/react";
 import { BellsGame } from "./BellsGame";
 import * as music from "../../music";
@@ -588,6 +589,125 @@ describe("BellsGame", () => {
     }
 
     unmount();
+    vi.useRealTimers();
+  });
+
+  it("does not trigger sparkles on intermediate taps and keeps sparkles past 250ms on sequence completion", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 0] for easy
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward demo to enter play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+
+    // Before any tap, no sparkles should be rendered
+    expect(screen.queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    // First tap (intermediate tap): should NOT trigger sparkles
+    act(() => {
+      fireEvent.click(bell0);
+    });
+
+    expect(screen.queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    // Fast-forward 100ms into the 250ms tap glow
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(screen.queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    // Complete the 250ms glow
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    expect(screen.queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    // Second tap (completes sequence): triggers sparkles
+    act(() => {
+      fireEvent.click(bell0);
+    });
+
+    // Sparkles should now be rendered
+    const sparkles = screen.getAllByText(/[✨⭐]/);
+    expect(sparkles.length).toBeGreaterThan(0);
+
+    // Advance 300ms (past the 250ms tap glow timer): sparkles must NOT be prematurely unmounted
+    act(() => {
+      vi.advanceTimersByTime(300);
+    });
+    expect(screen.getAllByText(/[✨⭐]/).length).toBe(sparkles.length);
+
+    vi.useRealTimers();
+  });
+
+  it("resets sparkKey so sparkles do not display before first completion in a new game", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const playedMidis: number[] = [];
+    vi.spyOn(music, "playNote").mockImplementation((midi) => {
+      playedMidis.push(midi);
+    });
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const midiToBellIndex: Record<number, number> = {
+      60: 0,
+      62: 1,
+      64: 2,
+      67: 3,
+      69: 4,
+    };
+
+    // Win the game (5 rounds for easy)
+    for (let round = 0; round < 5; round++) {
+      playedMidis.length = 0;
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      const seq = playedMidis.map((m) => midiToBellIndex[m]);
+      act(() => {
+        for (const idx of seq) {
+          fireEvent.click(screen.getByTestId(`bell-${idx}`));
+        }
+      });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+
+    // Win overlay is visible, advance 600ms so the tap shield unarms
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    const playAgainBtn = screen.getByText(t("en", "overlay.playAgain"));
+    act(() => {
+      fireEvent.click(playAgainBtn);
+    });
+
+    // Advance past demo into play phase of new game
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const bell0 = screen.getByTestId("bell-0");
+    // In the new game, before completing a sequence, sparkles should not be present on bells
+    expect(within(bell0).queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    // Tap bell 0 once (intermediate tap)
+    act(() => {
+      fireEvent.click(bell0);
+    });
+    expect(within(bell0).queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
     vi.useRealTimers();
   });
 });

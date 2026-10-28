@@ -170,6 +170,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     tappedRef.current = [];
     setTapped([]);
     setWrongFlash(false);
+    setSparkKey(0);
     setRound(makeBellsRound(rngRef.current, difficulty));
   };
 
@@ -377,8 +378,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text style={[styles.bellText, { fontSize: bellSize * 0.4 }]}>
                   🔔
                 </Text>
-                {glowIdx === i && (
-                  <SparkleBurst trigger={sparkKey + i} count={4} size={12} />
+                {sparkKey > 0 && (
+                  <SparkleBurst
+                    trigger={`${sparkKey}-${i}`}
+                    count={4}
+                    size={12}
+                  />
                 )}
               </Pressable>
             </Animated.View>
