@@ -248,6 +248,10 @@ export type UIKey =
   | 'hidden.turn' | 'hidden.prompt'
   | 'shadow.hint' | 'shadow.hintTricky'
   | 'oddone.defaultQuestion'
+  | 'oddone.not.animals'
+  | 'oddone.not.nature'
+  | 'oddone.not.food'
+  | 'oddone.not.things'
   | 'rules.memoryCheck' | 'rules.ruleNumber' | 'rules.doAgain'
   | 'rules.remind' | 'rules.progress'
   | 'puzzle.peek' | 'puzzle.peekA11y' | 'puzzle.hint' | 'puzzle.tileA11y'
@@ -618,6 +622,10 @@ export const EN: Table = {
   'shadow.hint': 'Tap the sticker that makes the shadow!',
   'shadow.hintTricky': 'It might be flipped or turned — look at the shape!',
   'oddone.defaultQuestion': 'Which one does not belong?',
+  'oddone.not.animals': 'Which one is NOT an animal?',
+  'oddone.not.nature': 'Which one is NOT a flower, rainbow or star?',
+  'oddone.not.food': 'Which one is NOT food?',
+  'oddone.not.things': 'Which one is NOT a toy, vehicle or present?',
   'rules.memoryCheck': 'Memory check!',
   'rules.ruleNumber': 'Rule #{n}',
   'rules.doAgain': 'Do Rule #{n} again — remember it? 🤔',

@@ -1,4 +1,5 @@
-import { Lang } from "../../lang";
+import { Lang, LANGS } from "../../lang";
+import { t } from "../../i18n";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, wordFor } from "../../words";
 import {
@@ -70,8 +71,8 @@ export function makeOddOneRound(
 export function speechLines(): string[] {
   const lines = new Set<string>();
   for (const cat of Object.values(CATEGORY_TEXT)) {
-    for (const line of Object.values(cat.not)) {
-      lines.add(line);
+    for (const l of LANGS) {
+      lines.add(t(l.id, cat.not));
     }
   }
   return [...lines];
