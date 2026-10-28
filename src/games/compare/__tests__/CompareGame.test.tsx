@@ -651,10 +651,13 @@ describe("CompareGame language switch safety", () => {
     vi.useRealTimers();
   });
 
-  it("rebuilds round and speaks new language prompt when language is cycled mid-round", () => {
+  it("preserves active round and speaks new language prompt when language is cycled mid-round", () => {
     const saySpy = vi.spyOn(sound, "say");
+    const makeRoundSpy = vi.spyOn(logic, "makeCompareRound");
 
     render(<LangHarness initialLang="en" />);
+
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
 
     // English prompt spoken initially
     expect(saySpy).toHaveBeenCalledWith(
@@ -662,9 +665,25 @@ describe("CompareGame language switch safety", () => {
     );
     saySpy.mockClear();
 
+    const leftPlate = screen
+      .getByTestId(/^compare-plate-left-/)
+      .getAttribute("data-testid");
+    const rightPlate = screen
+      .getByTestId(/^compare-plate-right-/)
+      .getAttribute("data-testid");
+
     // Cycle language to Japanese via in-game header chip
     const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
+
+    // Active round is preserved: makeCompareRound not called again, plates unchanged
+    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByTestId(/^compare-plate-left-/).getAttribute("data-testid"),
+    ).toBe(leftPlate);
+    expect(
+      screen.getByTestId(/^compare-plate-right-/).getAttribute("data-testid"),
+    ).toBe(rightPlate);
 
     // Prompt updated visually and spoken in Japanese
     const prompt = screen.getByTestId(/^compare-prompt-/);
@@ -674,7 +693,7 @@ describe("CompareGame language switch safety", () => {
     );
   });
 
-  it("cycles lang during praise: drops pending sayThen callback, rebuilds round, and avoids double-advancing score", () => {
+  it("cycles lang during praise: finishes praise, advances to next round, and avoids double-advancing score", () => {
     vi.useFakeTimers();
     const saySpy = vi.spyOn(sound, "say");
     const goodSpy = vi.spyOn(sound.sfx, "good");
@@ -708,8 +727,7 @@ describe("CompareGame language switch safety", () => {
     const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
 
-    // Old sayThen callback was cancelled by useLangEpoch and dropped by !isValid()
-    // makeCompareRound was called once more by the lang effect to rebuild the round (total: 2)
+    // sayThen callback runs via stopNarration cancelPendingSayThen to advance game state to round 2
     expect(makeRoundSpy).toHaveBeenCalledTimes(2);
 
     // Score remains 1/6 (not advanced again or reset)
@@ -970,10 +988,10 @@ describe("CompareGame plate accessibility labels", () => {
 
     expect(
       screen.getByTestId(/^compare-plate-left-/).getAttribute("aria-label"),
-    ).toBe("2 かえる");
+    ).toBe("5 いぬ");
     expect(
       screen.getByTestId(/^compare-plate-right-/).getAttribute("aria-label"),
-    ).toBe("6 うさぎ");
+    ).toBe("3 ちょうちょ");
   });
 });
 

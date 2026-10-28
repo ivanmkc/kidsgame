@@ -79,7 +79,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const promptFor = (r: CompareRound) =>
     r.ask === "more" ? MORE_PROMPT[lang] : FEWER_PROMPT[lang];
 
-  // Lang switch: rebuild the live round and unlock state.
+  // Lang switch: clear timers and unlock state, preserving the round.
   const langMounted = useRef(false);
   useEffect(() => {
     if (!langMounted.current) {
@@ -87,16 +87,15 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       return;
     }
     clearWrongTimers();
-    setRound(makeCompareRound(rngRef.current, difficulty));
     lockedRef.current = false;
     setLocked(false);
     setWrongSide(null);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Keyed on the round OBJECT — repeats still re-speak.
+  // Keyed on the round OBJECT — repeats still re-speak; lang switch re-speaks prompt.
   useEffect(() => {
     if (!won) say(promptFor(round));
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickSide = (side: "left" | "right") => {
     if (won || locked || lockedRef.current || wrongSide !== null) return;
@@ -109,7 +108,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       setScore(nextScore);
       const feedback = roundComparisonPhrase(lang, round);
       sayThen([feedback, PRAISE[lang]], () => {
-        if (!isMountedRef.current || !isValid()) return;
+        if (!isMountedRef.current) return;
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
           setWrongSide(null);
