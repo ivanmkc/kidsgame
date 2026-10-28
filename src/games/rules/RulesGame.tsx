@@ -24,6 +24,7 @@ import {
   makeRules,
   makeRulesRound,
   pickRuleIndex,
+  rulesLayout,
   tileLabel,
 } from "./logic";
 import { useWinLine } from "../winlines";
@@ -156,17 +157,10 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
-  const cols = 3;
-  const rows = Math.ceil(tileCount / cols);
-  const gap = 12;
-  // 44px kid-thumb floor (mobile-Chrome audit measured 41px in landscape)
-  const tile = Math.max(
-    44,
-    Math.min(
-      (Math.min(width - 32, 520) - (cols - 1) * gap) / cols,
-      (height - 84 - 130 - (rows - 1) * gap) / rows,
-      140,
-    ),
+  const { tile, gap, cols, isLandscape } = rulesLayout(
+    width,
+    height,
+    tileCount,
   );
 
   return (
@@ -193,9 +187,16 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         </View>
       }
     >
-      <View style={styles.board}>
+      <View
+        style={[styles.board, isLandscape && styles.boardLandscape]}
+        testID="rules-board"
+      >
         <View
-          style={[styles.ruleCard, shadows.soft]}
+          style={[
+            styles.ruleCard,
+            isLandscape && styles.ruleCardLandscape,
+            shadows.soft,
+          ]}
           testID={`rules-rule-${round.rule.category}${round.isRecall ? "-recall" : ""}`}
         >
           <Text style={styles.ruleNumber}>
@@ -203,7 +204,9 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
               ? t(lang, "rules.memoryCheck")
               : t(lang, "rules.ruleNumber", { n: round.ruleNumber })}
           </Text>
-          <Text style={styles.ruleText}>
+          <Text
+            style={[styles.ruleText, isLandscape && styles.ruleTextLandscape]}
+          >
             {round.isRecall && !reminded
               ? t(lang, "rules.doAgain", { n: round.ruleNumber })
               : round.rule.label}
@@ -225,42 +228,51 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
           ) : null}
         </View>
         <View
-          style={[styles.grid, { width: cols * tile + (cols - 1) * gap, gap }]}
+          style={[styles.gridArea, isLandscape && styles.gridAreaLandscape]}
         >
-          {round.tiles.map((t, i) => {
-            const done = tapped.includes(i);
-            return (
-              <Pressable
-                key={`${roundIdx}-${i}`}
-                onPress={() => onTile(i)}
-                testID={`rules-tile-${i}-${t.icon}-${t.isMatch ? "y" : "n"}`}
-                accessibilityLabel={tileLabel(t.icon, lang)}
-                accessibilityRole="button"
-                style={({ pressed }) => [
-                  styles.tile,
-                  shadows.soft,
-                  { width: tile, height: tile },
-                  done && styles.tileDone,
-                  wrongIdx === i && styles.wrong,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Image
-                  source={SPOTIT_ICONS[t.icon]}
-                  style={{ width: "78%", height: "78%" }}
-                  resizeMode="contain"
-                />
-                {done ? <SparkleBurst trigger={i} count={4} size={13} /> : null}
-              </Pressable>
-            );
-          })}
+          <View
+            style={[
+              styles.grid,
+              { width: cols * tile + (cols - 1) * gap, gap },
+            ]}
+          >
+            {round.tiles.map((t, i) => {
+              const done = tapped.includes(i);
+              return (
+                <Pressable
+                  key={`${roundIdx}-${i}`}
+                  onPress={() => onTile(i)}
+                  testID={`rules-tile-${i}-${t.icon}-${t.isMatch ? "y" : "n"}`}
+                  accessibilityLabel={tileLabel(t.icon, lang)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.tile,
+                    shadows.soft,
+                    { width: tile, height: tile },
+                    done && styles.tileDone,
+                    wrongIdx === i && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Image
+                    source={SPOTIT_ICONS[t.icon]}
+                    style={{ width: "78%", height: "78%" }}
+                    resizeMode="contain"
+                  />
+                  {done ? (
+                    <SparkleBurst trigger={i} count={4} size={13} />
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </View>
+          <Text style={styles.hint} testID="rules-progress">
+            {t(lang, "rules.progress", {
+              found: tapped.length,
+              total: round.matchCount,
+            })}
+          </Text>
         </View>
-        <Text style={styles.hint} testID="rules-progress">
-          {t(lang, "rules.progress", {
-            found: tapped.length,
-            total: round.matchCount,
-          })}
-        </Text>
       </View>
       <WinOverlay
         visible={won}
@@ -292,6 +304,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 16,
     paddingHorizontal: 16,
+    minHeight: 0,
+  },
+  boardLandscape: {
+    flexDirection: "row",
+    gap: 20,
   },
   ruleCard: {
     backgroundColor: colors.gold,
@@ -303,6 +320,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     maxWidth: 520,
   },
+  ruleCardLandscape: {
+    maxWidth: 220,
+    paddingHorizontal: 16,
+  },
   ruleNumber: {
     fontFamily: fonts.body,
     fontSize: 12,
@@ -313,6 +334,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.ink,
     textAlign: "center",
+  },
+  ruleTextLandscape: {
+    fontSize: 18,
+  },
+  gridArea: {
+    alignItems: "center",
+    gap: 16,
+  },
+  gridAreaLandscape: {
+    gap: 8,
   },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   tile: {

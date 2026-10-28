@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import { makeRng } from "../../../rng";
-import { makeRules, makeRulesRound, pickRuleIndex, tileLabel } from "../logic";
+import {
+  makeRules,
+  makeRulesRound,
+  pickRuleIndex,
+  rulesLayout,
+  tileLabel,
+} from "../logic";
 
 describe("pickRuleIndex", () => {
   it("easy difficulty never recalls and advances rule indices consecutively", () => {
@@ -263,3 +269,51 @@ describe("tileLabel", () => {
     );
   });
 });
+
+describe("rulesLayout", () => {
+  it("portrait (phone): sets landscape false, gap 12, cols 3", () => {
+    const l = rulesLayout(390, 844, 9);
+    expect(l.isLandscape).toBe(false);
+    expect(l.cols).toBe(3);
+    expect(l.rows).toBe(3);
+    expect(l.gap).toBe(12);
+    expect(l.tile).toBeGreaterThan(44);
+  });
+
+  it("landscape (phone): sets landscape true, gap 10, touch targets >= 64px for 9 tiles", () => {
+    const l = rulesLayout(844, 390, 9);
+    expect(l.isLandscape).toBe(true);
+    expect(l.cols).toBe(3);
+    expect(l.rows).toBe(3);
+    expect(l.gap).toBe(10);
+    expect(l.tile).toBeGreaterThanOrEqual(64);
+  });
+
+  it("landscape (667x375): fits without vertical overflow on all difficulties", () => {
+    const headerHeight = 84;
+    const ruleCardHeight = 120;
+    const hintAreaHeight = 26;
+
+    // Test across Hard (9), Medium (8), and Easy (6)
+    for (const count of [9, 8, 6]) {
+      const l = rulesLayout(667, 375, count);
+      expect(l.isLandscape).toBe(true);
+      expect(l.tile).toBeGreaterThanOrEqual(64);
+
+      const gridHeight = l.rows * l.tile + (l.rows - 1) * l.gap;
+      const gridAreaHeight = gridHeight + hintAreaHeight;
+      // In side-by-side layout, required height is header plus max of card and grid area
+      const totalRequiredHeight =
+        headerHeight + Math.max(ruleCardHeight, gridAreaHeight);
+
+      expect(totalRequiredHeight).toBeLessThanOrEqual(375);
+    }
+  });
+
+  it("landscape (568x320): preserves minimum 44px thumb target floor", () => {
+    const l = rulesLayout(568, 320, 9);
+    expect(l.isLandscape).toBe(true);
+    expect(l.tile).toBeGreaterThanOrEqual(44);
+  });
+});
+

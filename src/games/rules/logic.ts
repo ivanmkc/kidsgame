@@ -98,3 +98,54 @@ export function tileLabel(icon: string, lang: Lang = "en"): string {
   if (!entry) throw new Error(`Unknown rules icon: ${icon}`);
   return wordFor(entry, lang).text;
 }
+
+export interface RulesLayout {
+  tile: number;
+  gap: number;
+  cols: number;
+  rows: number;
+  isLandscape: boolean;
+}
+
+/**
+ * Computes responsive tile and grid layout for RulesGame.
+ * On landscape viewports, the rule card sits beside the grid rather than
+ * stacked vertically, freeing vertical space so the grid fits without overflow.
+ */
+export function rulesLayout(
+  width: number,
+  height: number,
+  tileCount: number,
+): RulesLayout {
+  const isLandscape = width > height;
+  const cols = 3;
+  const rows = Math.ceil(tileCount / cols);
+
+  if (isLandscape) {
+    const gap = 10;
+    // Available height: screen height minus GameShell header (84px),
+    // progress hint text & gap (~28px), and safety margins (~12px).
+    const availH = height - 124;
+    // Available width for grid: screen width minus outer padding (32px),
+    // rule card column (220px), and horizontal gap (20px).
+    const availW = width - 272;
+    const tileH = (availH - (rows - 1) * gap) / rows;
+    const tileW = (availW - (cols - 1) * gap) / cols;
+    const tile = Math.max(44, Math.floor(Math.min(tileH, tileW, 120)));
+    return { tile, gap, cols, rows, isLandscape };
+  }
+
+  const gap = 12;
+  const availW = Math.min(width - 32, 520);
+  const availH = height - 84 - 130;
+  const tile = Math.max(
+    44,
+    Math.min(
+      (availW - (cols - 1) * gap) / cols,
+      (availH - (rows - 1) * gap) / rows,
+      140,
+    ),
+  );
+  return { tile, gap, cols, rows, isLandscape };
+}
+
