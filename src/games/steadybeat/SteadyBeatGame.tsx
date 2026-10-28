@@ -97,7 +97,6 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           clearInterval(interval);
           if (flashTimer.current) clearTimeout(flashTimer.current);
           setFlash(false);
-          playDrum(0.5);
           setListenBeat(null);
           setPhase("tap");
           say(t(lang, "music.yourTurn" as never));
