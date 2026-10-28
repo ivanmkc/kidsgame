@@ -475,7 +475,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.pickEmoji}>🙅</Text>
+                  <Text style={styles.pickEmoji}>🔀</Text>
                   <Text style={[styles.pickLabel, { color: "#E89B4F" }]}>
                     {t(lang, "music.different" as never)}
                   </Text>

@@ -62,6 +62,21 @@ describe("SameDiffGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("Different choice button renders neutral comparison symbol 🔀 instead of negative 🙅", () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    const diffButton = screen.getByTestId("samediff-diff");
+    expect(diffButton.textContent).toContain("🔀");
+    expect(diffButton.textContent).not.toContain("🙅");
+
+    vi.useRealTimers();
+  });
+
   it("computes proportional pitch ratios in logic", () => {
     const roundSame: SameDiffRound = {
       phraseA: [
@@ -712,7 +727,7 @@ describe("SameDiffGame UI", () => {
 
     // Before any tap, neither button should contain sparkle emojis
     expect(sameBtn.textContent).toBe("👯Same");
-    expect(diffBtn.textContent).toBe("🙅Different");
+    expect(diffBtn.textContent).toBe("🔀Different");
 
     // Wrong pick: tapping 'different' when answer is 'same'
     act(() => {
@@ -721,7 +736,7 @@ describe("SameDiffGame UI", () => {
 
     // Neither button should sparkle on wrong pick
     expect(sameBtn.textContent).toBe("👯Same");
-    expect(diffBtn.textContent).toBe("🙅Different");
+    expect(diffBtn.textContent).toBe("🔀Different");
 
     // Wait for wrong penalty timer
     act(() => {
@@ -736,7 +751,7 @@ describe("SameDiffGame UI", () => {
     // During transition, only the correct button has celebration sparkles
     expect(sameBtn.textContent).toContain("✨");
     expect(sameBtn.textContent).toContain("⭐");
-    expect(diffBtn.textContent).toBe("🙅Different");
+    expect(diffBtn.textContent).toBe("🔀Different");
 
     // Advance to round 2 pick phase
     act(() => {
@@ -748,7 +763,7 @@ describe("SameDiffGame UI", () => {
 
     // In round 2 before tap, neither button should sparkle
     expect(r2SameBtn.textContent).toBe("👯Same");
-    expect(r2DiffBtn.textContent).toBe("🙅Different");
+    expect(r2DiffBtn.textContent).toBe("🔀Different");
 
     // Correct pick for round 2: tapping 'different'
     act(() => {
