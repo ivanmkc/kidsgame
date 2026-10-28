@@ -122,4 +122,52 @@ describe("EscapeGame revealed item hit target", () => {
       vi.restoreAllMocks();
     }
   });
+
+  it("shows visual feedback when tapping a locked hotspot without needed item", () => {
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sfx, "boing").mockImplementation(() => {});
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        sceneId="toyroom"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const chestSpot = screen.getByTestId("escape-spot-chest");
+    expect(screen.queryByTestId("escape-feedback-chest")).toBeNull();
+
+    fireEvent.click(chestSpot);
+
+    const feedback = screen.getByTestId("escape-feedback-chest");
+    expect(feedback).toBeDefined();
+    expect(feedback.textContent).toContain("❌");
+  });
+
+  it("shows visual feedback when tapping an empty flavor search spot", () => {
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sfx, "tap").mockImplementation(() => {});
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        sceneId="toyroom"
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const teddySpot = screen.getByTestId("escape-spot-teddy");
+    expect(screen.queryByTestId("escape-feedback-teddy")).toBeNull();
+
+    fireEvent.click(teddySpot);
+
+    const feedback = screen.getByTestId("escape-feedback-teddy");
+    expect(feedback).toBeDefined();
+    expect(feedback.textContent).toContain("🔍");
+  });
 });
