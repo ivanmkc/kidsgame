@@ -166,3 +166,26 @@ describe("bellLabel", () => {
     expect(bellLabel(0, "yue")).toBe("鈴鐺 1");
   });
 });
+
+describe("makeBellsRound", () => {
+  it("generates ascending monotonic sequences for easy difficulty", () => {
+    const rng = makeRng(0);
+    const round = makeBellsRound(rng, "easy");
+    expect(round.sequence.length).toBe(2);
+    expect(round.sequence[1]).toBe(round.sequence[0] + 1);
+  });
+
+  it("generates descending monotonic sequences for easy difficulty", () => {
+    // mock Rng that returns 0.6 on first call (so randInt(rng, 2) === 1, making isAscending false)
+    // and returns 0.9 on second call (so randInt(rng, 2) === 1, making start 1+1=2)
+    let callCount = 0;
+    const mockRng = () => {
+      callCount++;
+      if (callCount === 1) return 0.6; // isAscending = false
+      return 0.9; // start = randInt(mockRng, 2) + 1 = Math.floor(1.8) + 1 = 1 + 1 = 2
+    };
+    const round = makeBellsRound(mockRng, "easy");
+    expect(round.sequence.length).toBe(2);
+    expect(round.sequence[1]).toBe(round.sequence[0] - 1);
+  });
+});
