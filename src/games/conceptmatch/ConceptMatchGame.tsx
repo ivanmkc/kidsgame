@@ -1,16 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
-import { SHAPE_ICONS, SPOTIT_ICONS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { FlipCard, MemoryBoard } from '../../components/MemoryBoard';
-import { WinOverlay } from '../../components/WinOverlay';
-import { useMemoryLogic } from '../../components/useMemoryLogic';
-import { t } from '../../i18n';
-import { Lang } from '../../lang';
-import { makeRng } from '../../rng';
-import { say, sfx, useSay } from '../../sound';
-import { colors, fonts } from '../../theme';
-import { ConceptMatchCard, ConceptMatchDeck, buildBoard, isMatch, updateBoardLang } from './logic';
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { SHAPE_ICONS, SPOTIT_ICONS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
+import { WinOverlay } from "../../components/WinOverlay";
+import { useMemoryLogic } from "../../components/useMemoryLogic";
+import { t } from "../../i18n";
+import { Lang } from "../../lang";
+import { makeRng } from "../../rng";
+import { say, sfx, useSay } from "../../sound";
+import { colors, fonts } from "../../theme";
+import {
+  ConceptMatchCard,
+  ConceptMatchDeck,
+  buildBoard,
+  isMatch,
+  updateBoardLang,
+} from "./logic";
 
 export interface ConceptMatchGameProps {
   deck?: ConceptMatchDeck;
@@ -19,21 +25,27 @@ export interface ConceptMatchGameProps {
   pairs?: number;
 }
 
-export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs = 2 }: ConceptMatchGameProps) {
+export function ConceptMatchGame({
+  deck = "letters",
+  onHome,
+  lang = "en",
+  pairs = 2,
+}: ConceptMatchGameProps) {
   const [roundKey, setRoundKey] = useState(0);
   const [board, setBoard] = useState<ConceptMatchCard[]>(() =>
     buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
   );
 
-  useSay(t(lang, 'card.memory.blurb'));
+  const { faceUp, matched, moves, lockRef, onFlip, reset, won, matchedPairs } =
+    useMemoryLogic({
+      board,
+      isMatch,
+      onMatch: () => {
+        sfx.good();
+      },
+    });
 
-  const { faceUp, matched, moves, lockRef, onFlip, reset, won, matchedPairs } = useMemoryLogic({
-    board,
-    isMatch,
-    onMatch: () => {
-      sfx.good();
-    },
-  });
+  useSay(won ? null : t(lang, "card.memory.blurb"));
 
   const prevDeck = useRef(deck);
   const prevPairs = useRef(pairs);
@@ -49,7 +61,9 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
     prevLang.current = lang;
 
     if (deckChanged || pairsChanged) {
-      setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs));
+      setBoard(
+        buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
+      );
       reset();
       return;
     }
@@ -61,14 +75,15 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
 
   useEffect(() => {
     if (won) {
-      say(t(lang, 'win.memory'));
+      say(t(lang, "win.memory"));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [won]);
+  }, [won, lang]);
 
   const resetGame = useCallback(() => {
     setRoundKey((k) => k + 1);
-    setBoard(buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs));
+    setBoard(
+      buildBoard(makeRng(Math.floor(Math.random() * 1e9)), deck, lang, pairs),
+    );
     reset();
   }, [deck, lang, pairs, reset]);
 
@@ -87,13 +102,16 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
 
   return (
     <GameShell
-      title={t(lang, 'shell.memory.title')}
-      subtitle={t(lang, 'shell.memory.sub', { n: totalPairs })}
+      title={t(lang, "shell.memory.title")}
+      subtitle={t(lang, "shell.memory.sub", { n: totalPairs })}
       onBack={onHome ?? (() => {})}
       lang={lang}
       right={
         <View style={styles.headerRight}>
-          <ScoreChip label={`🧠 ${matchedPairs}/${totalPairs}`} testID="concept-score" />
+          <ScoreChip
+            label={`🧠 ${matchedPairs}/${totalPairs}`}
+            testID="concept-score"
+          />
         </View>
       }
     >
@@ -101,7 +119,8 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
         <MemoryBoard cardCount={board.length} testID="concept-board">
           {(cardW) =>
             board.map((card) => {
-              const isUp = faceUp.includes(card.key) || matched.includes(card.key);
+              const isUp =
+                faceUp.includes(card.key) || matched.includes(card.key);
               const isMatched = matched.includes(card.key);
               return (
                 <FlipCard
@@ -110,7 +129,9 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
                   up={isUp}
                   matched={isMatched}
                   onFlip={() => handleFlip(card)}
-                  accessibilityLabel={isUp ? card.speech : t(lang, 'memory.cardFaceDown')}
+                  accessibilityLabel={
+                    isUp ? card.speech : t(lang, "memory.cardFaceDown")
+                  }
                   testID={`concept-card-${card.key}`}
                   sparkleTrigger={card.conceptId}
                   renderCardFace={() => renderCardFace(card, cardW)}
@@ -120,15 +141,15 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
           }
         </MemoryBoard>
         <Text style={styles.moves} testID="concept-moves">
-          {t(lang, 'memory.moves', { n: moves })}
+          {t(lang, "memory.moves", { n: moves })}
         </Text>
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.memory')}
+        message={t(lang, "win.memory")}
         lang={lang}
         onNext={resetGame}
-        nextLabel={t(lang, 'overlay.nextRound')}
+        nextLabel={t(lang, "overlay.nextRound")}
         onHome={onHome ?? (() => {})}
       />
     </GameShell>
@@ -138,14 +159,17 @@ export function ConceptMatchGame({ deck = 'letters', onHome, lang = 'en', pairs 
 function renderCardFace(card: ConceptMatchCard, size: number) {
   const { display } = card;
   switch (display.type) {
-    case 'text':
+    case "text":
       return (
         <Text
           testID={`card-text-${card.key}`}
           style={[
             styles.cardText,
             {
-              fontSize: display.text.length <= 2 ? size * 0.42 : Math.min(size * 0.22, 24),
+              fontSize:
+                display.text.length <= 2
+                  ? size * 0.42
+                  : Math.min(size * 0.22, 24),
             },
           ]}
           numberOfLines={1}
@@ -154,16 +178,23 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
           {display.text}
         </Text>
       );
-    case 'icon': {
-      const iconSource = SPOTIT_ICONS[display.icon] ?? (SHAPE_ICONS as Record<string, number>)[display.icon];
+    case "icon": {
+      const iconSource =
+        SPOTIT_ICONS[display.icon] ??
+        (SHAPE_ICONS as Record<string, number>)[display.icon];
       if (!iconSource) {
         throw new Error(`Missing icon asset for concept: ${display.icon}`);
       }
       return (
-        <Image testID={`card-icon-${card.key}`} source={iconSource} style={styles.cardImage} resizeMode="contain" />
+        <Image
+          testID={`card-icon-${card.key}`}
+          source={iconSource}
+          style={styles.cardImage}
+          resizeMode="contain"
+        />
       );
     }
-    case 'color':
+    case "color":
       return (
         <View
           testID={`card-color-${card.key}`}
@@ -178,7 +209,7 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
           ]}
         />
       );
-    case 'audio': {
+    case "audio": {
       const visualText = display.text || card.speech;
       return (
         <View testID={`card-audio-${card.key}`} style={styles.audioWrap}>
@@ -186,7 +217,10 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
           {visualText ? (
             <Text
               testID={`card-audio-text-${card.key}`}
-              style={[styles.audioText, { fontSize: Math.min(size * 0.18, 22) }]}
+              style={[
+                styles.audioText,
+                { fontSize: Math.min(size * 0.18, 22) },
+              ]}
               numberOfLines={1}
             >
               {visualText}
@@ -195,7 +229,7 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
         </View>
       );
     }
-    case 'dots': {
+    case "dots": {
       const dotSize = Math.max(8, Math.min(size * 0.16, 16));
       return (
         <View testID={`card-dots-${card.key}`} style={styles.dotsWrap}>
@@ -222,52 +256,52 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
 const styles = StyleSheet.create({
   boardWrap: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   cardImage: {
-    width: '78%',
-    height: '78%',
+    width: "78%",
+    height: "78%",
   },
   cardText: {
     fontFamily: fonts.display,
     color: colors.ink,
-    textAlign: 'center',
+    textAlign: "center",
     paddingHorizontal: 4,
   },
   colorSwatch: {
     borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
+    borderColor: "rgba(0, 0, 0, 0.12)",
   },
   audioWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 4,
     paddingHorizontal: 4,
   },
   audioText: {
     fontFamily: fonts.display,
     color: colors.ink,
-    textAlign: 'center',
+    textAlign: "center",
   },
   dotsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '80%',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "80%",
     gap: 6,
   },
   dot: {
     backgroundColor: colors.teal,
   },
   moves: {
-    textAlign: 'center',
+    textAlign: "center",
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
     fontSize: 15,
