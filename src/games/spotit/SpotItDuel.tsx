@@ -109,7 +109,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
     const w = scores.a > scores.b ? MP_PLAYERS[0] : MP_PLAYERS[1];
     const l = scores.a > scores.b ? MP_PLAYERS[1] : MP_PLAYERS[0];
     const lScore = Math.min(scores.a, scores.b);
-    say(`${t(lang, 'win.spotitDuel', { name: w.name })} ${t(lang, lScore === 1 ? 'win.spotitDuelSubOne' : 'win.spotitDuelSub', { emoji: '', name: l.name, n: lScore })}`);
+    say(`${t(lang, 'win.spotitDuel', { name: t(lang, w.name) })} ${t(lang, lScore === 1 ? 'win.spotitDuelSubOne' : 'win.spotitDuelSub', { emoji: '', name: t(lang, l.name), n: lScore })}`);
   }, [phase, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redeal = () => {
@@ -235,14 +235,14 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
       </View>
       <WinOverlay
         visible={phase === 'matchEnd'}
-        message={t(lang, 'win.spotitDuel', { name: winner.name })}
+        message={t(lang, 'win.spotitDuel', { name: t(lang, winner.name) })}
         sub={t(lang, loserScore === 1 ? 'win.spotitDuelSubOne' : 'win.spotitDuelSub', {
-          emoji: loser.emoji, name: loser.name, n: loserScore,
+          emoji: loser.emoji, name: t(lang, loser.name), n: loserScore,
         })}
         stats={
           <View style={styles.statsCol}>
-            <StarPips player={0} score={scores.a} total={winsNeeded} testID="duel-final-score-a" />
-            <StarPips player={1} score={scores.b} total={winsNeeded} testID="duel-final-score-b" />
+            <StarPips player={0} score={scores.a} total={winsNeeded} testID="duel-final-score-a" lang={lang} />
+            <StarPips player={1} score={scores.b} total={winsNeeded} testID="duel-final-score-b" lang={lang} />
           </View>
         }
         onNext={rematch}
@@ -333,7 +333,7 @@ function Zone({
           />
         </DealIn>
       </View>
-      <StarPips player={ZONE_PLAYER[z]} score={score} total={total} testID={`duel-score-${z}`} />
+      <StarPips player={ZONE_PLAYER[z]} score={score} total={total} testID={`duel-score-${z}`} lang={lang} />
       {phase === 'ready' ? (
         <View style={styles.countWrap} pointerEvents="none">
           <Text style={styles.count} testID={z === 'a' ? 'duel-countdown' : undefined}>
@@ -345,12 +345,12 @@ function Zone({
   );
 }
 
-function StarPips({ player, score, total, testID }: { player: PlayerIx; score: number; total: number; testID: string }) {
+function StarPips({ player, score, total, testID, lang = 'en' }: { player: PlayerIx; score: number; total: number; testID: string; lang?: Lang }) {
   const p = MP_PLAYERS[player];
   return (
     <View
       testID={testID}
-      accessibilityLabel={`${p.name} has ${score} stars`}
+      accessibilityLabel={t(lang, 'mp.hasStars', { name: t(lang, p.name), n: score })}
       style={[styles.pips, { borderColor: p.color }]}
     >
       <Text style={styles.pipEmoji}>{p.emoji}</Text>

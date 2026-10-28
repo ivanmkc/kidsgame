@@ -120,7 +120,7 @@ export function HiddenGame({
   // Team Hunt narration: speak each turn change (identity by voice, zero reading).
   useSay(
     coop && scene && !won
-      ? t(lang, "hidden.turn", { name: MP_PLAYERS[turn].name })
+      ? t(lang, "hidden.turn", { name: t(lang, MP_PLAYERS[turn].name) })
       : null,
   );
   useSay(
@@ -337,12 +337,14 @@ export function HiddenGame({
                 count={countFor(finds, 0)}
                 active={turn === 0 && !won}
                 testID="hidden-player-chip-0"
+                lang={lang}
               />
               <PlayerChip
                 player={1}
                 count={countFor(finds, 1)}
                 active={turn === 1 && !won}
                 testID="hidden-player-chip-1"
+                lang={lang}
               />
             </>
           ) : null}
@@ -447,7 +449,7 @@ function TurnBanner({
       useNativeDriver: true,
     }).start();
   }, [turn, scaleAnim]);
-  const turnLabel = t(lang, "hidden.turn", { name: p.name });
+  const turnLabel = t(lang, "hidden.turn", { name: t(lang, p.name) });
   return (
     <Animated.View
       testID="hidden-turn-banner"

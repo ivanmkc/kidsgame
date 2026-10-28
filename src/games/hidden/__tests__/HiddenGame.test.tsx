@@ -41,8 +41,8 @@ describe("HiddenGame localization", () => {
 
     const banner = screen.getByTestId("hidden-turn-banner");
     expect(banner).toBeDefined();
-    expect(banner.getAttribute("aria-label")).toBe("Foxyの ばん！");
-    expect(screen.getByText(/Foxyの ばん！/)).toBeDefined();
+    expect(banner.getAttribute("aria-label")).toBe("きつねの ばん！");
+    expect(screen.getByText(/きつねの ばん！/)).toBeDefined();
     expect(screen.queryByText(/Foxy's turn/)).toBeNull();
   });
 
@@ -80,7 +80,7 @@ describe("HiddenGame localization", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
-    expect(screen.getByText(/轮到Foxy了！/)).toBeDefined();
+    expect(screen.getByText(/轮到狐狸了！/)).toBeDefined();
     unmountCmn();
     cleanup();
 
@@ -96,7 +96,7 @@ describe("HiddenGame localization", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
-    expect(screen.getByText(/到Foxy喇！/)).toBeDefined();
+    expect(screen.getByText(/到狐狸喇！/)).toBeDefined();
   });
 
   it("speaks localized narration cues for solo play and 2P turn changes", () => {
@@ -167,7 +167,7 @@ describe("HiddenGame localization", () => {
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
     expect(speakSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ text: "Foxyの ばん！" }),
+      expect.objectContaining({ text: "きつねの ばん！" }),
     );
   });
 
@@ -691,7 +691,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     // Turn starts on player 0 (Foxy)
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
-    ).toBe("Foxyの ばん！");
+    ).toBe("きつねの ばん！");
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
 
     goodSpy.mockClear();
@@ -708,7 +708,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
-    ).toBe("Foxyの ばん！");
+    ).toBe("きつねの ばん！");
 
     // Tap active checklist target
     const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
@@ -718,7 +718,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(screen.getByTestId("hidden-score").textContent).toContain("1/6");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
-    ).toBe("Bunnyの ばん！");
+    ).toBe("うさぎの ばん！");
   });
 
   it("clears hint ring immediately if a valid checklist target is tapped before omitted flash timer expires", () => {

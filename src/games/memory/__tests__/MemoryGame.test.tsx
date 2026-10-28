@@ -408,6 +408,7 @@ describe("MemoryGame", () => {
   });
 
   it("announces next player turn after mismatch timeout when not unmounted in duel mode", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
     vi.spyOn(logic, "buildBoard").mockReturnValue([
       { key: 0, icon: "apple" },
       { key: 1, icon: "banana" },
@@ -435,7 +436,9 @@ describe("MemoryGame", () => {
       vi.advanceTimersByTime(750);
     });
 
-    expect(sound.say).toHaveBeenCalledWith(expect.stringContaining("'s turn!"));
+    expect(sound.say).toHaveBeenCalledWith(
+      t("en", "hidden.turn", { name: t("en", MP_PLAYERS[1].name) }),
+    );
   });
 
   it("mounts fresh face-down cards on next round without flipping down from face-up", async () => {
@@ -513,6 +516,9 @@ describe("MemoryGame", () => {
     );
 
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    expect(sound.say).toHaveBeenCalledWith(
+      t("ja", "mp.starts", { name: t("ja", MP_PLAYERS[0].name) }),
+    );
     vi.mocked(sound.say).mockClear();
 
     // Match all pairs as Player 0
@@ -522,6 +528,9 @@ describe("MemoryGame", () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId("memory-card-2-apple"));
     });
+    expect(sound.say).toHaveBeenCalledWith(
+      t("ja", "memory.foundPair", { name: t("ja", MP_PLAYERS[0].name) }),
+    );
     await act(async () => {
       fireEvent.click(screen.getByTestId("memory-card-1-banana"));
     });
@@ -530,7 +539,7 @@ describe("MemoryGame", () => {
     });
 
     expect(sound.say).toHaveBeenCalledWith(
-      t("ja", "win.memoryWinner", { name: MP_PLAYERS[0].name }),
+      t("ja", "win.memoryWinner", { name: t("ja", MP_PLAYERS[0].name) }),
     );
     expect(sound.say).not.toHaveBeenCalledWith(
       expect.stringContaining("wins!"),
@@ -637,7 +646,9 @@ describe("MemoryGame", () => {
       fireEvent.click(screen.getByTestId("mp-choose-2p"));
     });
 
-    expect(sound.say).toHaveBeenCalledWith(`${MP_PLAYERS[0].name} starts!`);
+    expect(sound.say).toHaveBeenCalledWith(
+      t("en", "mp.starts", { name: t("en", MP_PLAYERS[0].name) }),
+    );
 
     unmount();
 
@@ -655,6 +666,8 @@ describe("MemoryGame", () => {
       fireEvent.click(screen.getByTestId("mp-choose-2p"));
     });
 
-    expect(sound.say).toHaveBeenCalledWith(`${MP_PLAYERS[1].name} starts!`);
+    expect(sound.say).toHaveBeenCalledWith(
+      t("en", "mp.starts", { name: t("en", MP_PLAYERS[1].name) }),
+    );
   });
 });
