@@ -232,6 +232,7 @@ export function JourneyScene({
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
+      onPointerLeave={onPointerCancel}
       testID="musicbox-stage"
       accessibilityLabel={t(lang, "musicbox.stage")}
     >

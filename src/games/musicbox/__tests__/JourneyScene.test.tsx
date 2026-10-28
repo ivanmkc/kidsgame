@@ -571,4 +571,26 @@ describe("JourneyScene accessibility", () => {
 
     unmount();
   });
+
+  it("does not leak pointer when dragging off stage", () => {
+    const playNoteSpy = vi.spyOn(music, "playNote");
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Touch down on stage
+    fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
+    // Drag off stage and release (which fires pointerOut on the stage, but maybe no pointerUp if not captured)
+    fireEvent.pointerLeave(stage, { pointerId: 1, clientX: -10, clientY: 100 });
+
+    playNoteSpy.mockClear();
+
+    // Now tap again with a different pointerId (or same, but let's say different)
+    fireEvent.pointerDown(stage, { pointerId: 2, clientX: 100, clientY: 100 });
+
+    // It should just play ONE note at velocity 1 (not a chord at velocity 0.7)
+    expect(playNoteSpy).toHaveBeenCalledTimes(1);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(expect.any(Number), 1);
+
+    unmount();
+  });
 });
