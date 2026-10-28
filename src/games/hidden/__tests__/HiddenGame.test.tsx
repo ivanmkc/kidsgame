@@ -267,6 +267,71 @@ describe("HiddenGame localization", () => {
       expect(target.getAttribute("aria-label")).toBe(t("ja", "a11y.target"));
     }
   });
+
+  it("renders checklist chips with accessibilityRole image and localized accessibilityLabel", () => {
+    const { unmount } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const chips = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    ).filter((el) => !el.getAttribute("data-testid")?.includes("-finder"));
+
+    expect(chips.length).toBeGreaterThan(0);
+    for (const chip of chips) {
+      expect(chip.getAttribute("role")).toBe("img");
+      expect(chip.getAttribute("aria-label")).toBe(t("ja", "a11y.target"));
+    }
+
+    const firstId = chips[0]
+      .getAttribute("data-testid")!
+      .replace("checklist-", "");
+    fireEvent.click(screen.getByTestId(`hidden-target-${firstId}`));
+
+    expect(chips[0].getAttribute("aria-label")).toBe(
+      t("ja", "a11y.targetFound"),
+    );
+
+    unmount();
+    cleanup();
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const enChecklist = screen.getByTestId("hidden-checklist");
+    const enChips = Array.from(
+      enChecklist.querySelectorAll('[data-testid^="checklist-"]'),
+    ).filter((el) => !el.getAttribute("data-testid")?.includes("-finder"));
+
+    expect(enChips.length).toBeGreaterThan(0);
+    expect(enChips[0].getAttribute("role")).toBe("img");
+    expect(enChips[0].getAttribute("aria-label")).toBe("Target");
+
+    const enFirstId = enChips[0]
+      .getAttribute("data-testid")!
+      .replace("checklist-", "");
+    fireEvent.click(screen.getByTestId(`hidden-target-${enFirstId}`));
+
+    expect(enChips[0].getAttribute("aria-label")).toBe("Target, found");
+  });
 });
 
 describe("HiddenGame gentle auto-hint", () => {

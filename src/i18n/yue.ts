@@ -24,6 +24,7 @@ export const YUE: Table = {
   'a11y.backMenu': '返去主目錄',
   'a11y.backPicker': '返去關卡選擇',
   'a11y.target': '目標',
+  'a11y.targetFound': '目標，已搵到',
   'grownups.install': '📲 加去主畫面',
   'grownups.share': '📤 分享俾家長',
   'grownups.copied': '✅ 已經複製咗連結！',

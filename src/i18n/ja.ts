@@ -25,6 +25,7 @@ export const JA: Table = {
   'a11y.backMenu': 'メニューにもどる',
   'a11y.backPicker': 'レベルえらびにもどる',
   'a11y.target': 'ターゲット',
+  'a11y.targetFound': 'ターゲット、みつかった',
   'grownups.install': '📲 ホームがめんに ついか',
   'grownups.share': '📤 ほかのかたにおしえる',
   'grownups.copied': '✅ リンクをコピーしました！',

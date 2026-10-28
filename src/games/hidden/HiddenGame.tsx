@@ -263,22 +263,24 @@ export function HiddenGame({
     <TurnBanner turn={turn} lang={lang} compact={isLandscape} />
   ) : null;
 
-  const checklistChips = drawn.map((t) => {
-    const done = foundIds.includes(t.id);
-    const finder = coop && done ? finderFor(t.id) : null;
+  const checklistChips = drawn.map((target) => {
+    const done = foundIds.includes(target.id);
+    const finder = coop && done ? finderFor(target.id) : null;
     return (
       <View
-        key={t.id}
+        key={target.id}
         style={[
           styles.chip,
           isLandscape && styles.chipLandscape,
           shadows.soft,
           done && styles.chipFound,
         ]}
-        testID={`checklist-${t.id}`}
+        testID={`checklist-${target.id}`}
+        accessibilityRole="image"
+        accessibilityLabel={t(lang, done ? "a11y.targetFound" : "a11y.target")}
       >
         <Image
-          source={SCENE_IMAGES[t.thumb]}
+          source={SCENE_IMAGES[target.thumb]}
           style={styles.chipImg}
           resizeMode="contain"
         />
@@ -301,7 +303,7 @@ export function HiddenGame({
               isLandscape && styles.finderBadgeLandscape,
               { borderColor: MP_PLAYERS[finder].color },
             ]}
-            testID={`checklist-${t.id}-finder`}
+            testID={`checklist-${target.id}-finder`}
           >
             <Text
               style={[
@@ -320,7 +322,9 @@ export function HiddenGame({
   return (
     <GameShell
       title={t(lang, "shell.hidden.title")}
-      subtitle={t(lang, "shell.hidden.subPlay", { name: scene.nameT?.[lang] ?? scene.name })}
+      subtitle={t(lang, "shell.hidden.subPlay", {
+        name: scene.nameT?.[lang] ?? scene.name,
+      })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}
