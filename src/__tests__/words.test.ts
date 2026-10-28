@@ -77,4 +77,22 @@ describe("WORDS", () => {
     const pig = WORDS.find((w) => w.icon === "pig");
     expect(pig?.rhymeKey).toBe("ig");
   });
+
+  it("assigns accurate Mandarin rhyme finals distinguishing -ie, -yu, -u, and excludes singleton car", () => {
+    const crab = WORDS.find((w) => w.icon === "crab");
+    const butterfly = WORDS.find((w) => w.icon === "butterfly");
+    const fish = WORDS.find((w) => w.icon === "fish");
+    const octopus = WORDS.find((w) => w.icon === "octopus");
+    const pig = WORDS.find((w) => w.icon === "pig");
+    const gift = WORDS.find((w) => w.icon === "gift");
+    const car = WORDS.find((w) => w.icon === "car");
+
+    expect(crab?.cmnRhyme).toBe("ie");
+    expect(butterfly?.cmnRhyme).toBe("ie");
+    expect(fish?.cmnRhyme).toBe("yu");
+    expect(octopus?.cmnRhyme).toBe("yu");
+    expect(pig?.cmnRhyme).toBe("u");
+    expect(gift?.cmnRhyme).toBe("u");
+    expect(car?.cmnRhyme).toBeUndefined();
+  });
 });
