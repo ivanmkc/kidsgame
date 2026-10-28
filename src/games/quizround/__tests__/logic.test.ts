@@ -337,4 +337,12 @@ describe("spriteLT", () => {
     const far = spriteLT(100, 100, 40, 500, 300, 16);
     expect(far).toEqual({ left: 500 - 16 - 40, top: 300 - 16 - 40 });
   });
+
+  it("centers sprite when size exceeds stage inner dimensions with inset", () => {
+    const pos = spriteLT(50, 50, 60, 80, 80, 16);
+    expect(pos).toEqual({ left: 10, top: 10 });
+
+    const mixed = spriteLT(0, 50, 60, 200, 80, 16);
+    expect(mixed).toEqual({ left: 16, top: 10 });
+  });
 });

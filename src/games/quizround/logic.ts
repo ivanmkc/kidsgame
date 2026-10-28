@@ -70,10 +70,26 @@ export function makeQuizRound<T>(
   return { target, tiles, answerIdx };
 }
 
+function clampAxis(
+  pct: number,
+  size: number,
+  stage: number,
+  inset: number,
+): number {
+  const inner = Math.max(0, stage - inset * 2);
+  if (inner < size) {
+    return Math.max(0, (stage - size) / 2);
+  }
+  const half = size / 2;
+  const c = Math.min(Math.max((pct / 100) * inner, half), inner - half);
+  return c - half + inset;
+}
+
 // Clamped sprite placement: positions are % of the stage, but a sprite has
 // EXTENT — near an edge the center must pull in by half the sprite or the
 // art clips outside the stage (landscape stages get very short). `inset`
 // pulls inward from stage edges to clear rounded corners or badges.
+// When inner stage space is smaller than the sprite, centers within the stage.
 export function spriteLT(
   pxPct: number,
   pyPct: number,
@@ -82,16 +98,8 @@ export function spriteLT(
   stageH: number,
   inset = 0,
 ): { left: number; top: number } {
-  const innerW = Math.max(0, stageW - inset * 2);
-  const innerH = Math.max(0, stageH - inset * 2);
-  const half = size / 2;
-  const cx = Math.min(
-    Math.max((pxPct / 100) * innerW, half),
-    Math.max(half, innerW - half),
-  );
-  const cy = Math.min(
-    Math.max((pyPct / 100) * innerH, half),
-    Math.max(half, innerH - half),
-  );
-  return { left: cx - half + inset, top: cy - half + inset };
+  return {
+    left: clampAxis(pxPct, size, stageW, inset),
+    top: clampAxis(pyPct, size, stageH, inset),
+  };
 }
