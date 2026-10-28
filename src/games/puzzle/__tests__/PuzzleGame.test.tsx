@@ -1,5 +1,7 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import {
   act,
   cleanup,
@@ -735,5 +737,51 @@ describe("PuzzleGame", () => {
       screen.getByText("ジャングル — 2まいを タップして いれかえよう"),
     ).toBeTruthy();
     unmountHiddenJa();
+  });
+
+  it("does not speak gameplay instruction hint when switching languages on victory screen", () => {
+    vi.spyOn(logic, "makePuzzle").mockReturnValue([0, 1, 2, 3, 4, 5]);
+    const saySpy = vi.spyOn(sound, "say");
+    const useSaySpy = vi.spyOn(sound, "useSay");
+
+    function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
+      const [lang, setLang] = useState<Lang>(initialLang);
+      const cycleLang = () => {
+        setLang((l) =>
+          l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+        );
+      };
+      return (
+        <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+          <PuzzleGame
+            onHome={noop}
+            difficulty="easy"
+            sceneId="d-dinos"
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<LangHarness initialLang="en" />);
+
+    // Initial mount with solved puzzle speaks win message
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.puzzle"));
+
+    // Verify victory screen (WinOverlay) is visible
+    expect(screen.getByTestId("play-again")).toBeTruthy();
+
+    saySpy.mockClear();
+    useSaySpy.mockClear();
+
+    // Tap language cycle button to switch from English to Japanese
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // useSay should be called with null when won is true, not the gameplay hint
+    expect(useSaySpy).toHaveBeenCalledWith(null);
+    expect(saySpy).not.toHaveBeenCalledWith(t("ja", "puzzle.hint"));
   });
 });

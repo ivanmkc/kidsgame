@@ -93,8 +93,10 @@ export function PuzzleGame({
     };
   }, [sceneId, cols, rows]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useSay(picked ? t(lang, "puzzle.hint") : t(lang, "picker.puzzle"));
   const won = perm.length === size && isSolved(perm);
+  useSay(
+    won ? null : picked ? t(lang, "puzzle.hint") : t(lang, "picker.puzzle"),
+  );
   const showTimer = settings.timer;
   const elapsed = useElapsed(showTimer && !won && !!picked, sceneId);
 
