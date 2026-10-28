@@ -62,6 +62,7 @@ export function HiddenGame({
   lang = "en",
 }: Props) {
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
+  const surprisePool = visible.length > 0 ? visible : manifest.hidden;
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
   // flattening to medium hid the easy-mode hint/no-timer design entirely.
@@ -182,9 +183,9 @@ export function HiddenGame({
             if (mode !== null) onPickScene(id);
           }}
           onSurprise={() => {
-            if (mode !== null)
+            if (mode !== null && surprisePool.length > 0)
               onPickScene(
-                visible[Math.floor(Math.random() * visible.length)].id,
+                surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
               );
           }}
           filterChip={

@@ -118,9 +118,10 @@ export function PuzzleGame({
           lang={lang}
           options={allOptions}
           onPick={onPickScene}
-          onSurprise={() =>
-            onPickScene(options[Math.floor(Math.random() * options.length)].id)
-          }
+          onSurprise={() => {
+            const surprisePool = options.length > 0 ? options : allOptions;
+            onPickScene(surprisePool[Math.floor(Math.random() * surprisePool.length)].id);
+          }}
           filterChip={
             onFilter ? (
               <FilterCycleChip
