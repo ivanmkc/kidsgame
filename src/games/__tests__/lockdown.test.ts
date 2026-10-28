@@ -453,5 +453,28 @@ describe("LockdownSettings", () => {
     expect(html).toContain(t("ja", "menu.section.word"));
     expect(html).toContain(t("ja", "menu.section.number"));
     expect(html).toContain(t("ja", "menu.section.music"));
+    expect(html).toContain(t("ja", "lockdown.title"));
+    expect(html).toContain(t("ja", "lockdown.subtitle"));
+    expect(html).toContain(t("ja", "lockdown.languages"));
+    expect(html).toContain(t("ja", "lockdown.done"));
+    expect(html).not.toContain("Parental Controls");
+  });
+
+  it("renders hidden count in Done button in Japanese mode", () => {
+    const html = renderToString(
+      React.createElement(
+        LangContext.Provider,
+        { value: { lang: "ja", onCycle: vi.fn() } },
+        React.createElement(LockdownSettings, {
+          hiddenGames: ["bingo"],
+          hiddenLangs: [],
+          onToggleGame: vi.fn(),
+          onToggleLang: vi.fn(),
+          onDone: vi.fn(),
+        }),
+      ),
+    );
+    expect(html).toContain(t("ja", "lockdown.doneHidden", { n: 1 }));
+    expect(html).not.toContain("hidden)");
   });
 });

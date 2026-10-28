@@ -298,6 +298,13 @@ export type UIKey =
   | 'gate.wordPrompt'
   | 'gate.wordPlaceholder'
   | 'gate.continue'
+  // ── Lockdown settings ──────────────────────────────────────────
+  | 'lockdown.title'
+  | 'lockdown.subtitle'
+  | 'lockdown.languages'
+  | 'lockdown.warning'
+  | 'lockdown.done'
+  | 'lockdown.doneHidden'
   // ── Colors ─────────────────────────────────────────────────────
   | 'color.red' | 'color.blue' | 'color.green' | 'color.yellow'
   | 'color.purple' | 'color.orange' | 'color.black' | 'color.white'
@@ -681,6 +688,14 @@ export const EN: Table = {
   'gate.wordPrompt': 'To continue, type the word',
   'gate.wordPlaceholder': 'Type the word here',
   'gate.continue': 'Continue',
+
+  'lockdown.title': 'Parental Controls',
+  'lockdown.subtitle': 'Toggle off games or languages to hide them from your child.',
+  'lockdown.languages': 'Languages',
+  'lockdown.warning': 'At least one language must remain visible.',
+  'lockdown.done': 'Done',
+  'lockdown.doneHidden': 'Done ({n} hidden)',
+
   'color.red': 'red', 'color.blue': 'blue', 'color.green': 'green', 'color.yellow': 'yellow',
   'color.purple': 'purple', 'color.orange': 'orange', 'color.black': 'black', 'color.white': 'white',
   'color.pink': 'pink', 'color.brown': 'brown', 'color.gray': 'gray',

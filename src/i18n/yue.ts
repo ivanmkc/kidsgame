@@ -370,6 +370,14 @@ export const YUE: Table = {
   'gate.wordPrompt': '請輸入以下單字以繼續',
   'gate.wordPlaceholder': '喺度輸入單字',
   'gate.continue': '繼續',
+
+  'lockdown.title': '家長控制',
+  'lockdown.subtitle': '關閉遊戲或語言以對小朋友隱藏。',
+  'lockdown.languages': '語言',
+  'lockdown.warning': '至少要保留一種可見嘅語言。',
+  'lockdown.done': '完成',
+  'lockdown.doneHidden': '完成（已隱藏 {n} 項）',
+
   'color.red': '紅色',
   'color.blue': '藍色',
   'color.green': '綠色',

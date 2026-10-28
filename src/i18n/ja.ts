@@ -371,6 +371,14 @@ export const JA: Table = {
   'gate.wordPrompt': 'つづけるには、次の単語を入力してください',
   'gate.wordPlaceholder': '単語を入力',
   'gate.continue': 'つづける',
+
+  'lockdown.title': '保護者用設定',
+  'lockdown.subtitle': 'ゲームや言語をオフにして、お子様から非表示にします。',
+  'lockdown.languages': '言語',
+  'lockdown.warning': '少なくとも1つの言語を表示しておく必要があります。',
+  'lockdown.done': '完了',
+  'lockdown.doneHidden': '完了（{n}件非表示）',
+
   'color.red': 'あか',
   'color.blue': 'あお',
   'color.green': 'みどり',
