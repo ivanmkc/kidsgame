@@ -37,7 +37,6 @@ export function AdultGate({ onPass, onCancel, lang: propLang }: Props) {
   const [holdProgress, setHoldProgress] = useState(0);
   const [word, setWord] = useState(() => randomGateWord(lang));
   const [typed, setTyped] = useState("");
-  const [_shake, setShake] = useState(false);
   const holdTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const holdStart = useRef<number>(0);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -95,7 +94,6 @@ export function AdultGate({ onPass, onCancel, lang: propLang }: Props) {
     if (typed.trim().toLowerCase() === word.toLowerCase()) {
       onPass();
     } else {
-      setShake(true);
       Animated.sequence([
         Animated.timing(shakeAnim, {
           toValue: 10,
@@ -122,7 +120,7 @@ export function AdultGate({ onPass, onCancel, lang: propLang }: Props) {
           duration: 50,
           useNativeDriver: true,
         }),
-      ]).start(() => setShake(false));
+      ]).start();
       setTyped("");
       setWord(randomGateWord(lang));
     }
