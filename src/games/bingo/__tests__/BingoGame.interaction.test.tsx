@@ -214,6 +214,39 @@ test("changes language", async () => {
   expect(jaPrompt.textContent).toContain("さがしてね");
 });
 
+test("updates board dimensions and mode when difficulty changes", async () => {
+  const onHome = vi.fn();
+  const { rerender } = render(
+    <BingoGame onHome={onHome} difficulty="easy" lang="en" />,
+  );
+  await act(async () => {
+    vi.runAllTimers();
+  });
+
+  expect(screen.getAllByTestId(/bingo-cell-/)).toHaveLength(9);
+  expect(screen.getByTestId("bingo-prompt").textContent).toMatch(/^Find the /);
+
+  // Switch difficulty to medium (4x4 board, 16 cells)
+  rerender(<BingoGame onHome={onHome} difficulty="medium" lang="en" />);
+  await act(async () => {
+    vi.runAllTimers();
+  });
+
+  expect(screen.getAllByTestId(/bingo-cell-/)).toHaveLength(16);
+  expect(screen.getByTestId("bingo-prompt").textContent).toMatch(/^Find the /);
+
+  // Switch difficulty to hard (3x3 board in phonics mode: "Find something that starts with ...!")
+  rerender(<BingoGame onHome={onHome} difficulty="hard" lang="en" />);
+  await act(async () => {
+    vi.runAllTimers();
+  });
+
+  expect(screen.getAllByTestId(/bingo-cell-/)).toHaveLength(9);
+  expect(screen.getByTestId("bingo-prompt").textContent).toMatch(
+    /^Find something that starts with /,
+  );
+});
+
 test("unmounts with wrong timer running", async () => {
   const onHome = vi.fn();
   const { unmount } = render(
