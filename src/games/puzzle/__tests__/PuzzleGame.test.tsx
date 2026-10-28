@@ -607,6 +607,85 @@ describe("PuzzleGame", () => {
     expect(goodSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("renders SparkleBurst feedback over tiles when swapped into correct positions", () => {
+    vi.spyOn(logic, "makePuzzle").mockReturnValue([1, 0, 3, 2, 4, 5]);
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Initial state: tiles have not reached correct positions via swap, so no sparkles
+    expect(screen.getByTestId("puzzle-tile-0-piece-1").textContent).toBe("");
+    expect(screen.getByTestId("puzzle-tile-1-piece-0").textContent).toBe("");
+
+    // 1. Swap tile 0 (piece 1) and tile 1 (piece 0) -> [0, 1, 3, 2, 4, 5]
+    // Both tiles reach solved positions -> both sparkle
+    fireEvent.click(screen.getByTestId("puzzle-tile-0-piece-1"));
+    fireEvent.click(screen.getByTestId("puzzle-tile-1-piece-0"));
+
+    expect(screen.getByTestId("puzzle-tile-0-piece-0").textContent).toContain(
+      "✨",
+    );
+    expect(screen.getByTestId("puzzle-tile-0-piece-0").textContent).toContain(
+      "⭐",
+    );
+    expect(screen.getByTestId("puzzle-tile-1-piece-1").textContent).toContain(
+      "✨",
+    );
+    expect(screen.getByTestId("puzzle-tile-1-piece-1").textContent).toContain(
+      "⭐",
+    );
+
+    // 2. Swap tile 0 (piece 0) and tile 2 (piece 3) -> [3, 1, 0, 2, 4, 5]
+    // Tile 0 moves away from solved position -> sparkle cleared; tile 2 is not solved -> no sparkle
+    fireEvent.click(screen.getByTestId("puzzle-tile-0-piece-0"));
+    fireEvent.click(screen.getByTestId("puzzle-tile-2-piece-3"));
+
+    expect(
+      screen.getByTestId("puzzle-tile-0-piece-3").textContent,
+    ).not.toContain("✨");
+    expect(
+      screen.getByTestId("puzzle-tile-2-piece-0").textContent,
+    ).not.toContain("✨");
+
+    // 3. Swap tile 0 (piece 3) and tile 2 (piece 0) -> [0, 1, 3, 2, 4, 5]
+    // Only tile 0 reaches solved position 0; tile 2 has piece 3 (not solved)
+    fireEvent.click(screen.getByTestId("puzzle-tile-0-piece-3"));
+    fireEvent.click(screen.getByTestId("puzzle-tile-2-piece-0"));
+
+    expect(screen.getByTestId("puzzle-tile-0-piece-0").textContent).toContain(
+      "✨",
+    );
+    expect(
+      screen.getByTestId("puzzle-tile-2-piece-3").textContent,
+    ).not.toContain("✨");
+
+    // 4. Swap tile 2 (piece 3) and tile 3 (piece 2) -> [0, 1, 2, 3, 4, 5]
+    // Both reach solved positions
+    fireEvent.click(screen.getByTestId("puzzle-tile-2-piece-3"));
+    fireEvent.click(screen.getByTestId("puzzle-tile-3-piece-2"));
+
+    expect(screen.getByTestId("puzzle-tile-2-piece-2").textContent).toContain(
+      "✨",
+    );
+    expect(screen.getByTestId("puzzle-tile-2-piece-2").textContent).toContain(
+      "⭐",
+    );
+    expect(screen.getByTestId("puzzle-tile-3-piece-3").textContent).toContain(
+      "✨",
+    );
+    expect(screen.getByTestId("puzzle-tile-3-piece-3").textContent).toContain(
+      "⭐",
+    );
+  });
+
   it("resolves localized scene names in allSceneOptions for diff and hidden scenes", () => {
     const enOptions = allSceneOptions("all", "en");
     expect(enOptions.find((o) => o.id === "d-dinos")?.name).toBe(
