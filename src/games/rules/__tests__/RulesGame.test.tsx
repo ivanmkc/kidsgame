@@ -144,6 +144,113 @@ describe("RulesGame", () => {
     }
   });
 
+  it("preserves simultaneous multi-touch taps on correct tiles and completes the round", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+        ruleNumber: 1,
+        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        isRecall: false,
+        tiles: [
+          { icon: "blossom", isMatch: true },
+          { icon: "sunflower", isMatch: true },
+          { icon: "soccer", isMatch: false },
+        ],
+        matchCount: 2,
+      });
+
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      const blossomTile = screen.getByTestId("rules-tile-0-blossom-y");
+      const sunflowerTile = screen.getByTestId("rules-tile-1-sunflower-y");
+
+      act(() => {
+        fireEvent.click(blossomTile);
+        fireEvent.click(sunflowerTile);
+      });
+
+      expect(sfx.good).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("rules-progress").textContent).toBe(
+        t("en", "rules.progress", { found: 2, total: 2 }),
+      );
+
+      act(() => {
+        vi.advanceTimersByTime(550);
+      });
+      expect(screen.getByTestId("rules-score").textContent).toContain("1/10");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("preserves simultaneous multi-touch taps on correct tiles during partial match", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+        ruleNumber: 1,
+        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        isRecall: false,
+        tiles: [
+          { icon: "blossom", isMatch: true },
+          { icon: "sunflower", isMatch: true },
+          { icon: "rainbow", isMatch: true },
+          { icon: "soccer", isMatch: false },
+        ],
+        matchCount: 3,
+      });
+
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      const blossomTile = screen.getByTestId("rules-tile-0-blossom-y");
+      const sunflowerTile = screen.getByTestId("rules-tile-1-sunflower-y");
+
+      act(() => {
+        fireEvent.click(blossomTile);
+        fireEvent.click(sunflowerTile);
+      });
+
+      expect(sfx.good).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("rules-progress").textContent).toBe(
+        t("en", "rules.progress", { found: 2, total: 3 }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("ignores duplicate simultaneous taps on the same correct tile", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+        ruleNumber: 1,
+        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        isRecall: false,
+        tiles: [
+          { icon: "blossom", isMatch: true },
+          { icon: "sunflower", isMatch: true },
+          { icon: "soccer", isMatch: false },
+        ],
+        matchCount: 2,
+      });
+
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      const blossomTile = screen.getByTestId("rules-tile-0-blossom-y");
+
+      act(() => {
+        fireEvent.click(blossomTile);
+        fireEvent.click(blossomTile);
+      });
+
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("rules-progress").textContent).toBe(
+        t("en", "rules.progress", { found: 1, total: 2 }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("displays Rule #6 after memory check on Hard difficulty without skipping numbers", () => {
     vi.useFakeTimers();
     try {
@@ -469,4 +576,3 @@ describe("RulesGame", () => {
     });
   });
 });
-
