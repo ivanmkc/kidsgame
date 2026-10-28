@@ -240,6 +240,64 @@ describe("PuzzleGame", () => {
     expect(screen.getByTestId("puzzle-peek-overlay")).toBeTruthy();
   });
 
+  it("ignores tile taps and plays no sounds while peek overlay is active", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makePuzzle").mockReturnValue([1, 0, 2, 3, 4, 5]);
+    const tapSpy = vi.spyOn(sfx, "tap");
+    const flipSpy = vi.spyOn(sfx, "flip");
+    const goodSpy = vi.spyOn(sfx, "good");
+
+    render(
+      <PuzzleGame
+        onHome={noop}
+        difficulty="easy"
+        sceneId={sceneId}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    const peekBtn = screen.getByTestId("puzzle-peek");
+    fireEvent.click(peekBtn);
+    expect(screen.getByTestId("puzzle-peek-overlay")).toBeTruthy();
+
+    tapSpy.mockClear();
+    flipSpy.mockClear();
+    goodSpy.mockClear();
+
+    // Tap tiles during peek
+    fireEvent.click(screen.getByTestId("puzzle-tile-0-piece-1"));
+    fireEvent.click(screen.getByTestId("puzzle-tile-1-piece-0"));
+
+    // No sounds played, no moves recorded, tiles remain unchanged
+    expect(tapSpy).not.toHaveBeenCalled();
+    expect(flipSpy).not.toHaveBeenCalled();
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("puzzle-moves").textContent).toContain("0");
+    expect(screen.queryByTestId("puzzle-tile-0-piece-1")).toBeTruthy();
+    expect(screen.queryByTestId("puzzle-tile-1-piece-0")).toBeTruthy();
+    expect(screen.queryByTestId("puzzle-tile-0-piece-0")).toBeNull();
+
+    // Advance past peek duration (2500ms)
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+    expect(screen.queryByTestId("puzzle-peek-overlay")).toBeNull();
+
+    // Tapping tiles now works normally
+    fireEvent.click(screen.getByTestId("puzzle-tile-0-piece-1"));
+    expect(tapSpy).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId("puzzle-tile-1-piece-0"));
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("puzzle-moves").textContent).toContain("1");
+    expect(screen.queryByTestId("puzzle-tile-0-piece-0")).toBeTruthy();
+    expect(screen.queryByTestId("puzzle-tile-1-piece-1")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   it("renders peek button with English accessibility label", () => {
     const { unmount } = render(
       <PuzzleGame

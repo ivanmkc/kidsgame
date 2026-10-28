@@ -154,7 +154,7 @@ export function PuzzleGame({
   const tileH = boardH / rows;
 
   const onTile = (pos: number) => {
-    if (won || perm.length === 0) return;
+    if (won || peek || perm.length === 0) return;
     const current = selectedRef.current;
     if (current === null) {
       sfx.tap();
