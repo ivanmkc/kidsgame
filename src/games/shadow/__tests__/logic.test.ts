@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LANGS, Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import { makeRng } from "../../../rng";
-import { ICON_CATEGORIES } from "../../iconCategories";
+import { CURRICULUM } from "../../../curriculum/content";
 import {
   SHADOW_PROMPTS,
   makeShadowRound,
@@ -40,7 +40,7 @@ describe("shadow prompt localization", () => {
 describe("makeShadowRound", () => {
   it("includes all available same-category distractors for small categories on hard tier", () => {
     const icons = [
-      ...ICON_CATEGORIES.nature,
+      ...CURRICULUM.categories.nature,
       "car",
       "plane",
       "rocket",
@@ -51,7 +51,7 @@ describe("makeShadowRound", () => {
     ];
     const hardDiff = { choices: 5, categoryDistractors: true, transform: true };
 
-    for (const answer of ICON_CATEGORIES.nature) {
+    for (const answer of CURRICULUM.categories.nature) {
       const answerIndex = icons.indexOf(answer);
       for (let seed = 1; seed <= 20; seed++) {
         const baseRng = makeRng(seed);
@@ -69,7 +69,7 @@ describe("makeShadowRound", () => {
         expect(round.options).toHaveLength(5);
         expect(new Set(round.options).size).toBe(5);
 
-        const expectedNatureDistractors = ICON_CATEGORIES.nature.filter(
+        const expectedNatureDistractors = CURRICULUM.categories.nature.filter(
           (i) => i !== answer,
         );
         for (const distractor of expectedNatureDistractors) {
