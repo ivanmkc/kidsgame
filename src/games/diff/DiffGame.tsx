@@ -1,5 +1,5 @@
 import { say, sfx } from "../../sound";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -28,10 +28,10 @@ import { Lang, useLangEpoch } from "../../lang";
 import { useWinLine } from "../winlines";
 import { t } from "../../i18n";
 import { baseImage, manifest } from "../../manifest";
-import { makeRng, sample } from "../../rng";
+import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { DiffHintButton } from "./DiffHintButton";
-import { diffPrompt, diffSceneWidth } from "./logic";
+import { buildDiffRound, diffPrompt, diffSceneWidth } from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -44,7 +44,9 @@ interface Props {
   lang?: Lang;
 }
 
-export function DiffGame({
+export function DiffGame(props: Props) { return <DiffRound key={props.sceneId} {...props} />; }
+
+function DiffRound({
   onHome,
   difficulty,
   filter = "all",
@@ -108,36 +110,15 @@ export function DiffGame({
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  // Pooled scenes draw a fresh random subset (and random side per
-  // difference) every time the scene mounts — a level never plays the
-  // same twice. Legacy flat pairs keep their fixed four.
-  const { boxes, overlaysA, overlaysB, total } = useMemo(() => {
-    const rng = makeRng(Math.floor(Math.random() * 1e9));
-    const round =
-      scene?.pool && scene.image
-        ? sample(rng, scene.pool, settingsFor(effDifficulty).diffDraw).map(
-            (p) => ({
-              box: p,
-              patch: p.patch as string | undefined,
-              patchOnA: rng() < 0.5,
-            }),
-          )
-        : (scene?.diffs ?? []).map((d) => ({
-            box: d,
-            patch: undefined as string | undefined,
-            patchOnA: false,
-          }));
+  const [{ total, boxes, overlaysA, overlaysB }] = useState(() => {
+    const layout = buildDiffRound(makeRng(Math.floor(Math.random() * 1e9)), scene, settingsFor(effDifficulty).diffDraw);
     return {
-      total: round.length,
-      boxes: round.map((r, i) => ({ id: String(i), box: r.box })),
-      overlaysA: round
-        .filter((r) => r.patch && r.patchOnA)
-        .map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
-      overlaysB: round
-        .filter((r) => r.patch && !r.patchOnA)
-        .map((r) => ({ box: r.box, source: SCENE_IMAGES[r.patch!] })),
+      total: layout.total,
+      boxes: layout.boxes,
+      overlaysA: layout.overlaysA.map((o) => ({ box: o.box, source: SCENE_IMAGES[o.source] })),
+      overlaysB: layout.overlaysB.map((o) => ({ box: o.box, source: SCENE_IMAGES[o.source] })),
     };
-  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+  });
   const won = found.length === total && total > 0;
   const progressPulse = useRef(new Animated.Value(1)).current;
   const prevFoundCount = useRef(0);

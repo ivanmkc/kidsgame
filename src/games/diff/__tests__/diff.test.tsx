@@ -40,6 +40,14 @@ vi.mock("react-native", async (importOriginal) => {
 });
 
 describe("DiffGame", () => {
+  it("preserves layout across re-renders and does not recalculate", () => {
+    const randomSpy = vi.spyOn(Math, "random");
+    const { rerender } = render(<DiffGame onHome={() => {}} onPickScene={() => {}} onBackToPicker={() => {}} difficulty="medium" sceneId="aquarium" lang="en" />);
+    const callsAfterMount = randomSpy.mock.calls.length;
+    rerender(<DiffGame onHome={() => {}} onPickScene={() => {}} onBackToPicker={() => {}} difficulty="medium" sceneId="aquarium" lang="ja" />);
+    expect(randomSpy.mock.calls.length).toBe(callsAfterMount);
+    randomSpy.mockRestore();
+  });
   const noop = () => {};
 
   afterEach(() => {
@@ -689,3 +697,4 @@ describe("DiffGame scene picker surprise fallback", () => {
     }
   });
 });
+
