@@ -7,6 +7,7 @@
 // correct tile — phonics boards carry distinct first-sounds (alternate
 // child names included), name boards never show two icons a kid would
 // call by the same word.
+import { t } from "../../i18n";
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, soundsFor, wordFor } from "../../words";
@@ -108,8 +109,12 @@ export function tileLabel(icon: string, lang: Lang): string {
 
 function namePromptLines(icon: string, lang: Lang): string[] {
   const entry = entryFor(icon);
-  if (!entry) return [`Find the ${icon}!`];
-  if (lang === "en") return [`Find the ${entry.en}!`];
+  if (lang === "en") {
+    return [t("en", "bingo.prompt", { word: entry ? entry.en : icon })];
+  }
+  if (!entry) {
+    return [t("en", "bingo.prompt", { word: icon })];
+  }
   const w = wordFor(entry, lang);
   const ask = NAME_ASK[lang];
   return [ask, `${w.text}！`];
@@ -124,7 +129,7 @@ function nameConfirmLines(icon: string, lang: Lang): string[] {
 }
 
 function phonicsPromptLines(sound: string): string[] {
-  return [`Find something that starts with ${sound}!`];
+  return [t("en", "bingo.promptPhonics", { sound })];
 }
 
 function phonicsConfirmLines(icon: string): string[] {
@@ -132,7 +137,10 @@ function phonicsConfirmLines(icon: string): string[] {
   if (!entry) return [`${icon}!`];
   return [
     `${capitalize(entry.en)}!`,
-    `${capitalize(entry.en)} starts with ${entry.sound}!`,
+    t("en", "bingo.confirmPhonics", {
+      word: capitalize(entry.en),
+      sound: entry.sound,
+    }),
   ];
 }
 

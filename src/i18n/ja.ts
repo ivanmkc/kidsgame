@@ -347,6 +347,7 @@ export const JA: Table = {
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
   'bingo.prompt': 'さがしてね {word}！',
   'bingo.promptPhonics': '{sound} で はじまる ものを さがしてね！',
+  'bingo.confirmPhonics': '{word} は {sound} で はじまるよ！',
   'story.tryAgain': 'あちゃ！ べつのみち ↩️',
   'story.startOver': 'はじめから 📖',
   'story.readAgain': 'おしまい！ もういちど 📖',
