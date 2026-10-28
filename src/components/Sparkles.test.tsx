@@ -2,7 +2,7 @@
 import { render } from '@testing-library/react';
 import { Animated, StyleSheet, type TextStyle } from 'react-native';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SparkleBurst } from './Sparkles';
+import { SparkleBurst, TwinkleField } from './Sparkles';
 
 describe('SparkleBurst', () => {
   afterEach(() => {
@@ -33,5 +33,61 @@ describe('SparkleBurst', () => {
     const flat = StyleSheet.flatten<TextStyle>(props.style as TextStyle);
     expect(flat.marginLeft).toBe(-8);
     expect(flat.marginTop).toBe(-9.6);
+  });
+
+  it('hides decorative burst pieces from accessibility tree', () => {
+    const spy = vi.spyOn(
+      Animated.Text as unknown as {
+        render: (
+          props: {
+            accessibilityElementsHidden?: boolean;
+            importantForAccessibility?: string;
+            'aria-hidden'?: boolean;
+          },
+          ref: unknown,
+        ) => unknown;
+      },
+      'render',
+    );
+    const { container } = render(<SparkleBurst count={4} trigger={1} />);
+    expect(spy).toHaveBeenCalled();
+    for (const call of spy.mock.calls) {
+      expect(call[0].accessibilityElementsHidden).toBe(true);
+      expect(call[0].importantForAccessibility).toBe('no');
+      expect(call[0]['aria-hidden']).toBe(true);
+    }
+    const nodes = container.querySelectorAll('[aria-hidden="true"]');
+    expect(nodes.length).toBe(4);
+  });
+});
+
+describe('TwinkleField', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('hides decorative twinkle pieces from accessibility tree', () => {
+    const spy = vi.spyOn(
+      Animated.Text as unknown as {
+        render: (
+          props: {
+            accessibilityElementsHidden?: boolean;
+            importantForAccessibility?: string;
+            'aria-hidden'?: boolean;
+          },
+          ref: unknown,
+        ) => unknown;
+      },
+      'render',
+    );
+    const { container } = render(<TwinkleField count={3} />);
+    expect(spy).toHaveBeenCalled();
+    for (const call of spy.mock.calls) {
+      expect(call[0].accessibilityElementsHidden).toBe(true);
+      expect(call[0].importantForAccessibility).toBe('no');
+      expect(call[0]['aria-hidden']).toBe(true);
+    }
+    const nodes = container.querySelectorAll('[aria-hidden="true"]');
+    expect(nodes.length).toBe(3);
   });
 });
