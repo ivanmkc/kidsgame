@@ -1,18 +1,30 @@
-import React, {useRef, useState, useEffect } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { SPOTIT_ICONS, SPOTIT_SHADOWS } from '../../assets/images';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { TimerRing, useElapsed } from '../../components/TimerRing';
-import { SparkleBurst } from '../../components/Sparkles';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty, settingsFor } from '../../difficulty';
-import { Lang } from '../../lang';
-import { t } from '../../i18n';
-import { manifest } from '../../manifest';
-import { makeRng } from '../../rng';
-import { colors, fonts, shadows } from '../../theme';
-import { sfx, say, useSay } from '../../sound';
-import { ShadowDifficulty, makeShadowRound, shadowPrompt } from './logic';
+import React, { useRef, useState, useEffect } from "react";
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import { SPOTIT_ICONS, SPOTIT_SHADOWS } from "../../assets/images";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { TimerRing, useElapsed } from "../../components/TimerRing";
+import { SparkleBurst } from "../../components/Sparkles";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang } from "../../lang";
+import { t } from "../../i18n";
+import { manifest } from "../../manifest";
+import { makeRng } from "../../rng";
+import { colors, fonts, shadows } from "../../theme";
+import { sfx, say, useSay } from "../../sound";
+import {
+  ShadowDifficulty,
+  makeShadowRound,
+  shadowOptionLabel,
+  shadowPrompt,
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -22,19 +34,23 @@ interface Props {
 
 function shadowDifficulty(d: Difficulty): ShadowDifficulty {
   // medium+ turns on mental rotation and confusable same-category options
-  if (d === 'hard') return { choices: 5, categoryDistractors: true, transform: true };
-  if (d === 'medium') return { choices: 4, categoryDistractors: true, transform: true };
+  if (d === "hard")
+    return { choices: 5, categoryDistractors: true, transform: true };
+  if (d === "medium")
+    return { choices: 4, categoryDistractors: true, transform: true };
   return { choices: 3, categoryDistractors: false, transform: false };
 }
 
-export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
+export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const diff = shadowDifficulty(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   // Warm-up: the session's first round is never rotated/mirrored — a
   // pre-reader gets one easy win before mental rotation kicks in.
   const warmup = { ...diff, transform: false };
-  const [round, setRound] = useState(() => makeShadowRound(rngRef.current, manifest.spotit.icons, warmup));
+  const [round, setRound] = useState(() =>
+    makeShadowRound(rngRef.current, manifest.spotit.icons, warmup),
+  );
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(0);
@@ -42,7 +58,9 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   useSay(shadowPrompt(lang));
-  useEffect(() => { if (won) say(t(lang, 'win.shadow')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (won) say(t(lang, "win.shadow"));
+  }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const roundClosedRef = useRef(false);
 
@@ -80,24 +98,46 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
 
   const { width, height } = useWindowDimensions();
   const shadowSize = Math.min(width - 100, height - 84 - 210, 280);
-  const optionSize = Math.min((Math.min(width, 640) - 32 - (diff.choices - 1) * 14) / diff.choices, 108);
+  const optionSize = Math.min(
+    (Math.min(width, 640) - 32 - (diff.choices - 1) * 14) / diff.choices,
+    108,
+  );
 
   return (
     <GameShell
-      title={t(lang, 'shell.shadow.title')}
-      subtitle={(round.rotation !== 0 || round.mirrored) ? t(lang, 'shell.shadow.subTricky') : t(lang, 'shell.shadow.sub')}
+      title={t(lang, "shell.shadow.title")}
+      subtitle={
+        round.rotation !== 0 || round.mirrored
+          ? t(lang, "shell.shadow.subTricky")
+          : t(lang, "shell.shadow.sub")
+      }
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {showTimer ? <TimerRing elapsed={elapsed} size={44} stroke={5} showLabel testID="shadow-timer" /> : null}
-          <ScoreChip label={`🌙 ${score}/${roundsToWin}`} testID="shadow-score" />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          {showTimer ? (
+            <TimerRing
+              elapsed={elapsed}
+              size={44}
+              stroke={5}
+              showLabel
+              testID="shadow-timer"
+            />
+          ) : null}
+          <ScoreChip
+            label={`🌙 ${score}/${roundsToWin}`}
+            testID="shadow-score"
+          />
         </View>
       }
     >
       <View style={styles.board}>
         <View
-          style={[styles.shadowCard, shadows.sticker, { width: shadowSize + 48, height: shadowSize + 48 }]}
+          style={[
+            styles.shadowCard,
+            shadows.sticker,
+            { width: shadowSize + 48, height: shadowSize + 48 },
+          ]}
           testID={`shadow-answer-${round.answer}`}
         >
           <Image
@@ -120,7 +160,7 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
               key={icon}
               onPress={() => onPick(icon)}
               testID={`shadow-option-${icon}`}
-              accessibilityLabel={icon}
+              accessibilityLabel={shadowOptionLabel(icon, lang)}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.option,
@@ -130,18 +170,25 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
                 pressed && styles.pressed,
               ]}
             >
-              <Image source={SPOTIT_ICONS[icon]} style={{ width: '82%', height: '82%' }} resizeMode="contain" />
+              <Image
+                source={SPOTIT_ICONS[icon]}
+                style={{ width: "82%", height: "82%" }}
+                resizeMode="contain"
+              />
             </Pressable>
           ))}
         </View>
         <Text style={styles.hint}>
-          {diff.transform ? t(lang, 'shadow.hintTricky') : t(lang, 'shadow.hint')}
+          {diff.transform
+            ? t(lang, "shadow.hintTricky")
+            : t(lang, "shadow.hint")}
         </Text>
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.shadow')}
-        onNext={reset} nextLabel={t(lang, 'overlay.nextRound')}
+        message={t(lang, "win.shadow")}
+        onNext={reset}
+        nextLabel={t(lang, "overlay.nextRound")}
         onHome={onHome}
         lang={lang}
       />
@@ -150,25 +197,41 @@ export function ShadowGame({ onHome, difficulty, lang = 'en' }: Props) {
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 20, paddingHorizontal: 16 },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 20,
+    paddingHorizontal: 16,
+  },
   shadowCard: {
     backgroundColor: colors.paper,
     borderRadius: 28,
     borderWidth: 4,
     borderColor: colors.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  options: { flexDirection: 'row', gap: 14, flexWrap: 'wrap', justifyContent: 'center' },
+  options: {
+    flexDirection: "row",
+    gap: 14,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
   option: {
     backgroundColor: colors.card,
     borderRadius: 20,
     borderWidth: 3,
     borderColor: colors.blush,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
-  wrong: { borderColor: colors.red, backgroundColor: 'rgba(232,86,79,0.15)' },
+  wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
-  hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14, textAlign: 'center' },
+  hint: {
+    fontFamily: fonts.bodyReg,
+    color: colors.inkSoft,
+    fontSize: 14,
+    textAlign: "center",
+  },
 });
