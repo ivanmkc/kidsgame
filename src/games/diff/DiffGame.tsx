@@ -22,7 +22,8 @@ import {
   nextSceneId,
   settingsFor,
 } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
+import { useWinLine } from "../winlines";
 import { t } from "../../i18n";
 import { baseImage, manifest } from "../../manifest";
 import { makeRng, sample } from "../../rng";
@@ -51,6 +52,7 @@ export function DiffGame({
   onBackToPicker,
   lang = "en",
 }: Props) {
+  useLangEpoch(lang);
   const visible = manifest.diff.filter((d) => inFilter(d.level, filter));
   const scene = manifest.diff.find((d) => d.id === sceneId) ?? null;
   // With the 🎨 All filter, play each scene at ITS OWN badge difficulty —
@@ -168,9 +170,7 @@ export function DiffGame({
     }, 80);
     return () => clearInterval(iv);
   }, [ready, sceneId, expectedAssets]);
-  useEffect(() => {
-    if (won) say(t(lang, "win.diff"));
-  }, [won]);
+  useWinLine(won, t(lang, "win.diff"));
   const showRound = ready || forceReady;
   const showTimer = settingsFor(effDifficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !!scene, sceneId);
@@ -336,7 +336,10 @@ export function DiffGame({
   return (
     <GameShell
       title={t(lang, "shell.diff.title")}
-      subtitle={t(lang, "shell.diff.subPlay", { name: scene.nameT?.[lang] ?? scene.name, n: total })}
+      subtitle={t(lang, "shell.diff.subPlay", {
+        name: scene.nameT?.[lang] ?? scene.name,
+        n: total,
+      })}
       onBack={onBackToPicker}
       backKind="picker"
       lang={lang}

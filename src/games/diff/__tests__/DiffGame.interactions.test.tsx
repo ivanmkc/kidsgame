@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { manifest } from "../../../manifest";
 import { t } from "../../../i18n";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import { DiffGame } from "../DiffGame";
 
 describe("DiffGame spoken prompt across scenes", () => {
@@ -198,7 +200,8 @@ describe("DiffGame spoken prompt across scenes", () => {
     expect(saySpy).not.toHaveBeenCalledWith(
       "こっそり ちがうところを ぜんぶ みつけよう！",
     );
-    expect(saySpy).not.toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "win.diff"));
+    saySpy.mockClear();
 
     // Advancing to the next scene speaks the prompt in the active language
     rerender(
@@ -214,5 +217,60 @@ describe("DiffGame spoken prompt across scenes", () => {
     expect(saySpy).toHaveBeenCalledWith(
       "こっそり ちがうところを ぜんぶ みつけよう！",
     );
+  });
+
+  it("cancels old-language speech via stopNarration when switching language on victory screen", () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const scene1 = manifest.diff[0].id;
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <DiffGame
+            onHome={noop}
+            difficulty="medium"
+            sceneId={scene1}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    // Tap all difference targets to trigger victory
+    const targets = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("left-target-"),
+      );
+    for (const target of targets) {
+      fireEvent.click(target);
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.diff"));
+
+    saySpy.mockClear();
+    stopNarrationSpy.mockClear();
+
+    // Click in-game language switch button while victory overlay is open
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    // useLangEpoch must call stopNarration to interrupt in-flight old-language speech
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+    // Victory message is spoken in new language
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "win.diff"));
+    // Victory overlay displays translated message
+    expect(screen.getByText(t("ja", "win.diff"))).toBeDefined();
   });
 });
