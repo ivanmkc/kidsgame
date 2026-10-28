@@ -22,7 +22,7 @@ import {
   settingsFor,
   nextFilter,
 } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import {
@@ -33,7 +33,7 @@ import {
   nextTurn,
 } from "../../multiplayer";
 import { makeRng, sample } from "../../rng";
-import { sfx, useSay, say } from "../../sound";
+import { sfx, useSay, say, stopNarration } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { Find, coopDrawCount, countFor } from "./coop";
 import { hiddenLayout } from "./logic";
@@ -61,6 +61,7 @@ export function HiddenGame({
   onBackToPicker,
   lang = "en",
 }: Props) {
+  useLangEpoch(lang);
   const visible = manifest.hidden.filter((h) => inFilter(h.level, filter));
   const surprisePool = visible.length > 0 ? visible : manifest.hidden;
   const scene = manifest.hidden.find((h) => h.id === sceneId) ?? null;
@@ -114,6 +115,7 @@ export function HiddenGame({
   useEffect(
     () => () => {
       if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
+      stopNarration();
     },
     [],
   );
@@ -135,7 +137,7 @@ export function HiddenGame({
   );
   useEffect(() => {
     if (won) say(t(lang, coop ? "win.hiddenCoop" : "win.hidden"));
-  }, [won, coop]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [won, coop, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Gentle auto-hint: pulse one random unfound target after inactivity delay
   // ~2.5s. Resets on find/turn/scene. Disabled on Hard (hiddenHintSecs: Infinity).
@@ -185,7 +187,8 @@ export function HiddenGame({
           onSurprise={() => {
             if (mode !== null && surprisePool.length > 0)
               onPickScene(
-                surprisePool[Math.floor(Math.random() * surprisePool.length)].id,
+                surprisePool[Math.floor(Math.random() * surprisePool.length)]
+                  .id,
               );
           }}
           filterChip={

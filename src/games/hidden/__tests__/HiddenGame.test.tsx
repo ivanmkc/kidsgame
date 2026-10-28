@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
 import {
   act,
   cleanup,
@@ -13,6 +13,8 @@ import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
 import { Animated } from "react-native";
 import { sfx } from "../../../sound";
+import { LangContext } from "../../../components/GameShell";
+import { Lang } from "../../../lang";
 import { HiddenGame } from "../HiddenGame";
 
 describe("HiddenGame localization", () => {
@@ -101,18 +103,16 @@ describe("HiddenGame localization", () => {
 
   it("speaks localized narration cues for solo play and 2P turn changes", () => {
     const speakSpy = vi.fn();
-    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+    vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
-    };
-    (
-      window as unknown as { SpeechSynthesisUtterance: unknown }
-    ).SpeechSynthesisUtterance = class {
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
       text: string;
       constructor(text: string) {
         this.text = text;
       }
-    };
+    });
 
     // In scene picker with Japanese
     const { unmount: unmountPicker } = render(
@@ -173,18 +173,16 @@ describe("HiddenGame localization", () => {
 
   it("does not speak intro prompts when mode is null (ModePicker is visible)", () => {
     const speakSpy = vi.fn();
-    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+    vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
-    };
-    (
-      window as unknown as { SpeechSynthesisUtterance: unknown }
-    ).SpeechSynthesisUtterance = class {
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
       text: string;
       constructor(text: string) {
         this.text = text;
       }
-    };
+    });
 
     // In picker with 2P enabled (mode === null)
     const { unmount: unmountPicker } = render(
@@ -567,18 +565,16 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
 
   it("acknowledges omitted targets with sfx.tap and instructional guidance without advancing finds", () => {
     const speakSpy = vi.fn();
-    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+    vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
-    };
-    (
-      window as unknown as { SpeechSynthesisUtterance: unknown }
-    ).SpeechSynthesisUtterance = class {
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
       text: string;
       constructor(text: string) {
         this.text = text;
       }
-    };
+    });
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -643,18 +639,16 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
 
   it("in 2P co-op mode, tapping an omitted target does not advance player turn", () => {
     const speakSpy = vi.fn();
-    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+    vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
-    };
-    (
-      window as unknown as { SpeechSynthesisUtterance: unknown }
-    ).SpeechSynthesisUtterance = class {
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
       text: string;
       constructor(text: string) {
         this.text = text;
       }
-    };
+    });
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -1298,4 +1292,149 @@ describe("HiddenGame win overlay and progression", () => {
   });
 });
 
+describe("HiddenGame language switch", () => {
+  const noop = () => {};
 
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.clearAllTimers();
+    cleanup();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("stops narration via useLangEpoch and updates labels when language switches mid-game", () => {
+    const speakSpy = vi.fn();
+    vi.stubGlobal("speechSynthesis", {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    });
+
+    const stopSpy = vi.spyOn(sound, "stopNarration");
+
+    const Harness = () => {
+      const [lang, setLang] = useState<Lang>("en");
+      return (
+        <LangContext.Provider value={{ lang, onCycle: () => setLang("ja") }}>
+          <HiddenGame
+            onHome={noop}
+            difficulty="medium"
+            twoPlayerEnabled={false}
+            sceneId={manifest.hidden[0].id}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    };
+
+    render(<Harness />);
+
+    // Initial English prompt is spoken via playClip (no speechSynthesis if asset exists),
+    // but we can check the on-screen text update
+    expect(screen.getByText("🔎 0/5")).toBeDefined();
+
+    stopSpy.mockClear();
+    speakSpy.mockClear();
+
+    // Switch language mid-round through the same path the in-game button uses
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+    
+    // Prove no old-language timer fires
+    vi.advanceTimersByTime(30000);
+
+    // stopNarration must be called by useLangEpoch to interrupt in-flight old-language speech
+    expect(stopSpy).toHaveBeenCalled();
+
+    // Japanese prompt is spoken
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "かくれてる ものを ぜんぶ みつけよう！",
+      }),
+    );
+
+    // Board text labels should update (if any). The score chip is still "🔎 0/5".
+    expect(screen.getByText("🔎 0/5")).toBeDefined();
+    // The checklist items have accessibilityLabel "a11y.target".
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = checklist.querySelectorAll('[data-testid^="checklist-"]');
+    expect(targets[0].getAttribute("aria-label")).toBe(t("ja", "a11y.target"));
+  });
+
+  it("interrupts win speech and plays new language win speech on language switch during win overlay", () => {
+    const saySpy = vi.spyOn(sound, "say");
+    const stopSpy = vi.spyOn(sound, "stopNarration");
+
+    const scene = manifest.hidden[0];
+    const Harness = () => {
+      const [lang, setLang] = useState<Lang>("en");
+      return (
+        <LangContext.Provider value={{ lang, onCycle: () => setLang("ja") }}>
+          <HiddenGame
+            onHome={noop}
+            difficulty="easy"
+            sceneId={scene.id}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    };
+
+    render(<Harness />);
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const id of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${id}`));
+    }
+
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.hidden"));
+    saySpy.mockClear();
+    stopSpy.mockClear();
+
+    // Switch language on win overlay through the same path the in-game button uses
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+    
+    // Prove no old-language timer fires
+    vi.advanceTimersByTime(30000);
+
+    expect(stopSpy).toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "win.hidden"));
+    expect(screen.getByText(t("ja", "win.hidden"))).toBeDefined();
+  });
+
+  it("stops narration audio on unmount to prevent leaks", () => {
+    const stopSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={false}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+    stopSpy.mockClear();
+    unmount();
+    expect(stopSpy).toHaveBeenCalled();
+  });
+});
