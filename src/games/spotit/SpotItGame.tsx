@@ -8,11 +8,12 @@ import { t } from '../../i18n';
 import { ModePicker } from '../../multiplayer';
 import { makeRng } from '../../rng';
 import { colors } from '../../theme';
-import { sfx, say, useSay } from '../../sound';
+import { sfx, useSay } from '../../sound';
 import { TimerRing, fmtTime, useElapsed } from '../../components/TimerRing';
 import { DealIn, Slot, SpotCard, layoutSlots } from './cards';
 import { buildDeck, dealRound } from './logic';
 import { SpotItDuel } from './SpotItDuel';
+import { useWinLine } from '../winlines';
 
 interface Props {
   onHome: () => void;
@@ -61,7 +62,7 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
   const [timerKey, setTimerKey] = useState(0);
   const won = score >= roundsToWin;
   useSay(locked ? null : t(lang, 'shell.spotit.sub'));
-  useEffect(() => { if (won) say(t(lang, 'win.spotit')); }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  useWinLine(won, t(lang, 'win.spotit'));
   useEffect(() => () => {
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
   }, []);
