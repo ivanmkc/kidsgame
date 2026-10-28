@@ -149,6 +149,15 @@ describe('DIFFICULTIES', () => {
     expect(DIFFICULTIES.medium.hiddenHintSecs).toBe(15);
     expect(DIFFICULTIES.hard.hiddenHintSecs).toBe(Infinity);
   });
+
+  it('scaffolds musicbox settings across easy, medium, hard', () => {
+    expect(DIFFICULTIES.easy.musicboxFreePlay).toBe(true);
+    expect(DIFFICULTIES.medium.musicboxFreePlay).toBe(false);
+    expect(DIFFICULTIES.hard.musicboxFreePlay).toBe(false);
+    expect(DIFFICULTIES.easy.musicboxChords).toBe(false);
+    expect(DIFFICULTIES.medium.musicboxChords).toBe(false);
+    expect(DIFFICULTIES.hard.musicboxChords).toBe(true);
+  });
 });
 
 describe('loadFilter and saveFilter', () => {

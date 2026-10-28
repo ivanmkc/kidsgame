@@ -28,14 +28,21 @@ import { Lang } from "../../lang";
 
 interface Props {
   scene: SceneDef;
+  freePlay?: boolean;
+  richChords?: boolean;
   lang: Lang;
 }
 
 const SCROLL_PER_TAP = 48;
 const MAX_SPAWNS = 20;
 
-export function JourneyScene({ scene, lang }: Props) {
-  const song = songById(scene.songId);
+export function JourneyScene({
+  scene,
+  freePlay = false,
+  richChords = false,
+  lang,
+}: Props) {
+  const song = freePlay ? null : songById(scene.songId);
   const [state, setState] = useState<BoxState>(() => startState(song));
   const [spawns, setSpawns] = useState<SpawnEntry[]>([]);
   const spawnsRef = useRef(spawns);
@@ -62,7 +69,7 @@ export function JourneyScene({ scene, lang }: Props) {
   }, [scrollX]);
 
   useEffect(() => {
-    setState(startState(song));
+    setState(startState(freePlay ? null : songById(scene.songId)));
     setSpawns([]);
     scrollX.setValue(0);
     scrollTotal.current = 0;
@@ -85,7 +92,7 @@ export function JourneyScene({ scene, lang }: Props) {
     );
     loop.start();
     return () => loop.stop();
-  }, [scene.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [scene.id, freePlay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doTap = useCallback(
     (x: number, y: number, fingerCount: number) => {
@@ -95,9 +102,9 @@ export function JourneyScene({ scene, lang }: Props) {
       const offset = octaveOffset(yFrac);
       const s = stateRef.current;
       const midi = noteForTap(s) + offset;
-      const offsets = harmonyOffsets(fingerCount, midi);
+      const offsets = harmonyOffsets(fingerCount, midi, richChords);
       for (const h of offsets) {
-        playNote(midi + h, fingerCount > 1 ? 0.7 : 1);
+        playNote(midi + h, offsets.length > 1 ? 0.7 : 1);
       }
       const big = beatsForTap(s) > 1;
       setState(advance(s));
@@ -139,7 +146,7 @@ export function JourneyScene({ scene, lang }: Props) {
         },
       ]);
     },
-    [scene, scrollX, vehicleBounce],
+    [richChords, scene, scrollX, vehicleBounce],
   );
 
   const onTapSpawn = useCallback((entry: SpawnEntry) => {

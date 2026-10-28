@@ -216,6 +216,7 @@ export default function App() {
       {screen === 'musicbox' && (
         <MusicBoxGame
           onHome={goHome}
+          difficulty={difficulty}
           sceneId={param}
           onPickScene={(id) => navigate(`musicbox/${id}`)}
           onBackToPicker={() => navigate('musicbox')}

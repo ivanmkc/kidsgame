@@ -45,6 +45,8 @@ export interface DifficultySettings {
   rulesRecallFrom: number; // round index where memory-check rounds may start (Infinity = never)
   duelWins: number;     // Spot-It duel: stars to win the match
   duelHintSecs: number; // Spot-It duel: sparkle hint delay for a kid trailing by >=2
+  musicboxFreePlay: boolean; // toddler free-play: pentatonic magic keys where every tap sounds melodious
+  musicboxChords: boolean;   // older kids: multi-voice chord harmonies layered with melody
 }
 
 export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
@@ -56,6 +58,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     hiddenHintSecs: 15,
     rulesRounds: 10, rulesTiles: 6, rulesRecallFrom: Infinity,
     duelWins: 3, duelHintSecs: 3,
+    musicboxFreePlay: true, musicboxChords: false,
   },
   medium: {
     spotitRounds: 12, memoryPairs: 6,
@@ -65,6 +68,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     hiddenHintSecs: 15,
     rulesRounds: 10, rulesTiles: 8, rulesRecallFrom: 6,
     duelWins: 5, duelHintSecs: 4,
+    musicboxFreePlay: false, musicboxChords: false,
   },
   hard: {
     spotitRounds: 14, memoryPairs: 8,
@@ -74,6 +78,7 @@ export const DIFFICULTIES: Record<Difficulty, DifficultySettings> = {
     hiddenHintSecs: Infinity,
     rulesRounds: 10, rulesTiles: 9, rulesRecallFrom: 3,
     duelWins: 7, duelHintSecs: 5,
+    musicboxFreePlay: false, musicboxChords: true,
   },
 };
 
