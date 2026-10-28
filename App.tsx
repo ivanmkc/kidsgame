@@ -259,10 +259,10 @@ export default function App() {
           lang={lang}
         />
       )}
-      {screen === 'cm-numdots' && <ConceptMatchGame deck="numerals-dots" onHome={goHome} lang={lang} />}
-      {screen === 'cm-numhan' && <ConceptMatchGame deck="numerals-han" onHome={goHome} lang={lang} />}
-      {screen === 'cm-shapes' && <ConceptMatchGame deck="shapes-objects" onHome={goHome} lang={lang} />}
-      {screen === 'cm-animals' && <ConceptMatchGame deck="animals-sounds" onHome={goHome} lang={lang} />}
+      {screen === 'cm-numdots' && <ConceptMatchGame deck="numerals-dots" onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'cm-numhan' && <ConceptMatchGame deck="numerals-han" onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'cm-shapes' && <ConceptMatchGame deck="shapes-objects" onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'cm-animals' && <ConceptMatchGame deck="animals-sounds" onHome={goHome} difficulty={difficulty} lang={lang} />}
       </LangContext.Provider>
     </SafeAreaView>
   );
