@@ -667,6 +667,33 @@ describe("CountGame stage critter positioning", () => {
       ) + 11;
     expect(badgeMaxDist).toBeLessThanOrEqual(cornerRadius);
   });
+
+  it("clamps stage height to minimum floor on short viewports to prevent negative dimensions", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 600,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 240,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    vi.spyOn(countLogic, "makeCountRound").mockReturnValue({
+      icon: "star",
+      n: 1,
+      positions: [{ x: 50, y: 50 }],
+      choices: [1, 2, 3],
+      answer: 1,
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const stage = screen.getByTestId("count-stage-star-1");
+    const stageH = parseFloat(stage.style.height);
+    expect(stageH).toBeGreaterThanOrEqual(120);
+    expect(stageH).toBe(120);
+  });
 });
 
 describe("critterLabel", () => {
