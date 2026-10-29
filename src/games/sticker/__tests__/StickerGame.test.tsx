@@ -425,6 +425,60 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('drops sticker onto the stage with y-offset scaled by aspect ratio', async () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayItem = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    expect(trayItem).toBeDefined();
+
+    const stageProps = capturedViewProps['sticker-stage'];
+    expect(stageProps).toBeDefined();
+    // f.x = 10, f.y = 20, f.w = 300, f.h = 200
+    stageProps?.onLayout?.({} as unknown);
+
+    const dispatchTouch = (type: 'start' | 'move' | 'end', x: number, y: number) => {
+      const touch = { pageX: x, pageY: y, clientX: x, clientY: y, identifier: 0, target: trayItem! };
+      if (type === 'start') {
+        fireEvent.touchStart(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else if (type === 'move') {
+        fireEvent.touchMove(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else {
+        fireEvent.touchEnd(trayItem!, { touches: [], changedTouches: [touch] });
+      }
+    };
+
+    await act(async () => {
+      dispatchTouch('start', 100, 100);
+      await new Promise((r) => setTimeout(r, 210));
+      dispatchTouch('move', 50, 50); // drop at px = 50, py = 50
+    });
+    act(() => {
+      dispatchTouch('end', 50, 50);
+    });
+
+    // Calculations for stage frame f.x=10, f.y=20, f.w=300, f.h=200
+    // Drop at px=50, py=50
+    // y = (50 - 20) / 200 - 0.045 * (300 / 200) = 30 / 200 - 0.045 * 1.5 = 0.15 - 0.0675 = 0.0825
+    const stickers = screen.getAllByTestId(/sticker-placed-/);
+    expect(stickers.length).toBeGreaterThan(0);
+    const style = stickers[0].getAttribute('style') || '';
+    
+    const topMatch = /top:\s*([\d.]+)px/.exec(style);
+    expect(topMatch).not.toBeNull();
+    const top = parseFloat(topMatch![1]);
+    
+    const stage = screen.getByTestId('sticker-stage');
+    const stageStyle = stage.getAttribute('style') || '';
+    const stageHMatch = /height:\s*([\d.]+)px/.exec(stageStyle);
+    const stageH = parseFloat(stageHMatch![1]);
+    
+    expect(Math.abs(top / stageH - 0.0825)).toBeLessThan(0.001);
+
+    unmount();
+  });
+
   it('renders a large, playable stage in mobile landscape viewports without collapsing', () => {
     mockDimensions = { width: 844, height: 390 };
     const html = renderToString(
