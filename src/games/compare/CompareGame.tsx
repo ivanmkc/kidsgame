@@ -56,7 +56,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.compare"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const isMountedRef = useRef(true);
@@ -114,6 +114,8 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
           setWrongSide(null);
           lockedRef.current = false;
           setLocked(false);
+        } else {
+          setWon(true);
         }
       });
     } else {
@@ -141,6 +143,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
     clearWrongTimers();
     lockedRef.current = false;
     setLocked(false);
+    setWon(false);
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeCompareRound(rngRef.current, difficulty));
