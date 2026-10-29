@@ -512,6 +512,41 @@ describe("HiddenGame difficulty settings", () => {
     expect(screen.queryByTestId("hidden-timer")).toBeNull();
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
   });
+
+  it("differentiates target count between easy and medium in 2P co-op mode", () => {
+    const scene = manifest.hidden.find((h) => h.id === "candyshop")!;
+    expect(scene.targets.length).toBe(8);
+
+    const { unmount: unmountEasy } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        twoPlayerEnabled={true}
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
+    unmountEasy();
+    cleanup();
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="medium"
+        twoPlayerEnabled={true}
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+  });
 });
 
 describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
@@ -654,7 +689,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     const tapSpy = vi.spyOn(sfx, "tap");
     const saySpy = vi.spyOn(sound, "say");
 
-    // dinonest has 7 targets; in 2P easy, coopDrawCount(5, 7) draws 6 targets, leaving 1 omitted
+    // dinonest has 7 targets; in 2P easy, coopDrawCount(5, 7) draws 4 targets, leaving 3 omitted
     const dinoScene = manifest.hidden.find((h) => h.id === "dinonest")!;
     expect(dinoScene.targets.length).toBe(7);
 
@@ -686,7 +721,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("きつねの ばん！");
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
 
     goodSpy.mockClear();
     tapSpy.mockClear();
@@ -699,7 +734,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(tapSpy).toHaveBeenCalled();
     expect(goodSpy).not.toHaveBeenCalled();
     expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("きつねの ばん！");
@@ -709,7 +744,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     fireEvent.click(drawnBtn);
 
     expect(goodSpy).toHaveBeenCalled();
-    expect(screen.getByTestId("hidden-score").textContent).toContain("1/6");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/4");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("うさぎの ばん！");
