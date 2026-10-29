@@ -49,7 +49,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
-  const firstTryRef = useRef(true);
   const [round, setRound] = useState<HighLowRound>(() =>
     makeHighLowRound(rngRef.current, difficulty),
   );
@@ -199,7 +198,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
-      const nextScore = nextScoreValue(score, firstTryRef.current);
+      const nextScore = nextScoreValue(score);
       setScore(nextScore);
       setWrongPick(null);
       setInstructionalDirection(null);
@@ -214,7 +213,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
         advanceTimerRef.current = setTimeout(() => {
           advanceTimerRef.current = null;
           lockedRef.current = false;
-          firstTryRef.current = true;
           roundEpochRef.current++;
           setRound(makeHighLowRound(rngRef.current, difficulty));
         }, 1000);
@@ -232,7 +230,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       lockedRef.current = true;
-      firstTryRef.current = false;
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
       const trueDir = correctAnswer(round);
@@ -274,7 +271,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     stopSequence();
     stopNarration();
     lockedRef.current = false;
-    firstTryRef.current = true;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setRoundIndex(0);
