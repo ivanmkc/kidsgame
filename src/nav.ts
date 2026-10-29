@@ -1,35 +1,50 @@
-import { useEffect, useState } from 'react';
-import { Platform } from 'react-native';
-import { stopNarration } from './sound';
+import { useEffect, useState } from "react";
+import { Platform } from "react-native";
+import { stopNarration } from "./sound";
 
 // Route strings: 'players' | 'menu' | '<game>' | '<game>/<sceneId>'.
 // On web the route lives in the URL hash so browser back/forward work; on
 // native it's plain state.
 
-const isWeb = Platform.OS === 'web' && typeof window !== 'undefined';
+const isWeb = Platform.OS === "web" && typeof window !== "undefined";
 
 export function readHash(): string {
-  if (!isWeb) return 'players';
-  const h = window.location.hash.replace(/^#\/?/, '');
-  return h || 'players';
+  if (!isWeb) return "players";
+  const h = window.location.hash.replace(/^#\/?/, "");
+  return h || "players";
 }
 
-export function useRoute(): [string, (r: string, opts?: { replace?: boolean }) => void] {
+type RouteListener = (route: string) => void;
+const listeners = new Set<RouteListener>();
+
+export function useRoute(): [
+  string,
+  (r: string, opts?: { replace?: boolean }) => void,
+] {
   const [route, setRoute] = useState<string>(() => readHash());
 
   useEffect(() => {
-    if (!isWeb) return;
+    listeners.add(setRoute);
+    if (!isWeb) {
+      return () => {
+        listeners.delete(setRoute);
+      };
+    }
     // Cancel the previous screen's narration BEFORE React commits the
     // new tree. If we deferred this to an after-mount useEffect, React
     // would run the child's mount-effect say() FIRST and then our
     // parent-effect stopNarration() would fade out the fresh clip — the
     // "first round is silent" bug the kids kept hitting.
-    const onPop = () => { stopNarration(); setRoute(readHash()); };
-    window.addEventListener('popstate', onPop);
-    window.addEventListener('hashchange', onPop);
+    const onPop = () => {
+      stopNarration();
+      setRoute(readHash());
+    };
+    window.addEventListener("popstate", onPop);
+    window.addEventListener("hashchange", onPop);
     return () => {
-      window.removeEventListener('popstate', onPop);
-      window.removeEventListener('hashchange', onPop);
+      listeners.delete(setRoute);
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("hashchange", onPop);
     };
   }, []);
 
@@ -39,12 +54,15 @@ export function useRoute(): [string, (r: string, opts?: { replace?: boolean }) =
     // effect sees a clean slate and its opening say() is not interrupted.
     if (isWeb) stopNarration();
     setRoute(r);
+    for (const fn of listeners) {
+      if (fn !== setRoute) fn(r);
+    }
     if (isWeb) {
       const url = `#/${r}`;
       if (opts?.replace) {
-        window.history.replaceState(null, '', url);
+        window.history.replaceState(null, "", url);
       } else if (window.location.hash !== url) {
-        window.history.pushState(null, '', url);
+        window.history.pushState(null, "", url);
       }
     }
   };
@@ -53,6 +71,6 @@ export function useRoute(): [string, (r: string, opts?: { replace?: boolean }) =
 }
 
 export function routeParts(route: string): { screen: string; param?: string } {
-  const [screen, param] = route.split('/');
+  const [screen, param] = route.split("/");
   return { screen, param };
 }

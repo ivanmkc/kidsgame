@@ -7,11 +7,15 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Lang } from "../lang";
-import { t } from "../i18n";
+import { t, UIKey } from "../i18n";
 import { sfx } from "../sound";
 import { colors, darken, fonts, shadows } from "../theme";
 import { ChunkyButton } from "./ChunkyButton";
 import { Confetti } from "./Confetti";
+import { routeParts, useRoute } from "../nav";
+import { ALL_MENU_CARDS, CardKey } from "../menuCards";
+import { CURRICULUM_PATH } from "../curriculum/path";
+import { useLockdown } from "../lockdown";
 
 interface Props {
   visible: boolean;
@@ -36,6 +40,19 @@ export function WinOverlay({
 }: Props) {
   const { width, height } = useWindowDimensions();
   const landscape = width > height;
+
+  const { isGameHidden } = useLockdown();
+
+  const [route, navigate] = useRoute();
+  const { screen } = routeParts(route);
+  const nextKey = CURRICULUM_PATH[screen as CardKey];
+  const candidateCard = nextKey
+    ? ALL_MENU_CARDS.find((c) => c.key === nextKey)
+    : undefined;
+  const nextCard =
+    candidateCard && !isGameHidden(candidateCard.route)
+      ? candidateCard
+      : undefined;
 
   const slideY = useRef(new Animated.Value(300)).current;
   const starAnims = [
@@ -151,6 +168,19 @@ export function WinOverlay({
               paddingVertical={btnPad}
               disabled={!armed}
             />
+            {nextCard ? (
+              <ChunkyButton
+                label={`▶️ ${t(lang, `card.${nextCard.key}.title` as UIKey)}`}
+                color={nextCard.color}
+                darkColor={darken(nextCard.color)}
+                onPress={() => armed && navigate(nextCard.route)}
+                testID="next-game"
+                minWidth={btnWidth}
+                fontSize={btnFont}
+                paddingVertical={btnPad}
+                disabled={!armed}
+              />
+            ) : null}
             <ChunkyButton
               label={t(lang, "overlay.allGames")}
               color={colors.purple}
@@ -212,5 +242,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   statsWrap: { flexDirection: "row", justifyContent: "center" },
-  btnRow: { flexDirection: "row", gap: 12, justifyContent: "center" },
+  btnRow: {
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
 });
