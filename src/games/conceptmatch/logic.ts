@@ -1,3 +1,4 @@
+import { Difficulty } from "../../difficulty";
 import { t, UIKey } from "../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../lang";
 import { Rng, shuffle } from "../../rng";
@@ -103,6 +104,37 @@ export const GLYPH_TWINS: Record<string, string> = {
   I: "L",
   L: "I",
 };
+
+/**
+ * Returns the target pair count for a given difficulty and deck.
+ * For shapes-objects, the shape pool contains 4 pairs, so difficulty ramps
+ * cleanly across easy (2 pairs), medium (3 pairs), and hard (4 pairs).
+ */
+export function pairsForDifficulty(
+  difficulty: Difficulty = "medium",
+  deck?: ConceptMatchDeck,
+): number {
+  if (deck === "shapes-objects") {
+    switch (difficulty) {
+      case "easy":
+        return 2;
+      case "hard":
+        return 4;
+      case "medium":
+      default:
+        return 3;
+    }
+  }
+  switch (difficulty) {
+    case "easy":
+      return 3;
+    case "hard":
+      return 5;
+    case "medium":
+    default:
+      return 4;
+  }
+}
 
 export function buildBoard(
   rng: Rng,

@@ -664,14 +664,67 @@ describe("ConceptMatchGame", () => {
   it("adjusts pair count based on difficulty prop", () => {
     const buildBoardSpy = vi.spyOn(logic, "buildBoard");
     const { rerender } = render(
-      <ConceptMatchGame deck="letters" difficulty="easy" lang="en" />
+      <ConceptMatchGame deck="letters" difficulty="easy" lang="en" />,
     );
-    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 3);
-    
+    expect(buildBoardSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      "letters",
+      "en",
+      3,
+    );
+
     rerender(<ConceptMatchGame deck="letters" difficulty="medium" lang="en" />);
-    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 4);
-    
+    expect(buildBoardSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      "letters",
+      "en",
+      4,
+    );
+
     rerender(<ConceptMatchGame deck="letters" difficulty="hard" lang="en" />);
-    expect(buildBoardSpy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 5);
+    expect(buildBoardSpy).toHaveBeenCalledWith(
+      expect.anything(),
+      "letters",
+      "en",
+      5,
+    );
+  });
+
+  it("renders distinct card and pair counts for shapes-objects across easy, medium, and hard", () => {
+    const { rerender } = render(
+      <ConceptMatchGame deck="shapes-objects" difficulty="easy" lang="en" />,
+    );
+    let cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(4);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/2");
+    expect(screen.getByText("Find all 2 pairs")).toBeDefined();
+
+    rerender(
+      <ConceptMatchGame deck="shapes-objects" difficulty="medium" lang="en" />,
+    );
+    cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(6);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/3");
+    expect(screen.getByText("Find all 3 pairs")).toBeDefined();
+
+    rerender(
+      <ConceptMatchGame deck="shapes-objects" difficulty="hard" lang="en" />,
+    );
+    cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(8);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/4");
+    expect(screen.getByText("Find all 4 pairs")).toBeDefined();
   });
 });

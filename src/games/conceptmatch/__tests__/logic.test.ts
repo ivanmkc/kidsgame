@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { t, UIKey } from "../../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../../lang";
 import { makeRng } from "../../../rng";
-import { WORDS, wordFor } from '../../../curriculum/content';
+import { WORDS, wordFor } from "../../../curriculum/content";
 import {
   ALPHABET,
   ANIMALS,
@@ -12,6 +12,7 @@ import {
   SHAPES,
   buildBoard,
   isMatch,
+  pairsForDifficulty,
   updateBoardLang,
   updateCardLang,
 } from "../logic";
@@ -1107,6 +1108,44 @@ describe("conceptmatch/logic", () => {
           }
         }
       }
+    });
+  });
+
+  describe("pairsForDifficulty", () => {
+    it("scales shapes-objects deck (2 for easy, 3 for medium, 4 for hard)", () => {
+      expect(pairsForDifficulty("easy", "shapes-objects")).toBe(2);
+      expect(pairsForDifficulty("medium", "shapes-objects")).toBe(3);
+      expect(pairsForDifficulty("hard", "shapes-objects")).toBe(4);
+    });
+
+    it("scales other decks (3 for easy, 4 for medium, 5 for hard)", () => {
+      const otherDecks: ConceptMatchDeck[] = [
+        "letters",
+        "picture-word",
+        "picture-spoken",
+        "color-word",
+        "numerals-han",
+        "numerals-dots",
+        "animals-sounds",
+        "mixed",
+      ];
+      for (const deck of otherDecks) {
+        expect(pairsForDifficulty("easy", deck)).toBe(3);
+        expect(pairsForDifficulty("medium", deck)).toBe(4);
+        expect(pairsForDifficulty("hard", deck)).toBe(5);
+      }
+    });
+
+    it("defaults to medium rules when difficulty is omitted", () => {
+      expect(pairsForDifficulty()).toBe(4);
+      expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(3);
+      expect(pairsForDifficulty(undefined, "letters")).toBe(4);
+    });
+
+    it("scales correctly when deck is omitted", () => {
+      expect(pairsForDifficulty("easy")).toBe(3);
+      expect(pairsForDifficulty("medium")).toBe(4);
+      expect(pairsForDifficulty("hard")).toBe(5);
     });
   });
 });
