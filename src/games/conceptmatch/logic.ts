@@ -1,7 +1,7 @@
 import { t, UIKey } from "../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, WordEntry, wordFor } from "../../words";
+import { WORDS, WordEntry, wordFor } from '../../curriculum/words';
 
 export type CardDisplay =
   | { type: "text"; text: string }

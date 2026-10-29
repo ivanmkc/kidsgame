@@ -3,7 +3,7 @@
 // non-EN modes the tile set can't accidentally offer two "duh" answers.
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../../words';
+import { WORDS, WordEntry, soundsFor, wordFor } from '../../curriculum/words';
 
 export interface SoundsTile {
   key: string;

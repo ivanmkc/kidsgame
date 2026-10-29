@@ -1,6 +1,6 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from "../../words";
+import { WORDS, wordFor } from '../../curriculum/words';
 import {
   CATEGORY_CONFLICTS,
   CATEGORY_TEXT,

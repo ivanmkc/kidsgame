@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { RHYME_WORDS, WORDS, soundsFor, wordFor } from "../words";
+import { RHYME_WORDS, WORDS, soundsFor, wordFor } from '../curriculum/words';
 
 describe("RHYME_WORDS", () => {
   it("contains Level 2 minimal pairs with correct phonics and rhymeKeys", () => {

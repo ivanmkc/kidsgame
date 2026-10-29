@@ -1,6 +1,6 @@
 import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
-import { WORDS, wordFor } from '../../words';
+import { WORDS, wordFor } from '../../curriculum/words';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
 export const SYMBOLS = [

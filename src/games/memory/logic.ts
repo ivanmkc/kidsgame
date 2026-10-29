@@ -1,6 +1,6 @@
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { WORDS, wordFor } from '../../words';
+import { WORDS, wordFor } from '../../curriculum/words';
 
 export interface MemoryCard {
   key: number; // unique per card

@@ -13,7 +13,7 @@ import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
-import { WORDS } from "../../../words";
+import { WORDS } from '../../../curriculum/words';
 import { SoundsGame } from "../SoundsGame";
 import * as logic from "../logic";
 

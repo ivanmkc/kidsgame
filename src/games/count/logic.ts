@@ -2,7 +2,7 @@ import { Difficulty } from "../../difficulty";
 import { t } from "../../i18n";
 import { Lang, numberWord } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
-import { WORDS, wordFor } from "../../words";
+import { WORDS, wordFor } from '../../curriculum/words';
 
 import { CURRICULUM } from "../../curriculum/content";
 

@@ -1,6 +1,6 @@
 import { Lang } from '../../lang';
 import { t, UIKey } from '../../i18n';
-import { WORDS, wordFor } from '../../words';
+import { WORDS, wordFor } from '../../curriculum/words';
 import { SCENE_AR } from '../../manifest';
 
 export interface StickerLayout {
