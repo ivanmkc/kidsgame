@@ -126,6 +126,35 @@ describe("RhymeGame", () => {
     cleanup();
   });
 
+  it("updates round tiles and column layout when difficulty changes while mounted", () => {
+    setViewport(390, 844);
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const { rerender } = render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    expect(screen.getAllByTestId(/^rhyme-tile-/)).toHaveLength(3);
+    const tile0 = screen.getByTestId("rhyme-tile-0");
+    expect(tile0.style.width).toBe("110px");
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/8");
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const correctIdx = round.tiles.findIndex((t) => t.isAnswer);
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${correctIdx}`));
+    expect(goodSpy).toHaveBeenCalled();
+    goodSpy.mockClear();
+
+    rerender(<RhymeGame onHome={onHome} difficulty="hard" lang="en" />);
+
+    expect(screen.getAllByTestId(/^rhyme-tile-/)).toHaveLength(5);
+    const hardTile = screen.getByTestId("rhyme-tile-0");
+    expect(hardTile.style.width).toBe("60.4px");
+    expect(screen.getByTestId("rhyme-score").textContent).toBe("🎵 0/12");
+
+    const hardRound = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const newWrongIdx = hardRound.tiles.findIndex((t) => !t.isAnswer);
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${newWrongIdx}`));
+    expect(wrongSpy).toHaveBeenCalled();
+  });
+
   it("renders prompt and tiles on portrait orientation", () => {
     setViewport(390, 844);
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);

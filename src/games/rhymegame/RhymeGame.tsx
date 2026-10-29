@@ -69,6 +69,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const historyRef = useRef<string[]>([]);
   const prevLangRef = useRef(gameLang);
+  const prevDiffRef = useRef(difficulty);
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<RhymeRound | null>(() => {
     if (!playable) return null;
@@ -89,8 +90,9 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     };
   }, []);
   useEffect(() => {
-    if (prevLangRef.current === gameLang) return;
+    if (prevLangRef.current === gameLang && prevDiffRef.current === difficulty) return;
     prevLangRef.current = gameLang;
+    prevDiffRef.current = difficulty;
     if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     setWrongIdx(null);
     setCorrectIdx(null);
@@ -109,7 +111,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     } else {
       setRound(null);
     }
-  }, [gameLang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [gameLang, difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won && playable, timerKey);
   const { width, height } = useWindowDimensions();
 
