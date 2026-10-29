@@ -10,7 +10,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FastSlowGame } from "./FastSlowGame";
-import { playSequence, stopSequence } from "../../music";
+import { playSequence, stopSequence, primeMusic } from "../../music";
 import { say, saySequence, sayThen, sfx, stopNarration } from "../../sound";
 import { LangContext } from "../../components/GameShell";
 import { Difficulty } from "../../difficulty";
@@ -71,6 +71,7 @@ vi.mock("../../music", () => ({
     defaultPlaySequenceImpl(notes, bpm, cb, onEnd),
   ),
   stopSequence: vi.fn(),
+  primeMusic: vi.fn(),
 }));
 
 function setViewport(width: number, height: number) {
@@ -116,6 +117,63 @@ afterEach(() => {
 });
 
 describe("FastSlowGame UI interaction", () => {
+  it("calls primeMusic on mount to ensure the first round plays on iOS Safari", () => {
+    vi.useFakeTimers();
+    vi.mocked(primeMusic).mockClear();
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+    // The listenTimer hasn't fired yet (needs 1000ms), but primeMusic should have been called on mount.
+    expect(primeMusic).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it("calls primeMusic synchronously on pick and replay to resume AudioContext on iOS Safari", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    const origImpl = vi.mocked(playSequence).getMockImplementation();
+    vi.mocked(playSequence).mockImplementation((notes, bpm, onNote, onDone) => {
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+    vi.mocked(primeMusic).mockClear();
+
+    act(() => {
+      vi.advanceTimersByTime(1000); // listen delay
+    });
+
+    act(() => {
+      onDoneCb?.(); // complete playback, phase becomes 'pick'
+    });
+
+    const replayBtn = screen.getByTestId("fastslow-replay");
+    act(() => {
+      fireEvent.click(replayBtn);
+    });
+    expect(primeMusic).toHaveBeenCalledTimes(1);
+
+    vi.mocked(primeMusic).mockClear();
+
+    // Replay playback
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      onDoneCb?.();
+    });
+
+    const fastBtn = screen.getByTestId("fastslow-fast");
+    act(() => {
+      fireEvent.click(fastBtn);
+    });
+    expect(primeMusic).toHaveBeenCalledTimes(1);
+
+    if (origImpl) {
+      vi.mocked(playSequence).mockImplementation(origImpl);
+    }
+    vi.useRealTimers();
+  });
+
   it("tracks history and prevents streaks of 3 identical speeds", () => {
     vi.useFakeTimers();
     const randomSpy = vi.spyOn(Math, "random").mockReturnValue(0.12345);
