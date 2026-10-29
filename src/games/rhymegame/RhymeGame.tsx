@@ -20,7 +20,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sayThen, saySequence, sfx } from "../../sound";
+import { sayThen, saySequence, sfx, stopNarration } from "../../sound";
 import { useWinLine } from "../winlines";
 import {
   RhymeRound,
@@ -85,6 +85,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
   const { isValid } = useLangEpoch(gameLang);
   useEffect(() => {
     return () => {
+      stopNarration();
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     };
   }, []);
