@@ -1,5 +1,5 @@
 import { Lang } from "../../lang";
-import { RHYME_WORDS, WORDS } from '../../curriculum/words';
+import { RHYME_WORDS, WORDS } from "../../curriculum/content";
 import { WORD_LEVELS } from "../../curriculum/content";
 
 export interface Word {

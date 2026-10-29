@@ -1,10 +1,7 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from '../../curriculum/words';
-import {
-  CATEGORY_CONFLICTS,
-  CATEGORY_TEXT,
-} from "../iconCategories";
+import { WORDS, wordFor } from "../../curriculum/content";
+import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
 import { CURRICULUM } from "../../curriculum/content";
 import { t } from "../../i18n";
 
@@ -38,13 +35,16 @@ export function makeRulesRound(
   isRecall: boolean,
 ): RulesRound {
   const rule = rules[ruleIndex];
-  const inCat = CURRICULUM.categories[rule.category].filter((m) => icons.includes(m));
+  const inCat = CURRICULUM.categories[rule.category].filter((m) =>
+    icons.includes(m),
+  );
   const confusable = (CATEGORY_CONFLICTS[rule.category] ?? []).flatMap(
     (c) => CURRICULUM.categories[c],
   );
   const outCat = icons.filter(
     (i) =>
-      !CURRICULUM.categories[rule.category].includes(i) && !confusable.includes(i),
+      !CURRICULUM.categories[rule.category].includes(i) &&
+      !confusable.includes(i),
   );
   const matchCount = Math.min(2 + Math.floor(rng() * 2), inCat.length); // 2-3 matches
   const matches = shuffle(rng, inCat).slice(0, matchCount);
@@ -162,4 +162,3 @@ export function rulesLayout(
   );
   return { tile, gap, cols, rows, isLandscape };
 }
-

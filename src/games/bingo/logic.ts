@@ -10,7 +10,7 @@
 import { t } from "../../i18n";
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, WordEntry, soundsFor, wordFor } from '../../curriculum/words';
+import { WORDS, WordEntry, soundsFor, wordFor } from "../../curriculum/content";
 
 export type BingoMode = "name" | "phonics";
 

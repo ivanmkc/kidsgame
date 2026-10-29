@@ -2,12 +2,12 @@
 // mode) + a JA kana hunt. Distractors bias toward visually confusable
 // shapes on M/H so the game teaches discrimination — but sound-mode picks
 // letters with UNIQUE sounds so a single prompt has one answer.
-import { t } from '../../i18n';
-import { Lang } from '../../lang';
-import { Rng, shuffle } from '../../rng';
-import { RHYME_WORDS, WORDS } from '../../curriculum/words';
+import { t } from "../../i18n";
+import { Lang } from "../../lang";
+import { Rng, shuffle } from "../../rng";
+import { RHYME_WORDS, WORDS } from "../../curriculum/content";
 
-export type LetterTier = 'upper' | 'mixed' | 'sound' | 'kana';
+export type LetterTier = "upper" | "mixed" | "sound" | "kana";
 
 export interface LetterTile {
   key: string;
@@ -17,10 +17,10 @@ export interface LetterTile {
 
 export interface LetterRound {
   tier: LetterTier;
-  targetKey: string;      // stable key for avoid-repeat + testIDs
-  targetDisplay: string;  // shown in the prompt card
-  promptLine: string;     // EXACT string spoken (byte-identical to speechLines())
-  romanCaption?: string;  // JA romaji caption for parents
+  targetKey: string; // stable key for avoid-repeat + testIDs
+  targetDisplay: string; // shown in the prompt card
+  promptLine: string; // EXACT string spoken (byte-identical to speechLines())
+  romanCaption?: string; // JA romaji caption for parents
   tiles: LetterTile[];
   answerIdx: number;
 }
@@ -32,35 +32,59 @@ export interface LetterSettings {
 }
 
 export function settingsForLetters(
-  difficulty: 'easy' | 'medium' | 'hard',
+  difficulty: "easy" | "medium" | "hard",
   lang: Lang,
 ): LetterSettings {
-  if (lang === 'ja') {
+  if (lang === "ja") {
     // JA kana hunt: 6 tiles (easy, dissimilar), 8 tiles (medium, confusables),
     // 12 tiles (hard, high density 4x3 grid with confusable discrimination).
-    if (difficulty === 'easy') return { rounds: 8, tiles: 6, tier: 'kana' };
-    if (difficulty === 'hard') return { rounds: 12, tiles: 12, tier: 'kana' };
-    return { rounds: 10, tiles: 8, tier: 'kana' };
+    if (difficulty === "easy") return { rounds: 8, tiles: 6, tier: "kana" };
+    if (difficulty === "hard") return { rounds: 12, tiles: 12, tier: "kana" };
+    return { rounds: 10, tiles: 8, tier: "kana" };
   }
-  if (difficulty === 'easy') return { rounds: 8, tiles: 6, tier: 'upper' };
-  if (difficulty === 'hard') return { rounds: 12, tiles: 8, tier: 'sound' };
-  return { rounds: 10, tiles: 8, tier: 'mixed' };
+  if (difficulty === "easy") return { rounds: 8, tiles: 6, tier: "upper" };
+  if (difficulty === "hard") return { rounds: 12, tiles: 8, tier: "sound" };
+  return { rounds: 10, tiles: 8, tier: "mixed" };
 }
 
 const ALL_LETTERS: string[] = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I",
+  "J",
+  "K",
+  "L",
+  "M",
+  "N",
+  "O",
+  "P",
+  "Q",
+  "R",
+  "S",
+  "T",
+  "U",
+  "V",
+  "W",
+  "X",
+  "Y",
+  "Z",
 ];
 
 // Shape-confusable groups — used as distractor bias on M and as the
 // forbidden set on E (E asks for visually DISSIMILAR distractors).
 export const LETTER_CONFUSABLES: string[][] = [
-  ['E', 'F'],
-  ['B', 'P', 'R'],
-  ['O', 'Q', 'C'],
-  ['M', 'N', 'W'],
-  ['I', 'L', 'J'],
-  ['U', 'V'],
+  ["E", "F"],
+  ["B", "P", "R"],
+  ["O", "Q", "C"],
+  ["M", "N", "W"],
+  ["I", "L", "J"],
+  ["U", "V"],
 ];
 
 function confusableGroup(letter: string): string[] {
@@ -70,12 +94,12 @@ function confusableGroup(letter: string): string[] {
 // Visually confusable kana groups — used as distractor bias on M/H and
 // forbidden on E (dissimilar distractors).
 export const KANA_CONFUSABLES: string[][] = [
-  ['さ', 'ち', 'き'], // mirror symmetry (さ/ち) & crossbar count (さ/き)
-  ['ぬ', 'ね'],       // looped right stem
-  ['あ', 'お'],       // round body + cross
-  ['い', 'こ'],       // parallel curved strokes
-  ['け', 'に'],       // vertical stem + right hooks
-  ['た', 'な'],       // cross stem + right marks
+  ["さ", "ち", "き"], // mirror symmetry (さ/ち) & crossbar count (さ/き)
+  ["ぬ", "ね"], // looped right stem
+  ["あ", "お"], // round body + cross
+  ["い", "こ"], // parallel curved strokes
+  ["け", "に"], // vertical stem + right hooks
+  ["た", "な"], // cross stem + right marks
 ];
 
 export function kanaConfusableGroup(kana: string): string[] {
@@ -88,8 +112,8 @@ export function kanaConfusableGroup(kana: string): string[] {
 // apart are not a lesson — one of them is simply wrong for no readable
 // reason. Keyed by label (case matters), not by letter.
 const GLYPH_TWINS: Record<string, string[]> = {
-  I: ['l'],
-  l: ['I'],
+  I: ["l"],
+  l: ["I"],
 };
 
 /** Labels indistinguishable from `label` when drawn on a tile. */
@@ -113,23 +137,45 @@ export const LETTER_SOUNDS: { letter: string; sound: string }[] = (() => {
 
 // JA hiragana pool (25 gojūon rows A–NO) + romaji captions for parents.
 export const KANA_POOL: { kana: string; romaji: string }[] = [
-  { kana: 'あ', romaji: 'a' }, { kana: 'い', romaji: 'i' }, { kana: 'う', romaji: 'u' }, { kana: 'え', romaji: 'e' }, { kana: 'お', romaji: 'o' },
-  { kana: 'か', romaji: 'ka' }, { kana: 'き', romaji: 'ki' }, { kana: 'く', romaji: 'ku' }, { kana: 'け', romaji: 'ke' }, { kana: 'こ', romaji: 'ko' },
-  { kana: 'さ', romaji: 'sa' }, { kana: 'し', romaji: 'shi' }, { kana: 'す', romaji: 'su' }, { kana: 'せ', romaji: 'se' }, { kana: 'そ', romaji: 'so' },
-  { kana: 'た', romaji: 'ta' }, { kana: 'ち', romaji: 'chi' }, { kana: 'つ', romaji: 'tsu' }, { kana: 'て', romaji: 'te' }, { kana: 'と', romaji: 'to' },
-  { kana: 'な', romaji: 'na' }, { kana: 'に', romaji: 'ni' }, { kana: 'ぬ', romaji: 'nu' }, { kana: 'ね', romaji: 'ne' }, { kana: 'の', romaji: 'no' },
+  { kana: "あ", romaji: "a" },
+  { kana: "い", romaji: "i" },
+  { kana: "う", romaji: "u" },
+  { kana: "え", romaji: "e" },
+  { kana: "お", romaji: "o" },
+  { kana: "か", romaji: "ka" },
+  { kana: "き", romaji: "ki" },
+  { kana: "く", romaji: "ku" },
+  { kana: "け", romaji: "ke" },
+  { kana: "こ", romaji: "ko" },
+  { kana: "さ", romaji: "sa" },
+  { kana: "し", romaji: "shi" },
+  { kana: "す", romaji: "su" },
+  { kana: "せ", romaji: "se" },
+  { kana: "そ", romaji: "so" },
+  { kana: "た", romaji: "ta" },
+  { kana: "ち", romaji: "chi" },
+  { kana: "つ", romaji: "tsu" },
+  { kana: "て", romaji: "te" },
+  { kana: "と", romaji: "to" },
+  { kana: "な", romaji: "na" },
+  { kana: "に", romaji: "ni" },
+  { kana: "ぬ", romaji: "nu" },
+  { kana: "ね", romaji: "ne" },
+  { kana: "の", romaji: "no" },
 ];
 
-function pickIndex(rng: Rng, n: number): number { return Math.floor(rng() * n); }
+function pickIndex(rng: Rng, n: number): number {
+  return Math.floor(rng() * n);
+}
 
 export function makeLetterRound(
   rng: Rng,
   tier: LetterTier,
   tileCount: number,
   avoidKey?: string,
-  lang: Lang = tier === 'kana' ? 'ja' : 'en',
+  lang: Lang = tier === "kana" ? "ja" : "en",
 ): LetterRound {
-  if (tier === 'kana') {
+  if (tier === "kana") {
     const candidates = KANA_POOL.filter((k) => k.kana !== avoidKey);
     const confusableCandidates = candidates.filter(
       (k) => kanaConfusableGroup(k.kana).length > 0,
@@ -160,17 +206,24 @@ export function makeLetterRound(
 
     const tiles: LetterTile[] = shuffle(rng, [
       { key: target.kana, label: target.kana, isAnswer: true },
-      ...distractorKana.map((d) => ({ key: d.kana, label: d.kana, isAnswer: false })),
+      ...distractorKana.map((d) => ({
+        key: d.kana,
+        label: d.kana,
+        isAnswer: false,
+      })),
     ]);
     return {
-      tier, targetKey: target.kana, targetDisplay: target.kana,
-      promptLine: t(lang, 'letters.findKana', { kana: target.kana }),
+      tier,
+      targetKey: target.kana,
+      targetDisplay: target.kana,
+      promptLine: t(lang, "letters.findKana", { kana: target.kana }),
       romanCaption: target.romaji,
-      tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
+      tiles,
+      answerIdx: tiles.findIndex((t) => t.isAnswer),
     };
   }
 
-  if (tier === 'sound') {
+  if (tier === "sound") {
     const candidates = LETTER_SOUNDS.filter((s) => s.letter !== avoidKey);
     const target = candidates[pickIndex(rng, candidates.length)];
     // Distractors: other letters with DIFFERENT sounds so exactly one tile
@@ -179,19 +232,26 @@ export function makeLetterRound(
     const distractors = shuffle(rng, others).slice(0, tileCount - 1);
     const tiles: LetterTile[] = shuffle(rng, [
       { key: target.letter, label: target.letter, isAnswer: true },
-      ...distractors.map((d) => ({ key: d.letter, label: d.letter, isAnswer: false })),
+      ...distractors.map((d) => ({
+        key: d.letter,
+        label: d.letter,
+        isAnswer: false,
+      })),
     ]);
     return {
-      tier, targetKey: target.letter, targetDisplay: target.letter,
-      promptLine: t(lang, 'letters.sound', { sound: target.sound }),
-      tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
+      tier,
+      targetKey: target.letter,
+      targetDisplay: target.letter,
+      promptLine: t(lang, "letters.sound", { sound: target.sound }),
+      tiles,
+      answerIdx: tiles.findIndex((t) => t.isAnswer),
     };
   }
 
   // upper / mixed
   const upperCands = ALL_LETTERS.filter((L) => L !== avoidKey?.toUpperCase());
   const targetLetter = upperCands[pickIndex(rng, upperCands.length)];
-  const useLower = tier === 'mixed' && rng() < 0.5;
+  const useLower = tier === "mixed" && rng() < 0.5;
   const displayed = useLower ? targetLetter.toLowerCase() : targetLetter;
   const key = displayed;
 
@@ -201,7 +261,7 @@ export function makeLetterRound(
   const confusablePool = otherLetters.filter((L) => forbidden.has(L));
 
   let distractorLetters: string[];
-  if (tier === 'upper') {
+  if (tier === "upper") {
     // E tier: dissimilar shapes; skip the confusable group entirely.
     distractorLetters = shuffle(rng, easyPool).slice(0, tileCount - 1);
   } else {
@@ -218,7 +278,7 @@ export function makeLetterRound(
   const tiles: LetterTile[] = shuffle(rng, [
     { key, label: displayed, isAnswer: true },
     ...distractorLetters.map((L) => {
-      const lower = tier === 'mixed' && rng() < 0.5;
+      const lower = tier === "mixed" && rng() < 0.5;
       let lbl = lower ? L.toLowerCase() : L;
       if (glyphTwinsOf(lbl).some((twin) => usedLabels.has(twin))) {
         lbl = lower ? L : L.toLowerCase();
@@ -229,9 +289,12 @@ export function makeLetterRound(
   ]);
 
   return {
-    tier, targetKey: key, targetDisplay: displayed,
-    promptLine: t(lang, 'letters.find', { letter: targetLetter }),
-    tiles, answerIdx: tiles.findIndex((t) => t.isAnswer),
+    tier,
+    targetKey: key,
+    targetDisplay: displayed,
+    promptLine: t(lang, "letters.find", { letter: targetLetter }),
+    tiles,
+    answerIdx: tiles.findIndex((t) => t.isAnswer),
   };
 }
 
@@ -239,13 +302,16 @@ export function makeLetterRound(
 // pipeline pre-renders these; runtime must match byte-for-byte.
 export function speechLines(): string[] {
   const lines = new Set<string>();
-  for (const lang of (['en', 'ja', 'cmn', 'yue'] as const)) {
+  for (const lang of ["en", "ja", "cmn", "yue"] as const) {
     // upper + mixed prompts speak the LETTER NAME (case-agnostic).
-    for (const L of ALL_LETTERS) lines.add(t(lang, 'letters.find', { letter: L }));
+    for (const L of ALL_LETTERS)
+      lines.add(t(lang, "letters.find", { letter: L }));
     // sound-mode prompts, one per unique sound.
-    for (const s of LETTER_SOUNDS) lines.add(t(lang, 'letters.sound', { sound: s.sound }));
+    for (const s of LETTER_SOUNDS)
+      lines.add(t(lang, "letters.sound", { sound: s.sound }));
     // kana prompts, one per hiragana in the pool.
-    for (const k of KANA_POOL) lines.add(t(lang, 'letters.findKana', { kana: k.kana }));
+    for (const k of KANA_POOL)
+      lines.add(t(lang, "letters.findKana", { kana: k.kana }));
   }
   return [...lines];
 }

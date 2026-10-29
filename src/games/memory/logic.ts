@@ -1,6 +1,6 @@
-import { Lang } from '../../lang';
-import { Rng, shuffle } from '../../rng';
-import { WORDS, wordFor } from '../../curriculum/words';
+import { Lang } from "../../lang";
+import { Rng, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../curriculum/content";
 
 export interface MemoryCard {
   key: number; // unique per card
@@ -9,7 +9,11 @@ export interface MemoryCard {
 
 export const MEMORY_PAIRS = 6;
 
-export function buildBoard(rng: Rng, iconNames: string[], pairs = MEMORY_PAIRS): MemoryCard[] {
+export function buildBoard(
+  rng: Rng,
+  iconNames: string[],
+  pairs = MEMORY_PAIRS,
+): MemoryCard[] {
   const chosen = shuffle(rng, iconNames).slice(0, pairs);
   const cards = chosen.flatMap((icon, i) => [
     { key: i * 2, icon },
