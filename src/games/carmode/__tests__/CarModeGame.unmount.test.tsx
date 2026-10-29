@@ -158,4 +158,112 @@ describe("CarModeGame unmount", () => {
 
     expect(sayThenSpy).not.toHaveBeenCalled();
   });
+
+  it("does not transition to gap when unmounted while sayThen is active during prompt", () => {
+    vi.useFakeTimers();
+    const toGapSpy = vi.spyOn(logic, "toGap");
+    const actual = logic.startState("rhyme", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      pack: "rhyme",
+      phase: "prompt",
+      rounds: [
+        {
+          id: "rhyme-1",
+          pack: "rhyme",
+          prompt: ["prompt1"],
+          reveal: ["reveal1"],
+          sfx: "good",
+          gapMs: 1000,
+        },
+      ],
+      roundIdx: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
+
+    unmount();
+
+    // Fast-forward through all timers.
+    vi.runAllTimers();
+
+    expect(toGapSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not transition to gap when unmounted while sayThen is active after boops complete", () => {
+    vi.useFakeTimers();
+    const toGapSpy = vi.spyOn(logic, "toGap");
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "prompt",
+      rounds: [
+        {
+          id: "test-boops-1",
+          pack: "boops",
+          noteCount: 2,
+          prompt: ["prompt1"],
+          reveal: ["reveal1"],
+          sfx: "good",
+          gapMs: 1000,
+        },
+      ],
+      roundIdx: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
+
+    // Fast-forward through the music boop sequence so playBoops completes and sayThen starts
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // sayThen is active; unmount component while in flight
+    unmount();
+
+    // Fast-forward through all timers.
+    vi.runAllTimers();
+
+    expect(toGapSpy).not.toHaveBeenCalled();
+  });
+
+  it("does not transition to reveal when unmounted while sayThen is active during replay prompt", () => {
+    vi.useFakeTimers();
+    const toRevealSpy = vi.spyOn(logic, "toReveal");
+    const actual = logic.startState("rhyme", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      pack: "rhyme",
+      phase: "gap",
+      rounds: [
+        {
+          id: "rhyme-1",
+          pack: "rhyme",
+          prompt: ["prompt1"],
+          reveal: ["reveal1"],
+          sfx: "good",
+          gapMs: 1000,
+        },
+      ],
+      roundIdx: 0,
+    });
+
+    const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
+
+    // Advance past phase debounce
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Tap to trigger replay prompt
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+
+    unmount();
+
+    // Fast-forward through all timers.
+    vi.runAllTimers();
+
+    expect(toRevealSpy).not.toHaveBeenCalled();
+  });
 });

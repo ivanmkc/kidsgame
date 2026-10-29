@@ -1,20 +1,20 @@
 // @vitest-environment happy-dom
-import React, { useEffect } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { type Lang, useLangEpoch } from '../lang';
+import React, { useEffect } from "react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { type Lang, useLangEpoch } from "../lang";
 
-describe('useLangEpoch', () => {
+describe("useLangEpoch", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('increments epoch on lang change, calls stopNarration synchronously in useLayoutEffect, and validates old closures', async () => {
-    const { renderHook, act } = await import('@testing-library/react');
-    const sound = await import('../sound');
-    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+  it("increments epoch on lang change, calls stopNarration synchronously in useLayoutEffect, and validates old closures", async () => {
+    const { renderHook, act } = await import("@testing-library/react");
+    const sound = await import("../sound");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
 
     const { result, rerender } = renderHook(({ lang }) => useLangEpoch(lang), {
-      initialProps: { lang: 'en' as Lang },
+      initialProps: { lang: "en" as Lang },
     });
 
     expect(result.current.epoch).toBe(0);
@@ -24,7 +24,7 @@ describe('useLangEpoch', () => {
     const oldIsValid = result.current.isValid;
 
     act(() => {
-      rerender({ lang: 'ja' });
+      rerender({ lang: "ja" });
     });
 
     expect(result.current.epoch).toBe(1);
@@ -33,11 +33,11 @@ describe('useLangEpoch', () => {
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('runs stopNarration before child say() and invalidates old closure pending sayThen callback', async () => {
-    const { render, act } = await import('@testing-library/react');
-    const sound = await import('../sound');
-    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
-    const saySpy = vi.spyOn(sound, 'say');
+  it("runs stopNarration before child say() and invalidates old closure pending sayThen callback", async () => {
+    const { render, act } = await import("@testing-library/react");
+    const sound = await import("../sound");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const saySpy = vi.spyOn(sound, "say");
 
     let capturedIsValid: (() => boolean) | undefined;
     const done = vi.fn();
@@ -59,7 +59,7 @@ describe('useLangEpoch', () => {
 
     // Trigger a pending sayThen with old closure state
     const oldIsValid = capturedIsValid;
-    sound.sayThen(['Old speech'], () => {
+    sound.sayThen(["Old speech"], () => {
       done(oldIsValid?.());
     });
 
@@ -77,5 +77,17 @@ describe('useLangEpoch', () => {
     expect(lastStopOrder!).toBeLessThan(lastSayOrder!);
 
     expect(done).toHaveBeenCalledWith(false);
+  });
+
+  it("returns isValid() false after unmount", async () => {
+    const { renderHook } = await import("@testing-library/react");
+
+    const { result, unmount } = renderHook(({ lang }) => useLangEpoch(lang), {
+      initialProps: { lang: "en" as Lang },
+    });
+
+    expect(result.current.isValid()).toBe(true);
+    unmount();
+    expect(result.current.isValid()).toBe(false);
   });
 });

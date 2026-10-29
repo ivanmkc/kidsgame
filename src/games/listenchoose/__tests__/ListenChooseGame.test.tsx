@@ -489,17 +489,21 @@ describe("ListenChooseGame", () => {
       // the label text is inside a Text component inside the ChoiceCard
       // So we can query for the Text component or check textContent of choice elements
       const choiceElements = screen.queryAllByTestId(/^choice-[^0-9]/);
+      let correctBtn: HTMLElement | undefined;
       for (const el of choiceElements) {
         const label = el.textContent;
         if (label) {
           // The word must be a valid Japanese translation, not an English fallback (which would be [a-z]+)
           expect(label).not.toMatch(/^[a-z]+$/i);
+          if (label === targetText) {
+            correctBtn = el;
+          }
         }
       }
 
       // Click the correct choice
-      const correctBtn = screen.getByRole("button", { name: targetText! });
-      fireEvent.click(correctBtn);
+      expect(correctBtn).toBeDefined();
+      fireEvent.click(correctBtn!);
 
       // Advance past celebration animation (800ms)
       act(() => {
@@ -837,20 +841,24 @@ describe("ListenChooseGame", () => {
 
   it("scales the speaker button down while actively speaking", () => {
     let capturedCb: (() => void) | null = null;
-    const sayThenSpy = vi.spyOn(sound, "sayThen").mockImplementation((_text, cb) => {
-      if (cb) capturedCb = cb;
-    });
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_text, cb) => {
+        if (cb) capturedCb = cb;
+      });
     const onHome = vi.fn();
     render(<ListenChooseGame onHome={onHome} />);
-    
+
     fireEvent.click(screen.getByTestId("play-button"));
-    
+
     const captured = capturedPressableMap["speaker-button"];
     const latestCaptured = captured[captured.length - 1];
-    const styleFunction = latestCaptured.style as (state: { pressed: boolean }) => any;
+    const styleFunction = latestCaptured.style as (state: {
+      pressed: boolean;
+    }) => any;
     const evaluatedStyle = styleFunction({ pressed: false });
     const flattenedStyle = StyleSheet.flatten(evaluatedStyle);
-    
+
     expect(flattenedStyle.transform).toEqual([{ scale: 0.94 }]);
 
     expect(capturedCb).not.toBeNull();
@@ -860,10 +868,12 @@ describe("ListenChooseGame", () => {
 
     const capturedAfter = capturedPressableMap["speaker-button"];
     const latestCapturedAfter = capturedAfter[capturedAfter.length - 1];
-    const styleFunctionAfter = latestCapturedAfter.style as (state: { pressed: boolean }) => any;
+    const styleFunctionAfter = latestCapturedAfter.style as (state: {
+      pressed: boolean;
+    }) => any;
     const evaluatedStyleAfter = styleFunctionAfter({ pressed: false });
     const flattenedStyleAfter = StyleSheet.flatten(evaluatedStyleAfter);
-    
+
     expect(flattenedStyleAfter.transform).toBeUndefined();
     sayThenSpy.mockRestore();
   });

@@ -86,6 +86,7 @@ export function hanNumeral(n: number): string {
 export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolean } {
   const epochRef = useRef(0);
   const prevLangRef = useRef(lang);
+  const isMountedRef = useRef(true);
 
   if (prevLangRef.current !== lang) {
     prevLangRef.current = lang;
@@ -100,11 +101,15 @@ export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolea
     }
   }, [epoch]);
 
+  useLayoutEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   return {
     epoch,
-    isValid: () => epochRef.current === epoch,
+    isValid: () => isMountedRef.current && epochRef.current === epoch,
   };
 }
-
-
-
