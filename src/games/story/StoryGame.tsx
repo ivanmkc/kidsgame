@@ -337,15 +337,28 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                   <Text style={styles.pickCaption} numberOfLines={2}>{choiceLabel}</Text>
                 </Pressable>
               ) : (
-                <ChunkyButton
-                  key={c.next}
-                  label={`${choiceLabel}`}
-                  color={i === 0 ? colors.teal : colors.gold}
-                  darkColor={darken(i === 0 ? colors.teal : colors.gold)}
-                  onPress={() => pickChoice(c, choiceLabel)}
-                  testID={`story-choice-${c.next}`}
-                  minWidth={230}
-                />
+                <View key={c.next} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <ChunkyButton
+                    label={`${choiceLabel}`}
+                    color={i === 0 ? colors.teal : colors.gold}
+                    darkColor={darken(i === 0 ? colors.teal : colors.gold)}
+                    onPress={() => pickChoice(c, choiceLabel)}
+                    testID={`story-choice-${c.next}`}
+                    minWidth={230}
+                  />
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.speakerBtn, shadows.sticker,
+                      pressed && { transform: [{ scale: 0.95 }] },
+                    ]}
+                    onPress={() => say(choiceLabel)}
+                    testID={`story-choice-say-${c.next}`}
+                    accessibilityLabel={t(lang, 'listenchoose.play')}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.speakerIcon}>🔊</Text>
+                  </Pressable>
+                </View>
               );
             })}
           </View>
@@ -578,4 +591,17 @@ const styles = StyleSheet.create({
   },
   pickImg: { width: '100%', height: 118 },
   pickCaption: { fontFamily: fonts.displayMed, fontSize: 13, color: colors.ink, textAlign: 'center', marginTop: 4 },
+  speakerBtn: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.paper,
+    borderWidth: 4,
+    borderColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  speakerIcon: {
+    fontSize: 28,
+  },
 });
