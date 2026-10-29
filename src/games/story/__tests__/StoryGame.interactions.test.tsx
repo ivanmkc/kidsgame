@@ -364,5 +364,48 @@ describe('StoryGame choice navigation and redo history', () => {
     expect(screen.getByTestId('story-text-berry')).toBeDefined();
     expect(screen.queryByTestId('story-text-apple')).toBeNull();
   });
-});
 
+  it('ignores rapid double taps on standard button choices to prevent skipping scenes', () => {
+    const testRapidStory: Story = {
+      id: 'test-rapid-tap',
+      title: 'Rapid Tap Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Where shall we go?',
+          choices: [{ label: 'Forest', next: 'forest' }],
+        },
+        forest: {
+          image: 'story/luna_start.jpg',
+          text: 'In the deep forest',
+          choices: [{ label: 'Castle', next: 'castle' }],
+        },
+        castle: {
+          image: 'story/luna_start.jpg',
+          text: 'At the castle gate',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testRapidStory);
+
+    render(
+      <StoryGame
+        sceneId="test-rapid-tap"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Rapid double-tap
+    fireEvent.click(screen.getByTestId('story-choice-forest'));
+    // Instantly tap where the next scene's choice will appear
+    fireEvent.click(screen.getByTestId('story-choice-castle'));
+
+    // Ensure we are only on the first chosen scene, not skipped to the second
+    expect(screen.getByTestId('story-text-forest')).toBeDefined();
+    expect(screen.queryByTestId('story-text-castle')).toBeNull();
+  });
+});
