@@ -149,7 +149,7 @@ describe("OddOneGame", () => {
     }
   });
 
-  it("locks input during wrong-tap feedback and unlocks after timeout", () => {
+  it("does not block input after a wrong tap and allows immediate correction", () => {
     vi.useFakeTimers();
     try {
       const { container } = render(
@@ -169,32 +169,22 @@ describe("OddOneGame", () => {
       });
       expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-      // Attempt tapping the correct tile while wrong feedback is active: blocked
+      // Immediately tap the correct tile without waiting for the 450ms timeout
       const correctBtn = container.querySelector(
         '[data-testid$="-odd"]',
       ) as HTMLElement;
       act(() => {
         fireEvent.click(correctBtn);
       });
-      expect(sfx.good).not.toHaveBeenCalled();
-      expect(
-        container.querySelector('[data-testid="oddone-score"]')?.textContent,
-      ).toContain("0/10");
-
-      // Fast-forward past the 450ms wrong flash
-      act(() => {
-        vi.advanceTimersByTime(450);
-      });
-
-      // Now tapping the correct tile works
-      act(() => {
-        fireEvent.click(correctBtn);
-      });
-
       expect(sfx.good).toHaveBeenCalledTimes(1);
       expect(
         container.querySelector('[data-testid="oddone-score"]')?.textContent,
       ).toContain("1/10");
+
+      // Advance timers to complete celebration
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
     } finally {
       vi.useRealTimers();
     }
