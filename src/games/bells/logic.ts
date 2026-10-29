@@ -38,29 +38,44 @@ export function roundsToWin(d: Difficulty): number {
   return 8;
 }
 
-export function makeBellsRound(rng: Rng, d: Difficulty): BellsRound {
+export function makeBellsRound(
+  rng: Rng,
+  d: Difficulty,
+  previousSequence?: number[],
+): BellsRound {
   const n = bellCount(d);
   const len = seqLength(d);
   const bells: Bell[] = [];
   for (let i = 0; i < n; i++) {
     bells.push({ midi: PENTATONIC[i], color: BELL_COLORS[i] });
   }
-  const sequence: number[] = [];
-  if (d === "easy") {
-    const isAscending = randInt(rng, 2) === 0;
-    if (isAscending) {
-      const start = randInt(rng, n - 1);
-      sequence.push(start, start + 1);
+  let sequence: number[];
+  do {
+    sequence = [];
+    if (d === "easy") {
+      const isAscending = randInt(rng, 2) === 0;
+      if (isAscending) {
+        const start = randInt(rng, n - 1);
+        sequence.push(start, start + 1);
+      } else {
+        const start = randInt(rng, n - 1) + 1;
+        sequence.push(start, start - 1);
+      }
     } else {
-      const start = randInt(rng, n - 1) + 1;
-      sequence.push(start, start - 1);
+      for (let i = 0; i < len; i++) {
+        sequence.push(randInt(rng, n));
+      }
     }
-  } else {
-    for (let i = 0; i < len; i++) {
-      sequence.push(randInt(rng, n));
-    }
-  }
+  } while (previousSequence && sequencesMatch(sequence, previousSequence));
   return { bells, sequence };
+}
+
+function sequencesMatch(a: number[], b: number[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 export type TapResult = "continue" | "complete" | "wrong";

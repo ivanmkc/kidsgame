@@ -137,7 +137,11 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
         setScore(nextScore);
         demoTimers.current.push(
           setTimeout(() => {
-            const nr = makeBellsRound(rngRef.current, difficulty);
+            const nr = makeBellsRound(
+              rngRef.current,
+              difficulty,
+              round.sequence,
+            );
             setRound(nr);
           }, 600),
         );
