@@ -554,8 +554,14 @@ it("advances to next round after 1200ms result phase when round is passed", () =
   vi.useRealTimers();
 });
 
-it("retries round after 1200ms result phase when round is failed", () => {
+it("retries round with same tempo when instructional speech finishes after round is failed", () => {
   vi.useFakeTimers();
+  let onSpeechDone: (() => void) | undefined;
+  const sayThenSpy = vi
+    .spyOn(sound, "sayThen")
+    .mockImplementation((_texts, done) => {
+      onSpeechDone = done;
+    });
   const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
     bpm: 100,
     beatsPerRound: 8,
@@ -576,16 +582,144 @@ it("retries round after 1200ms result phase when round is failed", () => {
   });
 
   expect(screen.getAllByText("☆")).toHaveLength(8);
+  expect(screen.getByTestId("steadybeat-instructional-feedback")).toBeTruthy();
+  expect(
+    screen.getByTestId("steadybeat-instructional-feedback").textContent,
+  ).toContain("Listen...");
+  expect(sayThenSpy).toHaveBeenCalledWith(["Listen..."], expect.any(Function));
 
-  // Advance past 1200ms result phase
+  // Before speech completes, round has not restarted yet
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // When instructional speech finishes
   act(() => {
-    vi.advanceTimersByTime(1200);
+    onSpeechDone?.();
   });
 
-  // New round is generated for retry
-  expect(roundSpy).toHaveBeenCalledTimes(2);
+  // Same tempo is retried without calling makeSteadyBeatRound again
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+  expect(screen.getByText("Listen...")).toBeTruthy();
 
   roundSpy.mockRestore();
+  sayThenSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("provides fast instructional visual cue and speech when taps are too fast", () => {
+  vi.useFakeTimers();
+  let onSpeechDone: (() => void) | undefined;
+  const sayThenSpy = vi
+    .spyOn(sound, "sayThen")
+    .mockImplementation((_texts, done) => {
+      onSpeechDone = done;
+    });
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past listen phase (2400ms)
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  // Tap rapidly (every 250ms instead of 600ms target)
+  for (let i = 0; i < 6; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+  }
+
+  // Advance past tap evaluation (totalTime is 5900ms, elapsed was 1500ms)
+  act(() => {
+    vi.advanceTimersByTime(5000);
+  });
+
+  expect(
+    screen.getByTestId("steadybeat-instructional-feedback").textContent,
+  ).toContain("Fast");
+  expect(
+    screen.getByTestId("steadybeat-instructional-feedback").textContent,
+  ).toContain("🐰");
+  expect(sayThenSpy).toHaveBeenCalledWith(
+    ["Fast", "Listen..."],
+    expect.any(Function),
+  );
+
+  // After instructional speech finishes, same round is retried
+  act(() => {
+    onSpeechDone?.();
+  });
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+  expect(screen.getByText("Listen...")).toBeTruthy();
+
+  roundSpy.mockRestore();
+  sayThenSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("provides slow instructional visual cue and speech when taps are too slow", () => {
+  vi.useFakeTimers();
+  let onSpeechDone: (() => void) | undefined;
+  const sayThenSpy = vi
+    .spyOn(sound, "sayThen")
+    .mockImplementation((_texts, done) => {
+      onSpeechDone = done;
+    });
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past listen phase (2400ms)
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  // Tap slowly (every 1100ms instead of 600ms target)
+  for (let i = 0; i < 4; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(1100);
+    });
+  }
+
+  // Advance past tap evaluation
+  act(() => {
+    vi.advanceTimersByTime(1500);
+  });
+
+  expect(
+    screen.getByTestId("steadybeat-instructional-feedback").textContent,
+  ).toContain("Slow");
+  expect(
+    screen.getByTestId("steadybeat-instructional-feedback").textContent,
+  ).toContain("🐢");
+  expect(sayThenSpy).toHaveBeenCalledWith(
+    ["Slow", "Listen..."],
+    expect.any(Function),
+  );
+
+  // After instructional speech finishes, same round is retried
+  act(() => {
+    onSpeechDone?.();
+  });
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+  expect(screen.getByText("Listen...")).toBeTruthy();
+
+  roundSpy.mockRestore();
+  sayThenSpy.mockRestore();
   vi.useRealTimers();
 });
 
