@@ -206,7 +206,7 @@ describe("ListenChooseGame", () => {
     // First wrong pick
     fireEvent.click(distractorBtn);
 
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
     expect(sound.sayThen).toHaveBeenCalledWith(
       [targetWord.en],
       expect.any(Function),
@@ -224,11 +224,11 @@ describe("ListenChooseGame", () => {
     // Second wrong pick
     fireEvent.click(distractorBtn);
 
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
     expect(targetBtn.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("maintains streak on wrong guess without playing wrong sound effect", () => {
+  it("maintains streak on wrong guess while playing wrong sound effect", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
@@ -246,7 +246,7 @@ describe("ListenChooseGame", () => {
     const nextChoices = getRoundChoices();
     fireEvent.click(nextChoices.distractorBtn);
 
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("listenchoose-streak").textContent).toBe(
       "⭐ 1 / 12",
     );
@@ -356,12 +356,12 @@ describe("ListenChooseGame", () => {
     fireEvent.click(distractorBtn);
 
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
     // Rapid second tap while wobble is active
     fireEvent.click(distractorBtn);
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
   });
 
   it("ignores taps on choices while wrong choice is wobbling, and allows tapping after wobble completes", () => {
@@ -372,7 +372,7 @@ describe("ListenChooseGame", () => {
 
     // Tap wrong choice
     fireEvent.click(distractorBtn);
-    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
     // Immediately tap correct choice while wrong is still wobbling: ignored by lockedRef
     fireEvent.click(targetBtn);
