@@ -1432,40 +1432,51 @@ describe("conceptmatch/logic", () => {
   });
 
   describe("pairsForDifficulty", () => {
-    it("scales shapes-objects deck (2 for easy, 3 for medium, 4 for hard)", () => {
+    it("scales shapes-objects deck capped by capacity (2 for easy, 4 for medium, 4 for hard)", () => {
       expect(pairsForDifficulty("easy", "shapes-objects")).toBe(2);
-      expect(pairsForDifficulty("medium", "shapes-objects")).toBe(3);
+      expect(pairsForDifficulty("medium", "shapes-objects")).toBe(4);
       expect(pairsForDifficulty("hard", "shapes-objects")).toBe(4);
     });
 
-    it("scales other decks (3 for easy, 4 for medium, 5 for hard)", () => {
+    it("scales animals-sounds deck capped by capacity (2 for easy, 5 for medium, 5 for hard)", () => {
+      expect(pairsForDifficulty("easy", "animals-sounds")).toBe(2);
+      expect(pairsForDifficulty("medium", "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty("hard", "animals-sounds")).toBe(5);
+    });
+
+    it("scales numerals-dots deck (2 for easy, 6 for medium, 8 for hard, capped at 9)", () => {
+      expect(pairsForDifficulty("easy", "numerals-dots")).toBe(2);
+      expect(pairsForDifficulty("medium", "numerals-dots")).toBe(6);
+      expect(pairsForDifficulty("hard", "numerals-dots")).toBe(8);
+    });
+
+    it("scales other decks (2 for easy, 6 for medium, 8 for hard)", () => {
       const otherDecks: ConceptMatchDeck[] = [
         "letters",
         "picture-word",
         "picture-spoken",
         "color-word",
         "numerals-han",
-        "numerals-dots",
-        "animals-sounds",
         "mixed",
       ];
       for (const deck of otherDecks) {
-        expect(pairsForDifficulty("easy", deck)).toBe(3);
-        expect(pairsForDifficulty("medium", deck)).toBe(4);
-        expect(pairsForDifficulty("hard", deck)).toBe(5);
+        expect(pairsForDifficulty("easy", deck)).toBe(2);
+        expect(pairsForDifficulty("medium", deck)).toBe(6);
+        expect(pairsForDifficulty("hard", deck)).toBe(8);
       }
     });
 
     it("defaults to medium rules when difficulty is omitted", () => {
-      expect(pairsForDifficulty()).toBe(4);
-      expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(3);
-      expect(pairsForDifficulty(undefined, "letters")).toBe(4);
+      expect(pairsForDifficulty()).toBe(6);
+      expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(4);
+      expect(pairsForDifficulty(undefined, "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty(undefined, "letters")).toBe(6);
     });
 
     it("scales correctly when deck is omitted", () => {
-      expect(pairsForDifficulty("easy")).toBe(3);
-      expect(pairsForDifficulty("medium")).toBe(4);
-      expect(pairsForDifficulty("hard")).toBe(5);
+      expect(pairsForDifficulty("easy")).toBe(2);
+      expect(pairsForDifficulty("medium")).toBe(6);
+      expect(pairsForDifficulty("hard")).toBe(8);
     });
   });
 });

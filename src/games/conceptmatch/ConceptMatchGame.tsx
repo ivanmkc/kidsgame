@@ -44,6 +44,8 @@ export function ConceptMatchGame({
       deck,
       lang,
       activePairs,
+      undefined,
+      true,
     ),
   );
 
@@ -78,6 +80,8 @@ export function ConceptMatchGame({
           deck,
           lang,
           activePairs,
+          undefined,
+          true,
         ),
       );
       reset();
@@ -103,6 +107,8 @@ export function ConceptMatchGame({
         deck,
         lang,
         activePairs,
+        undefined,
+        true,
       ),
     );
     reset();

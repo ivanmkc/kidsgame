@@ -118,6 +118,8 @@ export const CMN: Table = {
   'card.cm-colors.blurb': '把颜色和文字连成对！',
   'card.cm-letters.title': '字母配对',
   'card.cm-letters.blurb': '把大写和小写字母连成对！',
+  'card.cm-mixed.title': '混合配对',
+  'card.cm-mixed.blurb': '把字母、文字和颜色连成对！',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',

@@ -483,10 +483,24 @@ describe("ConceptMatchGame", () => {
     const spy = vi.spyOn(logic, "buildBoard");
 
     const { rerender } = render(<ConceptMatchGame deck="letters" pairs={2} />);
-    expect(spy).toHaveBeenCalledWith(expect.anything(), "letters", "en", 2);
+    expect(spy).toHaveBeenCalledWith(
+      expect.anything(),
+      "letters",
+      "en",
+      2,
+      undefined,
+      true,
+    );
 
     rerender(<ConceptMatchGame deck="color-word" pairs={2} />);
-    expect(spy).toHaveBeenCalledWith(expect.anything(), "color-word", "en", 2);
+    expect(spy).toHaveBeenCalledWith(
+      expect.anything(),
+      "color-word",
+      "en",
+      2,
+      undefined,
+      true,
+    );
   });
 
   it("preserves active round progress and updates card text/speech when lang changes mid-game (G5)", async () => {
@@ -661,7 +675,7 @@ describe("ConceptMatchGame", () => {
     expect(screen.getByTestId("card-color-red-color")).toBeDefined();
   });
 
-  it("adjusts pair count based on difficulty prop", () => {
+  it("adjusts pair count based on difficulty prop (2 for easy, 6 for medium, 8 for hard)", () => {
     const buildBoardSpy = vi.spyOn(logic, "buildBoard");
     const { rerender } = render(
       <ConceptMatchGame deck="letters" difficulty="easy" lang="en" />,
@@ -670,7 +684,9 @@ describe("ConceptMatchGame", () => {
       expect.anything(),
       "letters",
       "en",
-      3,
+      2,
+      undefined,
+      true,
     );
 
     rerender(<ConceptMatchGame deck="letters" difficulty="medium" lang="en" />);
@@ -678,7 +694,9 @@ describe("ConceptMatchGame", () => {
       expect.anything(),
       "letters",
       "en",
-      4,
+      6,
+      undefined,
+      true,
     );
 
     rerender(<ConceptMatchGame deck="letters" difficulty="hard" lang="en" />);
@@ -686,11 +704,13 @@ describe("ConceptMatchGame", () => {
       expect.anything(),
       "letters",
       "en",
-      5,
+      8,
+      undefined,
+      true,
     );
   });
 
-  it("renders distinct card and pair counts for shapes-objects across easy, medium, and hard", () => {
+  it("caps card and pair counts for shapes-objects (2 for easy, 4 for medium and hard)", () => {
     const { rerender } = render(
       <ConceptMatchGame deck="shapes-objects" difficulty="easy" lang="en" />,
     );
@@ -711,9 +731,9 @@ describe("ConceptMatchGame", () => {
       .filter((el) =>
         el.getAttribute("data-testid")?.startsWith("concept-card-"),
       );
-    expect(cards).toHaveLength(6);
-    expect(screen.getByTestId("concept-score").textContent).toContain("0/3");
-    expect(screen.getByText("Find all 3 pairs")).toBeDefined();
+    expect(cards).toHaveLength(8);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/4");
+    expect(screen.getByText("Find all 4 pairs")).toBeDefined();
 
     rerender(
       <ConceptMatchGame deck="shapes-objects" difficulty="hard" lang="en" />,
@@ -726,5 +746,55 @@ describe("ConceptMatchGame", () => {
     expect(cards).toHaveLength(8);
     expect(screen.getByTestId("concept-score").textContent).toContain("0/4");
     expect(screen.getByText("Find all 4 pairs")).toBeDefined();
+  });
+
+  it("caps card and pair counts for animals-sounds (2 for easy, 5 for medium and hard)", () => {
+    const { rerender } = render(
+      <ConceptMatchGame deck="animals-sounds" difficulty="easy" lang="en" />,
+    );
+    let cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(4);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/2");
+    expect(screen.getByText("Find all 2 pairs")).toBeDefined();
+
+    rerender(
+      <ConceptMatchGame deck="animals-sounds" difficulty="medium" lang="en" />,
+    );
+    cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(10);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/5");
+    expect(screen.getByText("Find all 5 pairs")).toBeDefined();
+
+    rerender(
+      <ConceptMatchGame deck="animals-sounds" difficulty="hard" lang="en" />,
+    );
+    cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(10);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/5");
+    expect(screen.getByText("Find all 5 pairs")).toBeDefined();
+  });
+
+  it("renders a 4x4 grid (16 cards, 8 pairs) for mixed deck on hard difficulty", () => {
+    render(<ConceptMatchGame deck="mixed" difficulty="hard" lang="en" />);
+    const cards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("concept-card-"),
+      );
+    expect(cards).toHaveLength(16);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/8");
+    expect(screen.getByText("Find all 8 pairs")).toBeDefined();
   });
 });

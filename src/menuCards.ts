@@ -45,7 +45,8 @@ export type CardKey =
   | 'cm-picword'
   | 'cm-picspeak'
   | 'cm-colors'
-  | 'cm-letters';
+  | 'cm-letters'
+  | 'cm-mixed';
 
 export interface CardDef {
   route: string;
@@ -96,6 +97,7 @@ export const GAME_CARDS: CardDef[] = [
   { route: 'bingo', color: '#D66FA8', key: 'bingo', preview: 'bingo' },
   { route: 'cm-shapes', color: colors.teal, key: 'cm-shapes', preview: 'icons8' },
   { route: 'cm-animals', color: '#E8874F', key: 'cm-animals', preview: 'icons8' },
+  { route: 'cm-mixed', color: colors.purple, key: 'cm-mixed', preview: 'icons8' },
   // musicbox hidden pending redesign — v1 missed the Sago Mini interaction
   // model (route stays live for dev via #/musicbox deep link).
   // { route: 'musicbox', color: '#E8A24F', key: 'musicbox', preview: 'musicbox' },

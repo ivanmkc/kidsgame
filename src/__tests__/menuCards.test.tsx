@@ -96,6 +96,10 @@ test("WORD_CARDS, NUMBER_CARDS and GAME_CARDS register Concept Match decks", () 
   expect(animals).toBeDefined();
   expect(animals?.key).toBe("cm-animals");
 
+  const mixed = GAME_CARDS.find((c) => c.route === "cm-mixed");
+  expect(mixed).toBeDefined();
+  expect(mixed?.key).toBe("cm-mixed");
+
   const picspeak = WORD_CARDS.find((c) => c.route === "cm-picspeak");
   expect(picspeak).toBeDefined();
   expect(picspeak?.key).toBe("cm-picspeak");
@@ -118,6 +122,7 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   const numhanCard = NUMBER_CARDS.find((c) => c.route === "cm-numhan")!;
   const shapesCard = GAME_CARDS.find((c) => c.route === "cm-shapes")!;
   const animalsCard = GAME_CARDS.find((c) => c.route === "cm-animals")!;
+  const mixedCard = GAME_CARDS.find((c) => c.route === "cm-mixed")!;
 
   const picspeakHtml = renderToString(
     <MenuCard
@@ -250,6 +255,54 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   );
   expect(picwordYueHtml).toContain("圖片同文字");
   expect(picwordYueHtml).toContain("將圖片同文字配成一對！");
+
+  const mixedHtml = renderToString(
+    <MenuCard
+      g={mixedCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(mixedHtml).toContain("Mixed Match");
+  expect(mixedHtml).toContain("Match letters, words, and colors!");
+
+  const mixedJaHtml = renderToString(
+    <MenuCard
+      g={mixedCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(mixedJaHtml).toContain("いろいろあわせ");
+  expect(mixedJaHtml).toContain("もじや ことばや いろを あわせよう！");
+
+  const mixedCmnHtml = renderToString(
+    <MenuCard
+      g={mixedCard}
+      lang="cmn"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(mixedCmnHtml).toContain("混合配对");
+  expect(mixedCmnHtml).toContain("把字母、文字和颜色连成对！");
+
+  const mixedYueHtml = renderToString(
+    <MenuCard
+      g={mixedCard}
+      lang="yue"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(mixedYueHtml).toContain("混合配對");
+  expect(mixedYueHtml).toContain("將字母、文字同顏色配成一對！");
 });
 
 
