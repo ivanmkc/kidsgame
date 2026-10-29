@@ -47,6 +47,7 @@ describe("SumsGame fast-tap", () => {
     // Clear initial round saySequence calls.
     vi.clearAllMocks();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const wrongButtons = buttons.filter((b) => {
       const tid = b.getAttribute("data-testid");
@@ -89,6 +90,7 @@ describe("SumsGame fast-tap", () => {
     );
     vi.clearAllMocks();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -125,6 +127,7 @@ describe("SumsGame fast-tap", () => {
     render(<SumsGame onHome={() => {}} difficulty="easy" lang="en" />);
     vi.clearAllMocks();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const correctBtn = buttons.find((b) =>
       b.getAttribute("data-testid")?.endsWith("-answer"),
@@ -150,6 +153,7 @@ describe("SumsGame fast-tap", () => {
       b.getAttribute("data-testid")?.endsWith("-answer"),
     );
     expect(nextCorrectBtn).toBeDefined();
+    act(() => { vi.advanceTimersByTime(3000); });
     fireEvent.click(nextCorrectBtn!);
     expect(sound.sfx.good).toHaveBeenCalledTimes(2);
     expect(sound.sayThen).toHaveBeenCalledTimes(2);
@@ -175,7 +179,8 @@ describe("SumsGame", () => {
     });
 
     const clickAnswer = (isWrong = false) => {
-      const buttons = screen.getAllByRole("button");
+      act(() => { vi.advanceTimersByTime(3000); });
+    const buttons = screen.getAllByRole("button");
       const targetButtons = buttons.filter((b) => {
         const tid = b.getAttribute("data-testid");
         if (!tid || !tid.startsWith("sums-choice-")) return false;
@@ -235,7 +240,8 @@ describe("SumsGame", () => {
     });
 
     const clickCorrectAnswer = () => {
-      const buttons = screen.getAllByRole("button");
+      act(() => { vi.advanceTimersByTime(3000); });
+    const buttons = screen.getAllByRole("button");
       const target = buttons.find((b) => {
         const tid = b.getAttribute("data-testid");
         return tid && tid.startsWith("sums-choice-") && tid.endsWith("-answer");
@@ -280,122 +286,6 @@ describe("SumsGame", () => {
     // Now win line and WinOverlay trigger
     expect(saySpy).toHaveBeenCalledWith(t("en", "win.sums"));
     expect(screen.getByTestId("win-overlay")).toBeDefined();
-
-    unmount();
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-  });
-
-  it("clears pending incoming critter boing sound timers when correct answer is tapped quickly", () => {
-    vi.useFakeTimers();
-    vi.spyOn(sound, "say").mockImplementation(() => {});
-    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
-    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
-    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
-    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
-    const boingSpy = vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
-
-    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
-      icon: "butterfly",
-      a: 2,
-      b: 3,
-      sum: 5,
-      aPositions: [
-        { x: 10, y: 10 },
-        { x: 20, y: 20 },
-      ],
-      bPositions: [
-        { x: 30, y: 30 },
-        { x: 40, y: 40 },
-        { x: 50, y: 50 },
-      ],
-      choices: [3, 4, 5],
-    });
-
-    const { unmount } = render(
-      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
-    );
-
-    // At 200ms, no boing has fired yet (first is scheduled at 400ms).
-    act(() => {
-      vi.advanceTimersByTime(200);
-    });
-    expect(boingSpy).not.toHaveBeenCalled();
-
-    // Tap the correct answer.
-    const buttons = screen.getAllByRole("button");
-    const correctBtn = buttons.find((b) =>
-      b.getAttribute("data-testid")?.endsWith("-answer"),
-    );
-    expect(correctBtn).toBeDefined();
-    fireEvent.click(correctBtn!);
-    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
-
-    // Advance past all scheduled boing times (400ms, 650ms, 900ms).
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-
-    // Boing timers should have been cancelled when the correct answer was picked.
-    expect(boingSpy).not.toHaveBeenCalled();
-
-    unmount();
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-  });
-
-  it("clears remaining incoming critter boing timers when answered after first boing", () => {
-    vi.useFakeTimers();
-    vi.spyOn(sound, "say").mockImplementation(() => {});
-    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
-    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
-    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
-    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
-    const boingSpy = vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
-
-    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
-      icon: "butterfly",
-      a: 2,
-      b: 3,
-      sum: 5,
-      aPositions: [
-        { x: 10, y: 10 },
-        { x: 20, y: 20 },
-      ],
-      bPositions: [
-        { x: 30, y: 30 },
-        { x: 40, y: 40 },
-        { x: 50, y: 50 },
-      ],
-      choices: [3, 4, 5],
-    });
-
-    const { unmount } = render(
-      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
-    );
-
-    // Advance to 500ms: first boing (at 400ms) has fired, remaining 2 (at 650ms, 900ms) pending.
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(boingSpy).toHaveBeenCalledTimes(1);
-
-    // Tap the correct answer.
-    const buttons = screen.getAllByRole("button");
-    const correctBtn = buttons.find((b) =>
-      b.getAttribute("data-testid")?.endsWith("-answer"),
-    );
-    expect(correctBtn).toBeDefined();
-    fireEvent.click(correctBtn!);
-    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
-
-    // Advance past all scheduled boing times.
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-
-    // No additional boing sounds should have fired.
-    expect(boingSpy).toHaveBeenCalledTimes(1);
 
     unmount();
     vi.useRealTimers();
@@ -500,6 +390,10 @@ describe("SumsGame", () => {
       <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
     );
 
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -522,6 +416,59 @@ describe("SumsGame", () => {
 
     fireEvent.click(wrongBtn);
     expect(sound.sfx.wrong).toHaveBeenCalledTimes(2);
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("prevents tapping before incoming critters appear", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "butterfly",
+      a: 2,
+      b: 2,
+      sum: 4,
+      aPositions: [{ x: 10, y: 10 }, { x: 20, y: 20 }],
+      bPositions: [{ x: 30, y: 30 }, { x: 40, y: 40 }],
+      choices: [3, 4, 5],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Initial state: locked. Tap correct answer immediately.
+    const buttons = screen.getAllByRole("button");
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    fireEvent.click(correctBtn);
+    expect(sound.sfx.good).not.toHaveBeenCalled();
+
+    // Advance just before unlock (400 + 2 * 250 + 420 = 1320ms)
+    // Actually, wait, it unlocks precisely at 1320.
+    // If I advance to 1319, it's still locked.
+    act(() => {
+      vi.advanceTimersByTime(1319);
+    });
+    fireEvent.click(correctBtn);
+    expect(sound.sfx.good).not.toHaveBeenCalled();
+
+    // Advance to unlock
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    fireEvent.click(correctBtn);
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
 
     unmount();
     vi.useRealTimers();

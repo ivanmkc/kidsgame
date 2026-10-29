@@ -118,6 +118,7 @@ describe("SumsGame language switch safety", () => {
     expect(screen.getByTestId("sums-score").textContent).toContain("0/5");
 
     // Tap correct choice for round 1
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const correctBtn = buttons.find((b) =>
       b.getAttribute("data-testid")?.endsWith("-answer"),
@@ -153,6 +154,7 @@ describe("SumsGame language switch safety", () => {
     )!;
     expect(nextCorrectBtn).toBeDefined();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     fireEvent.click(nextCorrectBtn);
 
     // Score advances cleanly to 2/5 without skipped rounds or double-advance
@@ -171,6 +173,7 @@ describe("SumsGame language switch safety", () => {
     saySpy.mockClear();
     saySeqSpy.mockClear();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -227,6 +230,7 @@ describe("SumsGame language switch safety", () => {
 
     saySpy.mockClear();
 
+    act(() => { vi.advanceTimersByTime(3000); });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
