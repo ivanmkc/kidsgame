@@ -152,7 +152,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
         if (!isValid()) return;
         setWrongIdx((w) => (w === i ? null : w));
       }, 450);
-      saySequence(round.promptLines);
+      saySequence([round.tiles[i].word, ...round.promptLines]);
     }
   };
 

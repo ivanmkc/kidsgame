@@ -151,14 +151,20 @@ describe("RhymeGame", () => {
     expect(tile0.style.height).toBe("91px");
   });
 
-  it("handles correct and wrong tile taps", () => {
-    setViewport(844, 390);
+  it("speaks distractor word before prompt on wrong tap", () => {
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
-
-    fireEvent.click(screen.getByTestId("rhyme-tile-0"));
-    expect(
-      goodSpy.mock.calls.length + wrongSpy.mock.calls.length,
-    ).toBeGreaterThan(0);
+    
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
+    const wrongIdx = round.tiles.findIndex(t => !t.isAnswer);
+    const wrongTile = round.tiles[wrongIdx];
+    
+    saySequenceSpy.mockClear();
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
+    
+    expect(sound.sfx.wrong).toHaveBeenCalled();
+    expect(saySequenceSpy).toHaveBeenCalledWith([wrongTile.word, ...round.promptLines]);
   });
 
   it("tapping a correct tile twice only triggers sfx.good once", () => {
