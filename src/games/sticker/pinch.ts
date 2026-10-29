@@ -18,8 +18,9 @@ export function pinchTransform(
   start: Touch2, now: Touch2, baseSize: number, baseRotation: number,
 ): { size: number; rotation: number } {
   const scale = dist(start) > 8 ? dist(now) / dist(start) : 1;
+  const angleDelta = dist(start) > 8 ? angleDeg(now) - angleDeg(start) : 0;
   return {
     size: Math.min(0.32, Math.max(0.04, baseSize * scale)),
-    rotation: (baseRotation + angleDeg(now) - angleDeg(start)) % 360,
+    rotation: (baseRotation + angleDelta) % 360,
   };
 }
