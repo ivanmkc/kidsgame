@@ -7,8 +7,7 @@ import {
   scatterPositions,
 } from "../count/logic";
 import { spriteLT } from "../quizround/logic";
-import { WORDS, wordFor } from '../../curriculum/words';
-import { CURRICULUM } from "../../curriculum/content";
+import { CURRICULUM, WORDS, wordFor } from '../../curriculum/content';
 
 export interface Side {
   icon: string;

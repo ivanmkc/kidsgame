@@ -1,6 +1,6 @@
 import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
-import { WORDS, wordFor } from '../../curriculum/words';
+import { WORDS, wordFor } from '../../curriculum/content';
 import { t } from '../../i18n';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.

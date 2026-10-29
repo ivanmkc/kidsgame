@@ -1,9 +1,8 @@
 import { Lang, LANGS } from "../../lang";
 import { t } from "../../i18n";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from "../../curriculum/words";
 import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
-import { CURRICULUM } from "../../curriculum/content";
+import { CURRICULUM, WORDS, wordFor } from "../../curriculum/content";
 
 export interface OddOneRound {
   baseCategory: string;

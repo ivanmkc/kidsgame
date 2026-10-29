@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LANGS } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
-import { WORDS } from '../../curriculum/words';
-import { WORD_LEVELS as levelsData } from "../../curriculum/content";
+import { WORD_LEVELS as levelsData, WORDS } from "../../curriculum/content";
 import {
   LEVEL_1_WORDS,
   LEVEL_1_WORD_IDS,

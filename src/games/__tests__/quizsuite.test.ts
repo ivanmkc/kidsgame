@@ -20,7 +20,7 @@ import {
   availableEntries, canPlay, effectiveLang, makeRhymeRound, playableFamilies,
   settingsForRhyme, speechLines as rhymeSpeechLines,
 } from '../rhymegame/logic';
-import { RHYME_WORDS, WORDS, WordEntry, soundsFor } from '../../curriculum/words';
+import { RHYME_WORDS, WORDS, WordEntry, soundsFor } from '../../curriculum/content';
 
 const SEEDS = Array.from({ length: 200 }, (_, i) => i + 1);
 

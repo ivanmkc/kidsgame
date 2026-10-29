@@ -9,7 +9,7 @@ import { t } from '../../i18n';
 import { manifest } from '../../manifest';
 import { Rng, shuffle } from '../../rng';
 import { RHYME_SPRITES } from '../../assets/images';
-import { RHYME_WORDS, WORDS, WordEntry, wordFor } from '../../curriculum/words';
+import { RHYME_WORDS, WORDS, WordEntry, wordFor } from '../../curriculum/content';
 
 export interface RhymeEntry {
   icon: string;

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { t, UIKey } from "../../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../../lang";
 import { makeRng } from "../../../rng";
-import { WORDS, wordFor } from '../../../curriculum/words';
+import { WORDS, wordFor } from '../../../curriculum/content';
 import {
   ALPHABET,
   ANIMALS,
