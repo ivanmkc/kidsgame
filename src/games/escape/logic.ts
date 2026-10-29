@@ -84,7 +84,7 @@ export function applyTap(room: EscapeRoom, s: EscapeState, hotspotId: string): {
   // HOLDING the right item is enough (needs are unique and the tray is
   // tiny, so this is never ambiguous) — selecting first is taught but a
   // 3-year-old can't wedge by skipping it.
-  if (h.needs && !s.inventory.includes(h.needs)) {
+  if (h.needs && (!s.inventory.includes(h.needs) || (s.selected !== null && s.selected !== h.needs))) {
     return { state: s, effect: { kind: 'locked', say: h.sayLocked } };
   }
   const inventory = h.needs ? s.inventory.filter((i) => i !== h.needs) : s.inventory.slice();
