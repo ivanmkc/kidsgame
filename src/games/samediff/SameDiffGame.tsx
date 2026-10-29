@@ -318,7 +318,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 {ratiosA.map((ratio, i) => {
                   const isNoteActive =
                     phase === "listenA" && activeNote === i;
-                  const stemHeight = Math.max(2, Math.round(6 + ratio * 20));
+                  const stemHeight = Math.max(2, Math.round(6 + ratio * 56));
                   return (
                     <View
                       key={i}
@@ -359,7 +359,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   ? ratiosB.map((ratio, i) => {
                       const isNoteActive =
                         phase === "listenB" && activeNote === i;
-                      const stemHeight = Math.max(2, Math.round(6 + ratio * 20));
+                      const stemHeight = Math.max(2, Math.round(6 + ratio * 56));
                       return (
                         <View
                           key={i}
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   phraseNotesTrack: {
     flexDirection: "row",
     alignItems: "flex-end",
-    height: 44,
+    height: 80,
     gap: 10,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   noteCueCol: {
     width: 26,
-    height: 40,
+    height: 76,
     alignItems: "center",
     justifyContent: "flex-end",
   },
