@@ -99,12 +99,17 @@ test("WORD_CARDS, NUMBER_CARDS and GAME_CARDS register Concept Match decks", () 
   const picspeak = WORD_CARDS.find((c) => c.route === "cm-picspeak");
   expect(picspeak).toBeDefined();
   expect(picspeak?.key).toBe("cm-picspeak");
+
+  const colors = WORD_CARDS.find((c) => c.route === "cm-colors");
+  expect(colors).toBeDefined();
+  expect(colors?.key).toBe("cm-colors");
 });
 
 test("Concept Match menu cards render localized titles and blurbs", () => {
   const onNavigate = vi.fn();
   const picwordCard = WORD_CARDS.find((c) => c.route === "cm-picword")!;
   const picspeakCard = WORD_CARDS.find((c) => c.route === "cm-picspeak")!;
+  const colorsCard = WORD_CARDS.find((c) => c.route === "cm-colors")!;
   const numdotsCard = NUMBER_CARDS.find((c) => c.route === "cm-numdots")!;
   const numhanCard = NUMBER_CARDS.find((c) => c.route === "cm-numhan")!;
   const shapesCard = GAME_CARDS.find((c) => c.route === "cm-shapes")!;
@@ -133,6 +138,18 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   );
   expect(picwordHtml).toContain("Picture &amp; Word");
   expect(picwordHtml).toContain("Match the picture to its word!");
+
+  const colorsHtml = renderToString(
+    <MenuCard
+      g={colorsCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(colorsHtml).toContain("Colors &amp; Words");
+  expect(colorsHtml).toContain("Match the color to its word!");
 
   const enHtml = renderToString(
     <MenuCard

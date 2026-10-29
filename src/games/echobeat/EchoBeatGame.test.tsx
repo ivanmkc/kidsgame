@@ -884,10 +884,10 @@ describe("EchoBeatGame", () => {
     });
     expect(screen.getByText("Your turn!")).toBeTruthy();
 
-    // Tap once (incorrect rhythm) and wait for evaluation delay (1200ms)
+    // Tap once (incorrect rhythm) and wait for evaluation delay (3000ms)
     act(() => {
       fireEvent.click(drum);
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(3000);
     });
 
     // During retry, only a single retry emoji is rendered in status card

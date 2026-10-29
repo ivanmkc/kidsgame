@@ -112,6 +112,8 @@ export const YUE: Table = {
   'card.cm-picword.blurb': '將圖片同文字配成一對！',
   'card.cm-picspeak.title': '圖片同聲音',
   'card.cm-picspeak.blurb': '將圖片同聲音配成一對！',
+  'card.cm-colors.title': '顏色同文字',
+  'card.cm-colors.blurb': '將顏色同文字配成一對！',
 
   'picker.surprise': '🎲 隨機嚟一個！',
   'picker.diff': '想喺邊玩？',
