@@ -15,26 +15,25 @@ import { UIKey } from '../i18n';
 // One home for how each category is worded to kids — Rule Time's "tap"
 // labels and Odd One Out's "which is not" questions must describe the same
 // membership, so they live next to it.
-// `tap` stays English (Rule Time is an English-phonics game by design).
 // `not` stores the i18n key so Odd One Out renders via t(lang, key).
-export const CATEGORY_TEXT: Record<string, { tap: string; not: UIKey }> = {
+export const CATEGORY_TEXT: Record<string, { tap: UIKey; not: UIKey }> = {
   animals: {
-    tap: 'Tap all the ANIMALS! 🐾',
+    tap: 'rules.tap.animals',
     not: 'oddone.not.animals',
   },
   nature: {
-    tap: 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
+    tap: 'rules.tap.nature',
     not: 'oddone.not.nature',
   },
   food: {
-    tap: 'Tap all the YUMMY FOOD! 🍎',
+    tap: 'rules.tap.food',
     not: 'oddone.not.food',
   },
   things: {
     // The present is a member too, so both wordings name it — "NOT a toy
     // or vehicle" made the gift a second right answer in Odd One Out, and
     // an untappable match in Rule Time.
-    tap: 'Tap the TOYS, VEHICLES & PRESENTS! 🚗',
+    tap: 'rules.tap.things',
     not: 'oddone.not.things',
   },
 };

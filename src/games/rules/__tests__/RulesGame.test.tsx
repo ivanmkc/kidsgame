@@ -149,7 +149,7 @@ describe("RulesGame", () => {
     try {
       vi.spyOn(logic, "makeRulesRound").mockReturnValue({
         ruleNumber: 1,
-        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        rule: { category: "nature", labelKey: "rules.tap.nature" },
         isRecall: false,
         tiles: [
           { icon: "blossom", isMatch: true },
@@ -182,7 +182,7 @@ describe("RulesGame", () => {
     try {
       vi.spyOn(logic, "makeRulesRound").mockReturnValue({
         ruleNumber: 1,
-        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        rule: { category: "nature", labelKey: "rules.tap.nature" },
         isRecall: false,
         tiles: [
           { icon: "blossom", isMatch: true },
@@ -221,7 +221,7 @@ describe("RulesGame", () => {
     try {
       vi.spyOn(logic, "makeRulesRound").mockReturnValue({
         ruleNumber: 1,
-        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        rule: { category: "nature", labelKey: "rules.tap.nature" },
         isRecall: false,
         tiles: [
           { icon: "blossom", isMatch: true },
@@ -256,7 +256,7 @@ describe("RulesGame", () => {
     try {
       vi.spyOn(logic, "makeRulesRound").mockReturnValue({
         ruleNumber: 1,
-        rule: { category: "nature", label: "Tap the FLOWERS!" },
+        rule: { category: "nature", labelKey: "rules.tap.nature" },
         isRecall: false,
         tiles: [
           { icon: "blossom", isMatch: true },
@@ -347,7 +347,7 @@ describe("RulesGame", () => {
   it("uses localized toddler-appropriate accessibility labels on grid tiles across languages", () => {
     vi.spyOn(logic, "makeRulesRound").mockReturnValue({
       ruleNumber: 1,
-      rule: { category: "nature", label: "Tap the FLOWERS!" },
+      rule: { category: "nature", labelKey: "rules.tap.nature" },
       isRecall: false,
       tiles: [
         { icon: "blossom", isMatch: true },
@@ -599,6 +599,33 @@ describe("RulesGame", () => {
         vi.useRealTimers();
       }
     });
+  });
+
+
+  it("renders and speaks localized prompt in non-English locales", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "makeRulesRound").mockReturnValue({
+        ruleNumber: 1,
+        rule: { category: "nature", labelKey: "rules.tap.nature" },
+        isRecall: false,
+        tiles: [
+          { icon: "blossom", isMatch: true },
+          { icon: "dog", isMatch: false },
+        ],
+        matchCount: 1,
+      });
+
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="ja" />);
+      
+      expect(screen.getByText("おはな、にじ、ほしを ぜんぶ タップしてね！ 🌸")).toBeTruthy();
+      expect(saySequence).toHaveBeenCalledWith([
+        expect.any(String),
+        "おはな、にじ、ほしを ぜんぶ タップしてね！ 🌸",
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   describe("layout responsiveness", () => {
