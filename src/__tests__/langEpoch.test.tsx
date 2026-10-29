@@ -90,4 +90,48 @@ describe("useLangEpoch", () => {
     unmount();
     expect(result.current.isValid()).toBe(false);
   });
+
+  it("keeps isValid() true for committed screen when a concurrent render with language change is discarded", async () => {
+    const { render, act } = await import("@testing-library/react");
+
+    let capturedIsValid: (() => boolean) | undefined;
+
+    function TestComp({
+      lang,
+      shouldSuspend,
+    }: {
+      lang: Lang;
+      shouldSuspend?: boolean;
+    }) {
+      const { isValid } = useLangEpoch(lang);
+      capturedIsValid = isValid;
+      if (shouldSuspend) {
+        throw new Promise(() => {});
+      }
+      return <div>{lang}</div>;
+    }
+
+    const { rerender } = render(
+      <React.Suspense fallback={<div>Loading</div>}>
+        <TestComp lang="en" />
+      </React.Suspense>,
+    );
+
+    const committedIsValid = capturedIsValid!;
+    expect(committedIsValid()).toBe(true);
+
+    // Trigger an aborted concurrent render with new language 'ja' that suspends before commit
+    act(() => {
+      React.startTransition(() => {
+        rerender(
+          <React.Suspense fallback={<div>Loading</div>}>
+            <TestComp lang="ja" shouldSuspend={true} />
+          </React.Suspense>,
+        );
+      });
+    });
+
+    // The discarded render must not invalidate the committed screen's callbacks
+    expect(committedIsValid()).toBe(true);
+  });
 });
