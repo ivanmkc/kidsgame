@@ -1,22 +1,40 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { RHYME_SPRITES as RHYME_ICONS, SPOTIT_ICONS } from '../../assets/images';
-import { Confetti } from '../../components/Confetti';
-import { GameShell, ScoreChip } from '../../components/GameShell';
-import { SparkleBurst } from '../../components/Sparkles';
-import { WinOverlay } from '../../components/WinOverlay';
-import { Difficulty } from '../../difficulty';
-import { Lang, useLangEpoch } from '../../lang';
-import { t } from '../../i18n';
-import { makeRng } from '../../rng';
-import { say, sayThen, saySequence, sfx } from '../../sound';
-import { colors, darken, fonts, shadows } from '../../theme';
-import { useWinLine } from '../winlines';
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  SpellRound, SpellTile,
-  charLine, decoyAlphabetFor, decoysFor, linesForWord, makeRound,
-  pickGameWords, wordPool,
-} from './logic';
+  Animated,
+  Easing,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import {
+  RHYME_SPRITES as RHYME_ICONS,
+  SPOTIT_ICONS,
+} from "../../assets/images";
+import { Confetti } from "../../components/Confetti";
+import { GameShell, ScoreChip } from "../../components/GameShell";
+import { SparkleBurst } from "../../components/Sparkles";
+import { WinOverlay } from "../../components/WinOverlay";
+import { Difficulty } from "../../difficulty";
+import { Lang, useLangEpoch } from "../../lang";
+import { t } from "../../i18n";
+import { makeRng } from "../../rng";
+import { say, sayThen, saySequence, sfx } from "../../sound";
+import { colors, darken, fonts, shadows } from "../../theme";
+import { useWinLine } from "../winlines";
+import {
+  SpellRound,
+  SpellTile,
+  charLine,
+  decoyAlphabetFor,
+  decoysFor,
+  linesForWord,
+  makeRound,
+  pickGameWords,
+  wordPool,
+} from "./logic";
 
 interface Props {
   onHome: () => void;
@@ -37,7 +55,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   const alphabet = useMemo(() => decoyAlphabetFor(lang, pool), [lang, pool]);
   const decoys = decoysFor(difficulty);
 
-  const [gameKey, setGameKey] = useState(0);           // bump on Play Again
+  const [gameKey, setGameKey] = useState(0); // bump on Play Again
   const gameWordsRef = useRef(pickGameWords(rngRef.current, pool, difficulty));
   const [wordIdx, setWordIdx] = useState(0);
   const [round, setRound] = useState<SpellRound>(() =>
@@ -53,8 +71,11 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
   // Lang switch: rebuild the word list and current round from the new pool.
   const langMounted = useRef(false);
   useEffect(() => {
-    if (!langMounted.current) { langMounted.current = true; return; }
-    
+    if (!langMounted.current) {
+      langMounted.current = true;
+      return;
+    }
+
     // Evaluate won state early for the early return
     const wordCount = gameWordsRef.current.length;
     const isWon = wordCount > 0 && wordIdx >= wordCount;
@@ -69,13 +90,15 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     setWordIdx(0);
     placedIdsRef.current = [];
     setPlacedIds([]);
-    setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
+    setRound(
+      makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
+    );
     setGameKey((k) => k + 1);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const wordCount = gameWordsRef.current.length;
   const won = wordCount > 0 && wordIdx >= wordCount;
-  useWinLine(won, t(lang, 'win.spell', { n: wordCount }));
+  useWinLine(won, t(lang, "win.spell", { n: wordCount }));
 
   // Fresh round → speak the intro + slowly-spelled word (chained).
   useEffect(() => {
@@ -84,9 +107,12 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     saySequence([ask, spell]);
   }, [round, won]);
 
-  useEffect(() => () => {
-    if (wrongTimer.current) clearTimeout(wrongTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+    },
+    [],
+  );
 
   const onTile = (tile: SpellTile) => {
     if (!isValid()) return;
@@ -115,7 +141,14 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
           if (!isValid()) return;
           const nextI = wordIdx + 1;
           if (nextI < wordCount) {
-            setRound(makeRound(rngRef.current, gameWordsRef.current[nextI], decoys, alphabet));
+            setRound(
+              makeRound(
+                rngRef.current,
+                gameWordsRef.current[nextI],
+                decoys,
+                alphabet,
+              ),
+            );
             placedIdsRef.current = [];
             setPlacedIds([]);
           }
@@ -152,66 +185,121 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     setWordIdx(0);
     placedIdsRef.current = [];
     setPlacedIds([]);
-    setRound(makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet));
+    setRound(
+      makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
+    );
     setGameKey((k) => k + 1);
   };
 
   const { width, height } = useWindowDimensions();
   const slotCount = round.chars.length;
   const tileCount = round.tiles.length;
-  const slot = Math.max(24, Math.min((Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount, 68));
-  const tileSize = Math.max(28, Math.min((Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount, 74));
+  const slot = Math.max(
+    24,
+    Math.min(
+      (Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount,
+      68,
+    ),
+  );
+  const tileSize = Math.max(
+    28,
+    Math.min(
+      (Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount,
+      74,
+    ),
+  );
   const shortH = height < 480;
-  const bigIcon = Math.max(56, Math.min(
-    width * 0.4,
-    height - 84 - slot * 1.15 - tileSize * 1.15 - (shortH ? 130 : 190),
-    220,
-  ));
+  const bigIcon = Math.max(
+    56,
+    Math.min(
+      width * 0.4,
+      height - 84 - slot * 1.15 - tileSize * 1.15 - (shortH ? 130 : 190),
+      220,
+    ),
+  );
 
-  const placedChars = placedIds.map((id) => round.tiles.find((t) => t.id === id)?.char ?? '');
+  const placedChars = placedIds.map(
+    (id) => round.tiles.find((t) => t.id === id)?.char ?? "",
+  );
 
   return (
     <GameShell
-      title={t(lang, 'shell.spell.title')}
-      subtitle={t(lang, 'shell.spell.sub')}
+      title={t(lang, "shell.spell.title")}
+      subtitle={t(lang, "shell.spell.sub")}
       onBack={onHome}
       lang={lang}
-      right={<ScoreChip label={`🔤 ${Math.min(wordIdx, wordCount)}/${wordCount}`} testID="spell-score" />}
+      right={
+        <ScoreChip
+          label={`🔤 ${Math.min(wordIdx, wordCount)}/${wordCount}`}
+          testID="spell-score"
+        />
+      }
     >
       <View style={[styles.board, shortH && { gap: 10 }]} key={gameKey}>
         <Pressable
           disabled={won || placedIds.length === round.chars.length}
-          onPress={() => { sfx.tap(); saySequence([linesForWord(round.word).ask, linesForWord(round.word).spell]); }}
-          accessibilityLabel={t(lang, 'spell.hearAgain')}
+          onPress={() => {
+            sfx.tap();
+            saySequence([
+              linesForWord(round.word).ask,
+              linesForWord(round.word).spell,
+            ]);
+          }}
+          accessibilityLabel={t(lang, "spell.hearAgain")}
           accessibilityRole="button"
-          style={({ pressed }) => [styles.iconCard, shadows.soft, pressed && styles.pressed]}
+          style={({ pressed }) => [
+            styles.iconCard,
+            shadows.soft,
+            pressed && styles.pressed,
+          ]}
           testID={`spell-word-${round.word.icon}`}
         >
           {iconFor(round.word.icon) ? (
-            <Image source={iconFor(round.word.icon)} style={{ width: bigIcon, height: bigIcon }} resizeMode="contain" />
+            <Image
+              source={iconFor(round.word.icon)}
+              style={{ width: bigIcon, height: bigIcon }}
+              resizeMode="contain"
+            />
           ) : (
             <Text style={styles.iconFallback}>{round.word.text}</Text>
           )}
-          {round.word.roman ? <Text style={styles.romanCaption}>{round.word.roman}</Text> : null}
-          {shortH ? null : <Text style={styles.speakerHint}>{t(lang, 'spell.hearAgain')}</Text>}
+          {round.word.roman ? (
+            <Text style={styles.romanCaption}>{round.word.roman}</Text>
+          ) : null}
+          {shortH ? null : (
+            <Text style={styles.speakerHint}>{t(lang, "spell.hearAgain")}</Text>
+          )}
         </Pressable>
 
         <View style={[styles.slotRow, { gap: 10 }]}>
           {round.chars.map((_, i) => {
             const filledChar = placedChars[i];
             const done = !!filledChar;
+            const active = !won && i === placedChars.length;
             return (
               <View
                 key={i}
                 testID={`spell-slot-${i}`}
-                style={[styles.slot, shadows.soft, { width: slot, height: slot * 1.15 }, done && styles.slotDone]}
+                style={[
+                  styles.slot,
+                  shadows.soft,
+                  { width: slot, height: slot * 1.15 },
+                  active && styles.slotActive,
+                  done && styles.slotDone,
+                ]}
               >
                 {done ? (
                   <Text style={styles.slotText}>{filledChar}</Text>
                 ) : (
                   <Text style={styles.slotGhost}>{round.chars[i]}</Text>
                 )}
-                {done ? <SparkleBurst trigger={`${gameKey}-${wordIdx}-${i}`} count={4} size={11} /> : null}
+                {done ? (
+                  <SparkleBurst
+                    trigger={`${gameKey}-${wordIdx}-${i}`}
+                    count={4}
+                    size={11}
+                  />
+                ) : null}
               </View>
             );
           })}
@@ -236,9 +324,9 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       {celebrate ? <Confetti key={celebrate} count={22} /> : null}
       <WinOverlay
         visible={won}
-        message={t(lang, 'win.spell', { n: wordCount })}
+        message={t(lang, "win.spell", { n: wordCount })}
         onNext={reset}
-        nextLabel={t(lang, 'overlay.playAgain')}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
@@ -247,7 +335,11 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
 }
 
 function LetterTile({
-  tile, size, consumed, wobble, onPress,
+  tile,
+  size,
+  consumed,
+  wobble,
+  onPress,
 }: {
   tile: SpellTile;
   size: number;
@@ -263,23 +355,58 @@ function LetterTile({
     if (!wobble) return;
     shake.setValue(0);
     Animated.sequence([
-      Animated.timing(shake, { toValue: 1, duration: 60, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: -1, duration: 80, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 1, duration: 80, easing: Easing.linear, useNativeDriver: true }),
-      Animated.timing(shake, { toValue: 0, duration: 60, easing: Easing.linear, useNativeDriver: true }),
+      Animated.timing(shake, {
+        toValue: 1,
+        duration: 60,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: -1,
+        duration: 80,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 1,
+        duration: 80,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shake, {
+        toValue: 0,
+        duration: 60,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
     ]).start();
   }, [wobble, shake]);
   useEffect(() => {
-    Animated.spring(fade, { toValue: consumed ? 0 : 1, friction: 6, useNativeDriver: true }).start();
+    Animated.spring(fade, {
+      toValue: consumed ? 0 : 1,
+      friction: 6,
+      useNativeDriver: true,
+    }).start();
   }, [consumed, fade]);
-  const rotate = shake.interpolate({ inputRange: [-1, 1], outputRange: ['-9deg', '9deg'] });
+  const rotate = shake.interpolate({
+    inputRange: [-1, 1],
+    outputRange: ["-9deg", "9deg"],
+  });
   return (
     <Animated.View
       style={{
         opacity: fade,
-        transform: [{ scale: fade.interpolate({ inputRange: [0, 1], outputRange: [0.3, 1] }) }, { rotate }],
+        transform: [
+          {
+            scale: fade.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0.3, 1],
+            }),
+          },
+          { rotate },
+        ],
       }}
-      pointerEvents={consumed ? 'none' : 'auto'}
+      pointerEvents={consumed ? "none" : "auto"}
     >
       <Pressable
         onPress={onPress}
@@ -300,7 +427,15 @@ function LetterTile({
 }
 
 const styles = StyleSheet.create({
-  board: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 18, paddingHorizontal: 16, minHeight: 0, overflow: 'hidden' },
+  board: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 18,
+    paddingHorizontal: 16,
+    minHeight: 0,
+    overflow: "hidden",
+  },
   iconCard: {
     backgroundColor: colors.card,
     borderRadius: 24,
@@ -308,26 +443,41 @@ const styles = StyleSheet.create({
     borderColor: colors.blush,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 4,
   },
   iconFallback: { fontFamily: fonts.display, fontSize: 40, color: colors.ink },
-  romanCaption: { fontFamily: fonts.bodyReg, fontSize: 13, color: colors.inkSoft, letterSpacing: 0.5 },
-  speakerHint: { fontFamily: fonts.bodyReg, fontSize: 12, color: colors.inkSoft },
-  slotRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  romanCaption: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 13,
+    color: colors.inkSoft,
+    letterSpacing: 0.5,
+  },
+  speakerHint: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 12,
+    color: colors.inkSoft,
+  },
+  slotRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   slot: {
     backgroundColor: colors.paper,
     borderRadius: 14,
     borderWidth: 3,
-    borderStyle: 'dashed',
+    borderStyle: "dashed",
     borderColor: colors.purple,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  slotActive: {
+    borderStyle: "solid",
+    borderColor: colors.gold,
+    backgroundColor: "#FFF9EC",
+    ...shadows.glowGold,
   },
   slotDone: {
-    borderStyle: 'solid',
+    borderStyle: "solid",
     borderColor: colors.green,
-    backgroundColor: 'rgba(95,191,110,0.14)',
+    backgroundColor: "rgba(95,191,110,0.14)",
   },
   slotText: { fontFamily: fonts.display, fontSize: 30, color: colors.ink },
   slotGhost: {
@@ -336,14 +486,14 @@ const styles = StyleSheet.create({
     color: colors.purple,
     opacity: 0.28,
   },
-  tileRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
+  tileRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center" },
   tile: {
     backgroundColor: colors.gold,
     borderRadius: 16,
     borderWidth: 3,
     borderColor: darken(colors.gold, 0.2),
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   tileText: { fontFamily: fonts.display, fontSize: 32, color: colors.ink },
   pressed: { opacity: 0.75, transform: [{ scale: 0.94 }] },

@@ -764,7 +764,9 @@ describe("SpellGame", () => {
     }) {
       const [lang, setLang] = React.useState<Lang>(initialLang);
       const onCycle = () => {
-        setLang((prev) => (prev === "en" ? "ja" : prev === "ja" ? "cmn" : "en"));
+        setLang((prev) =>
+          prev === "en" ? "ja" : prev === "ja" ? "cmn" : "en",
+        );
       };
       return (
         <LangContext.Provider value={{ lang, onCycle }}>
@@ -828,7 +830,7 @@ describe("SpellGame", () => {
       });
 
       render(<SpellGameTestHarness initialLang="en" />);
-      
+
       fireEvent.click(screen.getByTestId("spell-tile-3")); // C
       fireEvent.click(screen.getByTestId("spell-tile-2")); // A
       fireEvent.click(screen.getByTestId("spell-tile-1")); // T
@@ -889,33 +891,31 @@ describe("SpellGame", () => {
         ];
       });
 
-      vi.spyOn(logic, "makeRound").mockImplementation(
-        (_rng, word) => {
-          if (word.lang === "en") {
-            return {
-              word,
-              chars: word.chars,
-              decoys: ["Z"],
-              tiles: [
-                { id: 1, char: "C" },
-                { id: 2, char: "A" },
-                { id: 3, char: "T" },
-                { id: 4, char: "Z" },
-              ],
-            };
-          }
+      vi.spyOn(logic, "makeRound").mockImplementation((_rng, word) => {
+        if (word.lang === "en") {
           return {
             word,
             chars: word.chars,
-            decoys: ["き"],
+            decoys: ["Z"],
             tiles: [
-              { id: 10, char: "い" },
-              { id: 20, char: "ぬ" },
-              { id: 30, char: "き" },
+              { id: 1, char: "C" },
+              { id: 2, char: "A" },
+              { id: 3, char: "T" },
+              { id: 4, char: "Z" },
             ],
           };
-        },
-      );
+        }
+        return {
+          word,
+          chars: word.chars,
+          decoys: ["き"],
+          tiles: [
+            { id: 10, char: "い" },
+            { id: 20, char: "ぬ" },
+            { id: 30, char: "き" },
+          ],
+        };
+      });
 
       render(<SpellGameTestHarness initialLang="en" />);
 
@@ -1008,31 +1008,29 @@ describe("SpellGame", () => {
         ];
       });
 
-      vi.spyOn(logic, "makeRound").mockImplementation(
-        (_rng, word) => {
-          if (word.lang === "en") {
-            return {
-              word,
-              chars: word.chars,
-              decoys: [],
-              tiles: [
-                { id: 1, char: "C" },
-                { id: 2, char: "A" },
-                { id: 3, char: "T" },
-              ],
-            };
-          }
+      vi.spyOn(logic, "makeRound").mockImplementation((_rng, word) => {
+        if (word.lang === "en") {
           return {
             word,
             chars: word.chars,
             decoys: [],
             tiles: [
-              { id: 10, char: "い" },
-              { id: 20, char: "ぬ" },
+              { id: 1, char: "C" },
+              { id: 2, char: "A" },
+              { id: 3, char: "T" },
             ],
           };
-        },
-      );
+        }
+        return {
+          word,
+          chars: word.chars,
+          decoys: [],
+          tiles: [
+            { id: 10, char: "い" },
+            { id: 20, char: "ぬ" },
+          ],
+        };
+      });
 
       render(<SpellGameTestHarness initialLang="en" />);
 
@@ -1078,8 +1076,22 @@ describe("SpellGame", () => {
 
   it("remounts confetti on subsequent words", () => {
     vi.spyOn(logic, "pickGameWords").mockReturnValue([
-      { icon: "a", lang: "en", text: "A", chars: ["A"], roman: "", source: "spotit" },
-      { icon: "b", lang: "en", text: "B", chars: ["B"], roman: "", source: "spotit" },
+      {
+        icon: "a",
+        lang: "en",
+        text: "A",
+        chars: ["A"],
+        roman: "",
+        source: "spotit",
+      },
+      {
+        icon: "b",
+        lang: "en",
+        text: "B",
+        chars: ["B"],
+        roman: "",
+        source: "spotit",
+      },
     ]);
     vi.spyOn(logic, "makeRound").mockImplementation((_rng, gw) => {
       if (gw.text === "A") {
@@ -1087,39 +1099,45 @@ describe("SpellGame", () => {
           word: gw,
           chars: ["A"],
           decoys: [],
-          tiles: [{ id: 1, char: "A" }, { id: 2, char: "X" }],
+          tiles: [
+            { id: 1, char: "A" },
+            { id: 2, char: "X" },
+          ],
         };
       }
       return {
         word: gw,
         chars: ["B"],
         decoys: [],
-        tiles: [{ id: 3, char: "B" }, { id: 4, char: "Y" }],
+        tiles: [
+          { id: 3, char: "B" },
+          { id: 4, char: "Y" },
+        ],
       };
     });
 
     render(
       <LangContext.Provider value={{ lang: "en", onCycle: () => {} }}>
-        <SpellGame
-          difficulty="easy"
-          onHome={() => {}}
-          lang="en"
-        />
-      </LangContext.Provider>
+        <SpellGame difficulty="easy" onHome={() => {}} lang="en" />
+      </LangContext.Provider>,
     );
 
     // Complete first word
     fireEvent.click(screen.getByTestId("spell-tile-1"));
-    
-    act(() => { vi.runAllTimers(); });
-    
+
+    act(() => {
+      vi.runAllTimers();
+    });
+
     const confetti1 = screen.getAllByText("🎉")[0];
     expect(confetti1).toBeDefined();
 
     // Complete second word
     fireEvent.click(screen.getByTestId("spell-tile-3"));
-    
-    act(() => { vi.runAllTimers(); });
+
+    act(() => {
+      vi.runAllTimers();
+    });
 
     const confetti2 = screen.getAllByText("🎉")[0];
     expect(confetti2).toBeDefined();
@@ -1234,6 +1252,83 @@ describe("SpellGame", () => {
     expect(window.getComputedStyle(jaGhost0).opacity).toBe("0.28");
     expect(window.getComputedStyle(jaGhost1).opacity).toBe("0.28");
   });
+
+  it("highlights the currently active unfilled letter slot and advances the highlight as letters are placed", () => {
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const slot0 = screen.getByTestId("spell-slot-0");
+    const slot1 = screen.getByTestId("spell-slot-1");
+    const slot2 = screen.getByTestId("spell-slot-2");
+
+    // Slot 0 is active initially (solid gold border), slots 1 and 2 are inactive unfilled (dashed purple)
+    expect(window.getComputedStyle(slot0).borderTopStyle).toBe("solid");
+    expect(window.getComputedStyle(slot0).borderTopColor).toBe(
+      "rgba(255, 194, 75, 1.00)",
+    );
+    expect(window.getComputedStyle(slot1).borderTopStyle).toBe("dashed");
+    expect(window.getComputedStyle(slot1).borderTopColor).toBe(
+      "rgba(155, 126, 222, 1.00)",
+    );
+    expect(window.getComputedStyle(slot2).borderTopStyle).toBe("dashed");
+    expect(window.getComputedStyle(slot2).borderTopColor).toBe(
+      "rgba(155, 126, 222, 1.00)",
+    );
+
+    // Tap first tile 'C'
+    fireEvent.click(screen.getByTestId("spell-tile-1"));
+
+    // Slot 0 is now done (solid green border), slot 1 is active (solid gold), slot 2 remains inactive (dashed purple)
+    expect(window.getComputedStyle(slot0).borderTopStyle).toBe("solid");
+    expect(window.getComputedStyle(slot0).borderTopColor).toBe(
+      "rgba(95, 191, 110, 1.00)",
+    );
+    expect(window.getComputedStyle(slot1).borderTopStyle).toBe("solid");
+    expect(window.getComputedStyle(slot1).borderTopColor).toBe(
+      "rgba(255, 194, 75, 1.00)",
+    );
+    expect(window.getComputedStyle(slot2).borderTopStyle).toBe("dashed");
+    expect(window.getComputedStyle(slot2).borderTopColor).toBe(
+      "rgba(155, 126, 222, 1.00)",
+    );
+
+    // Tap second tile 'A'
+    fireEvent.click(screen.getByTestId("spell-tile-2"));
+
+    // Slots 0 and 1 are done, slot 2 is now active
+    expect(window.getComputedStyle(slot1).borderTopColor).toBe(
+      "rgba(95, 191, 110, 1.00)",
+    );
+    expect(window.getComputedStyle(slot2).borderTopStyle).toBe("solid");
+    expect(window.getComputedStyle(slot2).borderTopColor).toBe(
+      "rgba(255, 194, 75, 1.00)",
+    );
+  });
 });
-
-
