@@ -243,6 +243,7 @@ export const JA: Table = {
   'win.spotitDuel': '🏆 {name}のかち！',
   'win.spotitDuelSub': '{emoji} {name}は ⭐️{n}こ！ よくみたね！',
   'win.spotitDuelSubOne': '{emoji} {name}は ⭐️{n}こ！ よくみたね！',
+  'spotitDuel.countdown': 'ようい… スタート！',
   'win.letters': 'もじマスター！ ぜんぶ みつけた！',
   'win.lettersKana': 'かなマスター！ ぜんぶ みつけた！',
   'win.numbers': 'すうじマスター！ ぜんぶ みつけた！',

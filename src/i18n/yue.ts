@@ -242,6 +242,7 @@ export const YUE: Table = {
   'win.spotitDuel': '🏆 {name} 贏咗！',
   'win.spotitDuelSub': '{emoji} {name} 搵到 {n} 粒星 — 眼力好勁！',
   'win.spotitDuelSubOne': '{emoji} {name} 搵到 {n} 粒星 — 眼力好勁！',
+  'spotitDuel.countdown': '預備… 開始！',
   'win.letters': '字母大師！全部搵到！',
   'win.lettersKana': '假名大師！全部搵到！',
   'win.numbers': '數字大師！全部搵到！',

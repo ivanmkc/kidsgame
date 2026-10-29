@@ -1,6 +1,7 @@
 import { Lang } from '../../lang';
 import { Rng, randInt, shuffle } from '../../rng';
 import { WORDS, wordFor } from '../../curriculum/words';
+import { t } from '../../i18n';
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
 export const SYMBOLS = [
@@ -110,15 +111,8 @@ export function hintAfterMs(myScore: number, otherScore: number, baseSecs: numbe
 
 // --- Duel spoken prompts ----------------------------------------------------
 
-export const DUEL_COUNTDOWN_PROMPTS: Record<Lang, string> = {
-  en: 'Ready... Spot!',
-  ja: 'ようい… スタート！',
-  cmn: '准备… 开始！',
-  yue: '預備… 開始！',
-};
-
 export function duelCountdownPrompt(lang: Lang): string {
-  return DUEL_COUNTDOWN_PROMPTS[lang];
+  return t(lang, 'spotitDuel.countdown');
 }
 
 /** Localized screen-reader label for a card symbol. */
