@@ -299,7 +299,7 @@ export const CMN: Table = {
   'rules.memoryCheck': '记忆挑战！',
   'rules.ruleNumber': '规则 #{n}',
   'rules.doAgain': '再做一次规则 #{n} — 还记得吗？🤔',
-  'rules.remind': '💡 提醒我！',
+  'rules.remind': '🔊 提醒我！',
   'rules.progress': '已找到 {found} / {total}',
   'puzzle.peek': '🖼️ 偷看',
   'puzzle.peekA11y': '偷看拼好的图片',
