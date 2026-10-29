@@ -1,7 +1,13 @@
 // @vitest-environment happy-dom
 import React from "react";
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import { Animated } from "react-native";
 import * as music from "../../../music";
 import { sfx } from "../../../sound";
@@ -10,6 +16,7 @@ import * as bellsLogic from "../logic";
 
 describe("BellsGame", () => {
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
   });
 
@@ -187,6 +194,60 @@ describe("BellsGame", () => {
     unmount();
     expect(stopSpies[1]).toHaveBeenCalledTimes(1);
 
+    vi.useRealTimers();
+  });
+
+  it("hides replay button during completion transition", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    const { unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Initial listen phase: replay button hidden
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+
+    // Advance through demo into play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    // In play phase before completion: replay button is visible
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+
+    // Tap first bell of sequence [0, 1]
+    const bell0 = screen.getByTestId("bell-0");
+    fireEvent.click(bell0);
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+
+    // Tap second and final bell in sequence: round completes
+    const bell1 = screen.getByTestId("bell-1");
+    fireEvent.click(bell1);
+
+    // Immediately upon sequence completion, replay button is hidden
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+
+    // During the 600ms completion delay, replay button remains hidden
+    act(() => {
+      vi.advanceTimersByTime(599);
+    });
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+
+    // After 600ms, new round starts in listen phase: still hidden
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+
+    // After demo completes, replay button returns for the new round
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+
+    unmount();
     vi.useRealTimers();
   });
 });

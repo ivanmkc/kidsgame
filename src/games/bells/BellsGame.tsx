@@ -243,6 +243,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1, 1.06],
   });
 
+  const canReplay = canTap(round, tapped, phase, won, wrongFlash);
+
   const tapDots = [];
   for (let i = 0; i < round.sequence.length; i++) {
     tapDots.push(
@@ -307,7 +309,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                     : t(lang, "music.yourTurn")}
                 </Text>
               </View>
-              {phase === "play" ? (
+              {canReplay ? (
                 <Pressable
                   testID="replay-button"
                   accessibilityRole="button"
