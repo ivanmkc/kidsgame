@@ -157,6 +157,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const goBack = () => {
     const prev = hist.current.pop();
     if (prev) {
+      animating.current = false;
       sfx.tap();
       redo.current.push(nodeId);
       setNodeId(prev);
@@ -165,6 +166,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const goForward = () => {
     const next = redo.current.pop();
     if (next) {
+      animating.current = false;
       sfx.tap();
       hist.current.push(nodeId);
       setNodeId(next);
@@ -201,6 +203,16 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     animating.current = false;
     if (p) advance(p.next);
   };
+
+  const pickChoice = (c: StoryChoice, choiceLabel: string) => {
+    if (animating.current) return;
+    animating.current = true;
+    setTimeout(() => { animating.current = false; }, 400);
+    sfx.tap();
+    say(choiceLabel);
+    advance(c.next);
+  };
+
   const tx = zoomTarget ? (imgW / 2 - zoomTarget.cx) * ZOOM : 0;
   const ty = zoomTarget ? (imgH / 2 - zoomTarget.cy) * ZOOM : 0;
 
@@ -311,7 +323,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               return c.icon ? (
                 <Pressable
                   key={c.next}
-                  onPress={() => { sfx.tap(); say(choiceLabel); advance(c.next); }}
+                  onPress={() => pickChoice(c, choiceLabel)}
                   testID={`story-choice-${c.next}`}
                   accessibilityLabel={choiceLabel}
                   accessibilityRole="button"
@@ -330,7 +342,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                   label={`${choiceLabel}`}
                   color={i === 0 ? colors.teal : colors.gold}
                   darkColor={darken(i === 0 ? colors.teal : colors.gold)}
-                  onPress={() => { sfx.tap(); say(choiceLabel); advance(c.next); }}
+                  onPress={() => pickChoice(c, choiceLabel)}
                   testID={`story-choice-${c.next}`}
                   minWidth={230}
                 />
