@@ -161,6 +161,7 @@ export const CMN: Table = {
   'shell.count.title': '一起数一数',
   'shell.count.sub': '点每个小伙伴，然后告诉我一共几个',
   'shell.count.prompt': '有几个？',
+  'count.praise': '真棒！',
   'shell.compare.title': '谁多谁少',
   'shell.compare.subMore': '点数量多的一边',
   'shell.compare.subFewer': '点数量少的一边',

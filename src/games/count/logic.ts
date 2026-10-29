@@ -178,7 +178,7 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
     const nextScore = state.score + 1;
     deps.setScore(nextScore);
     const nw = numberWord(state.lang, state.round.answer).t;
-    deps.sayThen([nw, PRAISE[state.lang]], () => {
+    deps.sayThen([nw, t(state.lang, "count.praise")], () => {
       deps.setLocked(false);
       if (nextScore < state.roundsToWin) {
         const nr = deps.makeNextRound();
@@ -196,25 +196,11 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
     deps.setWrongPick(v);
     deps.clearTimeouts();
     deps.setTimeout(() => deps.setWrongPick((w) => (w === v ? null : w)), 450);
-    deps.setTimeout(() => deps.say(PROMPTS[state.lang]), 500);
+    deps.setTimeout(() => deps.say(t(state.lang, "shell.count.prompt")), 500);
   }
 }
 
 // ---------- speech (per-lang prompt + celebration) ----------
-
-export const PROMPTS: Record<Lang, string> = {
-  en: "How many?",
-  ja: "いくつかな？",
-  cmn: "有几个？",
-  yue: "有幾多個呀？",
-};
-
-export const PRAISE: Record<Lang, string> = {
-  en: "Great counting!",
-  ja: "すごい！",
-  cmn: "真棒！",
-  yue: "好叻呀！",
-};
 
 /** Every literal string this game will pass to say/saySequence, across all
  *  four langs — the orchestrator pre-renders TTS clips keyed by exact text.
@@ -223,8 +209,8 @@ export function speechLines(): string[] {
   const s = new Set<string>();
   (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
     s.add(t(L, "shell.count.sub"));
-    s.add(PROMPTS[L]);
-    s.add(PRAISE[L]);
+    s.add(t(L, "shell.count.prompt"));
+    s.add(t(L, "count.praise"));
   });
   return [...s];
 }

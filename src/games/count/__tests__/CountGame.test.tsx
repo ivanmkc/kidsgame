@@ -16,7 +16,6 @@ import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
-  PROMPTS,
   STAGE_PADDING,
   applyPickAnswer,
   critterLabel,
@@ -761,7 +760,7 @@ describe("CountGame language switch mid-quiz", () => {
     expect(
       within(promptCard).getByText(t("en", "shell.count.prompt")),
     ).toBeDefined();
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
 
     // Find and tap a wrong answer choice.
     const buttons = screen.getAllByRole("button");
@@ -795,7 +794,7 @@ describe("CountGame language switch mid-quiz", () => {
     );
 
     // Spoken prompt and display text should immediately reflect Japanese.
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.count.prompt"));
     const promptCardJa = screen.getByTestId("count-prompt");
     expect(
       within(promptCardJa).getByText(t("ja", "shell.count.prompt")),
@@ -810,7 +809,7 @@ describe("CountGame language switch mid-quiz", () => {
     });
 
     // The stale English prompt must NOT be spoken.
-    expect(saySpy).not.toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "shell.count.prompt"));
     expect(saySpy).not.toHaveBeenCalled();
     expect(
       within(promptCardJa).getByText(t("ja", "shell.count.prompt")),
@@ -915,7 +914,7 @@ describe("CountGame affordances, prompt replay and ordinal badges", () => {
 
     saySpy.mockClear();
     fireEvent.click(promptCard);
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
     expect(saySpy).toHaveBeenCalledTimes(1);
 
     fireEvent.click(promptCard);
@@ -946,7 +945,7 @@ describe("CountGame affordances, prompt replay and ordinal badges", () => {
 
     saySpy.mockClear();
     fireEvent.click(promptCard);
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.count.prompt"));
   });
 
   it("highlights winning choice with choiceCorrect during praise audio and guards prompt replay while locked", () => {

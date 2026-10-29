@@ -128,6 +128,7 @@ export type UIKey =
   | 'shell.count.title'
   | 'shell.count.sub'
   | 'shell.count.prompt'
+  | 'count.praise'
   | 'shell.compare.title'
   | 'shell.compare.subMore'
   | 'shell.compare.subFewer'
@@ -508,6 +509,7 @@ export const EN: Table = {
   'shell.count.title': 'Count With Me',
   'shell.count.sub': 'Tap every friend, then tell me how many',
   'shell.count.prompt': 'How many?',
+  'count.praise': 'Great counting!',
   'shell.compare.title': 'More or Less',
   'shell.compare.subMore': 'Tap the side with more',
   'shell.compare.subFewer': 'Tap the side with fewer',

@@ -161,6 +161,7 @@ export const YUE: Table = {
   'shell.count.title': '一齊數',
   'shell.count.sub': '撳每個朋友仔，然後話俾我聽有幾多個',
   'shell.count.prompt': '有幾多個呀？',
+  'count.praise': '好叻呀！',
   'shell.compare.title': '邊邊多啲',
   'shell.compare.subMore': '撳多啲嗰邊',
   'shell.compare.subFewer': '撳少啲嗰邊',
