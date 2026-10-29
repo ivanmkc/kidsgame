@@ -21,6 +21,24 @@ describe("ShadowGame", () => {
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it("clamps shadowSize on short viewports", () => {
+    vi.stubGlobal("innerWidth", 400);
+    vi.stubGlobal("innerHeight", 250);
+    fireEvent(window, new Event("resize"));
+
+    const { container } = render(
+      <ShadowGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+
+    const answerCard = container.querySelector(
+      '[data-testid^="shadow-answer-"]',
+    );
+    expect(answerCard).toBeTruthy();
+    expect((answerCard as HTMLElement).style.width).toBe("112px");
+    expect((answerCard as HTMLElement).style.height).toBe("112px");
   });
 
   it("renders correctly across all languages", () => {
@@ -184,8 +202,10 @@ describe("ShadowGame", () => {
       });
       // The tap is processed immediately
       expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
-      
-      act(() => { vi.advanceTimersByTime(10000); });
+
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
 
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
@@ -264,7 +284,9 @@ describe("ShadowGame", () => {
       act(() => {
         fireEvent.click(newCorrectBtn);
       });
-      act(() => { vi.advanceTimersByTime(10000); });
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
 
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
@@ -389,12 +411,18 @@ describe("ShadowGame", () => {
     try {
       const saySpy = vi.spyOn(sound, "say");
       const { container } = render(
-        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
 
-      const answerCard = container.querySelector('[data-testid^="shadow-answer-"]');
-      const answer = answerCard?.getAttribute("data-testid")?.replace("shadow-answer-", "");
-      const correctBtn = container.querySelector(`[data-testid="shadow-option-${answer}"]`) as HTMLElement;
+      const answerCard = container.querySelector(
+        '[data-testid^="shadow-answer-"]',
+      );
+      const answer = answerCard
+        ?.getAttribute("data-testid")
+        ?.replace("shadow-answer-", "");
+      const correctBtn = container.querySelector(
+        `[data-testid="shadow-option-${answer}"]`,
+      ) as HTMLElement;
 
       saySpy.mockClear();
 
@@ -403,17 +431,19 @@ describe("ShadowGame", () => {
       });
 
       expect(saySpy).toHaveBeenCalledWith(
-        logic.shadowOptionLabel(answer!, "en")
+        logic.shadowOptionLabel(answer!, "en"),
       );
 
       expect(
-        container.querySelector('[data-testid="shadow-score"]')?.textContent
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
       ).toContain("1/10");
 
-      act(() => { vi.advanceTimersByTime(1000); });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
 
       expect(
-        container.querySelector('[data-testid="shadow-score"]')?.textContent
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
       ).toContain("1/10");
     } finally {
       vi.useRealTimers();
@@ -425,7 +455,7 @@ describe("ShadowGame", () => {
     try {
       const saySeqSpy = vi.spyOn(sound, "saySequence");
       const { container } = render(
-        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
 
       for (let i = 0; i < 9; i++) {
