@@ -150,6 +150,44 @@ describe("SameDiffGame UI", () => {
     expect(phrasePitchRatios(flatRound, flatRound.phraseA)).toEqual([0.5, 0.5]);
   });
 
+  it("ensures 1-semitone differences are visually distinct (at least 4px)", () => {
+    vi.useFakeTimers();
+    // Simulate a hard difficulty 1-semitone offset (span of 13 semitones)
+    // C4 to C#5 (span = 13). Range: 60 to 73.
+    const roundDiff: SameDiffRound = {
+      phraseA: [
+        { m: 60, b: 1 },
+        { m: 65, b: 1 }, // Note 1
+        { m: 73, b: 1 },
+      ],
+      phraseB: [
+        { m: 60, b: 1 },
+        { m: 66, b: 1 }, // Note 1 is 1 semitone higher
+        { m: 73, b: 1 },
+      ],
+      answer: "different",
+      phraseIdx: 0,
+    };
+    vi.spyOn(logic, "makeSameDiffRound").mockReturnValue(roundDiff);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Fast-forward through listenA to listenB/choice phase
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    const stemA = screen.getByTestId("melody-0-stem-1");
+    const stemB = screen.getByTestId("melody-1-stem-1");
+
+    const heightA = parseInt(stemA.style.height as string, 10);
+    const heightB = parseInt(stemB.style.height as string, 10);
+
+    expect(Math.abs(heightA - heightB)).toBeGreaterThanOrEqual(4);
+
+    vi.useRealTimers();
+  });
+
   it("renders visual note cues and placeholders during listenA", () => {
     render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
     expect(screen.getByTestId("melody-notes-0")).toBeTruthy();
