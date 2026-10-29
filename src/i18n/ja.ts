@@ -362,6 +362,8 @@ export const JA: Table = {
   'story.startOver': 'はじめから 📖',
   'story.readAgain': 'おしまい！ もういちど 📖',
   'story.allStories': 'おはなし いちらん 🏠',
+  'story.hotLead': 'いきたい ほうを タップ！',
+  'story.nextLead': 'つぎは どうなる？',
   'carmode.tap': 'タップ！',
   'carmode.done': 'おしまい！',
 

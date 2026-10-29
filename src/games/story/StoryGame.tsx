@@ -21,19 +21,7 @@ interface Props {
   lang?: Lang;
 }
 
-const HOT_LEADS: Record<Lang, string> = {
-  en: 'Tap where you want to go!',
-  ja: 'いきたい ほうを タップ！',
-  cmn: '想去哪就点哪！',
-  yue: '想去邊就撳邊！',
-};
 
-const NEXT_LEADS: Record<Lang, string> = {
-  en: 'What should happen next?',
-  ja: 'つぎは どうなる？',
-  cmn: '接下来会怎样？',
-  yue: '跟住會點樣呢？',
-};
 // A narrated picture story where the kid steers: every node is spoken
 // aloud (pre-readers), two big choices branch the tale, four endings per
 // story make replays genuinely different.
@@ -110,7 +98,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     const cs = node.choices ?? [];
     const menu = cs.map((c) => (lang !== 'en' ? c.t?.[lang] : undefined) ?? c.label);
     const hots = cs.length > 0 && cs.every((c) => c.hot);
-    const lead = hots ? HOT_LEADS[lang] : NEXT_LEADS[lang];
+    const lead = hots ? t(lang, 'story.hotLead') : t(lang, 'story.nextLead');
     const nodeText = (lang !== 'en' ? node.t?.[lang] : undefined) ?? node.text;
     saySequence(menu.length ? [nodeText, lead, ...menu] : [nodeText]);
   }, [node, lang]);

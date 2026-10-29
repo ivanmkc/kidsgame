@@ -361,6 +361,8 @@ export const YUE: Table = {
   'story.startOver': '由頭嚟過 📖',
   'story.readAgain': '完！再睇一次 📖',
   'story.allStories': '所有故事 🏠',
+  'story.hotLead': '想去邊就撳邊！',
+  'story.nextLead': '跟住會點樣呢？',
   'carmode.tap': '撳一撳！',
   'carmode.done': '全部搞掂！',
 
