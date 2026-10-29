@@ -262,6 +262,33 @@ describe('difficulty filter in startState', () => {
     expect(s.rounds.length).toBe(10);
   });
 
+  it('filters silly pack by easy level', () => {
+    const allRounds = ALL_PACKS.silly.rounds();
+    const s = startState('silly', 42, 'easy');
+    const expectedLength = allRounds.filter(r => r.level === 'easy').length;
+    expect(s.rounds.length).toBe(expectedLength);
+  });
+
+  it('filters silly pack by medium level', () => {
+    const allRounds = ALL_PACKS.silly.rounds();
+    const s = startState('silly', 42, 'medium');
+    const expectedLength = allRounds.filter(r => r.level === 'medium').length;
+    expect(s.rounds.length).toBe(expectedLength);
+  });
+
+  it('filters silly pack by hard level', () => {
+    const allRounds = ALL_PACKS.silly.rounds();
+    const s = startState('silly', 42, 'hard');
+    const expectedLength = allRounds.filter(r => r.level === 'hard').length;
+    expect(s.rounds.length).toBe(expectedLength);
+  });
+
+  it('includes all silly rounds when difficulty is all', () => {
+    const allRounds = ALL_PACKS.silly.rounds();
+    const s = startState('silly', 42, 'all');
+    expect(s.rounds.length).toBe(allRounds.length);
+  });
+
   it('gap phase tap stays in gap for standard packs to allow prompt replay', () => {
     let s = startState('boops', 42);
     s = toGap(s);

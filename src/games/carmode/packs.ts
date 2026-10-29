@@ -23,6 +23,7 @@ export interface Round {
   noteCount?: number;
   twoTapAnswer?: boolean;
   answer?: boolean;
+  level?: 'easy' | 'medium' | 'hard';
 }
 
 // ── Count the Boops ─────────────────────────────────────────────────
@@ -45,41 +46,44 @@ function boopRounds(): Round[] {
 }
 
 // ── Finish the Rhyme ────────────────────────────────────────────────
-const RHYME_PAIRS: [string, string][] = [
-  ['The cat wore a big red', 'HAT!'],
-  ['The frog sat on a', 'LOG!'],
-  ['A mouse lived in a', 'HOUSE!'],
-  ['The bear sat in a', 'CHAIR!'],
-  ['The bee climbed up a', 'TREE!'],
-  ['The goat wore a warm', 'COAT!'],
-  ['The bug gave me a', 'HUG!'],
-  ['The fox hid in a', 'BOX!'],
-  ['The snake ate some', 'CAKE!'],
-  ['The whale told a', 'TALE!'],
-  ['The hen found a', 'PEN!'],
-  ['The pig wore a', 'WIG!'],
-  ['The moose drank some', 'JUICE!'],
-  ['The ape ate a', 'GRAPE!'],
-  ['The crow said', 'HELLO!'],
-  ['The pup drank from a', 'CUP!'],
-  ['The bat put on a', 'HAT!'],
-  ['The fly ate some', 'PIE!'],
-  ['The dog jumped on a', 'LOG!'],
-  ['The eel had a big', 'MEAL!'],
+// Difficulty rule: by how common the word and how obvious the rhyme is.
+const RHYME_PAIRS: [string, string, 'easy' | 'medium' | 'hard'][] = [
+  ['The cat wore a big red', 'HAT!', 'easy'],
+  ['The frog sat on a', 'LOG!', 'easy'],
+  ['A mouse lived in a', 'HOUSE!', 'easy'],
+  ['The bear sat in a', 'CHAIR!', 'easy'],
+  ['The bee climbed up a', 'TREE!', 'easy'],
+  ['The goat wore a warm', 'COAT!', 'medium'],
+  ['The bug gave me a', 'HUG!', 'easy'],
+  ['The fox hid in a', 'BOX!', 'medium'],
+  ['The snake ate some', 'CAKE!', 'hard'],
+  ['The whale told a', 'TALE!', 'hard'],
+  ['The hen found a', 'PEN!', 'medium'],
+  ['The pig wore a', 'WIG!', 'easy'],
+  ['The moose drank some', 'JUICE!', 'hard'],
+  ['The ape ate a', 'GRAPE!', 'hard'],
+  ['The crow said', 'HELLO!', 'hard'],
+  ['The pup drank from a', 'CUP!', 'easy'],
+  ['The bat put on a', 'HAT!', 'easy'],
+  ['The fly ate some', 'PIE!', 'medium'],
+  ['The dog jumped on a', 'LOG!', 'easy'],
+  ['The eel had a big', 'MEAL!', 'hard'],
 ];
 
 function rhymeRounds(): Round[] {
-  return RHYME_PAIRS.map(([setup, punch], i) => ({
+  return RHYME_PAIRS.map(([setup, punch, level], i) => ({
     id: `rhyme-${i}`,
     pack: 'rhyme' as PackId,
     prompt: [`${setup}...`],
     gapMs: 3500,
     reveal: [punch],
     sfx: 'good' as const,
+    level,
   }));
 }
 
 // ── Simon Says, Seat Edition ────────────────────────────────────────
+// Difficulty rule: untagged; plays the full mix for all difficulties.
 const SIMON_ACTIONS = [
   'Wiggle your toes!',
   'Blink three times!',
@@ -134,36 +138,38 @@ function simonRounds(): Round[] {
 }
 
 // ── Silly or True? ──────────────────────────────────────────────────
+// Difficulty rule: by how familiar the fact is.
 interface SillyRound {
   statement: string;
   isSilly: boolean;
+  level: 'easy' | 'medium' | 'hard';
 }
 
 const SILLY_STATEMENTS: SillyRound[] = [
-  { statement: 'Cows can fly!', isSilly: true },
-  { statement: 'Fish live in water!', isSilly: false },
-  { statement: 'Dogs can bark!', isSilly: false },
-  { statement: 'Cats wear shoes!', isSilly: true },
-  { statement: 'The sun is hot!', isSilly: false },
-  { statement: 'Bananas are blue!', isSilly: true },
-  { statement: 'Trees can dance!', isSilly: true },
-  { statement: 'Birds have wings!', isSilly: false },
-  { statement: 'The moon is made of cheese!', isSilly: true },
-  { statement: 'Elephants are big!', isSilly: false },
-  { statement: 'Frogs drive cars!', isSilly: true },
-  { statement: 'Rain comes from clouds!', isSilly: false },
-  { statement: 'Monkeys wear hats to school!', isSilly: true },
-  { statement: 'Snow is cold!', isSilly: false },
-  { statement: 'Spiders have eight legs!', isSilly: false },
-  { statement: 'Penguins play the piano!', isSilly: true },
-  { statement: 'Ice cream is frozen!', isSilly: false },
-  { statement: 'Giraffes have long necks!', isSilly: false },
-  { statement: 'Cars eat sandwiches!', isSilly: true },
-  { statement: 'Babies can ride bicycles!', isSilly: true },
-  { statement: 'Rabbits hop!', isSilly: false },
-  { statement: 'Shoes grow on trees!', isSilly: true },
-  { statement: 'Water is wet!', isSilly: false },
-  { statement: 'Rocks can sing!', isSilly: true },
+  { statement: 'Cows can fly!', isSilly: true, level: 'easy' },
+  { statement: 'Fish live in water!', isSilly: false, level: 'easy' },
+  { statement: 'Dogs can bark!', isSilly: false, level: 'easy' },
+  { statement: 'Cats wear shoes!', isSilly: true, level: 'easy' },
+  { statement: 'The sun is hot!', isSilly: false, level: 'easy' },
+  { statement: 'Bananas are blue!', isSilly: true, level: 'easy' },
+  { statement: 'Trees can dance!', isSilly: true, level: 'medium' },
+  { statement: 'Birds have wings!', isSilly: false, level: 'easy' },
+  { statement: 'The moon is made of cheese!', isSilly: true, level: 'hard' },
+  { statement: 'Elephants are big!', isSilly: false, level: 'medium' },
+  { statement: 'Frogs drive cars!', isSilly: true, level: 'easy' },
+  { statement: 'Rain comes from clouds!', isSilly: false, level: 'medium' },
+  { statement: 'Monkeys wear hats to school!', isSilly: true, level: 'medium' },
+  { statement: 'Snow is cold!', isSilly: false, level: 'medium' },
+  { statement: 'Spiders have eight legs!', isSilly: false, level: 'hard' },
+  { statement: 'Penguins play the piano!', isSilly: true, level: 'hard' },
+  { statement: 'Ice cream is frozen!', isSilly: false, level: 'medium' },
+  { statement: 'Giraffes have long necks!', isSilly: false, level: 'hard' },
+  { statement: 'Cars eat sandwiches!', isSilly: true, level: 'medium' },
+  { statement: 'Babies can ride bicycles!', isSilly: true, level: 'hard' },
+  { statement: 'Rabbits hop!', isSilly: false, level: 'hard' },
+  { statement: 'Shoes grow on trees!', isSilly: true, level: 'hard' },
+  { statement: 'Water is wet!', isSilly: false, level: 'hard' },
+  { statement: 'Rocks can sing!', isSilly: true, level: 'hard' },
 ];
 
 function sillyRounds(): Round[] {
@@ -181,32 +187,35 @@ function sillyRounds(): Round[] {
     sfx: s.isSilly ? 'boing' as const : 'good' as const,
     twoTapAnswer: true,
     answer: !s.isSilly,
+    level: s.level,
   }));
 }
 
 // ── Who Am I? ───────────────────────────────────────────────────────
+// Difficulty rule: by number and specificity of clues, with character names not in Easy.
 interface RiddleSpec {
   clues: string[];
   answer: string;
+  level: 'easy' | 'medium' | 'hard';
 }
 
 const RIDDLES: RiddleSpec[] = [
-  { clues: ['I am a sparkly unicorn.', 'I love to fly through rainbows.'], answer: 'LUNA!' },
-  { clues: ['I am a little puppy.', 'I wag my tail all day long.'], answer: 'PIP!' },
-  { clues: ['I am a little black kitten.', 'I carry a glowing lantern.'], answer: 'MILO!' },
-  { clues: ['I am a fluffy mint monster.', 'I give the biggest hugs!'], answer: 'MO!' },
-  { clues: ['I am a brave fox knight.', 'I wear shiny silver armor.'], answer: 'NOVA!' },
-  { clues: ['I am a big friendly dinosaur.', 'I love to stomp and roar!'], answer: 'REX!' },
-  { clues: ['I am a wise little owl.', 'I love to fly at night with my pointy hat.'], answer: 'WILLOW!' },
-  { clues: ['I am a beautiful sea dragon.', 'I swim in the deep blue ocean.'], answer: 'PEARL!' },
-  { clues: ['I am very tall with a long neck.', 'I have brown spots all over.'], answer: 'A giraffe!' },
-  { clues: ['I am black and white.', 'I waddle on the ice and love to swim.'], answer: 'A penguin!' },
-  { clues: ['I have a big mane.', 'I am the king of the jungle.'], answer: 'A lion!' },
-  { clues: ['I have eight legs.', 'I spin a sticky web.'], answer: 'A spider!' },
-  { clues: ['I am very slow.', 'I carry my house on my back.', 'I leave a shiny silver trail wherever I go.'], answer: 'A snail!' },
-  { clues: ['I have stripes.', 'I look like a horse in pajamas!'], answer: 'A zebra!' },
-  { clues: ['I am pink.', 'I stand on one leg in the water.'], answer: 'A flamingo!' },
-  { clues: ['I am gray and wrinkly.', 'I have a very long nose called a trunk.'], answer: 'An elephant!' },
+  { clues: ['I am a sparkly unicorn.', 'I love to fly through rainbows.'], answer: 'LUNA!', level: 'hard' },
+  { clues: ['I am a little puppy.', 'I wag my tail all day long.'], answer: 'PIP!', level: 'hard' },
+  { clues: ['I am a little black kitten.', 'I carry a glowing lantern.'], answer: 'MILO!', level: 'hard' },
+  { clues: ['I am a fluffy mint monster.', 'I give the biggest hugs!'], answer: 'MO!', level: 'hard' },
+  { clues: ['I am a brave fox knight.', 'I wear shiny silver armor.'], answer: 'NOVA!', level: 'hard' },
+  { clues: ['I am a big friendly dinosaur.', 'I love to stomp and roar!'], answer: 'REX!', level: 'medium' },
+  { clues: ['I am a wise little owl.', 'I love to fly at night with my pointy hat.'], answer: 'WILLOW!', level: 'medium' },
+  { clues: ['I am a beautiful sea dragon.', 'I swim in the deep blue ocean.'], answer: 'PEARL!', level: 'hard' },
+  { clues: ['I am very tall with a long neck.', 'I have brown spots all over.'], answer: 'A giraffe!', level: 'easy' },
+  { clues: ['I am black and white.', 'I waddle on the ice and love to swim.'], answer: 'A penguin!', level: 'easy' },
+  { clues: ['I have a big mane.', 'I am the king of the jungle.'], answer: 'A lion!', level: 'easy' },
+  { clues: ['I have eight legs.', 'I spin a sticky web.'], answer: 'A spider!', level: 'easy' },
+  { clues: ['I am very slow.', 'I carry my house on my back.', 'I leave a shiny silver trail wherever I go.'], answer: 'A snail!', level: 'medium' },
+  { clues: ['I have stripes.', 'I look like a horse in pajamas!'], answer: 'A zebra!', level: 'easy' },
+  { clues: ['I am pink.', 'I stand on one leg in the water.'], answer: 'A flamingo!', level: 'medium' },
+  { clues: ['I am gray and wrinkly.', 'I have a very long nose called a trunk.'], answer: 'An elephant!', level: 'easy' },
 ];
 
 function whoamiRounds(): Round[] {
@@ -217,36 +226,39 @@ function whoamiRounds(): Round[] {
     gapMs: 4000,
     reveal: [r.answer],
     sfx: 'good' as const,
+    level: r.level,
   }));
 }
 
 // ── Animal Sound Safari (TTS edition) ───────────────────────────────
+// Difficulty rule: by how familiar the animal is.
 interface AnimalSound {
   onomatopoeia: string;
   answer: string;
+  level: 'easy' | 'medium' | 'hard';
 }
 
 const ANIMAL_SOUNDS: AnimalSound[] = [
-  { onomatopoeia: 'Mooooo!', answer: 'A cow!' },
-  { onomatopoeia: 'Woof woof!', answer: 'A dog!' },
-  { onomatopoeia: 'Meow meow!', answer: 'A cat!' },
-  { onomatopoeia: 'Cock-a-doodle-doo!', answer: 'A rooster!' },
-  { onomatopoeia: 'Baaa baaa!', answer: 'A sheep!' },
-  { onomatopoeia: 'Oink oink!', answer: 'A pig!' },
-  { onomatopoeia: 'Quack quack!', answer: 'A duck!' },
-  { onomatopoeia: 'Neigh!', answer: 'A horse!' },
-  { onomatopoeia: 'Hoo hoo hoo!', answer: 'An owl!' },
-  { onomatopoeia: 'Ribbit ribbit!', answer: 'A frog!' },
-  { onomatopoeia: 'Bzzzzzzz!', answer: 'A bee!' },
-  { onomatopoeia: 'Hisssssss!', answer: 'A snake!' },
-  { onomatopoeia: 'Roar!', answer: 'A lion!' },
-  { onomatopoeia: 'Tweet tweet!', answer: 'A bird!' },
-  { onomatopoeia: 'Squeak squeak!', answer: 'A mouse!' },
-  { onomatopoeia: 'Gobble gobble!', answer: 'A turkey!' },
-  { onomatopoeia: 'Caw caw!', answer: 'A crow!' },
-  { onomatopoeia: 'Eee-aw! Eee-aw!', answer: 'A donkey!' },
-  { onomatopoeia: 'Chirp chirp!', answer: 'A cricket!' },
-  { onomatopoeia: 'Snap snap!', answer: 'An alligator!' },
+  { onomatopoeia: 'Mooooo!', answer: 'A cow!', level: 'easy' },
+  { onomatopoeia: 'Woof woof!', answer: 'A dog!', level: 'easy' },
+  { onomatopoeia: 'Meow meow!', answer: 'A cat!', level: 'easy' },
+  { onomatopoeia: 'Cock-a-doodle-doo!', answer: 'A rooster!', level: 'easy' },
+  { onomatopoeia: 'Baaa baaa!', answer: 'A sheep!', level: 'easy' },
+  { onomatopoeia: 'Oink oink!', answer: 'A pig!', level: 'easy' },
+  { onomatopoeia: 'Quack quack!', answer: 'A duck!', level: 'easy' },
+  { onomatopoeia: 'Neigh!', answer: 'A horse!', level: 'easy' },
+  { onomatopoeia: 'Hoo hoo hoo!', answer: 'An owl!', level: 'medium' },
+  { onomatopoeia: 'Ribbit ribbit!', answer: 'A frog!', level: 'medium' },
+  { onomatopoeia: 'Bzzzzzzz!', answer: 'A bee!', level: 'medium' },
+  { onomatopoeia: 'Hisssssss!', answer: 'A snake!', level: 'hard' },
+  { onomatopoeia: 'Roar!', answer: 'A lion!', level: 'medium' },
+  { onomatopoeia: 'Tweet tweet!', answer: 'A bird!', level: 'easy' },
+  { onomatopoeia: 'Squeak squeak!', answer: 'A mouse!', level: 'medium' },
+  { onomatopoeia: 'Gobble gobble!', answer: 'A turkey!', level: 'hard' },
+  { onomatopoeia: 'Caw caw!', answer: 'A crow!', level: 'hard' },
+  { onomatopoeia: 'Eee-aw! Eee-aw!', answer: 'A donkey!', level: 'hard' },
+  { onomatopoeia: 'Chirp chirp!', answer: 'A cricket!', level: 'hard' },
+  { onomatopoeia: 'Snap snap!', answer: 'An alligator!', level: 'hard' },
 ];
 
 function animalRounds(): Round[] {
@@ -257,6 +269,7 @@ function animalRounds(): Round[] {
     gapMs: 3500,
     reveal: [`It was... ${a.answer} Did you get it?`],
     sfx: 'good' as const,
+    level: a.level,
   }));
 }
 
