@@ -1012,6 +1012,48 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('does not overwrite magicReachable with false when aborted previous scene check resolves', async () => {
+    let urlIndex = 0;
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockImplementation(() => `https://example.com/image-${++urlIndex}.png`);
+    let scene1AbortResolver: ((v: boolean) => void) | undefined;
+    const scene1Promise = new Promise<boolean>((resolve) => {
+      scene1AbortResolver = resolve;
+    });
+
+    let callCount = 0;
+    vi.spyOn(magic, 'publicUrlReachable').mockImplementation((_url, signal) => {
+      callCount++;
+      if (callCount === 1) {
+        signal?.addEventListener('abort', () => {
+          queueMicrotask(() => scene1AbortResolver?.(false));
+        });
+        return scene1Promise;
+      }
+      return Promise.resolve(true);
+    });
+
+    const { rerender, unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    rerender(
+      <StickerGame sceneId="d-beach" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const magicBtn = await screen.findByTestId('magic-btn-1');
+    expect(magicBtn).toBeDefined();
+    unmount();
+  });
+
   it('cleans up timers and abort controllers on unmount', async () => {
     vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
