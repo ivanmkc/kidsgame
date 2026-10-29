@@ -473,4 +473,35 @@ describe("ShadowGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("stops narration on unmount", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <ShadowGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+    unmount();
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops narration when navigating away via home button", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    function App() {
+      const [screen, setScreen] = React.useState<"game" | "menu">("game");
+      return screen === "game" ? (
+        <ShadowGame
+          onHome={() => setScreen("menu")}
+          difficulty="easy"
+          lang="en"
+        />
+      ) : null;
+    }
+    const { getByTestId } = render(<App />);
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+    act(() => {
+      fireEvent.click(getByTestId("back-button"));
+    });
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
 });
+
