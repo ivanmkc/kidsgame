@@ -1,5 +1,8 @@
 // @vitest-environment happy-dom
-import React from "react";
+import React, { useState } from "react";
+import { Lang } from "../../../lang";
+import { LangContext } from "../../../components/GameShell";
+import { manifest } from "../../../manifest";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   render,
@@ -36,6 +39,32 @@ function setViewport(width: number, height: number) {
 }
 
 describe("EscapeGame revealed item hit target", () => {
+  function LangHarness({
+    initialLang = "en",
+    sceneId = "toyroom",
+  }: {
+    initialLang?: Lang;
+    sceneId?: string;
+  }) {
+    const [lang, setLang] = useState<Lang>(initialLang);
+    const cycleLang = () => {
+      setLang((l) =>
+        l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+      );
+    };
+    return (
+      <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+        <EscapeGame
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          sceneId={sceneId}
+          lang={lang}
+        />
+      </LangContext.Provider>
+    );
+  }
+
   beforeEach(() => {
     setViewport(800, 600);
   });
@@ -280,4 +309,41 @@ describe("EscapeGame revealed item hit target", () => {
       window.Image = origImage;
     }
   });
+
+  it("switches language mid-round and replays intro in new language", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration").mockImplementation(() => {});
+    
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    render(<LangHarness initialLang="en" sceneId={room.id} />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Initial mount speaks the room intro
+    expect(sound.say).toHaveBeenCalledWith(room.intro);
+    vi.mocked(sound.say).mockClear();
+
+    // Switch language to ja via header chip
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Old language speech must be halted
+    expect(stopNarrationSpy).toHaveBeenCalled();
+
+    // Should speak the new language intro
+    expect(sound.say).toHaveBeenCalledWith(room.t?.ja?.intro ?? room.intro);
+    
+    cleanup();
+    vi.useRealTimers();
+  });
+
 });
