@@ -115,11 +115,7 @@ export function applyTap(
   // HOLDING the right item is enough (needs are unique and the tray is
   // tiny, so this is never ambiguous) — selecting first is taught but a
   // 3-year-old can't wedge by skipping it.
-  if (
-    h.needs &&
-    (!s.inventory.includes(h.needs) ||
-      (s.selected !== null && s.selected !== h.needs))
-  ) {
+  if (h.needs && !s.inventory.includes(h.needs)) {
     return { state: s, effect: { kind: "locked", say: h.sayLocked } };
   }
   const inventory = h.needs
