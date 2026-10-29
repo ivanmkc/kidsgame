@@ -44,7 +44,8 @@ export type CardKey =
   | 'cm-animals'
   | 'cm-picword'
   | 'cm-picspeak'
-  | 'cm-colors';
+  | 'cm-colors'
+  | 'cm-letters';
 
 export interface CardDef {
   route: string;
@@ -64,6 +65,7 @@ export const WORD_CARDS: CardDef[] = [
   { route: 'cm-picword', color: '#E8874F', key: 'cm-picword', preview: 'icons0' },
   { route: 'cm-picspeak', color: '#4FB06D', key: 'cm-picspeak', preview: 'icons8' },
   { route: 'cm-colors', color: '#9C6FD6', key: 'cm-colors', preview: 'icons13' },
+  { route: 'cm-letters', color: '#E85D75', key: 'cm-letters', preview: 'icons0' },
 ];
 
 export const NUMBER_CARDS: CardDef[] = [

@@ -141,7 +141,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff', 'cm-numdots', 'cm-numhan', 'cm-shapes', 'cm-animals', 'cm-picword', 'cm-picspeak', 'cm-colors'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff', 'cm-numdots', 'cm-numhan', 'cm-shapes', 'cm-animals', 'cm-picword', 'cm-picspeak', 'cm-colors', 'cm-letters'];
   // A stale/mistyped hash must never strand a kid on a blank page — nor
   // must a link to a game this deploy holds back.
   const knownScreen = KNOWN.includes(parts.screen) && (parts.screen !== 'escape' || ESCAPE_SHIPPED) ? parts.screen : 'menu';
@@ -266,6 +266,7 @@ export default function App() {
       {screen === 'cm-picword' && <ConceptMatchGame deck="picture-word" onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'cm-picspeak' && <ConceptMatchGame deck="picture-spoken" onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'cm-colors' && <ConceptMatchGame deck="color-word" onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'cm-letters' && <ConceptMatchGame deck="letters" onHome={goHome} difficulty={difficulty} lang={lang} />}
       </LangContext.Provider>
     </SafeAreaView>
   );
