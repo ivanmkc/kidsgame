@@ -36,6 +36,7 @@ import { colors, fonts, shadows } from "../../theme";
 import {
   EscapeState,
   applyTap,
+  escapeDisplayWidth,
   escapeHintMs,
   isHotspotAvailable,
   nextHint,
@@ -172,7 +173,7 @@ export function EscapeGame({
     return () => clearInterval(iv);
   }, [room, state, hintMs]);
 
-  const displayWidth = Math.min(width - 24, 980);
+  const displayWidth = escapeDisplayWidth(width);
   const scale = displayWidth / 1280;
   const displayHeight = 720 * scale;
 
