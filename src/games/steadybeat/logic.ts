@@ -56,6 +56,8 @@ export function scoreTaps(
       }
     }
   }
+  const extraTaps = Math.max(0, tapTimesMs.length - round.beatsPerRound);
+  hits = Math.max(0, hits - extraTaps);
   return { hits, total: round.beatsPerRound };
 }
 
