@@ -142,6 +142,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
 
   const runMagic = useCallback((sticker: Placed) => {
     if (!picked || !publicImageUrl) return;
+    if (magicBackdrop !== null) return;
     if (pendingKey !== null && pendingKey !== sticker.key) return; // one at a time
     sfx.tap();
     // Center of the sticker in scene-relative coords — that's where the
@@ -152,7 +153,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
 
     const applySuccess = (dataUrl: string) => {
       setMagicBackdrop(dataUrl);
-      setMagicPhase({ [sticker.key]: 'done' });
+      setMagicPhase((m) => ({ ...m, [sticker.key]: 'done' }));
       setPendingKey(null);
       setMagicBurst((n) => n + 1);
       sfx.win();
@@ -192,7 +193,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         setPendingKey((k) => (k === sticker.key ? null : k));
         flashToast(t(lang, 'sticker.magicFizzled'));
       });
-  }, [picked, publicImageUrl, pendingKey, flashToast, lang]);
+  }, [picked, publicImageUrl, pendingKey, magicBackdrop, flashToast, lang]);
 
   const { width, height } = useWindowDimensions();
   const stageRef = useRef<View | null>(null);
@@ -281,7 +282,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
             if (phase === 'done') return null;
             const isDressup = DRESSUP_SET.has(s.icon);
             const magicVisible = isDressup && magicReachable === true;
-            const magicEnabled = magicVisible && (pendingKey === null || pendingKey === s.key);
+            const magicEnabled = magicVisible && magicBackdrop === null && (pendingKey === null || pendingKey === s.key);
             return (
               <DraggableSticker
                 key={s.key}
