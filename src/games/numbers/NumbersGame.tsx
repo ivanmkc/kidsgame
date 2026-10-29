@@ -49,6 +49,33 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [correctIdx, setCorrectIdx] = useState<number | null>(null);
+  const [timerKey, setTimerKey] = useState(0);
+
+  const reset = () => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+    if (lockTimerRef.current) {
+      clearTimeout(lockTimerRef.current);
+      lockTimerRef.current = null;
+    }
+    lockedRef.current = false;
+    setTimerKey((k) => k + 1);
+    rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
+    setRoundIdx(0);
+    setRound(makeNumberRound(rngRef.current, numSettings, lang));
+    setWrongIdx(null);
+    setCorrectIdx(null);
+  };
+
+  const prevDiff = useRef(difficulty);
+  useEffect(() => {
+    if (prevDiff.current !== difficulty) {
+      prevDiff.current = difficulty;
+      reset();
+    }
+  }, [difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { epoch, isValid } = useLangEpoch(lang);
 
@@ -80,9 +107,8 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     setRound((cur) => reskinNumberRound(cur, numSettings.useHan));
   }, [numSettings.useHan]);
-  const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = roundIdx >= roundsToWin;
+  const won = roundIdx >= roundsToWin && prevDiff.current === difficulty;
   useWinLine(won, t(lang, "win.numbers"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const { width, height } = useWindowDimensions();
@@ -160,24 +186,6 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       }, 450);
       saySequence(round.promptLines);
     }
-  };
-
-  const reset = () => {
-    if (errorTimerRef.current) {
-      clearTimeout(errorTimerRef.current);
-      errorTimerRef.current = null;
-    }
-    if (lockTimerRef.current) {
-      clearTimeout(lockTimerRef.current);
-      lockTimerRef.current = null;
-    }
-    lockedRef.current = false;
-    setTimerKey((k) => k + 1);
-    rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
-    setRoundIdx(0);
-    setRound(makeNumberRound(rngRef.current, numSettings, lang));
-    setWrongIdx(null);
-    setCorrectIdx(null);
   };
 
   const cols = numSettings.tiles <= 6 ? 3 : numSettings.tiles <= 8 ? 4 : 3;
