@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { describe, expect, it, afterEach, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   render,
   screen,
@@ -15,7 +15,31 @@ import { SpriteCanvas } from "../SpriteCanvas";
 
 const noop = () => {};
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  window.dispatchEvent(new Event("resize"));
+}
+
 describe("EscapeGame revealed item hit target", () => {
+  beforeEach(() => {
+    setViewport(800, 600);
+  });
+
   afterEach(() => {
     cleanup();
   });

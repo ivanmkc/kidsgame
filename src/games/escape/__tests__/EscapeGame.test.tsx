@@ -20,10 +20,36 @@ vi.mock("../../../assets/images", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   return {
     ...actual,
-    SCENE_IMAGES: new Proxy({}, { get: (_, prop) => ({ uri: `highres-${String(prop)}` }) }),
-    SCENE_THUMBS: new Proxy({}, { get: (_, prop) => ({ uri: `thumb-${String(prop)}` }) }),
+    SCENE_IMAGES: new Proxy(
+      {},
+      { get: (_, prop) => ({ uri: `highres-${String(prop)}` }) },
+    ),
+    SCENE_THUMBS: new Proxy(
+      {},
+      { get: (_, prop) => ({ uri: `thumb-${String(prop)}` }) },
+    ),
   };
 });
+
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  window.dispatchEvent(new Event("resize"));
+}
 
 describe("EscapeGame", () => {
   const noop = () => {};
@@ -600,5 +626,59 @@ describe("EscapeGame", () => {
     const img = container.querySelector("img");
     expect(img?.getAttribute("src")).toBe(`highres-${room.image}`);
     expect(img?.getAttribute("src")).not.toContain("thumb");
+  });
+
+  it("clamps displayWidth to minimum 256px when window width dips below 24px", () => {
+    const origW = window.innerWidth;
+    const origH = window.innerHeight;
+    try {
+      setViewport(20, 600);
+      const rooms = manifest.escape ?? [];
+      const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+      const { container } = render(
+        <EscapeGame
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          sceneId={room.id}
+          lang="en"
+        />,
+      );
+
+      const img = container.querySelector("img");
+      expect(img).toBeDefined();
+      expect((img?.parentElement as HTMLElement)?.style.width).toBe("256px");
+      expect((img?.parentElement as HTMLElement)?.style.height).toBe("144px");
+    } finally {
+      setViewport(origW, origH);
+    }
+  });
+
+  it("renders 256px frame on a 280px narrow viewport without overflowing", () => {
+    const origW = window.innerWidth;
+    const origH = window.innerHeight;
+    try {
+      setViewport(280, 600);
+      const rooms = manifest.escape ?? [];
+      const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+      const { container } = render(
+        <EscapeGame
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          sceneId={room.id}
+          lang="en"
+        />,
+      );
+
+      const img = container.querySelector("img");
+      expect(img).toBeDefined();
+      expect((img?.parentElement as HTMLElement)?.style.width).toBe("256px");
+      expect((img?.parentElement as HTMLElement)?.style.height).toBe("144px");
+    } finally {
+      setViewport(origW, origH);
+    }
   });
 });
