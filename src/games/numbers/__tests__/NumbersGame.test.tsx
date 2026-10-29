@@ -549,4 +549,14 @@ describe("NumbersGame", () => {
       setViewport(origWidth, origHeight);
     }
   });
+
+  it("calls stopNarration on unmount", () => {
+    const stopSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />,
+    );
+    expect(stopSpy).not.toHaveBeenCalled();
+    unmount();
+    expect(stopSpy).toHaveBeenCalled();
+  });
 });
