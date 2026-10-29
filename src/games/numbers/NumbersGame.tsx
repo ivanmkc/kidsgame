@@ -15,7 +15,7 @@ import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { saySequence, sfx } from "../../sound";
+import { saySequence, sfx, stopNarration } from "../../sound";
 import {
   NumberRound,
   makeNumberRound,
@@ -93,6 +93,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     return () => {
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
       if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
+      stopNarration();
     };
   }, []);
 
