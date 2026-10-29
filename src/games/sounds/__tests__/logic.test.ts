@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { makeSoundsRound, soundsLayout, settingsForSounds } from "../logic";
+import { WORDS } from "../../../curriculum/content";
+import { makeSoundsRound, settingsForSounds, soundsLayout } from "../logic";
 
 describe("soundsLayout", () => {
   it("enlarges tiles to 1x4 row across mobile landscape screens", () => {
@@ -100,6 +101,15 @@ describe("makeSoundsRound", () => {
     expect(round.target.icon).toBe("butterfly");
     const tileIcons = round.tiles.map((t) => t.icon);
     expect(tileIcons).not.toContain("ladybug");
+  });
+
+  it("indexes master WORDS array in tile wordIdx", () => {
+    const icons = ["apple", "rocket", "butterfly"];
+    const rng = () => 0;
+    const round = makeSoundsRound(rng, icons, "en", 3);
+    for (const tile of round.tiles) {
+      expect(WORDS[tile.wordIdx].icon).toBe(tile.icon);
+    }
   });
 });
 

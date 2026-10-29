@@ -19,6 +19,7 @@ import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { sayThen, saySequence, sfx, stopNarration } from "../../sound";
+import { WORDS, wordFor } from "../../curriculum/content";
 import {
   SoundsRound,
   makeSoundsRound,
@@ -202,7 +203,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
               key={`${roundIdx}-${i}-${t.icon}`}
               onPress={() => onTile(i)}
               testID={`sounds-tile-${i}`}
-              accessibilityLabel={t.icon}
+              accessibilityLabel={wordFor(WORDS[t.wordIdx], lang).text}
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.tile,
