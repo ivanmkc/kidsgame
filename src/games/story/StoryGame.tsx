@@ -447,7 +447,7 @@ function FxSpot({ fx, scale, lang = 'en' }: { fx: StoryFx; scale: number; lang?:
 // surprise SPRING out with a sting, then (after the story's beat) the
 // spoken reveal lands. Re-tappable forever — that's the toy.
 function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; reveal?: string; scale: number; lang?: Lang }) {
-  const { isValid } = useLangEpoch(lang);
+  useLangEpoch(lang);
   const [popped, setPopped] = useState(false);
   const spring = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
@@ -476,7 +476,7 @@ function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; r
       animating.current = false;
     });
     revealTimer.current = setTimeout(() => {
-      if (isValid()) say(latestReveal.current);
+      say(latestReveal.current);
       revealTimer.current = null;
     }, scare.delay);
   };
