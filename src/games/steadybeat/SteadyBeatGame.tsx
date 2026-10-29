@@ -11,7 +11,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
 import { SparkleBurst } from "../../components/Sparkles";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
@@ -33,6 +33,9 @@ interface Props {
 }
 
 export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
+  useLangEpoch(lang);
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SteadyBeatRound>(() =>
@@ -99,7 +102,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           setFlash(false);
           setListenBeat(null);
           setPhase("tap");
-          say(t(lang, "music.yourTurn" as never));
+          say(t(langRef.current, "music.yourTurn" as never));
           const tapBeatMs = 60000 / r.bpm;
           setStartMs(performance.now() + tapBeatMs);
           pulseAnim.setValue(0);
@@ -120,12 +123,12 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         listenPulse.setValue(1);
       };
     },
-    [lang, listenPulse, pulseAnim],
+    [listenPulse, pulseAnim],
   );
 
   useEffect(() => {
     if (!won) {
-      say(t(lang, "shell.steadybeat.sub"));
+      say(t(langRef.current, "shell.steadybeat.sub"));
       setTapTimesMs([]);
       setHits(0);
       setFlash(false);
@@ -135,7 +138,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         pulseAnim.stopAnimation();
       };
     }
-  }, [lang, round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (phase !== "tap") return;

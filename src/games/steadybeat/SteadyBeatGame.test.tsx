@@ -304,17 +304,9 @@ it("speaks in the updated language when lang changes during listen phase", () =>
 
   // Switch language to Japanese mid-listen
   rerender(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="ja" />);
-  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
-  saySpy.mockClear();
 
-  // After 1200ms (elapsed time for old timer), old interval was cancelled and round restarted
-  act(() => {
-    vi.advanceTimersByTime(1200);
-  });
-  expect(saySpy).not.toHaveBeenCalledWith("きみの ばん！");
-  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
-
-  // Advance remaining 1200ms to complete the restarted listen phase (2400ms = 4 beats)
+  // Metronome does not restart mid-round: count-in continues from beat 2
+  // After remaining 1200ms (2400ms total from start), count-in finishes and enters tap phase
   act(() => {
     vi.advanceTimersByTime(1200);
   });
@@ -322,6 +314,7 @@ it("speaks in the updated language when lang changes during listen phase", () =>
   // Should speak "Your turn!" in Japanese, not English
   expect(saySpy).toHaveBeenCalledWith("きみの ばん！");
   expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
+  expect(screen.getByText("きみの ばん！")).toBeTruthy();
 
   roundSpy.mockRestore();
   saySpy.mockRestore();
@@ -342,7 +335,7 @@ function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
   );
 }
 
-it("restarts round and speaks new subtitle when language button is clicked mid-round", () => {
+it("does not restart metronome when language button is clicked mid-round and updates speech for tap phase", () => {
   vi.useFakeTimers();
   const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
   const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
@@ -373,37 +366,183 @@ it("restarts round and speaks new subtitle when language button is clicked mid-r
     fireEvent.click(langBtn);
   });
 
-  // Round restarts: new subtitle is spoken in Japanese
-  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
-  saySpy.mockClear();
-
-  // Subtitle header updates to Japanese
+  // Subtitle header updates to Japanese in UI
   expect(screen.getByText("ビートに あわせて タップ！")).toBeTruthy();
 
-  // Metronome has restarted from beat 0: dots reset to 1 filled, 3 empty
-  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
-  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
-
-  // Advance 1200ms (when the old interval would have fired if not cancelled)
-  act(() => {
-    vi.advanceTimersByTime(1200);
-  });
-
-  // Old interval was cleared: no speech fired yet, still in listen phase
-  expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
-  expect(saySpy).not.toHaveBeenCalledWith("きみの ばん！");
+  // Metronome has NOT restarted: dots are still 3 filled, 1 empty
   expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(3);
   expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(1);
 
-  // Advance remaining 1200ms (2400ms total after language switch)
+  // Advance remaining 1200ms (2400ms total) to complete the 4-beat count-in
   act(() => {
     vi.advanceTimersByTime(1200);
   });
 
-  // Restarted round enters tap phase and speaks in Japanese
+  // Enters tap phase and speaks in Japanese
   expect(saySpy).toHaveBeenCalledWith("きみの ばん！");
   expect(saySpy).not.toHaveBeenCalledWith("Your turn!");
   expect(screen.getByText("きみの ばん！")).toBeTruthy();
+
+  roundSpy.mockRestore();
+  saySpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("does not restart metronome during result phase and advances round when result ends", () => {
+  vi.useFakeTimers();
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  const roundSpy = vi
+    .spyOn(logic, "makeSteadyBeatRound")
+    .mockImplementation(() => ({
+      bpm: 100,
+      beatsPerRound: 8,
+    }));
+
+  render(<LangHarness initialLang="en" />);
+
+  // Mount generates initial round (call 1)
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms at 100 bpm) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+
+  // Advance past tap phase evaluation timer (6000ms) to enter result phase
+  act(() => {
+    vi.advanceTimersByTime(6000);
+  });
+
+  // Result phase displays stars; transition timer scheduled for 1200ms
+  expect(screen.getAllByText("☆")).toHaveLength(8);
+
+  // Advance 500ms into the 1200ms result phase
+  act(() => {
+    vi.advanceTimersByTime(500);
+  });
+
+  // Round has not transitioned yet (still call 1)
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Click language cycle button mid-result-phase
+  const langBtn = screen.getByTestId("lang-cycle");
+  act(() => {
+    fireEvent.click(langBtn);
+  });
+
+  // Subtitle header updates to Japanese in UI
+  expect(screen.getByText("ビートに あわせて タップ！")).toBeTruthy();
+
+  // Metronome does NOT restart during result phase (still showing result stars, no listen dots)
+  expect(screen.getAllByText("☆")).toHaveLength(8);
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(
+    0,
+  );
+
+  // Round has not transitioned yet
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance remaining 700ms (1200ms total after result phase began)
+  act(() => {
+    vi.advanceTimersByTime(700);
+  });
+
+  // Transition timer fires at the end of the 1200ms result phase and advances to next round
+  expect(roundSpy).toHaveBeenCalledTimes(2);
+
+  // New round starts in Japanese: new subtitle spoken and listen dots appear
+  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
+
+  roundSpy.mockRestore();
+  saySpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("advances to next round without double-scoring when language button is clicked during result phase after passed round", () => {
+  vi.useFakeTimers();
+  const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+  const roundSpy = vi
+    .spyOn(logic, "makeSteadyBeatRound")
+    .mockImplementation(() => ({
+      bpm: 100,
+      beatsPerRound: 8,
+    }));
+
+  render(<LangHarness initialLang="en" />);
+
+  // Mount generates initial round (call 1)
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Advance past listen phase (2400ms) to enter tap phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  const circle = screen.getByTestId("steadybeat-circle");
+
+  // Wait 1-beat pause before expecting the first tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // Tap 8 times on each beat to pass the round
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+  }
+
+  // Advance past tap phase evaluation timer
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // Passed round: score increments to 1/4
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+
+  // Advance 500ms into the 1200ms result phase
+  act(() => {
+    vi.advanceTimersByTime(500);
+  });
+
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+
+  // Click language cycle button mid-result-phase
+  const langBtn = screen.getByTestId("lang-cycle");
+  act(() => {
+    fireEvent.click(langBtn);
+  });
+
+  // Metronome does NOT restart during result phase
+  expect(screen.queryAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(
+    0,
+  );
+  expect(roundSpy).toHaveBeenCalledTimes(1);
+  // Score remains 1/4 (no double-scoring)
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+
+  // Advance remaining 700ms (1200ms total after result phase began)
+  act(() => {
+    vi.advanceTimersByTime(700);
+  });
+
+  // Transition timer fires at the end of result phase and advances to next round
+  expect(roundSpy).toHaveBeenCalledTimes(2);
+  // Score is still 1/4 on start of next round
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+
+  // Next round starts count-in in Japanese
+  expect(saySpy).toHaveBeenCalledWith("ビートに あわせて タップ！");
+  expect(screen.getAllByTestId("steadybeat-listen-dot-filled")).toHaveLength(1);
+  expect(screen.getAllByTestId("steadybeat-listen-dot-empty")).toHaveLength(3);
 
   roundSpy.mockRestore();
   saySpy.mockRestore();
