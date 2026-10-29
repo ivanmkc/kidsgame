@@ -415,11 +415,7 @@ describe("NumbersGame", () => {
               onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
             }}
           >
-            <NumbersGame
-              onHome={vi.fn()}
-              difficulty="easy"
-              lang={lang}
-            />
+            <NumbersGame onHome={vi.fn()} difficulty="easy" lang={lang} />
           </LangContext.Provider>
         );
       }
@@ -460,6 +456,50 @@ describe("NumbersGame", () => {
       expect(stopSpy).toHaveBeenCalled();
     } finally {
       vi.useRealTimers();
+    }
+  });
+
+  it("clamps tile dimensions to at least 60px on short viewports", () => {
+    const origWidth = window.innerWidth;
+    const origHeight = window.innerHeight;
+    const setViewport = (width: number, height: number) => {
+      Object.defineProperty(window, "innerWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: height,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: height,
+        configurable: true,
+      });
+      if (window.visualViewport) {
+        Object.defineProperty(window.visualViewport, "width", {
+          value: width,
+          configurable: true,
+        });
+        Object.defineProperty(window.visualViewport, "height", {
+          value: height,
+          configurable: true,
+        });
+      }
+      window.dispatchEvent(new Event("resize"));
+    };
+
+    try {
+      setViewport(800, 100);
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+      const tile = screen.getByTestId("numbers-tile-0");
+      expect(parseFloat(tile.style.width)).toBeGreaterThanOrEqual(60);
+      expect(parseFloat(tile.style.height)).toBeGreaterThanOrEqual(60);
+    } finally {
+      setViewport(origWidth, origHeight);
     }
   });
 });
