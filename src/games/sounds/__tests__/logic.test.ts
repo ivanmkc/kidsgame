@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { makeSoundsRound, soundsLayout } from "../logic";
+import { makeSoundsRound, soundsLayout, settingsForSounds } from "../logic";
 
 describe("soundsLayout", () => {
   it("enlarges tiles to 1x4 row across mobile landscape screens", () => {
@@ -100,5 +100,23 @@ describe("makeSoundsRound", () => {
     expect(round.target.icon).toBe("butterfly");
     const tileIcons = round.tiles.map((t) => t.icon);
     expect(tileIcons).not.toContain("ladybug");
+  });
+});
+
+describe("settingsForSounds", () => {
+  it("scales rounds and tiles with difficulty", () => {
+    expect(settingsForSounds("easy")).toEqual({ rounds: 8, tiles: 3 });
+    expect(settingsForSounds("medium")).toEqual({ rounds: 10, tiles: 4 });
+    expect(settingsForSounds("hard")).toEqual({ rounds: 12, tiles: 6 });
+  });
+});
+describe("soundsLayout 6 tiles", () => {
+  it("computes reasonable sizes for 6 tiles", () => {
+    const l1 = soundsLayout(780, 360, 6);
+    expect(l1.tile).toBeGreaterThan(0);
+    const l2 = soundsLayout(390, 844, 6);
+    expect(l2.tile).toBeGreaterThan(0);
+    const l3 = soundsLayout(1024, 768, 6);
+    expect(l3.tile).toBeGreaterThan(0);
   });
 });
