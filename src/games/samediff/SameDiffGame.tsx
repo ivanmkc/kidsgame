@@ -76,6 +76,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   const playRound = useCallback((r: SameDiffRound) => {
+    const epoch = ++roundEpochRef.current;
     stopSequence();
     stopNarration();
     if (gapTimer.current) clearTimeout(gapTimer.current);
@@ -83,7 +84,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     setActiveNote(null);
     setCorrectPick(null);
     setPhase("listenA");
-    const epoch = ++roundEpochRef.current;
 
     const startMelody = () => {
       if (roundEpochRef.current !== epoch) return;
