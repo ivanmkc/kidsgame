@@ -30,6 +30,8 @@ interface Props {
   lang: Lang;
 }
 
+const SUCCESS_DELAY_MS = 400;
+
 // Number Hunt: spoken number → tap the matching tile. JA/zh hard tier
 // swaps arabic tiles for han numerals so recognition transfers across
 // scripts.
@@ -46,6 +48,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     makeNumberRound(rngRef.current, numSettings, lang),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [correctIdx, setCorrectIdx] = useState<number | null>(null);
 
   const { epoch, isValid } = useLangEpoch(lang);
 
@@ -63,6 +66,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     lockedRef.current = false;
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
+    setCorrectIdx(null);
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -126,6 +130,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setWrongIdx(null);
+      setCorrectIdx(i);
       if (errorTimerRef.current) {
         clearTimeout(errorTimerRef.current);
         errorTimerRef.current = null;
@@ -135,14 +140,15 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
         if (!isValid()) return;
         lockedRef.current = false;
         lockTimerRef.current = null;
-      }, 300);
-      const next = roundIdx + 1;
-      setRoundIdx(next);
-      if (next < roundsToWin) {
-        setRound(
-          makeNumberRound(rngRef.current, numSettings, lang, round.targetN),
-        );
-      }
+        setCorrectIdx(null);
+        const next = roundIdx + 1;
+        setRoundIdx(next);
+        if (next < roundsToWin) {
+          setRound(
+            makeNumberRound(rngRef.current, numSettings, lang, round.targetN),
+          );
+        }
+      }, SUCCESS_DELAY_MS);
     } else {
       sfx.wrong();
       setWrongIdx(i);
@@ -171,6 +177,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     setRoundIdx(0);
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
+    setCorrectIdx(null);
   };
 
   const cols = numSettings.tiles <= 6 ? 3 : numSettings.tiles <= 8 ? 4 : 3;
@@ -210,6 +217,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
           {lang !== "en" ? (
             <Pressable
               onPress={() => {
+                if (lockedRef.current) return;
                 sfx.tap();
                 setScript(numSettings.useHan ? "arabic" : "han");
               }}
@@ -283,6 +291,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
                 styles.tile,
                 shadows.soft,
                 { width: tile, height: tile },
+                correctIdx === i && styles.correct,
                 wrongIdx === i && styles.wrong,
                 pressed && styles.pressed,
               ]}
@@ -368,6 +377,10 @@ const styles = StyleSheet.create({
     fontFamily: fonts.display,
     color: colors.ink,
     includeFontPadding: false,
+  },
+  correct: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.15)",
   },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
   pressed: { transform: [{ scale: 0.94 }] },
