@@ -131,15 +131,17 @@ function SpotItSolo({ onHome, difficulty, seed, locked, lang }: {
       right={<ScoreChip label={`⭐ ${score}/${roundsToWin}`} testID="spotit-score" />}
     >
       <View style={[styles.board, isLandscape && styles.boardRow]}>
-        <DealIn key={`t${roundKey}`} from={-1}>
-          {showTimer ? (
-            <TimerRing elapsed={elapsed} size={cardSize + 24} stroke={9} testID="spotit-timer">
+        {showTimer ? (
+          <TimerRing elapsed={elapsed} size={cardSize + 24} stroke={9} testID="spotit-timer">
+            <DealIn key={`t${roundKey}`} from={-1}>
               <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" lang={lang} />
-            </TimerRing>
-          ) : (
+            </DealIn>
+          </TimerRing>
+        ) : (
+          <DealIn key={`t${roundKey}`} from={-1}>
             <SpotCard card={round.top} slots={slots.top} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.teal} testIDPrefix="top" lang={lang} />
-          )}
-        </DealIn>
+          </DealIn>
+        )}
         <Text style={styles.vs}>👀</Text>
         <DealIn key={`b${roundKey}`} from={1}>
           <SpotCard card={round.bottom} slots={slots.bottom} size={cardSize} onTap={onTap} wrongFlash={wrongFlash} tint={colors.red} testIDPrefix="bottom" lang={lang} />
