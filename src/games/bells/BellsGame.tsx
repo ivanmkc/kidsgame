@@ -276,12 +276,12 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 style={[
                   styles.statusCard,
                   shadows.soft,
-                  phase === "play" && styles.yourTurnCard,
+                  phase === "play" && !wrongFlash && styles.yourTurnCard,
                   wrongFlash && styles.wrongCard,
                   shortH && styles.statusCardShort,
                 ]}
               >
-                {phase === "listen" ? (
+                {phase === "listen" || wrongFlash ? (
                   <Animated.Text
                     style={[
                       styles.statusEmoji,
@@ -304,7 +304,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                 <Text
                   style={[styles.statusText, shortH && styles.statusTextShort]}
                 >
-                  {phase === "listen"
+                  {phase === "listen" || wrongFlash
                     ? t(lang, "music.listen")
                     : t(lang, "music.yourTurn")}
                 </Text>
@@ -363,7 +363,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
               key={i}
               style={[
                 { marginBottom: i * (bellSize * 0.2) },
-                phase === "play"
+                phase === "play" && !wrongFlash
                   ? { transform: [{ scale: bellScale }] }
                   : undefined,
               ]}
@@ -382,7 +382,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
                     borderColor: glowIdx === i ? colors.paper : bell.color,
                     opacity: phase === "listen" && glowIdx !== i ? 0.5 : 1,
                   },
-                  phase === "play" && shadows.glowGold,
+                  phase === "play" && !wrongFlash && shadows.glowGold,
                   glowIdx === i && styles.bellGlow,
                   pressed && styles.pressed,
                 ]}
