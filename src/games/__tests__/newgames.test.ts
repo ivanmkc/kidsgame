@@ -301,7 +301,9 @@ describe("rule time", () => {
         expect(matches.length).toBe(round.matchCount);
         expect(matches.length).toBeGreaterThanOrEqual(2);
         for (const t of round.tiles) {
-          const inCat = CURRICULUM.categories[round.rule.category].includes(t.icon);
+          const inCat = CURRICULUM.categories[round.rule.category].includes(
+            t.icon,
+          );
           expect(t.isMatch).toBe(inCat);
         }
         expect(round.isRecall).toBe(idx === 3);
@@ -323,5 +325,11 @@ describe("sticker pinch transform", () => {
     const start = { x0: 100, y0: 100, x1: 200, y1: 100 };
     const turned = { x0: 100, y0: 100, x1: 100, y1: 200 }; // 90deg
     expect(pinchTransform(start, turned, 0.1, 10).rotation).toBeCloseTo(100);
+  });
+  it("ignores noisy start angle when fingers start too close together", async () => {
+    const { pinchTransform } = await import("../sticker/pinch");
+    const start = { x0: 100, y0: 100, x1: 101.414, y1: 101.414 }; // dist = 2 <= 8, 45deg
+    const now = { x0: 50, y0: 100, x1: 150, y1: 100 }; // dist = 100, 0deg
+    expect(pinchTransform(start, now, 0.1, 25).rotation).toBe(25);
   });
 });
