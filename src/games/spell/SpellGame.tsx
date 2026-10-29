@@ -200,7 +200,11 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
                 testID={`spell-slot-${i}`}
                 style={[styles.slot, shadows.soft, { width: slot, height: slot * 1.15 }, done && styles.slotDone]}
               >
-                {done ? <Text style={styles.slotText}>{filledChar}</Text> : null}
+                {done ? (
+                  <Text style={styles.slotText}>{filledChar}</Text>
+                ) : (
+                  <Text style={styles.slotGhost}>{round.chars[i]}</Text>
+                )}
                 {done ? <SparkleBurst trigger={`${gameKey}-${wordIdx}-${i}`} count={4} size={11} /> : null}
               </View>
             );
@@ -320,6 +324,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(95,191,110,0.14)',
   },
   slotText: { fontFamily: fonts.display, fontSize: 30, color: colors.ink },
+  slotGhost: {
+    fontFamily: fonts.display,
+    fontSize: 30,
+    color: colors.purple,
+    opacity: 0.28,
+  },
   tileRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   tile: {
     backgroundColor: colors.gold,
