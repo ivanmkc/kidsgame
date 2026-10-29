@@ -192,7 +192,7 @@ function FoundRing({ color }: { color?: string }) {
         pointerEvents="none"
         style={[
           styles.ring,
-          { borderColor: color ?? colors.ring },
+          { borderColor: color ?? colors.green },
           {
             transform: [
               {
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   ring: {
     flex: 1,
     borderWidth: 5,
-    borderColor: colors.ring,
+    borderColor: colors.green,
     borderRadius: 999,
     backgroundColor: "rgba(95,191,110,0.16)",
   },

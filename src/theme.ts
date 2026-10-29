@@ -12,7 +12,6 @@ export const colors = {
   purple: '#9B7EDE',
   green: '#5FBF6E',
   blush: '#FFE3D2',
-  ring: '#5FBF6E',
 };
 
 export const fonts = {
