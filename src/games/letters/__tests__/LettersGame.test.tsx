@@ -39,38 +39,52 @@ describe("LettersGame", () => {
   });
 
   it("prevents fast-tap hammering from advancing the round and playing sound twice", () => {
-    const generatedRounds: logic.LetterRound[] = [];
-    const origMakeLetterRound = logic.makeLetterRound;
-    const makeRoundSpy = vi
-      .spyOn(logic, "makeLetterRound")
-      .mockImplementation((rng, tier, tileCount, avoidKey) => {
-        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
-        generatedRounds.push(res);
-        return res;
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      const makeRoundSpy = vi
+        .spyOn(logic, "makeLetterRound")
+        .mockImplementation((rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        });
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
       });
 
-    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+      expect(sfx.good).not.toHaveBeenCalled();
 
-    act(() => {
-      fireEvent.click(screen.getByTestId("play-button"));
-    });
+      const round1 = generatedRounds[0];
+      const correctLabel = round1.tiles[round1.answerIdx].label;
+      const correctBtn = screen.getByLabelText(correctLabel);
+      expect(correctBtn).toBeTruthy();
 
-    expect(makeRoundSpy).toHaveBeenCalledTimes(1);
-    expect(sfx.good).not.toHaveBeenCalled();
+      act(() => {
+        fireEvent.click(correctBtn);
+        fireEvent.click(correctBtn);
+      });
 
-    const round1 = generatedRounds[0];
-    const correctLabel = round1.tiles[round1.answerIdx].label;
-    const correctBtn = screen.getByLabelText(correctLabel);
-    expect(correctBtn).toBeTruthy();
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+      // Immediately on click: celebration delay is active, round has not advanced yet
+      expect(makeRoundSpy).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
 
-    act(() => {
-      fireEvent.click(correctBtn);
-      fireEvent.click(correctBtn);
-    });
+      // Advance through celebration delay
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
 
-    expect(sfx.good).toHaveBeenCalledTimes(1);
-    expect(makeRoundSpy).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
+      expect(makeRoundSpy).toHaveBeenCalledTimes(2);
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("locks input during wrong-tap feedback and ignores further taps for 450ms", () => {
@@ -118,11 +132,17 @@ describe("LettersGame", () => {
         vi.advanceTimersByTime(450);
       });
 
-      // Now tapping the correct tile works and advances the round
+      // Now tapping the correct tile works and starts celebration
       act(() => {
         fireEvent.click(correctBtn);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+
+      // Fast-forward past celebration delay
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
     } finally {
       vi.useRealTimers();
@@ -130,39 +150,50 @@ describe("LettersGame", () => {
   });
 
   it("unlocks input on new round so that the next round is playable", () => {
-    const generatedRounds: logic.LetterRound[] = [];
-    const origMakeLetterRound = logic.makeLetterRound;
-    vi.spyOn(logic, "makeLetterRound").mockImplementation(
-      (rng, tier, tileCount, avoidKey) => {
-        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
-        generatedRounds.push(res);
-        return res;
-      },
-    );
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
 
-    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
-    act(() => {
-      fireEvent.click(screen.getByTestId("play-button"));
-    });
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
 
-    // Round 1
-    const round1Answer = generatedRounds[0].tiles[generatedRounds[0].answerIdx];
-    act(() => {
-      fireEvent.click(screen.getByLabelText(round1Answer.label));
-    });
+      // Round 1
+      const round1Answer = generatedRounds[0].tiles[generatedRounds[0].answerIdx];
+      act(() => {
+        fireEvent.click(screen.getByLabelText(round1Answer.label));
+      });
 
-    expect(sfx.good).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
-    expect(generatedRounds).toHaveLength(2);
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
+      expect(generatedRounds).toHaveLength(2);
 
-    // Round 2 tile click works
-    const round2Answer = generatedRounds[1].tiles[generatedRounds[1].answerIdx];
-    act(() => {
-      fireEvent.click(screen.getByLabelText(round2Answer.label));
-    });
+      // Round 2 tile click works
+      const round2Answer = generatedRounds[1].tiles[generatedRounds[1].answerIdx];
+      act(() => {
+        fireEvent.click(screen.getByLabelText(round2Answer.label));
+      });
 
-    expect(sfx.good).toHaveBeenCalledTimes(2);
-    expect(screen.getByTestId("letters-score").textContent).toContain("2/8");
+      expect(sfx.good).toHaveBeenCalledTimes(2);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toContain("2/8");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("hides glyph by default, speaks from speaker button, and reveals after second miss", () => {
@@ -330,6 +361,9 @@ describe("LettersGame", () => {
         fireEvent.click(correctBtn2);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
       expect(screen.getByTestId("letters-score").textContent).toBe("🈶 1/10");
       expect(say).toHaveBeenCalledTimes(5);
 
@@ -410,45 +444,54 @@ describe("LettersGame", () => {
   });
 
   it("stops narration via useLangEpoch when language switches on win screen or mid-round", () => {
-    vi.spyOn(logic, "settingsForLetters").mockReturnValue({
-      rounds: 1,
-      tiles: 6,
-      tier: "upper",
-    });
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "settingsForLetters").mockReturnValue({
+        rounds: 1,
+        tiles: 6,
+        tier: "upper",
+      });
 
-    const generatedRounds: logic.LetterRound[] = [];
-    const origMakeLetterRound = logic.makeLetterRound;
-    vi.spyOn(logic, "makeLetterRound").mockImplementation(
-      (rng, tier, tileCount, avoidKey) => {
-        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
-        generatedRounds.push(res);
-        return res;
-      },
-    );
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
 
-    const { rerender } = render(
-      <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
-    );
+      const { rerender } = render(
+        <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
 
-    act(() => {
-      fireEvent.click(screen.getByTestId("play-button"));
-    });
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
 
-    const round1 = generatedRounds[0];
-    const correctTile = round1.tiles[round1.answerIdx];
-    const correctBtn = screen.getByLabelText(correctTile.label);
+      const round1 = generatedRounds[0];
+      const correctTile = round1.tiles[round1.answerIdx];
+      const correctBtn = screen.getByLabelText(correctTile.label);
 
-    act(() => {
-      fireEvent.click(correctBtn);
-    });
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
 
-    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(screen.getByTestId("win-overlay")).toBeTruthy();
 
-    vi.mocked(stopNarration).mockClear();
+      vi.mocked(stopNarration).mockClear();
 
-    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
+      rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
 
-    expect(stopNarration).toHaveBeenCalled();
+      expect(stopNarration).toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("shows glyph immediately when captions toggle is turned ON", () => {
@@ -501,58 +544,67 @@ describe("LettersGame", () => {
   });
 
   it("disables speaker button and ignores taps when game is won", () => {
-    vi.spyOn(logic, "settingsForLetters").mockReturnValue({
-      rounds: 1,
-      tiles: 6,
-      tier: "upper",
-    });
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "settingsForLetters").mockReturnValue({
+        rounds: 1,
+        tiles: 6,
+        tier: "upper",
+      });
 
-    let loopStop = vi.fn();
-    const loopSpy = vi.spyOn(Animated, "loop").mockReturnValue({
-      start: vi.fn(),
-      stop: loopStop,
-      reset: vi.fn(),
-    });
+      let loopStop = vi.fn();
+      const loopSpy = vi.spyOn(Animated, "loop").mockReturnValue({
+        start: vi.fn(),
+        stop: loopStop,
+        reset: vi.fn(),
+      });
 
-    const generatedRounds: logic.LetterRound[] = [];
-    const origMakeLetterRound = logic.makeLetterRound;
-    vi.spyOn(logic, "makeLetterRound").mockImplementation(
-      (rng, tier, tileCount, avoidKey) => {
-        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
-        generatedRounds.push(res);
-        return res;
-      },
-    );
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
 
-    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
 
-    act(() => {
-      fireEvent.click(screen.getByTestId("play-button"));
-    });
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
 
-    const round1 = generatedRounds[0];
-    const correctTile = round1.tiles[round1.answerIdx];
-    const correctBtn = screen.getByLabelText(correctTile.label);
+      const round1 = generatedRounds[0];
+      const correctTile = round1.tiles[round1.answerIdx];
+      const correctBtn = screen.getByLabelText(correctTile.label);
 
-    act(() => {
-      fireEvent.click(correctBtn);
-    });
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
 
-    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(screen.getByTestId("win-overlay")).toBeTruthy();
 
-    const speakerBtn = screen.getByTestId("speaker-button");
-    expect(speakerBtn.getAttribute("aria-disabled")).toBe("true");
-    
-    // The pulse loop should be stopped when the game is won
-    expect(loopStop).toHaveBeenCalled();
+      const speakerBtn = screen.getByTestId("speaker-button");
+      expect(speakerBtn.getAttribute("aria-disabled")).toBe("true");
+      
+      // The pulse loop should be stopped when the game is won
+      expect(loopStop).toHaveBeenCalled();
 
-    vi.mocked(say).mockClear();
-    act(() => {
-      fireEvent.click(speakerBtn);
-    });
+      vi.mocked(say).mockClear();
+      act(() => {
+        fireEvent.click(speakerBtn);
+      });
 
-    expect(say).not.toHaveBeenCalled();
-    loopSpy.mockRestore();
+      expect(say).not.toHaveBeenCalled();
+      loopSpy.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it.each(["en", "ja", "cmn", "yue"] as const)(
@@ -630,5 +682,225 @@ describe("LettersGame", () => {
 
     // Because captions are reset to false on lang change, the glyph should no longer be shown immediately (since misses = 0)
     expect(screen.queryByTestId("letters-glyph")).toBeNull();
+  });
+
+  it("celebrates correct tile tap with SparkleBurst, locks input, and delays round advance by 600ms", () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const round1 = generatedRounds[0];
+      const correctTile = round1.tiles[round1.answerIdx];
+      const wrongTile = round1.tiles.find((t) => !t.isAnswer)!;
+      const correctBtn = screen.getByLabelText(correctTile.label);
+      const wrongBtn = screen.getByLabelText(wrongTile.label);
+
+      // Before tap: no sparkles
+      expect(correctBtn.textContent).not.toMatch(/✨|⭐/);
+
+      // Tap correct tile
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // Celebration active: SparkleBurst rendered on the correct tile
+      expect(correctBtn.textContent).toMatch(/✨|⭐/);
+
+      // Score has not advanced yet
+      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+
+      // Tapping another tile during celebration is locked out
+      act(() => {
+        fireEvent.click(wrongBtn);
+      });
+      expect(sfx.wrong).not.toHaveBeenCalled();
+
+      // At 599ms: still in celebration
+      act(() => {
+        vi.advanceTimersByTime(599);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+
+      // At 600ms: celebration finishes and round advances
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
+      expect(generatedRounds).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("delays WinOverlay on final winning round until 600ms celebration completes", () => {
+    vi.useFakeTimers();
+    try {
+      vi.spyOn(logic, "settingsForLetters").mockReturnValue({
+        rounds: 1,
+        tiles: 6,
+        tier: "upper",
+      });
+
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const round1 = generatedRounds[0];
+      const correctTile = round1.tiles[round1.answerIdx];
+      const correctBtn = screen.getByLabelText(correctTile.label);
+
+      // Tap winning tile
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // WinOverlay is NOT visible immediately on tap
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+      expect(correctBtn.textContent).toMatch(/✨|⭐/);
+
+      // Advance through celebration delay
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+
+      // WinOverlay is now visible
+      expect(screen.getByTestId("win-overlay")).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("clears celebration timer and resets state when language switches mid-celebration", () => {
+    vi.useFakeTimers();
+    try {
+      function LettersGameTestWrapper() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        const onCycle = () => {
+          setLang((prev) => (prev === "en" ? "ja" : "en"));
+        };
+        return (
+          <LangContext.Provider value={{ lang, onCycle }}>
+            <LettersGame onHome={() => {}} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      render(<LettersGameTestWrapper />);
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const round1 = generatedRounds[0];
+      const correctTile = round1.tiles[round1.answerIdx];
+      const correctBtn = screen.getByLabelText(correctTile.label);
+
+      // Tap correct tile
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+      expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // Switch language 200ms into celebration
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      act(() => {
+        fireEvent.click(screen.getByTestId("lang-cycle"));
+      });
+
+      // Advance past remaining time of the old celebration timer
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Round should be reset for new language, score still 0/8
+      expect(screen.getByTestId("letters-score").textContent).toBe("🈶 0/8");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("clears celebration timer on unmount", () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+      const setTimeoutSpy = vi.spyOn(global, "setTimeout");
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+
+      const { unmount } = render(
+        <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const round = generatedRounds[0];
+      const correctTile = round.tiles[round.answerIdx];
+      act(() => {
+        fireEvent.click(screen.getByLabelText(correctTile.label));
+      });
+
+      // The celebration timer is started with a 600ms delay
+      const callIdx = setTimeoutSpy.mock.calls.findLastIndex(
+        (args) => args[1] === 600,
+      );
+      expect(callIdx).toBeGreaterThanOrEqual(0);
+      const timerId = setTimeoutSpy.mock.results[callIdx].value;
+
+      unmount();
+
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(timerId);
+
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
