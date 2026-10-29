@@ -159,7 +159,7 @@ export function makeRound(
   let decoyPool = alphabet.filter((c) => !banned.has(c));
   const sameScript = decoyPool.filter((c) => scriptOf(c) === targetScript);
   if (sameScript.length >= decoyCount) decoyPool = sameScript;
-  const decoys = shuffle(rng, decoyPool).slice(0, Math.min(decoyCount, decoyPool.length));
+  const decoys = shuffle(rng, decoyPool).slice(0, decoyCount);
   const combined = [...chars, ...decoys];
   const shuffled = shuffle(rng, combined);
   const tiles: SpellTile[] = shuffled.map((char, i) => ({ id: i, char }));
