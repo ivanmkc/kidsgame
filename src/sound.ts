@@ -123,10 +123,11 @@ function primeUnlock(): void {
 
 if (Platform.OS === 'web' && typeof window !== 'undefined') {
   const onFirstGesture = () => {
-    audioUnlocked = true;
     window.removeEventListener('pointerdown', onFirstGesture, true);
     window.removeEventListener('touchstart', onFirstGesture, true);
     window.removeEventListener('keydown', onFirstGesture, true);
+    if (audioUnlocked) return;
+    audioUnlocked = true;
     // Unlock the singleton element WHILE we're inside the gesture. From
     // now on, .play() from a useEffect works even on iOS Safari.
     primeUnlock();
@@ -216,7 +217,10 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
       }
       const p = a.play();
       if (p && typeof p.then === 'function') {
-        p.then(() => { audioUnlocked = true; }).catch(() => { /* pre-gesture: caller queued pendingNarration */ });
+        p.then(() => {
+          audioUnlocked = true;
+          if (pendingNarration?.texts[0] === text) pendingNarration = null;
+        }).catch(() => { /* pre-gesture: caller queued pendingNarration */ });
       }
       return;
     }

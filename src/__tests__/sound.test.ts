@@ -191,6 +191,53 @@ describe("sound sayThen", () => {
 
     expect(done).toHaveBeenCalledTimes(1);
   });
+
+  it("does not cut off or replay clip on first gesture if autoplay succeeded without gesture", async () => {
+    playImpl = () => Promise.resolve();
+
+    sound.say("A big egg!");
+    await Promise.resolve();
+
+    const playSpy = vi.spyOn(lastAudio!, "play");
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+
+    // Audio should not be interrupted by primeUnlock() nor restarted by pendingNarration
+    expect(lastAudio?.src).toContain("b5c04eb67ec79cec.mp3");
+    expect(playSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not restart sequence on first gesture if sequence autoplays successfully", async () => {
+    playImpl = () => Promise.resolve();
+
+    const done = vi.fn();
+    sound.saySequence(["A big egg!", "A flamingo!"], done);
+    await Promise.resolve();
+
+    const playSpy = vi.spyOn(lastAudio!, "play");
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+
+    // Initial clip should not be interrupted by primeUnlock() nor restarted
+    expect(lastAudio?.src).toContain("b5c04eb67ec79cec.mp3");
+    expect(playSpy).toHaveBeenCalledTimes(1);
+
+    // Initial clip finishes
+    lastAudio?.onended?.(new Event("ended"));
+    await Promise.resolve();
+
+    // Second clip plays without restarting the first clip
+    expect(lastAudio?.src).toContain("1b03801ffd5e3cfa.mp3");
+    expect(playSpy).toHaveBeenCalledTimes(2);
+    expect(done).not.toHaveBeenCalled();
+
+    lastAudio?.onended?.(new Event("ended"));
+    expect(done).toHaveBeenCalledTimes(1);
+  });
 });
 
 class FakeUtterance {
