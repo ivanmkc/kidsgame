@@ -773,6 +773,78 @@ describe("SpellGame", () => {
       );
     }
 
+    it("preserves victory state when language switches on win screen", () => {
+      vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, pool) => {
+        const lang = pool[0]?.lang ?? "en";
+        if (lang === "en") {
+          return [
+            {
+              icon: "cat",
+              lang: "en",
+              text: "CAT",
+              chars: ["C", "A", "T"],
+              roman: "",
+              fallbackText: "🐱",
+              source: "spotit",
+            } as logic.SpellWord,
+          ];
+        } else {
+          return [
+            {
+              icon: "dog",
+              lang: "ja",
+              text: "いぬ",
+              chars: ["い", "ぬ"],
+              roman: "inu",
+              fallbackText: "🐶",
+              source: "spotit",
+            } as logic.SpellWord,
+          ];
+        }
+      });
+      vi.spyOn(logic, "makeRound").mockImplementation((_rng, word) => {
+        if (word.lang === "en") {
+          return {
+            word,
+            chars: ["C", "A", "T"],
+            tiles: [
+              { id: 1, char: "T" },
+              { id: 2, char: "A" },
+              { id: 3, char: "C" },
+            ],
+            decoys: [],
+          };
+        } else {
+          return {
+            word,
+            chars: ["い", "ぬ"],
+            tiles: [
+              { id: 10, char: "い" },
+              { id: 11, char: "ぬ" },
+            ],
+            decoys: [],
+          };
+        }
+      });
+
+      render(<SpellGameTestHarness initialLang="en" />);
+      
+      fireEvent.click(screen.getByTestId("spell-tile-3")); // C
+      fireEvent.click(screen.getByTestId("spell-tile-2")); // A
+      fireEvent.click(screen.getByTestId("spell-tile-1")); // T
+
+      act(() => {
+        vi.runAllTimers();
+      });
+
+      expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("lang-cycle"));
+      });
+
+      expect(screen.getByTestId("win-overlay")).toBeTruthy();
+    });
     it("cancels pending wrong wobble timer when language switches mid-wobble", () => {
       vi.spyOn(sound, "stopNarration");
       vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, pool) => {
