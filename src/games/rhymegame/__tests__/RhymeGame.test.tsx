@@ -6,6 +6,7 @@ import {
   fireEvent,
   act,
   cleanup,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LangContext } from "../../../components/GameShell";
@@ -155,16 +156,20 @@ describe("RhymeGame", () => {
     const saySequenceSpy = vi.spyOn(sound, "saySequence");
     const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
-    
-    const round = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
-    const wrongIdx = round.tiles.findIndex(t => !t.isAnswer);
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const wrongIdx = round.tiles.findIndex((t) => !t.isAnswer);
     const wrongTile = round.tiles[wrongIdx];
-    
+
     saySequenceSpy.mockClear();
     fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
-    
+
     expect(sound.sfx.wrong).toHaveBeenCalled();
-    expect(saySequenceSpy).toHaveBeenCalledWith([wrongTile.word, ...round.promptLines]);
+    expect(saySequenceSpy).toHaveBeenCalledWith([
+      wrongTile.word,
+      ...round.promptLines,
+    ]);
   });
 
   it("tapping a correct tile twice only triggers sfx.good once", () => {
@@ -604,5 +609,119 @@ describe("RhymeGame", () => {
     const round1Tile = screen.getByTestId("rhyme-tile-0");
     fireEvent.click(round1Tile);
     expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
+  });
+
+  it("makes promptCard an accessible button with spell.hearAgain and replays round prompt on tap", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+
+    render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const promptCard = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
+
+    expect(promptCard.getAttribute("role")).toBe("button");
+    expect(promptCard.getAttribute("aria-label")).toBe(
+      t("en", "spell.hearAgain"),
+    );
+    expect(
+      within(promptCard).getByText(t("en", "spell.hearAgain")),
+    ).toBeDefined();
+
+    saySequenceSpy.mockClear();
+    fireEvent.click(promptCard);
+    expect(saySequenceSpy).toHaveBeenCalledTimes(1);
+    expect(saySequenceSpy).toHaveBeenCalledWith(round.promptLines);
+
+    fireEvent.click(promptCard);
+    expect(saySequenceSpy).toHaveBeenCalledTimes(2);
+    expect(saySequenceSpy).toHaveBeenLastCalledWith(round.promptLines);
+  });
+
+  it("shows localized spell.hearAgain accessibility label and speaker hint across languages", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+
+    const { rerender } = render(
+      <RhymeGame onHome={onHome} difficulty="easy" lang="ja" />,
+    );
+
+    const jaRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const promptCardJa = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
+
+    expect(promptCardJa.getAttribute("role")).toBe("button");
+    expect(promptCardJa.getAttribute("aria-label")).toBe(
+      t("ja", "spell.hearAgain"),
+    );
+    expect(
+      within(promptCardJa).getByText(t("ja", "spell.hearAgain")),
+    ).toBeDefined();
+
+    saySequenceSpy.mockClear();
+    fireEvent.click(promptCardJa);
+    expect(saySequenceSpy).toHaveBeenCalledWith(jaRound.promptLines);
+
+    rerender(<RhymeGame onHome={onHome} difficulty="easy" lang="cmn" />);
+    const cmnRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const promptCardCmn = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
+
+    expect(promptCardCmn.getAttribute("aria-label")).toBe(
+      t("cmn", "spell.hearAgain"),
+    );
+    expect(
+      within(promptCardCmn).getByText(t("cmn", "spell.hearAgain")),
+    ).toBeDefined();
+
+    saySequenceSpy.mockClear();
+    fireEvent.click(promptCardCmn);
+    expect(saySequenceSpy).toHaveBeenCalledWith(cmnRound.promptLines);
+  });
+
+  it("guards prompt replay during celebration and when won", () => {
+    vi.spyOn(logic, "settingsForRhyme").mockReturnValue({
+      rounds: 1,
+      tiles: 3,
+    });
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence");
+
+    render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
+
+    const currentRound = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const promptCard = screen
+      .getAllByTestId(/^rhyme-prompt-/)
+      .find((el) => el.getAttribute("data-testid") !== "rhyme-prompt-image")!;
+
+    // Tap correct tile to start celebration
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${currentRound.answerIdx}`));
+    expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+    // Tapping prompt card while celebration is in progress is ignored
+    saySequenceSpy.mockClear();
+    fireEvent.click(promptCard);
+    expect(saySequenceSpy).not.toHaveBeenCalled();
+
+    // Finish celebration -> game is won
+    const finishCelebration = sayThenDoneCallbacks.pop()!;
+    act(() => {
+      finishCelebration();
+    });
+
+    expect(screen.getByTestId("play-again")).toBeDefined();
+
+    // Tapping prompt card when won is ignored
+    saySequenceSpy.mockClear();
+    fireEvent.click(promptCard);
+    expect(saySequenceSpy).not.toHaveBeenCalled();
   });
 });
