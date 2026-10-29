@@ -195,7 +195,7 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
           ))}
         </View>
         <Text style={styles.hint}>
-          {diff.transform
+          {round.rotation !== 0 || round.mirrored
             ? t(lang, "shadow.hintTricky")
             : t(lang, "shadow.hint")}
         </Text>

@@ -503,5 +503,64 @@ describe("ShadowGame", () => {
     });
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("does not warn about tricky shadows on the warmup round, but does on tricky rounds", () => {
+    vi.useFakeTimers();
+    const origMakeShadowRound = logic.makeShadowRound;
+    let roundCount = 0;
+    const makeRoundSpy = vi
+      .spyOn(logic, "makeShadowRound")
+      .mockImplementation((rng, icons, diff, previousAnswer) => {
+        const round = origMakeShadowRound(rng, icons, diff, previousAnswer);
+        if (roundCount === 1) {
+          // Force the second round to be tricky
+          round.rotation = 45;
+          round.mirrored = false;
+        }
+        roundCount++;
+        return round;
+      });
+
+    try {
+      // Create a game on medium, which has tricky rounds but the first round is a warmup
+      const { container } = render(
+        <ShadowGame onHome={() => {}} difficulty="medium" lang="en" />,
+      );
+
+      // Warmup round should not have tricky hint
+      expect(container.textContent).not.toContain(t("en", "shadow.hintTricky"));
+      expect(container.textContent).toContain(t("en", "shadow.hint"));
+
+      // Complete the first round
+      const answerCard = container.querySelector(
+        '[data-testid^="shadow-answer-"]',
+      );
+      const answer = answerCard
+        ?.getAttribute("data-testid")
+        ?.replace("shadow-answer-", "");
+      const correctBtn = container.querySelector(
+        `[data-testid="shadow-option-${answer}"]`,
+      ) as HTMLElement;
+
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+
+      // Wait for the next round
+      act(() => {
+        vi.advanceTimersByTime(1500);
+      });
+
+      // Second round should have the tricky hint
+      expect(container.textContent).toContain(t("en", "shadow.hintTricky"));
+      expect(container.textContent).not.toContain(t("en", "shadow.hint"));
+
+    } finally {
+      vi.useRealTimers();
+      makeRoundSpy.mockRestore();
+    }
+  });
 });
+
+
 
