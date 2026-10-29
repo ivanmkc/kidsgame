@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
@@ -17,7 +17,7 @@ import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, saySequence, sayThen, sfx, stopNarration } from "../../sound";
-import { playSequence, stopSequence } from "../../music";
+import { playSequence, stopSequence, primeMusic } from "../../music";
 import { useWinLine } from "../winlines";
 import {
   makeFastSlowRound,
@@ -40,6 +40,9 @@ const LISTEN_DELAY_MS = 1000;
 
 export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
+  useLayoutEffect(() => {
+    primeMusic();
+  }, []);
   const { width } = useWindowDimensions();
   const layout = fastSlowLayout(width);
   const total = roundsToWin(difficulty);
@@ -194,6 +197,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   }, [phase, won, lang, playRound, round]);
 
   const onPick = (picked: "fast" | "slow") => {
+    primeMusic();
     if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
     stopNarration();
     if (isCorrect(round, picked)) {
@@ -251,6 +255,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   const replay = () => {
+    primeMusic();
     if (!isValid() || phase !== "pick") return;
     stopSequence();
     stopNotePulse();

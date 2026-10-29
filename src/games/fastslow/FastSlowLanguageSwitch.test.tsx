@@ -33,6 +33,7 @@ const defaultPlaySequenceImpl = (
 vi.mock('../../music', () => ({
   playSequence: vi.fn((notes, bpm, cb, onEnd) => defaultPlaySequenceImpl(notes, bpm, cb, onEnd)),
   stopSequence: vi.fn(),
+  primeMusic: vi.fn(),
 }));
 
 function LangHarness({
