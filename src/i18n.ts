@@ -90,6 +90,7 @@ export type UIKey =
   | 'card.cm-animals.title' | 'card.cm-animals.blurb'
   | 'card.cm-picword.title' | 'card.cm-picword.blurb'
   | 'card.cm-picspeak.title' | 'card.cm-picspeak.blurb'
+  | 'card.cm-colors.title' | 'card.cm-colors.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -466,6 +467,8 @@ export const EN: Table = {
   'card.cm-picword.blurb': 'Match the picture to its word!',
   'card.cm-picspeak.title': 'Picture & Audio',
   'card.cm-picspeak.blurb': 'Match the picture to the spoken word!',
+  'card.cm-colors.title': 'Colors & Words',
+  'card.cm-colors.blurb': 'Match the color to its word!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',

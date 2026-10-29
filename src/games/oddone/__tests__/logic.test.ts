@@ -1,14 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
 import { makeOddOneRound } from '../logic';
 import * as iconCategories from '../../iconCategories';
+import { CURRICULUM } from '../../../curriculum/content';
 
 describe('makeOddOneRound', () => {
   it('does not pick an intruder that is also in the base category', () => {
     // Mock the categories to have an overlap
-    vi.spyOn(iconCategories, 'ICON_CATEGORIES', 'get').mockReturnValue({
+    const originalCategories = CURRICULUM.categories;
+    CURRICULUM.categories = {
       fruit: ['apple', 'banana'],
       food: ['apple', 'pizza'],
-    });
+    };
     vi.spyOn(iconCategories, 'CATEGORY_CONFLICTS', 'get').mockReturnValue({});
 
     let calls = 0;
@@ -28,5 +30,6 @@ describe('makeOddOneRound', () => {
     expect(round.baseCategory).toBe('fruit');
     expect(round.oddCategory).toBe('food');
     expect(round.odd).toBe('pizza'); // Should not be 'apple'
+    CURRICULUM.categories = originalCategories;
   });
 });
