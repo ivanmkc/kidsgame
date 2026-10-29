@@ -100,6 +100,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
       flashTimerRef.current = null;
     }
     setBoopFlash(false);
+    stopNarration();
     stopSequence();
   }, []);
 
@@ -116,7 +117,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
         (next.phase === "prompt" || next.phase === "done")
       ) {
         clearTimers();
-        stopNarration();
         if (next.phase === "done") {
           setCelebrate((c) => c + 1);
         }
@@ -166,7 +166,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   useEffect(
     () => () => {
       clearTimers();
-      stopNarration();
     },
     [clearTimers],
   );
@@ -199,15 +198,17 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
         notes,
         150,
         () => {
+          if (!isValid()) return;
           triggerVisualBoop();
         },
         () => {
+          if (!isValid()) return;
           setBoopFlash(false);
           onDone?.();
         },
       );
     },
-    [triggerVisualBoop],
+    [isValid, triggerVisualBoop],
   );
 
   const startRound = useCallback(
@@ -407,7 +408,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const switchPack = useCallback(
     (id: PackId) => {
       clearTimers();
-      stopNarration();
       setPackId(id);
       setCelebrate(0);
       const next = activeDifficulty
