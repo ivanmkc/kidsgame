@@ -556,6 +556,94 @@ describe("OddOneGame", () => {
     expect(tilesEn[3]?.getAttribute("aria-label")).toBe("dog");
   });
 
+  it("announces the correct intruder item name for vocabulary reinforcement on pick", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementationOnce(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["apple", "banana", "cat", "pizza"],
+      oddIndex: 2,
+    }));
+
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(say).toHaveBeenCalledWith(t("en", "oddone.not.food"));
+    vi.mocked(say).mockClear();
+
+    const correctBtn = container.querySelector(
+      '[data-testid$="-odd"]',
+    ) as HTMLElement;
+    expect(correctBtn).toBeTruthy();
+
+    act(() => {
+      fireEvent.click(correctBtn);
+    });
+
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledWith("cat");
+  });
+
+  it("announces the correct intruder item name in the chosen language on pick", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementationOnce(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["apple", "banana", "cat", "pizza"],
+      oddIndex: 2,
+    }));
+
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+
+    vi.mocked(say).mockClear();
+
+    const correctBtn = container.querySelector(
+      '[data-testid$="-odd"]',
+    ) as HTMLElement;
+    expect(correctBtn).toBeTruthy();
+
+    act(() => {
+      fireEvent.click(correctBtn);
+    });
+
+    expect(sfx.good).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledWith("ねこ");
+  });
+
+  it("does not announce item name when picking a wrong tile", () => {
+    vi.spyOn(logic, "makeOddOneRound").mockImplementationOnce(() => ({
+      baseCategory: "food",
+      oddCategory: "animals",
+      odd: "cat",
+      items: ["apple", "banana", "cat", "pizza"],
+      oddIndex: 2,
+    }));
+
+    const { container } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    vi.mocked(say).mockClear();
+
+    const buttons = container.querySelectorAll('[data-testid^="oddone-item-"]');
+    const wrongBtn = Array.from(buttons).find(
+      (b) => !b.getAttribute("data-testid")?.endsWith("-odd"),
+    ) as HTMLElement;
+    expect(wrongBtn).toBeTruthy();
+
+    act(() => {
+      fireEvent.click(wrongBtn);
+    });
+
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+    expect(say).not.toHaveBeenCalled();
+  });
+
   describe("itemLabel", () => {
     it("returns localized icon name across all supported languages", () => {
       expect(logic.itemLabel("dog", "en")).toBe("dog");
