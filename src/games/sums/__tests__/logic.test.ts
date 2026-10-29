@@ -73,6 +73,16 @@ describe('sumsLayout', () => {
     expect(tablet.stageW).toBe(560);
     expect(tablet.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
   });
+
+  it('clamps stageW to a minimum of 0 on extremely narrow viewports to avoid negative dimensions', () => {
+    const narrowPortrait = sumsLayout(30, 600, 2);
+    expect(narrowPortrait.stageW).toBeGreaterThanOrEqual(0);
+    expect(narrowPortrait.isLandscape).toBe(false);
+
+    const narrowLandscape = sumsLayout(40, 30, 2);
+    expect(narrowLandscape.stageW).toBeGreaterThanOrEqual(0);
+    expect(narrowLandscape.isLandscape).toBe(true);
+  });
 });
 
 describe('sumsSettings', () => {
