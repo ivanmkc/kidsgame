@@ -220,7 +220,7 @@ def synth(job: tuple[str, str]) -> bool:
         # bare short imperatives ("Slip through the vent") make the TTS
         # return EMPTY audio; a trailing period reliably fixes it — use it
         # on retries so first-attempt keys/prosody stay unchanged.
-        attempt_say = say if attempt == 0 or say[-1:] in '.!?。！？' else say + '.'
+        attempt_say = say if attempt == 0 or (len(say) > 3 and say[-1:] in '.!?。！？') else say + '.'
         try:
             resp = client().models.generate_content(
                 model="gemini-3.1-flash-tts-preview",
@@ -360,7 +360,7 @@ def synth_lang(job: tuple[str, str]) -> tuple[str, str] | None:
         return (key, out.name)
     for attempt in range(3):
         # same empty-audio workaround as synth(): CJK period on retries
-        attempt_text = text if attempt == 0 or text[-1:] in '.!?。！？' else text + '。'
+        attempt_text = text if attempt == 0 or (len(text) > 3 and text[-1:] in '.!?。！？') else text + '。'
         try:
             resp = client().models.generate_content(
                 model="gemini-3.1-flash-tts-preview",
