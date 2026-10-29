@@ -1131,5 +1131,45 @@ describe("SameDiffGame UI", () => {
       unmount();
       expect(stopNarrationSpy).toHaveBeenCalled();
     });
+
+    it("increments roundEpochRef before stopNarration in playRound so pending sayThen does not trigger stale melody", () => {
+      vi.useFakeTimers();
+      let capturedPlayRound: (() => void) | undefined;
+      const origSetTimeout = globalThis.setTimeout;
+      vi.spyOn(globalThis, "setTimeout").mockImplementation(((
+        fn: (...args: unknown[]) => void,
+        ms?: number,
+        ...args: unknown[]
+      ) => {
+        if (ms === 400 && !capturedPlayRound) {
+          capturedPlayRound = fn as () => void;
+        }
+        return origSetTimeout(fn, ms, ...args);
+      }) as typeof setTimeout);
+
+      const playSpy = vi
+        .spyOn(music, "playSequence")
+        .mockReturnValue(() => {});
+
+      render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      // Advance mount delay (400ms) to trigger first playRound
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+
+      // sayThen called with "Listen...", playSequence not yet called
+      expect(playSpy).not.toHaveBeenCalled();
+
+      // Triggering playRound again while sayThen is pending must not launch stale melody
+      act(() => {
+        capturedPlayRound?.();
+      });
+
+      expect(playSpy).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
   });
 });
+
