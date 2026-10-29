@@ -368,6 +368,8 @@ export const CMN: Table = {
   'story.startOver': '重新开始 📖',
   'story.readAgain': '结束！再读一次 📖',
   'story.allStories': '所有故事 🏠',
+  'story.hotLead': '想去哪就点哪！',
+  'story.nextLead': '接下来会怎样？',
   'carmode.tap': '点一点！',
   'carmode.done': '全部完成！',
 
