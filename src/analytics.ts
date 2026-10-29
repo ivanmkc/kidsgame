@@ -29,6 +29,9 @@ export function track(e: string, p: Record<string, string | number> = {}): void 
       path: window.location.hash || '#/',
     });
     if (navigator.sendBeacon) navigator.sendBeacon(BEACON, body);
-    else void fetch(BEACON, { method: 'POST', body, keepalive: true });
+    else
+      void fetch(BEACON, { method: 'POST', body, keepalive: true }).catch(
+        () => {},
+      );
   } catch { /* analytics must never break play */ }
 }
