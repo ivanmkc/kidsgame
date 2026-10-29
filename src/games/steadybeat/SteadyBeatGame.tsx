@@ -165,6 +165,8 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           transitionTimerRef.current = setTimeout(() => {
             setWon(true);
           }, 1200);
+        } else {
+          transitionTimerRef.current = setTimeout(() => setWon(true), 1200);
         }
       } else {
         sfx.wrong();
@@ -196,6 +198,10 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       transitionTimerRef.current = null;
     }
     if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
     setFlash(false);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
