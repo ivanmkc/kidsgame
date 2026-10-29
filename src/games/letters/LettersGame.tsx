@@ -87,6 +87,10 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!started) return;
+    if (won) {
+      pulse.setValue(1);
+      return;
+    }
     const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulse, {
@@ -102,8 +106,11 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       ]),
     );
     loop.start();
-    return () => loop.stop();
-  }, [pulse, started]);
+    return () => {
+      loop.stop();
+      pulse.setValue(1);
+    };
+  }, [pulse, started, won]);
 
   useEffect(() => {
     lockedRef.current = false;

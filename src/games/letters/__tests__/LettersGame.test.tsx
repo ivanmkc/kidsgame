@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LettersGame } from "../LettersGame";
+import { Animated } from "react-native";
 import { LangContext } from "../../../components/GameShell";
 import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
@@ -506,6 +507,13 @@ describe("LettersGame", () => {
       tier: "upper",
     });
 
+    let loopStop = vi.fn();
+    const loopSpy = vi.spyOn(Animated, "loop").mockReturnValue({
+      start: vi.fn(),
+      stop: loopStop,
+      reset: vi.fn(),
+    });
+
     const generatedRounds: logic.LetterRound[] = [];
     const origMakeLetterRound = logic.makeLetterRound;
     vi.spyOn(logic, "makeLetterRound").mockImplementation(
@@ -534,6 +542,9 @@ describe("LettersGame", () => {
 
     const speakerBtn = screen.getByTestId("speaker-button");
     expect(speakerBtn.getAttribute("aria-disabled")).toBe("true");
+    
+    // The pulse loop should be stopped when the game is won
+    expect(loopStop).toHaveBeenCalled();
 
     vi.mocked(say).mockClear();
     act(() => {
@@ -541,6 +552,7 @@ describe("LettersGame", () => {
     });
 
     expect(say).not.toHaveBeenCalled();
+    loopSpy.mockRestore();
   });
 
   it.each(["en", "ja", "cmn", "yue"] as const)(
