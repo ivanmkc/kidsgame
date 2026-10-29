@@ -374,6 +374,12 @@ export const CMN: Table = {
   'story.nextLead': '接下来会怎样？',
   'carmode.tap': '点一点！',
   'carmode.done': '全部完成！',
+  'carmode.pack.boops': '数数嘟嘟声',
+  'carmode.pack.rhyme': '押韵游戏',
+  'carmode.pack.simon': '老师说',
+  'carmode.pack.silly': '真假辨别',
+  'carmode.pack.whoami': '我是谁？',
+  'carmode.pack.animal': '动物叫声',
 
   'feedback.chip': '💬 反馈意见',
   'feedback.title': '告诉我们！',

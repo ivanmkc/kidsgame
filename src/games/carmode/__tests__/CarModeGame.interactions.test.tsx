@@ -14,6 +14,8 @@ import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import * as music from "../../../music";
 import * as logic from "../logic";
+import { ALL_PACKS, PACK_ORDER } from "../packs";
+import { t, UIKey } from "../../../i18n";
 import { CarModeGame } from "../CarModeGame";
 
 const noop = () => {};
@@ -277,7 +279,7 @@ describe("CarModeGame interactions", () => {
     { lang: "cmn", expected: "全部完成！" },
     { lang: "yue", expected: "全部搞掂！" },
   ] as const)(
-    "localizes completion screen text for $lang",
+    "localizes completion screen text and pack buttons for $lang",
     ({ lang, expected }) => {
       const actual = logic.startState("boops", 42);
       vi.spyOn(logic, "startState").mockReturnValue({
@@ -288,6 +290,16 @@ describe("CarModeGame interactions", () => {
       render(<CarModeGame onHome={noop} lang={lang} />);
       expect(screen.getByText(expected)).toBeDefined();
       expect(screen.queryByText("All done!")).toBeNull();
+
+      for (const packId of PACK_ORDER) {
+        const localizedName = t(lang, `carmode.pack.${packId}` as UIKey);
+        const englishName = ALL_PACKS[packId].name;
+        const btn = screen.getByTestId(`carmode-pack-${packId}`);
+        expect(within(btn).getByText(localizedName)).toBeDefined();
+        expect(within(btn).queryByText(englishName)).toBeNull();
+        expect(btn.getAttribute("aria-label")).toBe(localizedName);
+        expect(btn.getAttribute("aria-label")).not.toBe(englishName);
+      }
     },
   );
 
