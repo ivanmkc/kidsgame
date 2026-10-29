@@ -19,13 +19,19 @@ describe('coopDrawCount', () => {
     }
   });
 
-  it('even-ifies upward: 5 → 6 with room in the pool', () => {
-    expect(coopDrawCount(5, 10)).toBe(6);
+  it('even-ifies downward: 5 → 4 so easy draws fewer targets than medium', () => {
+    expect(coopDrawCount(5, 10)).toBe(4);
+  });
+
+  it('differentiates easy (5), medium (6), and hard (8) draw counts', () => {
+    expect(coopDrawCount(5, 8)).toBe(4);
+    expect(coopDrawCount(6, 8)).toBe(6);
+    expect(coopDrawCount(8, 8)).toBe(8);
   });
 
   it('clamps into a 7-pool and stays even', () => {
     expect(coopDrawCount(6, 7)).toBe(6);
-    expect(coopDrawCount(7, 7)).toBe(6); // 7→8, clamp 7, still-odd → 6
+    expect(coopDrawCount(7, 7)).toBe(6); // 7→6, clamp 7 → 6
     expect(coopDrawCount(8, 7)).toBe(6);
   });
 });
