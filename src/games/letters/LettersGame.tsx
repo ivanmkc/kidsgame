@@ -62,8 +62,14 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
-  useWinLine(won && !isFinishing, t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"));
-  const elapsed = useElapsed(showTimer && !won && !isFinishing && started, timerKey);
+  useWinLine(
+    won && !isFinishing,
+    t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"),
+  );
+  const elapsed = useElapsed(
+    showTimer && !won && !isFinishing && started,
+    timerKey,
+  );
   const { width, height } = useWindowDimensions();
 
   // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
@@ -215,10 +221,13 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const cols = tileCount <= 6 ? 3 : 4;
   const rows = Math.ceil(tileCount / cols);
   const gap = 12;
-  const tile = Math.min(
-    (Math.min(width - 32, 560) - (cols - 1) * gap) / cols,
-    (height - 84 - 130 - (rows - 1) * gap) / rows,
-    140,
+  const tile = Math.max(
+    10,
+    Math.min(
+      (Math.min(width - 32, 560) - (cols - 1) * gap) / cols,
+      (height - 84 - 130 - (rows - 1) * gap) / rows,
+      140,
+    ),
   );
 
   const chipEmoji = tier === "kana" ? "🈶" : tier === "sound" ? "👂" : "🔤";

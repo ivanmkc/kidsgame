@@ -156,7 +156,8 @@ describe("LettersGame", () => {
       });
 
       // Round 1
-      const round1Answer = generatedRounds[0].tiles[generatedRounds[0].answerIdx];
+      const round1Answer =
+        generatedRounds[0].tiles[generatedRounds[0].answerIdx];
       act(() => {
         fireEvent.click(screen.getByLabelText(round1Answer.label));
       });
@@ -169,7 +170,8 @@ describe("LettersGame", () => {
       expect(generatedRounds).toHaveLength(2);
 
       // Round 2 tile click works
-      const round2Answer = generatedRounds[1].tiles[generatedRounds[1].answerIdx];
+      const round2Answer =
+        generatedRounds[1].tiles[generatedRounds[1].answerIdx];
       act(() => {
         fireEvent.click(screen.getByLabelText(round2Answer.label));
       });
@@ -395,7 +397,9 @@ describe("LettersGame", () => {
       });
 
       // The error timer is specifically the one started with a 450ms delay
-      const callIdx = setTimeoutSpy.mock.calls.findLastIndex(args => args[1] === 450);
+      const callIdx = setTimeoutSpy.mock.calls.findLastIndex(
+        (args) => args[1] === 450,
+      );
       const timerId = setTimeoutSpy.mock.results[callIdx].value;
 
       unmount();
@@ -492,7 +496,6 @@ describe("LettersGame", () => {
     });
 
     // Check that it shows ON
-    
 
     act(() => {
       fireEvent.click(screen.getByTestId("play-button"));
@@ -569,7 +572,7 @@ describe("LettersGame", () => {
 
       const speakerBtn = screen.getByTestId("speaker-button");
       expect(speakerBtn.getAttribute("aria-disabled")).toBe("true");
-      
+
       // The pulse loop should be stopped when the game is won
       expect(loopStop).toHaveBeenCalled();
 
@@ -646,7 +649,6 @@ describe("LettersGame", () => {
     act(() => {
       fireEvent.click(captionsToggle);
     });
-    
 
     act(() => {
       fireEvent.click(screen.getByTestId("play-button"));
@@ -879,6 +881,43 @@ describe("LettersGame", () => {
       });
     } finally {
       vi.useRealTimers();
+    }
+  });
+
+  it("does not produce negative tile dimensions on very small viewports", () => {
+    const originalWidth = document.documentElement.clientWidth;
+    const originalHeight = document.documentElement.clientHeight;
+
+    try {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: 20,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: 20,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const tile = screen.getByTestId("letters-tile-0");
+      expect(parseFloat(tile.style.width)).toBeGreaterThanOrEqual(10);
+      expect(parseFloat(tile.style.height)).toBeGreaterThanOrEqual(10);
+    } finally {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: originalWidth,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: originalHeight,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
     }
   });
 });
