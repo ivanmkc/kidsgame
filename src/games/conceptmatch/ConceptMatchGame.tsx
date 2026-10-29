@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { SHAPE_ICONS, SPOTIT_ICONS } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
@@ -37,6 +37,7 @@ export function ConceptMatchGame({
 }: ConceptMatchGameProps) {
   const activePairs = pairs ?? pairsForDifficulty(difficulty, deck);
 
+  const [captions, setCaptions] = useState(false);
   const [roundKey, setRoundKey] = useState(0);
   const [board, setBoard] = useState<ConceptMatchCard[]>(() =>
     buildBoard(
@@ -135,6 +136,21 @@ export function ConceptMatchGame({
       lang={lang}
       right={
         <View style={styles.headerRight}>
+          <Pressable
+            onPress={() => setCaptions((c) => !c)}
+            testID="captions-toggle"
+            accessibilityRole="button"
+            hitSlop={12}
+            style={({ pressed }) => [
+              styles.captionsToggle,
+              pressed && { opacity: 0.6 }
+            ]}
+          >
+            <Text style={styles.captionsToggleText}>
+              💬 {t(lang, "listenchoose.captions")}:{" "}
+              {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
+            </Text>
+          </Pressable>
           <ScoreChip
             label={`🧠 ${matchedPairs}/${totalPairs}`}
             testID="concept-score"
@@ -161,7 +177,7 @@ export function ConceptMatchGame({
                   }
                   testID={`concept-card-${card.key}`}
                   sparkleTrigger={card.conceptId}
-                  renderCardFace={() => renderCardFace(card, cardW)}
+                  renderCardFace={() => renderCardFace(card, cardW, captions)}
                 />
               );
             })
@@ -183,7 +199,7 @@ export function ConceptMatchGame({
   );
 }
 
-function renderCardFace(card: ConceptMatchCard, size: number) {
+function renderCardFace(card: ConceptMatchCard, size: number, captions: boolean) {
   const { display } = card;
   switch (display.type) {
     case "text":
@@ -237,7 +253,7 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
         />
       );
     case "audio": {
-      const visualText = display.text || card.speech;
+      const visualText = display.text || (captions ? card.speech : null);
       return (
         <View testID={`card-audio-${card.key}`} style={styles.audioWrap}>
           <Text style={{ fontSize: size * 0.32 }}>🔊</Text>
@@ -281,6 +297,19 @@ function renderCardFace(card: ConceptMatchCard, size: number) {
 }
 
 const styles = StyleSheet.create({
+  captionsToggle: {
+    backgroundColor: "rgba(255,255,255,0.6)",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  captionsToggleText: {
+    fontFamily: fonts.bodyReg,
+    color: colors.ink,
+    fontSize: 14,
+  },
   boardWrap: {
     flex: 1,
     alignItems: "center",
