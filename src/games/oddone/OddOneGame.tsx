@@ -83,8 +83,8 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
 
   const onPick = (idx: number) => {
     if (won || roundClosedRef.current) return;
-    roundClosedRef.current = true;
     if (idx === round.oddIndex) {
+      roundClosedRef.current = true;
       sfx.good();
       say(itemLabel(round.odd, lang));
       const next = score + 1;
@@ -108,7 +108,6 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
       setWrongIdx(idx);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       wrongTimerRef.current = setTimeout(() => {
-        roundClosedRef.current = false;
         setWrongIdx((w) => (w === idx ? null : w));
       }, 450);
     }
