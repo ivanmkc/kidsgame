@@ -77,6 +77,25 @@ describe("SameDiffGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("keeps visual scaffolding on screen during choice phase", () => {
+    vi.useFakeTimers();
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Fast-forward through listenA and listenB to the pick phase
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    // Pick buttons are shown
+    expect(screen.getByTestId("samediff-same")).toBeTruthy();
+
+    // The visual notes should remain on screen
+    expect(screen.getByTestId("melody-row-0")).toBeTruthy();
+    expect(screen.getByTestId("melody-row-1")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   it("computes proportional pitch ratios in logic", () => {
     const roundSame: SameDiffRound = {
       phraseA: [
@@ -822,14 +841,14 @@ describe("SameDiffGame UI", () => {
 
     // The choice container and sparkles remain mounted through the full 650ms animation
     expect(screen.getByTestId("samediff-same")).toBeTruthy();
-    expect(screen.queryByTestId("melody-dot-0")).toBeNull();
+    expect(screen.getByTestId("melody-dot-0")).toBeTruthy();
 
     // Advance remaining 300ms to complete the 1000ms transition delay
     act(() => {
       vi.advanceTimersByTime(300);
     });
 
-    // At 1000ms, the next round's listening card mounts
+    // At 1000ms, the next round's listening card mounts (it never unmounted, but choice container unmounts)
     expect(screen.queryByTestId("samediff-same")).toBeNull();
     expect(screen.getByTestId("melody-dot-0")).toBeTruthy();
 

@@ -286,108 +286,106 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       }
     >
       <View style={styles.board}>
-        {phase === "listenA" || phase === "listenB" ? (
-          <View style={[styles.listenCard, shadows.soft]}>
-            <Animated.Text
-              style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
-            >
-              👂
-            </Animated.Text>
-            <View style={styles.melodyRows}>
-              <View style={styles.melodyRow} testID="melody-row-0">
-                <View
-                  testID="melody-dot-0"
-                  style={[
-                    styles.melodyDot,
-                    (phase === "listenA" || phase === "listenB") &&
-                      styles.melodyDotFilled,
-                  ]}
-                />
-                <View testID="melody-notes-0" style={styles.phraseNotesTrack}>
-                  {ratiosA.map((ratio, i) => {
-                    const isNoteActive =
-                      phase === "listenA" && activeNote === i;
-                    const stemHeight = Math.round(6 + ratio * 20);
-                    return (
+        <View style={[styles.listenCard, shadows.soft]}>
+          <Animated.Text
+            style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
+          >
+            👂
+          </Animated.Text>
+          <View style={styles.melodyRows}>
+            <View style={styles.melodyRow} testID="melody-row-0">
+              <View
+                testID="melody-dot-0"
+                style={[
+                  styles.melodyDot,
+                  styles.melodyDotFilled,
+                ]}
+              />
+              <View testID="melody-notes-0" style={styles.phraseNotesTrack}>
+                {ratiosA.map((ratio, i) => {
+                  const isNoteActive =
+                    phase === "listenA" && activeNote === i;
+                  const stemHeight = Math.round(6 + ratio * 20);
+                  return (
+                    <View
+                      key={i}
+                      testID={`melody-0-note-${i}`}
+                      aria-selected={isNoteActive}
+                      style={styles.noteCueCol}
+                    >
                       <View
-                        key={i}
-                        testID={`melody-0-note-${i}`}
-                        aria-selected={isNoteActive}
-                        style={styles.noteCueCol}
-                      >
-                        <View
-                          testID={`melody-0-dot-${i}${isNoteActive ? "-active" : ""}`}
-                          style={[
-                            styles.noteDot,
-                            isNoteActive && styles.noteDotActive,
-                          ]}
-                        />
-                        <View
-                          testID={`melody-0-stem-${i}`}
-                          style={[
-                            styles.noteStem,
-                            { height: stemHeight },
-                            isNoteActive && styles.noteStemActive,
-                          ]}
-                        />
-                      </View>
-                    );
-                  })}
-                </View>
+                        testID={`melody-0-dot-${i}${isNoteActive ? "-active" : ""}`}
+                        style={[
+                          styles.noteDot,
+                          isNoteActive && styles.noteDotActive,
+                        ]}
+                      />
+                      <View
+                        testID={`melody-0-stem-${i}`}
+                        style={[
+                          styles.noteStem,
+                          { height: stemHeight },
+                          isNoteActive && styles.noteStemActive,
+                        ]}
+                      />
+                    </View>
+                  );
+                })}
               </View>
-              <View style={styles.melodyRow} testID="melody-row-1">
-                <View
-                  testID="melody-dot-1"
-                  style={[
-                    styles.melodyDot,
-                    phase === "listenB" && styles.melodyDotFilled,
-                  ]}
-                />
-                <View testID="melody-notes-1" style={styles.phraseNotesTrack}>
-                  {phase === "listenB"
-                    ? ratiosB.map((ratio, i) => {
-                        const isNoteActive =
-                          phase === "listenB" && activeNote === i;
-                        const stemHeight = Math.round(6 + ratio * 20);
-                        return (
-                          <View
-                            key={i}
-                            testID={`melody-1-note-${i}`}
-                            aria-selected={isNoteActive}
-                            style={styles.noteCueCol}
-                          >
-                            <View
-                              testID={`melody-1-dot-${i}${isNoteActive ? "-active" : ""}`}
-                              style={[
-                                styles.noteDot,
-                                isNoteActive && styles.noteDotActive,
-                              ]}
-                            />
-                            <View
-                              testID={`melody-1-stem-${i}`}
-                              style={[
-                                styles.noteStem,
-                                { height: stemHeight },
-                                isNoteActive && styles.noteStemActive,
-                              ]}
-                            />
-                          </View>
-                        );
-                      })
-                    : [0, 1, 2].map((i) => (
+            </View>
+            <View style={styles.melodyRow} testID="melody-row-1">
+              <View
+                testID="melody-dot-1"
+                style={[
+                  styles.melodyDot,
+                  phase !== "listenA" && styles.melodyDotFilled,
+                ]}
+              />
+              <View testID="melody-notes-1" style={styles.phraseNotesTrack}>
+                {phase !== "listenA"
+                  ? ratiosB.map((ratio, i) => {
+                      const isNoteActive =
+                        phase === "listenB" && activeNote === i;
+                      const stemHeight = Math.round(6 + ratio * 20);
+                      return (
                         <View
                           key={i}
-                          testID={`melody-1-placeholder-${i}`}
+                          testID={`melody-1-note-${i}`}
+                          aria-selected={isNoteActive}
                           style={styles.noteCueCol}
                         >
-                          <View style={styles.notePlaceholder} />
+                          <View
+                            testID={`melody-1-dot-${i}${isNoteActive ? "-active" : ""}`}
+                            style={[
+                              styles.noteDot,
+                              isNoteActive && styles.noteDotActive,
+                            ]}
+                          />
+                          <View
+                            testID={`melody-1-stem-${i}`}
+                            style={[
+                              styles.noteStem,
+                              { height: stemHeight },
+                              isNoteActive && styles.noteStemActive,
+                            ]}
+                          />
                         </View>
-                      ))}
-                </View>
+                      );
+                    })
+                  : [0, 1, 2].map((i) => (
+                      <View
+                        key={i}
+                        testID={`melody-1-placeholder-${i}`}
+                        style={styles.noteCueCol}
+                      >
+                        <View style={styles.notePlaceholder} />
+                      </View>
+                    ))}
               </View>
             </View>
           </View>
-        ) : (
+        </View>
+        {(phase === "pick" || phase === "transition") && (
           <View style={styles.pickContainer}>
             <Pressable
               onPress={replay}
