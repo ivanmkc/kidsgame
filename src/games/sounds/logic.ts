@@ -46,10 +46,13 @@ function candidateTile(
   rows: number,
 ): number {
   const gap = 14;
-  return Math.min(
-    (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
-    (height - 84 - 130 - (rows - 1) * gap) / rows,
-    170,
+  return Math.max(
+    0,
+    Math.min(
+      (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
+      (height - 84 - 130 - (rows - 1) * gap) / rows,
+      170,
+    ),
   );
 }
 
