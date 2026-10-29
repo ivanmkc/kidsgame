@@ -481,4 +481,8 @@ export const YUE: Table = {
   'hidden.scene.steampunk_airship': '蒸汽飛艇',
   'hidden.scene.giant_kitchen': '巨人嘅廚房',
   'hidden.scene.witch_kitchen': '女巫嘅廚房',
+
+  'sums.plus': '加',
+  'sums.question': '一共有幾多個呀？',
+  'sums.praise': '啱晒！',
 };

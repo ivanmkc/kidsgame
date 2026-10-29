@@ -15,7 +15,6 @@ import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { SumsGame } from "../SumsGame";
 import * as logic from "../logic";
-import { PLUS, QUESTION } from "../logic";
 
 function LangHarness({
   difficulty = "easy",
@@ -61,7 +60,7 @@ describe("SumsGame language switch safety", () => {
 
     expect(makeRoundSpy).toHaveBeenCalledTimes(1);
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.en, QUESTION.en]),
+      expect.arrayContaining([t("en", "sums.plus"), t("en", "sums.question")]),
     );
     expect(screen.getByText(t("en", "shell.sums.sub"))).toBeDefined();
 
@@ -76,7 +75,7 @@ describe("SumsGame language switch safety", () => {
 
     // Prompt updated and spoken in Japanese for the current round
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.ja, QUESTION.ja]),
+      expect.arrayContaining([t("ja", "sums.plus"), t("ja", "sums.question")]),
     );
 
     // UI labels update instantly to Japanese
@@ -92,7 +91,7 @@ describe("SumsGame language switch safety", () => {
     );
 
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.en, QUESTION.en]),
+      expect.arrayContaining([t("en", "sums.plus"), t("en", "sums.question")]),
     );
     expect(screen.getByText(t("en", "shell.sums.sub"))).toBeDefined();
 
@@ -101,7 +100,7 @@ describe("SumsGame language switch safety", () => {
     rerender(<SumsGame onHome={() => {}} difficulty="easy" lang="ja" />);
 
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.ja, QUESTION.ja]),
+      expect.arrayContaining([t("ja", "sums.plus"), t("ja", "sums.question")]),
     );
     expect(screen.getByText(t("ja", "shell.sums.sub"))).toBeDefined();
     expect(screen.getByTestId("sums-score").textContent).toContain("0/5");
@@ -144,7 +143,7 @@ describe("SumsGame language switch safety", () => {
 
     // Prompt is spoken in Japanese for the next round
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.ja, QUESTION.ja]),
+      expect.arrayContaining([t("ja", "sums.plus"), t("ja", "sums.question")]),
     );
 
     // Play the fresh round in Japanese
@@ -194,7 +193,7 @@ describe("SumsGame language switch safety", () => {
 
     // New Japanese prompt spoken
     expect(saySeqSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([PLUS.ja, QUESTION.ja]),
+      expect.arrayContaining([t("ja", "sums.plus"), t("ja", "sums.question")]),
     );
     saySpy.mockClear();
 
@@ -204,7 +203,7 @@ describe("SumsGame language switch safety", () => {
     });
 
     // The old 500ms setTimeout did NOT speak the old English question
-    expect(saySpy).not.toHaveBeenCalledWith(QUESTION.en);
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "sums.question"));
 
     // Board is interactive and can be answered correctly
     const freshButtons = screen.getAllByRole("button");
@@ -252,7 +251,7 @@ describe("SumsGame language switch safety", () => {
     act(() => {
       vi.advanceTimersByTime(1000);
     });
-    expect(saySpy).not.toHaveBeenCalledWith(QUESTION.en);
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "sums.question"));
     expect(screen.getByTestId("sums-score").textContent).toContain("1/5");
   });
 });

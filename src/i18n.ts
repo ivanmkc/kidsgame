@@ -346,7 +346,9 @@ export type UIKey =
   | 'hidden.scene.sky_market' | 'hidden.scene.coral_reef' | 'hidden.scene.spooky_graveyard' | 'hidden.scene.ice_palace'
   | 'hidden.scene.monster_bedroom' | 'hidden.scene.treehouse_village' | 'hidden.scene.dragonfly_meadow' | 'hidden.scene.cloud_kingdom'
   | 'hidden.scene.crystal_cavern' | 'hidden.scene.circus_backstage' | 'hidden.scene.mole_city' | 'hidden.scene.steampunk_airship'
-  | 'hidden.scene.giant_kitchen' | 'hidden.scene.witch_kitchen';
+  | 'hidden.scene.giant_kitchen' | 'hidden.scene.witch_kitchen'
+  // ── Game-specific prompts ────────────────────────────────────────
+  | 'sums.plus' | 'sums.question' | 'sums.praise';
 
 export type Table = Record<UIKey, string>;
 
@@ -771,6 +773,10 @@ export const EN: Table = {
   'hidden.scene.crystal_cavern': 'Crystal Cavern', 'hidden.scene.circus_backstage': 'Circus Backstage',
   'hidden.scene.mole_city': 'Underground Mole City', 'hidden.scene.steampunk_airship': 'Steampunk Airship',
   'hidden.scene.giant_kitchen': 'Giant\'s Kitchen', 'hidden.scene.witch_kitchen': 'Witch\'s Kitchen',
+
+  'sums.plus': 'plus',
+  'sums.question': 'How many now?',
+  'sums.praise': 'That\'s right!',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };

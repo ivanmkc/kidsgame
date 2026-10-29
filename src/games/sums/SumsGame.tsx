@@ -21,9 +21,6 @@ import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
 import { sayThen, saySequence, sfx, say } from "../../sound";
 import {
-  PLUS,
-  PRAISE,
-  QUESTION,
   SumsRound,
   makeSumsRound,
   sumsLayout,
@@ -89,9 +86,9 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     }
     saySequence([
       numberWord(lang, round.a).t,
-      PLUS[lang],
+      t(lang, "sums.plus"),
       numberWord(lang, round.b).t,
-      QUESTION[lang],
+      t(lang, "sums.question"),
     ]);
   }, [round, lang, won]);
 
@@ -125,7 +122,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       const nextScore = score + 1;
       setScore(nextScore);
-      sayThen([numberWord(lang, round.sum).t, PRAISE[lang]], () => {
+      sayThen([numberWord(lang, round.sum).t, t(lang, "sums.praise")], () => {
         lockedRef.current = false;
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
@@ -146,7 +143,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       }, 450);
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
       wrongVoiceTimer.current = setTimeout(() => {
-        say(QUESTION[lang]);
+        say(t(lang, "sums.question"));
         wrongVoiceTimer.current = null;
       }, 500);
     }
