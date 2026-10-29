@@ -11,6 +11,7 @@ import {
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { EscapeGame } from "../EscapeGame";
+import { SpriteCanvas } from "../SpriteCanvas";
 
 const noop = () => {};
 
@@ -169,5 +170,90 @@ describe("EscapeGame revealed item hit target", () => {
     const feedback = screen.getByTestId("escape-feedback-teddy");
     expect(feedback).toBeDefined();
     expect(feedback.textContent).toContain("🔍");
+  });
+
+  it("draws sprite sheet for hotspot without a rest layer when revealed or opened", () => {
+    const drawnImages: string[] = [];
+    const getContextSpy = vi
+      .spyOn(HTMLCanvasElement.prototype, "getContext")
+      .mockReturnValue({
+        setTransform: vi.fn(),
+        clearRect: vi.fn(),
+        scale: vi.fn(),
+        drawImage: vi.fn((img: { src?: string }) => {
+          if (img?.src) drawnImages.push(img.src);
+        }),
+      } as unknown as CanvasRenderingContext2D);
+
+    const origImage = window.Image;
+    const images: MockImage[] = [];
+    class MockImage {
+      private _src = "";
+      naturalWidth = 100;
+      naturalHeight = 100;
+      onload: (() => void) | null = null;
+      get src() {
+        return this._src;
+      }
+      set src(val: string) {
+        this._src = val;
+        images.push(this);
+      }
+    }
+    window.Image = MockImage as unknown as typeof Image;
+
+    try {
+      const dummyRoom = {
+        id: "dummy",
+        name: "dummy",
+        image: "dummy.png",
+        intro: "",
+        winText: "",
+        items: [],
+        hotspots: [
+          {
+            id: "h1",
+            kind: "search" as const,
+            box: { x: 0, y: 0, w: 10, h: 10 },
+            sprite: {
+              sheet: "h1_sheet.png",
+              cols: 2,
+              frameCount: 2,
+              fps: 10,
+              bbox: { x: 0, y: 0, w: 10, h: 10 },
+            },
+          },
+        ],
+      };
+
+      const dummyState = {
+        used: [],
+        revealed: ["h1"],
+        inventory: [],
+        selected: null,
+        done: false,
+      };
+
+      render(
+        <SpriteCanvas
+          room={dummyRoom}
+          state={dummyState}
+          anims={[]}
+          setAnims={noop}
+          scale={1}
+        />,
+      );
+
+      act(() => {
+        for (const img of images) {
+          img.onload?.();
+        }
+      });
+
+      expect(drawnImages.some((src) => src.includes("h1_sheet"))).toBe(true);
+    } finally {
+      getContextSpy.mockRestore();
+      window.Image = origImage;
+    }
   });
 });

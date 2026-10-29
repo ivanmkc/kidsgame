@@ -97,12 +97,12 @@ export function SpriteCanvas({
       const isRevealed = st.revealed.includes(h.id);
       const hasRestLayer = Boolean(sp.rest && sp.restBbox);
 
-      if (hasRestLayer) {
-        // Clean-plate model: rest layer drawn for untouched hotspots,
-        // sprite last frame for revealed/used, item layer for revealed
-        const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
+      // Clean-plate model: rest layer drawn for untouched hotspots,
+      // sprite last frame for revealed/used, item layer for revealed
+      const entry = entriesRef.current.find((e) => e.hotspotId === h.id);
 
-        if (!isUsed && !isRevealed && !entry) {
+      if (!isUsed && !isRevealed && !entry) {
+        if (hasRestLayer) {
           const rest = restRef.current[h.id];
           if (rest?.naturalWidth && sp.restBbox) {
             ctx.drawImage(
@@ -113,18 +113,39 @@ export function SpriteCanvas({
               sp.restBbox.h * s,
             );
           }
-          continue;
         }
+        continue;
+      }
 
-        if (entry) {
-          if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
-          const sheet = sheetsRef.current[h.id];
-          if (!sheet?.naturalWidth) continue;
+      if (entry) {
+        if (!sp.sheet || !sp.cols || !sp.frameCount) continue;
+        const sheet = sheetsRef.current[h.id];
+        if (!sheet?.naturalWidth) continue;
+        const frameW = sheet.naturalWidth / sp.cols;
+        const rows = Math.ceil(sp.frameCount / sp.cols);
+        const frameH = sheet.naturalHeight / rows;
+        const col = entry.frameIndex % sp.cols;
+        const row = Math.floor(entry.frameIndex / sp.cols);
+        ctx.drawImage(
+          sheet,
+          col * frameW,
+          row * frameH,
+          frameW,
+          frameH,
+          sp.bbox.x * s,
+          sp.bbox.y * s,
+          sp.bbox.w * s,
+          sp.bbox.h * s,
+        );
+      } else if ((isUsed || isRevealed) && sp.sheet) {
+        const sheet = sheetsRef.current[h.id];
+        if (sheet?.naturalWidth && sp.cols && sp.frameCount) {
           const frameW = sheet.naturalWidth / sp.cols;
           const rows = Math.ceil(sp.frameCount / sp.cols);
           const frameH = sheet.naturalHeight / rows;
-          const col = entry.frameIndex % sp.cols;
-          const row = Math.floor(entry.frameIndex / sp.cols);
+          const lastIdx = sp.frameCount - 1;
+          const col = lastIdx % sp.cols;
+          const row = Math.floor(lastIdx / sp.cols);
           ctx.drawImage(
             sheet,
             col * frameW,
@@ -136,30 +157,7 @@ export function SpriteCanvas({
             sp.bbox.w * s,
             sp.bbox.h * s,
           );
-        } else if ((isUsed || isRevealed) && sp.sheet) {
-          const sheet = sheetsRef.current[h.id];
-          if (sheet?.naturalWidth && sp.cols && sp.frameCount) {
-            const frameW = sheet.naturalWidth / sp.cols;
-            const rows = Math.ceil(sp.frameCount / sp.cols);
-            const frameH = sheet.naturalHeight / rows;
-            const lastIdx = sp.frameCount - 1;
-            const col = lastIdx % sp.cols;
-            const row = Math.floor(lastIdx / sp.cols);
-            ctx.drawImage(
-              sheet,
-              col * frameW,
-              row * frameH,
-              frameW,
-              frameH,
-              sp.bbox.x * s,
-              sp.bbox.y * s,
-              sp.bbox.w * s,
-              sp.bbox.h * s,
-            );
-          }
         }
-
-        continue;
       }
     }
   }, []);
