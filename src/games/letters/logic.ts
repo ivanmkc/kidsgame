@@ -5,7 +5,7 @@
 import { t } from '../../i18n';
 import { Lang } from '../../lang';
 import { Rng, shuffle } from '../../rng';
-import { RHYME_WORDS, WORDS } from '../../words';
+import { RHYME_WORDS, WORDS } from '../../curriculum/words';
 
 export type LetterTier = 'upper' | 'mixed' | 'sound' | 'kana';
 

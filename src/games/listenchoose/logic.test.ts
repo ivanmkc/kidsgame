@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { makeRng } from "../../rng";
-import { WORDS } from "../../words";
-import levelsData from "./levels.json";
+import { WORDS } from '../../curriculum/words';
+import { WORD_LEVELS as levelsData } from "../../curriculum/content";
 import {
   LEVEL_1_WORDS,
   LEVEL_1_WORD_IDS,

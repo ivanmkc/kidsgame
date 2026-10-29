@@ -1,6 +1,6 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from "../../words";
+import { WORDS, wordFor } from '../../curriculum/words';
 import { sameCategory } from "../iconCategories";
 
 // Spoken prompt for Shadow Match across all four languages.

@@ -1,4 +1,6 @@
 import { ICON_CATEGORIES } from '../games/iconCategories';
+export * from './words';
+export { default as WORD_LEVELS } from './wordLevels.json';
 
 export const CURRICULUM = {
   categories: ICON_CATEGORIES,

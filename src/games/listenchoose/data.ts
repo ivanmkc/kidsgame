@@ -1,6 +1,7 @@
 import { Lang } from "../../lang";
-import { RHYME_WORDS, WORDS } from "../../words";
-import levels from "./levels.json";
+import { RHYME_WORDS, WORDS } from '../../curriculum/words';
+import { WORD_LEVELS } from "../../curriculum/content";
+
 export interface Word {
   icon: string;
   en: string;
@@ -17,9 +18,9 @@ export interface Word {
   yueR?: string;
 }
 
-export const LEVEL_1_WORD_IDS: readonly string[] = levels.level1;
-export const LEVEL_2_WORD_IDS: readonly string[] = levels.level2;
-export const LEVEL_3_WORD_IDS: readonly string[] = levels.level3;
+export const LEVEL_1_WORD_IDS: readonly string[] = WORD_LEVELS.level1;
+export const LEVEL_2_WORD_IDS: readonly string[] = WORD_LEVELS.level2;
+export const LEVEL_3_WORD_IDS: readonly string[] = WORD_LEVELS.level3;
 
 const ALL_WORDS_BY_ID = new Map<string, Word>(
   [...WORDS, ...RHYME_WORDS].map((w) => [w.icon, w]),

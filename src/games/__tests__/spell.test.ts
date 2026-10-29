@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SPOTIT_ICONS } from '../../assets/images';
 import { Lang } from '../../lang';
 import { makeRng } from '../../rng';
-import { RHYME_WORDS, WORDS } from '../../words';
+import { RHYME_WORDS, WORDS } from '../../curriculum/words';
 import {
   SpellDifficulty, SpellWord,
   charLine, decoyAlphabetFor, decoysFor, linesForWord, makeRound,
