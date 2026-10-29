@@ -121,3 +121,19 @@ export function symbolLabel(iconName: string, lang: Lang): string {
   if (!entry) throw new Error(`Unknown spotit icon: ${iconName}`);
   return wordFor(entry, lang).text;
 }
+
+export function computeSoloCardSize(width: number, height: number): number {
+  const isLandscape = width > height;
+  const availH = height - 84;
+  return isLandscape
+    ? Math.max(0, Math.min(availH - 24, (width - 3 * 24) / 2, 460))
+    : Math.max(0, Math.min((availH - 60) / 2, width - 40, 400));
+}
+
+export function computeDuelCardSize(width: number, height: number): number {
+  const isLandscape = width > height;
+  const availH = height - 84;
+  return isLandscape
+    ? Math.max(0, Math.min(availH - 90, (width - 2 * 12) / 2 / 2 - 20, 320))
+    : Math.max(0, Math.min((availH - 24) / 2 - 52, (width - 60) / 2, 320));
+}

@@ -11,7 +11,7 @@ import { colors } from "../../theme";
 import { sfx, useSay } from "../../sound";
 import { TimerRing, fmtTime, useElapsed } from "../../components/TimerRing";
 import { DealIn, Slot, SpotCard, layoutSlots } from "./cards";
-import { buildDeck, dealRound } from "./logic";
+import { buildDeck, dealRound, computeSoloCardSize } from "./logic";
 import { SpotItDuel } from "./SpotItDuel";
 import { useWinLine } from "../winlines";
 
@@ -165,11 +165,8 @@ function SpotItSolo({
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
-  const availH = height - 84;
   // Two cards side by side in landscape, stacked in portrait — sized to fit.
-  const cardSize = isLandscape
-    ? Math.min(availH - 24, (width - 3 * 24) / 2, 460)
-    : Math.min((availH - 60) / 2, width - 40, 400);
+  const cardSize = computeSoloCardSize(width, height);
 
   return (
     <GameShell
