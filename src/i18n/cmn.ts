@@ -472,4 +472,8 @@ export const CMN: Table = {
   'hidden.scene.steampunk_airship': '蒸汽飞艇',
   'hidden.scene.giant_kitchen': '巨人的厨房',
   'hidden.scene.witch_kitchen': '女巫的厨房',
+
+  'sums.plus': '加',
+  'sums.question': '一共有几个？',
+  'sums.praise': '答对了！',
 };

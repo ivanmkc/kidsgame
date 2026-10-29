@@ -1,4 +1,5 @@
 import { Difficulty } from "../../difficulty";
+import { t } from "../../i18n";
 import { Lang } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
 import { Position, scatterPositions } from "../count/logic";
@@ -114,35 +115,15 @@ export function makeSumsRound(rng: Rng, d: Difficulty): SumsRound {
 
 // ---------- speech ----------
 
-export const PLUS: Record<Lang, string> = {
-  en: "plus",
-  ja: "たす",
-  cmn: "加",
-  yue: "加",
-};
-
-export const QUESTION: Record<Lang, string> = {
-  en: "How many now?",
-  ja: "ぜんぶで いくつ？",
-  cmn: "一共有几个？",
-  yue: "一共有幾多個呀？",
-};
-
-export const PRAISE: Record<Lang, string> = {
-  en: "That's right!",
-  ja: "せいかい！",
-  cmn: "答对了！",
-  yue: "啱晒！",
-};
 
 /** Every game-specific literal this game will speak, across all four langs.
  *  Number words are shared across the suite (orchestrator's pool). */
 export function speechLines(): string[] {
   const s = new Set<string>();
   (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
-    s.add(PLUS[L]);
-    s.add(QUESTION[L]);
-    s.add(PRAISE[L]);
+    s.add(t(L, "sums.plus"));
+    s.add(t(L, "sums.question"));
+    s.add(t(L, "sums.praise"));
   });
   return [...s];
 }

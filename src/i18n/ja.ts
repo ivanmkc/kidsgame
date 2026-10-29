@@ -473,4 +473,8 @@ export const JA: Table = {
   'hidden.scene.steampunk_airship': 'スチームパンク ひこうせん',
   'hidden.scene.giant_kitchen': 'きょじん の だいどころ',
   'hidden.scene.witch_kitchen': 'まじょ の だいどころ',
+
+  'sums.plus': 'たす',
+  'sums.question': 'ぜんぶで いくつ？',
+  'sums.praise': 'せいかい！',
 };
