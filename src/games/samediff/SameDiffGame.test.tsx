@@ -300,7 +300,9 @@ describe("SameDiffGame UI", () => {
       });
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
+    expect(screen.getByTestId("samediff-score").textContent).toContain(
+      `${expectedScore}/`,
+    );
 
     // Pick buttons remain mounted during transition so visual cues play
     expect(screen.getByTestId("samediff-same")).toBeTruthy();
@@ -311,7 +313,9 @@ describe("SameDiffGame UI", () => {
       fireEvent.click(sameBtn);
       fireEvent.click(diffBtn);
     });
-    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
+    expect(screen.getByTestId("samediff-score").textContent).toContain(
+      `${expectedScore}/`,
+    );
 
     // Advance through the transition delay and playback for round 2
     act(() => {
@@ -324,7 +328,11 @@ describe("SameDiffGame UI", () => {
     act(() => {
       fireEvent.click(round2Same);
     });
-    if (screen.getByTestId("samediff-score").textContent?.includes(`${expectedScore}/`)) {
+    if (
+      screen
+        .getByTestId("samediff-score")
+        .textContent?.includes(`${expectedScore}/`)
+    ) {
       act(() => {
         vi.advanceTimersByTime(500);
         fireEvent.click(round2Diff);
@@ -332,7 +340,9 @@ describe("SameDiffGame UI", () => {
     } else {
       expectedScore++;
     }
-    expect(screen.getByTestId("samediff-score").textContent).toContain(`${expectedScore}/`);
+    expect(screen.getByTestId("samediff-score").textContent).toContain(
+      `${expectedScore}/`,
+    );
 
     vi.useRealTimers();
   });
@@ -351,7 +361,11 @@ describe("SameDiffGame UI", () => {
       act(() => {
         fireEvent.click(sameBtn);
       });
-      if (screen.getByTestId("samediff-score").textContent?.includes(`${currentScore}/`)) {
+      if (
+        screen
+          .getByTestId("samediff-score")
+          .textContent?.includes(`${currentScore}/`)
+      ) {
         act(() => {
           vi.advanceTimersByTime(500);
           fireEvent.click(diffBtn);
@@ -361,9 +375,14 @@ describe("SameDiffGame UI", () => {
       }
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain(`${currentScore}/8`);
+    expect(screen.getByTestId("samediff-score").textContent).toContain(
+      `${currentScore}/8`,
+    );
     act(() => {
-      vi.advanceTimersByTime(700);
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
     });
 
     const playAgainBtn = screen.getByTestId("play-again");
@@ -689,7 +708,11 @@ describe("SameDiffGame UI", () => {
       act(() => {
         fireEvent.click(sameBtn);
       });
-      if (screen.getByTestId("samediff-score").textContent?.includes(`${currentScore}/`)) {
+      if (
+        screen
+          .getByTestId("samediff-score")
+          .textContent?.includes(`${currentScore}/`)
+      ) {
         act(() => {
           vi.advanceTimersByTime(500);
           fireEvent.click(diffBtn);
@@ -699,7 +722,9 @@ describe("SameDiffGame UI", () => {
       }
     }
 
-    expect(screen.getByTestId("samediff-score").textContent).toContain(`${currentScore}/8`);
+    expect(screen.getByTestId("samediff-score").textContent).toContain(
+      `${currentScore}/8`,
+    );
     // Exactly 8 rounds were generated for the 8 rounds
     expect(spy).toHaveBeenCalledTimes(8);
 
@@ -718,9 +743,12 @@ describe("SameDiffGame UI", () => {
       expect(currResult.phraseIdx).not.toBe(prevResult.phraseIdx);
     }
 
-    // Advance to win overlay and click Play Again
+    // Advance to win overlay (1000ms win delay + 600ms arm delay) and click Play Again
     act(() => {
-      vi.advanceTimersByTime(700);
+      vi.advanceTimersByTime(1000);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
     });
     const playAgainBtn = screen.getByTestId("play-again");
     act(() => {
@@ -884,6 +912,119 @@ describe("SameDiffGame UI", () => {
     // At 1000ms, the next round's listening card mounts (it never unmounted, but choice container unmounts)
     expect(screen.queryByTestId("samediff-same")).toBeNull();
     expect(screen.getByTestId("melody-dot-0")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
+  it("delays win overlay by 1000ms after final correct pick so sparkles and sfx finish", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeSameDiffRound").mockImplementation(() => ({
+      phraseIdx: 0,
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: "same",
+    }));
+    const goodSpy = vi.spyOn(sfx, "good");
+    const winSpy = vi.spyOn(sfx, "win");
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Play 7 rounds to reach the final (8th) round on easy difficulty
+    for (let r = 0; r < 7; r++) {
+      act(() => {
+        vi.advanceTimersByTime(4800);
+      });
+      fireEvent.click(screen.getByTestId("samediff-same"));
+    }
+
+    // Round 8: advance through listen phases to pick phase
+    act(() => {
+      vi.advanceTimersByTime(4800);
+    });
+    const finalBtn = screen.getByTestId("samediff-same");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    goodSpy.mockClear();
+    winSpy.mockClear();
+
+    // Tap the winning answer
+    fireEvent.click(finalBtn);
+
+    // Immediate tick: sfx.good fires, celebration sparkles active, but WinOverlay is deferred
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(finalBtn.textContent).toContain("✨");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // Repeated taps during celebration are locked
+    fireEvent.click(finalBtn);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+
+    // At 999ms: WinOverlay is still not mounted
+    act(() => {
+      vi.advanceTimersByTime(999);
+    });
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 1000ms: WinOverlay mounts and sfx.win fires
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(winSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    // WinOverlay buttons arm after 600ms
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(screen.getByTestId("play-again")).toBeTruthy();
+
+    // Reset via play-again hides WinOverlay and resets round
+    fireEvent.click(screen.getByTestId("play-again"));
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.getByTestId("samediff-score").textContent).toContain("0/8");
+
+    vi.useRealTimers();
+  });
+
+  it("clears winTimer on unmount if unmounted during final round celebration", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeSameDiffRound").mockImplementation(() => ({
+      phraseIdx: 0,
+      phraseA: [{ m: 60, b: 1 }],
+      phraseB: [{ m: 60, b: 1 }],
+      answer: "same",
+    }));
+    const winSpy = vi.spyOn(sfx, "win");
+
+    const { unmount } = render(
+      <SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Play 7 rounds
+    for (let r = 0; r < 7; r++) {
+      act(() => {
+        vi.advanceTimersByTime(4800);
+      });
+      fireEvent.click(screen.getByTestId("samediff-same"));
+    }
+
+    // Round 8: reach pick phase and tap winning answer
+    act(() => {
+      vi.advanceTimersByTime(4800);
+    });
+    fireEvent.click(screen.getByTestId("samediff-same"));
+
+    // Unmount before 1000ms timer elapses
+    unmount();
+
+    // Advance past 1000ms
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // sfx.win should never fire after unmount
+    expect(winSpy).not.toHaveBeenCalled();
 
     vi.useRealTimers();
   });
@@ -1180,9 +1321,7 @@ describe("SameDiffGame UI", () => {
         return origSetTimeout(fn, ms, ...args);
       }) as typeof setTimeout);
 
-      const playSpy = vi
-        .spyOn(music, "playSequence")
-        .mockReturnValue(() => {});
+      const playSpy = vi.spyOn(music, "playSequence").mockReturnValue(() => {});
 
       render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -1205,4 +1344,3 @@ describe("SameDiffGame UI", () => {
     });
   });
 });
-
