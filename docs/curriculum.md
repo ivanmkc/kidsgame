@@ -44,7 +44,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 - `sounds` - Phonological awareness (Level 1)
 - `letters` - Letter-sound (Level 2)
 - `spell` - Blending (Level 3)
-- `bingo` - Sight words (Level 4)
+- `bingo` (phonics mode) - Phonological awareness (Level 1)
 - `story` - Sight words (Level 4)
 
 ### Numeracy
@@ -66,6 +66,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 ### Languages EN/JA/ZH
 
 - `carmode` - Languages EN/JA/ZH (Level 1)
+- `bingo` (name mode) - Languages EN/JA/ZH (Level 1)
 
 ### Executive Function
 
