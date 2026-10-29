@@ -191,12 +191,10 @@ describe("CompareGame fast-tap lock", () => {
       act(() => {
         fireEvent.click(correctPlate);
       });
-      if (r < 5) {
-        expect(sayThenCallback).not.toBeNull();
-        act(() => {
-          sayThenCallback!();
-        });
-      }
+      expect(sayThenCallback).not.toBeNull();
+      act(() => {
+        sayThenCallback!();
+      });
     }
 
     expect(screen.getByTestId("compare-score").textContent).toContain("6/6");
@@ -1117,3 +1115,67 @@ describe("CompareGame spoken voice prompts use central i18n table", () => {
   });
 });
 
+describe("CompareGame final round bug", () => {
+  let saySpy: ReturnType<typeof vi.spyOn>;
+  let sayThenSpy: ReturnType<typeof vi.spyOn>;
+  let sayThenCallback: (() => void) | null = null;
+  let sfxGoodSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    sayThenCallback = null;
+    saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    sayThenSpy = vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCallback = cb ?? null;
+    });
+    sfxGoodSpy = vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("does not announce win prematurely on the final round", () => {
+    vi.spyOn(logic, "compareSettings").mockReturnValue({
+      rounds: 1,
+      range: [1, 5],
+      minGap: 2,
+      minRatio: 1.5,
+      fewerFraction: 0,
+    });
+    vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+      left: { icon: "dog", count: 2, positions: [] },
+      right: { icon: "star", count: 6, positions: [] },
+      ask: "more",
+      correctSide: "right",
+    });
+
+    render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    saySpy.mockClear();
+
+    const plates = [
+      screen.getByTestId(/^compare-plate-left/),
+      screen.getByTestId(/^compare-plate-right/),
+    ];
+    const correctPlate = plates.find((p) =>
+      p.getAttribute("data-testid")?.endsWith("-correct"),
+    )!;
+
+    act(() => {
+      fireEvent.click(correctPlate);
+    });
+
+    expect(sfxGoodSpy).toHaveBeenCalled();
+    expect(sayThenSpy).toHaveBeenCalled();
+
+    // Win should not be triggered before sayThen callback
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "win.compare"));
+
+    act(() => {
+      sayThenCallback?.();
+    });
+
+    expect(saySpy).toHaveBeenCalledWith(t("en", "win.compare"));
+  });
+});
