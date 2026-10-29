@@ -127,9 +127,8 @@ export function getInstructionalFeedback(
 
 export function nextScoreValue(
   currentScore: number,
-  isFirstTry: boolean,
 ): number {
-  return isFirstTry ? currentScore + 1 : currentScore;
+  return currentScore + 1;
 }
 
 export interface FastSlowLayout {

@@ -584,8 +584,8 @@ describe("FastSlowGame UI interaction", () => {
     );
     fireEvent.click(correctBtn);
 
-    // Celebration happens, but score does NOT increment on fallback!
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    // Celebration happens, and score increments on fallback!
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
 
     // Advance celebration
     act(() => {
@@ -596,7 +596,7 @@ describe("FastSlowGame UI interaction", () => {
     });
 
     // Round 2 is loaded
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
 
     vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
     vi.useRealTimers();
@@ -652,8 +652,8 @@ describe("FastSlowGame UI interaction", () => {
       });
     }
 
-    // After 8 rounds, score is 0/8, NOT 8/8
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    // After 8 rounds, score is 8/8
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 8/8");
 
     // WinOverlay mounts
     act(() => {
@@ -664,7 +664,7 @@ describe("FastSlowGame UI interaction", () => {
     vi.useRealTimers();
   });
 
-  it("awards points only for first-try correct rounds in mixed performance game", () => {
+  it("awards points for all correct rounds in mixed performance game", () => {
     vi.useFakeTimers();
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -713,7 +713,7 @@ describe("FastSlowGame UI interaction", () => {
       });
     }
 
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 3/8");
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 8/8");
 
     vi.useRealTimers();
   });
@@ -942,7 +942,7 @@ describe("FastSlowGame UI interaction", () => {
     expect(
       within(activeCorrectBtn).queryAllByText(/✨|⭐/).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
 
     vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
     vi.useRealTimers();
@@ -997,9 +997,9 @@ describe("FastSlowGame UI interaction", () => {
     );
     expect(correctBtn).toBeTruthy();
 
-    // Fallback tap awards 0 points
+    // Fallback tap awards 1 point
     fireEvent.click(correctBtn);
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
 
     vi.useRealTimers();
   });
