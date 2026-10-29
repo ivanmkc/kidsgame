@@ -48,6 +48,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const lockedRef = useRef(false);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongPickRef = useRef<"high" | "low" | null>(null);
   const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
@@ -59,6 +60,14 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [listenNote, setListenNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<"high" | "low" | null>(null);
+  const clearWrongTimer = () => {
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
+    wrongPickRef.current = null;
+    setWrongPick(null);
+  };
   const [instructionalDirection, setInstructionalDirection] = useState<
     "high" | "low" | null
   >(null);
@@ -169,11 +178,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       wrongTimerRef.current !== null ||
       (phase === "listen" && instructionalDirection !== null)
     ) {
-      if (wrongTimerRef.current) {
-        clearTimeout(wrongTimerRef.current);
-        wrongTimerRef.current = null;
-      }
-      setWrongPick(null);
+      clearWrongTimer();
       setInstructionalDirection(correctAnswer(round));
       setPhase("listen");
       setListenNote(null);
@@ -196,15 +201,15 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "high" | "low") => {
-    if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
+    if (won || phase !== "pick" || lockedRef.current || !isValid() || wrongPickRef.current === picked) return;
     stopNarration();
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
+      clearWrongTimer();
       sfx.good();
       setSparkKey((k) => k + 1);
       const nextScore = nextScoreValue(score);
       setScore(nextScore);
-      setWrongPick(null);
       setInstructionalDirection(null);
       const nextRoundIndex = roundIndex + 1;
       setRoundIndex(nextRoundIndex);
@@ -233,7 +238,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
-      lockedRef.current = true;
+      wrongPickRef.current = picked;
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
       const trueDir = correctAnswer(round);
@@ -244,6 +249,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       wrongTimerRef.current = setTimeout(() => {
         wrongTimerRef.current = null;
         if (roundEpochRef.current !== currentEpoch || !isValid()) return;
+        lockedRef.current = true;
+        wrongPickRef.current = null;
         setWrongPick(null);
         setInstructionalDirection(trueDir);
         feedbackSpeechRef.current = getInstructionalFeedback(round, lang);
@@ -264,10 +271,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(advanceTimerRef.current);
       advanceTimerRef.current = null;
     }
-    if (wrongTimerRef.current) {
-      clearTimeout(wrongTimerRef.current);
-      wrongTimerRef.current = null;
-    }
+    clearWrongTimer();
     if (winTimerRef.current) {
       clearTimeout(winTimerRef.current);
       winTimerRef.current = null;
@@ -279,7 +283,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     setScore(0);
     setRoundIndex(0);
     setWon(false);
-    setWrongPick(null);
     setInstructionalDirection(null);
     setListenNote(null);
     setRound(makeHighLowRound(rngRef.current, difficulty));
@@ -293,11 +296,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
         clearTimeout(listenTimerRef.current);
         listenTimerRef.current = null;
       }
-      if (wrongTimerRef.current) {
-        clearTimeout(wrongTimerRef.current);
-        wrongTimerRef.current = null;
-      }
-      setWrongPick(null);
+      clearWrongTimer();
       setInstructionalDirection(null);
       setPhase("listen");
       setListenNote(null);

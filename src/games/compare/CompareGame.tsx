@@ -52,6 +52,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrongSide, setWrongSide] = useState<"left" | "right" | null>(null);
+  const wrongSideRef = useRef<"left" | "right" | null>(null);
   const [locked, setLocked] = useState(false);
   const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
@@ -62,16 +63,21 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   const isMountedRef = useRef(true);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const clearWrongTimers = () => {
+  const cancelWrongTimers = () => {
     wrongTimerRef.current.forEach(clearTimeout);
     wrongTimerRef.current = [];
+  };
+
+  const clearWrongState = () => {
+    cancelWrongTimers();
+    wrongSideRef.current = null;
+    setWrongSide(null);
   };
 
   useEffect(
     () => () => {
       isMountedRef.current = false;
-      wrongTimerRef.current.forEach(clearTimeout);
-      wrongTimerRef.current = [];
+      cancelWrongTimers();
     },
     [],
   );
@@ -86,10 +92,9 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       langMounted.current = true;
       return;
     }
-    clearWrongTimers();
+    clearWrongState();
     lockedRef.current = false;
     setLocked(false);
-    setWrongSide(null);
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keyed on the round OBJECT — repeats still re-speak; lang switch re-speaks prompt.
@@ -98,9 +103,9 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickSide = (side: "left" | "right") => {
-    if (won || locked || lockedRef.current || wrongSide !== null) return;
+    if (won || locked || lockedRef.current || wrongSideRef.current === side) return;
     if (side === round.correctSide) {
-      clearWrongTimers();
+      clearWrongState();
       lockedRef.current = true;
       setLocked(true);
       sfx.good();
@@ -111,21 +116,22 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
         if (!isMountedRef.current) return;
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));
+          wrongSideRef.current = null;
           setWrongSide(null);
           lockedRef.current = false;
           setLocked(false);
         }
       });
     } else {
-      lockedRef.current = true;
       sfx.wrong();
+      cancelWrongTimers();
+      wrongSideRef.current = side;
       setWrongSide(side);
-      clearWrongTimers();
       wrongTimerRef.current.push(
         setTimeout(() => {
           if (!isMountedRef.current || !isValid()) return;
+          wrongSideRef.current = null;
           setWrongSide((s) => (s === side ? null : s));
-          lockedRef.current = false;
         }, 450),
       );
       wrongTimerRef.current.push(
@@ -138,14 +144,13 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
-    clearWrongTimers();
+    clearWrongState();
     lockedRef.current = false;
     setLocked(false);
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeCompareRound(rngRef.current, difficulty));
     setScore(0);
-    setWrongSide(null);
   };
 
   const { width, height } = useWindowDimensions();

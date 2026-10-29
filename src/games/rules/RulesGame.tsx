@@ -74,10 +74,19 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   const [tapped, setTapped] = useState<number[]>([]);
   const tappedRef = useRef<number[]>([]);
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const wrongIdxRef = useRef<number | null>(null);
   const [reminded, setReminded] = useState(false);
   const remindTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const winTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearWrongTimer = () => {
+    if (wrongTimer.current) {
+      clearTimeout(wrongTimer.current);
+      wrongTimer.current = null;
+    }
+    wrongIdxRef.current = null;
+    setWrongIdx(null);
+  };
   const remind = () => {
     sfx.tap();
     say(round.rule.label);
@@ -85,7 +94,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     if (remindTimer.current) clearTimeout(remindTimer.current);
     remindTimer.current = setTimeout(() => setReminded(false), 2600);
   };
-  const [celebrate, setCelebrate] = useState(0);
+  const [, setCelebrate] = useState(0);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
@@ -107,6 +116,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
 
   useEffect(() => {
     introDone.current = false;
+    clearWrongTimer();
   }, [lang]);
 
   useEffect(() => {
@@ -124,7 +134,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (lockedRef.current || won || tappedRef.current.includes(i)) return;
+    if (lockedRef.current || won || tappedRef.current.includes(i) || wrongIdxRef.current === i) return;
     if (round.tiles[i].isMatch) {
       sfx.good();
       const next = [...tappedRef.current, i];
@@ -132,6 +142,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
       setTapped((prev) => (prev.includes(i) ? prev : [...prev, i]));
       if (next.length === round.matchCount) {
         lockedRef.current = true;
+        clearWrongTimer();
         setCelebrate((c) => c + 1);
         const nextIdx = roundIdx + 1;
         if (remindTimer.current) clearTimeout(remindTimer.current);
@@ -147,20 +158,22 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         }, 550);
       }
     } else {
-      lockedRef.current = true;
       sfx.wrong();
       say(tileLabel(round.tiles[i].icon, lang));
+      wrongIdxRef.current = i;
       setWrongIdx(i);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       wrongTimer.current = setTimeout(() => {
-        lockedRef.current = false;
+        wrongIdxRef.current = null;
         setWrongIdx((w) => (w === i ? null : w));
+        wrongTimer.current = null;
       }, 450);
     }
   };
 
   const reset = () => {
     lockedRef.current = false;
+    clearWrongTimer();
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     rulesRef.current = makeRules(rngRef.current, roundsToWin);
@@ -168,7 +181,6 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     setRound(buildRound(0));
     tappedRef.current = [];
     setTapped([]);
-    setWrongIdx(null);
   };
 
   const { width, height } = useWindowDimensions();

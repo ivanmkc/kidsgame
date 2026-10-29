@@ -36,7 +36,12 @@ describe("SumsGame fast-tap", () => {
     vi.restoreAllMocks();
   });
 
-  it("locks input and triggers error feedback only once when tapped rapidly", () => {
+  it("allows immediate tap of correct choice after wrong answer while ignoring repeated wrong taps", () => {
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
+      sayThenCb = cb;
+    });
+
     render(<SumsGame onHome={() => {}} difficulty="easy" lang="en" />);
 
     // Clear initial round saySequence calls.
@@ -55,40 +60,27 @@ describe("SumsGame fast-tap", () => {
     expect(wrongButton).toBeDefined();
     expect(correctBtn).toBeDefined();
 
-    // Tap rapidly 4 times and try tapping correct choice while locked
+    // Tap wrong choice
     fireEvent.click(wrongButton);
-    act(() => {
-      vi.advanceTimersByTime(100);
-    });
-    fireEvent.click(wrongButton);
-    act(() => {
-      vi.advanceTimersByTime(100);
-    });
-    fireEvent.click(correctBtn!);
-    act(() => {
-      vi.advanceTimersByTime(100);
-    });
-    fireEvent.click(wrongButton);
-
-    // Initial tap triggered error sfx once; subsequent taps while locked are dropped
     expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
-    expect(sound.sfx.good).not.toHaveBeenCalled();
 
-    // At 449ms from first tap: still locked and before 500ms voice timeout
-    act(() => {
-      vi.advanceTimersByTime(149);
-    });
-    expect(sound.say).not.toHaveBeenCalled();
+    // Repeated tap on the same wrong choice is ignored
+    fireEvent.click(wrongButton);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
 
-    // At 450ms: wrong pick lock expires. At 500ms: voice prompt fires once
-    act(() => {
-      vi.advanceTimersByTime(51);
-    });
-    expect(sound.say).toHaveBeenCalledTimes(1);
-
-    // Now unlocked, tapping correct choice succeeds
+    // Immediately tap correct choice: succeeds without waiting for 450ms lockout
     fireEvent.click(correctBtn!);
     expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+    // Additional tap on wrong choice during celebration is ignored
+    fireEvent.click(wrongButton);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // Praise finishes and advances round
+    act(() => {
+      sayThenCb?.();
+    });
+    expect(screen.getByTestId("sums-score").textContent).toContain("1/5");
   });
 
   it("clears wrongPickTimer on unmount without throwing", () => {
@@ -475,6 +467,64 @@ describe("SumsGame", () => {
     expect(correctBtn).toBeDefined();
 
     unmount();
+    vi.restoreAllMocks();
+  });
+
+  it("clears wrong pick lockout when language switches mid-flash so tapping the wrong choice again gives sfx.wrong", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "butterfly",
+      a: 2,
+      b: 3,
+      sum: 5,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+        { x: 50, y: 50 },
+      ],
+      choices: [3, 4, 5],
+    });
+
+    const { rerender, unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    const buttons = screen.getAllByRole("button");
+    const wrongBtn = buttons.find((b) => {
+      const tid = b.getAttribute("data-testid");
+      return tid && tid.startsWith("sums-choice-") && !tid.endsWith("-answer");
+    })!;
+    expect(wrongBtn).toBeDefined();
+
+    vi.mocked(sound.sfx.wrong).mockClear();
+
+    fireEvent.click(wrongBtn);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(wrongBtn);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    rerender(<SumsGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    fireEvent.click(wrongBtn);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(2);
+
+    unmount();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 });
