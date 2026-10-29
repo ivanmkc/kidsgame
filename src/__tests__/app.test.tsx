@@ -99,6 +99,7 @@ test.each([
   ["cm-shapes"],
   ["cm-animals"],
   ["cm-picword"],
+  ["cm-picspeak"],
 ])(
   "App routes to ConceptMatchGame for %s",
   async (route) => {
