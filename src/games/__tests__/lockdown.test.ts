@@ -20,7 +20,7 @@ import {
   countHidden,
 } from "../../menuCards";
 import { t } from "../../i18n";
-import { RHYME_WORDS, WORDS } from '../../curriculum/words';
+import { RHYME_WORDS, WORDS } from '../../curriculum/content';
 
 const mockStorage = new Map<string, string>();
 
