@@ -299,7 +299,7 @@ export const YUE: Table = {
   'rules.memoryCheck': '記憶挑戰！',
   'rules.ruleNumber': '規則 #{n}',
   'rules.doAgain': '再做一次規則 #{n} — 仲記得嗎？🤔',
-  'rules.remind': '💡 提我！',
+  'rules.remind': '🔊 提我！',
   'rules.progress': '搵到 {found} / {total}',
   'puzzle.peek': '🖼️ 偷睇',
   'puzzle.peekA11y': '偷睇砌好嘅圖',

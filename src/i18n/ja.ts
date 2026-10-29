@@ -300,7 +300,7 @@ export const JA: Table = {
   'rules.memoryCheck': 'きおくクイズ！',
   'rules.ruleNumber': 'ルール #{n}',
   'rules.doAgain': 'ルール #{n} を もういちど — おぼえてる？ 🤔',
-  'rules.remind': '💡 おしえて！',
+  'rules.remind': '🔊 おしえて！',
   'rules.progress': '{total}こ ちゅう {found}こ',
   'puzzle.peek': '🖼️ ちらみ',
   'puzzle.peekA11y': 'かんせいした えを ちらっとみる',
