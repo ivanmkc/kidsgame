@@ -709,6 +709,8 @@ describe("HighLowGame language switch safety", () => {
         return () => {};
       },
     );
+    const saySpy = vi.spyOn(sound, "say");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
 
     render(<LangHarness initialLang="en" />);
 
@@ -723,9 +725,22 @@ describe("HighLowGame language switch safety", () => {
     const scoreChip = screen.getByTestId("highlow-score");
     const initialScore = scoreChip.textContent;
 
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.highlow.sub" as never));
+    saySpy.mockClear();
+    stopNarrationSpy.mockClear();
+
     // Cycle language
     const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
+
+    // Audio narration stops and re-narrates prompt in Japanese
+    expect(stopNarrationSpy).toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.highlow.sub" as never));
+    const stopOrder = stopNarrationSpy.mock.invocationCallOrder[0];
+    const sayOrder = saySpy.mock.invocationCallOrder[0];
+    expect(stopOrder).toBeDefined();
+    expect(sayOrder).toBeDefined();
+    expect(stopOrder).toBeLessThan(sayOrder);
 
     // Labels should update to Japanese
     expect(highBtn.textContent).toContain(t("ja", "music.high" as never));

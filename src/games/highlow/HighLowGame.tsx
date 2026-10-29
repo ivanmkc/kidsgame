@@ -192,6 +192,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
         listenTimerRef.current = null;
         playRound(round);
       }, 400);
+    } else if (phase === "pick") {
+      say(t(lang, "shell.highlow.sub"));
     }
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
