@@ -78,6 +78,23 @@ describe("makeShadowRound", () => {
       }
     }
   });
+
+  it("avoids previousAnswer if possible", () => {
+    const icons = ["dog", "cat", "bird"];
+    const d = { choices: 3, categoryDistractors: false, transform: false };
+    const rng = () => 0; // would pick "dog" if not filtered
+    const round = makeShadowRound(rng, icons, d, "dog");
+    // "dog" is excluded, so "cat" (index 0 in ["cat", "bird"]) is picked.
+    expect(round.answer).toBe("cat");
+  });
+
+  it("allows previousAnswer if it is the only option", () => {
+    const icons = ["dog"];
+    const d = { choices: 1, categoryDistractors: false, transform: false };
+    const rng = () => 0;
+    const round = makeShadowRound(rng, icons, d, "dog");
+    expect(round.answer).toBe("dog");
+  });
 });
 
 describe("shadowOptionLabel", () => {
