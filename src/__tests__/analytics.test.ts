@@ -215,4 +215,26 @@ describe('analytics', () => {
     const { track } = await import('../analytics');
     expect(() => track('crash_fetch')).not.toThrow();
   });
+
+  it('catches and suppresses asynchronous promise rejections from fetch', async () => {
+    const unhandled: unknown[] = [];
+    const onUnhandled = (err: unknown) => {
+      unhandled.push(err);
+    };
+    process.on('unhandledRejection', onUnhandled);
+    try {
+      const fakeNavigatorWithoutBeacon: FakeNavigator = {};
+      vi.stubGlobal('navigator', fakeNavigatorWithoutBeacon);
+      vi.stubGlobal('fetch', () =>
+        Promise.reject(new Error('Network failure')),
+      );
+
+      const { track } = await import('../analytics');
+      track('fetch_reject');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(unhandled).toHaveLength(0);
+    } finally {
+      process.off('unhandledRejection', onUnhandled);
+    }
+  });
 });
