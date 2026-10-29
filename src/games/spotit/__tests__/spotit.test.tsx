@@ -180,4 +180,35 @@ describe('SpotItGame language switch safety', () => {
     expect(goodSpy).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId('spotit-score').textContent).toContain('2/10');
   });
+
+  it('keeps TimerRing mounted across rounds in timed difficulty', () => {
+    render(<SpotItGame onHome={() => {}} difficulty="medium" seed={42} />);
+    fireEvent.pointerDown(document.body);
+
+    const timerBefore = screen.getByTestId('spotit-timer');
+    expect(timerBefore).toBeDefined();
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+    expect(matchingId).toBeDefined();
+
+    const matchingButton = screen.getByTestId(`top-symbol-${matchingId}`);
+    expect(timerBefore.contains(matchingButton)).toBe(true);
+
+    act(() => {
+      fireEvent.click(matchingButton);
+    });
+
+    const timerAfter = screen.getByTestId('spotit-timer');
+    expect(timerAfter).toBe(timerBefore);
+  });
 });
+
