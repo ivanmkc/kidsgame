@@ -54,6 +54,11 @@ describe('spell — EN word pool (unchanged behavior)', () => {
 });
 
 describe('spell — ja word pool', () => {
+  it('returns words when called with default arguments (spotitIcons)', () => {
+    const pool = wordPool('ja');
+    expect(pool.length).toBeGreaterThan(0);
+  });
+
   it('pulls kana words with 2-4 chars, rejects overlong entries', () => {
     const pool = wordPool('ja', ALL_ICONS);
     expect(pool.length).toBeGreaterThanOrEqual(15);
