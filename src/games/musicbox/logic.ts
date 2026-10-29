@@ -83,6 +83,11 @@ export function harmonyOffsets(
 /** Vertical zone determines which object pool to draw from.
  *  yFrac 0 = top, 1 = bottom. */
 export type SpawnZone = "sky" | "mid" | "ground";
+export const ZONE_PARALLAX_SPEEDS: Record<SpawnZone, number> = {
+  sky: 0.2,
+  mid: 0.5,
+  ground: 1,
+};
 export function spawnZone(yFrac: number): SpawnZone {
   if (yFrac < 0.35) return "sky";
   if (yFrac > 0.65) return "ground";

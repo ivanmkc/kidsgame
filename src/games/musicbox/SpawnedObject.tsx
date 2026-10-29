@@ -3,7 +3,7 @@ import { Animated, Image, Pressable, StyleSheet } from "react-native";
 import { MUSICBOX_IMAGES } from "../../assets/images";
 import { t } from "../../i18n";
 import { Lang } from "../../lang";
-import type { SpawnZone } from "./logic";
+import { ZONE_PARALLAX_SPEEDS, type SpawnZone } from "./logic";
 
 export interface SpawnEntry {
   id: number;
@@ -65,9 +65,14 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
     });
   }, [spawnIn, idle, cfg.dur]);
 
+  const speed = ZONE_PARALLAX_SPEEDS[entry.zone];
   const worldTranslateX = useMemo(
-    () => Animated.add(Animated.multiply(scrollX, -1), entry.scrollAtSpawn),
-    [scrollX, entry.scrollAtSpawn],
+    () =>
+      Animated.multiply(
+        Animated.add(Animated.multiply(scrollX, -1), entry.scrollAtSpawn),
+        speed,
+      ),
+    [scrollX, entry.scrollAtSpawn, speed],
   );
 
   const handlePress = useCallback(() => {

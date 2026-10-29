@@ -10,6 +10,7 @@ import {
   pickSpawnSprite,
   songById,
   speechLines,
+  ZONE_PARALLAX_SPEEDS,
 } from "../musicbox/logic";
 import { SONGS, PENTATONIC } from "../musicbox/songs";
 import { SCENES, sceneById } from "../musicbox/scenes";
@@ -245,5 +246,11 @@ describe("musicbox v2 logic", () => {
     expect(lines).toContain(
       "まほうの けんばん！ タップすると きれいなおとが なるよ！",
     );
+  });
+
+  it("defines parallax speeds for all spawn zones", () => {
+    expect(ZONE_PARALLAX_SPEEDS.sky).toBe(0.2);
+    expect(ZONE_PARALLAX_SPEEDS.mid).toBe(0.5);
+    expect(ZONE_PARALLAX_SPEEDS.ground).toBe(1);
   });
 });
