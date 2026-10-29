@@ -365,6 +365,8 @@ describe("LettersGame", () => {
           return res;
         },
       );
+      const setTimeoutSpy = vi.spyOn(global, "setTimeout");
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
 
       const { unmount } = render(
         <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
@@ -379,7 +381,13 @@ describe("LettersGame", () => {
         fireEvent.click(screen.getByLabelText(wrongTile.label));
       });
 
+      // The error timer is specifically the one started with a 450ms delay
+      const callIdx = setTimeoutSpy.mock.calls.findLastIndex(args => args[1] === 450);
+      const timerId = setTimeoutSpy.mock.results[callIdx].value;
+
       unmount();
+
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(timerId);
 
       act(() => {
         vi.advanceTimersByTime(1000);
