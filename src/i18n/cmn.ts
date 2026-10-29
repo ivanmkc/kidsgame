@@ -116,6 +116,8 @@ export const CMN: Table = {
   'card.cm-picspeak.blurb': '把图片和声音连成对！',
   'card.cm-colors.title': '颜色与文字',
   'card.cm-colors.blurb': '把颜色和文字连成对！',
+  'card.cm-letters.title': '字母配对',
+  'card.cm-letters.blurb': '把大写和小写字母连成对！',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',

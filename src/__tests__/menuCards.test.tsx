@@ -103,6 +103,9 @@ test("WORD_CARDS, NUMBER_CARDS and GAME_CARDS register Concept Match decks", () 
   const colors = WORD_CARDS.find((c) => c.route === "cm-colors");
   expect(colors).toBeDefined();
   expect(colors?.key).toBe("cm-colors");
+  const letters = WORD_CARDS.find((c) => c.route === "cm-letters");
+  expect(letters).toBeDefined();
+  expect(letters?.key).toBe("cm-letters");
 });
 
 test("Concept Match menu cards render localized titles and blurbs", () => {
@@ -110,6 +113,7 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   const picwordCard = WORD_CARDS.find((c) => c.route === "cm-picword")!;
   const picspeakCard = WORD_CARDS.find((c) => c.route === "cm-picspeak")!;
   const colorsCard = WORD_CARDS.find((c) => c.route === "cm-colors")!;
+  const lettersCard = WORD_CARDS.find((c) => c.route === "cm-letters")!;
   const numdotsCard = NUMBER_CARDS.find((c) => c.route === "cm-numdots")!;
   const numhanCard = NUMBER_CARDS.find((c) => c.route === "cm-numhan")!;
   const shapesCard = GAME_CARDS.find((c) => c.route === "cm-shapes")!;
@@ -150,6 +154,18 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   );
   expect(colorsHtml).toContain("Colors &amp; Words");
   expect(colorsHtml).toContain("Match the color to its word!");
+
+  const lettersHtml = renderToString(
+    <MenuCard
+      g={lettersCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(lettersHtml).toContain("Letter Match");
+  expect(lettersHtml).toContain("Match big and small letters!");
 
   const enHtml = renderToString(
     <MenuCard

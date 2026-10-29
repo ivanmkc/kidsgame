@@ -117,6 +117,8 @@ export const JA: Table = {
   'card.cm-picspeak.blurb': '絵と音を合わせよう！',
   'card.cm-colors.title': '色と言葉',
   'card.cm-colors.blurb': '色と言葉を合わせよう！',
+  'card.cm-letters.title': 'もじあわせ',
+  'card.cm-letters.blurb': '大文字と小文字を合わせよう！',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',
