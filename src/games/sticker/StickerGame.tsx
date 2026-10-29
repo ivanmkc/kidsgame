@@ -87,7 +87,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     setMagicReachable(null);
     if (!publicImageUrl) { setMagicReachable(false); return; }
     const ac = new AbortController();
-    void publicUrlReachable(publicImageUrl, ac.signal).then(setMagicReachable);
+    void publicUrlReachable(publicImageUrl, ac.signal).then((reachable) => {
+      if (!ac.signal.aborted) setMagicReachable(reachable);
+    });
     return () => ac.abort();
   }, [publicImageUrl]);
 
