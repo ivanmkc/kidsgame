@@ -504,7 +504,7 @@ describe("SameDiffGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("prevents fast-tap hammering on wrong choice from playing wrong sound multiple times", () => {
+  it("prevents fast-tap hammering on wrong choice from playing wrong sound multiple times while immediately accepting correct choice", () => {
     vi.useFakeTimers();
     const wrongSpy = vi.spyOn(sfx, "wrong").mockImplementation(() => {});
     const goodSpy = vi.spyOn(sfx, "good").mockImplementation(() => {});
@@ -536,19 +536,14 @@ describe("SameDiffGame UI", () => {
     // Wrong sound played exactly once
     expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    // Tapping the correct choice during the 500ms lock is ignored
+    // Tapping the same wrong choice again within 500ms is ignored
     act(() => {
       vi.advanceTimersByTime(200);
-      fireEvent.click(sameBtn);
+      fireEvent.click(diffBtn);
     });
-    expect(goodSpy).not.toHaveBeenCalled();
-    expect(screen.getByTestId("samediff-score").textContent).toContain("0/");
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    // After the 500ms wrong cooldown expires, taps are unlocked
-    act(() => {
-      vi.advanceTimersByTime(300);
-    });
-
+    // Tapping the correct choice responds immediately without waiting for the 500ms timer
     act(() => {
       fireEvent.click(sameBtn);
     });
