@@ -253,7 +253,7 @@ export function makeBoard(
       return {
         mode,
         answerIdx: idx,
-        sound: entry.sound,
+        sound: phonicsVoiceSound(entry.sound),
         promptLines: phonicsPromptLines(entry.sound),
         confirmLines: phonicsConfirmLines(icon),
       };

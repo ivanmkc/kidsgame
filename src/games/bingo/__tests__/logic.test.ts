@@ -122,6 +122,14 @@ describe("makeBoard", () => {
       }
     }
   });
+
+  it("phonics board: maps internal phonetic symbols to voice sounds for display", () => {
+    for (let seed = 1; seed <= 50; seed++) {
+      const b = boardWith(seed, 3, "phonics");
+      const sounds = b.calls.map((c) => c.sound);
+      expect(sounds).not.toContain("aa");
+    }
+  });
 });
 
 describe("checkBingo", () => {
@@ -335,7 +343,7 @@ describe("speechLines", () => {
       (c) => b.cells[c.answerIdx].icon === "apple",
     );
     expect(appleCall).toBeDefined();
-    expect(appleCall!.sound).toBe("aa");
+    expect(appleCall!.sound).toBe("ah");
     expect(appleCall!.promptLines).toEqual([
       "Find something that starts with ah!",
     ]);
