@@ -184,7 +184,6 @@ export function playDrumSequence(
   onHit?: (index: number) => void,
   onDone?: () => void,
 ): () => void {
-  if (!gaps.length) { onDone?.(); return () => {}; }
   const muted = isMuted();
   const c = muted ? null : getCtx();
   if (!muted && (!c || !master)) { onDone?.(); return () => {}; }
