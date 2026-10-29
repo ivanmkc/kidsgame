@@ -41,6 +41,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const [roundIdx, setRoundIdx] = useState(0);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [round, setRound] = useState<SoundsRound>(() =>
     makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
   );
@@ -50,7 +51,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const won = roundIdx >= roundsToWin;
   useWinLine(won, t(lang, lang === "en" ? "win.sounds" : "win.soundsWords"));
   const { isValid } = useLangEpoch(lang);
-  const elapsed = useElapsed(showTimer && !won, timerKey);
+  const elapsed = useElapsed(showTimer && !won && !isFinishing, timerKey);
   const { width, height } = useWindowDimensions();
 
   const prompts = resolveSoundsPrompts(round.target, lang);
@@ -69,6 +70,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       // Wait for the confirmation chime to finish before advancing — otherwise
       // the next round's prompt say() cancels the celebration mid-word.
       const nextIdx = roundIdx + 1;
+      if (nextIdx >= roundsToWin) setIsFinishing(true);
       sayThen(prompts.confirmLines, () => {
         lockedRef.current = false;
         if (!isValid()) return;
@@ -99,6 +101,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    setIsFinishing(false);
     lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
