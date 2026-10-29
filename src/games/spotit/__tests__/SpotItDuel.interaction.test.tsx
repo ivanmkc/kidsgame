@@ -133,4 +133,80 @@ describe('SpotItDuel interaction and speech', () => {
       vi.useRealTimers();
     }
   });
+
+  it('resets countdown and shows 3-2-1 overlay on rematch', () => {
+    vi.useFakeTimers();
+    try {
+      const fixedRound = {
+        center: [0, 1, 2, 3, 4, 5],
+        a: [0, 6, 7, 8, 9, 10],
+        b: [1, 11, 12, 13, 14, 15],
+        answerA: 0,
+        answerB: 1,
+      };
+      vi.spyOn(spotitLogic, 'dealDuelRound').mockReturnValue(fixedRound);
+
+      render(<SpotItDuel onHome={noop} difficulty="easy" lang="en" />);
+
+      // Initial countdown: 3 -> 2 -> 1 -> 0 -> phase becomes 'play'
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('3');
+      for (let i = 0; i < 4; i++) {
+        act(() => {
+          vi.advanceTimersByTime(800);
+        });
+      }
+      expect(screen.queryByTestId('duel-countdown')).toBeNull();
+
+      // Win the match: Player A scores 3 times
+      for (let i = 0; i < 3; i++) {
+        act(() => {
+          const symbolBtn = screen.getByTestId('duel-a-my-symbol-0');
+          fireEvent.click(symbolBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(2000);
+        });
+      }
+
+      // WinOverlay is now visible. Advance 600ms so the tap shield arms the rematch button:
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+
+      const rematchBtn = screen.getByTestId('play-again');
+      expect(rematchBtn).not.toBeNull();
+
+      vi.mocked(say).mockClear();
+
+      // Click rematch
+      act(() => {
+        fireEvent.click(rematchBtn);
+      });
+
+      // Countdown should be reset to 3 and countdown element visible
+      const countdownEl = screen.queryByTestId('duel-countdown');
+      expect(countdownEl).not.toBeNull();
+      expect(countdownEl?.textContent).toBe('3');
+      expect(say).toHaveBeenCalledWith('Ready... Spot!');
+
+      // Step through countdown
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('2');
+
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('1');
+
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.queryByTestId('duel-countdown')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
+

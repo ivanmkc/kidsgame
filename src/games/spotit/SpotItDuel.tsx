@@ -134,6 +134,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
     setFrozen({ a: false, b: false });
     setRoundWinner(null);
     roundClosedRef.current = true; // taps ignored until countdown finishes
+    setCount(3);
     setPhase('ready');
   };
 
