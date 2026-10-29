@@ -7,7 +7,7 @@ import * as logic from "../logic";
 import { say, sfx, stopNarration } from "../../../sound";
 import { CATEGORY_TEXT } from "../../iconCategories";
 import { CURRICULUM } from "../../../curriculum/content";
-import { Lang } from "../../../lang";
+import { Lang, LANGS } from "../../../lang";
 import { LangContext } from "../../../components/GameShell";
 import { t } from "../../../i18n";
 
@@ -443,14 +443,25 @@ describe("OddOneGame", () => {
   });
 
   describe("speechLines", () => {
-    it("exports all 16 prompt lines across all categories and languages", () => {
+    it("exports all 20 prompt lines across categories, fallback, and languages", () => {
       const lines = logic.speechLines();
-      expect(lines).toHaveLength(16);
+      expect(lines).toHaveLength(20);
       expect(lines).toContain("Which one is NOT an animal?");
       expect(lines).toContain("どうぶつじゃないのは？");
       expect(lines).toContain("哪一个不是动物？");
       expect(lines).toContain("邊個唔係動物？");
-      expect(new Set(lines).size).toBe(16);
+      expect(lines).toContain(t("en", "oddone.defaultQuestion"));
+      expect(lines).toContain(t("ja", "oddone.defaultQuestion"));
+      expect(lines).toContain(t("cmn", "oddone.defaultQuestion"));
+      expect(lines).toContain(t("yue", "oddone.defaultQuestion"));
+      expect(new Set(lines).size).toBe(20);
+    });
+
+    it("includes oddone.defaultQuestion across all supported languages", () => {
+      const lines = new Set(logic.speechLines());
+      for (const l of LANGS) {
+        expect(lines.has(t(l.id, "oddone.defaultQuestion"))).toBe(true);
+      }
     });
   });
 

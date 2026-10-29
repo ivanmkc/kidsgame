@@ -1,11 +1,8 @@
 import { Lang, LANGS } from "../../lang";
 import { t } from "../../i18n";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from '../../curriculum/words';
-import {
-  CATEGORY_CONFLICTS,
-  CATEGORY_TEXT,
-} from "../iconCategories";
+import { WORDS, wordFor } from "../../curriculum/words";
+import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
 import { CURRICULUM } from "../../curriculum/content";
 
 export interface OddOneRound {
@@ -70,6 +67,9 @@ export function makeOddOneRound(
 /** All category prompt lines across every supported language (clip pre-render contract). */
 export function speechLines(): string[] {
   const lines = new Set<string>();
+  for (const l of LANGS) {
+    lines.add(t(l.id, "oddone.defaultQuestion"));
+  }
   for (const cat of Object.values(CATEGORY_TEXT)) {
     for (const l of LANGS) {
       lines.add(t(l.id, cat.not));
