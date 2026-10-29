@@ -51,7 +51,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
-  const firstTryRef = useRef(true);
   const notePulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const notePulse = useRef(new Animated.Value(1)).current;
   const [activeNote, setActiveNote] = useState<number | null>(null);
@@ -200,7 +199,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setSparkKey((k) => k + 1);
-      const next = nextScoreValue(score, firstTryRef.current);
+      const next = nextScoreValue(score);
       setScore(next);
       setWrongPick(null);
       setInstructionalTempo(null);
@@ -210,7 +209,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       if (nextHistory.length < total) {
         transitionTimerRef.current = setTimeout(() => {
           lockedRef.current = false;
-          firstTryRef.current = true;
           roundEpochRef.current++;
           setRound(makeFastSlowRound(rngRef.current, difficulty, nextHistory));
         }, 1000);
@@ -222,7 +220,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       lockedRef.current = true;
-      firstTryRef.current = false;
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
       const trueSpeed = getActualSpeed(round);
@@ -277,7 +274,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     roundEpochRef.current++;
     feedbackSpeechRef.current = null;
     lockedRef.current = false;
-    firstTryRef.current = true;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);

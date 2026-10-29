@@ -148,11 +148,9 @@ describe("fast or slow", () => {
     expect(getInstructionalFeedback(slowRound, "yue")).toEqual(["慢", "聽下…"]);
   });
 
-  it("increments score only on first try and penalizes fallback attempts", () => {
-    expect(nextScoreValue(0, true)).toBe(1);
-    expect(nextScoreValue(5, true)).toBe(6);
-    expect(nextScoreValue(0, false)).toBe(0);
-    expect(nextScoreValue(5, false)).toBe(5);
+  it("increments score unconditionally", () => {
+    expect(nextScoreValue(0)).toBe(1);
+    expect(nextScoreValue(5)).toBe(6);
   });
 
   it("renders FastSlowGame and displays localized strings", () => {
