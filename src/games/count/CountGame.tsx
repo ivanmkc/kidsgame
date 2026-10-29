@@ -20,7 +20,6 @@ import { colors, darken, fonts, shadows } from "../../theme";
 import { say, sayThen, sfx } from "../../sound";
 import {
   CountRound,
-  PROMPTS,
   applyTap,
   countSettings,
   critterLabel,
@@ -76,7 +75,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
     setLocked(false);
     if (!won) {
       if (phase === "quiz") {
-        say(PROMPTS[lang]);
+        say(t(lang, "shell.count.prompt"));
       } else if (phase === "count") {
         say(t(lang, "shell.count.sub"));
       }
@@ -234,7 +233,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               disabled={won}
               onPress={() => {
                 if (won || lockedRef.current) return;
-                say(PROMPTS[lang]);
+                say(t(lang, "shell.count.prompt"));
               }}
               accessibilityRole="button"
               accessibilityLabel={promptText}

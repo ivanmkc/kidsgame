@@ -162,6 +162,7 @@ export const JA: Table = {
   'shell.count.title': 'いっしょにかぞえよう',
   'shell.count.sub': 'みんなを タップして いくつか おしえて',
   'shell.count.prompt': 'いくつかな？',
+  'count.praise': 'すごい！',
   'shell.compare.title': 'どっちがおおい？',
   'shell.compare.subMore': 'おおいほうを タップ',
   'shell.compare.subFewer': 'すくないほうを タップ',

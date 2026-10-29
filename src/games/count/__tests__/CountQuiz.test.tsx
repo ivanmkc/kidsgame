@@ -12,7 +12,6 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
-import { PROMPTS } from "../logic";
 
 describe("CountGame quiz phase", () => {
   beforeEach(() => {
@@ -141,7 +140,7 @@ describe("CountGame quiz phase", () => {
       fireEvent.click(c);
     }
 
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
     saySpy.mockClear();
 
     const promptBtn = screen.getByTestId("count-prompt");
@@ -156,7 +155,7 @@ describe("CountGame quiz phase", () => {
 
     fireEvent.click(promptBtn);
     expect(saySpy).toHaveBeenCalledTimes(1);
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.en);
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
   });
 
   it("does not replay prompt audio when locked during transition", () => {
@@ -208,7 +207,7 @@ describe("CountGame quiz phase", () => {
       fireEvent.click(c);
     }
 
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.count.prompt"));
     saySpy.mockClear();
 
     const promptBtn = screen.getByTestId("count-prompt");
@@ -223,7 +222,7 @@ describe("CountGame quiz phase", () => {
 
     fireEvent.click(promptBtn);
     expect(saySpy).toHaveBeenCalledTimes(1);
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.count.prompt"));
   });
 
   it("stops narration via useLangEpoch when language switches mid-game", () => {
@@ -287,7 +286,7 @@ describe("CountGame quiz phase", () => {
     // Prompt replay and inputs are unlocked
     saySpy.mockClear();
     fireEvent.click(promptBtn);
-    expect(saySpy).toHaveBeenCalledWith(PROMPTS.ja);
+    expect(saySpy).toHaveBeenCalledWith(t("ja", "shell.count.prompt"));
 
     // Choices are also interactive again
     fireEvent.click(wrongChoice!);
