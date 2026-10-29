@@ -107,6 +107,7 @@ describe("ListenChooseGame", () => {
       vi.runOnlyPendingTimers();
     });
     vi.useRealTimers();
+    vi.restoreAllMocks();
     cleanup();
     setViewport(1024, 768);
   });
@@ -819,5 +820,38 @@ describe("ListenChooseGame", () => {
     expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({ text: t("yue", "card.listenchoose.blurb") }),
     );
+  });
+
+  it("scales the speaker button down while actively speaking", () => {
+    let capturedCb: (() => void) | null = null;
+    const sayThenSpy = vi.spyOn(sound, "sayThen").mockImplementation((_text, cb) => {
+      if (cb) capturedCb = cb;
+    });
+    const onHome = vi.fn();
+    render(<ListenChooseGame onHome={onHome} />);
+    
+    fireEvent.click(screen.getByTestId("play-button"));
+    
+    const captured = capturedPressableMap["speaker-button"];
+    const latestCaptured = captured[captured.length - 1];
+    const styleFunction = latestCaptured.style as (state: { pressed: boolean }) => any;
+    const evaluatedStyle = styleFunction({ pressed: false });
+    const flattenedStyle = StyleSheet.flatten(evaluatedStyle);
+    
+    expect(flattenedStyle.transform).toEqual([{ scale: 0.94 }]);
+
+    expect(capturedCb).not.toBeNull();
+    act(() => {
+      capturedCb!();
+    });
+
+    const capturedAfter = capturedPressableMap["speaker-button"];
+    const latestCapturedAfter = capturedAfter[capturedAfter.length - 1];
+    const styleFunctionAfter = latestCapturedAfter.style as (state: { pressed: boolean }) => any;
+    const evaluatedStyleAfter = styleFunctionAfter({ pressed: false });
+    const flattenedStyleAfter = StyleSheet.flatten(evaluatedStyleAfter);
+    
+    expect(flattenedStyleAfter.transform).toBeUndefined();
+    sayThenSpy.mockRestore();
   });
 });

@@ -49,6 +49,8 @@ export function ListenChooseGame({
 }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
   const [started, setStarted] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speakEpochRef = useRef(0);
   const [captions, setCaptions] = useState(false);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [state, setGameState] = useState<GameState>(() =>
@@ -93,6 +95,7 @@ export function ListenChooseGame({
     setWobbleIcon(null);
     setCelebrate(false);
     setStarted(false);
+    setIsSpeaking(false);
     setGameState(initGameState(rngRef.current, difficulty, lang));
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -101,16 +104,22 @@ export function ListenChooseGame({
     lockedRef.current = false;
     setStarted(true);
     const targetWord = getWordText(state.currentRound.target, lang);
+    const currentSpeakEpoch = ++speakEpochRef.current;
+    setIsSpeaking(true);
     sayThen([targetWord], () => {
       if (!isValid()) return;
+      if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
     });
   };
 
   const onReplay = () => {
     if (!isValid()) return;
     const targetWord = getWordText(state.currentRound.target, lang);
+    const currentSpeakEpoch = ++speakEpochRef.current;
+    setIsSpeaking(true);
     sayThen([targetWord], () => {
       if (!isValid()) return;
+      if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
     });
   };
 
@@ -143,8 +152,11 @@ export function ListenChooseGame({
         if (!next.won) {
           if (!isValid()) return;
           const nextWord = getWordText(next.currentRound.target, lang);
+          const currentSpeakEpoch = ++speakEpochRef.current;
+          setIsSpeaking(true);
           sayThen([nextWord], () => {
             if (!isValid()) return;
+            if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
           });
         }
       }, 800);
@@ -167,8 +179,11 @@ export function ListenChooseGame({
       setGameState(next);
       if (!isValid()) return;
       const targetWord = getWordText(state.currentRound.target, lang);
+      const currentSpeakEpoch = ++speakEpochRef.current;
+      setIsSpeaking(true);
       sayThen([targetWord], () => {
         if (!isValid()) return;
+        if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
       });
     }
   };
@@ -265,7 +280,7 @@ export function ListenChooseGame({
                     borderRadius: layout.speakerSize / 2,
                   },
                   shadows.soft,
-                  pressed && styles.pressed,
+                  (pressed || isSpeaking) && styles.pressed,
                 ]}
               >
                 <Text
@@ -336,8 +351,11 @@ export function ListenChooseGame({
           const next = initGameState(rngRef.current, difficulty, lang);
           setGameState(next);
           if (!isValid()) return;
+          const currentSpeakEpoch = ++speakEpochRef.current;
+          setIsSpeaking(true);
           sayThen([getWordText(next.currentRound.target, lang)], () => {
             if (!isValid()) return;
+            if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
           });
         }}
         onHome={handleHome}
