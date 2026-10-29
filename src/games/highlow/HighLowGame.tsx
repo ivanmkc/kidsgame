@@ -16,7 +16,7 @@ import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sayThen, sfx, stopNarration } from "../../sound";
+import { say, sayThen, sfx, stopNarration } from "../../sound";
 import { playSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -39,6 +39,8 @@ interface Props {
 
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const { width } = useWindowDimensions();
   const layout = highLowLayout(width);
   const total = roundsToWin(difficulty);
@@ -111,6 +113,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
           setInstructionalDirection(null);
           lockedRef.current = false;
           setPhase("pick");
+          say(t(langRef.current, "shell.highlow.sub"));
         }
       },
     );
@@ -194,6 +197,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: "high" | "low") => {
     if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
+    stopNarration();
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
       sfx.good();
@@ -353,6 +357,29 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     outputRange: [1, 1.04],
   });
 
+  const renderMelodyDots = (allFilled: boolean) => (
+    <View style={styles.melodyDotRow}>
+      <View
+        testID="melody-dot-0"
+        style={[
+          styles.melodyDot,
+          (allFilled || (listenNote !== null && listenNote >= 0)) &&
+            styles.melodyDotFilled,
+          { transform: [{ translateY: melodyDotOffsetY(round, 0) }] },
+        ]}
+      />
+      <View
+        testID="melody-dot-1"
+        style={[
+          styles.melodyDot,
+          (allFilled || (listenNote !== null && listenNote >= 1)) &&
+            styles.melodyDotFilled,
+          { transform: [{ translateY: melodyDotOffsetY(round, 1) }] },
+        ]}
+      />
+    </View>
+  );
+
   return (
     <GameShell
       title={t(lang, "shell.highlow.title" as never)}
@@ -391,33 +418,13 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 )}
               </Text>
             ) : null}
-            <View style={styles.melodyDotRow}>
-              <View
-                testID="melody-dot-0"
-                style={[
-                  styles.melodyDot,
-                  listenNote !== null &&
-                    listenNote >= 0 &&
-                    styles.melodyDotFilled,
-                  { transform: [{ translateY: melodyDotOffsetY(round, 0) }] },
-                ]}
-              />
-              <View
-                testID="melody-dot-1"
-                style={[
-                  styles.melodyDot,
-                  listenNote !== null &&
-                    listenNote >= 1 &&
-                    styles.melodyDotFilled,
-                  { transform: [{ translateY: melodyDotOffsetY(round, 1) }] },
-                ]}
-              />
-            </View>
+            {renderMelodyDots(false)}
           </View>
         ) : (
           <View
             style={{ alignItems: "center", gap: layout.gap, width: "100%" }}
           >
+            {renderMelodyDots(true)}
             <Pressable
               onPress={replay}
               testID="highlow-replay"

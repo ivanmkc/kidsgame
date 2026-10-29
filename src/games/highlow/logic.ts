@@ -69,9 +69,7 @@ export function getInstructionalFeedback(
   return [t(lang, dirKey), t(lang, "music.listen")];
 }
 
-export function nextScoreValue(
-  currentScore: number,
-): number {
+export function nextScoreValue(currentScore: number): number {
   return currentScore + 1;
 }
 
