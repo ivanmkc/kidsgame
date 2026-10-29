@@ -1,9 +1,9 @@
 // First Sounds (EN phonics) / First Words (JA/cmn/yue localised).
 // Distractors in every mode carry DISTINCT phonic sounds so that even in
 // non-EN modes the tile set can't accidentally offer two "duh" answers.
-import { Lang } from '../../lang';
-import { Rng, shuffle } from '../../rng';
-import { WORDS, WordEntry, soundsFor, wordFor } from '../../curriculum/words';
+import { Lang } from "../../lang";
+import { Rng, shuffle } from "../../rng";
+import { WORDS, WordEntry, soundsFor, wordFor } from "../../curriculum/content";
 
 export interface SoundsTile {
   key: string;
@@ -25,10 +25,12 @@ export interface SoundsSettings {
   tiles: number;
 }
 
-export function settingsForSounds(difficulty: 'easy' | 'medium' | 'hard'): SoundsSettings {
-  if (difficulty === 'easy') return { rounds: 8,  tiles: 3 };
-  if (difficulty === 'hard') return { rounds: 12, tiles: 4 };
-  return                            { rounds: 10, tiles: 4 };
+export function settingsForSounds(
+  difficulty: "easy" | "medium" | "hard",
+): SoundsSettings {
+  if (difficulty === "easy") return { rounds: 8, tiles: 3 };
+  if (difficulty === "hard") return { rounds: 12, tiles: 4 };
+  return { rounds: 10, tiles: 4 };
 }
 
 export interface SoundsLayout {
@@ -89,10 +91,10 @@ export function soundsLayout(
 }
 
 const ASK: Record<Lang, string> = {
-  en: '',                    // EN builds a full "Which one starts with X?" line
-  ja: 'どれかな？',
-  cmn: '哪一个是？',
-  yue: '邊個係？',
+  en: "", // EN builds a full "Which one starts with X?" line
+  ja: "どれかな？",
+  cmn: "哪一个是？",
+  yue: "邊個係？",
 };
 
 function capitalize(s: string): string {
@@ -106,8 +108,11 @@ export interface SoundsPrompts {
   confirmLines: string[];
 }
 
-export function resolveSoundsPrompts(target: WordEntry, lang: Lang): SoundsPrompts {
-  if (lang === 'en') {
+export function resolveSoundsPrompts(
+  target: WordEntry,
+  lang: Lang,
+): SoundsPrompts {
+  if (lang === "en") {
     const promptLines = [`Which one starts with ${target.sound}?`];
     return {
       promptLines,
@@ -135,7 +140,11 @@ function playablePool(icons: string[]): WordEntry[] {
 }
 
 export function makeSoundsRound(
-  rng: Rng, icons: string[], lang: Lang, tileCount: number, avoidIcon?: string,
+  rng: Rng,
+  icons: string[],
+  lang: Lang,
+  tileCount: number,
+  avoidIcon?: string,
 ): SoundsRound {
   const pool = playablePool(icons);
   const candidates = pool.filter((w) => w.icon !== avoidIcon);
@@ -151,7 +160,10 @@ export function makeSoundsRound(
     twins.has(w.icon) || soundsFor(w).includes(target.sound);
   const usedSounds = new Set<string>([target.sound]);
   const distractors: WordEntry[] = [];
-  const shuffled = shuffle(rng, pool.filter((w) => w.icon !== target.icon && !ambiguous(w)));
+  const shuffled = shuffle(
+    rng,
+    pool.filter((w) => w.icon !== target.icon && !ambiguous(w)),
+  );
   for (const w of shuffled) {
     if (distractors.length >= tileCount - 1) break;
     if (usedSounds.has(w.sound)) continue;
@@ -200,7 +212,7 @@ export function speechLines(): string[] {
     s.add(`${capitalize(w.en)} starts with ${w.sound}!`);
   }
   // Non-EN: fixed ask word + per-entry localized word + confirm chime.
-  for (const lang of ['ja', 'cmn', 'yue'] as const) {
+  for (const lang of ["ja", "cmn", "yue"] as const) {
     s.add(ASK[lang]);
     for (const w of WORDS) {
       const loc = wordFor(w, lang);
