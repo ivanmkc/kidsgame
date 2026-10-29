@@ -1146,6 +1146,74 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('does not jump when one finger is lifted during pinch gesture', () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const placed = screen.getByTestId('sticker-placed-1');
+    expect(placed).toBeDefined();
+
+    const t1 = { pageX: 10, pageY: 10, clientX: 10, clientY: 10, identifier: 0, target: placed };
+    const t2 = { pageX: 100, pageY: 100, clientX: 100, clientY: 100, identifier: 1, target: placed };
+
+    act(() => {
+      fireEvent.touchStart(placed, { touches: [t1, t2], changedTouches: [t1, t2] });
+      fireEvent.touchMove(placed, {
+        touches: [
+          { ...t1, pageX: 10, pageY: 10 },
+          { ...t2, pageX: 100, pageY: 100 },
+        ],
+        changedTouches: [
+          { ...t1, pageX: 10, pageY: 10 },
+          { ...t2, pageX: 100, pageY: 100 },
+        ],
+      });
+      fireEvent.touchMove(placed, {
+        touches: [
+          { ...t1, pageX: 2, pageY: 2 },
+          { ...t2, pageX: 150, pageY: 150 },
+        ],
+        changedTouches: [
+          { ...t1, pageX: 2, pageY: 2 },
+          { ...t2, pageX: 150, pageY: 150 },
+        ],
+      });
+      // Lift t2 (finger 2 lifted, finger 1 still on screen)
+      fireEvent.touchEnd(placed, {
+        touches: [t1],
+        changedTouches: [t2],
+      });
+      // Move remaining finger
+      fireEvent.touchMove(placed, {
+        touches: [
+          { ...t1, pageX: 300, pageY: 300 },
+        ],
+        changedTouches: [
+          { ...t1, pageX: 300, pageY: 300 },
+        ],
+      });
+    });
+
+    expect(placed.style.transform).toContain('translateX(0px) translateY(0px)');
+
+    act(() => {
+      fireEvent.touchEnd(placed, {
+        touches: [],
+        changedTouches: [{ ...t1, pageX: 300, pageY: 300 }],
+      });
+    });
+
+    expect(screen.getByTestId('sticker-placed-1')).toBeDefined();
+    expect(placed.style.transform).toContain('translateX(0px) translateY(0px)');
+
+    unmount();
+  });
+
   it('uses cache and plays win sound on duplicate magic location', async () => {
     const sfxWinSpy = vi.spyOn(sfx, 'win').mockReturnValue();
     vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
