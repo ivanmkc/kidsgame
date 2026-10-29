@@ -155,16 +155,20 @@ describe("RhymeGame", () => {
     const saySequenceSpy = vi.spyOn(sound, "saySequence");
     const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
-    
-    const round = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
-    const wrongIdx = round.tiles.findIndex(t => !t.isAnswer);
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const wrongIdx = round.tiles.findIndex((t) => !t.isAnswer);
     const wrongTile = round.tiles[wrongIdx];
-    
+
     saySequenceSpy.mockClear();
     fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
-    
+
     expect(sound.sfx.wrong).toHaveBeenCalled();
-    expect(saySequenceSpy).toHaveBeenCalledWith([wrongTile.word, ...round.promptLines]);
+    expect(saySequenceSpy).toHaveBeenCalledWith([
+      wrongTile.word,
+      ...round.promptLines,
+    ]);
   });
 
   it("tapping a correct tile twice only triggers sfx.good once", () => {
@@ -604,5 +608,12 @@ describe("RhymeGame", () => {
     const round1Tile = screen.getByTestId("rhyme-tile-0");
     fireEvent.click(round1Tile);
     expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
+  });
+
+  it("renders 'coming soon' banner when original language has fewer than 3 families despite fallback", () => {
+    vi.spyOn(logic, "effectiveLang").mockReturnValue("en");
+
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(screen.getByTestId("rhyme-fewer-banner")).toBeDefined();
   });
 });

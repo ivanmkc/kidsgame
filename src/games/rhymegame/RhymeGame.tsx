@@ -62,7 +62,7 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
     familyCount,
   );
   const playable = canPlay(entries);
-  const showComingSoonBanner = familyCount < 3;
+  const showComingSoonBanner = gameLang !== lang;
 
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
