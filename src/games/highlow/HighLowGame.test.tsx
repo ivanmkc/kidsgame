@@ -452,11 +452,9 @@ describe("HighLowGame UI", () => {
     );
     fireEvent.click(correctBtnAgain);
 
-    // Celebration happens
+    // Celebration happens, and score increments on fallback!
     expect(goodSpy).toHaveBeenCalledTimes(1);
-
-    // But score does NOT increment!
-    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 1/8");
 
     // Advance celebration to load round 2
     act(() => {
@@ -474,8 +472,8 @@ describe("HighLowGame UI", () => {
     );
     fireEvent.click(correctBtnR2);
 
-    // Score now increments to 1/8
-    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 1/8");
+    // Score now increments to 2/8
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 2/8");
 
     vi.useRealTimers();
   });
@@ -534,8 +532,10 @@ describe("HighLowGame UI", () => {
       );
       fireEvent.click(correctBtnAfterReplay);
 
-      // Score stays 0
-      expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+      // Score increments
+      expect(screen.getByTestId("highlow-score").textContent).toBe(
+        `🎵 ${roundIdx + 1}/8`,
+      );
 
       // Advance celebration
       act(() => {
@@ -543,9 +543,9 @@ describe("HighLowGame UI", () => {
       });
     }
 
-    // WinOverlay is displayed and final score remains 0/8
+    // WinOverlay is displayed and final score is 8/8
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
-    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 8/8");
 
     vi.useRealTimers();
   });
@@ -835,7 +835,7 @@ describe("HighLowGame language switch safety", () => {
 
     // Player can now tap the correct answer in Japanese
     fireEvent.click(highBtn);
-    expect(screen.getByTestId("highlow-score").textContent).toContain("0/8");
+    expect(screen.getByTestId("highlow-score").textContent).toContain("1/8");
   });
 
   it("cancels pending wrong delay timer and speaks instructional feedback in new language when language switches during error flash", () => {

@@ -46,11 +46,9 @@ describe("highlow logic", () => {
     expect(roundsToWin("hard")).toBe(12);
   });
 
-  it("nextScoreValue increments only on first try", () => {
-    expect(nextScoreValue(0, true)).toBe(1);
-    expect(nextScoreValue(3, true)).toBe(4);
-    expect(nextScoreValue(0, false)).toBe(0);
-    expect(nextScoreValue(3, false)).toBe(3);
+  it("increments score unconditionally", () => {
+    expect(nextScoreValue(0)).toBe(1);
+    expect(nextScoreValue(3)).toBe(4);
   });
 
   it("provides instructional feedback stating the correct direction and listen prompt across languages", () => {
