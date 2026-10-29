@@ -86,6 +86,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
     roundClosedRef.current = true;
     if (idx === round.oddIndex) {
       sfx.good();
+      say(itemLabel(round.odd, lang));
       const next = score + 1;
       setScore(next);
       setWrongIdx(null);
