@@ -112,8 +112,8 @@ describe("HighLowGame UI", () => {
       onDoneCb?.();
     });
 
-    expect(screen.queryByTestId("melody-dot-0")).toBeNull();
-    expect(screen.queryByTestId("melody-dot-1")).toBeNull();
+    expect(screen.getByTestId("melody-dot-0")).toBeDefined();
+    expect(screen.getByTestId("melody-dot-1")).toBeDefined();
     expect(screen.getByTestId("highlow-high")).toBeDefined();
     expect(screen.getByTestId("highlow-low")).toBeDefined();
 
@@ -195,7 +195,7 @@ describe("HighLowGame UI", () => {
     // Pick buttons remain mounted immediately and score updates
     expect(screen.queryByTestId("highlow-high")).not.toBeNull();
     expect(screen.queryByTestId("highlow-low")).not.toBeNull();
-    expect(screen.queryByTestId("melody-dot-0")).toBeNull();
+    expect(screen.queryByTestId("melody-dot-0")).not.toBeNull();
     expect(screen.getByTestId("highlow-score").textContent).toContain("1/");
 
     // Halfway through celebration delay (500ms): buttons still mounted
@@ -204,7 +204,7 @@ describe("HighLowGame UI", () => {
     });
     expect(screen.queryByTestId("highlow-high")).not.toBeNull();
     expect(screen.queryByTestId("highlow-low")).not.toBeNull();
-    expect(screen.queryByTestId("melody-dot-0")).toBeNull();
+    expect(screen.queryByTestId("melody-dot-0")).not.toBeNull();
 
     // Tapping during celebration delay is locked / ignored
     fireEvent.click(wrongBtn);
@@ -411,7 +411,7 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("gates score progression so fallback picks complete round with celebration but do not increment score", () => {
+  it("awards score progression when round is completed on second attempt after wrong answer and hint", () => {
     vi.useFakeTimers();
     let latestNotes: music.SeqNote[] = [];
     let onDoneCb: (() => void) | undefined;
@@ -478,7 +478,7 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("scout repro: missing all rounds initially provides instructional feedback and finishes with 0 score rather than 8/8", () => {
+  it("awards credit for guided corrections across all rounds so child finishes with 8/8 score", () => {
     vi.useFakeTimers();
     let latestNotes: music.SeqNote[] = [];
     let onDoneCb: (() => void) | undefined;
@@ -532,7 +532,7 @@ describe("HighLowGame UI", () => {
       );
       fireEvent.click(correctBtnAfterReplay);
 
-      // Score increments
+      // Score increments for guided correction
       expect(screen.getByTestId("highlow-score").textContent).toBe(
         `🎵 ${roundIdx + 1}/8`,
       );
@@ -543,7 +543,7 @@ describe("HighLowGame UI", () => {
       });
     }
 
-    // WinOverlay is displayed and final score is 8/8
+    // WinOverlay is displayed and final score is full 8/8
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
     expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 8/8");
 
@@ -847,6 +847,7 @@ describe("HighLowGame language switch safety", () => {
         return () => {};
       },
     );
+    const saySpy = vi.spyOn(sound, "say");
     const sayThenSpy = vi.spyOn(sound, "sayThen");
     vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
       noteA: 72,
@@ -860,6 +861,10 @@ describe("HighLowGame language switch safety", () => {
       vi.advanceTimersByTime(400);
       onDoneCb?.();
     });
+
+    expect(saySpy).toHaveBeenCalledWith("Was the second note higher or lower?");
+    saySpy.mockClear();
+    sayThenSpy.mockClear();
 
     // Tap wrong answer ("high")
     const highBtn = screen.getByTestId("highlow-high");
@@ -1288,6 +1293,81 @@ describe("HighLowGame accessibility", () => {
       // Child selects "Higher" based on dot 1 being vertically higher
       fireEvent.click(screen.getByTestId("highlow-high"));
       expect(goodSpy).toHaveBeenCalledTimes(1);
+
+      vi.useRealTimers();
+    });
+
+    it("speaks round prompt with say and retains melody dot pitch contour during pick phase", () => {
+      vi.useFakeTimers();
+      let onDoneCb: (() => void) | undefined;
+      vi.spyOn(music, "playSequence").mockImplementation(
+        (_notes, _bpm, _onNote, onDone) => {
+          onDoneCb = onDone;
+          return () => {};
+        },
+      );
+      const saySpy = vi.spyOn(sound, "say");
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 60,
+        noteB: 72,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      // Advance through initial listen delay
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      // Spoke round prompt upon entering pick phase
+      expect(saySpy).toHaveBeenCalledWith(
+        "Was the second note higher or lower?",
+      );
+
+      // Visual melody dot pitch contour is retained alongside pick buttons
+      const dot0 = screen.getByTestId("melody-dot-0") as HTMLElement;
+      const dot1 = screen.getByTestId("melody-dot-1") as HTMLElement;
+      expect(dot0).toBeDefined();
+      expect(dot1).toBeDefined();
+      expect(dot0.style.transform).toBe("translateY(20px)");
+      expect(dot1.style.transform).toBe("translateY(-20px)");
+      expect(screen.getByTestId("highlow-high")).toBeDefined();
+      expect(screen.getByTestId("highlow-low")).toBeDefined();
+
+      vi.useRealTimers();
+    });
+
+    it("calls stopNarration on pick to prevent prompt audio from overlapping celebration and next round", () => {
+      vi.useFakeTimers();
+      let onDoneCb: (() => void) | undefined;
+      vi.spyOn(music, "playSequence").mockImplementation(
+        (_notes, _bpm, _onNote, onDone) => {
+          onDoneCb = onDone;
+          return () => {};
+        },
+      );
+      const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 60,
+        noteB: 72,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      stopNarrationSpy.mockClear();
+
+      const highBtn = screen.getByTestId("highlow-high");
+      act(() => {
+        fireEvent.click(highBtn);
+      });
+
+      expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
 
       vi.useRealTimers();
     });

@@ -48,7 +48,7 @@ describe("highlow logic", () => {
 
   it("increments score unconditionally", () => {
     expect(nextScoreValue(0)).toBe(1);
-    expect(nextScoreValue(3)).toBe(4);
+    expect(nextScoreValue(5)).toBe(6);
   });
 
   it("provides instructional feedback stating the correct direction and listen prompt across languages", () => {
