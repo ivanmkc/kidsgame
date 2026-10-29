@@ -182,7 +182,7 @@ describe("SoundsGame round transition lock", () => {
   let wrongSpy: ReturnType<typeof vi.spyOn>;
   let saySequenceSpy: ReturnType<typeof vi.spyOn>;
   let sayThenSpy: ReturnType<typeof vi.spyOn>;
-  let sayThenCallback: (() => void) | null = null;
+  let sayThenCallback = null as (() => void) | null;
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -435,5 +435,68 @@ describe("SoundsGame narration cleanup", () => {
     expect(saySequenceSpy).toHaveBeenCalledTimes(1);
     unmount();
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("SoundsGame timer behavior", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  it("stops timer during final round confirmation", () => {
+    const onHome = vi.fn();
+    
+    // Force 1 round to win, but keeping medium so timer is true
+    vi.spyOn(logic, "settingsForSounds").mockReturnValue({ rounds: 1, tiles: 3 });
+
+    let roundInfo: logic.SoundsRound | undefined;
+    const origMakeSoundsRound = logic.makeSoundsRound;
+    vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+      const res = origMakeSoundsRound(...args);
+      roundInfo = res;
+      return res;
+    });
+
+    let sayThenCallback: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_seq, cb) => {
+      sayThenCallback = cb;
+    });
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+
+    render(<SoundsGame onHome={onHome} difficulty="medium" lang="en" />);
+    
+    // Timer starts at 0:00
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:00");
+    
+    // Advance 5 seconds
+    act(() => { vi.advanceTimersByTime(5000); });
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
+    
+    // Tap correct tile
+    if (!roundInfo) throw new Error("roundInfo not set");
+    const correctTile = screen.getByTestId(`sounds-tile-${roundInfo.answerIdx}`);
+    fireEvent.click(correctTile);
+    
+    // We are now in final celebration, sayThenCallback is captured
+    expect(sayThenCallback).not.toBeNull();
+    
+    // Advance time again. Since we tapped the final correct tile, timer should NOT advance
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
+    
+    // Finish celebration
+    act(() => { sayThenCallback?.(); });
+    
+    // Time still not advancing because we won
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
   });
 });
