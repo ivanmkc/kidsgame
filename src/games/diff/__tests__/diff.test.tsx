@@ -42,9 +42,27 @@ vi.mock("react-native", async (importOriginal) => {
 describe("DiffGame", () => {
   it("preserves layout across re-renders and does not recalculate", () => {
     const randomSpy = vi.spyOn(Math, "random");
-    const { rerender } = render(<DiffGame onHome={() => {}} onPickScene={() => {}} onBackToPicker={() => {}} difficulty="medium" sceneId="aquarium" lang="en" />);
+    const { rerender } = render(
+      <DiffGame
+        onHome={() => {}}
+        onPickScene={() => {}}
+        onBackToPicker={() => {}}
+        difficulty="medium"
+        sceneId="aquarium"
+        lang="en"
+      />,
+    );
     const callsAfterMount = randomSpy.mock.calls.length;
-    rerender(<DiffGame onHome={() => {}} onPickScene={() => {}} onBackToPicker={() => {}} difficulty="medium" sceneId="aquarium" lang="ja" />);
+    rerender(
+      <DiffGame
+        onHome={() => {}}
+        onPickScene={() => {}}
+        onBackToPicker={() => {}}
+        difficulty="medium"
+        sceneId="aquarium"
+        lang="ja"
+      />,
+    );
     expect(randomSpy.mock.calls.length).toBe(callsAfterMount);
     randomSpy.mockRestore();
   });
@@ -84,6 +102,39 @@ describe("DiffGame", () => {
 
     fireEvent.click(screen.getByTestId("left-target-0"));
     expect(sfxSpy).toHaveBeenCalledOnce();
+  });
+
+  it("keeps found targets interactive on both pictures without passing taps to backdrop", () => {
+    const sfxSpy = vi.spyOn(sfx, "good").mockReturnValue();
+    render(
+      <DiffGame
+        onHome={noop}
+        difficulty="medium"
+        sceneId={manifest.diff[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    const leftTarget = screen.getByTestId("left-target-0");
+    const rightTarget = screen.getByTestId("right-target-0");
+
+    // Initially unfound
+    expect(leftTarget.getAttribute("aria-disabled")).toBeNull();
+    expect(rightTarget.getAttribute("aria-disabled")).toBeNull();
+
+    // Tap to find the difference
+    fireEvent.click(leftTarget);
+    expect(sfxSpy).toHaveBeenCalledTimes(1);
+
+    // Found targets must not be disabled (which would let touches pass to the backdrop)
+    expect(leftTarget.getAttribute("aria-disabled")).toBeNull();
+    expect(rightTarget.getAttribute("aria-disabled")).toBeNull();
+
+    // Tapping the same difference again on either picture does not trigger good sfx or count as miss
+    fireEvent.click(leftTarget);
+    fireEvent.click(rightTarget);
+    expect(sfxSpy).toHaveBeenCalledTimes(1);
   });
 
   it("renders hint button with localized accessibilityLabel following lang", () => {
@@ -697,4 +748,3 @@ describe("DiffGame scene picker surprise fallback", () => {
     }
   });
 });
-
