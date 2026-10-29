@@ -69,6 +69,8 @@ export const JA: Table = {
   'card.sounds.blurb': 'きこえた ことばの えを えらぼう',
   'card.rhyme.title': 'ライムタイム',
   'card.rhyme.blurb': 'おなじひびきの えを さがそう！',
+  'card.wordfamily.title': 'ことばの かぞく',
+  'card.wordfamily.blurb': 'おとを あわせて ことばを つくろう！',
   'card.spell.title': 'ことばづくり',
   'card.spell.blurb': 'もじを ならべて ことばを つくろう！',
   'card.listenchoose.title': 'きいてえらぼう',
