@@ -415,6 +415,96 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("stops narration and does not re-trigger saySequence during wrong pick error flash", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+      noteA: 60,
+      noteB: 72, // ascending -> correctAnswer is "high"
+    });
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    saySeqSpy.mockClear();
+    stopNarrationSpy.mockClear();
+
+    // Pick wrong answer ("low")
+    fireEvent.click(screen.getByTestId("highlow-low"));
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+    // saySequence must NOT be re-triggered during wrong-pick error flash
+    expect(saySeqSpy).not.toHaveBeenCalled();
+
+    // Advance 200ms into the 500ms flash
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(saySeqSpy).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it("stops narration on replay and speaks prompt and choices again after replay completes", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+
+    render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    saySeqSpy.mockClear();
+    stopNarrationSpy.mockClear();
+
+    // Click replay button in pick phase
+    fireEvent.click(screen.getByTestId("highlow-replay"));
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).not.toHaveBeenCalled();
+
+    // Melody finishes replaying
+    act(() => {
+      onDoneCb?.();
+    });
+
+    // Re-enters pick phase and speaks prompt and choices again
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      "Was the second note higher or lower?",
+      "Higher",
+      "Lower",
+    ]);
+
+    vi.useRealTimers();
+  });
+
   it("awards score progression when round is completed on second attempt after wrong answer and hint", () => {
     vi.useFakeTimers();
     let latestNotes: music.SeqNote[] = [];
@@ -851,7 +941,7 @@ describe("HighLowGame language switch safety", () => {
         return () => {};
       },
     );
-    const saySpy = vi.spyOn(sound, "say");
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
     const sayThenSpy = vi.spyOn(sound, "sayThen");
     vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
       noteA: 72,
@@ -866,8 +956,12 @@ describe("HighLowGame language switch safety", () => {
       onDoneCb?.();
     });
 
-    expect(saySpy).toHaveBeenCalledWith("Was the second note higher or lower?");
-    saySpy.mockClear();
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      "Was the second note higher or lower?",
+      "Higher",
+      "Lower",
+    ]);
+    saySeqSpy.mockClear();
     sayThenSpy.mockClear();
 
     // Tap wrong answer ("high")
@@ -898,6 +992,7 @@ describe("HighLowGame language switch safety", () => {
       expect.any(Function),
       expect.any(Number),
     );
+    expect(saySeqSpy).not.toHaveBeenCalled();
   });
 
   it("stops playing sequence and restarts melody cleanly when language switches mid-listen", () => {
@@ -1017,6 +1112,54 @@ describe("HighLowGame language switch safety", () => {
     const lowBtnR2 = screen.getByTestId("highlow-low");
     expect(highBtnR2.textContent).toContain("たかくなった");
     expect(lowBtnR2.textContent).toContain("ひくくなった");
+  });
+
+  it("speaks prompt and choices in new language when language switches during pick phase without cancelling new speech", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+
+    render(<LangHarness initialLang="en" />);
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      "Was the second note higher or lower?",
+      "Higher",
+      "Lower",
+    ]);
+
+    saySeqSpy.mockClear();
+    stopNarrationSpy.mockClear();
+
+    // Cycle language to Japanese mid-round in pick phase
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // stopNarration must precede saySequence so the new language narration is not cancelled
+    expect(stopNarrationSpy).toHaveBeenCalled();
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      t("ja", "shell.highlow.sub" as never),
+      t("ja", "music.high" as never),
+      t("ja", "music.low" as never),
+    ]);
+
+    const stopOrder = stopNarrationSpy.mock.invocationCallOrder[0];
+    const sayOrder = saySeqSpy.mock.invocationCallOrder[0];
+    expect(stopOrder).toBeLessThan(sayOrder);
   });
 });
 
@@ -1301,7 +1444,7 @@ describe("HighLowGame accessibility", () => {
       vi.useRealTimers();
     });
 
-    it("speaks round prompt with say and retains melody dot pitch contour during pick phase", () => {
+    it("speaks round prompt and choices with saySequence and retains melody dot pitch contour during pick phase", () => {
       vi.useFakeTimers();
       let onDoneCb: (() => void) | undefined;
       vi.spyOn(music, "playSequence").mockImplementation(
@@ -1310,7 +1453,7 @@ describe("HighLowGame accessibility", () => {
           return () => {};
         },
       );
-      const saySpy = vi.spyOn(sound, "say");
+      const saySeqSpy = vi.spyOn(sound, "saySequence");
       vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
         noteA: 60,
         noteB: 72,
@@ -1324,10 +1467,12 @@ describe("HighLowGame accessibility", () => {
         onDoneCb?.();
       });
 
-      // Spoke round prompt upon entering pick phase
-      expect(saySpy).toHaveBeenCalledWith(
+      // Spoke round prompt and choices upon entering pick phase
+      expect(saySeqSpy).toHaveBeenCalledWith([
         "Was the second note higher or lower?",
-      );
+        "Higher",
+        "Lower",
+      ]);
 
       // Visual melody dot pitch contour is retained alongside pick buttons
       const dot0 = screen.getByTestId("melody-dot-0") as HTMLElement;
