@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { t } from "../../../i18n";
 import { makeRng } from "../../../rng";
 import {
+  KANA_POOL,
   LETTER_SOUNDS,
   kanaConfusableGroup,
   makeLetterRound,
   settingsForLetters,
   shouldShowGlyph,
+  speechLines,
 } from "../logic";
 
 describe("shouldShowGlyph", () => {
@@ -146,26 +149,86 @@ describe("makeLetterRound: kana tier", () => {
 describe("makeLetterRound: prompt line localization", () => {
   it("localizes upper/mixed tier prompt across all languages", () => {
     const rng = () => 0;
-    expect(makeLetterRound(rng, "upper", 6, undefined, "en").promptLine).toBe("Find the letter A!");
-    expect(makeLetterRound(rng, "upper", 6, undefined, "ja").promptLine).toBe("「A」をさがして！");
-    expect(makeLetterRound(rng, "upper", 6, undefined, "cmn").promptLine).toBe("找一找字母 A！");
-    expect(makeLetterRound(rng, "upper", 6, undefined, "yue").promptLine).toBe("搵一搵字母 A！");
+    expect(makeLetterRound(rng, "upper", 6, undefined, "en").promptLine).toBe(
+      "Find the letter A!",
+    );
+    expect(makeLetterRound(rng, "upper", 6, undefined, "ja").promptLine).toBe(
+      "「A」をさがして！",
+    );
+    expect(makeLetterRound(rng, "upper", 6, undefined, "cmn").promptLine).toBe(
+      "找一找字母 A！",
+    );
+    expect(makeLetterRound(rng, "upper", 6, undefined, "yue").promptLine).toBe(
+      "搵一搵字母 A！",
+    );
   });
 
   it("localizes sound tier prompt across all languages", () => {
     const idxA = LETTER_SOUNDS.findIndex((s) => s.letter === "A");
     const rngA = () => (idxA + 0.5) / LETTER_SOUNDS.length;
-    expect(makeLetterRound(rngA, "sound", 8, undefined, "en").promptLine).toBe("Which letter says aa?");
-    expect(makeLetterRound(rngA, "sound", 8, undefined, "ja").promptLine).toBe("「aa」の おとの もじは どれ？");
-    expect(makeLetterRound(rngA, "sound", 8, undefined, "cmn").promptLine).toBe("哪个字母发 aa 的音？");
-    expect(makeLetterRound(rngA, "sound", 8, undefined, "yue").promptLine).toBe("邊個字母發 aa 嘅音？");
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "en").promptLine).toBe(
+      "Which letter says aa?",
+    );
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "ja").promptLine).toBe(
+      "「aa」の おとの もじは どれ？",
+    );
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "cmn").promptLine).toBe(
+      "哪个字母发 aa 的音？",
+    );
+    expect(makeLetterRound(rngA, "sound", 8, undefined, "yue").promptLine).toBe(
+      "邊個字母發 aa 嘅音？",
+    );
   });
 
   it("localizes kana tier prompt across all languages", () => {
     const rng = () => 0;
-    expect(makeLetterRound(rng, "kana", 6, undefined, "ja").promptLine).toBe("「あ」をさがして！");
-    expect(makeLetterRound(rng, "kana", 6, undefined, "en").promptLine).toBe("Find the kana あ!");
-    expect(makeLetterRound(rng, "kana", 6, undefined, "cmn").promptLine).toBe("找一找假名 あ！");
-    expect(makeLetterRound(rng, "kana", 6, undefined, "yue").promptLine).toBe("搵一搵假名 あ！");
+    expect(makeLetterRound(rng, "kana", 6, undefined, "ja").promptLine).toBe(
+      "「あ」をさがして！",
+    );
+    expect(makeLetterRound(rng, "kana", 6, undefined, "en").promptLine).toBe(
+      "Find the kana あ!",
+    );
+    expect(makeLetterRound(rng, "kana", 6, undefined, "cmn").promptLine).toBe(
+      "找一找假名 あ！",
+    );
+    expect(makeLetterRound(rng, "kana", 6, undefined, "yue").promptLine).toBe(
+      "搵一搵假名 あ！",
+    );
+  });
+});
+
+describe("speechLines", () => {
+  it("only generates reachable prompts per language", () => {
+    const lines = speechLines();
+    const lineSet = new Set(lines);
+
+    // Total should only include valid combinations:
+    // 25 kana (ja) + 3 * (26 letters + 18 sounds) = 157.
+    expect(lines).toHaveLength(
+      KANA_POOL.length + 3 * (26 + LETTER_SOUNDS.length),
+    );
+
+    // Valid combinations included:
+    expect(lineSet.has(t("ja", "letters.findKana", { kana: "あ" }))).toBe(true);
+    expect(lineSet.has(t("en", "letters.find", { letter: "A" }))).toBe(true);
+    expect(lineSet.has(t("en", "letters.sound", { sound: "aa" }))).toBe(true);
+    expect(lineSet.has(t("cmn", "letters.find", { letter: "A" }))).toBe(true);
+    expect(lineSet.has(t("yue", "letters.sound", { sound: "aa" }))).toBe(true);
+
+    // Unreachable combinations excluded:
+    // Non-JA languages never play kana tier
+    expect(lineSet.has(t("en", "letters.findKana", { kana: "あ" }))).toBe(
+      false,
+    );
+    expect(lineSet.has(t("cmn", "letters.findKana", { kana: "あ" }))).toBe(
+      false,
+    );
+    expect(lineSet.has(t("yue", "letters.findKana", { kana: "あ" }))).toBe(
+      false,
+    );
+
+    // JA never plays alphabet or phonics sound tiers
+    expect(lineSet.has(t("ja", "letters.find", { letter: "A" }))).toBe(false);
+    expect(lineSet.has(t("ja", "letters.sound", { sound: "aa" }))).toBe(false);
   });
 });

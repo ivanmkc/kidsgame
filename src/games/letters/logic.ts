@@ -303,15 +303,21 @@ export function makeLetterRound(
 export function speechLines(): string[] {
   const lines = new Set<string>();
   for (const lang of ["en", "ja", "cmn", "yue"] as const) {
-    // upper + mixed prompts speak the LETTER NAME (case-agnostic).
-    for (const L of ALL_LETTERS)
-      lines.add(t(lang, "letters.find", { letter: L }));
-    // sound-mode prompts, one per unique sound.
-    for (const s of LETTER_SOUNDS)
-      lines.add(t(lang, "letters.sound", { sound: s.sound }));
-    // kana prompts, one per hiragana in the pool.
-    for (const k of KANA_POOL)
-      lines.add(t(lang, "letters.findKana", { kana: k.kana }));
+    if (lang === "ja") {
+      // kana prompts, one per hiragana in the pool.
+      for (const k of KANA_POOL) {
+        lines.add(t(lang, "letters.findKana", { kana: k.kana }));
+      }
+    } else {
+      // upper + mixed prompts speak the LETTER NAME (case-agnostic).
+      for (const L of ALL_LETTERS) {
+        lines.add(t(lang, "letters.find", { letter: L }));
+      }
+      // sound-mode prompts, one per unique sound.
+      for (const s of LETTER_SOUNDS) {
+        lines.add(t(lang, "letters.sound", { sound: s.sound }));
+      }
+    }
   }
   return [...lines];
 }
