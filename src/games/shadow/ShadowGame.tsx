@@ -18,7 +18,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx, say, useSay } from "../../sound";
+import { sfx, say, saySequence, useSay } from "../../sound";
 import {
   ShadowDifficulty,
   makeShadowRound,
@@ -59,7 +59,12 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
   const won = score >= roundsToWin;
   useSay(shadowPrompt(lang));
   useEffect(() => {
-    if (won) say(t(lang, "win.shadow"));
+    if (won) {
+      saySequence([
+        shadowOptionLabel(round.answer, lang),
+        t(lang, "win.shadow"),
+      ]);
+    }
   }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const roundClosedRef = useRef(false);
@@ -78,6 +83,7 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
       setScore(next);
       setWrong(null);
       if (next < roundsToWin) {
+        say(shadowOptionLabel(round.answer, lang));
         setTimeout(() => {
           setRound(
             makeShadowRound(
