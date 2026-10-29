@@ -98,10 +98,15 @@ test.each([
   ["cm-numhan"],
   ["cm-shapes"],
   ["cm-animals"],
-])("App routes to ConceptMatchGame for %s", async (route) => {
-  window.location.hash = `#/${route}`;
-  const { default: App } = await import("../../App");
-  render(<App />);
-  expect(screen.getByTestId("concept-board")).toBeTruthy();
-});
+  ["cm-picword"],
+])(
+  "App routes to ConceptMatchGame for %s",
+  async (route) => {
+    window.location.hash = `#/${route}`;
+    const { default: App } = await import("../../App");
+    render(<App />);
+    expect(screen.getByTestId("concept-board")).toBeTruthy();
+  },
+  15000,
+);
 

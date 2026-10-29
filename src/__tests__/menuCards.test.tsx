@@ -75,7 +75,11 @@ test("sounds card title and blurb match whole-word matching in ja, cmn, and yue"
   expect(yueHtml).not.toContain("首音");
 });
 
-test("NUMBER_CARDS and GAME_CARDS register Concept Match decks", () => {
+test("WORD_CARDS, NUMBER_CARDS and GAME_CARDS register Concept Match decks", () => {
+  const picword = WORD_CARDS.find((c) => c.route === "cm-picword");
+  expect(picword).toBeDefined();
+  expect(picword?.key).toBe("cm-picword");
+
   const numdots = NUMBER_CARDS.find((c) => c.route === "cm-numdots");
   expect(numdots).toBeDefined();
   expect(numdots?.key).toBe("cm-numdots");
@@ -95,10 +99,23 @@ test("NUMBER_CARDS and GAME_CARDS register Concept Match decks", () => {
 
 test("Concept Match menu cards render localized titles and blurbs", () => {
   const onNavigate = vi.fn();
+  const picwordCard = WORD_CARDS.find((c) => c.route === "cm-picword")!;
   const numdotsCard = NUMBER_CARDS.find((c) => c.route === "cm-numdots")!;
   const numhanCard = NUMBER_CARDS.find((c) => c.route === "cm-numhan")!;
   const shapesCard = GAME_CARDS.find((c) => c.route === "cm-shapes")!;
   const animalsCard = GAME_CARDS.find((c) => c.route === "cm-animals")!;
+
+  const picwordHtml = renderToString(
+    <MenuCard
+      g={picwordCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picwordHtml).toContain("Picture &amp; Word");
+  expect(picwordHtml).toContain("Match the picture to its word!");
 
   const enHtml = renderToString(
     <MenuCard
@@ -147,5 +164,41 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   );
   expect(yueHtml).toContain("動物叫聲");
   expect(yueHtml).toContain("將動物同叫聲配對！");
+
+  const picwordJaHtml = renderToString(
+    <MenuCard
+      g={picwordCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picwordJaHtml).toContain("絵と言葉");
+  expect(picwordJaHtml).toContain("絵と言葉を合わせよう！");
+
+  const picwordCmnHtml = renderToString(
+    <MenuCard
+      g={picwordCard}
+      lang="cmn"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picwordCmnHtml).toContain("图片与文字");
+  expect(picwordCmnHtml).toContain("把图片和文字连成对！");
+
+  const picwordYueHtml = renderToString(
+    <MenuCard
+      g={picwordCard}
+      lang="yue"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picwordYueHtml).toContain("圖片同文字");
+  expect(picwordYueHtml).toContain("將圖片同文字配成一對！");
 });
 

@@ -108,6 +108,8 @@ export const CMN: Table = {
   'card.cm-shapes.blurb': '把形状和物品配对！',
   'card.cm-animals.title': '动物叫声',
   'card.cm-animals.blurb': '把动物和叫声配对！',
+  'card.cm-picword.title': '图片与文字',
+  'card.cm-picword.blurb': '把图片和文字连成对！',
 
   'picker.surprise': '🎲 随机来一个！',
   'picker.diff': '想在哪玩？',
