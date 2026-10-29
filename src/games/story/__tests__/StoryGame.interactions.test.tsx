@@ -156,7 +156,7 @@ describe('StoryGame ScareSpot interactions', () => {
     expect(sfxBoingSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('speaks updated language reveal when language is switched mid-scare before reveal fires', () => {
+  it('cancels in-flight scare reveal speech when language is switched mid-scare before reveal fires', () => {
     const saySpy = vi.spyOn(sound, 'say');
 
     const scareStory: Story = {
@@ -166,6 +166,9 @@ describe('StoryGame ScareSpot interactions', () => {
         start: {
           image: 'story/luna_start.jpg',
           text: 'Look closely...',
+          t: {
+            ja: 'よく みてね...',
+          },
           scare: {
             x: 10,
             y: 20,
@@ -209,6 +212,9 @@ describe('StoryGame ScareSpot interactions', () => {
     const scareSpot = screen.getByTestId('story-scare');
     fireEvent.click(scareSpot);
 
+    // Visual pop should appear
+    expect(screen.getByTestId('story-scare-pop')).toBeTruthy();
+
     // Switch language before reveal delay elapses
     fireEvent.click(screen.getByTestId('lang-cycle'));
 
@@ -217,8 +223,12 @@ describe('StoryGame ScareSpot interactions', () => {
       vi.advanceTimersByTime(300);
     });
 
-    expect(saySpy).toHaveBeenCalledWith('やさしい おばけ だよ！');
-    expect(saySpy).not.toHaveBeenCalledWith('It is a friendly ghost!');
+    // Mid-game language switch cancels in-flight scare reveal speech
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // UI safely reflects the new language
+    expect(screen.getByTestId('story-text-start').textContent).toBe('よく みてね...');
+    expect(screen.getByTestId('story-scare-pop')).toBeTruthy();
   });
 });
 
