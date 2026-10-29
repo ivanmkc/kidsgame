@@ -146,7 +146,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const isEnd = !node.choices || node.choices.length === 0;
   const hasHots = !isEnd && node.choices!.every((c) => c.hot);
   // hotspot nodes have no button row below, so the picture gets the room
-  const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 250)) * ar, 900);
+  const imgW = Math.max(0, Math.min(width - 24, (height - 84 - (hasHots ? 110 : 250)) * ar, 900));
   const imgH = imgW / ar;
 
   const advance = (next: string) => {
