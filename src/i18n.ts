@@ -214,6 +214,7 @@ export type UIKey =
   | 'win.spotitDuel'
   | 'win.spotitDuelSub'
   | 'win.spotitDuelSubOne'
+  | 'spotitDuel.countdown'
   | 'win.letters'
   | 'win.lettersKana'
   | 'win.numbers'
@@ -592,6 +593,7 @@ export const EN: Table = {
   'win.spotitDuel': '🏆 {name} wins!',
   'win.spotitDuelSub': '{emoji} {name} spotted {n} stars — great eyes!',
   'win.spotitDuelSubOne': '{emoji} {name} spotted {n} star — great eyes!',
+  'spotitDuel.countdown': 'Ready... Spot!',
   'win.letters': 'Letter master! You found them all!',
   'win.lettersKana': 'Kana master! You found them all!',
   'win.numbers': 'Number master! You found them all!',

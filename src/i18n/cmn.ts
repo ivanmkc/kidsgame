@@ -246,6 +246,7 @@ export const CMN: Table = {
   'win.spotitDuel': '🏆 {name} 赢啦！',
   'win.spotitDuelSub': '{emoji} {name} 找到 {n} 颗星 — 眼力真棒！',
   'win.spotitDuelSubOne': '{emoji} {name} 找到 {n} 颗星 — 眼力真棒！',
+  'spotitDuel.countdown': '准备… 开始！',
   'win.letters': '字母大师！全都找到了！',
   'win.lettersKana': '假名大师！全都找到了！',
   'win.numbers': '数字大师！全都找到了！',
