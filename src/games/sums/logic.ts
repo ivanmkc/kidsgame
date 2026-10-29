@@ -44,7 +44,7 @@ export function sumsLayout(
   if (isLandscape) {
     const availH = height - 84 - 16;
     const stageH = Math.round(Math.max(MIN_STAGE_H, Math.min(availH, 360)));
-    const maxStageW = (width - 48) * 0.52;
+    const maxStageW = Math.max(0, width - 48) * 0.52;
     const stageW = Math.round(Math.min(maxStageW, stageH * 1.3));
     const critterSize = Math.round(
       Math.min(
@@ -55,7 +55,7 @@ export function sumsLayout(
     return { isLandscape, stageW, stageH, critterSize };
   }
 
-  const stageW = Math.min(width - 32, 560);
+  const stageW = Math.max(0, Math.min(width - 32, 560));
   const stageH = Math.round(
     Math.max(MIN_STAGE_H, Math.min(height - 84 - 200, stageW * 0.72)),
   );
