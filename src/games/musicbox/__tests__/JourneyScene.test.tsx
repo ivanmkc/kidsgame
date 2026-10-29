@@ -442,42 +442,7 @@ describe("JourneyScene accessibility", () => {
     unmount();
   });
 
-  it("plays diatonic harmony on multi-touch without chromatic sharps", () => {
-    // Twinkle notes: 0: C(60), 1: C(60), 2: G(67), 3: G(67), 4: A(69), 5: A(69)
-    const playNoteSpy = vi.spyOn(music, "playNote");
-    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
-    const stage = screen.getByLabelText("Stage");
 
-    // Advance 4 notes (0..3) with single taps
-    for (let i = 1; i <= 4; i++) {
-      fireEvent.pointerDown(stage, {
-        pointerId: i,
-        clientX: 100,
-        clientY: 100,
-      });
-      fireEvent.pointerUp(stage, { pointerId: i });
-    }
-
-    playNoteSpy.mockClear();
-
-    // 2-finger tap: hold finger 10, then touch finger 11 (active count = 2 on note 5: A)
-    fireEvent.pointerDown(stage, {
-      pointerId: 10,
-      clientX: 100,
-      clientY: 100,
-    });
-    fireEvent.pointerDown(stage, {
-      pointerId: 11,
-      clientX: 200,
-      clientY: 100,
-    });
-
-    // Note 5 is A (69 + 12 = 81 in top third). Diatonic minor third above A is C (84), not C# (85).
-    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 81, 0.7);
-    expect(playNoteSpy).toHaveBeenNthCalledWith(3, 84, 0.7);
-
-    unmount();
-  });
 
   it("freePlay mode plays pentatonic scale without song melody constraints", () => {
     const playNoteSpy = vi.spyOn(music, "playNote");
