@@ -149,7 +149,7 @@ export function TapScene({
               lang,
               found ? "a11y.targetFound" : "a11y.target",
             )}
-            disabled={disabled || found}
+            disabled={disabled}
             onPress={() => (disabled || found ? undefined : onHit(id))}
             style={{
               position: "absolute",
