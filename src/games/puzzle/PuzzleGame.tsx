@@ -275,6 +275,12 @@ export function PuzzleGame({
                 {sparkles[pos] ? (
                   <SparkleBurst trigger={sparkles[pos]} />
                 ) : null}
+                {selected === pos ? (
+                  <View
+                    style={styles.selectedOverlay}
+                    testID="puzzle-selected-overlay"
+                  />
+                ) : null}
               </Pressable>
             );
           })}
@@ -325,7 +331,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.5)",
   },
-  selected: { borderWidth: 4, borderColor: colors.gold, zIndex: 2 },
+  selected: { borderColor: colors.gold, zIndex: 2 },
+  selectedOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 3,
+    borderColor: colors.gold,
+    pointerEvents: "none",
+  },
   hint: {
     fontFamily: fonts.bodyReg,
     color: colors.inkSoft,
