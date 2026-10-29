@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { SPOTIT_ICONS } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
+import { SparkleBurst } from "../../components/Sparkles";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
@@ -46,6 +47,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [correctIdx, setCorrectIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
@@ -67,12 +69,14 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       sfx.good();
       setWrongIdx(null);
+      setCorrectIdx(i);
       // Wait for the confirmation chime to finish before advancing — otherwise
       // the next round's prompt say() cancels the celebration mid-word.
       const nextIdx = roundIdx + 1;
       if (nextIdx >= roundsToWin) setIsFinishing(true);
       sayThen(prompts.confirmLines, () => {
         lockedRef.current = false;
+        setCorrectIdx(null);
         if (!isValid()) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
@@ -110,6 +114,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
     );
     setWrongIdx(null);
+    setCorrectIdx(null);
   };
 
   const { gap, tile, gridWidth } = soundsLayout(width, height, tileCount);
@@ -193,6 +198,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
                 shadows.soft,
                 { width: tile, height: tile },
                 wrongIdx === i && styles.wrong,
+                correctIdx === i && styles.correct,
                 pressed && styles.pressed,
               ]}
             >
@@ -201,6 +207,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
                 style={{ width: "80%", height: "80%" }}
                 resizeMode="contain"
               />
+              {correctIdx === i ? <SparkleBurst trigger={correctIdx} /> : null}
             </Pressable>
           ))}
         </View>
@@ -280,5 +287,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
+  correct: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.15)",
+  },
   pressed: { transform: [{ scale: 0.94 }] },
 });
