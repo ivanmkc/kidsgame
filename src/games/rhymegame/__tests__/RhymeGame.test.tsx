@@ -155,16 +155,20 @@ describe("RhymeGame", () => {
     const saySequenceSpy = vi.spyOn(sound, "saySequence");
     const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
     render(<RhymeGame onHome={onHome} difficulty="easy" lang="en" />);
-    
-    const round = makeRhymeRoundSpy.mock.results.at(-1)!.value as logic.RhymeRound;
-    const wrongIdx = round.tiles.findIndex(t => !t.isAnswer);
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    const wrongIdx = round.tiles.findIndex((t) => !t.isAnswer);
     const wrongTile = round.tiles[wrongIdx];
-    
+
     saySequenceSpy.mockClear();
     fireEvent.click(screen.getByTestId(`rhyme-tile-${wrongIdx}`));
-    
+
     expect(sound.sfx.wrong).toHaveBeenCalled();
-    expect(saySequenceSpy).toHaveBeenCalledWith([wrongTile.word, ...round.promptLines]);
+    expect(saySequenceSpy).toHaveBeenCalledWith([
+      wrongTile.word,
+      ...round.promptLines,
+    ]);
   });
 
   it("tapping a correct tile twice only triggers sfx.good once", () => {
@@ -432,6 +436,37 @@ describe("RhymeGame", () => {
     act(() => {
       vi.advanceTimersByTime(500);
     });
+  });
+
+  it("stops narration when unmounted so audio does not leak across navigation", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <RhymeGame onHome={onHome} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops narration when unmounted during celebration speech", () => {
+    const makeRhymeRoundSpy = vi.spyOn(logic, "makeRhymeRound");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <RhymeGame onHome={onHome} difficulty="easy" lang="en" />,
+    );
+
+    const round = makeRhymeRoundSpy.mock.results.at(-1)!
+      .value as logic.RhymeRound;
+    stopNarrationSpy.mockClear();
+
+    fireEvent.click(screen.getByTestId(`rhyme-tile-${round.answerIdx}`));
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
 
   it("generates only one round and narrates prompt once on initial mount", () => {
