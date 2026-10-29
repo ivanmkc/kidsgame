@@ -7,12 +7,14 @@ import {
   ALPHABET,
   ANIMALS,
   COLORS,
+  CONFUSING_LETTER_GROUPS,
   ConceptMatchCard,
   ConceptMatchDeck,
   SHAPES,
   buildBoard,
   isMatch,
   pairsForDifficulty,
+  rhymeKeyFor,
   updateBoardLang,
   updateCardLang,
 } from "../logic";
@@ -95,6 +97,16 @@ describe("conceptmatch/logic", () => {
       expect(isMatch(colorCard, redTextCard)).toBe(true);
       expect(isMatch(redTextCard, dotsCard)).toBe(true);
       expect(isMatch(iconCard, colorCard)).toBe(false);
+    });
+  });
+
+  describe("rhymeKeyFor", () => {
+    it("returns rhymeKey for English, jaRhyme for Japanese, cmnRhyme for Mandarin, yueRhyme for Cantonese", () => {
+      const dog = WORDS.find((w) => w.icon === "dog")!;
+      expect(rhymeKeyFor(dog, "en")).toBe(dog.rhymeKey);
+      expect(rhymeKeyFor(dog, "ja")).toBe(dog.jaRhyme);
+      expect(rhymeKeyFor(dog, "cmn")).toBe(dog.cmnRhyme);
+      expect(rhymeKeyFor(dog, "yue")).toBe(dog.yueRhyme);
     });
   });
 
@@ -942,6 +954,314 @@ describe("conceptmatch/logic", () => {
           const uniqueKeys = new Set(keys);
           expect(uniqueKeys.size).toBe(board.length);
         }
+      });
+    });
+
+    describe("groupSimilar option", () => {
+      describe("letters deck", () => {
+        it("groups confusing letters on the board more frequently than random", () => {
+          let similarCountTrue = 0;
+          let similarCountFalse = 0;
+          const trials = 100;
+
+          const sharesConfusingGroup = (letters: string[]) =>
+            CONFUSING_LETTER_GROUPS.some((group) =>
+              letters.every((l) => group.includes(l)),
+            );
+
+          for (let seed = 0; seed < trials; seed++) {
+            const boardTrue = buildBoard(
+              makeRng(seed),
+              "letters",
+              "en",
+              2,
+              undefined,
+              true,
+            );
+            const conceptsTrue = Array.from(
+              new Set(boardTrue.map((c) => c.conceptId)),
+            );
+            if (sharesConfusingGroup(conceptsTrue)) {
+              similarCountTrue++;
+            }
+
+            const boardFalse = buildBoard(
+              makeRng(seed),
+              "letters",
+              "en",
+              2,
+              undefined,
+              false,
+            );
+            const conceptsFalse = Array.from(
+              new Set(boardFalse.map((c) => c.conceptId)),
+            );
+            if (sharesConfusingGroup(conceptsFalse)) {
+              similarCountFalse++;
+            }
+          }
+
+          expect(similarCountTrue).toBe(trials);
+          expect(similarCountFalse).toBeLessThan(trials / 2);
+        });
+
+        it("draws from confusing letter groups first for 4 pairs", () => {
+          const board = buildBoard(
+            makeRng(42),
+            "letters",
+            "en",
+            4,
+            undefined,
+            true,
+          );
+          expect(board).toHaveLength(8);
+          const concepts = Array.from(new Set(board.map((c) => c.conceptId)));
+          expect(concepts).toHaveLength(4);
+          const allConfusingLetters = CONFUSING_LETTER_GROUPS.flat();
+          for (const c of concepts) {
+            expect(allConfusingLetters).toContain(c);
+          }
+        });
+
+        it("falls back to random letters when requested pairs exceed confusing letter groups", () => {
+          const board = buildBoard(
+            makeRng(7),
+            "letters",
+            "en",
+            20,
+            undefined,
+            true,
+          );
+          expect(board).toHaveLength(40);
+          const concepts = new Set(board.map((c) => c.conceptId));
+          expect(concepts.size).toBe(20);
+        });
+
+        it("never contains both I and L on the same board (GLYPH_TWINS) with groupSimilar = true", () => {
+          for (let seed = 0; seed < 100; seed++) {
+            const board = buildBoard(
+              makeRng(seed),
+              "letters",
+              "en",
+              8,
+              undefined,
+              true,
+            );
+            const conceptIds = new Set(board.map((c) => c.conceptId));
+            expect(conceptIds.has("I") && conceptIds.has("L")).toBe(false);
+          }
+          for (let seed = 0; seed < 100; seed++) {
+            const board = buildBoard(
+              makeRng(seed),
+              "letters",
+              "en",
+              20,
+              undefined,
+              true,
+            );
+            const conceptIds = new Set(board.map((c) => c.conceptId));
+            expect(conceptIds.has("I") && conceptIds.has("L")).toBe(false);
+          }
+        });
+
+        it("respects excludedConcepts when groupSimilar = true", () => {
+          const excluded = new Set(["B", "D", "P", "Q"]);
+          const board = buildBoard(
+            makeRng(1),
+            "letters",
+            "en",
+            2,
+            excluded,
+            true,
+          );
+          const concepts = new Set(board.map((c) => c.conceptId));
+          for (const l of excluded) {
+            expect(concepts.has(l)).toBe(false);
+          }
+        });
+
+        it("falls back when all confusing groups are excluded", () => {
+          const allConfusingLetters = new Set(CONFUSING_LETTER_GROUPS.flat());
+          const board = buildBoard(
+            makeRng(1),
+            "letters",
+            "en",
+            2,
+            allConfusingLetters,
+            true,
+          );
+          expect(board).toHaveLength(4);
+          const concepts = new Set(board.map((c) => c.conceptId));
+          expect(concepts.size).toBe(2);
+          for (const c of concepts) {
+            expect(allConfusingLetters.has(c)).toBe(false);
+          }
+        });
+      });
+
+      describe("vocabulary decks", () => {
+        it("groups rhyming words in English picture-word deck when groupSimilar = true", () => {
+          let rhymingTrue = 0;
+          let rhymingFalse = 0;
+          const trials = 50;
+
+          for (let seed = 0; seed < trials; seed++) {
+            const boardTrue = buildBoard(
+              makeRng(seed),
+              "picture-word",
+              "en",
+              2,
+              undefined,
+              true,
+            );
+            const conceptsTrue = Array.from(
+              new Set(boardTrue.map((c) => c.conceptId)),
+            );
+            const entriesTrue = conceptsTrue.map((id) =>
+              WORDS.find((w) => w.icon === id)!,
+            );
+            const keyA = rhymeKeyFor(entriesTrue[0], "en");
+            const keyB = rhymeKeyFor(entriesTrue[1], "en");
+            if (keyA && keyB && keyA === keyB) {
+              rhymingTrue++;
+            }
+
+            const boardFalse = buildBoard(
+              makeRng(seed),
+              "picture-word",
+              "en",
+              2,
+              undefined,
+              false,
+            );
+            const conceptsFalse = Array.from(
+              new Set(boardFalse.map((c) => c.conceptId)),
+            );
+            const entriesFalse = conceptsFalse.map((id) =>
+              WORDS.find((w) => w.icon === id)!,
+            );
+            const keyFalseA = rhymeKeyFor(entriesFalse[0], "en");
+            const keyFalseB = rhymeKeyFor(entriesFalse[1], "en");
+            if (keyFalseA && keyFalseB && keyFalseA === keyFalseB) {
+              rhymingFalse++;
+            }
+          }
+
+          expect(rhymingTrue).toBe(trials);
+          expect(rhymingFalse).toBeLessThan(trials / 4);
+        });
+
+        it("groups rhyming words in English picture-spoken deck when groupSimilar = true", () => {
+          const board = buildBoard(
+            makeRng(123),
+            "picture-spoken",
+            "en",
+            2,
+            undefined,
+            true,
+          );
+          expect(board).toHaveLength(4);
+          const concepts = Array.from(new Set(board.map((c) => c.conceptId)));
+          expect(concepts).toHaveLength(2);
+          const entry0 = WORDS.find((w) => w.icon === concepts[0])!;
+          const entry1 = WORDS.find((w) => w.icon === concepts[1])!;
+          expect(rhymeKeyFor(entry0, "en")).toBeTruthy();
+          expect(rhymeKeyFor(entry0, "en")).toBe(rhymeKeyFor(entry1, "en"));
+        });
+
+        it("works safely across all supported languages (en, ja, cmn, yue)", () => {
+          const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+          for (const lang of langs) {
+            const board = buildBoard(
+              makeRng(99),
+              "picture-word",
+              lang,
+              2,
+              undefined,
+              true,
+            );
+            expect(board).toHaveLength(4);
+            const concepts = Array.from(new Set(board.map((c) => c.conceptId)));
+            expect(concepts).toHaveLength(2);
+            const entry0 = WORDS.find((w) => w.icon === concepts[0])!;
+            const entry1 = WORDS.find((w) => w.icon === concepts[1])!;
+            const key0 = rhymeKeyFor(entry0, lang);
+            const key1 = rhymeKeyFor(entry1, lang);
+            expect(key0).toBeTruthy();
+            expect(key0).toBe(key1);
+
+            for (const card of board) {
+              const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+              const expectedText = wordFor(entry, lang).text;
+              expect(card.speech).toBe(expectedText);
+              if (card.display.type === "text") {
+                expect(card.display.text).toBe(expectedText);
+              }
+            }
+          }
+        });
+
+        it("never contains name twins on the same board with groupSimilar = true", () => {
+          for (let seed = 0; seed < 50; seed++) {
+            const board = buildBoard(
+              makeRng(seed),
+              "picture-word",
+              "en",
+              15,
+              undefined,
+              true,
+            );
+            const conceptIds = new Set(board.map((c) => c.conceptId));
+            expect(
+              conceptIds.has("blossom") && conceptIds.has("sunflower"),
+            ).toBe(false);
+          }
+        });
+
+        it("respects excludedConcepts with groupSimilar = true", () => {
+          const excluded = new Set(["dog", "frog"]);
+          const board = buildBoard(
+            makeRng(42),
+            "picture-word",
+            "en",
+            2,
+            excluded,
+            true,
+          );
+          const concepts = new Set(board.map((c) => c.conceptId));
+          expect(concepts.has("dog")).toBe(false);
+          expect(concepts.has("frog")).toBe(false);
+        });
+
+        it("falls back to random words when pairs exceeds available rhyming words", () => {
+          const board = buildBoard(
+            makeRng(10),
+            "picture-word",
+            "en",
+            15,
+            undefined,
+            true,
+          );
+          expect(board).toHaveLength(30);
+          const concepts = new Set(board.map((c) => c.conceptId));
+          expect(concepts.size).toBe(15);
+        });
+      });
+
+      describe("mixed deck", () => {
+        it("passes groupSimilar to subdecks in mixed deck", () => {
+          const board = buildBoard(
+            makeRng(77),
+            "mixed",
+            "en",
+            6,
+            undefined,
+            true,
+          );
+          expect(board).toHaveLength(12);
+          const concepts = new Set(board.map((c) => c.conceptId));
+          expect(concepts.size).toBe(6);
+        });
       });
     });
 
