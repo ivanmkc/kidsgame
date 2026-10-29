@@ -375,6 +375,12 @@ export const JA: Table = {
   'story.nextLead': 'つぎは どうなる？',
   'carmode.tap': 'タップ！',
   'carmode.done': 'おしまい！',
+  'carmode.pack.boops': 'ブープをかぞえよう',
+  'carmode.pack.rhyme': 'ライムをかんせいさせよう',
+  'carmode.pack.simon': 'サイモン・セイズ',
+  'carmode.pack.silly': 'ほんと？うそ？',
+  'carmode.pack.whoami': 'わたしはだれ？',
+  'carmode.pack.animal': 'どうぶつのなきごえ',
 
   'feedback.chip': '💬 ごいけん',
   'feedback.title': 'おしえて！',

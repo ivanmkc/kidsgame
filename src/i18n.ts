@@ -288,14 +288,11 @@ export type UIKey =
   | 'bingo.prompt'
   | 'bingo.promptPhonics'
   | 'bingo.confirmPhonics'
-  | 'story.tryAgain'
-  | 'story.startOver'
-  | 'story.readAgain'
-  | 'story.allStories'
-  | 'story.hotLead'
-  | 'story.nextLead'
-  | 'carmode.tap'
-  | 'carmode.done'
+  | 'story.tryAgain' | 'story.startOver' | 'story.readAgain' | 'story.allStories'
+  | 'story.hotLead' | 'story.nextLead'
+  | 'carmode.tap' | 'carmode.done'
+  | 'carmode.pack.boops' | 'carmode.pack.rhyme' | 'carmode.pack.simon'
+  | 'carmode.pack.silly' | 'carmode.pack.whoami' | 'carmode.pack.animal'
   // ── Feedback modal ─────────────────────────────────────────────
   | 'feedback.chip'
   | 'feedback.title'
@@ -703,14 +700,13 @@ export const EN: Table = {
   'bingo.prompt': 'Find the {word}!',
   'bingo.promptPhonics': 'Find something that starts with {sound}!',
   'bingo.confirmPhonics': '{word} starts with {sound}!',
-  'story.tryAgain': 'Oops! Try another way ↩️',
-  'story.startOver': 'Start over 📖',
-  'story.readAgain': 'The End! Read again 📖',
-  'story.allStories': 'All Stories 🏠',
-  'story.hotLead': 'Tap where you want to go!',
-  'story.nextLead': 'What should happen next?',
-  'carmode.tap': 'Tap!',
-  'carmode.done': 'All done!',
+  'story.tryAgain': 'Oops! Try another way ↩️', 'story.startOver': 'Start over 📖',
+  'story.readAgain': 'The End! Read again 📖', 'story.allStories': 'All Stories 🏠',
+  'story.hotLead': 'Tap where you want to go!', 'story.nextLead': 'What should happen next?',
+  'carmode.tap': 'Tap!', 'carmode.done': 'All done!',
+  'carmode.pack.boops': 'Count the Boops', 'carmode.pack.rhyme': 'Finish the Rhyme',
+  'carmode.pack.simon': 'Simon Says', 'carmode.pack.silly': 'Silly or True?',
+  'carmode.pack.whoami': 'Who Am I?', 'carmode.pack.animal': 'Animal Sound Safari',
 
   'feedback.chip': '💬 Send Feedback',
   'feedback.title': 'Tell us!',

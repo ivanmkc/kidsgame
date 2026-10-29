@@ -11,11 +11,11 @@ import {
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { Confetti } from "../../components/Confetti";
 import { Lang, useLangEpoch } from "../../lang";
-import { t } from "../../i18n";
+import { t, UIKey } from "../../i18n";
 import { saySequence, sayThen, sfx, stopNarration } from "../../sound";
 import { playSequence, primeMusic, SeqNote, stopSequence } from "../../music";
 import { fonts, shadows } from "../../theme";
-import { ALL_PACKS, PACK_ORDER, PackId, Round } from "./packs";
+import { PACK_ORDER, PackId, Round } from "./packs";
 import {
   CarModeState,
   advance,
@@ -564,10 +564,10 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                   ]}
                   accessibilityRole="button"
                   accessibilityState={{ selected: id === packId }}
-                  accessibilityLabel={ALL_PACKS[id].name}
+                  accessibilityLabel={t(lang, `carmode.pack.${id}` as UIKey)}
                   testID={`carmode-pack-${id}`}
                 >
-                  <Text style={styles.packBtnText}>{ALL_PACKS[id].name}</Text>
+                  <Text style={styles.packBtnText}>{t(lang, `carmode.pack.${id}` as UIKey)}</Text>
                 </Pressable>
               ))}
             </View>

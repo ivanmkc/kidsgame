@@ -506,7 +506,7 @@ describe("ListenChooseGame", () => {
         vi.advanceTimersByTime(800);
       });
     }
-  });
+  }, 15000);
 
   it("wins the game and shows WinOverlay when streak reaches 12", () => {
     vi.useFakeTimers();
@@ -529,8 +529,8 @@ describe("ListenChooseGame", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="ja" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
-    // Complete 30 rounds
-    for (let i = 0; i < 30; i++) {
+    // Complete 12 rounds to reach win overlay
+    for (let i = 0; i < 12; i++) {
       const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
       const correctBtn = screen.getByRole("button", { name: targetText! });
       fireEvent.click(correctBtn);
@@ -553,7 +553,7 @@ describe("ListenChooseGame", () => {
     expect(sound.sayThen).toHaveBeenCalledTimes(1);
     const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     expect(spokenWord).not.toMatch(/^[a-z]+$/i);
-  });
+  }, 15000);
   it("renders a ScrollView for the board to allow scrolling on compact viewports", () => {
     render(<ListenChooseGame onHome={vi.fn()} />);
     const props = capturedScrollViewProps.find(

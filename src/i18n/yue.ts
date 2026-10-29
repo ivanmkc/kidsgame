@@ -374,6 +374,12 @@ export const YUE: Table = {
   'story.nextLead': '跟住會點樣呢？',
   'carmode.tap': '撳一撳！',
   'carmode.done': '全部搞掂！',
+  'carmode.pack.boops': '數數嘟嘟聲',
+  'carmode.pack.rhyme': '押韻遊戲',
+  'carmode.pack.simon': '老師話',
+  'carmode.pack.silly': '真定假',
+  'carmode.pack.whoami': '我係邊個？',
+  'carmode.pack.animal': '動物叫聲',
 
   'feedback.chip': '💬 意見',
   'feedback.title': '話俾我哋知！',

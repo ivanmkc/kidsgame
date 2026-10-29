@@ -8,6 +8,7 @@ import * as music from "../../../music";
 import * as logic from "../logic";
 import { ALL_PACKS, PACK_ORDER } from "../packs";
 import { CarModeGame } from "../CarModeGame";
+import { t, UIKey } from "../../../i18n";
 
 type PressableFake = Partial<
   Pick<
@@ -199,10 +200,13 @@ describe("CarModeGame", () => {
 
     // Verify all pack buttons are rendered with appropriate labels and styles
     for (const packId of PACK_ORDER) {
+      expect(html).toContain(t("en", `carmode.pack.${packId}` as UIKey));
       const btn = capturedPressables[`carmode-pack-${packId}`];
       expect(btn).toBeDefined();
       expect(btn.accessibilityRole).toBe("button");
-      expect(btn.accessibilityLabel).toBe(ALL_PACKS[packId].name);
+      expect(btn.accessibilityLabel).toBe(
+        t("en", `carmode.pack.${packId}` as UIKey),
+      );
       expect(btn.accessibilityState).toEqual({ selected: packId === "boops" });
 
       type StyleFn = (state: {
@@ -223,6 +227,36 @@ describe("CarModeGame", () => {
     rhymeBtn.onPress?.();
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
+
+  it.each(["ja", "cmn", "yue"] as const)(
+    "renders localized completion screen pack buttons and accessibility labels in %s without hardcoded English",
+    (lang) => {
+      const actual = logic.startState("boops", 42);
+      vi.spyOn(logic, "startState").mockReturnValue({
+        ...actual,
+        phase: "done",
+      });
+
+      const html = renderToString(<CarModeGame onHome={noop} lang={lang} />);
+      expect(html).toContain(t(lang, "carmode.done"));
+
+      for (const packId of PACK_ORDER) {
+        const localizedName = t(lang, `carmode.pack.${packId}` as UIKey);
+        const englishName = ALL_PACKS[packId].name;
+
+        // Button text rendered into HTML matches localized name and not hardcoded English name
+        expect(html).toContain(localizedName);
+        expect(html).not.toContain(englishName);
+
+        // Accessibility label matches localized name and not hardcoded English name
+        const btn = capturedPressables[`carmode-pack-${packId}`];
+        expect(btn).toBeDefined();
+        expect(btn.accessibilityRole).toBe("button");
+        expect(btn.accessibilityLabel).toBe(localizedName);
+        expect(btn.accessibilityLabel).not.toBe(englishName);
+      }
+    },
+  );
 
   it("ignores taps when already complete", () => {
     const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
