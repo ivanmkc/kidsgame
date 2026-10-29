@@ -290,10 +290,10 @@ describe("rules spoken lines", () => {
 
   it("rulesRecallLine returns English prompt for en", () => {
     expect(rulesRecallLine(1, "en")).toBe(
-      "Memory check! Do rule number 1 again. Do you remember it?",
+      "Memory check! Do Rule #1 again — remember it? 🤔",
     );
     expect(rulesRecallLine(5)).toBe(
-      "Memory check! Do rule number 5 again. Do you remember it?",
+      "Memory check! Do Rule #5 again — remember it? 🤔",
     );
   });
 

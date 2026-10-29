@@ -110,9 +110,6 @@ export function rulesIntroLine(lang: Lang = "en"): string {
 
 /** Localized spoken memory check line for RulesGame recall rounds. */
 export function rulesRecallLine(ruleNumber: number, lang: Lang = "en"): string {
-  if (lang === "en") {
-    return `Memory check! Do rule number ${ruleNumber} again. Do you remember it?`;
-  }
   return `${t(lang, "rules.memoryCheck")} ${t(lang, "rules.doAgain", { n: ruleNumber })}`;
 }
 
