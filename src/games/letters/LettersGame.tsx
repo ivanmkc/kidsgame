@@ -44,6 +44,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   } = settingsForLetters(difficulty, lang);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  const wrongIdxRef = useRef<number | null>(null);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -67,15 +68,20 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
   const langMounted = useRef(false);
+  const clearWrongTimer = () => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+    wrongIdxRef.current = null;
+    setWrongIdx(null);
+  };
   useEffect(() => {
     if (!langMounted.current) {
       langMounted.current = true;
       return;
     }
-    if (errorTimerRef.current) {
-      clearTimeout(errorTimerRef.current);
-      errorTimerRef.current = null;
-    }
+    clearWrongTimer();
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current);
       successTimerRef.current = null;
@@ -84,7 +90,6 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
     setCaptions(false);
     setMisses(0);
-    setWrongIdx(null);
     setCorrectIdx(null);
     setIsFinishing(false);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -129,6 +134,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     lockedRef.current = false;
+    clearWrongTimer();
   }, [round]);
 
   // Speak on EVERY round — keyed on the round object, not the text, so a
@@ -138,11 +144,11 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   }, [round, won, isFinishing, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (!started || won || isFinishing || lockedRef.current) return;
-    lockedRef.current = true;
+    if (!started || won || isFinishing || lockedRef.current || wrongIdxRef.current === i) return;
     if (round.tiles[i].isAnswer) {
+      lockedRef.current = true;
+      clearWrongTimer();
       sfx.good();
-      setWrongIdx(null);
       setMisses(0);
       setCorrectIdx(i);
       if (errorTimerRef.current) {
@@ -173,10 +179,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       }, SUCCESS_DELAY_MS);
     } else {
       sfx.wrong();
+      wrongIdxRef.current = i;
       setWrongIdx(i);
       setMisses((m) => m + 1);
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
       errorTimerRef.current = setTimeout(() => {
-        lockedRef.current = false;
+        wrongIdxRef.current = null;
         setWrongIdx((w) => (w === i ? null : w));
         errorTimerRef.current = null;
       }, 450);
@@ -194,12 +202,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       errorTimerRef.current = null;
     }
     lockedRef.current = false;
+    clearWrongTimer();
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
     setMisses(0);
     setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
-    setWrongIdx(null);
     setCorrectIdx(null);
     setIsFinishing(false);
   };

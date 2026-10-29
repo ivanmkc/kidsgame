@@ -378,7 +378,7 @@ describe("ListenChooseGame", () => {
     expect(sfx.wrong).toHaveBeenCalledTimes(1);
   });
 
-  it("ignores taps on choices while wrong choice is wobbling, and allows tapping after wobble completes", () => {
+  it("allows immediate tap of correct choice after wrong guess while ignoring repeated wrong taps", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
@@ -388,21 +388,35 @@ describe("ListenChooseGame", () => {
     fireEvent.click(distractorBtn);
     expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-    // Immediately tap correct choice while wrong is still wobbling: ignored by lockedRef
-    fireEvent.click(targetBtn);
-    expect(sfx.good).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("celebration")).toBeNull();
+    // Immediately tapping the same wrong choice again is ignored
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-    // Advance timer past wobble duration (450ms)
-    act(() => {
-      vi.advanceTimersByTime(450);
-    });
-
-    // Now tap correct choice: works
+    // Immediately tap correct choice: succeeds without waiting for 450ms lockout
     fireEvent.click(targetBtn);
     expect(sfx.good).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("celebration")).toBeTruthy();
   });
+
+  it("clears wrong pick lockout when replay is tapped during wobble so tapping the wrong choice again gives sfx.wrong", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { distractorBtn } = getRoundChoices();
+    vi.mocked(sfx.wrong).mockClear();
+
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId("speaker-button"));
+
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+  });
+
   it("cleans up celebration timer on unmount without speaking next word", () => {
     const { unmount } = render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));

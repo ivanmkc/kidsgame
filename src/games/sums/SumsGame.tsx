@@ -41,6 +41,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
+  const wrongPickRef = useRef<number | null>(null);
   const lockedRef = useRef(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -54,6 +55,15 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const clearBoingTimers = () => {
     boingTimersRef.current.forEach(clearTimeout);
     boingTimersRef.current = [];
+  };
+
+  const clearWrongTimer = () => {
+    if (wrongPickTimer.current) {
+      clearTimeout(wrongPickTimer.current);
+      wrongPickTimer.current = null;
+    }
+    wrongPickRef.current = null;
+    setWrongPick(null);
   };
 
   useEffect(
@@ -74,12 +84,8 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(wrongVoiceTimer.current);
       wrongVoiceTimer.current = null;
     }
-    if (wrongPickTimer.current) {
-      clearTimeout(wrongPickTimer.current);
-      wrongPickTimer.current = null;
-      setWrongPick(null);
-      lockedRef.current = false;
-    }
+    clearWrongTimer();
+    lockedRef.current = false;
     saySequence([
       numberWord(lang, round.a).t,
       t(lang, "sums.plus"),
@@ -103,17 +109,14 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   }, [round, won]);
 
   const pickAnswer = (v: number) => {
-    if (won || lockedRef.current) return;
+    if (won || lockedRef.current || wrongPickRef.current === v) return;
     if (v === round.sum) {
       lockedRef.current = true;
+      clearWrongTimer();
       clearBoingTimers();
       if (wrongVoiceTimer.current) {
         clearTimeout(wrongVoiceTimer.current);
         wrongVoiceTimer.current = null;
-      }
-      if (wrongPickTimer.current) {
-        clearTimeout(wrongPickTimer.current);
-        wrongPickTimer.current = null;
       }
       sfx.good();
       const nextScore = score + 1;
@@ -122,18 +125,18 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         lockedRef.current = false;
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
-          setWrongPick(null);
+          clearWrongTimer();
         } else {
           setWon(true);
         }
       });
     } else {
-      lockedRef.current = true;
       sfx.wrong();
+      wrongPickRef.current = v;
       setWrongPick(v);
       if (wrongPickTimer.current) clearTimeout(wrongPickTimer.current);
       wrongPickTimer.current = setTimeout(() => {
-        lockedRef.current = false;
+        wrongPickRef.current = null;
         setWrongPick((w) => (w === v ? null : w));
         wrongPickTimer.current = null;
       }, 450);
@@ -151,15 +154,11 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(wrongVoiceTimer.current);
       wrongVoiceTimer.current = null;
     }
-    if (wrongPickTimer.current) {
-      clearTimeout(wrongPickTimer.current);
-      wrongPickTimer.current = null;
-    }
+    clearWrongTimer();
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeSumsRound(rngRef.current, difficulty));
     setScore(0);
-    setWrongPick(null);
     lockedRef.current = false;
     setWon(false);
   };

@@ -60,7 +60,17 @@ export function ListenChooseGame({
   const [celebrate, setCelebrate] = useState(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wobbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongPickRef = useRef<string | null>(null);
   const lockedRef = useRef(false);
+
+  const clearWrongTimer = () => {
+    if (wobbleTimerRef.current) {
+      clearTimeout(wobbleTimerRef.current);
+      wobbleTimerRef.current = null;
+    }
+    wrongPickRef.current = null;
+    setWobbleIcon(null);
+  };
 
   const { width, height } = useWindowDimensions();
   const layout = listenChooseLayout(
@@ -87,12 +97,8 @@ export function ListenChooseGame({
       clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = null;
     }
-    if (wobbleTimerRef.current) {
-      clearTimeout(wobbleTimerRef.current);
-      wobbleTimerRef.current = null;
-    }
+    clearWrongTimer();
     lockedRef.current = false;
-    setWobbleIcon(null);
     setCelebrate(false);
     setStarted(false);
     setIsSpeaking(false);
@@ -102,6 +108,7 @@ export function ListenChooseGame({
   const onPlay = () => {
     if (!isValid()) return;
     lockedRef.current = false;
+    clearWrongTimer();
     setStarted(true);
     const targetWord = getWordText(state.currentRound.target, lang);
     const currentSpeakEpoch = ++speakEpochRef.current;
@@ -114,6 +121,7 @@ export function ListenChooseGame({
 
   const onReplay = () => {
     if (!isValid()) return;
+    clearWrongTimer();
     const targetWord = getWordText(state.currentRound.target, lang);
     const currentSpeakEpoch = ++speakEpochRef.current;
     setIsSpeaking(true);
@@ -125,16 +133,17 @@ export function ListenChooseGame({
 
   const handleHome = () => {
     lockedRef.current = false;
+    clearWrongTimer();
     onHome();
   };
 
   const onPick = (choice: Word) => {
-    if (lockedRef.current || !isValid()) return;
-    lockedRef.current = true;
+    if (lockedRef.current || !isValid() || wrongPickRef.current === choice.icon) return;
     const isCorrect = choice.icon === state.currentRound.target.icon;
     if (isCorrect) {
+      lockedRef.current = true;
+      clearWrongTimer();
       sfx.good();
-      setWobbleIcon(null);
       setCelebrate(true);
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
@@ -162,12 +171,14 @@ export function ListenChooseGame({
       }, 800);
     } else {
       sfx.wrong();
+      wrongPickRef.current = choice.icon;
       setWobbleIcon(choice.icon);
       if (wobbleTimerRef.current) clearTimeout(wobbleTimerRef.current);
       wobbleTimerRef.current = setTimeout(() => {
         if (!isValid()) return;
-        lockedRef.current = false;
+        wrongPickRef.current = null;
         setWobbleIcon((w) => (w === choice.icon ? null : w));
+        wobbleTimerRef.current = null;
       }, 450);
       const next = updateGameState(
         state,

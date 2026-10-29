@@ -87,7 +87,7 @@ describe("LettersGame", () => {
     }
   });
 
-  it("locks input during wrong-tap feedback and ignores further taps for 450ms", () => {
+  it("allows immediate tap of correct tile after wrong tile while ignoring repeated wrong taps", () => {
     vi.useFakeTimers();
     try {
       const generatedRounds: logic.LetterRound[] = [];
@@ -120,19 +120,7 @@ describe("LettersGame", () => {
 
       expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-      // Attempting to tap the correct tile while wrong feedback is active is ignored
-      act(() => {
-        fireEvent.click(correctBtn);
-      });
-      expect(sfx.good).not.toHaveBeenCalled();
-      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
-
-      // Fast-forward past the 450ms timeout
-      act(() => {
-        vi.advanceTimersByTime(450);
-      });
-
-      // Now tapping the correct tile works and starts celebration
+      // Tapping the correct tile immediately succeeds without waiting for 450ms lockout
       act(() => {
         fireEvent.click(correctBtn);
       });
@@ -338,25 +326,15 @@ describe("LettersGame", () => {
       expect(sfx.wrong).toHaveBeenCalledTimes(2);
       expect(say).toHaveBeenCalledTimes(4);
 
-      // Advance timers by 250ms (reaching 450ms mark of the first timer while only 250ms into the second)
+      // Repeated tap on the same wrong Japanese tile is ignored
       act(() => {
-        vi.advanceTimersByTime(250);
+        fireEvent.click(wrongBtn2);
       });
+      expect(sfx.wrong).toHaveBeenCalledTimes(2);
 
-      // Assert tapping correct Japanese tile is still ignored because first timer was cleared and second is still running
+      // Tapping the correct Japanese tile succeeds immediately
       const correctTile2 = round2.tiles.find((t) => t.isAnswer)!;
       const correctBtn2 = screen.getByLabelText(correctTile2.label);
-      act(() => {
-        fireEvent.click(correctBtn2);
-      });
-      expect(sfx.good).not.toHaveBeenCalled();
-
-      // Advance remaining 200ms of the second timer
-      act(() => {
-        vi.advanceTimersByTime(200);
-      });
-
-      // Now tapping the correct Japanese tile should succeed
       act(() => {
         fireEvent.click(correctBtn2);
       });

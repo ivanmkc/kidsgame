@@ -301,7 +301,7 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("locks input on incorrect pick and ignores taps during the 500ms error flash", () => {
+  it("allows immediate retry of correct pick on incorrect pick while ignoring repeated wrong taps", () => {
     vi.useFakeTimers();
     let latestNotes: music.SeqNote[] = [];
     let onDoneCb: (() => void) | undefined;
@@ -334,10 +334,14 @@ describe("HighLowGame UI", () => {
     fireEvent.click(wrongBtn);
     expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    // Tapping alternate button immediately during the 500ms error flash is ignored
+    // Repeated tap on the same wrong button is ignored
+    fireEvent.click(wrongBtn);
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+    // Tapping correct button immediately succeeds without waiting for 500ms error flash
     fireEvent.click(correctBtn);
-    expect(goodSpy).not.toHaveBeenCalled();
-    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 1/8");
 
     vi.useRealTimers();
   });
@@ -1368,6 +1372,100 @@ describe("HighLowGame accessibility", () => {
       });
 
       expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+
+      vi.useRealTimers();
+    });
+
+    it("clears wrong pick lockout when replay is tapped mid-flash so tapping the wrong button again gives sfx.wrong", () => {
+      vi.useFakeTimers();
+      let onDoneCb: (() => void) | undefined;
+      vi.spyOn(music, "playSequence").mockImplementation(
+        (_notes, _bpm, _onNote, onDone) => {
+          onDoneCb = onDone;
+          return () => {};
+        },
+      );
+      const wrongSpy = vi.spyOn(sfx, "wrong");
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 60,
+        noteB: 72,
+      });
+
+      render(<HighLowGame onHome={noop} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      wrongSpy.mockClear();
+
+      const lowBtn = screen.getByTestId("highlow-low");
+      fireEvent.click(lowBtn);
+      expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      const replayBtn = screen.getByTestId("highlow-replay");
+      fireEvent.click(replayBtn);
+
+      act(() => {
+        onDoneCb?.();
+      });
+
+      const lowBtnAfterReplay = screen.getByTestId("highlow-low");
+      fireEvent.click(lowBtnAfterReplay);
+      expect(wrongSpy).toHaveBeenCalledTimes(2);
+
+      vi.useRealTimers();
+    });
+
+    it("clears wrong pick lockout when language switches mid-flash so tapping the wrong button again gives sfx.wrong", () => {
+      vi.useFakeTimers();
+      let onDoneCb: (() => void) | undefined;
+      vi.spyOn(music, "playSequence").mockImplementation(
+        (_notes, _bpm, _onNote, onDone) => {
+          onDoneCb = onDone;
+          return () => {};
+        },
+      );
+      let sayThenCb: (() => void) | undefined;
+      vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+        sayThenCb = cb;
+      });
+      const wrongSpy = vi.spyOn(sfx, "wrong");
+      vi.spyOn(highLowLogic, "makeHighLowRound").mockReturnValue({
+        noteA: 60,
+        noteB: 72,
+      });
+
+      render(<LangHarness initialLang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(400);
+        onDoneCb?.();
+      });
+
+      wrongSpy.mockClear();
+
+      const lowBtn = screen.getByTestId("highlow-low");
+      fireEvent.click(lowBtn);
+      expect(wrongSpy).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+
+      act(() => {
+        sayThenCb?.();
+        onDoneCb?.();
+      });
+
+      const lowBtnAfterLang = screen.getByTestId("highlow-low");
+      fireEvent.click(lowBtnAfterLang);
+      expect(wrongSpy).toHaveBeenCalledTimes(2);
 
       vi.useRealTimers();
     });

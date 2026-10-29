@@ -51,6 +51,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongPickRef = useRef<"fast" | "slow" | null>(null);
   const listenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
@@ -64,6 +65,14 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<"listen" | "pick" | "celebrate">("listen");
   const [wrongPick, setWrongPick] = useState<"fast" | "slow" | null>(null);
+  const clearWrongTimer = () => {
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
+    wrongPickRef.current = null;
+    setWrongPick(null);
+  };
   const [instructionalTempo, setInstructionalTempo] = useState<
     "fast" | "slow" | null
   >(null);
@@ -147,6 +156,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (epoch === 0 || won) return;
+    clearWrongTimer();
     if (phase === "listen") {
       if (listenTimerRef.current) {
         clearTimeout(listenTimerRef.current);
@@ -197,15 +207,15 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: "fast" | "slow") => {
     primeMusic();
-    if (won || phase !== "pick" || lockedRef.current || !isValid()) return;
+    if (won || phase !== "pick" || lockedRef.current || !isValid() || wrongPickRef.current === picked) return;
     stopNarration();
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
+      clearWrongTimer();
       sfx.good();
       setSparkKey((k) => k + 1);
       const next = nextScoreValue(score);
       setScore(next);
-      setWrongPick(null);
       setInstructionalTempo(null);
       const nextHistory = [...history, picked];
       setHistory(nextHistory);
@@ -223,12 +233,19 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
-      lockedRef.current = true;
+      wrongPickRef.current = picked;
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
       const trueSpeed = getActualSpeed(round);
+      if (wrongTimerRef.current) {
+        clearTimeout(wrongTimerRef.current);
+        wrongTimerRef.current = null;
+      }
       wrongTimerRef.current = setTimeout(() => {
+        wrongTimerRef.current = null;
         if (roundEpochRef.current !== currentEpoch) return;
+        lockedRef.current = true;
+        wrongPickRef.current = null;
         setWrongPick(null);
         setInstructionalTempo(trueSpeed);
         feedbackSpeechRef.current = getInstructionalFeedback(round, lang);
@@ -257,9 +274,8 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     stopSequence();
     stopNotePulse();
     if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
-    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    clearWrongTimer();
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
-    setWrongPick(null);
     setInstructionalTempo(null);
     setPhase("listen");
     replayTimerRef.current = setTimeout(
@@ -270,7 +286,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     if (listenTimerRef.current) clearTimeout(listenTimerRef.current);
-    if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    clearWrongTimer();
     if (replayTimerRef.current) clearTimeout(replayTimerRef.current);
     if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
     stopSequence();
@@ -282,7 +298,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);
-    setWrongPick(null);
     setInstructionalTempo(null);
     setHistory([]);
     setRound(makeFastSlowRound(rngRef.current, difficulty, []));

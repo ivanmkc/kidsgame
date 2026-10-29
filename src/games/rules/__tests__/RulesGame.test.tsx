@@ -101,7 +101,7 @@ describe("RulesGame", () => {
     }
   });
 
-  it("locks input during wrong-tap feedback so rapid taps trigger error feedback once", () => {
+  it("allows immediate tap of match tile after wrong tile while ignoring repeated wrong taps", () => {
     vi.useFakeTimers();
     try {
       render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
@@ -123,18 +123,7 @@ describe("RulesGame", () => {
       // sfx.wrong is triggered only once
       expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-      // Tapping a match tile while wrong feedback is active is ignored
-      act(() => {
-        fireEvent.click(matchTile);
-      });
-      expect(sfx.good).not.toHaveBeenCalled();
-
-      // Advance past the 450ms wobble timeout
-      act(() => {
-        vi.advanceTimersByTime(450);
-      });
-
-      // After unlocking, tapping a match tile succeeds
+      // Tapping a match tile immediately succeeds
       act(() => {
         fireEvent.click(matchTile);
       });

@@ -121,7 +121,7 @@ describe("CompareGame fast-tap lock", () => {
     expect(screen.getByTestId("compare-score").textContent).toContain("2/6");
   });
 
-  it("ignores taps on correct side while wrong-side feedback is active", () => {
+  it("allows immediate tap on correct side after wrong-side tap while ignoring repeated wrong taps", () => {
     vi.useFakeTimers();
     render(<CompareGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -141,16 +141,13 @@ describe("CompareGame fast-tap lock", () => {
     });
     expect(wrongSpy).toHaveBeenCalledTimes(1);
 
+    // Repeated tap on the same wrong plate is ignored
     act(() => {
-      fireEvent.click(correctPlate);
+      fireEvent.click(wrongPlate);
     });
-    expect(goodSpy).not.toHaveBeenCalled();
-    expect(screen.getByTestId("compare-score").textContent).toContain("0/6");
+    expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    act(() => {
-      vi.advanceTimersByTime(450);
-    });
-
+    // Tapping correct plate immediately succeeds without waiting for 450ms lockout
     act(() => {
       fireEvent.click(correctPlate);
     });

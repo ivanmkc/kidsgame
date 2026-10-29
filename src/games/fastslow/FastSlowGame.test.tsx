@@ -879,14 +879,8 @@ describe("FastSlowGame UI interaction", () => {
     vi.useRealTimers();
   });
 
-  it("provides visual feedback on wrong pick with red tint, blocks immediate taps, and shows instructional tempo on listen card (R3)", () => {
+  it("allows immediate tap of correct choice after wrong pick while ignoring repeated wrong taps", () => {
     vi.useFakeTimers();
-    let onSpeechDone: (() => void) | undefined;
-    vi.mocked(sayThen).mockImplementation(
-      (_texts?: string[], onDone?: () => void) => {
-        onSpeechDone = onDone;
-      },
-    );
 
     render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
 
@@ -908,41 +902,13 @@ describe("FastSlowGame UI interaction", () => {
     // Tap wrong button
     fireEvent.click(wrongBtn);
 
-    // 1. Visual cue: tapped button is tinted red, picks are locked
-    // 2. Immediate exploitation attempt: tapping correct button while red tint is active does NOT award score or advance
+    // Repeated tap on the same wrong button is ignored
+    fireEvent.click(wrongBtn);
+
+    // Immediate tap of correct button succeeds without waiting for 500ms error flash
     fireEvent.click(correctBtn);
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
-    expect(within(correctBtn).queryAllByText(/✨|⭐/)).toHaveLength(0);
-
-    // 3. Advance through 500ms red tint into listen phase
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-
-    // 4. Visual cue for true tempo and listen card (R3)
-    expect(screen.getByTestId("fastslow-instructional-tempo").textContent).toBe(
-      speed === "fast" ? "🐰 Fast" : "🐢 Slow",
-    );
-    expect(screen.getByText("Listen...")).toBeTruthy();
-    // Pick buttons are unmounted during listen demonstration
-    expect(screen.queryByTestId("fastslow-fast")).toBeNull();
-
-    // 5. Complete speech and melody replay
-    act(() => {
-      onSpeechDone?.();
-    });
-
-    // Re-query buttons once demonstration returns to pick phase
-    const activeCorrectBtn = screen.getByTestId(
-      speed === "fast" ? "fastslow-fast" : "fastslow-slow",
-    );
-    fireEvent.click(activeCorrectBtn);
-
-    // Celebration sparkles appear on correct button, but score does not increase on fallback
-    expect(
-      within(activeCorrectBtn).queryAllByText(/✨|⭐/).length,
-    ).toBeGreaterThan(0);
     expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
+    expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(0);
 
     vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
     vi.useRealTimers();
@@ -1435,5 +1401,92 @@ describe("FastSlowGame language switch safety", () => {
       vi.advanceTimersByTime(2000);
     });
     expect(playSequence).not.toHaveBeenCalled();
+  });
+
+  it("clears wrong pick lockout when replay is tapped mid-flash so tapping the wrong button again gives sfx.wrong", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.mocked(playSequence).mockImplementation((_notes, _bpm, _onNote, onDone) => {
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<FastSlowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+      onDoneCb?.();
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    vi.mocked(sfx.wrong).mockClear();
+
+    fireEvent.click(wrongBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    fireEvent.click(screen.getByTestId("fastslow-replay"));
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+      onDoneCb?.();
+    });
+
+    const wrongBtnAfterReplay = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+    fireEvent.click(wrongBtnAfterReplay);
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
+  });
+
+  it("clears wrong pick lockout when language switches mid-flash so tapping the wrong button again gives sfx.wrong", () => {
+    vi.useFakeTimers();
+    let onDoneCb: (() => void) | undefined;
+    vi.mocked(playSequence).mockImplementation((_notes, _bpm, _onNote, onDone) => {
+      onDoneCb = onDone;
+      return () => {};
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+      onDoneCb?.();
+    });
+
+    const calls = vi.mocked(playSequence).mock.calls;
+    const bpm = calls[calls.length - 1][1] as number;
+    const speed = bpm >= 140 ? "fast" : "slow";
+    const wrongBtn = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+
+    vi.mocked(sfx.wrong).mockClear();
+
+    fireEvent.click(wrongBtn);
+    expect(sfx.wrong).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    const wrongBtnAfterLang = screen.getByTestId(
+      speed === "fast" ? "fastslow-slow" : "fastslow-fast",
+    );
+    fireEvent.click(wrongBtnAfterLang);
+    expect(sfx.wrong).toHaveBeenCalledTimes(2);
+
+    vi.useRealTimers();
   });
 });
