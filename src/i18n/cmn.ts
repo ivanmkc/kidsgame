@@ -354,6 +354,8 @@ export const CMN: Table = {
   'letters.find': '找一找字母 {letter}！',
   'letters.sound': '哪个字母发 {sound} 的音？',
   'letters.findKana': '找一找假名 {kana}！',
+  'numbers.findNumber': '找一找数字 {n}！',
+  'numbers.find': '找一找！',
   'bingo.prompt': '找一找 {word}！',
   'bingo.promptPhonics': '找一找 {sound} 开头的！',
   'bingo.confirmPhonics': '{word} 是 {sound} 开头的！',

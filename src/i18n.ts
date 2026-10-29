@@ -279,6 +279,8 @@ export type UIKey =
   | 'letters.find'
   | 'letters.sound'
   | 'letters.findKana'
+  | 'numbers.findNumber'
+  | 'numbers.find'
   | 'bingo.prompt'
   | 'bingo.promptPhonics'
   | 'bingo.confirmPhonics'
@@ -681,6 +683,8 @@ export const EN: Table = {
   'letters.find': 'Find the letter {letter}!',
   'letters.sound': 'Which letter says {sound}?',
   'letters.findKana': 'Find the kana {kana}!',
+  'numbers.findNumber': 'Find the number {n}!',
+  'numbers.find': '',
   'bingo.prompt': 'Find the {word}!',
   'bingo.promptPhonics': 'Find something that starts with {sound}!',
   'bingo.confirmPhonics': '{word} starts with {sound}!',

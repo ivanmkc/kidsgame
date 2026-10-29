@@ -1,4 +1,5 @@
 import { hanNumeral, Lang, numberWord } from '../../lang';
+import { t } from '../../i18n';
 import { Rng, shuffle } from '../../rng';
 import { CURRICULUM } from '../../curriculum/content';
 
@@ -18,15 +19,6 @@ export interface NumberRound {
   tiles: NumberTile[];
   answerIdx: number;
 }
-
-// Wording for the second (or first) spoken line in non-EN modes; kept
-// short so the offline TTS clip stays tiny + snappy.
-const FIND_WORD: Record<Lang, string> = {
-  en: '',                 // EN speaks a single "Find the number N!" line instead
-  ja: 'さがしてね！',
-  cmn: '找一找！',
-  yue: '搵一搵！',
-};
 
 export interface NumberSettings {
   rounds: number;
@@ -91,9 +83,9 @@ export function makeNumberRound(
   const displayText = label(targetN, false);
   let promptLines: string[];
   if (lang === 'en') {
-    promptLines = [`Find the number ${targetN}!`];
+    promptLines = [t(lang, 'numbers.findNumber', { n: targetN })];
   } else {
-    promptLines = [FIND_WORD[lang], numberWord(lang, targetN).t];
+    promptLines = [t(lang, 'numbers.find'), numberWord(lang, targetN).t];
   }
   return {
     targetN, targetKey, useHan, promptLines, displayText,
@@ -106,11 +98,12 @@ export function makeNumberRound(
 export function speechLines(): string[] {
   const s = new Set<string>();
   // EN: 0..20 covers the widest tier.
-  for (let n = 0; n <= 20; n++) s.add(`Find the number ${n}!`);
+  const langEn: Lang = 'en';
+  for (let n = 0; n <= 20; n++) s.add(t(langEn, 'numbers.findNumber', { n }));
   // Non-EN: the "find" word plus every localized number that could appear
   // as a target (E/M go up to 9, H tier up to 20).
   for (const lang of ['ja', 'cmn', 'yue'] as const) {
-    s.add(FIND_WORD[lang]);
+    s.add(t(lang, 'numbers.find'));
     for (let n = 1; n <= 20; n++) s.add(numberWord(lang, n).t);
   }
   return [...s];

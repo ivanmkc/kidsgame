@@ -354,6 +354,8 @@ export const YUE: Table = {
   'letters.find': '搵一搵字母 {letter}！',
   'letters.sound': '邊個字母發 {sound} 嘅音？',
   'letters.findKana': '搵一搵假名 {kana}！',
+  'numbers.findNumber': '搵一搵數字 {n}！',
+  'numbers.find': '搵一搵！',
   'bingo.prompt': '搵一搵 {word}！',
   'bingo.promptPhonics': '搵一搵 {sound} 起頭嘅！',
   'bingo.confirmPhonics': '{word} 係 {sound} 起頭嘅！',

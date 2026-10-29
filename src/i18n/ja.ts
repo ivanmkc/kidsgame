@@ -355,6 +355,8 @@ export const JA: Table = {
   'letters.find': '「{letter}」をさがして！',
   'letters.sound': '「{sound}」の おとの もじは どれ？',
   'letters.findKana': '「{kana}」をさがして！',
+  'numbers.findNumber': '「{n}」をさがしてね！',
+  'numbers.find': 'さがしてね！',
   'bingo.prompt': 'さがしてね {word}！',
   'bingo.promptPhonics': '{sound} で はじまる ものを さがしてね！',
   'bingo.confirmPhonics': '{word} は {sound} で はじまるよ！',
