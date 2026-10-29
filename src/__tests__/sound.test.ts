@@ -446,3 +446,211 @@ describe("sound module", () => {
     });
   });
 });
+
+describe("sfx pool and playback", () => {
+  let sound: typeof import("../sound");
+  let audioInstances: HTMLAudioElement[];
+  let inGesture: boolean;
+  let primedElements: Set<HTMLAudioElement>;
+  let playCalls: Array<{
+    audio: HTMLAudioElement;
+    src: string;
+    volume: number;
+  }>;
+
+  beforeEach(async () => {
+    vi.useFakeTimers();
+    vi.resetModules();
+    audioInstances = [];
+    primedElements = new Set();
+    playCalls = [];
+    inGesture = false;
+
+    const originalAudio = window.Audio;
+    vi.spyOn(window, "Audio").mockImplementation(function () {
+      const a = new originalAudio();
+      audioInstances.push(a);
+
+      vi.spyOn(a, "cloneNode");
+
+      vi.spyOn(a, "play").mockImplementation(function (this: HTMLAudioElement) {
+        if (inGesture) {
+          primedElements.add(this);
+          return Promise.resolve();
+        }
+        if (!primedElements.has(this)) {
+          return Promise.reject(
+            new Error("NotAllowedError: unprimed element outside user gesture"),
+          );
+        }
+        playCalls.push({ audio: this, src: this.src, volume: this.volume });
+        return Promise.resolve();
+      });
+
+      return a;
+    });
+
+    sound = await import("../sound");
+    sound.setMuted(false);
+  });
+
+  afterEach(() => {
+    sound.stopNarration();
+    window.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(0);
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it("primes SFX pool elements on the first user gesture", () => {
+    expect(audioInstances.length).toBeGreaterThanOrEqual(6);
+    expect(primedElements.size).toBe(0);
+
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    expect(primedElements.size).toBeGreaterThanOrEqual(6);
+    for (const a of audioInstances) {
+      if (primedElements.has(a)) {
+        expect(a.src).toContain("data:audio/wav;base64");
+      }
+    }
+  });
+
+  it("plays async SFX outside user gesture on primed pool element without cloning", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    let played = false;
+    setTimeout(() => {
+      sound.sfx.boing(0.35);
+      played = true;
+    }, 500);
+
+    vi.advanceTimersByTime(500);
+    expect(played).toBe(true);
+
+    expect(playCalls.length).toBe(1);
+    expect(playCalls[0].src).toContain("sfx/boing.mp3");
+    expect(playCalls[0].volume).toBe(0.35);
+    expect(primedElements.has(playCalls[0].audio)).toBe(true);
+
+    for (const a of audioInstances) {
+      expect(a.cloneNode).not.toHaveBeenCalled();
+    }
+  });
+
+  it("rapid taps overlap across pool elements", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    sound.sfx.tap();
+    sound.sfx.tap();
+
+    expect(playCalls.length).toBe(2);
+    expect(playCalls[0].audio).not.toBe(playCalls[1].audio);
+    expect(playCalls[0].src).toContain("sfx/tap.mp3");
+    expect(playCalls[1].src).toContain("sfx/tap.mp3");
+  });
+
+  it("resets currentTime when same sound plays again on recycled pool element", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    sound.sfx.flip();
+    expect(playCalls.length).toBe(1);
+    const firstAudio = playCalls[0].audio;
+    firstAudio.currentTime = 0.5;
+
+    // Cycle through the other 5 elements in the 6-element pool
+    for (let i = 0; i < 5; i++) {
+      sound.sfx.tap();
+    }
+    expect(playCalls.length).toBe(6);
+
+    // 7th sound cycles back to firstAudio; playing flip again should reset currentTime to 0
+    sound.sfx.flip();
+    expect(playCalls.length).toBe(7);
+    expect(playCalls[6].audio).toBe(firstAudio);
+    expect(firstAudio.currentTime).toBe(0);
+  });
+
+  it("plays each SFX sound with its expected volume", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    const variants: Array<[() => void, string, number]> = [
+      [() => sound.sfx.tap(), "sfx/tap.mp3", 0.35],
+      [() => sound.sfx.good(), "sfx/good.mp3", 0.5],
+      [() => sound.sfx.wrong(), "sfx/wrong.mp3", 0.4],
+      [() => sound.sfx.wrong(0.2), "sfx/wrong.mp3", 0.2],
+      [() => sound.sfx.flip(), "sfx/flip.mp3", 0.35],
+      [() => sound.sfx.win(), "sfx/win.mp3", 0.6],
+      [() => sound.sfx.boing(), "sfx/boing.mp3", 0.6],
+      [() => sound.sfx.boing(0.35), "sfx/boing.mp3", 0.35],
+      [() => sound.sfx.thunder(), "sfx/thunder.mp3", 0.75],
+    ];
+
+    for (const [fn, expectedSrc, expectedVol] of variants) {
+      playCalls.length = 0;
+      fn();
+      expect(playCalls.length).toBe(1);
+      expect(playCalls[0].src).toContain(expectedSrc);
+      expect(playCalls[0].volume).toBeCloseTo(expectedVol, 2);
+    }
+  });
+
+  it("does not play SFX when muted", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    sound.setMuted(true);
+    sound.sfx.tap();
+    sound.sfx.boing();
+    expect(playCalls.length).toBe(0);
+  });
+
+  it("wraps around pool when all pool elements are busy", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    for (let i = 0; i < 7; i++) {
+      sound.sfx.tap();
+    }
+    expect(playCalls.length).toBe(7);
+    expect(playCalls[6].audio).toBe(playCalls[0].audio);
+  });
+
+  it("silently handles synchronous exceptions from play() without crashing caller", () => {
+    inGesture = true;
+    window.dispatchEvent(new Event("pointerdown"));
+    inGesture = false;
+
+    const firstAudio = audioInstances[0];
+    vi.spyOn(firstAudio, "play").mockImplementation(() => {
+      throw new Error("Synchronous audio failure");
+    });
+
+    expect(() => sound.sfx.tap()).not.toThrow();
+  });
+
+  it("silently handles synchronous exceptions when priming SFX pool without crashing primeUnlock", () => {
+    const firstAudio = audioInstances[0];
+    vi.spyOn(firstAudio, "play").mockImplementation(() => {
+      throw new Error("Synchronous prime rejection");
+    });
+
+    expect(() => {
+      inGesture = true;
+      window.dispatchEvent(new Event("pointerdown"));
+      inGesture = false;
+    }).not.toThrow();
+  });
+});
