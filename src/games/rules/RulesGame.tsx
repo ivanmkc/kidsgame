@@ -104,6 +104,11 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   // Speak the game intro once, then every rule aloud — pre-readers play
   // entirely by ear here.
   const introDone = useRef(false);
+
+  useEffect(() => {
+    introDone.current = false;
+  }, [lang]);
+
   useEffect(() => {
     if (won) return;
     const line = round.isRecall
@@ -112,10 +117,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
-      saySequence([
-        rulesIntroLine(lang),
-        line,
-      ]);
+      saySequence([rulesIntroLine(lang), line]);
     } else {
       say(line);
     }
