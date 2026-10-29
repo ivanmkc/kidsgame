@@ -19,13 +19,8 @@ import { t } from "../../i18n";
 import { Position } from "../count/logic";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
-import { sayThen, saySequence, sfx, say } from "../../sound";
-import {
-  SumsRound,
-  makeSumsRound,
-  sumsLayout,
-  sumsSettings,
-} from "./logic";
+import { sayThen, saySequence, sfx, say, stopNarration } from "../../sound";
+import { SumsRound, makeSumsRound, sumsLayout, sumsSettings } from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -63,6 +58,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(
     () => () => {
+      stopNarration();
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
       if (wrongPickTimer.current) clearTimeout(wrongPickTimer.current);
       clearBoingTimers();
