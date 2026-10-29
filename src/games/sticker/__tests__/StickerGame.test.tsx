@@ -880,7 +880,7 @@ describe('StickerGame', () => {
     vi.useRealTimers();
   });
 
-  it('reverts first magicked sticker to placed overlay when second sticker is magicked', async () => {
+  it('disables magic button for other stickers once one is magicked', async () => {
     vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
     vi.spyOn(magic, 'callMagic').mockImplementation(async (args) => ({
@@ -921,15 +921,19 @@ describe('StickerGame', () => {
 
     const magicBtn2 = await screen.findByTestId('magic-btn-2');
 
-    // Apply magic to second sticker
+    // Magic button on second sticker is disabled because one sticker is already baked
+    expect(capturedPressableProps['magic-btn-2']?.disabled).toBe(true);
+    expect(magicBtn2.getAttribute('aria-disabled')).toBe('true');
+
+    // Attempting to tap the disabled magic button does not trigger magic or un-bake the first sticker
     await act(async () => {
       fireEvent.click(magicBtn2);
     });
 
-    // Second sticker is now baked into backdrop; first sticker is not deleted and reverts to placed
-    expect(screen.queryByTestId('sticker-placed-2')).toBeNull();
-    expect(screen.getByTestId('sticker-placed-1')).not.toBeNull();
-    expect(screen.getByTestId('magic-btn-1')).not.toBeNull();
+    expect(magic.callMagic).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('magic-backdrop')).not.toBeNull();
+    expect(screen.queryByTestId('sticker-placed-1')).toBeNull();
+    expect(screen.getByTestId('sticker-placed-2')).not.toBeNull();
 
     unmount();
   });
