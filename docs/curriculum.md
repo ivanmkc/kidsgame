@@ -16,7 +16,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 - **Level 1 (Age 3-4):** Subitizing
 - **Level 2 (Age 4-5):** Counting
 - **Level 3 (Age 5):** Comparing
-- **Level 4 (Age 5-6):** Shapes and patterns
+- **Level 4 (Age 5-6):** Part-whole number decomposition, set equivalence, shapes and patterns
 - **Level 5 (Age 6-7):** Adding within 10
 
 ### 3. Music and Rhythm
@@ -83,6 +83,10 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 - `spotit` - Executive Function (Level 3)
 
 ## Map Gaps & New Game Specs
+
+- **Part-whole and equivalence Game (Numeracy - Level 4):**
+  - **Spec:** A game teaching part-whole number decomposition and set equivalence ("equal / same") as necessary foundational concepts before formal addition equations.
+  - **Path:** Follows `compare` and leads to `sums`.
 
 - **Shapes and Patterns Game (Numeracy - Level 4):**
   - **Spec:** A game where kids identify geometric shapes and complete visual patterns.
