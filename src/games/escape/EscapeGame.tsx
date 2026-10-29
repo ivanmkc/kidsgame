@@ -107,7 +107,7 @@ export function EscapeGame({
   const visible = rooms.filter((r) => inFilter(r.level, filter));
   const surprisePool = visible.length > 0 ? visible : rooms;
   const effDifficulty =
-    filter === "all" && room?.level ? room.level : difficulty;
+    filter !== "all" ? filter : (room?.level || difficulty);
   const hintMs = escapeHintMs(effDifficulty);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);

@@ -333,15 +333,15 @@ describe("EscapeGame", () => {
     expect(onPickScene).toHaveBeenCalledWith("toyroom");
   });
 
-  it("idle hint delay scales with difficulty (easy 8s vs medium 12s)", () => {
+  it("idle hint delay uses filter over global difficulty (easy 8s vs hard 18s)", () => {
     const { unmount } = render(
       <EscapeGame
         onHome={noop}
         onPickScene={noop}
         onBackToPicker={noop}
         sceneId="toyroom"
-        difficulty="easy"
-        filter="easy"
+        difficulty="hard" // global difficulty is hard
+        filter="easy"     // but filter is easy
         lang="en"
       />,
     );
@@ -355,7 +355,7 @@ describe("EscapeGame", () => {
     });
     expect(pillow.children.length).toBe(0);
 
-    // After 8.5s total, hint has triggered on easy
+    // After 8.5s total, hint has triggered because filter is easy
     act(() => {
       vi.advanceTimersByTime(1500);
     });
