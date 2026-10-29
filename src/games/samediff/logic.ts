@@ -157,17 +157,16 @@ export function nextScoreValue(
 }
 
 /**
- * Compute normalized pitch positions [0..1] for a phrase given the round's min and max MIDI pitches.
- * Returns 0.5 if all notes in the round have identical pitch.
+ * Compute normalized pitch positions [0..1] for a phrase given phraseA's min and max MIDI pitches.
+ * Returns 0.5 if all notes in the phrase have identical pitch.
  */
 export function phrasePitchRatios(
   round: SameDiffRound,
   phrase: SeqNote[],
 ): number[] {
-  const allNotes = [...round.phraseA, ...round.phraseB];
-  let minM = allNotes[0]?.m ?? 60;
+  let minM = round.phraseA[0]?.m ?? 60;
   let maxM = minM;
-  for (const n of allNotes) {
+  for (const n of round.phraseA) {
     if (n.m < minM) minM = n.m;
     if (n.m > maxM) maxM = n.m;
   }

@@ -305,7 +305,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 {ratiosA.map((ratio, i) => {
                   const isNoteActive =
                     phase === "listenA" && activeNote === i;
-                  const stemHeight = Math.round(6 + ratio * 20);
+                  const stemHeight = Math.max(2, Math.round(6 + ratio * 20));
                   return (
                     <View
                       key={i}
@@ -346,7 +346,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   ? ratiosB.map((ratio, i) => {
                       const isNoteActive =
                         phase === "listenB" && activeNote === i;
-                      const stemHeight = Math.round(6 + ratio * 20);
+                      const stemHeight = Math.max(2, Math.round(6 + ratio * 20));
                       return (
                         <View
                           key={i}
