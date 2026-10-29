@@ -129,6 +129,10 @@ export function speechLines(): string[] {
     out.push(t(l.id, "musicbox.intro"));
     out.push(t(l.id, "musicbox.introFree"));
     out.push(t(l.id, "shell.musicbox.subPicker"));
+    out.push(t(l.id, "shell.musicbox.subPlay"));
+    for (const s of SONGS) {
+      out.push(t(l.id, `song.${s.id}` as Parameters<typeof t>[1]));
+    }
   }
   return [...new Set(out)];
 }

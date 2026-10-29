@@ -235,7 +235,7 @@ describe("musicbox v2 logic", () => {
 
   it("speechLines covers intro, free-play intro, and picker prompts across all languages, no duplicates", () => {
     const lines = speechLines();
-    expect(lines.length).toBe(12);
+    expect(lines.length).toBe(42);
     expect(new Set(lines).size).toBe(lines.length);
     expect(lines).toContain("Pick a song to play!");
     expect(lines).toContain("うたを えらんでね！");
@@ -246,6 +246,9 @@ describe("musicbox v2 logic", () => {
     expect(lines).toContain(
       "まほうの けんばん！ タップすると きれいなおとが なるよ！",
     );
+    expect(lines).toContain("Tap anywhere to play the next note!");
+    expect(lines).toContain("Twinkle Twinkle Little Star");
+    expect(lines).toContain("Jingle Bells");
   });
 
   it("defines parallax speeds for all spawn zones", () => {
