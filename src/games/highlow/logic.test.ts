@@ -138,28 +138,30 @@ describe("highlow logic", () => {
   });
 
   describe("highLowLayout", () => {
-    it("adapts layout for compact portrait viewports (< 380px) so buttons fit without clipping", () => {
+    it("adapts layout for compact portrait viewports (< 430px) so buttons fit without clipping", () => {
       const portrait360 = highLowLayout(360);
       expect(portrait360.gap).toBe(10);
-      expect(portrait360.pickBtnPaddingHorizontal).toBe(12);
+      expect(portrait360.pickBtnPaddingHorizontal).toBe(8);
       expect(portrait360.pickBtnMinWidth).toBe(96);
       expect(portrait360.replaySize).toBe(56);
       expect(portrait360.replayFontSize).toBe(28);
+      expect(portrait360.pickLabelFontSize).toBe(16);
 
-      const viewports = [320, 360, 375];
+      const viewports = [320, 360, 375, 390, 414];
       for (const width of viewports) {
         const layout = highLowLayout(width);
         const containerWidth = width - 32;
         const minRowWidth =
           layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
         expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+        expect(layout.pickBtnMinWidth).toBe(96);
       }
     });
 
     it("adapts layout for ultra-compact 320px portrait viewport", () => {
       const layout = highLowLayout(320);
       expect(layout.gap).toBe(10);
-      expect(layout.pickBtnPaddingHorizontal).toBe(12);
+      expect(layout.pickBtnPaddingHorizontal).toBe(8);
       expect(layout.pickBtnMinWidth).toBe(96);
       expect(layout.replaySize).toBe(56);
       expect(layout.replayFontSize).toBe(28);
@@ -168,15 +170,17 @@ describe("highlow logic", () => {
       const minRowWidth =
         layout.pickBtnMinWidth * 2 + layout.replaySize + layout.gap * 2;
       expect(minRowWidth).toBeLessThanOrEqual(containerWidth);
+      expect(layout.pickBtnMinWidth).toBe(96);
     });
 
-    it("preserves spacious layout on standard mobile, tablets, and desktop (>= 380px)", () => {
-      const portrait380 = highLowLayout(380);
-      expect(portrait380.gap).toBe(12);
-      expect(portrait380.pickBtnPaddingHorizontal).toBe(16);
-      expect(portrait380.pickBtnMinWidth).toBe(130);
-      expect(portrait380.replaySize).toBe(72);
-      expect(portrait380.replayFontSize).toBe(36);
+    it("preserves spacious layout on standard mobile, tablets, and desktop (>= 430px)", () => {
+      const portrait430 = highLowLayout(430);
+      expect(portrait430.gap).toBe(12);
+      expect(portrait430.pickBtnPaddingHorizontal).toBe(16);
+      expect(portrait430.pickBtnMinWidth).toBe(130);
+      expect(portrait430.replaySize).toBe(72);
+      expect(portrait430.replayFontSize).toBe(36);
+      expect(portrait430.pickLabelFontSize).toBe(22);
 
       const tablet = highLowLayout(768);
       expect(tablet.gap).toBe(12);
@@ -184,6 +188,7 @@ describe("highlow logic", () => {
       expect(tablet.pickBtnMinWidth).toBe(130);
       expect(tablet.replaySize).toBe(72);
       expect(tablet.replayFontSize).toBe(36);
+      expect(tablet.pickLabelFontSize).toBe(22);
 
       const desktop = highLowLayout(1024);
       expect(desktop.gap).toBe(12);

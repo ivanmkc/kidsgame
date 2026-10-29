@@ -420,39 +420,8 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
           </View>
         ) : (
           <View
-            testID="highlow-pick-row"
-            style={[styles.pickRow, { gap: layout.gap }]}
+            style={{ alignItems: "center", gap: layout.gap, width: "100%" }}
           >
-            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
-              <Pressable
-                onPress={() => onPick("high")}
-                testID="highlow-high"
-                accessibilityRole="button"
-                accessibilityLabel={t(lang, "music.high")}
-                style={({ pressed }) => [
-                  styles.pickBtn,
-                  {
-                    backgroundColor: "#E3EEFB",
-                    borderColor: "#5DA9E8",
-                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
-                    minWidth: layout.pickBtnMinWidth,
-                  },
-                  shadows.glowGold,
-                  wrongPick === "high" && styles.wrong,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Text style={styles.pickEmoji}>↗️</Text>
-                <Text style={[styles.pickLabel, { color: "#5DA9E8" }]}>
-                  {t(lang, "music.high" as never)}
-                </Text>
-                {phase === "celebrate" &&
-                correctAnswer(round) === "high" &&
-                sparkKey > 0 ? (
-                  <SparkleBurst trigger={sparkKey} count={5} size={14} />
-                ) : null}
-              </Pressable>
-            </Animated.View>
             <Pressable
               onPress={replay}
               testID="highlow-replay"
@@ -475,36 +444,91 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 🔊
               </Text>
             </Pressable>
-            <Animated.View style={{ transform: [{ scale: pickScale }] }}>
-              <Pressable
-                onPress={() => onPick("low")}
-                testID="highlow-low"
-                accessibilityRole="button"
-                accessibilityLabel={t(lang, "music.low")}
-                style={({ pressed }) => [
-                  styles.pickBtn,
-                  {
-                    backgroundColor: "#FFF0E5",
-                    borderColor: "#E8874F",
-                    paddingHorizontal: layout.pickBtnPaddingHorizontal,
-                    minWidth: layout.pickBtnMinWidth,
-                  },
-                  shadows.glowGold,
-                  wrongPick === "low" && styles.wrong,
-                  pressed && styles.pressed,
-                ]}
+            <View
+              testID="highlow-pick-row"
+              style={[styles.pickRow, { gap: layout.gap, width: "100%" }]}
+            >
+              <Animated.View
+                style={{ flex: 1, transform: [{ scale: pickScale }] }}
               >
-                <Text style={styles.pickEmoji}>↘️</Text>
-                <Text style={[styles.pickLabel, { color: "#E8874F" }]}>
-                  {t(lang, "music.low" as never)}
-                </Text>
-                {phase === "celebrate" &&
-                correctAnswer(round) === "low" &&
-                sparkKey > 0 ? (
-                  <SparkleBurst trigger={sparkKey} count={5} size={14} />
-                ) : null}
-              </Pressable>
-            </Animated.View>
+                <Pressable
+                  onPress={() => onPick("high")}
+                  testID="highlow-high"
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, "music.high")}
+                  style={({ pressed }) => [
+                    styles.pickBtn,
+                    { width: "100%" },
+                    {
+                      backgroundColor: "#E3EEFB",
+                      borderColor: "#5DA9E8",
+                      paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                      minWidth: layout.pickBtnMinWidth,
+                    },
+                    shadows.glowGold,
+                    wrongPick === "high" && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.pickEmoji}>↗️</Text>
+                  <Text
+                    adjustsFontSizeToFit
+                    numberOfLines={1}
+                    style={[
+                      styles.pickLabel,
+                      { color: "#5DA9E8", fontSize: layout.pickLabelFontSize },
+                    ]}
+                  >
+                    {t(lang, "music.high" as never)}
+                  </Text>
+                  {phase === "celebrate" &&
+                  correctAnswer(round) === "high" &&
+                  sparkKey > 0 ? (
+                    <SparkleBurst trigger={sparkKey} count={5} size={14} />
+                  ) : null}
+                </Pressable>
+              </Animated.View>
+              <Animated.View
+                style={{ flex: 1, transform: [{ scale: pickScale }] }}
+              >
+                <Pressable
+                  onPress={() => onPick("low")}
+                  testID="highlow-low"
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, "music.low")}
+                  style={({ pressed }) => [
+                    styles.pickBtn,
+                    { width: "100%" },
+                    {
+                      backgroundColor: "#FFF0E5",
+                      borderColor: "#E8874F",
+                      paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                      minWidth: layout.pickBtnMinWidth,
+                    },
+                    shadows.glowGold,
+                    wrongPick === "low" && styles.wrong,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text style={styles.pickEmoji}>↘️</Text>
+                  <Text
+                    adjustsFontSizeToFit
+                    numberOfLines={1}
+                    style={[
+                      styles.pickLabel,
+                      { color: "#E8874F", fontSize: layout.pickLabelFontSize },
+                    ]}
+                  >
+                    {t(lang, "music.low" as never)}
+                  </Text>
+                  {phase === "celebrate" &&
+                  correctAnswer(round) === "low" &&
+                  sparkKey > 0 ? (
+                    <SparkleBurst trigger={sparkKey} count={5} size={14} />
+                  ) : null}
+                </Pressable>
+              </Animated.View>
+            </View>
           </View>
         )}
       </View>
