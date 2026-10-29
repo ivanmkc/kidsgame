@@ -535,6 +535,7 @@ const DraggableSticker = React.memo(function DraggableSticker({
           tf(pl.key, size, rotation);
           return;
         }
+        if (pinchStart.current) return;
         Animated.event([null, { dx: pan.current!.x, dy: pan.current!.y }], { useNativeDriver: false })(e, g);
       },
       onPanResponderRelease: (_e, g) => {
