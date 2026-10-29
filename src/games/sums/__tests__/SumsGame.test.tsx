@@ -112,6 +112,18 @@ describe("SumsGame fast-tap", () => {
     });
   });
 
+  it("calls stopNarration on unmount to prevent audio leak across navigation", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
   it("ignores rapid double tap on the correct answer before state update", () => {
     let sayThenCb: (() => void) | undefined;
     vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
