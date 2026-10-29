@@ -114,20 +114,23 @@ describe("RulesGame", () => {
       const matchTile = matchTiles[0];
 
       // Rapidly tap the wrong tile multiple times
-      act(() => {
-        fireEvent.click(wrongTile);
-        fireEvent.click(wrongTile);
-        fireEvent.click(wrongTile);
-      });
+      act(() => { fireEvent.click(wrongTile); });
+      act(() => { fireEvent.click(wrongTile); });
+      act(() => { fireEvent.click(wrongTile); });
 
       // sfx.wrong is triggered only once
       expect(sfx.wrong).toHaveBeenCalledTimes(1);
 
-      // Tapping a match tile immediately succeeds
+      // Tapping a match tile while wrong feedback is active succeeds immediately
       act(() => {
         fireEvent.click(matchTile);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
+
+      // Advance past the 450ms wobble timeout
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
     } finally {
       vi.useRealTimers();
     }

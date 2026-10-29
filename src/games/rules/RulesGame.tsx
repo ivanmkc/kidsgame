@@ -158,6 +158,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         }, 550);
       }
     } else {
+      if (wrongIdx !== null) return;
       sfx.wrong();
       say(tileLabel(round.tiles[i].icon, lang));
       wrongIdxRef.current = i;
