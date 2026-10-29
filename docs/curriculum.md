@@ -92,9 +92,9 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
   - **Spec:** A game where kids identify geometric shapes and complete visual patterns.
   - **Path:** Follows `compare` and leads to `sums`.
 
-- **Advanced Phonics (Early Literacy - Level 2.5):**
-  - **Spec:** A game bridging letter sounds to blending by practicing digraphs and CVC words.
-  - **Path:** Follows `letters` and leads to `spell`.
+- **Word Family (Early Literacy - Level 2.5):**
+  - **Spec:** Advanced Phonics: Onset-Rime & CVC Blending. Directly reuses CVC word vocabulary and icons from `src/curriculum/words.ts` and `CURRICULUM.critters` (cat, bat, hat, dog, pig, fox, sun, bun, box, jar, bed, bus) with existing art from `assets/game/rhyme/` and `assets/game/spotit/`. Pre-reader core loop: The child sees a familiar picture prompt (e.g. a cat) with a fixed rime chunk (`_ a t`). A spoken voice prompt asks: "Let's make CAT! What sound starts cat?" Three chunky onset letter tiles (`c`, `b`, `h`) are displayed at the bottom tray. Touching any tile speaks its letter sound (e.g. tapping 'c' speaks "/k/"). The child drags or taps the matching onset consonant tile into the empty slot. When the correct tile is placed, the word blends visually and aurally ("c-at, cat!"), followed by a brief celebratory animation of the critter.
+  - **Path:** Follows `letters` (Level 2: Letter-sound) and leads to `spell` (Level 3: Blending).
 
 - **Sentence Builder (Languages EN/JA/ZH - Level 2):**
   - **Spec:** A game focusing on constructing simple sentences using vocabulary learned. The child drags word tiles into slots to build a descriptive sentence (e.g. "Dog eats apple"). [Detailed Design](sentence-builder-design.md)

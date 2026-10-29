@@ -11,6 +11,7 @@ export type CardKey =
   | 'letters'
   | 'sounds'
   | 'rhyme'
+  | 'wordfamily'
   | 'spell'
   | 'listenchoose'
   | 'count'
@@ -57,6 +58,7 @@ export const WORD_CARDS: CardDef[] = [
   { route: 'letters', color: '#E85D75', key: 'letters', preview: 'icons0' },
   { route: 'sounds', color: '#5DA9E8', key: 'sounds', preview: 'icons8' },
   { route: 'rhyme', color: '#9C6FD6', key: 'rhyme', preview: 'icons13' },
+  { route: 'wordfamily', color: '#9C6FD6', key: 'wordfamily', preview: 'icons13', beta: true },
   { route: 'spell', color: '#4FB06D', key: 'spell', preview: 'icons20' },
   { route: 'listenchoose', color: '#E8874F', key: 'listenchoose', preview: 'icons0' },
   { route: 'cm-picword', color: '#E8874F', key: 'cm-picword', preview: 'icons0' },

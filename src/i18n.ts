@@ -24,14 +24,10 @@ export type UIKey =
   | 'menu.section.music'
   | 'badge.beta'
   | 'menu.play'
-  | 'chip.sound'
-  | 'chip.muted'
-  | 'chip.twoPlayers'
-  | 'chip.twoPlayersOn'
-  | 'a11y.langCycle'
-  | 'a11y.diffCycle'
-  | 'a11y.soundOn'
-  | 'a11y.soundOff'
+  | 'chip.sound' | 'chip.muted'
+  | 'chip.twoPlayers' | 'chip.twoPlayersOn'
+  | 'a11y.langCycle' | 'a11y.diffCycle'
+  | 'a11y.soundOn' | 'a11y.soundOff'
   | 'a11y.twoPlayer'
   | 'a11y.backMenu'
   | 'a11y.backPicker'
@@ -68,6 +64,7 @@ export type UIKey =
   | 'card.letters.title'  | 'card.letters.blurb'
   | 'card.sounds.title'   | 'card.sounds.blurb'
   | 'card.rhyme.title'    | 'card.rhyme.blurb'
+  | 'card.wordfamily.title' | 'card.wordfamily.blurb'
   | 'card.spell.title'    | 'card.spell.blurb'
   | 'card.listenchoose.title' | 'card.listenchoose.blurb'
   | 'card.count.title'    | 'card.count.blurb'
@@ -420,6 +417,8 @@ export const EN: Table = {
   'card.sounds.blurb': 'Which one starts with that sound?',
   'card.rhyme.title': 'Rhyme Time',
   'card.rhyme.blurb': 'Frog... dog! Find what rhymes!',
+  'card.wordfamily.title': 'Word Family',
+  'card.wordfamily.blurb': 'Match the sound to make a word!',
   'card.spell.title': 'Word Builder',
   'card.spell.blurb': 'Tap the letters to build the word!',
   'card.listenchoose.title': 'Listen and Choose',

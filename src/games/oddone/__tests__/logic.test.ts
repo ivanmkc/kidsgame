@@ -3,8 +3,6 @@ import { makeOddOneRound } from '../logic';
 import * as iconCategories from '../../iconCategories';
 import { CURRICULUM } from '../../../curriculum/content';
 
-
-
 describe('makeOddOneRound', () => {
   it('does not pick an intruder that is also in the base category', () => {
     // Mock the categories to have an overlap
@@ -13,7 +11,6 @@ describe('makeOddOneRound', () => {
       fruit: ['apple', 'banana'],
       food: ['apple', 'pizza'],
     };
-    vi.spyOn(iconCategories, 'CATEGORY_CONFLICTS', 'get').mockReturnValue({});
 
     try {
       let calls = 0;

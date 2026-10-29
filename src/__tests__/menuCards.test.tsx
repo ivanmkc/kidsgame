@@ -236,3 +236,58 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   expect(picwordYueHtml).toContain("將圖片同文字配成一對！");
 });
 
+
+test("WORD_CARDS registers Word Family card with beta: true and localized text", () => {
+  const onNavigate = vi.fn();
+  const wordfamilyCard = WORD_CARDS.find((c) => c.route === "wordfamily")!;
+  expect(wordfamilyCard).toBeDefined();
+  expect(wordfamilyCard.beta).toBe(true);
+
+  const enHtml = renderToString(
+    <MenuCard
+      g={wordfamilyCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(enHtml).toContain("Word Family");
+  expect(enHtml).toContain("Match the sound to make a word!");
+
+  const cmnHtml = renderToString(
+    <MenuCard
+      g={wordfamilyCard}
+      lang="cmn"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(cmnHtml).toContain("词族");
+  expect(cmnHtml).toContain("配对发音，拼出单词！");
+
+  const jaHtml = renderToString(
+    <MenuCard
+      g={wordfamilyCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(jaHtml).toContain("ことばの かぞく");
+  expect(jaHtml).toContain("おとを あわせて ことばを つくろう！");
+
+  const yueHtml = renderToString(
+    <MenuCard
+      g={wordfamilyCard}
+      lang="yue"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(yueHtml).toContain("詞語家族");
+  expect(yueHtml).toContain("配對發音，砌出字詞！");
+});
