@@ -379,6 +379,9 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
     if (isComplete(current)) return;
 
     if (current.phase === "prompt") {
+      if (currentRound(current)?.pack === "boops") {
+        return;
+      }
       stopNarration();
       applyStateTransition(toGap(current));
       return;

@@ -109,6 +109,9 @@ describe("CarModeGame interactions", () => {
   });
 
   it("allows user taps during prompt phase to advance directly to gap", () => {
+    const actual = logic.startState("silly", 42);
+    vi.spyOn(logic, "startState").mockReturnValue(actual);
+
     render(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Listen...")).toBeDefined();
@@ -119,9 +122,8 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByText("Your turn!")).toBeDefined();
   });
 
-  it("clears in-flight boop notes and visual flash when skipping prompt phase by tapping", () => {
+  it("ignores tap during prompt phase for boops to prevent skipping sequence", () => {
     vi.useFakeTimers();
-    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
     const stopSequenceSpy = vi.spyOn(music, "stopSequence");
 
     const actual = logic.startState("boops", 42);
@@ -164,24 +166,14 @@ describe("CarModeGame interactions", () => {
     });
     expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
 
-    // Tap to skip prompt phase and advance to gap phase.
+    // Tap to skip prompt phase (now ignored for boops)
     const tapBtn = screen.getByTestId("carmode-tap");
     act(() => {
       fireEvent.click(tapBtn);
     });
 
-    expect(screen.getByText("Your turn!")).toBeDefined();
-    expect(stopSequenceSpy).toHaveBeenCalled();
-    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
-
-    // Advance through gap and reveal duration.
-    act(() => {
-      vi.advanceTimersByTime(5000);
-    });
-
-    // In-flight boop note timers must NOT continue firing in gap or reveal phases.
-    expect(screen.queryByTestId("carmode-boop-flash")).toBeNull();
-    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(screen.getByText("Listen...")).toBeDefined();
+    expect(stopSequenceSpy).toHaveBeenCalledTimes(1);
   });
 
   it("advances round immediately on single tap during reveal phase for twoTapAnswer pack", () => {
@@ -235,6 +227,9 @@ describe("CarModeGame interactions", () => {
   });
 
   it("displays localized phase text in Japanese when advancing from prompt to gap", () => {
+    const actual = logic.startState("silly", 42);
+    vi.spyOn(logic, "startState").mockReturnValue(actual);
+
     render(<CarModeGame onHome={noop} lang="ja" />);
 
     expect(screen.getByText("きいてね…")).toBeDefined();
@@ -305,6 +300,12 @@ describe("CarModeGame interactions", () => {
         setTimeout(cb, 100);
       });
 
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: 1,
+    });
+
     function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
       const [lang, setLang] = useState<Lang>(initialLang);
       const cycleLang = () => {
@@ -320,14 +321,6 @@ describe("CarModeGame interactions", () => {
     }
 
     render(<LangHarness initialLang="en" />);
-
-    // Advance to round 2
-    const tapBtn = screen.getByTestId("carmode-tap");
-    fireEvent.click(tapBtn);
-    act(() => {
-      vi.advanceTimersByTime(3400);
-    });
-    fireEvent.click(tapBtn);
 
     expect(screen.getByText("Car Mode")).toBeDefined();
     expect(screen.getByText("Listen...")).toBeDefined();
@@ -374,6 +367,12 @@ describe("CarModeGame interactions", () => {
         setTimeout(cb, 100);
       });
 
+    const actual = logic.startState("boops", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: 1,
+    });
+
     function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
       const [lang, setLang] = useState<Lang>(initialLang);
       const cycleLang = () => {
@@ -390,19 +389,11 @@ describe("CarModeGame interactions", () => {
 
     render(<LangHarness initialLang="en" />);
 
-    // Advance to round 2, then to gap phase
-    const tapBtn = screen.getByTestId("carmode-tap");
-    fireEvent.click(tapBtn);
+    // Advance to gap phase by waiting out boops sequence
     act(() => {
-      vi.advanceTimersByTime(3400);
+      vi.advanceTimersByTime(5000);
     });
-    fireEvent.click(tapBtn);
     expect(screen.getByTestId("carmode-score").textContent).toContain("2/10");
-
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-    fireEvent.click(tapBtn);
     expect(screen.getByText("Your turn!")).toBeDefined();
 
     stopNarrationSpy.mockClear();
