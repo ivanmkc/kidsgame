@@ -411,7 +411,7 @@ describe('StoryGame', () => {
     };
     manifest.stories?.push(happyEndStory);
 
-    const html = renderToString(
+    const { container, getByTestId } = render(
       <StoryGame
         sceneId="test-happy-end"
         onHome={noop}
@@ -421,10 +421,16 @@ describe('StoryGame', () => {
       />,
     );
 
+    const html = container.innerHTML;
+
     expect(html).toContain('They lived happily ever after!');
     expect(html).toContain('data-testid="story-end-clip"');
     expect(html).toContain('The End! Read again 📖');
     expect(html).toContain('All Stories 🏠');
+
+    const frame = getByTestId('story-frame');
+    expect(frame.textContent).not.toContain('🎉');
+    expect(container.textContent).toContain('🎉');
 
     const restartBtn = capturedPressableMap['story-restart'];
     const homeBtn = capturedPressableMap['story-home'];
