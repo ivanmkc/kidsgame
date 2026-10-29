@@ -42,27 +42,38 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
   const cfg = IDLE_CONFIGS[entry.zone];
 
   useEffect(() => {
-    Animated.spring(spawnIn, {
+    const springAnim = Animated.spring(spawnIn, {
       toValue: 1,
       friction: 5,
       tension: 60,
       useNativeDriver: true,
-    }).start(() => {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(idle, {
-            toValue: 1,
-            duration: cfg.dur,
-            useNativeDriver: true,
-          }),
-          Animated.timing(idle, {
-            toValue: 0,
-            duration: cfg.dur,
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
     });
+
+    const loopAnim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(idle, {
+          toValue: 1,
+          duration: cfg.dur,
+          useNativeDriver: true,
+        }),
+        Animated.timing(idle, {
+          toValue: 0,
+          duration: cfg.dur,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+
+    springAnim.start(({ finished }) => {
+      if (finished) {
+        loopAnim.start();
+      }
+    });
+
+    return () => {
+      springAnim.stop();
+      loopAnim.stop();
+    };
   }, [spawnIn, idle, cfg.dur]);
 
   const speed = ZONE_PARALLAX_SPEEDS[entry.zone];
