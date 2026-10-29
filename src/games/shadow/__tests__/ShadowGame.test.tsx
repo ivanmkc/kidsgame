@@ -5,7 +5,8 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { ShadowGame } from "../ShadowGame";
 import * as logic from "../logic";
 import { SHADOW_PROMPTS } from "../logic";
-import { sfx } from "../../../sound";
+import * as sound from "../../../sound";
+const { sfx } = sound;
 import { LANGS, Lang } from "../../../lang";
 import { t } from "../../../i18n";
 
@@ -15,6 +16,7 @@ describe("ShadowGame", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    vi.clearAllTimers();
   });
 
   afterEach(() => {
@@ -124,12 +126,12 @@ describe("ShadowGame", () => {
         fireEvent.click(correctBtn);
         fireEvent.click(correctBtn);
       });
-      
+
       // Verify transition is delayed
       expect(makeRoundSpy).toHaveBeenCalledTimes(1);
-      
+
       act(() => {
-        vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(10000);
       });
 
       expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
@@ -182,6 +184,9 @@ describe("ShadowGame", () => {
       });
       // The tap is processed immediately
       expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
+      
+      act(() => { vi.advanceTimersByTime(10000); });
+
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
       ).toContain("1/10");
@@ -211,11 +216,14 @@ describe("ShadowGame", () => {
           fireEvent.click(correctBtn);
         });
         if (i < 9) {
-          const currentAnswer = container.querySelector('[data-testid^="shadow-answer-"]')?.getAttribute("data-testid")?.replace("shadow-answer-", "");
+          const currentAnswer = container
+            .querySelector('[data-testid^="shadow-answer-"]')
+            ?.getAttribute("data-testid")
+            ?.replace("shadow-answer-", "");
           expect(currentAnswer).toBe(answer);
         }
         act(() => {
-          vi.advanceTimersByTime(1000);
+          vi.advanceTimersByTime(10000);
         });
       }
 
@@ -256,6 +264,7 @@ describe("ShadowGame", () => {
       act(() => {
         fireEvent.click(newCorrectBtn);
       });
+      act(() => { vi.advanceTimersByTime(10000); });
 
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
@@ -305,12 +314,12 @@ describe("ShadowGame", () => {
       act(() => {
         fireEvent.click(correctBtn);
       });
-      
+
       // Verify transition is delayed
       expect(makeRoundSpy).toHaveBeenCalledTimes(1);
 
       act(() => {
-        vi.advanceTimersByTime(1000);
+        vi.advanceTimersByTime(10000);
       });
 
       // Round 1 (mental rotation kicks in immediately after the single warmup round)
@@ -374,5 +383,94 @@ describe("ShadowGame", () => {
     expect(optionsEn[0].getAttribute("aria-label")).toBe(
       logic.shadowOptionLabel(icon, "en"),
     );
+  });
+  it("speaks the vocabulary word when the correct option is tapped and delays round advancement", () => {
+    vi.useFakeTimers();
+    try {
+      const saySpy = vi.spyOn(sound, "say");
+      const { container } = render(
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+      );
+
+      const answerCard = container.querySelector('[data-testid^="shadow-answer-"]');
+      const answer = answerCard?.getAttribute("data-testid")?.replace("shadow-answer-", "");
+      const correctBtn = container.querySelector(`[data-testid="shadow-option-${answer}"]`) as HTMLElement;
+
+      saySpy.mockClear();
+
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+
+      expect(saySpy).toHaveBeenCalledWith(
+        logic.shadowOptionLabel(answer!, "en")
+      );
+
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent
+      ).toContain("1/10");
+
+      act(() => { vi.advanceTimersByTime(1000); });
+
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent
+      ).toContain("1/10");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("speaks both vocabulary word and win message in sequence on the winning round", () => {
+    vi.useFakeTimers();
+    try {
+      const saySeqSpy = vi.spyOn(sound, "saySequence");
+      const { container } = render(
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+      );
+
+      for (let i = 0; i < 9; i++) {
+        const answerCard = container.querySelector(
+          '[data-testid^="shadow-answer-"]',
+        );
+        const answer = answerCard
+          ?.getAttribute("data-testid")
+          ?.replace("shadow-answer-", "");
+        const correctBtn = container.querySelector(
+          `[data-testid="shadow-option-${answer}"]`,
+        ) as HTMLElement;
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(1000);
+        });
+      }
+
+      saySeqSpy.mockClear();
+
+      const lastAnswerCard = container.querySelector(
+        '[data-testid^="shadow-answer-"]',
+      );
+      const lastAnswer = lastAnswerCard
+        ?.getAttribute("data-testid")
+        ?.replace("shadow-answer-", "");
+      const lastCorrectBtn = container.querySelector(
+        `[data-testid="shadow-option-${lastAnswer}"]`,
+      ) as HTMLElement;
+
+      act(() => {
+        fireEvent.click(lastCorrectBtn);
+      });
+
+      expect(saySeqSpy).toHaveBeenCalledWith([
+        logic.shadowOptionLabel(lastAnswer!, "en"),
+        t("en", "win.shadow"),
+      ]);
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
+      ).toContain("10/10");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
