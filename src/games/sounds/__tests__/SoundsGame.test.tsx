@@ -13,7 +13,7 @@ import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
-import { WORDS } from '../../../curriculum/words';
+import { WORDS } from "../../../curriculum/words";
 import { SoundsGame } from "../SoundsGame";
 import * as logic from "../logic";
 
@@ -426,11 +426,13 @@ describe("SoundsGame narration cleanup", () => {
 
   it("stops narration on unmount", () => {
     const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
-    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    const saySequenceSpy = vi
+      .spyOn(sound, "saySequence")
+      .mockImplementation(() => {});
 
     const onHome = vi.fn();
     const { unmount } = render(
-      <SoundsGame onHome={onHome} difficulty="easy" lang="en" />
+      <SoundsGame onHome={onHome} difficulty="easy" lang="en" />,
     );
     expect(saySequenceSpy).toHaveBeenCalledTimes(1);
     unmount();
@@ -453,9 +455,12 @@ describe("SoundsGame timer behavior", () => {
 
   it("stops timer during final round confirmation", () => {
     const onHome = vi.fn();
-    
+
     // Force 1 round to win, but keeping medium so timer is true
-    vi.spyOn(logic, "settingsForSounds").mockReturnValue({ rounds: 1, tiles: 3 });
+    vi.spyOn(logic, "settingsForSounds").mockReturnValue({
+      rounds: 1,
+      tiles: 3,
+    });
 
     let roundInfo: logic.SoundsRound | undefined;
     const origMakeSoundsRound = logic.makeSoundsRound;
@@ -472,31 +477,82 @@ describe("SoundsGame timer behavior", () => {
     vi.spyOn(sound, "saySequence").mockImplementation(() => {});
 
     render(<SoundsGame onHome={onHome} difficulty="medium" lang="en" />);
-    
+
     // Timer starts at 0:00
     expect(screen.getByTestId("sounds-timer").textContent).toContain("0:00");
-    
+
     // Advance 5 seconds
-    act(() => { vi.advanceTimersByTime(5000); });
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
     expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
-    
+
     // Tap correct tile
     if (!roundInfo) throw new Error("roundInfo not set");
-    const correctTile = screen.getByTestId(`sounds-tile-${roundInfo.answerIdx}`);
+    const correctTile = screen.getByTestId(
+      `sounds-tile-${roundInfo.answerIdx}`,
+    );
     fireEvent.click(correctTile);
-    
+
     // We are now in final celebration, sayThenCallback is captured
     expect(sayThenCallback).not.toBeNull();
-    
+
     // Advance time again. Since we tapped the final correct tile, timer should NOT advance
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
-    
+
     // Finish celebration
-    act(() => { sayThenCallback?.(); });
-    
+    act(() => {
+      sayThenCallback?.();
+    });
+
     // Time still not advancing because we won
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
+  });
+});
+
+describe("SoundsGame visual feedback", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("applies sparkles to correct tile during transition, then clears them", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+
+    render(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    expect(screen.queryAllByText(/✨|⭐/).length).toBe(0);
+
+    const tiles = screen.getAllByTestId(/^sounds-tile-/);
+    for (const tile of tiles) {
+      fireEvent.click(tile);
+      if (sayThenCb) break;
+    }
+
+    // Sparkles should now be present
+    expect(screen.queryAllByText(/✨|⭐/).length).toBeGreaterThan(0);
+
+    // Call sayThen callback
+    act(() => {
+      sayThenCb!();
+    });
+
+    // Sparkles should be cleared
+    expect(screen.queryAllByText(/✨|⭐/).length).toBe(0);
   });
 });
