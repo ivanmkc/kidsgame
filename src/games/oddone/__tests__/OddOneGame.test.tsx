@@ -79,6 +79,25 @@ describe("OddOneGame", () => {
     expect(cols).toBe(3);
   });
 
+  it("clamps minimum tile size to 60px on short viewports to prevent negative dimensions", () => {
+    const originalWidth = window.innerWidth;
+    const originalHeight = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", { value: 800, configurable: true });
+    Object.defineProperty(window, "innerHeight", { value: 100, configurable: true });
+    try {
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />
+      );
+      const buttons = container.querySelectorAll('[data-testid^="oddone-item-"]');
+      expect(buttons.length).toBeGreaterThan(0);
+      const tileWidth = parseFloat((buttons[0] as HTMLElement).style.width);
+      expect(tileWidth).toBe(60);
+    } finally {
+      Object.defineProperty(window, "innerWidth", { value: originalWidth, configurable: true });
+      Object.defineProperty(window, "innerHeight", { value: originalHeight, configurable: true });
+    }
+  });
+
   it("prevents fast-tap hammering from advancing the round and RNG twice", () => {
     vi.useFakeTimers();
     try {
