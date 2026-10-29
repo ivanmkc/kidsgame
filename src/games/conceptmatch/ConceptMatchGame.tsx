@@ -16,6 +16,7 @@ import {
   ConceptMatchDeck,
   buildBoard,
   isMatch,
+  pairsForDifficulty,
   updateBoardLang,
 } from "./logic";
 
@@ -34,8 +35,7 @@ export function ConceptMatchGame({
   pairs,
   difficulty = "medium",
 }: ConceptMatchGameProps) {
-  const activePairs =
-    pairs ?? (difficulty === "easy" ? 3 : difficulty === "hard" ? 5 : 4);
+  const activePairs = pairs ?? pairsForDifficulty(difficulty, deck);
 
   const [roundKey, setRoundKey] = useState(0);
   const [board, setBoard] = useState<ConceptMatchCard[]>(() =>
