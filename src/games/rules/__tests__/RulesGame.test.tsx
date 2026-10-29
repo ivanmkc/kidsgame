@@ -165,7 +165,7 @@ describe("RulesGame", () => {
       vi.mocked(say).mockClear();
 
       const wrongTile = screen.getByTestId("rules-tile-1-soccer-n");
-      
+
       act(() => {
         fireEvent.click(wrongTile);
       });
@@ -414,6 +414,21 @@ describe("RulesGame", () => {
       ]);
     });
 
+    it("repeats intro line in new language when lang switches mid-game", () => {
+      const { rerender } = render(
+        <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+      vi.mocked(saySequence).mockClear();
+      vi.mocked(say).mockClear();
+
+      rerender(<RulesGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+      expect(saySequence).toHaveBeenCalledWith([
+        "ルールタイム！ ルールどおりに はやく タップ！",
+        expect.any(String),
+      ]);
+    });
+
     it("speaks localized memory check prompt on recall round in non-English locales", () => {
       vi.useFakeTimers();
       try {
@@ -460,7 +475,9 @@ describe("RulesGame", () => {
 
         expect(screen.getByText("Memory check!")).toBeTruthy();
         expect(say).toHaveBeenCalledWith(
-          expect.stringMatching(/^Memory check! Do Rule #\d+ again — remember it\? 🤔/),
+          expect.stringMatching(
+            /^Memory check! Do Rule #\d+ again — remember it\? 🤔/,
+          ),
         );
       } finally {
         vi.useRealTimers();
