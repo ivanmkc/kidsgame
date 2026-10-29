@@ -77,6 +77,7 @@ vi.mock("react-native", async (importOriginal) => {
 });
 
 describe("ListenChooseGame", () => {
+
   it("starts with 4 choices when difficulty is hard", () => {
     const onHome = vi.fn();
     render(<ListenChooseGame onHome={onHome} difficulty="hard" />);

@@ -191,6 +191,19 @@ describe('spell — pickGameWords', () => {
       expect(twos / total).toBeGreaterThan(0.6);
     }
   });
+
+  it('applies probabilistic variation across seeds rather than locking in 100% of longer words (ja hard)', () => {
+    const pool = wordPool('ja', ALL_ICONS);
+    const longWords = pool.filter((w) => w.chars.length >= 4).map((w) => w.text);
+    let allLongWordsCount = 0;
+    for (let seed = 1; seed <= 20; seed++) {
+      const words = pickGameWords(makeRng(seed), pool, 'hard').map((w) => w.text);
+      const hasAll = longWords.every((lw) => words.includes(lw));
+      if (hasAll) allLongWordsCount++;
+    }
+    // With rigid sorting, this was 20/20. With probabilistic sorting, it should be less.
+    expect(allLongWordsCount).toBeLessThan(20);
+  });
 });
 
 describe('spell — makeRound (tile bank + solvability)', () => {
