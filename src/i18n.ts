@@ -88,6 +88,7 @@ export type UIKey =
   | 'card.cm-numhan.title'  | 'card.cm-numhan.blurb'
   | 'card.cm-shapes.title'  | 'card.cm-shapes.blurb'
   | 'card.cm-animals.title' | 'card.cm-animals.blurb'
+  | 'card.cm-picword.title' | 'card.cm-picword.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
   | 'picker.surprise'
   | 'picker.diff'
@@ -455,6 +456,8 @@ export const EN: Table = {
   'card.cm-shapes.blurb': 'Match shapes to everyday objects!',
   'card.cm-animals.title': 'Animal Sounds',
   'card.cm-animals.blurb': 'Match each animal to its sound!',
+  'card.cm-picword.title': 'Picture & Word',
+  'card.cm-picword.blurb': 'Match the picture to its word!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',

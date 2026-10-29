@@ -40,7 +40,8 @@ export type CardKey =
   | 'cm-numdots'
   | 'cm-numhan'
   | 'cm-shapes'
-  | 'cm-animals';
+  | 'cm-animals'
+  | 'cm-picword';
 
 export interface CardDef {
   route: string;
@@ -56,6 +57,7 @@ export const WORD_CARDS: CardDef[] = [
   { route: 'rhyme', color: '#9C6FD6', key: 'rhyme', preview: 'icons13' },
   { route: 'spell', color: '#4FB06D', key: 'spell', preview: 'icons20' },
   { route: 'listenchoose', color: '#E8874F', key: 'listenchoose', preview: 'icons0' },
+  { route: 'cm-picword', color: '#E8874F', key: 'cm-picword', preview: 'icons0' },
 ];
 
 export const NUMBER_CARDS: CardDef[] = [
