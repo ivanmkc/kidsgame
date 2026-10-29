@@ -18,7 +18,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx, say, saySequence, useSay } from "../../sound";
+import { sfx, say, saySequence, stopNarration, useSay } from "../../sound";
 import {
   ShadowDifficulty,
   makeShadowRound,
@@ -58,6 +58,7 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
   const showTimer = settingsFor(difficulty).timer;
   const won = score >= roundsToWin;
   useSay(shadowPrompt(lang));
+  useEffect(() => stopNarration, []);
   useEffect(() => {
     if (won) {
       saySequence([
