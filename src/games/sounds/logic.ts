@@ -29,7 +29,7 @@ export function settingsForSounds(
   difficulty: "easy" | "medium" | "hard",
 ): SoundsSettings {
   if (difficulty === "easy") return { rounds: 8, tiles: 3 };
-  if (difficulty === "hard") return { rounds: 12, tiles: 4 };
+  if (difficulty === "hard") return { rounds: 12, tiles: 6 };
   return { rounds: 10, tiles: 4 };
 }
 
@@ -67,7 +67,22 @@ export function soundsLayout(
   let rows: number;
   let tile: number;
 
-  if (tileCount === 4) {
+  if (tileCount === 6) {
+    const tile6x1 = candidateTile(width, height, 6, 1);
+    const tile3x2 = candidateTile(width, height, 3, 2);
+    const tile2x3 = candidateTile(width, height, 2, 3);
+    tile = Math.max(tile6x1, tile3x2, tile2x3);
+    if (tile === tile6x1) {
+      cols = 6;
+      rows = 1;
+    } else if (tile === tile3x2) {
+      cols = 3;
+      rows = 2;
+    } else {
+      cols = 2;
+      rows = 3;
+    }
+  } else if (tileCount === 4) {
     const tile2x2 = candidateTile(width, height, 2, 2);
     const tile1x4 = candidateTile(width, height, 4, 1);
     if (tile1x4 > tile2x2) {
