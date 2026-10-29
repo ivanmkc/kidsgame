@@ -549,7 +549,7 @@ describe('StickerGame', () => {
     }
   });
 
-  it('stays silent when a scene is already picked', () => {
+  it('speaks localized welcoming instruction when a scene is entered across languages', () => {
     const spokenUtterances: string[] = [];
     class MockUtterance {
       text: string;
@@ -571,11 +571,16 @@ describe('StickerGame', () => {
     vi.stubGlobal('speechSynthesis', mockSpeechSynthesis);
     window.speechSynthesis = mockSpeechSynthesis as unknown as SpeechSynthesis;
 
-    const { unmount } = render(
-      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />,
-    );
-    expect(spokenUtterances).toHaveLength(0);
-    unmount();
+    const langs: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+    for (const lang of langs) {
+      spokenUtterances.length = 0;
+      const { unmount } = render(
+        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang} />,
+      );
+      expect(spokenUtterances).toContain(t(lang, 'card.sticker.blurb'));
+      expect(spokenUtterances).not.toContain(t(lang, 'picker.sticker'));
+      unmount();
+    }
   });
 
   it('shows fizzle toast when magic API resolves with ok: false', async () => {
