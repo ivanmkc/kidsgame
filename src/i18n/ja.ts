@@ -111,6 +111,8 @@ export const JA: Table = {
   'card.cm-animals.blurb': 'どうぶつと なきごえを あわせよう！',
   'card.cm-picword.title': '絵と言葉',
   'card.cm-picword.blurb': '絵と言葉を合わせよう！',
+  'card.cm-picspeak.title': '絵と音',
+  'card.cm-picspeak.blurb': '絵と音を合わせよう！',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',

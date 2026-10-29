@@ -95,15 +95,32 @@ test("WORD_CARDS, NUMBER_CARDS and GAME_CARDS register Concept Match decks", () 
   const animals = GAME_CARDS.find((c) => c.route === "cm-animals");
   expect(animals).toBeDefined();
   expect(animals?.key).toBe("cm-animals");
+
+  const picspeak = WORD_CARDS.find((c) => c.route === "cm-picspeak");
+  expect(picspeak).toBeDefined();
+  expect(picspeak?.key).toBe("cm-picspeak");
 });
 
 test("Concept Match menu cards render localized titles and blurbs", () => {
   const onNavigate = vi.fn();
   const picwordCard = WORD_CARDS.find((c) => c.route === "cm-picword")!;
+  const picspeakCard = WORD_CARDS.find((c) => c.route === "cm-picspeak")!;
   const numdotsCard = NUMBER_CARDS.find((c) => c.route === "cm-numdots")!;
   const numhanCard = NUMBER_CARDS.find((c) => c.route === "cm-numhan")!;
   const shapesCard = GAME_CARDS.find((c) => c.route === "cm-shapes")!;
   const animalsCard = GAME_CARDS.find((c) => c.route === "cm-animals")!;
+
+  const picspeakHtml = renderToString(
+    <MenuCard
+      g={picspeakCard}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picspeakHtml).toContain("Picture &amp; Audio");
+  expect(picspeakHtml).toContain("Match the picture to the spoken word!");
 
   const picwordHtml = renderToString(
     <MenuCard
