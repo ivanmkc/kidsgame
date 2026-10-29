@@ -165,7 +165,7 @@ describe("RulesGame", () => {
       vi.mocked(say).mockClear();
 
       const wrongTile = screen.getByTestId("rules-tile-1-soccer-n");
-      
+
       act(() => {
         fireEvent.click(wrongTile);
       });
@@ -460,7 +460,9 @@ describe("RulesGame", () => {
 
         expect(screen.getByText("Memory check!")).toBeTruthy();
         expect(say).toHaveBeenCalledWith(
-          expect.stringMatching(/^Memory check! Do Rule #\d+ again — remember it\? 🤔/),
+          expect.stringMatching(
+            /^Memory check! Do Rule #\d+ again — remember it\? 🤔/,
+          ),
         );
       } finally {
         vi.useRealTimers();
@@ -596,6 +598,42 @@ describe("RulesGame", () => {
         expect(clearTimeoutSpy).toHaveBeenCalled();
       } finally {
         clearTimeoutSpy.mockRestore();
+        vi.useRealTimers();
+      }
+    });
+
+    it("does not speak completed round's rule if language switches during round transition", () => {
+      vi.useFakeTimers();
+      try {
+        const { rerender } = render(
+          <RulesGame onHome={() => {}} difficulty="easy" lang="en" />,
+        );
+
+        // Clear initial intro narration
+        vi.mocked(saySequence).mockClear();
+        vi.mocked(say).mockClear();
+
+        // Complete the round by clicking all matching tiles
+        const matchTiles = screen.getAllByTestId(/-y$/);
+        for (const tile of matchTiles) {
+          fireEvent.click(tile);
+        }
+
+        // Switch language while transition is in progress (before 550ms timer)
+        rerender(<RulesGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+        // Should not narrate the completed round's rule
+        expect(say).not.toHaveBeenCalled();
+
+        // Advance through the transition
+        act(() => {
+          vi.advanceTimersByTime(550);
+        });
+
+        // Advances to round 2 and speaks the new round's rule
+        expect(screen.getByTestId("rules-score").textContent).toContain("1/10");
+        expect(say).toHaveBeenCalledTimes(1);
+      } finally {
         vi.useRealTimers();
       }
     });

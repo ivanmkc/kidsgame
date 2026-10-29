@@ -105,17 +105,14 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   // entirely by ear here.
   const introDone = useRef(false);
   useEffect(() => {
-    if (won) return;
+    if (won || lockedRef.current) return;
     const line = round.isRecall
       ? rulesRecallLine(round.ruleNumber, lang)
       : round.rule.label;
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
-      saySequence([
-        rulesIntroLine(lang),
-        line,
-      ]);
+      saySequence([rulesIntroLine(lang), line]);
     } else {
       say(line);
     }
