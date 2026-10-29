@@ -71,6 +71,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       errorTimerRef.current = null;
     }
     setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
+    setCaptions(false);
     setMisses(0);
     setWrongIdx(null);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps

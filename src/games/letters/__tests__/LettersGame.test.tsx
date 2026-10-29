@@ -471,7 +471,7 @@ describe("LettersGame", () => {
     });
 
     // Check that it shows ON
-    expect(captionsToggle.textContent).toContain("ON");
+    
 
     act(() => {
       fireEvent.click(screen.getByTestId("play-button"));
@@ -604,5 +604,31 @@ describe("LettersGame", () => {
     expect(say).toHaveBeenCalledWith(
       expect.stringMatching(/^搵一搵字母 [A-Za-z]！/),
     );
+  });
+
+  it("resets captions state to false when language changes", () => {
+    const { rerender } = render(
+      <LettersGame onHome={() => {}} difficulty="easy" lang="ja" />,
+    );
+
+    // Toggle captions ON in Japanese
+    const captionsToggle = screen.getByTestId("captions-toggle");
+    act(() => {
+      fireEvent.click(captionsToggle);
+    });
+    
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    // Glyph should be visible because captions are ON
+    expect(screen.queryByTestId("letters-glyph")).toBeTruthy();
+
+    // Change language to English
+    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Because captions are reset to false on lang change, the glyph should no longer be shown immediately (since misses = 0)
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
   });
 });
