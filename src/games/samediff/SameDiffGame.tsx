@@ -50,6 +50,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   >("listenA");
   const [activeNote, setActiveNote] = useState<number | null>(null);
   const [wrongPick, setWrongPick] = useState<"same" | "different" | null>(null);
+  const wrongPickRef = useRef<"same" | "different" | null>(null);
   const [correctPick, setCorrectPick] = useState<"same" | "different" | null>(
     null,
   );
@@ -80,8 +81,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     stopSequence();
     stopNarration();
     if (gapTimer.current) clearTimeout(gapTimer.current);
+    if (wrongTimer.current) clearTimeout(wrongTimer.current);
     if (replayTimer.current) clearTimeout(replayTimer.current);
     setActiveNote(null);
+    wrongPickRef.current = null;
+    setWrongPick(null);
     setCorrectPick(null);
     setPhase("listenA");
 
@@ -155,9 +159,12 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
 
   const onPick = (picked: "same" | "different") => {
     if (won || phase !== "pick" || lockedRef.current) return;
+    if (wrongPickRef.current === picked) return;
     stopNarration();
-    lockedRef.current = true;
     if (isCorrect(round, picked)) {
+      lockedRef.current = true;
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongPickRef.current = null;
       setPhase("transition");
       sfx.good();
       setCorrectPick(picked);
@@ -178,20 +185,25 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       firstTryRef.current = false;
+      wrongPickRef.current = picked;
       setWrongPick(picked);
       setCorrectPick(round.answer);
       saySequence(getInstructionalFeedback(round, lang));
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       wrongTimer.current = setTimeout(() => {
+        wrongPickRef.current = null;
         setWrongPick(null);
         setCorrectPick(null);
-        lockedRef.current = false;
       }, 500);
     }
   };
 
   const replay = () => {
     if (phase === "pick" && !lockedRef.current) {
+      if (wrongTimer.current) clearTimeout(wrongTimer.current);
+      wrongPickRef.current = null;
+      setWrongPick(null);
+      setCorrectPick(null);
       stopNarration();
       stopSequence();
       lockedRef.current = true;
@@ -212,6 +224,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setRoundIndex(0);
+    wrongPickRef.current = null;
     setWrongPick(null);
     setCorrectPick(null);
     setSparkKeys({ same: 0, different: 0 });
