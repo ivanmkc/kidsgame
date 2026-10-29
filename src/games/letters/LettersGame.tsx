@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
+import { SparkleBurst } from "../../components/Sparkles";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
@@ -30,6 +31,8 @@ interface Props {
   lang: Lang;
 }
 
+const SUCCESS_DELAY_MS = 600;
+
 // Letter Hunt: spoken letter (or kana / phonics sound) → tap the matching
 // tile. Pre-readers play entirely by ear; the tile is a huge Baloo glyph.
 export function LettersGame({ onHome, difficulty, lang }: Props) {
@@ -42,6 +45,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [started, setStarted] = useState(false);
   const [captions, setCaptions] = useState(false);
@@ -52,11 +56,13 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     makeLetterRound(rngRef.current, tier, tileCount, undefined, lang),
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
+  const [correctIdx, setCorrectIdx] = useState<number | null>(null);
+  const [isFinishing, setIsFinishing] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
-  useWinLine(won, t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"));
-  const elapsed = useElapsed(showTimer && !won && started, timerKey);
+  useWinLine(won && !isFinishing, t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"));
+  const elapsed = useElapsed(showTimer && !won && !isFinishing && started, timerKey);
   const { width, height } = useWindowDimensions();
 
   // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
@@ -70,16 +76,24 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
     }
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    lockedRef.current = false;
     setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
     setCaptions(false);
     setMisses(0);
     setWrongIdx(null);
+    setCorrectIdx(null);
+    setIsFinishing(false);
   }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(
     () => () => {
       stopNarration();
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
     },
     [],
   );
@@ -88,7 +102,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(() => {
     if (!started) return;
-    if (won) {
+    if (won || isFinishing) {
       pulse.setValue(1);
       return;
     }
@@ -111,7 +125,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       loop.stop();
       pulse.setValue(1);
     };
-  }, [pulse, started, won]);
+  }, [pulse, started, won, isFinishing]);
 
   useEffect(() => {
     lockedRef.current = false;
@@ -120,29 +134,43 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated target still gets read aloud.
   useEffect(() => {
-    if (started && !won) say(round.promptLine);
-  }, [round, won, started]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (started && !won && !isFinishing) say(round.promptLine);
+  }, [round, won, isFinishing, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (!started || won || lockedRef.current) return;
+    if (!started || won || isFinishing || lockedRef.current) return;
     lockedRef.current = true;
     if (round.tiles[i].isAnswer) {
       sfx.good();
       setWrongIdx(null);
       setMisses(0);
-      const next = roundIdx + 1;
-      setRoundIdx(next);
-      if (next < roundsToWin) {
-        setRound(
-          makeLetterRound(
-            rngRef.current,
-            tier,
-            tileCount,
-            round.targetKey,
-            lang,
-          ),
-        );
+      setCorrectIdx(i);
+      if (errorTimerRef.current) {
+        clearTimeout(errorTimerRef.current);
+        errorTimerRef.current = null;
       }
+      const next = roundIdx + 1;
+      if (next >= roundsToWin) {
+        setIsFinishing(true);
+      }
+      successTimerRef.current = setTimeout(() => {
+        lockedRef.current = false;
+        successTimerRef.current = null;
+        setCorrectIdx(null);
+        setIsFinishing(false);
+        setRoundIdx(next);
+        if (next < roundsToWin) {
+          setRound(
+            makeLetterRound(
+              rngRef.current,
+              tier,
+              tileCount,
+              round.targetKey,
+              lang,
+            ),
+          );
+        }
+      }, SUCCESS_DELAY_MS);
     } else {
       sfx.wrong();
       setWrongIdx(i);
@@ -157,6 +185,14 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (successTimerRef.current) {
+      clearTimeout(successTimerRef.current);
+      successTimerRef.current = null;
+    }
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
     lockedRef.current = false;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
@@ -164,6 +200,8 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setMisses(0);
     setRound(makeLetterRound(rngRef.current, tier, tileCount, undefined, lang));
     setWrongIdx(null);
+    setCorrectIdx(null);
+    setIsFinishing(false);
   };
 
   const cols = tileCount <= 6 ? 3 : 4;
@@ -260,9 +298,9 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
             >
               <Pressable
                 onPress={() => {
-                  if (!won) say(round.promptLine);
+                  if (!won && !isFinishing) say(round.promptLine);
                 }}
-                disabled={won}
+                disabled={won || isFinishing}
                 testID="speaker-button"
                 accessibilityRole="button"
                 accessibilityLabel={t(lang, "spell.hearAgain")}
@@ -309,6 +347,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                     shadows.soft,
                     { width: tile, height: tile },
                     wrongIdx === i && styles.wrong,
+                    correctIdx === i && styles.correct,
                     pressed && styles.pressed,
                   ]}
                 >
@@ -317,6 +356,9 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                   >
                     {t.label}
                   </Text>
+                  {correctIdx === i ? (
+                    <SparkleBurst trigger={correctIdx} />
+                  ) : null}
                 </Pressable>
               ))}
             </View>
@@ -324,7 +366,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
         )}
       </View>
       <WinOverlay
-        visible={won}
+        visible={won && !isFinishing}
         message={
           tier === "kana" ? t(lang, "win.lettersKana") : t(lang, "win.letters")
         }
@@ -447,5 +489,9 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   wrong: { borderColor: colors.red, backgroundColor: "rgba(232,86,79,0.15)" },
+  correct: {
+    borderColor: colors.teal,
+    backgroundColor: "rgba(34,166,153,0.15)",
+  },
   pressed: { transform: [{ scale: 0.94 }] },
 });
