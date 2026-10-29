@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useReducer, useRef } from 'react';
 import { stopNarration } from './sound';
 
 // Language mode for the Word/Number game suites: English, Japanese,
@@ -83,19 +83,35 @@ export function hanNumeral(n: number): string {
   return String(n);
 }
 
-export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolean } {
-  const epochRef = useRef(0);
-  const prevLangRef = useRef(lang);
+interface LangEpochState {
+  lang: Lang;
+  epoch: number;
+}
+
+function langEpochReducer(
+  state: LangEpochState,
+  nextLang: Lang,
+): LangEpochState {
+  if (state.lang === nextLang) return state;
+  return { lang: nextLang, epoch: state.epoch + 1 };
+}
+
+export function useLangEpoch(lang: Lang): {
+  epoch: number;
+  isValid: () => boolean;
+} {
+  const [state, dispatch] = useReducer(langEpochReducer, { lang, epoch: 0 });
+  const committedEpochRef = useRef(0);
   const isMountedRef = useRef(true);
 
-  if (prevLangRef.current !== lang) {
-    prevLangRef.current = lang;
-    epochRef.current += 1;
+  let epoch = state.epoch;
+  if (state.lang !== lang) {
+    epoch = state.epoch + 1;
+    dispatch(lang);
   }
 
-  const epoch = epochRef.current;
-
   useLayoutEffect(() => {
+    committedEpochRef.current = epoch;
     if (epoch > 0) {
       stopNarration();
     }
@@ -110,6 +126,6 @@ export function useLangEpoch(lang: Lang): { epoch: number; isValid: () => boolea
 
   return {
     epoch,
-    isValid: () => isMountedRef.current && epochRef.current === epoch,
+    isValid: () => isMountedRef.current && committedEpochRef.current === epoch,
   };
 }
