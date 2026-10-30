@@ -15,12 +15,19 @@ import { LangContext } from "../../../components/GameShell";
 import { type Lang } from "../../../lang";
 import { ListenChooseGame } from "../ListenChooseGame";
 import { LEVEL_1_WORDS, LEVEL_2_WORDS, LEVEL_3_WORDS, Word } from "../data";
-import { PressableProps, ScrollViewProps, StyleSheet } from "react-native";
+import {
+  PressableProps,
+  ScrollViewProps,
+  StyleSheet,
+  ViewProps,
+} from "react-native";
 import { colors } from "../../../theme";
 import { t } from "../../../i18n";
 
 type FakePressableProps = Partial<PressableProps>;
+type FakeViewProps = Partial<ViewProps>;
 const capturedPressableMap: Record<string, FakePressableProps[]> = {};
+const capturedViewMap: Record<string, FakeViewProps[]> = {};
 const capturedScrollViewProps: ScrollViewProps[] = [];
 
 function setViewport(width: number, height: number) {
@@ -59,8 +66,17 @@ vi.mock("react-native", async (importOriginal) => {
     actual.Pressable as React.ComponentType<FakePressableProps>;
   const ActualScrollView =
     actual.ScrollView as React.ComponentType<ScrollViewProps>;
+  const ActualView = actual.View as React.ComponentType<FakeViewProps>;
   return {
     ...actual,
+    View: (props: FakeViewProps) => {
+      if (typeof props.testID === "string") {
+        if (!capturedViewMap[props.testID])
+          capturedViewMap[props.testID] = [];
+        capturedViewMap[props.testID].push(props);
+      }
+      return React.createElement(ActualView, props);
+    },
     Pressable: (props: FakePressableProps) => {
       if (typeof props.testID === "string") {
         if (!capturedPressableMap[props.testID])
@@ -90,6 +106,9 @@ describe("ListenChooseGame", () => {
   beforeEach(() => {
     for (const key in capturedPressableMap) {
       delete capturedPressableMap[key];
+    }
+    for (const key in capturedViewMap) {
+      delete capturedViewMap[key];
     }
     capturedScrollViewProps.length = 0;
     vi.restoreAllMocks();
@@ -972,4 +991,19 @@ describe("ListenChooseGame", () => {
     fireEvent.click(screen.getByTestId("speaker-button"));
     expect(sound.sayThen).not.toHaveBeenCalled();
   });
+
+  it("sets pointerEvents none as a prop on celebration overlay so touches pass through on native", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
+
+    expect(screen.getByTestId("celebration")).toBeTruthy();
+    const celebrationCaptures = capturedViewMap["celebration"];
+    expect(celebrationCaptures).toBeDefined();
+    expect(celebrationCaptures?.[0]?.pointerEvents).toBe("none");
+    expect(celebrationCaptures?.[0]?.style).toEqual(StyleSheet.absoluteFill);
+  });
 });
+
