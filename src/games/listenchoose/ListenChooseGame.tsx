@@ -120,7 +120,7 @@ export function ListenChooseGame({
   };
 
   const onReplay = () => {
-    if (!isValid()) return;
+    if (lockedRef.current || state.won || !isValid()) return;
     clearWrongTimer();
     const targetWord = getWordText(state.currentRound.target, lang);
     const currentSpeakEpoch = ++speakEpochRef.current;
@@ -138,7 +138,8 @@ export function ListenChooseGame({
   };
 
   const onPick = (choice: Word) => {
-    if (lockedRef.current || !isValid() || wrongPickRef.current === choice.icon) return;
+    if (lockedRef.current || !isValid() || wrongPickRef.current === choice.icon)
+      return;
     const isCorrect = choice.icon === state.currentRound.target.icon;
     if (isCorrect) {
       lockedRef.current = true;
@@ -165,7 +166,8 @@ export function ListenChooseGame({
           setIsSpeaking(true);
           sayThen([nextWord], () => {
             if (!isValid()) return;
-            if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
+            if (speakEpochRef.current === currentSpeakEpoch)
+              setIsSpeaking(false);
           });
         }
       }, 800);
@@ -282,6 +284,7 @@ export function ListenChooseGame({
                 testID="speaker-button"
                 accessibilityRole="button"
                 accessibilityLabel={t(lang, "spell.hearAgain")}
+                disabled={lockedRef.current || state.won}
                 style={({ pressed }) => [
                   styles.speakerButton,
                   layout.shortH && styles.speakerButtonShort,
@@ -366,7 +369,8 @@ export function ListenChooseGame({
           setIsSpeaking(true);
           sayThen([getWordText(next.currentRound.target, lang)], () => {
             if (!isValid()) return;
-            if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
+            if (speakEpochRef.current === currentSpeakEpoch)
+              setIsSpeaking(false);
           });
         }}
         onHome={handleHome}

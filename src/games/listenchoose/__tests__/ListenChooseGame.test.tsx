@@ -891,4 +891,62 @@ describe("ListenChooseGame", () => {
     expect(flattenedStyleAfter.transform).toBeUndefined();
     sayThenSpy.mockRestore();
   });
+
+  it("disables speaker replay button during celebration transition to prevent stale audio overlap", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn } = getRoundChoices();
+    vi.mocked(sound.sayThen).mockClear();
+
+    // Tap correct choice to trigger celebration
+    fireEvent.click(targetBtn);
+    expect(screen.getByTestId("celebration")).toBeTruthy();
+
+    const speakerCaptures = capturedPressableMap["speaker-button"];
+    const celebrationSpeakerProps = speakerCaptures[speakerCaptures.length - 1];
+    expect(celebrationSpeakerProps?.disabled).toBe(true);
+
+    // Tap speaker button during celebration delay
+    const speakerBtn = screen.getByTestId("speaker-button");
+    fireEvent.click(speakerBtn);
+
+    // Should not trigger replay of the previous round's word
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    // Advance past celebration animation (800ms)
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    // New round started and spoke new target word once
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+
+    const postTransitionCaptures = capturedPressableMap["speaker-button"];
+    const activeSpeakerProps =
+      postTransitionCaptures[postTransitionCaptures.length - 1];
+    expect(activeSpeakerProps?.disabled).toBeFalsy();
+  });
+
+  it("disables speaker replay button when game is won", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    for (let i = 0; i < 12; i++) {
+      const { targetBtn } = getRoundChoices();
+      fireEvent.click(targetBtn);
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    const speakerCaptures = capturedPressableMap["speaker-button"];
+    const winSpeakerProps = speakerCaptures[speakerCaptures.length - 1];
+    expect(winSpeakerProps?.disabled).toBe(true);
+
+    vi.mocked(sound.sayThen).mockClear();
+    fireEvent.click(screen.getByTestId("speaker-button"));
+    expect(sound.sayThen).not.toHaveBeenCalled();
+  });
 });
