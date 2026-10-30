@@ -84,8 +84,11 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   }, [phase, lang]);
   useEffect(() => {
     if (phase === 'ready' && count === 0) {
-      roundClosedRef.current = false;
-      setPhase('play');
+      const t = setTimeout(() => {
+        roundClosedRef.current = false;
+        setPhase('play');
+      }, 500);
+      return () => clearTimeout(t);
     }
   }, [phase, count]);
 
