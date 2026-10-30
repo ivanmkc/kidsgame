@@ -53,12 +53,22 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
   );
   const [score, setScore] = useState(0);
   const [wrong, setWrong] = useState<string | null>(null);
+  const roundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const wrongTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
-  const won = score >= roundsToWin;
+  const [prevDifficulty, setPrevDifficulty] = useState(difficulty);
+  const isChanging = difficulty !== prevDifficulty;
+  const won = score >= roundsToWin && !isChanging;
   useSay(shadowPrompt(lang));
   useEffect(() => stopNarration, []);
+  useEffect(() => {
+    return () => {
+      if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+      if (wrongTimeoutRef.current) clearTimeout(wrongTimeoutRef.current);
+    };
+  }, []);
   useEffect(() => {
     if (won) {
       saySequence([
@@ -86,7 +96,8 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
       setWrong(null);
       if (next < roundsToWin) {
         say(shadowOptionLabel(round.answer, lang));
-        setTimeout(() => {
+        if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+        roundTimeoutRef.current = setTimeout(() => {
           setRound(
             makeShadowRound(
               rngRef.current,
@@ -100,11 +111,14 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
     } else {
       sfx.wrong();
       setWrong(icon);
-      setTimeout(() => setWrong((w) => (w === icon ? null : w)), 450);
+      if (wrongTimeoutRef.current) clearTimeout(wrongTimeoutRef.current);
+      wrongTimeoutRef.current = setTimeout(() => setWrong((w) => (w === icon ? null : w)), 450);
     }
   };
 
   const reset = () => {
+    if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+    if (wrongTimeoutRef.current) clearTimeout(wrongTimeoutRef.current);
     setTimerKey((k) => k + 1);
     roundClosedRef.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
@@ -112,6 +126,13 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
     setWrong(null);
     setRound(makeShadowRound(rngRef.current, manifest.spotit.icons, warmup));
   };
+
+  useEffect(() => {
+    if (isChanging) {
+      setPrevDifficulty(difficulty);
+      reset();
+    }
+  }, [difficulty, isChanging]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { width, height } = useWindowDimensions();
   const shadowSize = Math.min(width - 100, height - 84 - 210, 280);

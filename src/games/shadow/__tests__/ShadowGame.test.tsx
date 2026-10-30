@@ -618,6 +618,61 @@ describe("ShadowGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("resets the game when difficulty changes and prevents win trigger if score exceeds new threshold", () => {
+    vi.useFakeTimers();
+    try {
+      const saySeqSpy = vi.spyOn(sound, "saySequence");
+      const { container, rerender } = render(
+        <ShadowGame onHome={() => {}} difficulty="hard" lang="en" />,
+      );
+
+      // Score starts at 0/14
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
+      ).toContain("0/14");
+
+      // Advance score to 10
+      for (let i = 0; i < 10; i++) {
+        const answerCard = container.querySelector(
+          '[data-testid^="shadow-answer-"]',
+        );
+        const answer = answerCard
+          ?.getAttribute("data-testid")
+          ?.replace("shadow-answer-", "");
+        const correctBtn = container.querySelector(
+          `[data-testid="shadow-option-${answer}"]`,
+        ) as HTMLElement;
+
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(1000);
+        });
+      }
+
+      // Score is now 10/14
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
+      ).toContain("10/14");
+
+      saySeqSpy.mockClear();
+
+      // Change difficulty to easy (roundsToWin is 10)
+      rerender(<ShadowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      // Score should reset to 0/10
+      expect(
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
+      ).toContain("0/10");
+
+      // Should not trigger the win sequence
+      expect(saySeqSpy).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 
