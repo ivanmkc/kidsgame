@@ -20,7 +20,7 @@ from google.genai import types
 
 PROJECT = "adk-coding-agents"
 LOCATION = "global"
-NBP_MODEL = "gemini-nano-banana-2.1"
+NBP_MODEL = ("gemini-3-pro-image", "gemini-nano-banana-2.1")
 
 # NBP sometimes paints the edit mask's rectangle outline into its output.
 # Composites erode the region by this many px so a painted frame can never
@@ -56,19 +56,20 @@ def _first_image(resp) -> bytes | None:
 def _call(contents, attempts: int = 4) -> bytes:
     last = None
     for i in range(attempts):
-        try:
-            resp = client().models.generate_content(
-                model=NBP_MODEL,
-                contents=contents,
-                config=types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
-            )
-            data = _first_image(resp)
-            if data:
-                return data
-            last = RuntimeError("no image in response (content filter?)")
-        except Exception as e:  # noqa: BLE001 — retry any transient API error
-            last = e
-            reset_client()
+        for model in NBP_MODEL:
+            try:
+                resp = client().models.generate_content(
+                    model=model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
+                )
+                data = _first_image(resp)
+                if data:
+                    return data
+                last = RuntimeError(f"no image in response from {model} (content filter?)")
+            except Exception as e:
+                last = e
+                reset_client()
         wait = 5 * (i + 1)
         print(f"  WARN nbp attempt {i + 1} failed ({type(last).__name__}: {str(last)[:120]}); retry in {wait}s", file=sys.stderr)
         time.sleep(wait)

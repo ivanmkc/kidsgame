@@ -33,7 +33,7 @@ from PIL import Image
 
 PROJECT = os.environ.get("GOOGLE_CLOUD_PROJECT", "adk-coding-agents")
 LOCATION = "global"
-NBP_MODEL = "gemini-nano-banana-2.1"
+NBP_MODEL = ("gemini-3-pro-image", "gemini-nano-banana-2.1")
 JUDGE_MODEL = "gemini-2.5-flash"
 
 CROP_SIZE = 460          # square side, px, in the scene's pixel space
@@ -146,23 +146,24 @@ def _nbp_edit(crop: Image.Image, item: str, attempts: int = 4) -> Image.Image:
     contents = [types.Content(role="user", parts=parts)]
     last: Exception | None = None
     for i in range(attempts):
-        try:
-            resp = _client().models.generate_content(
-                model=NBP_MODEL,
-                contents=contents,
-                config=types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
-            )
-            data = _first_image(resp)
-            if data:
-                out = Image.open(io.BytesIO(data)).convert("RGB")
-                # NBP sometimes returns 1.8:1; snap back to the input square.
-                if out.size != crop.size:
-                    out = _center_crop_resize(out, crop.size)
-                return out
-            last = RuntimeError("no image in NBP response (content filter?)")
-        except Exception as e:  # noqa: BLE001
-            last = e
-            _reset_client()
+        for model in NBP_MODEL:
+            try:
+                resp = _client().models.generate_content(
+                    model=model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
+                )
+                data = _first_image(resp)
+                if data:
+                    out = Image.open(io.BytesIO(data)).convert("RGB")
+                    # NBP sometimes returns 1.8:1; snap back to the input square.
+                    if out.size != crop.size:
+                        out = _center_crop_resize(out, crop.size)
+                    return out
+                last = RuntimeError(f"no image in NBP response from {model} (content filter?)")
+            except Exception as e:
+                last = e
+                _reset_client()
         wait = 3 * (i + 1)
         print(f"  WARN nbp attempt {i + 1} failed ({type(last).__name__}: {str(last)[:120]}); retry in {wait}s", file=sys.stderr, flush=True)
         time.sleep(wait)
