@@ -66,7 +66,8 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
         t(lang, "win.shadow"),
       ]);
     }
-  }, [won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [won, lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const elapsed = useElapsed(showTimer && !won, timerKey);
   const roundClosedRef = useRef(false);
 

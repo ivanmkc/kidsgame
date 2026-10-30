@@ -184,8 +184,10 @@ describe("ShadowGame", () => {
       });
       // The tap is processed immediately
       expect(sfxGoodSpy).toHaveBeenCalledTimes(1);
-      
-      act(() => { vi.advanceTimersByTime(10000); });
+
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
 
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
@@ -264,7 +266,9 @@ describe("ShadowGame", () => {
       act(() => {
         fireEvent.click(newCorrectBtn);
       });
-      act(() => { vi.advanceTimersByTime(10000); });
+      act(() => {
+        vi.advanceTimersByTime(10000);
+      });
 
       expect(
         container.querySelector('[data-testid="shadow-score"]')?.textContent,
@@ -389,12 +393,18 @@ describe("ShadowGame", () => {
     try {
       const saySpy = vi.spyOn(sound, "say");
       const { container } = render(
-        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
 
-      const answerCard = container.querySelector('[data-testid^="shadow-answer-"]');
-      const answer = answerCard?.getAttribute("data-testid")?.replace("shadow-answer-", "");
-      const correctBtn = container.querySelector(`[data-testid="shadow-option-${answer}"]`) as HTMLElement;
+      const answerCard = container.querySelector(
+        '[data-testid^="shadow-answer-"]',
+      );
+      const answer = answerCard
+        ?.getAttribute("data-testid")
+        ?.replace("shadow-answer-", "");
+      const correctBtn = container.querySelector(
+        `[data-testid="shadow-option-${answer}"]`,
+      ) as HTMLElement;
 
       saySpy.mockClear();
 
@@ -403,17 +413,19 @@ describe("ShadowGame", () => {
       });
 
       expect(saySpy).toHaveBeenCalledWith(
-        logic.shadowOptionLabel(answer!, "en")
+        logic.shadowOptionLabel(answer!, "en"),
       );
 
       expect(
-        container.querySelector('[data-testid="shadow-score"]')?.textContent
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
       ).toContain("1/10");
 
-      act(() => { vi.advanceTimersByTime(1000); });
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
 
       expect(
-        container.querySelector('[data-testid="shadow-score"]')?.textContent
+        container.querySelector('[data-testid="shadow-score"]')?.textContent,
       ).toContain("1/10");
     } finally {
       vi.useRealTimers();
@@ -425,7 +437,7 @@ describe("ShadowGame", () => {
     try {
       const saySeqSpy = vi.spyOn(sound, "saySequence");
       const { container } = render(
-        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
 
       for (let i = 0; i < 9; i++) {
@@ -558,6 +570,52 @@ describe("ShadowGame", () => {
     } finally {
       vi.useRealTimers();
       makeRoundSpy.mockRestore();
+    }
+  });
+
+  it("replays the win line when switching languages on the win screen", () => {
+    vi.useFakeTimers();
+    try {
+      const saySeqSpy = vi.spyOn(sound, "saySequence");
+      const { container, rerender } = render(
+        <ShadowGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+
+      for (let i = 0; i < 10; i++) {
+        const answerCard = container.querySelector(
+          '[data-testid^="shadow-answer-"]',
+        );
+        const answer = answerCard
+          ?.getAttribute("data-testid")
+          ?.replace("shadow-answer-", "");
+        const correctBtn = container.querySelector(
+          `[data-testid="shadow-option-${answer}"]`,
+        ) as HTMLElement;
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(1000);
+        });
+      }
+
+      const lastAnswerCard = container.querySelector(
+        '[data-testid^="shadow-answer-"]',
+      );
+      const lastAnswer = lastAnswerCard
+        ?.getAttribute("data-testid")
+        ?.replace("shadow-answer-", "");
+
+      saySeqSpy.mockClear();
+
+      rerender(<ShadowGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+      expect(saySeqSpy).toHaveBeenCalledWith([
+        logic.shadowOptionLabel(lastAnswer!, "ja"),
+        t("ja", "win.shadow"),
+      ]);
+    } finally {
+      vi.useRealTimers();
     }
   });
 });
