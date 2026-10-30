@@ -238,6 +238,24 @@ describe("sound sayThen", () => {
     lastAudio?.onended?.(new Event("ended"));
     expect(done).toHaveBeenCalledTimes(1);
   });
+
+  it.each([
+    ["Dig here! 🕳️", "3f54f31a6f128ce6.mp3"],
+    ["Climb the creaky stairs 🕯️", "952207cd8f643afa.mp3"],
+    ["Ask about the key 🗝️", "4d4765717337da1c.mp3"],
+    ["Sit with the Twins 🗣️", "3df1acce7b5b6003.mp3"],
+    ["Try the trash-can trick 🗑️", "143dd3740969f64e.mp3"],
+  ])(
+    "plays pre-rendered voice clip for %s with variation selector",
+    async (rawText, expectedClip) => {
+      playImpl = () => Promise.resolve();
+
+      sound.say(rawText);
+      await Promise.resolve();
+
+      expect(lastAudio?.src).toContain(expectedClip);
+    },
+  );
 });
 
 class FakeUtterance {
@@ -322,6 +340,14 @@ describe("sound module", () => {
       const second = speakMock.mock.calls[1][0];
       expect(second.lang).toBe("ja-JP");
       expect(second.text).toBe("unmapped second");
+    });
+
+    it("strips emojis and variation selectors from speech synthesis fallback text", () => {
+      sound.say("unmapped phrase with variation 🕳️");
+
+      expect(speakMock).toHaveBeenCalledTimes(1);
+      const utterance = speakMock.mock.calls[0][0];
+      expect(utterance.text).toBe("unmapped phrase with variation");
     });
 
     it("toggles muted status and respects muted state", () => {
