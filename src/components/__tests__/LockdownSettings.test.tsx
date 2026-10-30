@@ -241,4 +241,23 @@ describe("LockdownSettings Interactive", () => {
 
     vi.useRealTimers();
   });
+
+  it("constrains ScrollView height with flex: 1 so Done button remains visible", () => {
+    render(
+      <LockdownSettings
+        hiddenGames={[]}
+        hiddenLangs={[]}
+        onToggleGame={vi.fn()}
+        onToggleLang={vi.fn()}
+        onDone={vi.fn()}
+      />,
+    );
+    const scroll = screen.getByTestId("lockdown-scroll");
+    expect(scroll).toBeDefined();
+    const style = window.getComputedStyle(scroll);
+    expect(style.flexBasis).toBe("0%");
+    expect(style.flexGrow).toBe("1");
+    expect(style.flexShrink).toBe("1");
+    expect(style.width).toBe("100%");
+  });
 });

@@ -66,6 +66,7 @@ export function LockdownSettings({
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
+          testID="lockdown-scroll"
         >
           {sections.map((section) => (
             <View key={section.title} style={styles.section}>
@@ -190,6 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scroll: {
+    flex: 1,
     width: "100%",
   },
   scrollContent: {
