@@ -11,7 +11,7 @@ import { stickerLabel, stickerLayout, stickerPrompt } from './logic';
 import { allSceneOptions } from '../sceneOptions';
 import { CURRICULUM } from '../../curriculum/content';
 import { Touch2, pinchTransform } from './pinch';
-import { sfx, useSay } from '../../sound';
+import { sfx, stopNarration, useSay } from '../../sound';
 import { colors, fonts, shadows } from '../../theme';
 import { cacheKey, callMagic, publicUrlReachable, resolvePublicImageUrl } from './magic';
 
@@ -110,6 +110,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   }, []);
   useEffect(() => { resetMagic(); }, [sceneId, resetMagic]);
   useEffect(() => () => {
+    stopNarration();
     if (toastTimer.current) clearTimeout(toastTimer.current);
     magicAborts.current.forEach((c) => c.abort());
     magicAborts.current.clear();
