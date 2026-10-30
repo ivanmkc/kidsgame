@@ -114,8 +114,15 @@ export function pickGameWords(rng: Rng, pool: SpellWord[], d: SpellDifficulty): 
   const lang: Lang = pool[0]?.lang ?? 'en';
   const shuffled = shuffle(rng, pool);
   const ranked = shuffled
-    .map((w, i) => ({ w, i, r: lengthRank(w.chars.length, d, lang) }))
-    .sort((a, b) => a.r - b.r || a.i - b.i);
+    .map((w, i) => {
+      const r = lengthRank(w.chars.length, d, lang);
+      // Soft score adjustment so multiple playthroughs draw a varied selection
+      // of words, rather than locking in 100% of the longer words.
+      const weight = Math.pow(4, -r);
+      const key = -Math.log(rng() || 1e-10) / weight;
+      return { w, i, key };
+    })
+    .sort((a, b) => a.key - b.key || a.i - b.i);
   const chosen: SpellWord[] = [];
   const seen = new Set<string>();
   for (const { w } of ranked) {
