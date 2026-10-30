@@ -130,7 +130,9 @@ export function JourneyScene({
         toValue: 1,
         friction: 4,
         useNativeDriver: true,
-      }).start(() => vehicleBounce.setValue(0));
+      }).start(({ finished }) => {
+        if (finished) vehicleBounce.setValue(0);
+      });
 
       const zone = spawnZone(yFrac);
       const pool = scene.objects[zone];

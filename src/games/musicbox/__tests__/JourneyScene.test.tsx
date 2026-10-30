@@ -593,4 +593,45 @@ describe("JourneyScene accessibility", () => {
 
     unmount();
   });
+
+  it("does not reset vehicleBounce to 0 when spring is interrupted ({ finished: false })", () => {
+    let bounceAnimCallback:
+      ((result: { finished: boolean }) => void) | undefined;
+    let bounceValue: Animated.Value | undefined;
+
+    const originalSpring = Animated.spring;
+    vi.spyOn(Animated, "spring").mockImplementation((value, config) => {
+      const anim = originalSpring(value, config);
+      if (config.friction === 4) {
+        bounceValue = value as Animated.Value;
+        const originalStart = anim.start.bind(anim);
+        anim.start = (cb?: (result: { finished: boolean }) => void) => {
+          bounceAnimCallback = cb;
+          return originalStart(cb);
+        };
+      }
+      return anim;
+    });
+
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(bounceValue).toBeDefined();
+    expect(bounceAnimCallback).toBeDefined();
+
+    const setValueSpy = vi.spyOn(bounceValue!, "setValue");
+
+    // Interrupted completion callback (e.g. from rapid second tap)
+    bounceAnimCallback!({ finished: false });
+    expect(setValueSpy).not.toHaveBeenCalled();
+
+    // Normal completion callback
+    bounceAnimCallback!({ finished: true });
+    expect(setValueSpy).toHaveBeenCalledWith(0);
+
+    unmount();
+  });
 });
