@@ -13,6 +13,7 @@ import { Lang } from "../../../lang";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { SpotItGame } from "../SpotItGame";
+import { SpotItDuel } from "../SpotItDuel";
 
 function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
   const [lang, setLang] = useState<Lang>(initialLang);
@@ -352,5 +353,83 @@ describe("SpotItGame language switch safety", () => {
 
     expect(goodSpy).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("spotit-score").textContent).toContain("1/10");
+  });
+});
+
+describe('SpotIt audio cleanup on unmount', () => {
+  beforeEach(() => {
+    setViewport(800, 600);
+    vi.restoreAllMocks();
+    vi.useFakeTimers();
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    sound.stopNarration();
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('calls stopNarration on unmount of SpotItDuel to prevent leaking audio', () => {
+    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+    const { unmount } = render(
+      <SpotItDuel onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls stopNarration on unmount of SpotItGame in solo mode', () => {
+    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+    const { unmount } = render(
+      <SpotItGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops narration when navigating away via home button from SpotItGame', () => {
+    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+    function App() {
+      const [screen, setScreen] = useState<'game' | 'menu'>('game');
+      return screen === 'game' ? (
+        <SpotItGame onHome={() => setScreen('menu')} difficulty="easy" lang="en" />
+      ) : null;
+    }
+    render(<App />);
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('back-button'));
+    });
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops narration when navigating away via home button from SpotItDuel', () => {
+    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+    function App() {
+      const [screen, setScreen] = useState<'game' | 'menu'>('game');
+      return screen === 'game' ? (
+        <SpotItDuel onHome={() => setScreen('menu')} difficulty="easy" lang="en" />
+      ) : null;
+    }
+    render(<App />);
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      fireEvent.click(screen.getByTestId('back-button'));
+    });
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
 });

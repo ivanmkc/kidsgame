@@ -7,7 +7,7 @@ import { Lang } from '../../lang';
 import { t } from '../../i18n';
 import { MP_PLAYERS, PlayerIx } from '../../multiplayer';
 import { makeRng } from '../../rng';
-import { say, sfx } from '../../sound';
+import { say, sfx, stopNarration } from '../../sound';
 import { colors, fonts } from '../../theme';
 import { DealIn, Slot, SpotCard, layoutSlots } from './cards';
 import {
@@ -72,7 +72,13 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   const frozenRef = useRef({ a: false, b: false });
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const later = (fn: () => void, ms: number) => { timersRef.current.push(setTimeout(fn, ms)); };
-  useEffect(() => () => { timersRef.current.forEach(clearTimeout); }, []);
+  useEffect(
+    () => () => {
+      stopNarration();
+      timersRef.current.forEach(clearTimeout);
+    },
+    [],
+  );
 
   // READY: 3-2-1 countdown, taps ignored until play.
   useEffect(() => {

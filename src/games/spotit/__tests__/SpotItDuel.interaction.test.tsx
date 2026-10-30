@@ -8,6 +8,7 @@ import { say } from '../../../sound';
 
 vi.mock('../../../sound', () => ({
   say: vi.fn(),
+  stopNarration: vi.fn(),
   sfx: {
     good: vi.fn(),
     wrong: vi.fn(),
