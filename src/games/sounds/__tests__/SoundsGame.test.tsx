@@ -114,10 +114,10 @@ describe("SoundsGame language switch safety", () => {
       if (sayThenSpy.mock.calls.length > 0) break;
     }
 
-    // Confirmation must be spoken in Japanese (ends with full-width exclamation mark)
+    // Confirmation must be spoken in Japanese (single line ending with full-width exclamation mark)
     expect(sayThenSpy).toHaveBeenCalledTimes(1);
     const confirmLines = sayThenSpy.mock.calls[0][0];
-    expect(confirmLines[0]).toMatch(/！$/);
+    expect(confirmLines).toEqual([expect.stringMatching(/！$/)]);
   });
 
   it("drops pending confirmation callback and does not advance round if language switches during praise", () => {
