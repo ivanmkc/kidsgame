@@ -626,3 +626,148 @@ describe("SoundsGame tile accessibility", () => {
     }
   });
 });
+
+describe("SoundsGame difficulty switch safety", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("resets round count and avoids instant win when switching from Hard to Easy mid-game", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+    const saySpy = vi.spyOn(sound, "say");
+
+    let latestRound: logic.SoundsRound | undefined;
+    const origMakeSoundsRound = logic.makeSoundsRound;
+    vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+      const res = origMakeSoundsRound(...args);
+      latestRound = res;
+      return res;
+    });
+
+    const { rerender } = render(
+      <SoundsGame onHome={() => {}} difficulty="hard" lang="en" />,
+    );
+
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/12");
+    expect(screen.getAllByTestId(/^sounds-tile-/)).toHaveLength(6);
+
+    // Complete 8 rounds on Hard (out of 12)
+    for (let r = 0; r < 8; r++) {
+      if (!latestRound) throw new Error("Round not generated");
+      const answerTile = screen.getByTestId(
+        `sounds-tile-${latestRound.answerIdx}`,
+      );
+      fireEvent.click(answerTile);
+      expect(sayThenCb).not.toBeNull();
+      act(() => {
+        sayThenCb!();
+        sayThenCb = null;
+      });
+    }
+
+    expect(screen.getByTestId("sounds-score").textContent).toContain("8/12");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // Switch difficulty to Easy (which requires only 8 rounds to win)
+    rerender(<SoundsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Score must reset to 0/8, NOT 8/8
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
+    // Win overlay must not be visible
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    // Victory fanfare win line must NOT have been spoken
+    expect(saySpy).not.toHaveBeenCalledWith(t("en", "win.sounds"));
+    // Active board displays 3 tiles (Easy count) instead of 6
+    expect(screen.getAllByTestId(/^sounds-tile-/)).toHaveLength(3);
+  });
+
+  it("updates tile count from 3 to 6 and resets score when switching from Easy to Hard", () => {
+    const { rerender } = render(
+      <SoundsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    expect(screen.getAllByTestId(/^sounds-tile-/)).toHaveLength(3);
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
+
+    // Switch to Hard
+    rerender(<SoundsGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Board now displays 6 tiles
+    expect(screen.getAllByTestId(/^sounds-tile-/)).toHaveLength(6);
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/12");
+  });
+
+  it("resets elapsed timer when switching difficulty between timed modes", () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <SoundsGame onHome={() => {}} difficulty="medium" lang="en" />,
+    );
+
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:00");
+
+    // Advance 5 seconds on Medium
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:05");
+
+    // Switch difficulty to Hard
+    rerender(<SoundsGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+    // Timer resets to 0:00
+    expect(screen.getByTestId("sounds-timer").textContent).toContain("0:00");
+  });
+
+  it("drops pending praise callback and does not advance round on difficulty switch", () => {
+    let sayThenCb: (() => void) | null = null;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      sayThenCb = cb ?? null;
+    });
+
+    let latestRound: logic.SoundsRound | undefined;
+    const origMakeSoundsRound = logic.makeSoundsRound;
+    vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+      const res = origMakeSoundsRound(...args);
+      latestRound = res;
+      return res;
+    });
+
+    const { rerender } = render(
+      <SoundsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Tap answer tile to begin praise/transition
+    if (!latestRound) throw new Error("Round not generated");
+    const answerTile = screen.getByTestId(
+      `sounds-tile-${latestRound.answerIdx}`,
+    );
+    fireEvent.click(answerTile);
+    expect(sayThenCb).not.toBeNull();
+
+    // Switch difficulty to Medium while celebration is active
+    rerender(<SoundsGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+    // Execute the stale sayThen callback if it was triggered or pending
+    if (sayThenCb) {
+      act(() => {
+        sayThenCb!();
+      });
+    }
+
+    // Round progress remains at 0/10
+    expect(screen.getByTestId("sounds-score").textContent).toContain("0/10");
+  });
+});

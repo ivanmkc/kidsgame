@@ -43,6 +43,8 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
   const wrongTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const diffMounted = useRef(false);
+  const roundEpochRef = useRef(0);
   const [roundIdx, setRoundIdx] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
   const [round, setRound] = useState<SoundsRound>(() =>
@@ -51,14 +53,42 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [correctIdx, setCorrectIdx] = useState<number | null>(null);
   const [timerKey, setTimerKey] = useState(0);
+  const [prevDifficulty, setPrevDifficulty] = useState(difficulty);
+
+  if (difficulty !== prevDifficulty) {
+    setPrevDifficulty(difficulty);
+    setRoundIdx(0);
+    setTimerKey((k) => k + 1);
+    setIsFinishing(false);
+    setWrongIdx(null);
+    setCorrectIdx(null);
+    setRound(
+      makeSoundsRound(rngRef.current, manifest.spotit.icons, lang, tileCount),
+    );
+  }
+
   const showTimer = settingsFor(difficulty).timer;
-  const won = roundIdx >= roundsToWin;
+  const currentRoundIdx = difficulty !== prevDifficulty ? 0 : roundIdx;
+  const won = currentRoundIdx >= roundsToWin;
   useWinLine(won, t(lang, lang === "en" ? "win.sounds" : "win.soundsWords"));
   const { isValid } = useLangEpoch(lang);
   const elapsed = useElapsed(showTimer && !won && !isFinishing, timerKey);
   const { width, height } = useWindowDimensions();
 
   const prompts = resolveSoundsPrompts(round.target, lang);
+
+  useEffect(() => {
+    if (!diffMounted.current) {
+      diffMounted.current = true;
+      return;
+    }
+    lockedRef.current = false;
+    roundEpochRef.current += 1;
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
+  }, [difficulty]);
 
   useEffect(
     () => () => {
@@ -80,12 +110,13 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       setCorrectIdx(i);
       // Wait for the confirmation chime to finish before advancing — otherwise
       // the next round's prompt say() cancels the celebration mid-word.
-      const nextIdx = roundIdx + 1;
+      const nextIdx = currentRoundIdx + 1;
       if (nextIdx >= roundsToWin) setIsFinishing(true);
+      const epoch = roundEpochRef.current;
       sayThen(prompts.confirmLines, () => {
         lockedRef.current = false;
         setCorrectIdx(null);
-        if (!isValid()) return;
+        if (!isValid() || epoch !== roundEpochRef.current) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(
@@ -119,6 +150,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     setIsFinishing(false);
     lockedRef.current = false;
+    roundEpochRef.current += 1;
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
@@ -157,7 +189,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
             />
           ) : null}
           <ScoreChip
-            label={`👂 ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`}
+            label={`👂 ${Math.min(currentRoundIdx, roundsToWin)}/${roundsToWin}`}
             testID="sounds-score"
           />
         </View>
@@ -200,7 +232,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
         <View style={[styles.grid, { width: gridWidth, gap }]}>
           {round.tiles.map((t, i) => (
             <Pressable
-              key={`${roundIdx}-${i}-${t.icon}`}
+              key={`${currentRoundIdx}-${i}-${t.icon}`}
               onPress={() => onTile(i)}
               testID={`sounds-tile-${i}`}
               accessibilityLabel={wordFor(WORDS[t.wordIdx], lang).text}
