@@ -11,7 +11,13 @@ import { colors } from "../../theme";
 import { sfx, stopNarration, useSay } from "../../sound";
 import { TimerRing, fmtTime, useElapsed } from "../../components/TimerRing";
 import { DealIn, Slot, SpotCard, layoutSlots } from "./cards";
-import { buildDeck, dealRound, computeSoloCardSize } from "./logic";
+import {
+  buildDeck,
+  dealRound,
+  computeSoloCardSize,
+  shouldShowSoloHintOnWrong,
+  soloHintDelayMs,
+} from "./logic";
 import { SpotItDuel } from "./SpotItDuel";
 import { useWinLine } from "../winlines";
 
@@ -84,6 +90,8 @@ function SpotItSolo({
   const [score, setScore] = useState(0);
   const [matchEnd, setMatchEnd] = useState(false);
   const [wrongFlash, setWrongFlash] = useState<number | null>(null);
+  const [showHint, setShowHint] = useState(false);
+  const wrongCountRef = useRef(0);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const winTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
@@ -102,6 +110,17 @@ function SpotItSolo({
   useEffect(() => {
     roundClosedRef.current = false;
   }, [round]);
+  useEffect(() => {
+    setShowHint(false);
+    wrongCountRef.current = 0;
+    if (locked || won) return;
+    const delay = soloHintDelayMs(difficulty);
+    if (!Number.isFinite(delay)) return;
+    const t = setTimeout(() => {
+      setShowHint(true);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [roundKey, locked, won, difficulty]);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
   const mmss = fmtTime(elapsed);
@@ -123,6 +142,8 @@ function SpotItSolo({
         clearTimeout(wrongTimerRef.current);
         wrongTimerRef.current = null;
       }
+      setShowHint(false);
+      wrongCountRef.current = 0;
       const next = score + 1;
       setScore(next);
       setWrongFlash(null);
@@ -144,6 +165,10 @@ function SpotItSolo({
         setWrongFlash((w) => (w === symbol ? null : w));
         wrongTimerRef.current = null;
       }, 450);
+      wrongCountRef.current += 1;
+      if (shouldShowSoloHintOnWrong(wrongCountRef.current)) {
+        setShowHint(true);
+      }
     }
   };
 
@@ -161,6 +186,8 @@ function SpotItSolo({
     setScore(0);
     setMatchEnd(false);
     setWrongFlash(null);
+    setShowHint(false);
+    wrongCountRef.current = 0;
     setTimerKey((k) => k + 1);
     nextRound();
   };
@@ -197,6 +224,7 @@ function SpotItSolo({
                 wrongFlash={wrongFlash}
                 tint={colors.teal}
                 testIDPrefix="top"
+                hintSymbol={showHint ? round.answer : null}
                 lang={lang}
               />
             </DealIn>
@@ -211,6 +239,7 @@ function SpotItSolo({
               wrongFlash={wrongFlash}
               tint={colors.teal}
               testIDPrefix="top"
+              hintSymbol={showHint ? round.answer : null}
               lang={lang}
             />
           </DealIn>
@@ -225,6 +254,7 @@ function SpotItSolo({
             wrongFlash={wrongFlash}
             tint={colors.red}
             testIDPrefix="bottom"
+            hintSymbol={showHint ? round.answer : null}
             lang={lang}
           />
         </DealIn>

@@ -354,6 +354,171 @@ describe("SpotItGame language switch safety", () => {
     expect(goodSpy).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("spotit-score").textContent).toContain("1/10");
   });
+
+  it("reveals hint on matching symbols after inactivity delay in easy mode", () => {
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} />);
+    fireEvent.pointerDown(document.body);
+
+    const topButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("top-symbol-"),
+      );
+    const bottomButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("bottom-symbol-"),
+      );
+
+    const topSymbolIds = topButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("top-symbol-", ""),
+    );
+    const bottomSymbolIds = bottomButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("bottom-symbol-", ""),
+    );
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id))!;
+    const distractorId = topSymbolIds.find((id) => id !== matchingId)!;
+
+    const matchingTopBtn = screen.getByTestId(`top-symbol-${matchingId}`);
+    const matchingBottomBtn = screen.getByTestId(`bottom-symbol-${matchingId}`);
+    const distractorBtn = screen.getByTestId(`top-symbol-${distractorId}`);
+
+    // Initially no sparkles on matching buttons
+    expect(matchingTopBtn.textContent).not.toContain("✨");
+    expect(matchingBottomBtn.textContent).not.toContain("✨");
+
+    // Advance 14 seconds (inactivity timer is 15s)
+    act(() => {
+      vi.advanceTimersByTime(14000);
+    });
+    expect(matchingTopBtn.textContent).not.toContain("✨");
+
+    // Advance 1 more second (15s total)
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Now matching symbols on both cards are hinted with sparkles
+    expect(matchingTopBtn.textContent).toContain("✨");
+    expect(matchingBottomBtn.textContent).toContain("✨");
+    // Distractor is not hinted
+    expect(distractorBtn.textContent).not.toContain("✨");
+
+    // Tapping the hinted matching symbol completes the round and advances
+    act(() => {
+      fireEvent.click(matchingTopBtn);
+    });
+
+    expect(screen.getByTestId("spotit-score").textContent).toContain("1/10");
+
+    // New round has started; hint is reset
+    const nextTopButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("top-symbol-"),
+      );
+    for (const btn of nextTopButtons) {
+      expect(btn.textContent).not.toContain("✨");
+    }
+  });
+
+  it("reveals hint immediately after two incorrect taps", () => {
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} />);
+    fireEvent.pointerDown(document.body);
+
+    const topButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("top-symbol-"),
+      );
+    const bottomButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("bottom-symbol-"),
+      );
+
+    const topSymbolIds = topButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("top-symbol-", ""),
+    );
+    const bottomSymbolIds = bottomButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("bottom-symbol-", ""),
+    );
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id))!;
+    const distractorId = topSymbolIds.find((id) => id !== matchingId)!;
+
+    const matchingTopBtn = screen.getByTestId(`top-symbol-${matchingId}`);
+    const distractorBtn = screen.getByTestId(`top-symbol-${distractorId}`);
+
+    // First wrong tap
+    act(() => {
+      fireEvent.click(distractorBtn);
+    });
+    expect(matchingTopBtn.textContent).not.toContain("✨");
+
+    // Advance 500ms to clear wrong flash timer
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(matchingTopBtn.textContent).not.toContain("✨");
+
+    // Second wrong tap
+    act(() => {
+      fireEvent.click(distractorBtn);
+    });
+
+    // Hint should now be revealed immediately without waiting for 15s inactivity
+    expect(matchingTopBtn.textContent).toContain("✨");
+    expect(
+      screen.getByTestId(`bottom-symbol-${matchingId}`).textContent,
+    ).toContain("✨");
+  });
+
+  it("disables inactivity hint on hard difficulty but reveals hint on two wrong taps", () => {
+    render(<SpotItGame onHome={() => {}} difficulty="hard" seed={42} />);
+    fireEvent.pointerDown(document.body);
+
+    const topButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("top-symbol-"),
+      );
+    const bottomButtons = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("bottom-symbol-"),
+      );
+
+    const topSymbolIds = topButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("top-symbol-", ""),
+    );
+    const bottomSymbolIds = bottomButtons.map((b) =>
+      b.getAttribute("data-testid")!.replace("bottom-symbol-", ""),
+    );
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id))!;
+    const distractorId = topSymbolIds.find((id) => id !== matchingId)!;
+
+    const matchingTopBtn = screen.getByTestId(`top-symbol-${matchingId}`);
+    const distractorBtn = screen.getByTestId(`top-symbol-${distractorId}`);
+
+    // Advance 30s — hard mode has Infinity inactivity delay, so no hint should show
+    act(() => {
+      vi.advanceTimersByTime(30000);
+    });
+    expect(matchingTopBtn.textContent).not.toContain("✨");
+
+    // Two wrong taps on hard mode should still guide the stuck player
+    act(() => {
+      fireEvent.click(distractorBtn);
+    });
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    act(() => {
+      fireEvent.click(distractorBtn);
+    });
+
+    expect(matchingTopBtn.textContent).toContain("✨");
+  });
 });
 
 describe('SpotIt audio cleanup on unmount', () => {
