@@ -191,4 +191,24 @@ describe('SpotItDuel', () => {
     expect(htmlYue).toContain('aria-label="狐狸有 0 粒星"');
     expect(htmlYue).toContain('aria-label="兔仔有 0 粒星"');
   });
+
+  it('scaffolds visual complexity: easy has 3 symbols, medium has 4, hard has 6 per card', () => {
+    // Easy: 4 cards * 3 symbols = 12
+    for (const key of Object.keys(capturedPressableProps)) delete capturedPressableProps[key];
+    renderToString(<SpotItDuel onHome={noop} difficulty="easy" seed={42} lang="en" />);
+    const easySymbols = Object.keys(capturedPressableProps).filter((k) => k.startsWith('duel-') && k.includes('-symbol-'));
+    expect(easySymbols).toHaveLength(12);
+
+    // Medium: 4 cards * 4 symbols = 16
+    for (const key of Object.keys(capturedPressableProps)) delete capturedPressableProps[key];
+    renderToString(<SpotItDuel onHome={noop} difficulty="medium" seed={42} lang="en" />);
+    const medSymbols = Object.keys(capturedPressableProps).filter((k) => k.startsWith('duel-') && k.includes('-symbol-'));
+    expect(medSymbols).toHaveLength(16);
+
+    // Hard: 4 cards * 6 symbols = 24
+    for (const key of Object.keys(capturedPressableProps)) delete capturedPressableProps[key];
+    renderToString(<SpotItDuel onHome={noop} difficulty="hard" seed={42} lang="en" />);
+    const hardSymbols = Object.keys(capturedPressableProps).filter((k) => k.startsWith('duel-') && k.includes('-symbol-'));
+    expect(hardSymbols).toHaveLength(24);
+  });
 });

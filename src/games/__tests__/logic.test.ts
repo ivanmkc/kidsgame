@@ -10,11 +10,69 @@ import {
   duelCountdownPrompt,
   hintAfterMs,
   leaderDealDelayMs,
+  orderForDifficulty,
   sharedSymbol,
   SYMBOLS,
 } from '../spotit/logic';
 
 const ASSETS = join(__dirname, '../../../assets/game');
+
+describe('spot it difficulty order mapping', () => {
+  it('maps difficulty to projective plane order n', () => {
+    expect(orderForDifficulty('easy')).toBe(2);
+    expect(orderForDifficulty('medium')).toBe(3);
+    expect(orderForDifficulty('hard')).toBe(5);
+    expect(orderForDifficulty(undefined)).toBe(3);
+  });
+});
+
+describe('spot it deck (order n=2, easy: 3 symbols)', () => {
+  const deck = buildDeck(2);
+
+  it('has 7 cards of 3 symbols each, all symbol indices valid', () => {
+    expect(deck).toHaveLength(7);
+    for (const card of deck) {
+      expect(card).toHaveLength(3);
+      expect(new Set(card).size).toBe(3);
+      for (const s of card) {
+        expect(s).toBeGreaterThanOrEqual(0);
+        expect(s).toBeLessThan(SYMBOLS.length);
+      }
+    }
+  });
+
+  it('every pair of cards shares exactly one symbol', () => {
+    for (let i = 0; i < deck.length; i++) {
+      for (let j = i + 1; j < deck.length; j++) {
+        expect(() => sharedSymbol(deck[i], deck[j])).not.toThrow();
+      }
+    }
+  });
+});
+
+describe('spot it deck (order n=3, medium: 4 symbols)', () => {
+  const deck = buildDeck(3);
+
+  it('has 13 cards of 4 symbols each, all symbol indices valid', () => {
+    expect(deck).toHaveLength(13);
+    for (const card of deck) {
+      expect(card).toHaveLength(4);
+      expect(new Set(card).size).toBe(4);
+      for (const s of card) {
+        expect(s).toBeGreaterThanOrEqual(0);
+        expect(s).toBeLessThan(SYMBOLS.length);
+      }
+    }
+  });
+
+  it('every pair of cards shares exactly one symbol', () => {
+    for (let i = 0; i < deck.length; i++) {
+      for (let j = i + 1; j < deck.length; j++) {
+        expect(() => sharedSymbol(deck[i], deck[j])).not.toThrow();
+      }
+    }
+  });
+});
 
 describe('spot it deck', () => {
   const deck = buildDeck();
@@ -57,6 +115,20 @@ describe('spot it duel', () => {
     const rng = makeRng(7);
     for (let r = 0; r < 300; r++) {
       const d = dealDuelRound(rng, deck);
+      expect(new Set([key(d.center), key(d.a), key(d.b)]).size).toBe(3);
+      expect(sharedSymbol(d.a, d.center)).toBe(d.answerA);
+      expect(sharedSymbol(d.b, d.center)).toBe(d.answerB);
+      expect(d.center).toContain(d.answerA);
+      expect(d.center).toContain(d.answerB);
+      expect(d.answerA).not.toBe(d.answerB);
+    }
+  });
+
+  it('deals 3 distinct cards on order n=2 deck without answer collision', () => {
+    const deck2 = buildDeck(2);
+    const rng = makeRng(17);
+    for (let r = 0; r < 100; r++) {
+      const d = dealDuelRound(rng, deck2);
       expect(new Set([key(d.center), key(d.a), key(d.b)]).size).toBe(3);
       expect(sharedSymbol(d.a, d.center)).toBe(d.answerA);
       expect(sharedSymbol(d.b, d.center)).toBe(d.answerB);

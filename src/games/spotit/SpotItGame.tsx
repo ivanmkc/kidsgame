@@ -15,6 +15,7 @@ import {
   buildDeck,
   dealRound,
   computeSoloCardSize,
+  orderForDifficulty,
   shouldShowSoloHintOnWrong,
   soloHintDelayMs,
 } from "./logic";
@@ -45,6 +46,7 @@ export function SpotItGame({
     <>
       {mode === "2p" ? (
         <SpotItDuel
+          key={difficulty}
           onHome={onHome}
           difficulty={difficulty}
           seed={seed}
@@ -78,14 +80,16 @@ function SpotItSolo({
   locked: boolean;
   lang: Lang;
 }) {
-  const deck = useMemo(() => buildDeck(), []);
+  const order = orderForDifficulty(difficulty);
+  const cardCount = order + 1;
+  const deck = useMemo(() => buildDeck(order), [order]);
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
   const roundClosedRef = useRef(false);
   const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
   const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
-    top: layoutSlots(rngRef.current),
-    bottom: layoutSlots(rngRef.current),
+    top: layoutSlots(rngRef.current, cardCount),
+    bottom: layoutSlots(rngRef.current, cardCount),
   }));
   const [score, setScore] = useState(0);
   const [matchEnd, setMatchEnd] = useState(false);
@@ -128,8 +132,8 @@ function SpotItSolo({
   const nextRound = () => {
     setRound(dealRound(rngRef.current, deck));
     setSlots({
-      top: layoutSlots(rngRef.current),
-      bottom: layoutSlots(rngRef.current),
+      top: layoutSlots(rngRef.current, cardCount),
+      bottom: layoutSlots(rngRef.current, cardCount),
     });
     setRoundKey((k) => k + 1);
   };
