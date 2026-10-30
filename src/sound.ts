@@ -194,7 +194,7 @@ export function stopNarration(): void {
 
 function playClip(text: string, token: number, onEnded?: () => void): void {
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined') return;
-  const spoken = text.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+  const spoken = text.replace(/[\u{FE0E}\u{FE0F}\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]/gu, '').trim();
   const clip = (speechLang !== 'en' ? VOICE[`${speechLang}|${spoken}`] : undefined) ?? VOICE[spoken];
   try {
     window.speechSynthesis?.cancel();
