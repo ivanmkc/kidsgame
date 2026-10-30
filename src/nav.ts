@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { stopNarration } from "./sound";
 
-// Route strings: 'players' | 'menu' | '<game>' | '<game>/<sceneId>'.
+// Route strings: 'menu' | '<game>' | '<game>/<sceneId>'.
 // On web the route lives in the URL hash so browser back/forward work; on
 // native it's plain state.
 
 const isWeb = Platform.OS === "web" && typeof window !== "undefined";
 
 export function readHash(): string {
-  if (!isWeb) return "players";
+  if (!isWeb) return "menu";
   const h = window.location.hash.replace(/^#\/?/, "");
-  return h || "players";
+  return h || "menu";
 }
 
 type RouteListener = (route: string) => void;
