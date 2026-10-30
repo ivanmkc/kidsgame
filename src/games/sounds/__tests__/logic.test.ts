@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { WORDS } from "../../../curriculum/content";
+import { WORDS, soundsFor } from "../../../curriculum/content";
+import { manifest } from "../../../manifest";
+import { makeRng } from "../../../rng";
 import {
   makeSoundsRound,
   resolveSoundsPrompts,
@@ -114,6 +116,40 @@ describe("makeSoundsRound", () => {
     const round = makeSoundsRound(rng, icons, "en", 3);
     for (const tile of round.tiles) {
       expect(WORDS[tile.wordIdx].icon).toBe(tile.icon);
+    }
+  });
+
+  it("does not select distractors that share phonic sounds via altSounds", () => {
+    // Rabbit has sound 'rrr' and altSound 'buh' (bunny). Banana has sound 'buh'.
+    // Target is star ('sss'). Distractors must not include both rabbit and banana.
+    const icons = ["star", "rabbit", "banana", "dog", "lion"];
+    const round = makeSoundsRound(() => 0, icons, "en", 4);
+    const distractorIcons = round.tiles
+      .filter((t) => !t.isAnswer)
+      .map((t) => t.icon);
+    const hasRabbit = distractorIcons.includes("rabbit");
+    const hasBanana = distractorIcons.includes("banana");
+    expect(hasRabbit && hasBanana).toBe(false);
+  });
+
+  it("avoids distractor phonic collisions across rounds on hard difficulty", () => {
+    for (const seed of [5, 8, 9]) {
+      const round = makeSoundsRound(
+        makeRng(seed),
+        manifest.spotit.icons,
+        "en",
+        6,
+      );
+      const distractors = round.tiles
+        .filter((t) => !t.isAnswer)
+        .map((t) => WORDS[t.wordIdx]);
+      const seenSounds = new Set<string>();
+      for (const w of distractors) {
+        for (const s of soundsFor(w)) {
+          expect(seenSounds.has(s)).toBe(false);
+          seenSounds.add(s);
+        }
+      }
     }
   });
 });
