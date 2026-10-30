@@ -191,6 +191,14 @@ describe('handleTap pure transitions', () => {
     expect(next.phase).toBe('gap');
   });
 
+  it('gap phase single tap transitions to reveal for standard packs', () => {
+    let s = startState('rhyme', 42);
+    s = toGap(s);
+    const next = handleTap(s);
+    expect(next.phase).toBe('reveal');
+    expect(next.pendingTaps).toBe(0);
+  });
+
   it('gap phase double tap transitions immediately if twoTapAnswer', () => {
     let s = startState('silly', 42);
     s = toGap(s);
@@ -289,10 +297,10 @@ describe('difficulty filter in startState', () => {
     expect(s.rounds.length).toBe(allRounds.length);
   });
 
-  it('gap phase tap stays in gap for standard packs to allow prompt replay', () => {
+  it('gap phase tap advances to reveal for standard packs', () => {
     let s = startState('boops', 42);
     s = toGap(s);
     const next = handleTap(s);
-    expect(next.phase).toBe('gap');
+    expect(next.phase).toBe('reveal');
   });
 });

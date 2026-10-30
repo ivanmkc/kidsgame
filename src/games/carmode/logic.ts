@@ -97,7 +97,7 @@ export function handleTap(s: CarModeState): CarModeState {
       if (s.pendingTaps === 0) return { ...s, pendingTaps: 1 };
       return toReveal(s, false);
     }
-    return s;
+    return toReveal(s);
   }
 
   if (s.phase === "reveal") {
