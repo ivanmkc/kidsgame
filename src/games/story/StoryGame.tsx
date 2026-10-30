@@ -220,7 +220,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     <GameShell title={t(lang, 'shell.story.title')} subtitle={title} onBack={onBackToPicker}
       backKind="picker" lang={lang}>
       <ScrollView contentContainerStyle={styles.wrap}>
-        <View style={[styles.frame, shadows.sticker]}>
+        <View testID="story-frame" style={[styles.frame, shadows.sticker]}>
           <Animated.View
             style={{
               width: imgW,
@@ -284,7 +284,6 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
           ) : null}
           {/* No in-story back button: remembering the path IS the game.
               Arrow keys remain as a desktop/dev affordance. */}
-          {isEnd && !node.bad ? <Confetti /> : null}
         </View>
         <Text style={styles.text} testID={`story-text-${nodeId}`}>{nodeText}</Text>
         {isEnd ? (
@@ -351,6 +350,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
           </View>
         )}
       </ScrollView>
+      {isEnd && !node.bad ? <Confetti /> : null}
     </GameShell>
   );
 }
