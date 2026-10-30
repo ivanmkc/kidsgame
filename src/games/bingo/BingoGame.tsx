@@ -59,9 +59,8 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [celebrate, setCelebrate] = useState(0);
   const [winLine, setWinLine] = useState<number[] | null>(null);
+  const [won, setWon] = useState(false);
   const lockedRef = useRef(false);
-
-  const won = winLine !== null;
   const markedCount = marked.filter(Boolean).length;
   useWinLine(won, t(lang, "win.bingo"));
 
@@ -83,6 +82,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCallIdx(0);
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
+    setWon(false);
     setWrongIdx(null);
     setCelebrate(0);
     lockedRef.current = false;
@@ -123,10 +123,11 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
       const line = checkBingo(next, board.size);
       if (line) {
+        setWinLine(line);
         sayThen(call.confirmLines, () => {
           if (!isValid()) return;
           lockedRef.current = false;
-          setWinLine(line);
+          setWon(true);
         });
       } else {
         sayThen(call.confirmLines, () => {
@@ -160,6 +161,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
     setCallIdx(0);
     setMarked(Array(boardRef.current.cells.length).fill(false));
     setWinLine(null);
+    setWon(false);
     setWrongIdx(null);
     setCelebrate(0);
     lockedRef.current = false;
