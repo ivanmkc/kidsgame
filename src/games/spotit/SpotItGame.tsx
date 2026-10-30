@@ -8,7 +8,7 @@ import { t } from "../../i18n";
 import { ModePicker } from "../../multiplayer";
 import { makeRng } from "../../rng";
 import { colors } from "../../theme";
-import { sfx, useSay } from "../../sound";
+import { sfx, stopNarration, useSay } from "../../sound";
 import { TimerRing, fmtTime, useElapsed } from "../../components/TimerRing";
 import { DealIn, Slot, SpotCard, layoutSlots } from "./cards";
 import { buildDeck, dealRound, computeSoloCardSize } from "./logic";
@@ -93,6 +93,7 @@ function SpotItSolo({
   useWinLine(won, t(lang, "win.spotit"));
   useEffect(
     () => () => {
+      stopNarration();
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (winTimerRef.current) clearTimeout(winTimerRef.current);
     },
