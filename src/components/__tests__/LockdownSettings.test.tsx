@@ -54,7 +54,6 @@ describe("LockdownSettings Interactive", () => {
     expect(onToggleGame).toHaveBeenCalledTimes(2);
     expect(onToggleGame).toHaveBeenCalledWith("spotit");
   });
-
   it("toggles lang ok", () => {
     const onToggleLang = vi.fn().mockReturnValue(true);
     render(
@@ -161,6 +160,84 @@ describe("LockdownSettings Interactive", () => {
       vi.advanceTimersByTime(2600);
     });
     expect(screen.queryByText(t("ja", "lockdown.warning"))).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it("resets warning timeout on rapid repeated failed toggles", () => {
+    vi.useFakeTimers();
+    const onToggleLang = vi.fn().mockReturnValue(false);
+    render(
+      <LockdownSettings
+        hiddenGames={[]}
+        hiddenLangs={[]}
+        onToggleGame={vi.fn()}
+        onToggleLang={onToggleLang}
+        onDone={vi.fn()}
+      />,
+    );
+    const inputs = screen.getAllByTestId("lock-lang-en");
+    const input = inputs[0].querySelector("input");
+
+    // First toggle at t=0
+    fireEvent.click(input!);
+    expect(
+      screen.getByText("At least one language must remain visible."),
+    ).toBeTruthy();
+
+    // Advance 2000ms (500ms before initial timeout would fire)
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    expect(
+      screen.getByText("At least one language must remain visible."),
+    ).toBeTruthy();
+
+    // Second toggle at t=2000ms: resets timeout to t=4500ms
+    fireEvent.click(input!);
+
+    // Advance 1000ms (t=3000ms, past initial 2500ms timeout)
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(
+      screen.getByText("At least one language must remain visible."),
+    ).toBeTruthy();
+
+    // Advance remaining 1600ms (t=4600ms, past the second 2500ms timeout)
+    act(() => {
+      vi.advanceTimersByTime(1600);
+    });
+    expect(
+      screen.queryByText("At least one language must remain visible."),
+    ).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it("clears warning timeout on unmount", () => {
+    vi.useFakeTimers();
+    const onToggleLang = vi.fn().mockReturnValue(false);
+    const { unmount } = render(
+      <LockdownSettings
+        hiddenGames={[]}
+        hiddenLangs={[]}
+        onToggleGame={vi.fn()}
+        onToggleLang={onToggleLang}
+        onDone={vi.fn()}
+      />,
+    );
+    const inputs = screen.getAllByTestId("lock-lang-en");
+    const input = inputs[0].querySelector("input");
+    fireEvent.click(input!);
+    expect(
+      screen.getByText("At least one language must remain visible."),
+    ).toBeTruthy();
+
+    unmount();
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
 
     vi.useRealTimers();
   });

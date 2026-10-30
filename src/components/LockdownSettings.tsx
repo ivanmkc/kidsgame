@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -32,12 +32,27 @@ export function LockdownSettings({
   const lang = langCtx?.lang ?? "en";
   const sections = buildGameSections(lang);
   const [langWarning, setLangWarning] = useState(false);
+  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleLangToggle = (lang: Lang) => {
     const ok = onToggleLang(lang);
     if (!ok) {
       setLangWarning(true);
-      setTimeout(() => setLangWarning(false), 2500);
+      if (warningTimerRef.current) {
+        clearTimeout(warningTimerRef.current);
+      }
+      warningTimerRef.current = setTimeout(() => {
+        setLangWarning(false);
+        warningTimerRef.current = null;
+      }, 2500);
     }
   };
 
