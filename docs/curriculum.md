@@ -85,7 +85,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 ## Map Gaps & New Game Specs
 
 - **Part-whole and equivalence Game (Numeracy - Level 4):**
-  - **Spec:** A game teaching part-whole number decomposition and set equivalence ("equal / same") as necessary foundational concepts before formal addition equations.
+  - **Spec:** A game teaching part-whole number decomposition and set equivalence ("equal / same") as necessary foundational concepts before formal addition equations. [Detailed Design](part-whole-design.md)
   - **Path:** Follows `compare` and leads to `sums`.
 
 - **Shapes and Patterns Game (Numeracy - Level 4):**
