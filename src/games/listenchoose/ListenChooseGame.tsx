@@ -57,6 +57,7 @@ export function ListenChooseGame({
     initGameState(rngRef.current, difficulty, lang),
   );
   const [wobbleIcon, setWobbleIcon] = useState<string | null>(null);
+  const [correctIcon, setCorrectIcon] = useState<string | null>(null);
   const [celebrate, setCelebrate] = useState(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wobbleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -99,6 +100,8 @@ export function ListenChooseGame({
     }
     clearWrongTimer();
     lockedRef.current = false;
+    setWobbleIcon(null);
+    setCorrectIcon(null);
     setCelebrate(false);
     setStarted(false);
     setIsSpeaking(false);
@@ -145,12 +148,15 @@ export function ListenChooseGame({
       lockedRef.current = true;
       clearWrongTimer();
       sfx.good();
+      setWobbleIcon(null);
+      setCorrectIcon(choice.icon);
       setCelebrate(true);
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
         if (!isValid()) return;
         lockedRef.current = false;
         setCelebrate(false);
+        setCorrectIcon(null);
         const next = updateGameState(
           state,
           choice.icon,
@@ -344,9 +350,11 @@ export function ListenChooseGame({
                   index={i}
                   lang={lang}
                   highlight={
-                    state.highlightCorrect &&
-                    choice.icon === state.currentRound.target.icon
+                    (state.highlightCorrect &&
+                      choice.icon === state.currentRound.target.icon) ||
+                    correctIcon === choice.icon
                   }
+                  correct={correctIcon === choice.icon}
                   wobble={wobbleIcon === choice.icon}
                   onPress={() => onPick(choice)}
                   layout={layout}
@@ -385,6 +393,7 @@ function ChoiceCard({
   index,
   lang,
   highlight,
+  correct,
   wobble,
   onPress,
   layout = listenChooseLayout(0, 800),
@@ -393,11 +402,32 @@ function ChoiceCard({
   index: number;
   lang: Lang;
   highlight: boolean;
+  correct: boolean;
   wobble: boolean;
   onPress: () => void;
   layout?: ListenChooseLayout;
 }) {
   const shake = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!correct) return;
+    pulse.setValue(1);
+    Animated.sequence([
+      Animated.timing(pulse, {
+        toValue: 1.08,
+        duration: 120,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(pulse, {
+        toValue: 1,
+        duration: 120,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [correct, pulse]);
 
   useEffect(() => {
     if (!wobble) return;
@@ -439,7 +469,7 @@ function ChoiceCard({
   return (
     <Animated.View
       testID={`choice-${index}`}
-      style={{ transform: [{ rotate }] }}
+      style={{ transform: [{ rotate }, { scale: pulse }] }}
     >
       <Pressable
         onPress={onPress}
@@ -454,6 +484,7 @@ function ChoiceCard({
           { width: layout.cardWidth, height: layout.cardHeight },
           shadows.soft,
           highlight && styles.highlightChoice,
+          correct && styles.correctChoice,
           wobble && styles.wrongChoice,
           pressed && styles.pressed,
         ]}
@@ -635,6 +666,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   highlightChoice: {
+    borderColor: colors.green,
+    borderWidth: 4,
+    backgroundColor: "#F0FFF4",
+  },
+  correctChoice: {
     borderColor: colors.green,
     borderWidth: 4,
     backgroundColor: "#F0FFF4",

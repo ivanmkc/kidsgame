@@ -287,6 +287,28 @@ describe("ListenChooseGame", () => {
     expect(newTarget).not.toBe(targetWord.en);
   });
 
+  it("provides on-card visual feedback (green border and background) when the correct choice is tapped", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetBtn, targetWord } = getRoundChoices();
+    expect(targetBtn.getAttribute("aria-selected")).toBe("false");
+
+    fireEvent.click(targetBtn);
+
+    expect(targetBtn.getAttribute("aria-selected")).toBe("true");
+    const captures = capturedPressableMap[`choice-${targetWord.icon}`];
+    expect(captures).toBeDefined();
+    const lastCapture = captures[captures.length - 1];
+    const rawStyle =
+      typeof lastCapture.style === "function"
+        ? lastCapture.style({ pressed: false })
+        : lastCapture.style;
+    const resolved = StyleSheet.flatten(rawStyle);
+    expect(resolved.borderColor).toBe(colors.green);
+    expect(resolved.backgroundColor).toBe("#F0FFF4");
+  });
+
   it("rapidly tapping the correct choice 3 times fires the correct logic and sound once", () => {
     render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
