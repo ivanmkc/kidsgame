@@ -157,7 +157,7 @@ export function EscapeGame({
 
   useEffect(() => {
     if (room) say(roomText(room, "intro", lang));
-  }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Idle hint: after hintMs without progress, glow the next actionable spot
   // (and auto-select the needed tray item so the glow is honest).
