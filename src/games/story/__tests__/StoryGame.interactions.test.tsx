@@ -156,7 +156,7 @@ describe('StoryGame ScareSpot interactions', () => {
     expect(sfxBoingSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('cancels in-flight scare reveal speech when language is switched mid-scare before reveal fires', () => {
+  it('plays the new language scare reveal speech when language is switched mid-scare', () => {
     const saySpy = vi.spyOn(sound, 'say');
 
     const scareStory: Story = {
@@ -223,8 +223,8 @@ describe('StoryGame ScareSpot interactions', () => {
       vi.advanceTimersByTime(300);
     });
 
-    // Mid-game language switch cancels in-flight scare reveal speech
-    expect(saySpy).not.toHaveBeenCalled();
+    // Mid-game language switch should play the new language text
+    expect(saySpy).toHaveBeenCalledWith('やさしい おばけ だよ！');
 
     // UI safely reflects the new language
     expect(screen.getByTestId('story-text-start').textContent).toBe('よく みてね...');
