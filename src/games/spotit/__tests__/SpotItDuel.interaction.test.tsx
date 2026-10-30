@@ -203,7 +203,77 @@ describe('SpotItDuel interaction and speech', () => {
       act(() => {
         vi.advanceTimersByTime(800);
       });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('Spot!');
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
       expect(screen.queryByTestId('duel-countdown')).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("displays 'Spot!' countdown visual prompt when count reaches 0 before transitioning to play", () => {
+    vi.useFakeTimers();
+    try {
+      const fixedRound = {
+        center: [0, 1, 2, 3, 4, 5],
+        a: [0, 6, 7, 8, 9, 10],
+        b: [1, 11, 12, 13, 14, 15],
+        answerA: 0,
+        answerB: 1,
+      };
+      vi.spyOn(spotitLogic, 'dealDuelRound').mockReturnValue(fixedRound);
+
+      render(<SpotItDuel onHome={noop} difficulty="easy" lang="en" />);
+
+      // Initial countdown is 3
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('3');
+
+      // 3 -> 2
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('2');
+
+      // 2 -> 1
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('1');
+
+      // 1 -> 0: 'Spot!' visual prompt displays
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('Spot!');
+
+      // Taps during the 'Spot!' visual prompt are ignored (phase remains 'ready')
+      act(() => {
+        const symbolBtn = screen.getByTestId('duel-a-my-symbol-0');
+        fireEvent.click(symbolBtn);
+      });
+      expect(screen.getByTestId('duel-score-a').getAttribute('aria-label')).toBe('Foxy has 0 stars');
+
+      // Prompt persists for the full 500ms linger window
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      expect(screen.getByTestId('duel-countdown').textContent).toBe('Spot!');
+
+      // After 500ms total, phase transitions to 'play' and countdown view unmounts
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      expect(screen.queryByTestId('duel-countdown')).toBeNull();
+
+      // Now taps are processed in 'play' phase
+      act(() => {
+        const symbolBtn = screen.getByTestId('duel-a-my-symbol-0');
+        fireEvent.click(symbolBtn);
+      });
+      expect(screen.getByTestId('duel-score-a').getAttribute('aria-label')).toBe('Foxy has 1 stars');
     } finally {
       vi.useRealTimers();
     }
