@@ -258,7 +258,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               />
             ) : null}
             {(node.fx ?? []).map((f, i) => (
-              <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} />
+              <FxSpot key={`${nodeId}-fx${i}`} fx={f} scale={imgW / 1280} lang={lang} />
             ))}
             {hasHots && !clip
               ? node.choices!.map((c, i) => {
@@ -398,7 +398,7 @@ function ChoiceSpot({ choice, label, index, scale, onPick }: {
 // Non-nav surprise: a whisper-subtle shimmer invites a tap; tapping makes
 // the region itself bounce with a sparkle burst + sfx (+ optional spoken
 // line). Never navigates — a toy inside the page, re-tappable forever.
-function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
+function FxSpot({ fx, scale, lang = 'en' }: { fx: StoryFx; scale: number; lang?: Lang }) {
   const bounce = useRef(new Animated.Value(0)).current;
   const pulse = useRef(new Animated.Value(0)).current;
   const [burst, setBurst] = useState(0);
@@ -412,7 +412,8 @@ function FxSpot({ fx, scale }: { fx: StoryFx; scale: number }) {
   }, [pulse]);
   const trigger = () => {
     if (fx.sting === 'flip') sfx.flip(); else if (fx.sting === 'tap') sfx.tap(); else sfx.boing();
-    if (fx.line) say(fx.line);
+    const line = (lang !== 'en' ? fx.t?.[lang] : undefined) ?? fx.line;
+    if (line) say(line);
     setBurst((b) => b + 1);
     bounce.setValue(0);
     Animated.spring(bounce, { toValue: 1, friction: 3, useNativeDriver: true }).start(() => bounce.setValue(0));

@@ -1268,7 +1268,7 @@ describe('StickerGame', () => {
       ok: true,
       image_b64: 'b64_data',
     });
-    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.5);
 
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />

@@ -77,6 +77,7 @@ export interface StoryScare extends Box {
 export interface StoryFx extends Box {
   sting?: 'boing' | 'tap' | 'flip';
   line?: string; // short spoken reaction (must have a voice clip)
+  t?: Record<string, string>; // ja/cmn/yue spoken reaction — falls back to line
 }
 
 export interface StoryNode {

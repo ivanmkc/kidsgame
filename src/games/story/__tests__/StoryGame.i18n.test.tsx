@@ -220,6 +220,39 @@ describe('StoryGame i18n', () => {
     expect(saySpy).toHaveBeenCalledWith('ただの ふるい カラスさん！ しげみで ねてたんだって。すすもう、ミロ…');
   });
 
+  it('speaks localized fx line in Japanese when triggered', () => {
+    const saySpy = vi.spyOn(sound, 'say');
+    const fxStory: Story = {
+      id: 'test-fx',
+      title: 'Fx Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'English node text.',
+          fx: [
+            {
+              x: 0,
+              y: 0,
+              w: 10,
+              h: 10,
+              sting: 'boing',
+              line: 'English fx line!',
+              t: { ja: 'Japanese fx line!' },
+            },
+          ],
+        },
+      },
+    };
+    manifest.stories?.push(fxStory);
+
+    render(<StoryGame sceneId="test-fx" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />);
+
+    const fxBtn = screen.getByTestId('story-fx');
+    fireEvent.click(fxBtn);
+
+    expect(saySpy).toHaveBeenCalledWith('Japanese fx line!');
+  });
+
   it('falls back to English when non-English translations are missing', () => {
     const englishOnlyStory: Story = {
       id: 'test-en-only',
