@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../../../i18n';
 import { Lang } from '../../../lang';
 import { sfx } from '../../../sound';
+import { LangContext } from '../../../components/GameShell';
 import {
   GestureResponderEvent,
   PanResponder,
@@ -49,26 +50,29 @@ let capturedGameShellProps: {
   right?: React.ReactNode;
 } | null = null;
 
-vi.mock('../../../components/GameShell', () => ({
-  GameShell: (props: {
-    title?: string;
-    subtitle?: string;
-    onBack?: () => void;
-    backKind?: string;
-    right?: React.ReactNode;
-    children?: React.ReactNode;
-  }) => {
-    capturedGameShellProps = props;
-    return (
-      <div data-testid="mock-game-shell">
-        <div>{props.title}</div>
-        <div>{props.subtitle}</div>
-        {props.right}
-        {props.children}
-      </div>
-    );
-  },
-}));
+vi.mock('../../../components/GameShell', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../components/GameShell')>();
+  return {
+    ...actual,
+    GameShell: (props: Parameters<typeof actual.GameShell>[0]) => {
+      capturedGameShellProps = props;
+      const langCtx = React.useContext(actual.LangContext);
+      return (
+        <div data-testid="mock-game-shell">
+          <div>{props.title}</div>
+          <div>{props.subtitle}</div>
+          {langCtx ? (
+            <button data-testid="lang-cycle" onClick={langCtx.onCycle}>
+              🌐
+            </button>
+          ) : null}
+          {props.right}
+          {props.children}
+        </div>
+      );
+    },
+  };
+});
 
 const capturedPressableProps: Record<
   string,
@@ -1326,6 +1330,91 @@ describe('StickerGame', () => {
     );
 
     randomSpy.mockRestore();
+    unmount();
+  });
+
+  it('updates toast text dynamically on mid-round language switch without holding stale language state', async () => {
+    const spokenUtterances: string[] = [];
+    class MockUtterance {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    }
+    const mockSpeechSynthesis = {
+      cancel: vi.fn(),
+      speak: vi.fn((u: MockUtterance) => {
+        spokenUtterances.push(u.text);
+      }),
+    };
+    vi.stubGlobal('SpeechSynthesisUtterance', MockUtterance);
+    vi.stubGlobal('speechSynthesis', mockSpeechSynthesis);
+    window.speechSynthesis = mockSpeechSynthesis as unknown as SpeechSynthesis;
+
+    vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
+    vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
+    vi.spyOn(magic, 'callMagic').mockResolvedValue({ ok: false });
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>('en');
+      const onCycle = () => {
+        setLang((l) => (l === 'en' ? 'ja' : l === 'ja' ? 'cmn' : l === 'cmn' ? 'yue' : 'en'));
+      };
+      return (
+        <LangContext.Provider value={{ lang, onCycle }}>
+          <StickerGame
+            sceneId="d-farm"
+            onHome={noop}
+            onPickScene={noop}
+            onBackToPicker={noop}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    const { unmount } = render(<Harness />);
+
+    // Initial welcoming instruction spoken in English
+    expect(spokenUtterances).toContain(t('en', 'card.sticker.blurb'));
+
+    // Place a sticker onto the stage
+    const trayBtn = screen
+      .getAllByRole('button')
+      .find((b) => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    expect(trayBtn).toBeDefined();
+    act(() => {
+      fireEvent.click(trayBtn!);
+    });
+
+    // Trigger magic, which resolves with ok: false to trigger fizzle toast
+    const magicBtn = await screen.findByRole('button', { name: 'Make it real' });
+    await act(async () => {
+      fireEvent.click(magicBtn);
+    });
+
+    // English toast is displayed
+    expect(await screen.findByText('The magic fizzled — try again!')).toBeDefined();
+
+    spokenUtterances.length = 0;
+
+    // Switch language mid-toast via in-game lang-cycle button
+    const langBtn = screen.getByTestId('lang-cycle');
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // Toast text dynamically updates to Japanese without holding stale English state
+    expect(await screen.findByText('まほうに しっぱいしちゃった — もういちど！')).toBeDefined();
+    expect(screen.queryByText('The magic fizzled — try again!')).toBeNull();
+
+    // useSay speaks the new Japanese prompt and no old English narration plays
+    expect(spokenUtterances).toContain(t('ja', 'card.sticker.blurb'));
+    expect(spokenUtterances).not.toContain(t('en', 'card.sticker.blurb'));
+
+    // Placed sticker remains safely on stage without being corrupted
+    expect(screen.getByTestId('sticker-placed-1')).toBeDefined();
+
     unmount();
   });
 });
