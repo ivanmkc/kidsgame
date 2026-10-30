@@ -16,7 +16,7 @@ import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sayThen, sfx, stopNarration } from "../../sound";
+import { saySequence, sayThen, sfx, stopNarration } from "../../sound";
 import { playSequence, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -39,8 +39,6 @@ interface Props {
 
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
-  const langRef = useRef(lang);
-  langRef.current = lang;
   const { width } = useWindowDimensions();
   const layout = highLowLayout(width);
   const total = roundsToWin(difficulty);
@@ -122,7 +120,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
           setInstructionalDirection(null);
           lockedRef.current = false;
           setPhase("pick");
-          say(t(langRef.current, "shell.highlow.sub"));
         }
       },
     );
@@ -199,6 +196,15 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       }, 400);
     }
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (won || phase !== "pick" || wrongPick !== null) return;
+    saySequence([
+      t(lang, "shell.highlow.sub"),
+      t(lang, "music.high"),
+      t(lang, "music.low"),
+    ]);
+  }, [phase, won, lang, wrongPick]);
 
   const onPick = (picked: "high" | "low") => {
     if (won || phase !== "pick" || lockedRef.current || !isValid() || wrongPickRef.current === picked) return;
