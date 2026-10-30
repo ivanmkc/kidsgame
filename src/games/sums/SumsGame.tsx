@@ -43,6 +43,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongPickRef = useRef<number | null>(null);
   const [correctPick, setCorrectPick] = useState<number | null>(null);
+  const [solved, setSolved] = useState(false);
   const lockedRef = useRef(true);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -133,11 +134,13 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       const nextScore = score + 1;
       setScore(nextScore);
+      setSolved(true);
       sayThen([numberWord(lang, round.sum).t, t(lang, "sums.praise")], () => {
         lockedRef.current = false;
         setCorrectPick(null);
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
+          setSolved(false);
           clearWrongTimer();
         } else {
           setWon(true);
@@ -173,6 +176,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     setRound(makeSumsRound(rngRef.current, difficulty));
     setScore(0);
     setCorrectPick(null);
+    setSolved(false);
     lockedRef.current = false;
     setWon(false);
   };
@@ -243,8 +247,8 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
           style={[styles.controls, isLandscape && styles.controlsLandscape]}
         >
           <View style={[styles.equation, shadows.soft]}>
-            <Text style={styles.equationText}>
-              {round.a} + {round.b} = ?
+            <Text style={styles.equationText} testID="sums-equation">
+              {round.a} + {round.b} = {solved ? round.sum : "?"}
             </Text>
           </View>
           <View
