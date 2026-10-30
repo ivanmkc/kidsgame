@@ -45,6 +45,11 @@ export const CURRICULUM = {
         fewerFraction: 0.3,
       },
     },
+    balance: {
+      easy: { rounds: 5, maxTotal: 5 },
+      medium: { rounds: 6, maxTotal: 7 },
+      hard: { rounds: 8, maxTotal: 10 },
+    },
     sums: {
       easy: { rounds: 5, maxSum: 5 },
       medium: { rounds: 6, maxSum: 7 },

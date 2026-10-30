@@ -52,6 +52,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 - `numbers` - Subitizing (Level 1)
 - `count` - Counting (Level 2)
 - `compare` - Comparing (Level 3)
+- `balance` - Part-whole number decomposition (Level 4)
 - `sums` - Adding within 10 (Level 5)
 
 ### Music and Rhythm
@@ -85,9 +86,13 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 
 ## Map Gaps & New Game Specs
 
-- **Part-whole and equivalence Game (Numeracy - Level 4):**
-  - **Spec:** A game teaching part-whole number decomposition and set equivalence ("equal / same") as necessary foundational concepts before formal addition equations. [Detailed Design](part-whole-design.md)
-  - **Path:** Follows `compare` and leads to `sums`.
+- **Set Equivalence Game (Numeracy - Level 4):**
+  - **Spec:** A game teaching set equivalence ("equal / same") as a complementary concept to part-whole number decomposition (`balance`).
+  - **Path:** Follows `balance` and leads to `sums`.
+
+- **Number Balance Scale & Drag Mechanics (Numeracy - Level 4):**
+  - **Spec:** Interactive balance scale mechanics with tilting animation and drag-and-drop apples/number weights as detailed in [Detailed Design](part-whole-design.md).
+  - **Path:** Follows `balance` part-whole decomposition.
 
 - **Shapes and Patterns Game (Numeracy - Level 4):**
   - **Spec:** A game where kids identify geometric shapes and complete visual
