@@ -1,14 +1,42 @@
-import { Lang } from '../../lang';
-import { Rng, randInt, shuffle } from '../../rng';
-import { WORDS, wordFor } from '../../curriculum/content';
-import { t } from '../../i18n';
+import { Difficulty, settingsFor } from "../../difficulty";
+import { Lang } from "../../lang";
+import { Rng, randInt, shuffle } from "../../rng";
+import { WORDS, wordFor } from "../../curriculum/content";
+import { t } from "../../i18n";
 
 // 31 distinct kid-friendly symbols — exactly n^2+n+1 for order n=5.
 export const SYMBOLS = [
-  '🐶', '🐱', '🦁', '🐸', '🐼', '🦊', '🐵', '🐷',
-  '🐰', '🐨', '🦄', '🐙', '🦀', '🐠', '🦋', '🐞',
-  '🌸', '🌻', '🍎', '🍌', '🍓', '🍕', '🍦', '🎈',
-  '🚗', '✈️', '🚀', '⚽', '🌈', '⭐', '🎁',
+  "🐶",
+  "🐱",
+  "🦁",
+  "🐸",
+  "🐼",
+  "🦊",
+  "🐵",
+  "🐷",
+  "🐰",
+  "🐨",
+  "🦄",
+  "🐙",
+  "🦀",
+  "🐠",
+  "🦋",
+  "🐞",
+  "🌸",
+  "🌻",
+  "🍎",
+  "🍌",
+  "🍓",
+  "🍕",
+  "🍦",
+  "🎈",
+  "🚗",
+  "✈️",
+  "🚀",
+  "⚽",
+  "🌈",
+  "⭐",
+  "🎁",
 ] as const;
 
 export type Card = number[]; // indices into SYMBOLS, 6 per card
@@ -40,7 +68,8 @@ export function buildDeck(n = 5): Card[] {
 export function sharedSymbol(a: Card, b: Card): number {
   const set = new Set(a);
   const shared = b.filter((s) => set.has(s));
-  if (shared.length !== 1) throw new Error(`cards share ${shared.length} symbols`);
+  if (shared.length !== 1)
+    throw new Error(`cards share ${shared.length} symbols`);
   return shared[0];
 }
 
@@ -63,8 +92,8 @@ export function dealRound(rng: Rng, deck: Card[]): SpotItRound {
 
 export interface DuelRound {
   center: Card; // shared card, shown once per zone
-  a: Card;      // player 0's own card
-  b: Card;      // player 1's own card
+  a: Card; // player 0's own card
+  b: Card; // player 1's own card
   answerA: number; // sharedSymbol(a, center)
   answerB: number; // sharedSymbol(b, center)
 }
@@ -103,7 +132,11 @@ export function leaderDealDelayMs(myScore: number, otherScore: number): number {
 
 /** Rubber-band: a kid trailing by >=2 gets a sparkle hint after this long
  *  with no correct tap; Infinity = no hint. */
-export function hintAfterMs(myScore: number, otherScore: number, baseSecs: number): number {
+export function hintAfterMs(
+  myScore: number,
+  otherScore: number,
+  baseSecs: number,
+): number {
   const deficit = otherScore - myScore;
   if (deficit < 2) return Infinity;
   return baseSecs * 1000;
@@ -112,7 +145,7 @@ export function hintAfterMs(myScore: number, otherScore: number, baseSecs: numbe
 // --- Duel spoken prompts ----------------------------------------------------
 
 export function duelCountdownPrompt(lang: Lang): string {
-  return t(lang, 'spotitDuel.countdown');
+  return t(lang, "spotitDuel.countdown");
 }
 
 /** Localized screen-reader label for a card symbol. */
@@ -136,4 +169,20 @@ export function computeDuelCardSize(width: number, height: number): number {
   return isLandscape
     ? Math.max(0, Math.min(availH - 90, (width - 2 * 12) / 2 / 2 - 20, 320))
     : Math.max(0, Math.min((availH - 24) / 2 - 52, (width - 60) / 2, 320));
+}
+
+export const SOLO_HINT_WRONG_TAPS = 2;
+
+/**
+ * Inactivity delay in ms before revealing the matching symbol as a hint in Spot It Solo.
+ * Mirrors difficulty settings (hiddenHintSecs), or Infinity if disabled.
+ */
+export function soloHintDelayMs(difficulty: Difficulty): number {
+  const secs = settingsFor(difficulty).hiddenHintSecs;
+  return Number.isFinite(secs) ? secs * 1000 : Infinity;
+}
+
+/** Whether the accumulated wrong taps should reveal the answer hint. */
+export function shouldShowSoloHintOnWrong(wrongTaps: number): boolean {
+  return wrongTaps >= SOLO_HINT_WRONG_TAPS;
 }
