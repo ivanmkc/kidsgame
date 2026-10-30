@@ -148,6 +148,10 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (wrongTimerRef.current) {
+      clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = null;
+    }
     setIsFinishing(false);
     lockedRef.current = false;
     roundEpochRef.current += 1;
