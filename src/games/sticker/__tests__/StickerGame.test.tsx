@@ -6,7 +6,8 @@ import * as magic from '../magic';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../../../i18n';
 import { Lang } from '../../../lang';
-import { sfx } from '../../../sound';
+import * as sound from '../../../sound';
+const { sfx } = sound;
 import { LangContext } from '../../../components/GameShell';
 import {
   GestureResponderEvent,
@@ -1416,5 +1417,16 @@ describe('StickerGame', () => {
     expect(screen.getByTestId('sticker-placed-1')).toBeDefined();
 
     unmount();
+  });
+
+  it('stops narration on unmount', () => {
+    const stopNarrationSpy = vi.spyOn(sound, 'stopNarration');
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+    unmount();
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+    stopNarrationSpy.mockRestore();
   });
 });
