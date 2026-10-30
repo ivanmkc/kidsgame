@@ -84,9 +84,29 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 
 ## Map Gaps & New Game Specs
 
-- **Part-whole and equivalence Game (Numeracy - Level 4):**
-  - **Spec:** A game teaching part-whole number decomposition and set equivalence ("equal / same") as necessary foundational concepts before formal addition equations. [Detailed Design](part-whole-design.md)
-  - **Path:** Follows `compare` and leads to `sums`.
+- **Number Balance (Numeracy - Level 4):**
+  - **Spec:** A game teaching part-whole number decomposition and set
+    equivalence ("equal / same") as necessary foundational concepts before
+    formal addition equations. [Detailed Design](part-whole-design.md)
+  - **Path:** Follows `compare` (Level 3) and leads to `sums` (Level 5).
+  - **Content reuse:** Reuses critter sprites from `CURRICULUM.critters`
+    ('frog', 'cat', 'dog', 'star', 'apple') and numerals 1..10 from
+    `CURRICULUM.numbers`.
+  - **Pre-reader core loop:** A colorful balance scale displays a whole
+    quantity on the left pan (e.g. 5 frogs) tilting it down. A spoken voice
+    prompt instructs: "Make both sides balance! Add frogs to make 5." The
+    right pan already holds a partial part (e.g. 2 frogs). The tray below
+    offers 3 candidate critter groups (e.g. 1, 3, 4); tapping any speaks its
+    count. Dragging or tapping the matching part (3 frogs) into the right pan
+    levels the scale horizontally with joyful audio feedback ("2 and 3 make 5
+    — they are equal!").
+  - **Difficulty steps:**
+    1. Easy: Sums up to 5 with visual 1-to-1 critter counters (e.g.
+       whole 3..5, missing part 1..3).
+    2. Medium: Sums up to 10 with visual critter counters (e.g. whole 6..10,
+       missing part 1..5).
+    3. Hard: Sums up to 10 with mixed numerals and critter groups, connecting
+       number symbols to decomposed quantities.
 
 - **Shapes and Patterns Game (Numeracy - Level 4):**
   - **Spec:** A game where kids identify geometric shapes and complete visual
