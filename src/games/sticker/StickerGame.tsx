@@ -145,7 +145,6 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
 
   const runMagic = useCallback((sticker: Placed) => {
     if (!picked || !publicImageUrl) return;
-    if (magicBackdrop !== null) return;
     if (pendingKey !== null && pendingKey !== sticker.key) return; // one at a time
     sfx.tap();
     // Center of the sticker in scene-relative coords — that's where the
@@ -285,7 +284,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
             if (phase === 'done') return null;
             const isDressup = DRESSUP_SET.has(s.icon);
             const magicVisible = isDressup && magicReachable === true;
-            const magicEnabled = magicVisible && magicBackdrop === null && (pendingKey === null || pendingKey === s.key);
+            const magicEnabled = magicVisible && (pendingKey === null || pendingKey === s.key);
             return (
               <DraggableSticker
                 key={s.key}
