@@ -89,7 +89,8 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
   - **Path:** Follows `compare` and leads to `sums`.
 
 - **Shapes and Patterns Game (Numeracy - Level 4):**
-  - **Spec:** A game where kids identify geometric shapes and complete visual patterns.
+  - **Spec:** A game where kids identify geometric shapes and complete visual
+    patterns. [Detailed Design](shapes-patterns-design.md)
   - **Path:** Follows `compare` and leads to `sums`.
 
 - **Word Family (Early Literacy - Level 2.5):**
