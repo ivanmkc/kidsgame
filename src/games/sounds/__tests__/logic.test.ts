@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { WORDS } from "../../../curriculum/content";
-import { makeSoundsRound, settingsForSounds, soundsLayout } from "../logic";
+import {
+  makeSoundsRound,
+  resolveSoundsPrompts,
+  settingsForSounds,
+  soundsLayout,
+} from "../logic";
 
 describe("soundsLayout", () => {
   it("enlarges tiles to 1x4 row across mobile landscape screens", () => {
@@ -128,5 +133,22 @@ describe("soundsLayout 6 tiles", () => {
     expect(l2.tile).toBeGreaterThan(0);
     const l3 = soundsLayout(1024, 768, 6);
     expect(l3.tile).toBeGreaterThan(0);
+  });
+});
+
+describe("resolveSoundsPrompts", () => {
+  it("provides localized confirmation lines without English translation in non-EN languages", () => {
+    const cat = WORDS.find((w) => w.en === "cat")!;
+    expect(resolveSoundsPrompts(cat, "ja").confirmLines).toEqual(["ねこ！"]);
+    expect(resolveSoundsPrompts(cat, "cmn").confirmLines).toEqual(["猫！"]);
+    expect(resolveSoundsPrompts(cat, "yue").confirmLines).toEqual(["貓！"]);
+  });
+
+  it("provides English confirmation lines in English mode", () => {
+    const cat = WORDS.find((w) => w.en === "cat")!;
+    expect(resolveSoundsPrompts(cat, "en").confirmLines).toEqual([
+      "Cat!",
+      "Cat starts with kuh!",
+    ]);
   });
 });

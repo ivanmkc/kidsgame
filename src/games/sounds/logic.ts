@@ -145,7 +145,7 @@ export function resolveSoundsPrompts(
   return {
     promptLines: [ASK[lang], w.text],
     displayPrompt: `${ASK[lang]} ${w.text}`,
-    confirmLines: [`${w.text}！`, `${capitalize(target.en)}!`],
+    confirmLines: [`${w.text}！`],
     caption: w.roman,
   };
 }
