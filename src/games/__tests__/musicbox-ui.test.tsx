@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from 'react';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { Animated } from 'react-native';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SpawnedObject, SpawnEntry } from '../musicbox/SpawnedObject';
@@ -113,5 +113,43 @@ describe('musicbox spawned object parallax scrolling', () => {
       expect(getTranslateX(note)).toBeCloseTo(0);
       unmount();
     }
+  });
+
+  it('does not reset wiggle to 0 when spring animation is interrupted', () => {
+    let startCallback: ((result: { finished: boolean }) => void) | undefined;
+    const origSpring = Animated.spring;
+    const springSpy = vi.spyOn(Animated, 'spring').mockImplementation((value, config) => {
+      const anim = origSpring(value, config);
+      if (config && 'friction' in config && config.friction === 4) {
+        const origStart = anim.start.bind(anim);
+        anim.start = (cb) => {
+          startCallback = cb as typeof startCallback;
+          return origStart(cb);
+        };
+      }
+      return anim;
+    });
+
+    const { unmount } = render(
+      <SpawnedObject entry={createEntry('sky')} scrollX={new Animated.Value(0)} lang="en" />,
+    );
+    const note = screen.getByRole('button', { name: 'Music note' });
+
+    fireEvent.click(note);
+    expect(startCallback).toBeDefined();
+
+    const setValueSpy = vi.spyOn(Animated.Value.prototype, 'setValue');
+
+    // Interrupted animation completion should not reset wiggle to 0
+    startCallback?.({ finished: false });
+    expect(setValueSpy).not.toHaveBeenCalled();
+
+    // Natural completion should reset wiggle to 0
+    startCallback?.({ finished: true });
+    expect(setValueSpy).toHaveBeenCalledWith(0);
+
+    setValueSpy.mockRestore();
+    springSpy.mockRestore();
+    unmount();
   });
 });
