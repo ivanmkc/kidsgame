@@ -316,6 +316,7 @@ describe("MusicBoxGame rendering", () => {
   it("re-speaks picker prompt when language is switched on song picker screen", () => {
     vi.useFakeTimers();
     const saySpy = vi.spyOn(sound, "say");
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
     const onHome = vi.fn();
     const onPickScene = vi.fn();
     const onBackToPicker = vi.fn();
@@ -343,9 +344,11 @@ describe("MusicBoxGame rendering", () => {
 
     expect(saySpy).toHaveBeenLastCalledWith("Pick a song to play!");
     expect(screen.getByText("Pick a song to play!")).toBeTruthy();
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByTestId("lang-cycle"));
 
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
     expect(saySpy).toHaveBeenLastCalledWith("うたを えらんでね！");
     expect(screen.getByText("うたを えらんでね！")).toBeTruthy();
 

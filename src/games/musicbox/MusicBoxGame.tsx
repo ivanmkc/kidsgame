@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Image, Pressable, ScrollView, StyleSheet, Text } from "react-native";
 import { GameShell } from "../../components/GameShell";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { t, UIKey } from "../../i18n";
 import { say } from "../../sound";
 import { MUSICBOX_IMAGES } from "../../assets/images";
@@ -32,19 +32,22 @@ export function MusicBoxGame({
   onBackToPicker,
   lang,
 }: Props) {
+  const { isValid } = useLangEpoch(lang);
   const scene = sceneId ? sceneById(sceneId) : undefined;
   const settings = settingsFor(difficulty);
 
   useEffect(() => {
-    if (scene) {
-      say(
-        t(
-          lang,
-          settings.musicboxFreePlay ? "musicbox.introFree" : "musicbox.intro",
-        ),
-      );
-    } else {
-      say(t(lang, "shell.musicbox.subPicker"));
+    if (isValid()) {
+      if (scene) {
+        say(
+          t(
+            lang,
+            settings.musicboxFreePlay ? "musicbox.introFree" : "musicbox.intro",
+          ),
+        );
+      } else {
+        say(t(lang, "shell.musicbox.subPicker"));
+      }
     }
   }, [lang, scene?.id, settings.musicboxFreePlay]); // eslint-disable-line react-hooks/exhaustive-deps
 
