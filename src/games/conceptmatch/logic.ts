@@ -105,35 +105,33 @@ export const GLYPH_TWINS: Record<string, string> = {
   L: "I",
 };
 
+const DECK_CAPACITIES: Partial<Record<ConceptMatchDeck, number>> = {
+  "shapes-objects": SHAPES.length,
+  "animals-sounds": ANIMALS.length,
+  "numerals-dots": 9,
+};
+
 /**
  * Returns the target pair count for a given difficulty and deck.
- * For shapes-objects, the shape pool contains 4 pairs, so difficulty ramps
- * cleanly across easy (2 pairs), medium (3 pairs), and hard (4 pairs).
+ * Ramps across easy (2 pairs / 2x2 grid), medium (6 pairs / 3x4 grid),
+ * and hard (8 pairs / 4x4 grid), capped by deck capacity (shapes-objects=4,
+ * animals-sounds=5, numerals-dots=9).
  */
 export function pairsForDifficulty(
   difficulty: Difficulty = "medium",
   deck?: ConceptMatchDeck,
 ): number {
-  if (deck === "shapes-objects") {
-    switch (difficulty) {
-      case "easy":
-        return 2;
-      case "hard":
-        return 4;
-      case "medium":
-      default:
-        return 3;
-    }
+  let target = 6;
+  if (difficulty === "easy") {
+    target = 2;
+  } else if (difficulty === "hard") {
+    target = 8;
   }
-  switch (difficulty) {
-    case "easy":
-      return 3;
-    case "hard":
-      return 5;
-    case "medium":
-    default:
-      return 4;
+
+  if (deck && DECK_CAPACITIES[deck] !== undefined) {
+    return Math.min(target, DECK_CAPACITIES[deck]!);
   }
+  return target;
 }
 
 export const CONFUSING_LETTER_GROUPS: string[][] = [

@@ -89,13 +89,10 @@ export type UIKey =
   | 'card.cm-picspeak.title' | 'card.cm-picspeak.blurb'
   | 'card.cm-colors.title' | 'card.cm-colors.blurb'
   | 'card.cm-letters.title' | 'card.cm-letters.blurb'
+  | 'card.cm-mixed.title' | 'card.cm-mixed.blurb'
   // ── ScenePicker surfaces ───────────────────────────────────────
-  | 'picker.surprise'
-  | 'picker.diff'
-  | 'picker.hidden'
-  | 'picker.story'
-  | 'picker.sticker'
-  | 'picker.puzzle'
+  | 'picker.surprise' | 'picker.diff' | 'picker.hidden'
+  | 'picker.story' | 'picker.sticker' | 'picker.puzzle'
   // ── ModePicker ─────────────────────────────────────────────────
   | 'mp.title' | 'mp.solo' | 'mp.duo'
   | 'mp.foxy' | 'mp.bunny' | 'mp.hasCount'
@@ -469,6 +466,8 @@ export const EN: Table = {
   'card.cm-colors.blurb': 'Match the color to its word!',
   'card.cm-letters.title': 'Letter Match',
   'card.cm-letters.blurb': 'Match big and small letters!',
+  'card.cm-mixed.title': 'Mixed Match',
+  'card.cm-mixed.blurb': 'Match letters, words, and colors!',
 
   'picker.surprise': '🎲 Surprise me!',
   'picker.diff': 'Where do you want to play?',

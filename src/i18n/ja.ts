@@ -119,6 +119,8 @@ export const JA: Table = {
   'card.cm-colors.blurb': '色と言葉を合わせよう！',
   'card.cm-letters.title': 'もじあわせ',
   'card.cm-letters.blurb': '大文字と小文字を合わせよう！',
+  'card.cm-mixed.title': 'いろいろあわせ',
+  'card.cm-mixed.blurb': 'もじや ことばや いろを あわせよう！',
 
   'picker.surprise': '🎲 おまかせ！',
   'picker.diff': 'どこで あそぶ？',
