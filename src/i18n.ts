@@ -285,7 +285,7 @@ export type UIKey =
   | 'bingo.promptPhonics'
   | 'bingo.confirmPhonics'
   | 'story.tryAgain' | 'story.startOver' | 'story.readAgain' | 'story.allStories'
-  | 'story.hotLead' | 'story.nextLead'
+  | 'story.hotLead' | 'story.nextLead' | 'story.a11yFx'
   | 'carmode.tap' | 'carmode.done'
   | 'carmode.pack.boops' | 'carmode.pack.rhyme' | 'carmode.pack.simon'
   | 'carmode.pack.silly' | 'carmode.pack.whoami' | 'carmode.pack.animal'
@@ -706,6 +706,7 @@ export const EN: Table = {
   'story.tryAgain': 'Oops! Try another way ↩️', 'story.startOver': 'Start over 📖',
   'story.readAgain': 'The End! Read again 📖', 'story.allStories': 'All Stories 🏠',
   'story.hotLead': 'Tap where you want to go!', 'story.nextLead': 'What should happen next?',
+  'story.a11yFx': 'Something fun is here',
   'carmode.tap': 'Tap!', 'carmode.done': 'All done!',
   'carmode.pack.boops': 'Count the Boops', 'carmode.pack.rhyme': 'Finish the Rhyme',
   'carmode.pack.simon': 'Simon Says', 'carmode.pack.silly': 'Silly or True?',

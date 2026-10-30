@@ -422,7 +422,7 @@ function FxSpot({ fx, scale, lang = 'en' }: { fx: StoryFx; scale: number; lang?:
     <Pressable
       onPress={trigger}
       testID="story-fx"
-      accessibilityLabel="Something fun is here"
+      accessibilityLabel={t(lang, 'story.a11yFx')}
       accessibilityRole="button"
       style={{ position: 'absolute', left: fx.x * scale, top: fx.y * scale, width: fx.w * scale, height: fx.h * scale }}
     >

@@ -380,6 +380,7 @@ export const JA: Table = {
   'story.allStories': 'おはなし いちらん 🏠',
   'story.hotLead': 'いきたい ほうを タップ！',
   'story.nextLead': 'つぎは どうなる？',
+  'story.a11yFx': 'ここに たのしいものが あるよ',
   'carmode.tap': 'タップ！',
   'carmode.done': 'おしまい！',
   'carmode.pack.boops': 'ブープをかぞえよう',
