@@ -25,6 +25,7 @@ import { SoundsGame } from './src/games/sounds/SoundsGame';
 import { RhymeGame } from './src/games/rhymegame/RhymeGame';
 import { CountGame } from './src/games/count/CountGame';
 import { CompareGame } from './src/games/compare/CompareGame';
+import { BalanceGame } from './src/games/balance/BalanceGame';
 import { SumsGame } from './src/games/sums/SumsGame';
 import { SpellGame } from './src/games/spell/SpellGame';
 import { ListenChooseGame } from './src/games/listenchoose/ListenChooseGame';
@@ -141,7 +142,7 @@ export default function App() {
   // effect races the child's mount-effect say() and silences round 1.
   useEffect(() => { track('view'); }, [route]);
   const parts = routeParts(route);
-  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff', 'cm-numdots', 'cm-numhan', 'cm-shapes', 'cm-animals', 'cm-picword', 'cm-picspeak', 'cm-colors', 'cm-letters', 'cm-mixed'];
+  const KNOWN = ['menu', 'spotit', 'diff', 'hidden', 'memory', 'shadow', 'oddone', 'rules', 'puzzle', 'sticker', 'story', 'letters', 'numbers', 'sounds', 'rhyme', 'spell', 'listenchoose', 'count', 'compare', 'balance', 'sums', 'bingo', 'musicbox', 'escape', 'carmode', 'highlow', 'bells', 'echobeat', 'steadybeat', 'fastslow', 'samediff', 'cm-numdots', 'cm-numhan', 'cm-shapes', 'cm-animals', 'cm-picword', 'cm-picspeak', 'cm-colors', 'cm-letters', 'cm-mixed'];
   // A stale/mistyped hash must never strand a kid on a blank page — nor
   // must a link to a game this deploy holds back.
   const knownScreen = KNOWN.includes(parts.screen) && (parts.screen !== 'escape' || ESCAPE_SHIPPED) ? parts.screen : 'menu';
@@ -165,6 +166,7 @@ export default function App() {
       {screen === 'listenchoose' && <ListenChooseGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'count' && <CountGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'compare' && <CompareGame onHome={goHome} difficulty={difficulty} lang={lang} />}
+      {screen === 'balance' && <BalanceGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'sums' && <SumsGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'menu' && (
         <Menu filter={filter} onPickFilter={pickFilter} onNavigate={navigate} twoPlayer={twoPlayer} onToggleTwoPlayer={setTwoPlayer} lang={lang} onCycleLang={cycleLangLocked} lockdown={lockdown} />
