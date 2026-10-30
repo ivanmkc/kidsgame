@@ -47,7 +47,9 @@ describe("SumsGame fast-tap", () => {
     // Clear initial round saySequence calls.
     vi.clearAllMocks();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const wrongButtons = buttons.filter((b) => {
       const tid = b.getAttribute("data-testid");
@@ -90,7 +92,9 @@ describe("SumsGame fast-tap", () => {
     );
     vi.clearAllMocks();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -127,7 +131,9 @@ describe("SumsGame fast-tap", () => {
     render(<SumsGame onHome={() => {}} difficulty="easy" lang="en" />);
     vi.clearAllMocks();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const correctBtn = buttons.find((b) =>
       b.getAttribute("data-testid")?.endsWith("-answer"),
@@ -153,7 +159,9 @@ describe("SumsGame fast-tap", () => {
       b.getAttribute("data-testid")?.endsWith("-answer"),
     );
     expect(nextCorrectBtn).toBeDefined();
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     fireEvent.click(nextCorrectBtn!);
     expect(sound.sfx.good).toHaveBeenCalledTimes(2);
     expect(sound.sayThen).toHaveBeenCalledTimes(2);
@@ -179,8 +187,10 @@ describe("SumsGame", () => {
     });
 
     const clickAnswer = (isWrong = false) => {
-      act(() => { vi.advanceTimersByTime(3000); });
-    const buttons = screen.getAllByRole("button");
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      const buttons = screen.getAllByRole("button");
       const targetButtons = buttons.filter((b) => {
         const tid = b.getAttribute("data-testid");
         if (!tid || !tid.startsWith("sums-choice-")) return false;
@@ -240,8 +250,10 @@ describe("SumsGame", () => {
     });
 
     const clickCorrectAnswer = () => {
-      act(() => { vi.advanceTimersByTime(3000); });
-    const buttons = screen.getAllByRole("button");
+      act(() => {
+        vi.advanceTimersByTime(3000);
+      });
+      const buttons = screen.getAllByRole("button");
       const target = buttons.find((b) => {
         const tid = b.getAttribute("data-testid");
         return tid && tid.startsWith("sums-choice-") && tid.endsWith("-answer");
@@ -436,8 +448,14 @@ describe("SumsGame", () => {
       a: 2,
       b: 2,
       sum: 4,
-      aPositions: [{ x: 10, y: 10 }, { x: 20, y: 20 }],
-      bPositions: [{ x: 30, y: 30 }, { x: 40, y: 40 }],
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+      ],
       choices: [3, 4, 5],
     });
 
@@ -469,6 +487,95 @@ describe("SumsGame", () => {
     });
     fireEvent.click(correctBtn);
     expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("provides visual confirmation with choiceCorrect and aria-selected on correct answer during praise delay", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    let praiseDoneCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      praiseDoneCb = cb;
+    });
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Wait for incoming critters animation to complete and unlock choices
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const buttons = screen.getAllByRole("button");
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+    const otherBtn = buttons.find(
+      (b) =>
+        b.getAttribute("data-testid")?.startsWith("sums-choice-") &&
+        !b.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+    expect(correctBtn).toBeDefined();
+    expect(otherBtn).toBeDefined();
+
+    // Before tapping, neither button is selected
+    expect(correctBtn.getAttribute("aria-selected")).toBe("false");
+    expect(otherBtn.getAttribute("aria-selected")).toBe("false");
+
+    // Tap wrong choice: wrong button highlights red, correct button is not highlighted
+    fireEvent.click(otherBtn);
+    expect(window.getComputedStyle(otherBtn).borderTopColor).toBe(
+      "rgba(232, 86, 79, 1.00)",
+    );
+    expect(window.getComputedStyle(correctBtn).borderTopColor).not.toBe(
+      "rgba(95, 191, 110, 1.00)",
+    );
+    expect(correctBtn.getAttribute("aria-selected")).toBe("false");
+
+    // Advance timer past wrong pick lockout
+    act(() => {
+      vi.advanceTimersByTime(450);
+    });
+
+    // Tap correct choice
+    fireEvent.click(correctBtn);
+
+    // During praise delay (before praise finishes):
+    // correct button has visual feedback
+    expect(correctBtn.getAttribute("aria-selected")).toBe("true");
+    expect(otherBtn.getAttribute("aria-selected")).toBe("false");
+    expect(window.getComputedStyle(correctBtn).borderTopColor).toBe(
+      "rgba(95, 191, 110, 1.00)",
+    );
+    expect(window.getComputedStyle(correctBtn).backgroundColor).toBe(
+      "rgba(95, 191, 110, 0.14)",
+    );
+    expect(window.getComputedStyle(correctBtn).backgroundColor).not.toBe(
+      window.getComputedStyle(otherBtn).backgroundColor,
+    );
+
+    // Praise finishes, round advances
+    act(() => {
+      praiseDoneCb?.();
+      vi.runAllTimers();
+    });
+
+    // In new round, choices reset
+    const newButtons = screen.getAllByRole("button");
+    const newChoices = newButtons.filter((b) =>
+      b.getAttribute("data-testid")?.startsWith("sums-choice-"),
+    );
+    for (const b of newChoices) {
+      expect(b.getAttribute("aria-selected")).toBe("false");
+    }
 
     unmount();
     vi.useRealTimers();
