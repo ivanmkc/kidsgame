@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Image, PanResponder, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { DRESSUP_ICONS, SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
+import { CHARACTER_ICONS, DRESSUP_ICONS, SCENE_IMAGES, SCENE_THUMBS, SPOTIT_ICONS } from '../../assets/images';
 import { GameShell } from '../../components/GameShell';
 import { ScenePicker } from '../../components/ScenePicker';
 import { SparkleBurst } from '../../components/Sparkles';
@@ -44,6 +44,7 @@ type MagicPhase = 'idle' | 'pending' | 'done';
 // picks up its own translation at render time.
 const TRAY_TABS: { id: string; emoji: string; nameKey: UIKey }[] = [
   { id: 'dressup', emoji: '👗', nameKey: 'sticker.tab.dressup' },
+  { id: 'characters', emoji: '👸', nameKey: 'sticker.tab.characters' },
   { id: 'animals', emoji: '🐾', nameKey: 'sticker.tab.animals' },
   { id: 'nature', emoji: '🌈', nameKey: 'sticker.tab.nature' },
   { id: 'food', emoji: '🍎', nameKey: 'sticker.tab.food' },
@@ -221,7 +222,12 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   }
 
   const { isLandscape, stageW, stageH } = stickerLayout(width, height);
-  const trayItems: string[] = tab === 'dressup' ? (manifest.dressup ?? []) : (CURRICULUM.categories[tab] ?? []);
+  const trayItems: string[] =
+    tab === 'dressup'
+      ? (manifest.dressup ?? [])
+      : tab === 'characters'
+        ? (manifest.characters ?? [])
+        : (CURRICULUM.categories[tab] ?? []);
 
   const addSticker = (icon: string, at?: { x: number; y: number }) => {
     sfx.tap();
@@ -367,7 +373,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
       </View>
       {ghost ? (
         <View pointerEvents="none" style={{ position: 'absolute', left: ghost.x - 36, top: ghost.y - 36, width: 72, height: 72, zIndex: 50 }}>
-          <Image source={DRESSUP_ICONS[ghost.icon] ?? SPOTIT_ICONS[ghost.icon]} style={{ width: '100%', height: '100%', opacity: 0.85 }} resizeMode="contain" />
+          <Image source={CHARACTER_ICONS?.[ghost.icon] ?? DRESSUP_ICONS[ghost.icon] ?? SPOTIT_ICONS[ghost.icon]} style={{ width: '100%', height: '100%', opacity: 0.85 }} resizeMode="contain" />
         </View>
       ) : null}
       <View style={{ display: 'none' }}>
@@ -477,7 +483,7 @@ function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
         accessibilityRole="button"
         style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}
       >
-        <Image source={DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
+        <Image source={CHARACTER_ICONS?.[icon] ?? DRESSUP_ICONS[icon] ?? SPOTIT_ICONS[icon]} style={{ width: '80%', height: '80%' }} resizeMode="contain" />
       </Pressable>
     </View>
   );
@@ -577,7 +583,7 @@ const DraggableSticker = React.memo(function DraggableSticker({
       }}
     >
       <Animated.Image
-        source={DRESSUP_ICONS[placed.icon] ?? SPOTIT_ICONS[placed.icon]}
+        source={CHARACTER_ICONS?.[placed.icon] ?? DRESSUP_ICONS[placed.icon] ?? SPOTIT_ICONS[placed.icon]}
         style={{ width: '100%', height: '100%', opacity: pulse }}
         resizeMode="contain"
       />

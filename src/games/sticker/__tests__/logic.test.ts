@@ -144,6 +144,36 @@ describe('stickerLabel', () => {
     }
   });
 
+  it('localizes character stickers across all supported languages', () => {
+    expect(stickerLabel('princess_pink', 'en')).toBe('pink princess');
+    expect(stickerLabel('princess_pink', 'ja')).toBe('ピンクのおひめさま');
+    expect(stickerLabel('princess_pink', 'cmn')).toBe('粉色公主');
+    expect(stickerLabel('princess_pink', 'yue')).toBe('粉紅色公主');
+
+    expect(stickerLabel('knight', 'en')).toBe('knight');
+    expect(stickerLabel('knight', 'ja')).toBe('きし');
+    expect(stickerLabel('knight', 'cmn')).toBe('骑士');
+    expect(stickerLabel('knight', 'yue')).toBe('騎士');
+
+    expect(stickerLabel('astronaut', 'en')).toBe('astronaut');
+    expect(stickerLabel('astronaut', 'ja')).toBe('うちゅうひこうし');
+    expect(stickerLabel('astronaut', 'cmn')).toBe('宇航员');
+    expect(stickerLabel('astronaut', 'yue')).toBe('太空人');
+  });
+
+  it('localizes every manifest character icon across all supported languages', () => {
+    const langs: Lang[] = ['en', 'ja', 'cmn', 'yue'];
+    expect(manifest.characters).toBeDefined();
+    expect(manifest.characters!.length).toBe(22);
+    for (const icon of manifest.characters!) {
+      for (const lang of langs) {
+        const label = stickerLabel(icon, lang);
+        expect(label).toBeTruthy();
+        expect(label).not.toContain('_');
+      }
+    }
+  });
+
   it('fails loudly on unknown sticker icon', () => {
     expect(() => stickerLabel('unknown_custom_item', 'en')).toThrow(
       'Unknown sticker icon: unknown_custom_item',

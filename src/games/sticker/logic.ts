@@ -75,10 +75,35 @@ const DRESSUP_KEYS: Record<string, UIKey> = {
   rain_boots: 'sticker.item.rain_boots',
 };
 
+const CHARACTER_KEYS: Record<string, UIKey> = {
+  princess_pink: 'sticker.character.princess_pink',
+  princess_blue: 'sticker.character.princess_blue',
+  prince: 'sticker.character.prince',
+  knight: 'sticker.character.knight',
+  fairy: 'sticker.character.fairy',
+  mermaid: 'sticker.character.mermaid',
+  wizard: 'sticker.character.wizard',
+  ballerina: 'sticker.character.ballerina',
+  superhero_kid: 'sticker.character.superhero_kid',
+  dragon: 'sticker.character.dragon',
+  mounted_knight: 'sticker.character.mounted_knight',
+  princess_rider: 'sticker.character.princess_rider',
+  queen: 'sticker.character.queen',
+  police_officer: 'sticker.character.police_officer',
+  firefighter: 'sticker.character.firefighter',
+  doctor: 'sticker.character.doctor',
+  astronaut: 'sticker.character.astronaut',
+  chef: 'sticker.character.chef',
+  pirate: 'sticker.character.pirate',
+  cowgirl: 'sticker.character.cowgirl',
+  robot: 'sticker.character.robot',
+  vet: 'sticker.character.vet',
+};
+
 /**
  * Returns the localized child-friendly label for a sticker icon.
  * For icons in WORDS (animals, nature, food, things), looks up the translated word.
- * For dressup items, looks up the localized item name in i18n dictionaries.
+ * For dressup items and characters, looks up the localized item name in i18n dictionaries.
  * Fails loudly on unknown icons to prevent untranslated labels from shipping.
  */
 export function stickerLabel(icon: string, lang: Lang = 'en'): string {
@@ -86,7 +111,7 @@ export function stickerLabel(icon: string, lang: Lang = 'en'): string {
   if (entry) {
     return wordFor(entry, lang).text;
   }
-  const key = DRESSUP_KEYS[icon];
+  const key = DRESSUP_KEYS[icon] ?? CHARACTER_KEYS[icon];
   if (key) {
     return t(lang, key);
   }
