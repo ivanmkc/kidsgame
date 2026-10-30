@@ -60,6 +60,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   const [correctIdx, setCorrectIdx] = useState<number | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
+  const [prevDifficulty, setPrevDifficulty] = useState(difficulty);
+  if (difficulty !== prevDifficulty) {
+    setPrevDifficulty(difficulty);
+    setRoundIdx(0);
+    setTimerKey((k) => k + 1);
+  }
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(
@@ -98,7 +104,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setMisses(0);
     setCorrectIdx(null);
     setIsFinishing(false);
-  }, [lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [difficulty, lang, tier, tileCount]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(
     () => () => {

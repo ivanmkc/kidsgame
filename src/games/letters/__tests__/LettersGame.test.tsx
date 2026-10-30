@@ -615,6 +615,70 @@ describe("LettersGame", () => {
     }
   });
 
+  it("resets round count and timer on difficulty change without jumping to win", () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey, lang) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey, lang);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      const { rerender } = render(
+        <LettersGame onHome={() => {}} difficulty="hard" lang="en" />,
+      );
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      // Advance timer by 5 seconds on Hard
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(screen.getByTestId("letters-timer").textContent).toBe("0:05");
+
+      // Complete 9 rounds on Hard (out of 12)
+      for (let r = 0; r < 9; r++) {
+        const round = generatedRounds[r];
+        const correctTile = round.tiles[round.answerIdx];
+        act(() => {
+          fireEvent.click(screen.getByLabelText(correctTile.label));
+        });
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      expect(screen.getByTestId("letters-score").textContent).toBe("👂 9/12");
+      expect(sfx.win).not.toHaveBeenCalled();
+
+      // Switch difficulty to Easy (which requires only 8 rounds to win)
+      act(() => {
+        rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      });
+
+      // Must not trigger instant win
+      expect(sfx.win).not.toHaveBeenCalled();
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+      // Round progress resets to 0/8
+      expect(screen.getByTestId("letters-score").textContent).toBe("🔤 0/8");
+
+      // Switch to Medium (which has timer) to verify timer reset
+      act(() => {
+        rerender(<LettersGame onHome={() => {}} difficulty="medium" lang="en" />);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toBe("🔤 0/10");
+      expect(screen.getByTestId("letters-timer").textContent).toBe("0:00");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("speaks localized carrier phrase when playing alphabet hunt in Mandarin", () => {
     render(<LettersGame onHome={() => {}} difficulty="easy" lang="cmn" />);
 
