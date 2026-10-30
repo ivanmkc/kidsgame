@@ -72,6 +72,7 @@ This curriculum organizes the games by learning strands and levels for ages 3-7,
 
 - `samediff` - Executive Function (Level 1)
 - `shadow` - Executive Function (Level 1)
+- `sticker` - Executive Function (Level 1)
 - `diff` - Executive Function (Level 1)
 - `hidden` - Executive Function (Level 1)
 - `oddone` - Executive Function (Level 1)
