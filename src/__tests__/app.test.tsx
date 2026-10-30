@@ -22,10 +22,13 @@ vi.mock("../sound", async (importOriginal) => {
   };
 });
 
-vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
-  ok: true,
-  json: () => Promise.resolve({}),
-}));
+vi.stubGlobal(
+  "fetch",
+  vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({}),
+  }),
+);
 
 test("MenuCard shows beta badge only for beta cards", () => {
   const betaCard: CardDef = {
@@ -91,6 +94,7 @@ test("MenuCard shows beta badge only for beta cards", () => {
 afterEach(() => {
   cleanup();
   window.location.hash = "";
+  window.localStorage.clear();
 });
 
 test.each([
@@ -114,3 +118,10 @@ test.each([
   15000,
 );
 
+test("App passes difficulty filter to CarModeGame", async () => {
+  window.localStorage.setItem("kgb.filter.v1", "easy");
+  window.location.hash = "#/carmode";
+  const { default: App } = await import("../../App");
+  render(<App />);
+  expect(screen.getByTestId("carmode-score").textContent).toContain("1/3");
+}, 15000);
