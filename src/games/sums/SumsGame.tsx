@@ -42,7 +42,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongPickRef = useRef<number | null>(null);
-  const lockedRef = useRef(false);
+  const lockedRef = useRef(true);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const [won, setWon] = useState(false);
@@ -100,11 +100,17 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     clearBoingTimers();
     if (won) return;
+    lockedRef.current = true;
     for (let i = 0; i < round.b; i++) {
       boingTimersRef.current.push(
         setTimeout(() => sfx.boing(0.35), 400 + i * 250),
       );
     }
+    boingTimersRef.current.push(
+      setTimeout(() => {
+        lockedRef.current = false;
+      }, 400 + round.b * 250 + 420)
+    );
     return clearBoingTimers;
   }, [round, won]);
 
