@@ -66,7 +66,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   const [magicBackdrop, setMagicBackdrop] = useState<string | null>(null);
   const [magicPhase, setMagicPhase] = useState<Record<number, MagicPhase>>({});
   const [pendingKey, setPendingKey] = useState<number | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<UIKey | null>(null);
   const [magicBurst, setMagicBurst] = useState(0);
   const magicCache = useRef<Map<string, string>>(new Map());
   const magicAborts = useRef<Map<number, AbortController>>(new Map());
@@ -133,7 +133,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
     setPlaced((p) => p.map((s) => (s.key === key ? { ...s, size, rotation } : s)));
   }, []);
 
-  const flashToast = useCallback((msg: string) => {
+  const flashToast = useCallback((msg: UIKey) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(msg);
     toastTimer.current = setTimeout(() => {
@@ -179,7 +179,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         if (!res.ok || !res.image_b64) {
           setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
           setPendingKey((k) => (k === sticker.key ? null : k));
-          flashToast(t(lang, 'sticker.magicFizzled'));
+          flashToast('sticker.magicFizzled');
           return;
         }
         const dataUrl = `data:image/png;base64,${res.image_b64}`;
@@ -193,9 +193,9 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
         if (cancelled) return;
         setMagicPhase((m) => { const { [sticker.key]: _drop, ...rest } = m; return rest; });
         setPendingKey((k) => (k === sticker.key ? null : k));
-        flashToast(t(lang, 'sticker.magicFizzled'));
+        flashToast('sticker.magicFizzled');
       });
-  }, [picked, publicImageUrl, pendingKey, magicBackdrop, flashToast, lang]);
+  }, [picked, publicImageUrl, pendingKey, magicBackdrop, flashToast]);
 
   const { width, height } = useWindowDimensions();
   const stageRef = useRef<View | null>(null);
@@ -314,7 +314,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
           ) : null}
           {toast ? (
             <View pointerEvents="none" style={styles.toast} testID="magic-toast">
-              <Text style={styles.toastText}>{toast}</Text>
+              <Text style={styles.toastText}>{t(lang, toast)}</Text>
             </View>
           ) : null}
         </View>
