@@ -13,7 +13,7 @@ import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import { manifest } from "../../../manifest";
 import * as sound from "../../../sound";
-import { WORDS } from "../../../curriculum/content";
+import { WORDS, wordFor } from "../../../curriculum/content";
 import { SoundsGame } from "../SoundsGame";
 import * as logic from "../logic";
 
@@ -82,11 +82,17 @@ describe("SoundsGame language switch safety", () => {
     // Japanese prompt is spoken via saySequence
     expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
 
-    // Board tiles remain identical across the language switch
+    // Board tiles update to localized Japanese labels
     const currentTiles = screen
       .getAllByTestId(/^sounds-tile-/)
       .map((t) => t.getAttribute("aria-label"));
-    expect(currentTiles).toEqual(initialTiles);
+    expect(currentTiles).toHaveLength(initialTiles.length);
+    currentTiles.forEach((label, i) => {
+      const enLabel = initialTiles[i];
+      const entry = WORDS.find((w) => w.en === enLabel);
+      expect(entry).toBeDefined();
+      expect(label).toBe(entry!.ja);
+    });
 
     // Score remains at 0/8
     expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
@@ -161,10 +167,10 @@ describe("SoundsGame language switch safety", () => {
       promptEl.getAttribute("data-testid")!.replace("sounds-prompt-", ""),
     );
     const pool = WORDS.filter((w) => manifest.spotit.icons.includes(w.icon));
-    const targetIcon = pool[targetIdx].icon;
+    const targetWord = wordFor(pool[targetIdx], "ja").text;
     const incorrectTile = screen
       .getAllByTestId(/^sounds-tile-/)
-      .find((t) => t.getAttribute("aria-label") !== targetIcon)!;
+      .find((t) => t.getAttribute("aria-label") !== targetWord)!;
     fireEvent.click(incorrectTile);
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
@@ -591,5 +597,32 @@ describe("SoundsGame visual feedback", () => {
 
     // Sparkles should be cleared
     expect(screen.queryAllByText(/✨|⭐/).length).toBe(0);
+  });
+});
+
+describe("SoundsGame tile accessibility", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
+  it("exposes localized names to screen readers on tiles across languages", () => {
+    for (const lang of ["en", "ja", "cmn", "yue"] as const) {
+      const { unmount } = render(
+        <SoundsGame onHome={() => {}} difficulty="easy" lang={lang} />,
+      );
+      const tiles = screen.getAllByTestId(/^sounds-tile-/);
+      expect(tiles.length).toBeGreaterThan(0);
+      for (const tile of tiles) {
+        const label = tile.getAttribute("aria-label");
+        expect(label).toBeTruthy();
+        const entry = WORDS.find((w) => wordFor(w, lang).text === label);
+        expect(entry).toBeDefined();
+        if (lang !== "en") {
+          // Non-English mode must not expose raw developer icon keys
+          expect(label).not.toBe(entry!.icon);
+        }
+      }
+      unmount();
+    }
   });
 });

@@ -202,7 +202,7 @@ export function makeSoundsRound(
   const tiles: SoundsTile[] = combined.map((w) => ({
     key: w.icon,
     icon: w.icon,
-    wordIdx: pool.indexOf(w),
+    wordIdx: WORDS.indexOf(w),
     isAnswer: w.icon === target.icon,
   }));
 
