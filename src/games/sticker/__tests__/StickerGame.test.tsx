@@ -202,6 +202,30 @@ describe('StickerGame', () => {
     expect(htmlYue).toContain('揀個地方裝飾');
   });
 
+  it('passes localized backdrop options to ScenePicker across non-English languages', () => {
+    const nonEnLangs: Lang[] = ['ja', 'cmn', 'yue'];
+    for (const lang of nonEnLangs) {
+      renderToString(
+        <StickerGame onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang} />,
+      );
+      expect(capturedPickerProps).not.toBeNull();
+      expect(capturedPickerProps?.lang).toBe(lang);
+      const expectedOptions = allSceneOptions('all', lang);
+      expect(capturedPickerProps?.options).toEqual(expectedOptions);
+
+      const options = capturedPickerProps?.options as { id: string; name: string }[];
+      const farmOption = options?.find((o) => o.id === 'd-farm');
+      expect(farmOption).toBeDefined();
+      if (lang === 'ja') {
+        expect(farmOption?.name).toBe('ぼくじょう');
+      } else if (lang === 'cmn') {
+        expect(farmOption?.name).toBe('农场');
+      } else if (lang === 'yue') {
+        expect(farmOption?.name).toBe('農場');
+      }
+    }
+  });
+
   it('renders game canvas with stage, tabs, tray and clear button when sceneId is valid', () => {
     const onBackToPickerSpy = vi.fn();
     const sfxFlipSpy = vi.spyOn(sfx, 'flip').mockReturnValue();
@@ -265,6 +289,20 @@ describe('StickerGame', () => {
       expect(html).toContain('data-testid="sticker-stage"');
       expect(html).toContain(b.name);
       expect(capturedGameShellProps?.subtitle).toBe(`${b.name} — decorate it your way!`);
+    }
+  });
+
+  it('interpolates localized scene name into header subtitle across languages', () => {
+    const cases: { lang: Lang; expectedSubtitle: string }[] = [
+      { lang: 'ja', expectedSubtitle: 'ぼくじょう — きみの すきに かざろう！' },
+      { lang: 'cmn', expectedSubtitle: '农场 — 随你怎么装饰！' },
+      { lang: 'yue', expectedSubtitle: '農場 — 隨你點樣裝飾！' },
+    ];
+    for (const { lang, expectedSubtitle } of cases) {
+      renderToString(
+        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang} />,
+      );
+      expect(capturedGameShellProps?.subtitle).toBe(expectedSubtitle);
     }
   });
 
@@ -1376,8 +1414,9 @@ describe('StickerGame', () => {
 
     const { unmount } = render(<Harness />);
 
-    // Initial welcoming instruction spoken in English
+    // Initial welcoming instruction spoken in English and header subtitle has English scene name
     expect(spokenUtterances).toContain(t('en', 'card.sticker.blurb'));
+    expect(capturedGameShellProps?.subtitle).toBe('Farm — decorate it your way!');
 
     // Place a sticker onto the stage
     const trayBtn = screen
@@ -1408,6 +1447,9 @@ describe('StickerGame', () => {
     // Toast text dynamically updates to Japanese without holding stale English state
     expect(await screen.findByText('まほうに しっぱいしちゃった — もういちど！')).toBeDefined();
     expect(screen.queryByText('The magic fizzled — try again!')).toBeNull();
+
+    // Header subtitle updates dynamically to Japanese with localized scene name
+    expect(capturedGameShellProps?.subtitle).toBe('ぼくじょう — きみの すきに かざろう！');
 
     // useSay speaks the new Japanese prompt and no old English narration plays
     expect(spokenUtterances).toContain(t('ja', 'card.sticker.blurb'));
