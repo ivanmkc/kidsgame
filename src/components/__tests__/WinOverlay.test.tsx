@@ -5,12 +5,36 @@ import {
   cleanup,
   fireEvent,
   render,
+  renderHook,
   screen,
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { sfx } from "../../sound";
+import { routeParts, useRoute } from "../../nav";
+import { useLockdown } from "../../lockdown";
 import { WinOverlay } from "../WinOverlay";
+
+function RouteHost() {
+  const [route] = useRoute();
+  const { screen: currentScreen } = routeParts(route);
+  return (
+    <div>
+      <div data-testid="active-screen">{currentScreen}</div>
+      {currentScreen === "letters" && (
+        <WinOverlay
+          visible={true}
+          message="Great job!"
+          onNext={vi.fn()}
+          onHome={vi.fn()}
+        />
+      )}
+      {currentScreen === "spell" && (
+        <div data-testid="spell-screen">Word Builder Screen</div>
+      )}
+    </div>
+  );
+}
 
 describe("WinOverlay", () => {
   beforeEach(() => {
@@ -21,6 +45,8 @@ describe("WinOverlay", () => {
     cleanup();
     vi.useRealTimers();
     vi.restoreAllMocks();
+    window.location.hash = "";
+    window.localStorage.clear();
   });
 
   it("allows message to wrap up to 3 lines without capping at 2 lines", () => {
@@ -101,5 +127,110 @@ describe("WinOverlay", () => {
     fireEvent.click(homeBtn);
     expect(tapSpy).toHaveBeenCalledTimes(2);
     expect(onHome).toHaveBeenCalledTimes(1);
+  });
+
+  it("renders next-game button when window.location.hash matches a mapped path key", () => {
+    window.location.hash = "#/letters";
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    const nextGameBtn = screen.getByTestId("next-game");
+    expect(nextGameBtn).toBeTruthy();
+    expect(nextGameBtn.textContent).toContain("▶️ Word Builder");
+
+    // Clicking before arming does not navigate
+    fireEvent.click(nextGameBtn);
+    expect(window.location.hash).toBe("#/letters");
+
+    // Advance past 600ms arming window
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    fireEvent.click(nextGameBtn);
+    expect(window.location.hash).toBe("#/spell");
+  });
+
+  it("navigates and switches screen in host when next-game button is tapped", () => {
+    window.location.hash = "#/letters";
+    render(<RouteHost />);
+
+    expect(screen.getByTestId("active-screen").textContent).toBe("letters");
+    const nextGameBtn = screen.getByTestId("next-game");
+    expect(nextGameBtn).toBeTruthy();
+    expect(nextGameBtn.textContent).toContain("▶️ Word Builder");
+
+    // Advance past 600ms arming window
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    fireEvent.click(nextGameBtn);
+
+    // Host useRoute updates and renders the next game screen
+    expect(screen.getByTestId("active-screen").textContent).toBe("spell");
+    expect(screen.getByTestId("spell-screen")).toBeTruthy();
+    expect(screen.queryByTestId("next-game")).toBeNull();
+    expect(window.location.hash).toBe("#/spell");
+  });
+
+  it("suppresses next-game button when target game is hidden in parental lockdown storage", () => {
+    const { result } = renderHook(() => useLockdown());
+    act(() => {
+      result.current.setHiddenGames(["spell"]);
+    });
+
+    window.location.hash = "#/letters";
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId("next-game")).toBeNull();
+
+    act(() => {
+      result.current.setHiddenGames([]);
+    });
+  });
+
+  it("does not render next-game button when route has no curriculum progression", () => {
+    window.location.hash = "#/sums";
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId("next-game")).toBeNull();
+  });
+
+  it("localizes next-game button title based on lang prop", () => {
+    window.location.hash = "#/letters";
+    render(
+      <WinOverlay
+        visible={true}
+        message="よくできました！"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+        lang="ja"
+      />,
+    );
+
+    const nextGameBtn = screen.getByTestId("next-game");
+    expect(nextGameBtn).toBeTruthy();
+    expect(nextGameBtn.textContent).toContain("▶️ ことばづくり");
   });
 });

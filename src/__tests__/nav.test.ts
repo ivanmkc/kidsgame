@@ -229,4 +229,20 @@ describe("useRoute", () => {
     expect(stopNarrationSpy).not.toHaveBeenCalled();
     expect(result.current[0]).toBe("players");
   });
+
+  it("synchronizes route across multiple useRoute instances when navigate is called", async () => {
+    const { useRoute } = await import("../nav");
+    const { result: instance1 } = renderHookRTL(() => useRoute());
+    const { result: instance2 } = renderHookRTL(() => useRoute());
+
+    expect(instance1.current[0]).toBe("players");
+    expect(instance2.current[0]).toBe("players");
+
+    act(() => {
+      instance2.current[1]("diff");
+    });
+
+    expect(instance1.current[0]).toBe("diff");
+    expect(instance2.current[0]).toBe("diff");
+  });
 });
