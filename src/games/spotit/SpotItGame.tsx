@@ -201,6 +201,20 @@ function SpotItSolo({
   // Two cards side by side in landscape, stacked in portrait — sized to fit.
   const cardSize = computeSoloCardSize(width, height);
 
+  const topCard = (
+    <SpotCard
+      card={round.top}
+      slots={slots.top}
+      size={cardSize}
+      onTap={onTap}
+      wrongFlash={wrongFlash}
+      tint={colors.teal}
+      testIDPrefix="top"
+      hintSymbol={showHint ? round.answer : null}
+      lang={lang}
+    />
+  );
+
   return (
     <GameShell
       title={t(lang, "shell.spotit.title")}
@@ -220,32 +234,12 @@ function SpotItSolo({
             testID="spotit-timer"
           >
             <DealIn key={`t${roundKey}`} from={-1}>
-              <SpotCard
-                card={round.top}
-                slots={slots.top}
-                size={cardSize}
-                onTap={onTap}
-                wrongFlash={wrongFlash}
-                tint={colors.teal}
-                testIDPrefix="top"
-                hintSymbol={showHint ? round.answer : null}
-                lang={lang}
-              />
+              {topCard}
             </DealIn>
           </TimerRing>
         ) : (
           <DealIn key={`t${roundKey}`} from={-1}>
-            <SpotCard
-              card={round.top}
-              slots={slots.top}
-              size={cardSize}
-              onTap={onTap}
-              wrongFlash={wrongFlash}
-              tint={colors.teal}
-              testIDPrefix="top"
-              hintSymbol={showHint ? round.answer : null}
-              lang={lang}
-            />
+            {topCard}
           </DealIn>
         )}
         <Text style={styles.vs}>👀</Text>
