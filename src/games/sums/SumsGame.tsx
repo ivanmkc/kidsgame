@@ -42,6 +42,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongPickRef = useRef<number | null>(null);
+  const [correctPick, setCorrectPick] = useState<number | null>(null);
   const lockedRef = useRef(true);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
@@ -86,6 +87,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     }
     clearWrongTimer();
     lockedRef.current = false;
+    setCorrectPick(null);
     saySequence([
       numberWord(lang, round.a).t,
       t(lang, "sums.plus"),
@@ -107,9 +109,12 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       );
     }
     boingTimersRef.current.push(
-      setTimeout(() => {
-        lockedRef.current = false;
-      }, 400 + round.b * 250 + 420)
+      setTimeout(
+        () => {
+          lockedRef.current = false;
+        },
+        400 + round.b * 250 + 420,
+      ),
     );
     return clearBoingTimers;
   }, [round, won]);
@@ -118,6 +123,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     if (won || lockedRef.current || wrongPickRef.current === v) return;
     if (v === round.sum) {
       lockedRef.current = true;
+      setCorrectPick(v);
       clearWrongTimer();
       clearBoingTimers();
       if (wrongVoiceTimer.current) {
@@ -129,6 +135,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       setScore(nextScore);
       sayThen([numberWord(lang, round.sum).t, t(lang, "sums.praise")], () => {
         lockedRef.current = false;
+        setCorrectPick(null);
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
           clearWrongTimer();
@@ -165,6 +172,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeSumsRound(rngRef.current, difficulty));
     setScore(0);
+    setCorrectPick(null);
     lockedRef.current = false;
     setWon(false);
   };
@@ -249,11 +257,13 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
                 testID={`sums-choice-${c}${c === round.sum ? "-answer" : ""}`}
                 accessibilityRole="button"
                 accessibilityLabel={String(c)}
+                aria-selected={correctPick === c}
                 style={({ pressed }) => [
                   styles.choice,
                   isLandscape && styles.choiceLandscape,
                   shadows.soft,
                   wrongPick === c && styles.choiceWrong,
+                  correctPick === c && styles.choiceCorrect,
                   pressed && styles.pressed,
                 ]}
               >
@@ -413,6 +423,10 @@ const styles = StyleSheet.create({
   choiceWrong: {
     borderColor: colors.red,
     backgroundColor: "rgba(232,86,79,0.14)",
+  },
+  choiceCorrect: {
+    borderColor: colors.green,
+    backgroundColor: "rgba(95,191,110,0.14)",
   },
   choiceText: { fontFamily: fonts.display, fontSize: 34, color: colors.ink },
   pressed: { transform: [{ scale: 0.94 }] },
