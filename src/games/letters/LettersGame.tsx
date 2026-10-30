@@ -171,12 +171,12 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       if (next >= roundsToWin) {
         setIsFinishing(true);
       }
+      setRoundIdx(next);
       successTimerRef.current = setTimeout(() => {
         lockedRef.current = false;
         successTimerRef.current = null;
         setCorrectIdx(null);
         setIsFinishing(false);
-        setRoundIdx(next);
         if (next < roundsToWin) {
           setRound(
             makeLetterRound(
@@ -360,7 +360,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
             >
               {round.tiles.map((t, i) => (
                 <Pressable
-                  key={`${roundIdx}-${i}-${t.key}`}
+                  key={`${round.targetKey}-${i}-${t.key}`}
                   onPress={() => onTile(i)}
                   testID={`letters-tile-${i}`}
                   accessibilityLabel={t.label}
