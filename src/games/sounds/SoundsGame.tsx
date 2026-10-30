@@ -41,6 +41,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const { rounds: roundsToWin, tiles: tileCount } = soundSettings;
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
+  const wrongTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [roundIdx, setRoundIdx] = useState(0);
   const [isFinishing, setIsFinishing] = useState(false);
   const [round, setRound] = useState<SoundsRound>(() =>
@@ -58,7 +59,13 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
 
   const prompts = resolveSoundsPrompts(round.target, lang);
 
-  useEffect(() => stopNarration, []);
+  useEffect(
+    () => () => {
+      stopNarration();
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+    },
+    [],
+  );
   useEffect(() => {
     if (!won) saySequence(prompts.promptLines);
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -94,7 +101,11 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
     } else {
       sfx.wrong();
       setWrongIdx(i);
-      setTimeout(() => setWrongIdx((w) => (w === i ? null : w)), 450);
+      if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
+      wrongTimerRef.current = setTimeout(() => {
+        wrongTimerRef.current = null;
+        setWrongIdx((w) => (w === i ? null : w));
+      }, 450);
       saySequence(prompts.promptLines);
     }
   };

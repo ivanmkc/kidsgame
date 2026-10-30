@@ -438,6 +438,43 @@ describe("SoundsGame narration cleanup", () => {
     unmount();
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("clears wrong timer on unmount", () => {
+    vi.useFakeTimers();
+    try {
+      const clearTimeoutSpy = vi.spyOn(global, "clearTimeout");
+      const setTimeoutSpy = vi.spyOn(global, "setTimeout");
+      vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+      vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+
+      let roundInfo: logic.SoundsRound | undefined;
+      const origMakeSoundsRound = logic.makeSoundsRound;
+      vi.spyOn(logic, "makeSoundsRound").mockImplementation((...args) => {
+        const res = origMakeSoundsRound(...args);
+        roundInfo = res;
+        return res;
+      });
+
+      const { unmount } = render(
+        <SoundsGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+
+      // Tap an incorrect tile to trigger wrong timer (450ms)
+      const wrongIdx = (roundInfo!.answerIdx + 1) % roundInfo!.tiles.length;
+      fireEvent.click(screen.getByTestId(`sounds-tile-${wrongIdx}`));
+
+      const callIdx = setTimeoutSpy.mock.calls.findLastIndex(
+        (args) => args[1] === 450,
+      );
+      expect(callIdx).toBeGreaterThanOrEqual(0);
+      const timerId = setTimeoutSpy.mock.results[callIdx].value;
+
+      unmount();
+      expect(clearTimeoutSpy).toHaveBeenCalledWith(timerId);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe("SoundsGame timer behavior", () => {
