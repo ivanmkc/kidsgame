@@ -17,6 +17,7 @@ import {
   duelCountdownPrompt,
   hintAfterMs,
   leaderDealDelayMs,
+  computeDuelCardSize,
 } from './logic';
 
 interface Props {
@@ -174,10 +175,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
-  const availH = height - 84;
-  const cardSize = isLandscape
-    ? Math.min(availH - 90, (width - 2 * 12) / 2 / 2 - 20, 320)
-    : Math.min((availH - 24) / 2 - 52, (width - 60) / 2, 320);
+  const cardSize = computeDuelCardSize(width, height);
 
   const winnerIx: PlayerIx = scores.a > scores.b ? 0 : 1;
   const winner = MP_PLAYERS[winnerIx];
