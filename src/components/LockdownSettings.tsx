@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -6,12 +6,12 @@ import {
   Switch,
   Text,
   View,
-} from 'react-native';
-import { Lang, LANGS } from '../lang';
-import { colors, fonts, shadows } from '../theme';
-import { LangContext } from './GameShell';
-import { buildGameSections, countHidden } from '../menuCards';
-import { t } from '../i18n';
+} from "react-native";
+import { Lang, LANGS } from "../lang";
+import { colors, fonts, shadows } from "../theme";
+import { LangContext } from "./GameShell";
+import { buildGameSections, countHidden } from "../menuCards";
+import { t } from "../i18n";
 
 interface Props {
   hiddenGames: string[];
@@ -29,7 +29,7 @@ export function LockdownSettings({
   onDone,
 }: Props) {
   const langCtx = useContext(LangContext);
-  const lang = langCtx?.lang ?? 'en';
+  const lang = langCtx?.lang ?? "en";
   const sections = buildGameSections(lang);
   const [langWarning, setLangWarning] = useState(false);
 
@@ -46,56 +46,79 @@ export function LockdownSettings({
   return (
     <View style={styles.backdrop}>
       <View style={styles.panel}>
-        <Text style={styles.title}>{t(lang, 'lockdown.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t(lang, 'lockdown.subtitle')}
-        </Text>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.title}>{t(lang, "lockdown.title")}</Text>
+        <Text style={styles.subtitle}>{t(lang, "lockdown.subtitle")}</Text>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        >
           {sections.map((section) => (
             <View key={section.title} style={styles.section}>
               <Text style={styles.sectionTitle}>{section.title}</Text>
               {section.games.map((game) => {
                 const hidden = hiddenGames.includes(game.id);
                 return (
-                  <View key={game.id} style={styles.row}>
-                    <Text style={[styles.rowLabel, hidden && styles.rowLabelOff]}>
+                  <Pressable
+                    key={game.id}
+                    style={styles.row}
+                    onPress={() => onToggleGame(game.id)}
+                    accessibilityRole="switch"
+                    accessibilityState={{ checked: !hidden }}
+                    accessibilityLabel={game.label}
+                    testID={`lock-row-game-${game.id}`}
+                  >
+                    <Text
+                      style={[styles.rowLabel, hidden && styles.rowLabelOff]}
+                    >
                       {game.label}
                     </Text>
-                    <Switch
-                      value={!hidden}
-                      onValueChange={() => onToggleGame(game.id)}
-                      trackColor={{ false: '#ddd', true: colors.teal }}
-                      thumbColor={colors.card}
-                      testID={`lock-game-${game.id}`}
-                    />
-                  </View>
+                    <View pointerEvents="none">
+                      <Switch
+                        value={!hidden}
+                        trackColor={{ false: "#ddd", true: colors.teal }}
+                        thumbColor={colors.card}
+                        testID={`lock-game-${game.id}`}
+                        aria-hidden={true}
+                      />
+                    </View>
+                  </Pressable>
                 );
               })}
             </View>
           ))}
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t(lang, 'lockdown.languages')}</Text>
+            <Text style={styles.sectionTitle}>
+              {t(lang, "lockdown.languages")}
+            </Text>
             {langWarning && (
-              <Text style={styles.warning}>
-                {t(lang, 'lockdown.warning')}
-              </Text>
+              <Text style={styles.warning}>{t(lang, "lockdown.warning")}</Text>
             )}
             {LANGS.map((lang) => {
               const hidden = hiddenLangs.includes(lang.id);
               return (
-                <View key={lang.id} style={styles.row}>
+                <Pressable
+                  key={lang.id}
+                  style={styles.row}
+                  onPress={() => handleLangToggle(lang.id)}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: !hidden }}
+                  accessibilityLabel={`${lang.emoji} ${lang.label}`}
+                  testID={`lock-row-lang-${lang.id}`}
+                >
                   <Text style={[styles.rowLabel, hidden && styles.rowLabelOff]}>
                     {lang.emoji} {lang.label}
                   </Text>
-                  <Switch
-                    value={!hidden}
-                    onValueChange={() => handleLangToggle(lang.id)}
-                    trackColor={{ false: '#ddd', true: colors.teal }}
-                    thumbColor={colors.card}
-                    testID={`lock-lang-${lang.id}`}
-                  />
-                </View>
+                  <View pointerEvents="none">
+                    <Switch
+                      value={!hidden}
+                      trackColor={{ false: "#ddd", true: colors.teal }}
+                      thumbColor={colors.card}
+                      testID={`lock-lang-${lang.id}`}
+                      aria-hidden={true}
+                    />
+                  </View>
+                </Pressable>
               );
             })}
           </View>
@@ -108,8 +131,8 @@ export function LockdownSettings({
         >
           <Text style={styles.doneText}>
             {totalHidden > 0
-              ? t(lang, 'lockdown.doneHidden', { n: totalHidden })
-              : t(lang, 'lockdown.done')}
+              ? t(lang, "lockdown.doneHidden", { n: totalHidden })
+              : t(lang, "lockdown.done")}
           </Text>
         </Pressable>
       </View>
@@ -119,20 +142,24 @@ export function LockdownSettings({
 
 const styles = StyleSheet.create({
   backdrop: {
-    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.55)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 100,
   },
   panel: {
     backgroundColor: colors.paper,
     borderRadius: 24,
     padding: 24,
-    width: '92%',
+    width: "92%",
     maxWidth: 420,
-    maxHeight: '85%',
-    alignItems: 'center',
+    maxHeight: "85%",
+    alignItems: "center",
   },
   title: {
     fontFamily: fonts.display,
@@ -144,11 +171,11 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyReg,
     fontSize: 14,
     color: colors.inkSoft,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 12,
   },
   scroll: {
-    width: '100%',
+    width: "100%",
   },
   scrollContent: {
     paddingBottom: 8,
@@ -166,11 +193,12 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.blush,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: 6,
     paddingHorizontal: 4,
+    minHeight: 44,
   },
   rowLabel: {
     fontFamily: fonts.body,
@@ -180,7 +208,7 @@ const styles = StyleSheet.create({
   },
   rowLabelOff: {
     color: colors.inkSoft,
-    textDecorationLine: 'line-through',
+    textDecorationLine: "line-through",
   },
   warning: {
     fontFamily: fonts.bodyReg,
@@ -195,12 +223,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors.teal,
     minHeight: 44,
-    justifyContent: 'center',
+    justifyContent: "center",
     ...shadows.soft,
   },
   doneText: {
     fontFamily: fonts.body,
     fontSize: 16,
-    color: '#fff',
+    color: "#fff",
   },
 });
