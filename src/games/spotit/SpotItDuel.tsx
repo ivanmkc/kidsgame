@@ -18,6 +18,7 @@ import {
   hintAfterMs,
   leaderDealDelayMs,
   computeDuelCardSize,
+  orderForDifficulty,
 } from './logic';
 
 interface Props {
@@ -43,16 +44,18 @@ const ZONE_PLAYER: Record<ZoneId, PlayerIx> = { a: 0, b: 1 };
 // Bunny (player 1, rotated 180° in portrait). Each kid hunts a DIFFERENT
 // answer between her own card and her upright copy of the shared center card.
 export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
-  const deck = useMemo(() => buildDeck(), []);
+  const order = orderForDifficulty(difficulty);
+  const cardCount = order + 1;
+  const deck = useMemo(() => buildDeck(order), [order]);
   const settings = settingsFor(difficulty);
   const winsNeeded = settings.duelWins;
   const hintSecs = settings.duelHintSecs;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
   const newSlots = (): ZoneSlots => ({
-    aOwn: layoutSlots(rngRef.current),
-    aShared: layoutSlots(rngRef.current),
-    bOwn: layoutSlots(rngRef.current),
-    bShared: layoutSlots(rngRef.current),
+    aOwn: layoutSlots(rngRef.current, cardCount),
+    aShared: layoutSlots(rngRef.current, cardCount),
+    bOwn: layoutSlots(rngRef.current, cardCount),
+    bShared: layoutSlots(rngRef.current, cardCount),
   });
 
   const [phase, setPhase] = useState<Phase>('ready');

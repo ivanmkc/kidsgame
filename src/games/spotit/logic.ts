@@ -39,7 +39,23 @@ export const SYMBOLS = [
   "🎁",
 ] as const;
 
-export type Card = number[]; // indices into SYMBOLS, 6 per card
+export type Card = number[]; // indices into SYMBOLS, n+1 per card
+
+export function orderForDifficulty(difficulty?: Difficulty): number {
+  switch (difficulty) {
+    case 'easy':
+      return 2;
+    case 'hard':
+      return 5;
+    case 'medium':
+    case undefined:
+      return 3;
+    default: {
+      const exhaustive: never = difficulty;
+      throw new Error(`Unknown difficulty: ${exhaustive}`);
+    }
+  }
+}
 
 // Projective plane of order n (prime): n^2+n+1 cards, n+1 symbols each,
 // any two cards share exactly one symbol.

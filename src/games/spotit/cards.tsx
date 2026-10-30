@@ -17,11 +17,13 @@ export interface Slot {
   rot: number;
 }
 
-export function layoutSlots(rng: Rng): Slot[] {
+export function layoutSlots(rng: Rng, count = 6): Slot[] {
+  if (count <= 0) return [];
   const slots: Slot[] = [{ cx: 0.5, cy: 0.5, size: 0.24 + rng() * 0.06, rot: (rng() - 0.5) * 50 }];
+  const ringCount = count - 1;
   const startAngle = rng() * Math.PI * 2;
-  for (let i = 0; i < 5; i++) {
-    const a = startAngle + (i * Math.PI * 2) / 5;
+  for (let i = 0; i < ringCount; i++) {
+    const a = startAngle + (i * Math.PI * 2) / ringCount;
     const r = 0.285 + rng() * 0.03;
     slots.push({
       cx: 0.5 + Math.cos(a) * r,

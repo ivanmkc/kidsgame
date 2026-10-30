@@ -52,9 +52,9 @@ describe('SpotItDuel interaction and speech', () => {
     vi.useFakeTimers();
     try {
       const fixedRound = {
-        center: [0, 1, 2, 3, 4, 5],
-        a: [0, 6, 7, 8, 9, 10],
-        b: [1, 11, 12, 13, 14, 15],
+        center: [0, 1, 2],
+        a: [0, 3, 4],
+        b: [1, 5, 6],
         answerA: 0,
         answerB: 1,
       };
@@ -92,9 +92,9 @@ describe('SpotItDuel interaction and speech', () => {
     vi.useFakeTimers();
     try {
       const fixedRound = {
-        center: [0, 1, 2, 3, 4, 5],
-        a: [0, 6, 7, 8, 9, 10],
-        b: [1, 11, 12, 13, 14, 15],
+        center: [0, 1, 2],
+        a: [0, 3, 4],
+        b: [1, 5, 6],
         answerA: 0,
         answerB: 1,
       };
@@ -139,9 +139,9 @@ describe('SpotItDuel interaction and speech', () => {
     vi.useFakeTimers();
     try {
       const fixedRound = {
-        center: [0, 1, 2, 3, 4, 5],
-        a: [0, 6, 7, 8, 9, 10],
-        b: [1, 11, 12, 13, 14, 15],
+        center: [0, 1, 2],
+        a: [0, 3, 4],
+        b: [1, 5, 6],
         answerA: 0,
         answerB: 1,
       };
@@ -219,9 +219,9 @@ describe('SpotItDuel interaction and speech', () => {
     vi.useFakeTimers();
     try {
       const fixedRound = {
-        center: [0, 1, 2, 3, 4, 5],
-        a: [0, 6, 7, 8, 9, 10],
-        b: [1, 11, 12, 13, 14, 15],
+        center: [0, 1, 2],
+        a: [0, 3, 4],
+        b: [1, 5, 6],
         answerA: 0,
         answerB: 1,
       };

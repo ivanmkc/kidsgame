@@ -597,4 +597,111 @@ describe('SpotIt audio cleanup on unmount', () => {
 
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
   });
+
+  it("remounts duel mode and rescales cards to 3 symbols when difficulty switches mid-game", () => {
+    const { rerender } = render(
+      <SpotItGame
+        onHome={() => {}}
+        twoPlayerEnabled={true}
+        difficulty="hard"
+        seed={42}
+        lang="en"
+      />,
+    );
+
+    // Pick 2P mode in the ModePicker
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    // Verify initial Hard mode duel state: 4 cards with 6 symbols each
+    const hardAMy = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-a-my-symbol-"));
+    const hardAShared = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-a-shared-symbol-"));
+    const hardBMy = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-b-my-symbol-"));
+    const hardBShared = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-b-shared-symbol-"));
+
+    expect(hardAMy).toHaveLength(6);
+    expect(hardAShared).toHaveLength(6);
+    expect(hardBMy).toHaveLength(6);
+    expect(hardBShared).toHaveLength(6);
+    expect(screen.getByTestId("spotit-duel-score").textContent).toContain("0 · 0");
+
+    // Switch difficulty to Easy mid-game
+    rerender(
+      <SpotItGame
+        onHome={() => {}}
+        twoPlayerEnabled={true}
+        difficulty="easy"
+        seed={42}
+        lang="en"
+      />,
+    );
+
+    // Assert that each duel card renders exactly 3 symbol buttons, score resets, and nothing throws
+    const easyAMy = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-a-my-symbol-"));
+    const easyAShared = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-a-shared-symbol-"));
+    const easyBMy = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-b-my-symbol-"));
+    const easyBShared = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("duel-b-shared-symbol-"));
+
+    expect(easyAMy).toHaveLength(3);
+    expect(easyAShared).toHaveLength(3);
+    expect(easyBMy).toHaveLength(3);
+    expect(easyBShared).toHaveLength(3);
+    expect(screen.getByTestId("spotit-duel-score").textContent).toContain("0 · 0");
+  });
+});
+
+describe('SpotItGame difficulty visual complexity scaffolding', () => {
+  beforeEach(() => {
+    setViewport(800, 600);
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'tap').mockImplementation(() => {});
+    vi.spyOn(sound, 'say').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('scaffolds visual complexity: easy has 3 symbols, medium has 4 symbols, hard has 6 symbols', () => {
+    // Easy: order n=2 -> n+1 = 3 symbols per card
+    const { unmount: unmountEasy } = render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} />);
+    const easyTop = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const easyBottom = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+    expect(easyTop).toHaveLength(3);
+    expect(easyBottom).toHaveLength(3);
+    unmountEasy();
+
+    // Medium: order n=3 -> n+1 = 4 symbols per card
+    const { unmount: unmountMedium } = render(<SpotItGame onHome={() => {}} difficulty="medium" seed={42} />);
+    const medTop = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const medBottom = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+    expect(medTop).toHaveLength(4);
+    expect(medBottom).toHaveLength(4);
+    unmountMedium();
+
+    // Hard: order n=5 -> n+1 = 6 symbols per card
+    const { unmount: unmountHard } = render(<SpotItGame onHome={() => {}} difficulty="hard" seed={42} />);
+    const hardTop = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const hardBottom = screen.getAllByRole('button').filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+    expect(hardTop).toHaveLength(6);
+    expect(hardBottom).toHaveLength(6);
+    unmountHard();
+  });
 });

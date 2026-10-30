@@ -2,8 +2,9 @@ import React from 'react';
 import { Pressable } from 'react-native';
 import { renderToString } from 'react-dom/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SpotCard, SymbolButton } from '../cards';
+import { SpotCard, SymbolButton, layoutSlots } from '../cards';
 import { symbolLabel } from '../logic';
+import { makeRng } from '../../../rng';
 
 type PressableFake = Partial<React.ComponentProps<typeof Pressable>>;
 const capturedPressableProps: Record<string, PressableFake> = {};
@@ -152,3 +153,43 @@ describe('SpotCard', () => {
     expect(capturedPressableProps['card-symbol-1'].accessibilityLabel).toBe('ねこ');
   });
 });
+
+describe('layoutSlots', () => {
+  it('defaults to 6 slots (1 center + 5 in outer ring)', () => {
+    const rng = makeRng(42);
+    const slots = layoutSlots(rng);
+    expect(slots).toHaveLength(6);
+    expect(slots[0].cx).toBe(0.5);
+    expect(slots[0].cy).toBe(0.5);
+  });
+
+  it('distributes slots correctly for easy (3 symbols) and medium (4 symbols)', () => {
+    const rng = makeRng(100);
+    const slots3 = layoutSlots(rng, 3);
+    expect(slots3).toHaveLength(3);
+    expect(slots3[0].cx).toBe(0.5);
+    expect(slots3[0].cy).toBe(0.5);
+
+    const slots4 = layoutSlots(rng, 4);
+    expect(slots4).toHaveLength(4);
+    expect(slots4[0].cx).toBe(0.5);
+    expect(slots4[0].cy).toBe(0.5);
+  });
+
+  it('distributes outer count - 1 slots evenly along the ring', () => {
+    // With fixed deterministic RNG, outer slots form an equilateral ring
+    const rng = makeRng(77);
+    const slots3 = layoutSlots(rng, 3);
+    const p1 = { x: slots3[1].cx - 0.5, y: slots3[1].cy - 0.5 };
+    const p2 = { x: slots3[2].cx - 0.5, y: slots3[2].cy - 0.5 };
+    // For 2 outer slots, angle difference is PI radians (opposite sides), so dot product is negative
+    const dot = p1.x * p2.x + p1.y * p2.y;
+    expect(dot).toBeLessThan(0);
+  });
+
+  it('returns empty array when count is <= 0', () => {
+    const rng = makeRng(1);
+    expect(layoutSlots(rng, 0)).toEqual([]);
+  });
+});
+
