@@ -581,4 +581,95 @@ describe("SumsGame", () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
+
+  it("displays sum in equation banner upon correct answer and resets to question mark on next round", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
+      sayThenCb = cb;
+    });
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "butterfly",
+      a: 2,
+      b: 3,
+      sum: 5,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+        { x: 50, y: 50 },
+      ],
+      choices: [3, 4, 5],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Initial state: equation displays unsolved question mark
+    expect(screen.getByTestId("sums-equation").textContent).toBe("2 + 3 = ?");
+
+    // Advance past incoming critters animation lock
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const buttons = screen.getAllByRole("button");
+    const wrongBtn = buttons.find((b) => {
+      const tid = b.getAttribute("data-testid");
+      return tid && tid.startsWith("sums-choice-") && !tid.endsWith("-answer");
+    })!;
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+
+    // Wrong pick keeps equation as unsolved question
+    fireEvent.click(wrongBtn);
+    expect(screen.getByTestId("sums-equation").textContent).toBe("2 + 3 = ?");
+
+    // Advance past wrong pick lock
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Correct pick immediately updates equation to show the sum during praise
+    fireEvent.click(correctBtn);
+    expect(screen.getByTestId("sums-equation").textContent).toBe("2 + 3 = 5");
+
+    // Next round begins after praise finishes
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "frog",
+      a: 4,
+      b: 1,
+      sum: 5,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+      ],
+      bPositions: [{ x: 50, y: 50 }],
+      choices: [4, 5, 6],
+    });
+    act(() => {
+      sayThenCb?.();
+    });
+
+    // New round reverts to unsolved question mark with new addends
+    expect(screen.getByTestId("sums-equation").textContent).toBe("4 + 1 = ?");
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 });
