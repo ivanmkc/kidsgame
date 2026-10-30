@@ -130,8 +130,8 @@ function simonRounds(): Round[] {
       pack: 'simon',
       prompt: [action],
       gapMs: 2500,
-      reveal: ['Oops! I did not say Simon says!'],
-      sfx: 'boing',
+      reveal: ["I hope you stayed still! I didn't say Simon says!"],
+      sfx: 'good',
     });
   });
   return out;

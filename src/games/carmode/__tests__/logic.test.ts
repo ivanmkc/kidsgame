@@ -103,6 +103,19 @@ describe('pack data integrity', () => {
   }
 });
 
+describe('simon pack specifics', () => {
+  const rounds = ALL_PACKS.simon.rounds();
+
+  it('trick rounds have positive reinforcement reveal and good sfx', () => {
+    const trickRounds = rounds.filter((r) => r.id.startsWith('simon-trick-'));
+    expect(trickRounds.length).toBeGreaterThan(0);
+    for (const r of trickRounds) {
+      expect(r.reveal).toEqual(["I hope you stayed still! I didn't say Simon says!"]);
+      expect(r.sfx).toBe('good');
+    }
+  });
+});
+
 describe('boops pack specifics', () => {
   const rounds = ALL_PACKS.boops.rounds();
 
