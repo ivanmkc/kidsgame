@@ -46,6 +46,7 @@ export function SpotItGame({
         />
       ) : (
         <SpotItSolo
+          key={difficulty}
           onHome={onHome}
           difficulty={difficulty}
           seed={seed}
