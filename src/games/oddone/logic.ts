@@ -1,8 +1,13 @@
 import { Lang, LANGS } from "../../lang";
 import { t } from "../../i18n";
 import { Rng, shuffle } from "../../rng";
-import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
-import { CURRICULUM, WORDS, wordFor } from "../../curriculum/content";
+import {
+  CATEGORY_CONFLICTS,
+  CATEGORY_TEXT,
+  CURRICULUM,
+  WORDS,
+  wordFor,
+} from "../../curriculum/content";
 
 export interface OddOneRound {
   baseCategory: string;

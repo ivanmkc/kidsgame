@@ -1,7 +1,6 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from '../../curriculum/content';
-import { sameCategory } from "../iconCategories";
+import { sameCategory, WORDS, wordFor } from "../../curriculum/content";
 
 // Spoken prompt for Shadow Match across all four languages.
 // English preserves the exact pre-rendered clip string; non-English modes

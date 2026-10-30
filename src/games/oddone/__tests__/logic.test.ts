@@ -1,15 +1,14 @@
-import { describe, expect, it, vi } from 'vitest';
-import { makeOddOneRound } from '../logic';
-import * as iconCategories from '../../iconCategories';
-import { CURRICULUM } from '../../../curriculum/content';
+import { describe, expect, it } from "vitest";
+import { makeOddOneRound } from "../logic";
+import { CURRICULUM } from "../../../curriculum/content";
 
-describe('makeOddOneRound', () => {
-  it('does not pick an intruder that is also in the base category', () => {
+describe("makeOddOneRound", () => {
+  it("does not pick an intruder that is also in the base category", () => {
     // Mock the categories to have an overlap
     const originalCategories = CURRICULUM.categories;
     CURRICULUM.categories = {
-      fruit: ['apple', 'banana'],
-      food: ['apple', 'pizza'],
+      fruit: ["apple", "banana"],
+      food: ["apple", "pizza"],
     };
 
     try {
@@ -24,12 +23,12 @@ describe('makeOddOneRound', () => {
         return val;
       };
 
-      const icons = ['apple', 'banana', 'pizza'];
+      const icons = ["apple", "banana", "pizza"];
       const round = makeOddOneRound(badRng, icons, 3);
 
-      expect(round.baseCategory).toBe('fruit');
-      expect(round.oddCategory).toBe('food');
-      expect(round.odd).toBe('pizza'); // Should not be 'apple'
+      expect(round.baseCategory).toBe("fruit");
+      expect(round.oddCategory).toBe("food");
+      expect(round.odd).toBe("pizza"); // Should not be 'apple'
     } finally {
       CURRICULUM.categories = originalCategories;
     }

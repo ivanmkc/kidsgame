@@ -5,8 +5,7 @@ import { act, cleanup, fireEvent, render } from "@testing-library/react";
 import { OddOneGame } from "../OddOneGame";
 import * as logic from "../logic";
 import { say, sfx, stopNarration } from "../../../sound";
-import { CATEGORY_TEXT } from "../../iconCategories";
-import { CURRICULUM } from "../../../curriculum/content";
+import { CATEGORY_TEXT, CURRICULUM } from "../../../curriculum/content";
 import { Lang, LANGS } from "../../../lang";
 import { LangContext } from "../../../components/GameShell";
 import { t } from "../../../i18n";
@@ -82,19 +81,33 @@ describe("OddOneGame", () => {
   it("clamps minimum tile size to 60px on short viewports to prevent negative dimensions", () => {
     const originalWidth = window.innerWidth;
     const originalHeight = window.innerHeight;
-    Object.defineProperty(window, "innerWidth", { value: 800, configurable: true });
-    Object.defineProperty(window, "innerHeight", { value: 100, configurable: true });
+    Object.defineProperty(window, "innerWidth", {
+      value: 800,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 100,
+      configurable: true,
+    });
     try {
       const { container } = render(
-        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
-      const buttons = container.querySelectorAll('[data-testid^="oddone-item-"]');
+      const buttons = container.querySelectorAll(
+        '[data-testid^="oddone-item-"]',
+      );
       expect(buttons.length).toBeGreaterThan(0);
       const tileWidth = parseFloat((buttons[0] as HTMLElement).style.width);
       expect(tileWidth).toBe(60);
     } finally {
-      Object.defineProperty(window, "innerWidth", { value: originalWidth, configurable: true });
-      Object.defineProperty(window, "innerHeight", { value: originalHeight, configurable: true });
+      Object.defineProperty(window, "innerWidth", {
+        value: originalWidth,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: originalHeight,
+        configurable: true,
+      });
     }
   });
 

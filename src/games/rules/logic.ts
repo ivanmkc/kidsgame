@@ -1,8 +1,12 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, wordFor } from "../../curriculum/content";
-import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
-import { CURRICULUM } from "../../curriculum/content";
+import {
+  CATEGORY_CONFLICTS,
+  CATEGORY_TEXT,
+  CURRICULUM,
+  WORDS,
+  wordFor,
+} from "../../curriculum/content";
 import { t } from "../../i18n";
 
 export interface Rule {
