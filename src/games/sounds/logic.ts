@@ -176,7 +176,7 @@ export function makeSoundsRound(
   const twins = new Set(target.nameTwins ?? []);
   const ambiguous = (w: WordEntry) =>
     twins.has(w.icon) || soundsFor(w).includes(target.sound);
-  const usedSounds = new Set<string>([target.sound]);
+  const usedSounds = new Set<string>(soundsFor(target));
   const distractors: WordEntry[] = [];
   const shuffled = shuffle(
     rng,
@@ -184,8 +184,8 @@ export function makeSoundsRound(
   );
   for (const w of shuffled) {
     if (distractors.length >= tileCount - 1) break;
-    if (usedSounds.has(w.sound)) continue;
-    usedSounds.add(w.sound);
+    if (soundsFor(w).some((s) => usedSounds.has(s))) continue;
+    for (const s of soundsFor(w)) usedSounds.add(s);
     distractors.push(w);
   }
   // Extremely narrow WORDS lists could run out of unique sounds; fall back
