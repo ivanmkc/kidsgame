@@ -385,14 +385,26 @@ describe('music', () => {
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
-  it('handles empty inputs in playSequence and playDrumSequence', () => {
+  it('handles empty inputs in playSequence', () => {
     const done1 = vi.fn();
     music.playSequence([], 120, undefined, done1)();
     expect(done1).toHaveBeenCalled();
+  });
 
-    const done2 = vi.fn();
-    music.playDrumSequence([], undefined, done2)();
-    expect(done2).toHaveBeenCalled();
+  it('plays 1-hit drum sequence when gaps is empty', () => {
+    vi.useFakeTimers();
+    setupWebAudio();
+    const onHit = vi.fn();
+    const onDone = vi.fn();
+    
+    music.playDrumSequence([], onHit, onDone);
+    
+    vi.advanceTimersByTime(50);
+    expect(onHit).toHaveBeenCalledTimes(1);
+    expect(onHit).toHaveBeenCalledWith(0);
+    
+    vi.advanceTimersByTime(300);
+    expect(onDone).toHaveBeenCalledTimes(1);
   });
 
   it('cancels playDrumSequence through returned cancel and stopSequence', () => {
