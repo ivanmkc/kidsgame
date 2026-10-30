@@ -268,7 +268,7 @@ describe("ConceptMatchGame", () => {
     expect(screen.getByTestId("card-dot-c-dots-2")).toBeDefined();
   });
 
-  it("renders audio card face with speech fallback when text is omitted to satisfy R3", () => {
+  it("renders audio card face with speech fallback only when captions are ON to satisfy R3", () => {
     const audioBoard: logic.ConceptMatchCard[] = [
       {
         key: "audio-no-text",
@@ -288,6 +288,12 @@ describe("ConceptMatchGame", () => {
     render(<ConceptMatchGame deck="picture-spoken" pairs={1} />);
 
     expect(screen.getByTestId("card-audio-audio-no-text")).toBeDefined();
+    // Should be blank by default to not ruin the audio memory challenge
+    expect(screen.queryByTestId("card-audio-text-audio-no-text")).toBeNull();
+
+    // Toggle captions on to satisfy R3
+    fireEvent.click(screen.getByTestId("captions-toggle"));
+    
     expect(
       screen.getByTestId("card-audio-text-audio-no-text").textContent,
     ).toBe("apple");
