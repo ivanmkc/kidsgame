@@ -88,6 +88,10 @@ export function WinOverlay({
         ),
       ).start();
       return () => clearTimeout(timer);
+    } else {
+      setArmed(false);
+      slideY.setValue(300);
+      starAnims.forEach((s) => s.setValue(0));
     }
   }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 

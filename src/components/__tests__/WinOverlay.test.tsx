@@ -263,4 +263,69 @@ describe("WinOverlay", () => {
     expect(nextGameBtn).toBeTruthy();
     expect(nextGameBtn.textContent).toContain("▶️ ことばづくり");
   });
+
+  it("keeps buttons disarmed on the first frame when transitioning back to visible", () => {
+    const onNext = vi.fn();
+    let initialAriaDisabled: string | null = null;
+
+    function LayoutProbe() {
+      React.useLayoutEffect(() => {
+        const btn = screen.queryByTestId("play-again");
+        if (btn && initialAriaDisabled === null) {
+          initialAriaDisabled = btn.getAttribute("aria-disabled");
+        }
+      });
+      return null;
+    }
+
+    const { rerender } = render(
+      <WinOverlay
+        visible={true}
+        message="Round 1"
+        onNext={onNext}
+        onHome={vi.fn()}
+      />,
+    );
+
+    // Round 1 arms after 600ms
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    // Tap play again for round 1
+    fireEvent.click(screen.getByTestId("play-again"));
+    expect(onNext).toHaveBeenCalledTimes(1);
+
+    // Round 2 starts: overlay hidden
+    rerender(
+      <WinOverlay
+        visible={false}
+        message="Round 1"
+        onNext={onNext}
+        onHome={vi.fn()}
+      />,
+    );
+
+    // Round 2 won: overlay becomes visible again
+    rerender(
+      <WinOverlay
+        visible={true}
+        message="Round 2"
+        stats={<LayoutProbe />}
+        onNext={onNext}
+        onHome={vi.fn()}
+      />,
+    );
+
+    // On the initial frame (before useEffect runs), the button must already be disabled
+    expect(initialAriaDisabled).toBe("true");
+
+    // After 600ms arming window passes on round 2, button is enabled
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    fireEvent.click(screen.getByTestId("play-again"));
+    expect(onNext).toHaveBeenCalledTimes(2);
+  });
 });
