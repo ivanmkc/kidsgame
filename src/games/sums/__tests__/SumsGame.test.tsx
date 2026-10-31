@@ -755,4 +755,59 @@ describe("SumsGame", () => {
     unmount();
     vi.restoreAllMocks();
   });
+
+  it("does not remount critters when correct answer is picked before praise finishes", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
+      sayThenCb = cb;
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Advance past incoming critters animation lock
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // find an incoming critter
+    const incomingCritter = screen.getByTestId("sums-incoming-0");
+
+    // find correct answer
+    const buttons = screen.getAllByRole("button");
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    );
+
+    // tap it
+    fireEvent.click(correctBtn!);
+
+    // score should update
+    expect(screen.getByTestId("sums-score").textContent).toContain("1/");
+
+    // verify the critter is the exact same DOM node (no remounting)
+    const afterClickCritter = screen.getByTestId("sums-incoming-0");
+    expect(afterClickCritter).toBe(incomingCritter);
+
+    // now finish praise
+    act(() => {
+      sayThenCb?.();
+    });
+
+    // round advanced, it's a new round so the critter should be a new DOM node (remounted for the next round)
+    const nextRoundCritter = screen.getByTestId("sums-incoming-0");
+    expect(nextRoundCritter).not.toBe(incomingCritter);
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 });
