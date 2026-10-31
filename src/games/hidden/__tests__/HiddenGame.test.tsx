@@ -110,13 +110,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     // In scene picker with Japanese
     const { unmount: unmountPicker } = render(
@@ -208,13 +211,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: cancelSpy,
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const saySpy = vi.spyOn(sound, "say");
@@ -242,11 +248,9 @@ describe("HiddenGame localization", () => {
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
 
     const expectedPrompt = t("ja", "hidden.prompt");
-    const expectedTurn0 = t(
-      "ja",
-      "hidden.turn",
-      { name: t("ja", MP_PLAYERS[0].name) },
-    );
+    const expectedTurn0 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[0].name),
+    });
 
     // saySequence is called with both prompt and turn
     expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn0]);
@@ -272,11 +276,9 @@ describe("HiddenGame localization", () => {
 
     fireEvent.click(screen.getByTestId(`hidden-target-${targets[0]}`));
 
-    const expectedTurn1 = t(
-      "ja",
-      "hidden.turn",
-      { name: t("ja", MP_PLAYERS[1].name) },
-    );
+    const expectedTurn1 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[1].name),
+    });
     expect(saySeqSpy).not.toHaveBeenCalled();
     expect(saySpy).toHaveBeenCalledWith(expectedTurn1);
   });
@@ -308,13 +310,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: cancelSpy,
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const saySpy = vi.spyOn(sound, "say");
@@ -414,12 +419,15 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     // In picker with 2P enabled (mode === null)
     const { unmount: unmountPicker } = render(
@@ -784,6 +792,81 @@ describe("HiddenGame difficulty settings", () => {
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
   });
+
+  it("updates drawn target count and score chip when difficulty filter changes on an active scene, cleanly resetting round state", () => {
+    const scene = manifest.hidden.find((h) => h.id === "candyshop")!;
+    expect(scene.targets.length).toBe(8);
+
+    const { rerender } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        filter="easy"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(screen.getByTestId("hidden-checklist").children.length).toBe(5);
+
+    // Find a target on easy
+    const easyChips = Array.from(
+      screen.getByTestId("hidden-checklist").children,
+    );
+    const foundId = easyChips[0]
+      .getAttribute("data-testid")!
+      .replace("checklist-", "");
+    fireEvent.click(screen.getByTestId(`hidden-target-${foundId}`));
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/5");
+
+    // Switching filter to medium cleanly resets finds and resizes checklist to 6
+    rerender(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        filter="medium"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+    expect(screen.getByTestId("hidden-checklist").children.length).toBe(6);
+
+    // Switching filter to hard cleanly resets finds and resizes checklist to 8
+    rerender(
+      <HiddenGame
+        onHome={noop}
+        difficulty="hard"
+        filter="hard"
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+      />,
+    );
+
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/8");
+    const hardChips = Array.from(
+      screen.getByTestId("hidden-checklist").children,
+    );
+    expect(hardChips.length).toBe(8);
+    for (const chip of hardChips) {
+      expect(chip.getAttribute("aria-label")).toBe(t("en", "a11y.target"));
+    }
+
+    // Completing all 8 targets reaches 8/8 and cleanly triggers WinOverlay without desync
+    for (const chip of hardChips) {
+      const targetId = chip
+        .getAttribute("data-testid")!
+        .replace("checklist-", "");
+      fireEvent.click(screen.getByTestId(`hidden-target-${targetId}`));
+    }
+    expect(screen.getByTestId("hidden-score").textContent).toContain("8/8");
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+  });
 });
 
 describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
@@ -841,12 +924,15 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -915,12 +1001,15 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -1584,12 +1673,15 @@ describe("HiddenGame language switch", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const stopSpy = vi.spyOn(sound, "stopNarration");
 
@@ -1621,7 +1713,7 @@ describe("HiddenGame language switch", () => {
 
     // Switch language mid-round through the same path the in-game button uses
     fireEvent.click(screen.getByTestId("lang-cycle"));
-    
+
     // Prove no old-language timer fires
     vi.advanceTimersByTime(30000);
 
@@ -1683,7 +1775,7 @@ describe("HiddenGame language switch", () => {
 
     // Switch language on win overlay through the same path the in-game button uses
     fireEvent.click(screen.getByTestId("lang-cycle"));
-    
+
     // Prove no old-language timer fires
     vi.advanceTimersByTime(30000);
 

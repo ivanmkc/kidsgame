@@ -70,6 +70,8 @@ export function HiddenGame({
   const effDifficulty =
     filter !== "all" ? filter : (scene?.level ?? difficulty);
 
+  const settings = settingsFor(effDifficulty);
+
   // ALL hooks live above the `if (!scene)` early return (repo hard rule).
   const [mode, setMode] = useState<"solo" | "2p" | null>(
     twoPlayerEnabled ? null : "solo",
@@ -79,6 +81,8 @@ export function HiddenGame({
   const [finds, setFinds] = useState<Find[]>([]); // solo stamps by:null
   const [hintId, setHintId] = useState<string | null>(null);
   const [prevSceneId, setPrevSceneId] = useState<string | null>(null);
+  const [prevHiddenDraw, setPrevHiddenDraw] = useState(settings.hiddenDraw);
+  const sceneSeedRef = useRef(Math.floor(Math.random() * 1e9));
   // Synchronous mirrors: burst multi-touch fires several onPress before any
   // re-render — attribution and turn flow must not read stale state.
   const turnRef = useRef<PlayerIx>(0);
@@ -86,8 +90,12 @@ export function HiddenGame({
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
   const omittedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  if (sceneId !== (prevSceneId ?? undefined)) {
+  const sceneChanged = sceneId !== (prevSceneId ?? undefined);
+  const drawChanged = settings.hiddenDraw !== prevHiddenDraw;
+  if (sceneChanged || drawChanged) {
     setPrevSceneId(sceneId ?? null);
+    setPrevHiddenDraw(settings.hiddenDraw);
+    sceneSeedRef.current = Math.floor(Math.random() * 1e9);
     setFinds([]);
     findsRef.current = new Set();
     setHintId(null);
@@ -95,7 +103,7 @@ export function HiddenGame({
       clearTimeout(omittedHintTimer.current);
       omittedHintTimer.current = null;
     }
-    if (sceneId) {
+    if (sceneId && sceneChanged) {
       // starting player alternates each scene
       const s = nextTurn(starterRef.current);
       starterRef.current = s;
@@ -104,15 +112,14 @@ export function HiddenGame({
     }
   }
 
-  const settings = settingsFor(effDifficulty);
   const showTimer = mode !== null && settings.timer && !coop;
 
   const drawn = useMemo(() => {
     if (!scene) return [];
     const base = settings.hiddenDraw;
     const n = coop ? coopDrawCount(base, scene.targets.length) : base;
-    return sample(makeRng(Math.floor(Math.random() * 1e9)), scene.targets, n);
-  }, [sceneId, coop]); // eslint-disable-line react-hooks/exhaustive-deps
+    return sample(makeRng(sceneSeedRef.current), scene.targets, n);
+  }, [sceneId, coop, settings.hiddenDraw]); // eslint-disable-line react-hooks/exhaustive-deps
   const total = drawn.length;
   const won = finds.length === total && total > 0;
   const elapsed = useElapsed(showTimer && !!scene && !won, sceneId);
