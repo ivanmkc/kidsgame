@@ -196,7 +196,13 @@ export function applyPickAnswer(v: number, state: PickState, deps: PickDeps) {
     deps.setWrongPick(v);
     deps.clearTimeouts();
     deps.setTimeout(() => deps.setWrongPick((w) => (w === v ? null : w)), 450);
-    deps.setTimeout(() => deps.say(t(state.lang, "shell.count.prompt")), 500);
+    deps.setTimeout(
+      () =>
+        deps.sayThen([numberWord(state.lang, v).t], () =>
+          deps.say(t(state.lang, "shell.count.prompt")),
+        ),
+      500,
+    );
   }
 }
 
