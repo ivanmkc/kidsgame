@@ -316,6 +316,7 @@ export type UIKey =
   | 'hidden.scene.crystal_cavern' | 'hidden.scene.circus_backstage' | 'hidden.scene.mole_city' | 'hidden.scene.steampunk_airship'
   | 'hidden.scene.giant_kitchen' | 'hidden.scene.witch_kitchen'
   // ── Game-specific prompts ────────────────────────────────────────
+  | 'compare.prompt.more' | 'compare.prompt.fewer' | 'compare.praise'
   | 'sums.plus' | 'sums.question' | 'sums.praise';
 
 export type Table = Record<UIKey, string>;
@@ -755,6 +756,10 @@ export const EN: Table = {
   'hidden.scene.crystal_cavern': 'Crystal Cavern', 'hidden.scene.circus_backstage': 'Circus Backstage',
   'hidden.scene.mole_city': 'Underground Mole City', 'hidden.scene.steampunk_airship': 'Steampunk Airship',
   'hidden.scene.giant_kitchen': 'Giant\'s Kitchen', 'hidden.scene.witch_kitchen': 'Witch\'s Kitchen',
+
+  'compare.prompt.more': 'Tap the side with MORE!',
+  'compare.prompt.fewer': 'Tap the side with FEWER!',
+  'compare.praise': 'That\'s right!',
 
   'sums.plus': 'plus',
   'sums.question': 'How many now?',

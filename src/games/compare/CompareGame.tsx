@@ -20,9 +20,6 @@ import { say, sayThen, sfx } from "../../sound";
 import { useWinLine } from "../winlines";
 import {
   CompareRound,
-  FEWER_PROMPT,
-  MORE_PROMPT,
-  PRAISE,
   Side,
   compareSettings,
   makeCompareRound,
@@ -83,7 +80,9 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
   );
 
   const promptFor = (r: CompareRound) =>
-    r.ask === "more" ? MORE_PROMPT[lang] : FEWER_PROMPT[lang];
+    r.ask === "more"
+      ? t(lang, "compare.prompt.more")
+      : t(lang, "compare.prompt.fewer");
 
   // Lang switch: clear timers and unlock state, preserving the round.
   const langMounted = useRef(false);
@@ -112,7 +111,7 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
       const nextScore = score + 1;
       setScore(nextScore);
       const feedback = roundComparisonPhrase(lang, round);
-      sayThen([feedback, PRAISE[lang]], () => {
+      sayThen([feedback, t(lang, "compare.praise")], () => {
         if (!isMountedRef.current) return;
         if (nextScore < roundsToWin) {
           setRound(makeCompareRound(rngRef.current, difficulty));

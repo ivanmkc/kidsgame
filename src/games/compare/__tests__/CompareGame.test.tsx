@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LangContext } from "../../../components/GameShell";
 import { Difficulty } from "../../../difficulty";
 import { Lang } from "../../../lang";
-import { t } from "../../../i18n";
+import { EN, t } from "../../../i18n";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { CompareGame } from "../CompareGame";
@@ -1033,15 +1033,87 @@ describe("CompareGame on-screen prompt localization", () => {
 
       const expectedUI = t(lang, expectedKey);
       const expectedSpoken =
-        ask === "more" ? logic.MORE_PROMPT[lang] : logic.FEWER_PROMPT[lang];
+        ask === "more"
+          ? t(lang, "compare.prompt.more")
+          : t(lang, "compare.prompt.fewer");
 
       const promptBtn = screen.getByTestId(`compare-prompt-${ask}`);
       expect(within(promptBtn).getByText(expectedUI)).toBeDefined();
       expect(promptBtn.getAttribute("aria-label")).toBe(expectedUI);
 
-      // Verify spoken text uses conversational prompt from logic, not UI text
+      // Verify spoken text uses conversational prompt from i18n, not UI text
       expect(saySpy).toHaveBeenCalledWith(expectedSpoken);
     });
   }
+});
+
+describe("CompareGame spoken voice prompts use central i18n table", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sfx, "wrong").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  const allLangs: Lang[] = ["en", "ja", "cmn", "yue"];
+
+  for (const lang of allLangs) {
+    it(`speaks praise via t(lang, 'compare.praise') on correct tap in ${lang}`, () => {
+      let sayThenLines: string[] = [];
+      vi.spyOn(sound, "sayThen").mockImplementation((lines, cb) => {
+        sayThenLines = lines;
+        if (cb) cb();
+      });
+
+      vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+        left: { icon: "star", count: 4, positions: [] },
+        right: { icon: "dog", count: 2, positions: [] },
+        ask: "more",
+        correctSide: "left",
+      });
+
+      render(<CompareGame onHome={noop} difficulty="easy" lang={lang} />);
+
+      fireEvent.click(screen.getByTestId(/^compare-plate-left/));
+
+      expect(sayThenLines[1]).toBe(t(lang, "compare.praise"));
+    });
+  }
+
+  it("uses updated translations from central i18n table for spoken prompts and praise", () => {
+    vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+      left: { icon: "star", count: 4, positions: [] },
+      right: { icon: "dog", count: 2, positions: [] },
+      ask: "more",
+      correctSide: "left",
+    });
+
+    const saySpy = vi.spyOn(sound, "say");
+    let sayThenLines: string[] = [];
+    vi.spyOn(sound, "sayThen").mockImplementation((lines, cb) => {
+      sayThenLines = lines;
+      if (cb) cb();
+    });
+
+    const origMore = EN["compare.prompt.more"];
+    const origPraise = EN["compare.praise"];
+    EN["compare.prompt.more"] = "Custom prompt: find MORE!";
+    EN["compare.praise"] = "Custom praise: great job!";
+
+    try {
+      render(<CompareGame onHome={noop} difficulty="easy" lang="en" />);
+      expect(saySpy).toHaveBeenCalledWith("Custom prompt: find MORE!");
+
+      fireEvent.click(screen.getByTestId(/^compare-plate-left/));
+      expect(sayThenLines[1]).toBe("Custom praise: great job!");
+    } finally {
+      EN["compare.prompt.more"] = origMore;
+      EN["compare.praise"] = origPraise;
+    }
+  });
 });
 
