@@ -245,4 +245,22 @@ describe("checkEcho", () => {
     expect(checkEcho(round, [0, 520], "medium").timingCorrect).toBe(true);
     expect(checkEcho(round, [0, 900], "hard").timingCorrect).toBe(false);
   });
+
+  it("rejects flat 1:1 steady tapping on easy difficulty for 1:2 short-long rhythm", () => {
+    const round = { gaps: [0.5, 1.0], hitCount: 3, bpm: 120 };
+    // Uniform 1.0s metronome taps on short-long pattern (repro F7edeb3)
+    const flatTaps = [0, 1000, 2000];
+    const flatResult = checkEcho(round, flatTaps, "easy");
+    expect(flatResult.countCorrect).toBe(true);
+    expect(flatResult.timingCorrect).toBe(false);
+
+    // Uniform 0.5s taps on short-long pattern also rejected
+    expect(checkEcho(round, [0, 500, 1000], "easy").timingCorrect).toBe(false);
+
+    // Correct short-long rhythm passes
+    const correctTaps = [0, 500, 1500];
+    const correctResult = checkEcho(round, correctTaps, "easy");
+    expect(correctResult.countCorrect).toBe(true);
+    expect(correctResult.timingCorrect).toBe(true);
+  });
 });
