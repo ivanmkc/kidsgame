@@ -161,7 +161,6 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       lockedRef.current = true;
       clearWrongTimer();
       sfx.good();
-      setMisses(0);
       setCorrectIdx(i);
       if (errorTimerRef.current) {
         clearTimeout(errorTimerRef.current);
@@ -175,6 +174,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       successTimerRef.current = setTimeout(() => {
         lockedRef.current = false;
         successTimerRef.current = null;
+        setMisses(0);
         setCorrectIdx(null);
         setIsFinishing(false);
         if (next < roundsToWin) {
