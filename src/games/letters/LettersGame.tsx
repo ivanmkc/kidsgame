@@ -19,6 +19,7 @@ import { colors, fonts, shadows } from "../../theme";
 import { say, sfx, stopNarration, useSay } from "../../sound";
 import {
   LetterRound,
+  lettersLayout,
   makeLetterRound,
   settingsForLetters,
   shouldShowGlyph,
@@ -225,17 +226,15 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setIsFinishing(false);
   };
 
-  const cols = tileCount <= 6 ? 3 : 4;
-  const rows = Math.ceil(tileCount / cols);
-  const gap = 12;
-  const tile = Math.max(
-    10,
-    Math.min(
-      (Math.min(width - 32, 560) - (cols - 1) * gap) / cols,
-      (height - 84 - 130 - (rows - 1) * gap) / rows,
-      140,
-    ),
-  );
+  const {
+    cols,
+    tile,
+    tileGap,
+    boardGap,
+    speakerSize,
+    speakerIconSize,
+    shortH,
+  } = lettersLayout(width, height, tileCount);
 
   const chipEmoji = tier === "kana" ? "🈶" : tier === "sound" ? "👂" : "🔤";
   const title =
@@ -271,11 +270,15 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
         </View>
       }
     >
-      <View style={styles.board}>
+      <View
+        style={[styles.board, { gap: boardGap }, shortH && styles.boardShort]}
+      >
         {!started ? (
-          <View style={styles.startScreen}>
-            <Text style={styles.startTitle}>{title}</Text>
-            <Text style={styles.startBlurb}>
+          <View style={[styles.startScreen, shortH && styles.startScreenShort]}>
+            <Text style={[styles.startTitle, shortH && styles.startTitleShort]}>
+              {title}
+            </Text>
+            <Text style={[styles.startBlurb, shortH && styles.startBlurbShort]}>
               {t(lang, "card.letters.blurb")}
             </Text>
             <Pressable
@@ -285,11 +288,17 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               accessibilityLabel={t(lang, "listenchoose.play")}
               style={({ pressed }) => [
                 styles.playButton,
+                shortH && styles.playButtonShort,
                 shadows.soft,
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.playButtonText}>
+              <Text
+                style={[
+                  styles.playButtonText,
+                  shortH && styles.playButtonTextShort,
+                ]}
+              >
                 {t(lang, "listenchoose.play")}
               </Text>
             </Pressable>
@@ -299,10 +308,16 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               accessibilityRole="button"
               style={({ pressed }) => [
                 styles.captionsToggle,
+                shortH && styles.captionsToggleShort,
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.captionsToggleText}>
+              <Text
+                style={[
+                  styles.captionsToggleText,
+                  shortH && styles.captionsToggleTextShort,
+                ]}
+              >
                 💬 {t(lang, "listenchoose.captions")}:{" "}
                 {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
               </Text>
@@ -314,6 +329,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               style={[
                 styles.prompt,
                 shadows.soft,
+                shortH && styles.promptShort,
                 shouldShowGlyph(misses, captions)
                   ? null
                   : styles.promptAudioOnly,
@@ -330,12 +346,18 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                 accessibilityLabel={t(lang, "spell.hearAgain")}
                 style={({ pressed }) => [
                   styles.speakerButton,
+                  {
+                    width: speakerSize,
+                    height: speakerSize,
+                    borderRadius: speakerSize / 2,
+                  },
                   pressed && styles.pressed,
                 ]}
               >
                 <Animated.Text
                   style={[
                     styles.speakerIcon,
+                    { fontSize: speakerIconSize },
                     { transform: [{ scale: pulse }] },
                   ]}
                 >
@@ -344,7 +366,13 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               </Pressable>
               {shouldShowGlyph(misses, captions) && (
                 <View style={styles.promptGlyphContainer}>
-                  <Text style={styles.promptGlyph} testID="letters-glyph">
+                  <Text
+                    style={[
+                      styles.promptGlyph,
+                      shortH && styles.promptGlyphShort,
+                    ]}
+                    testID="letters-glyph"
+                  >
                     {round.targetDisplay}
                   </Text>
                   {round.romanCaption ? (
@@ -356,7 +384,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
             <View
               style={[
                 styles.grid,
-                { width: cols * tile + (cols - 1) * gap, gap },
+                { width: cols * tile + (cols - 1) * tileGap, gap: tileGap },
               ]}
             >
               {round.tiles.map((t, i) => (
@@ -369,6 +397,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                   style={({ pressed }) => [
                     styles.tile,
                     shadows.soft,
+                    shortH && styles.tileShort,
                     { width: tile, height: tile },
                     wrongIdx === i && styles.wrong,
                     correctIdx === i && styles.correct,
@@ -518,4 +547,41 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(34,166,153,0.15)",
   },
   pressed: { transform: [{ scale: 0.94 }] },
+  boardShort: {
+    paddingHorizontal: 10,
+  },
+  startScreenShort: {
+    gap: 12,
+  },
+  startTitleShort: {
+    fontSize: 32,
+  },
+  startBlurbShort: {
+    fontSize: 18,
+  },
+  playButtonShort: {
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+  },
+  playButtonTextShort: {
+    fontSize: 18,
+  },
+  captionsToggleShort: {
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+  },
+  captionsToggleTextShort: {
+    fontSize: 15,
+  },
+  promptShort: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  promptGlyphShort: {
+    fontSize: 24,
+  },
+  tileShort: {
+    borderRadius: 14,
+  },
 });

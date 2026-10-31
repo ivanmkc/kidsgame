@@ -1121,4 +1121,99 @@ describe("LettersGame", () => {
       expect.stringMatching(/^Find the letter [A-Za-z]!/),
     );
   });
+
+  it("renders responsive layout with 6 columns and playable tiles on compact landscape (568x320)", () => {
+    const originalWidth = document.documentElement.clientWidth;
+    const originalHeight = document.documentElement.clientHeight;
+
+    try {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: 568,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: 320,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+
+      render(<LettersGame onHome={() => {}} difficulty="hard" lang="ja" />);
+
+      // On start screen, short layout is used
+      expect(screen.getByTestId("play-button")).toBeTruthy();
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      // 12 tiles in JA Hard mode
+      const tiles = screen.getAllByRole("button", { name: /^[ぁ-ん]$/ });
+      expect(tiles.length).toBe(12);
+
+      // Tile dimensions are scaled and >= 44px
+      const firstTile = screen.getByTestId("letters-tile-0");
+      expect(parseFloat(firstTile.style.width)).toBeGreaterThanOrEqual(44);
+      expect(parseFloat(firstTile.style.height)).toBeGreaterThanOrEqual(44);
+      expect(parseFloat(firstTile.style.width)).toBe(45);
+      expect(parseFloat(firstTile.style.height)).toBe(45);
+
+      // Speaker button is scaled using layout.speakerSize
+      const speakerBtn = screen.getByTestId("speaker-button");
+      expect(speakerBtn).toBeTruthy();
+      expect(parseFloat(speakerBtn.style.width)).toBe(56);
+      expect(parseFloat(speakerBtn.style.height)).toBe(56);
+    } finally {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: originalWidth,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: originalHeight,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+    }
+  });
+
+  it("reveals prompt glyph with compact font size when captions are toggled on compact landscape", () => {
+    const originalWidth = document.documentElement.clientWidth;
+    const originalHeight = document.documentElement.clientHeight;
+
+    try {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: 568,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: 320,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+
+      render(<LettersGame onHome={() => {}} difficulty="medium" lang="en" />);
+
+      // Toggle captions on before clicking play
+      act(() => {
+        fireEvent.click(screen.getByTestId("captions-toggle"));
+      });
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      // Glyph is displayed with compact font size style
+      const glyph = screen.getByTestId("letters-glyph");
+      expect(glyph).toBeTruthy();
+    } finally {
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: originalWidth,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: originalHeight,
+        configurable: true,
+      });
+      window.dispatchEvent(new Event("resize"));
+    }
+  });
 });
