@@ -76,21 +76,21 @@ export function sumsSettings(d: Difficulty): {
   return CURRICULUM.numbers.sums[d];
 }
 
-/** Three unique choices in [1..upper], answer always included. */
+/** Three unique choices in [2..maxSum], answer always included. */
 export function makeSumChoices(
   rng: Rng,
   answer: number,
   maxSum: number,
 ): number[] {
-  const upper = Math.max(maxSum + 2, answer + 2, 6);
+  const upper = maxSum;
   const others = new Set<number>();
   let guard = 0;
   while (others.size < 2 && guard++ < 200) {
-    const cand = 1 + randInt(rng, upper);
+    const cand = 2 + randInt(rng, upper - 1);
     if (cand !== answer) others.add(cand);
   }
   // extreme corner: fill with sequential values if the loop couldn't
-  let fallback = 1;
+  let fallback = 2;
   while (others.size < 2) {
     if (fallback !== answer) others.add(fallback);
     fallback++;

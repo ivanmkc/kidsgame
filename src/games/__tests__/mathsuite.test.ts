@@ -554,6 +554,10 @@ describe("little sums", () => {
         expect(r.choices).toHaveLength(3);
         expect(new Set(r.choices).size).toBe(3);
         expect(r.choices).toContain(r.sum);
+        for (const choice of r.choices) {
+          expect(choice).toBeGreaterThanOrEqual(2);
+          expect(choice).toBeLessThanOrEqual(maxSum);
+        }
         expect(CURRICULUM.critters).toContain(r.icon);
       }
     });
@@ -575,6 +579,10 @@ describe("little sums", () => {
         expect(c).toHaveLength(3);
         expect(new Set(c).size).toBe(3);
         expect(c).toContain(answer);
+        for (const choice of c) {
+          expect(choice).toBeGreaterThanOrEqual(2);
+          expect(choice).toBeLessThanOrEqual(cap);
+        }
       }
     }
   });
