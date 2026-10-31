@@ -37,43 +37,26 @@ export type UIKey =
   | 'filter.all' | 'filter.easy' | 'filter.medium' | 'filter.hard'
   | 'filter.allLevels' | 'filter.easyLevels' | 'filter.mediumLevels' | 'filter.hardLevels'
   // ── Menu game cards: titles + blurbs ───────────────────────────
-  | 'card.spotit.title'   | 'card.spotit.blurb'
-  | 'card.diff.title'     | 'card.diff.blurb'
-  | 'card.hidden.title'   | 'card.hidden.blurb'
-  | 'card.memory.title'   | 'card.memory.blurb'
-  | 'card.puzzle.title'   | 'card.puzzle.blurb'
-  | 'card.shadow.title'   | 'card.shadow.blurb'
-  | 'card.oddone.title'   | 'card.oddone.blurb'
-  | 'card.rules.title'    | 'card.rules.blurb'
-  | 'card.rules.banner'
-  | 'card.sticker.title'  | 'card.sticker.blurb'
-  | 'card.story.title'    | 'card.story.blurb'
-  | 'card.letters.title'  | 'card.letters.blurb'
-  | 'card.sounds.title'   | 'card.sounds.blurb'
-  | 'card.rhyme.title'    | 'card.rhyme.blurb'
-  | 'card.wordfamily.title' | 'card.wordfamily.blurb'
+  | 'card.spotit.title'   | 'card.spotit.blurb' | 'card.diff.title'     | 'card.diff.blurb'
+  | 'card.hidden.title'   | 'card.hidden.blurb' | 'card.memory.title'   | 'card.memory.blurb'
+  | 'card.puzzle.title'   | 'card.puzzle.blurb' | 'card.shadow.title'   | 'card.shadow.blurb'
+  | 'card.oddone.title'   | 'card.oddone.blurb' | 'card.rules.title'    | 'card.rules.blurb' | 'card.rules.banner'
+  | 'card.sticker.title'  | 'card.sticker.blurb' | 'card.story.title'    | 'card.story.blurb'
+  | 'card.letters.title'  | 'card.letters.blurb' | 'card.sounds.title'   | 'card.sounds.blurb'
+  | 'card.rhyme.title'    | 'card.rhyme.blurb' | 'card.wordfamily.title' | 'card.wordfamily.blurb'
   | 'card.spell.title'    | 'card.spell.blurb'
-  | 'card.listenchoose.title' | 'card.listenchoose.blurb'
-  | 'card.count.title'    | 'card.count.blurb'
-  | 'card.numbers.title'  | 'card.numbers.blurb'
-  | 'card.compare.title'  | 'card.compare.blurb'
+  | 'card.listenchoose.title' | 'card.listenchoose.blurb' | 'card.count.title'    | 'card.count.blurb'
+  | 'card.numbers.title'  | 'card.numbers.blurb' | 'card.compare.title'  | 'card.compare.blurb'
+  | 'card.balance.title'  | 'card.balance.blurb'
   | 'card.sums.title'     | 'card.sums.blurb'
-  | 'card.musicbox.title' | 'card.musicbox.blurb'
-  | 'card.bingo.title'    | 'card.bingo.blurb'
-  | 'card.carmode.title'  | 'card.carmode.blurb'
-  | 'card.escape.title'   | 'card.escape.blurb'
-  | 'card.highlow.title'  | 'card.highlow.blurb'
-  | 'card.bells.title'    | 'card.bells.blurb'
-  | 'card.echobeat.title' | 'card.echobeat.blurb'
-  | 'card.steadybeat.title' | 'card.steadybeat.blurb'
-  | 'card.fastslow.title' | 'card.fastslow.blurb'
-  | 'card.samediff.title' | 'card.samediff.blurb'
-  | 'card.cm-numdots.title' | 'card.cm-numdots.blurb'
-  | 'card.cm-numhan.title'  | 'card.cm-numhan.blurb'
-  | 'card.cm-shapes.title'  | 'card.cm-shapes.blurb'
-  | 'card.cm-animals.title' | 'card.cm-animals.blurb'
-  | 'card.cm-picword.title' | 'card.cm-picword.blurb'
-  | 'card.cm-picspeak.title' | 'card.cm-picspeak.blurb'
+  | 'card.musicbox.title' | 'card.musicbox.blurb' | 'card.bingo.title'    | 'card.bingo.blurb'
+  | 'card.carmode.title'  | 'card.carmode.blurb' | 'card.escape.title'   | 'card.escape.blurb'
+  | 'card.highlow.title'  | 'card.highlow.blurb' | 'card.bells.title'    | 'card.bells.blurb'
+  | 'card.echobeat.title' | 'card.echobeat.blurb' | 'card.steadybeat.title' | 'card.steadybeat.blurb'
+  | 'card.fastslow.title' | 'card.fastslow.blurb' | 'card.samediff.title' | 'card.samediff.blurb'
+  | 'card.cm-numdots.title' | 'card.cm-numdots.blurb' | 'card.cm-numhan.title'  | 'card.cm-numhan.blurb'
+  | 'card.cm-shapes.title'  | 'card.cm-shapes.blurb' | 'card.cm-animals.title' | 'card.cm-animals.blurb'
+  | 'card.cm-picword.title' | 'card.cm-picword.blurb' | 'card.cm-picspeak.title' | 'card.cm-picspeak.blurb'
   | 'card.cm-colors.title' | 'card.cm-colors.blurb'
   | 'card.cm-letters.title' | 'card.cm-letters.blurb'
   | 'card.cm-mixed.title' | 'card.cm-mixed.blurb'
@@ -116,6 +99,9 @@ export type UIKey =
   | 'shell.compare.title'
   | 'shell.compare.subMore'
   | 'shell.compare.subFewer'
+  | 'shell.balance.title'
+  | 'shell.balance.sub'
+  | 'balance.praise'
   | 'shell.sums.title'
   | 'shell.sums.sub'
   | 'shell.spotit.title'
@@ -208,6 +194,7 @@ export type UIKey =
   | 'win.spell'
   | 'win.count'
   | 'win.compare'
+  | 'win.balance'
   | 'win.sums'
   | 'win.bingo'
   | 'win.musicbox'
@@ -402,6 +389,8 @@ export const EN: Table = {
   'card.numbers.blurb': 'Find the number — one, two, three!',
   'card.compare.title': 'More or Less',
   'card.compare.blurb': 'Which side has more treats?',
+  'card.balance.title': 'Number Balance',
+  'card.balance.blurb': 'Decompose numbers and balance parts into a whole',
   'card.sums.title': 'Little Sums',
   'card.sums.blurb': 'One more hops in — how many now?',
   'card.musicbox.title': 'Music Box',
@@ -486,6 +475,8 @@ export const EN: Table = {
   'shell.compare.title': 'More or Less',
   'shell.compare.subMore': 'Tap the side with more',
   'shell.compare.subFewer': 'Tap the side with fewer',
+  'shell.balance.title': 'Number Balance',
+  'shell.balance.sub': 'Find the missing part!',
   'shell.sums.title': 'Little Sums',
   'shell.sums.sub': 'See them add up, then tell me the total',
   'shell.spotit.title': 'Spot It!',
@@ -584,6 +575,7 @@ export const EN: Table = {
   'win.spell': 'Great spelling! You built {n} words!',
   'win.count': 'Amazing counter! You got them all!',
   'win.compare': 'Sharp eyes! You compared like a champ!',
+  'win.balance': 'Amazing! You balanced the numbers!',
   'win.sums': 'Sum superstar! You added them all!',
   'win.bingo': 'BINGO! You got a line!',
   'win.musicbox': 'Beautiful music! You played the whole song!',
@@ -759,6 +751,7 @@ export const EN: Table = {
   'sums.plus': 'plus',
   'sums.question': 'How many now?',
   'sums.praise': 'That\'s right!',
+  'balance.praise': 'That\'s right!',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };

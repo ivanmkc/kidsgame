@@ -17,6 +17,7 @@ export type CardKey =
   | 'count'
   | 'numbers'
   | 'compare'
+  | 'balance'
   | 'sums'
   | 'spotit'
   | 'diff'
@@ -73,6 +74,7 @@ export const NUMBER_CARDS: CardDef[] = [
   { route: 'count', color: '#E8A24F', key: 'count', preview: 'icons0' },
   { route: 'numbers', color: '#3E9BB8', key: 'numbers', preview: 'icons8' },
   { route: 'compare', color: '#D66FA8', key: 'compare', preview: 'icons13' },
+  { route: 'balance', color: '#4FB06D', key: 'balance', preview: 'icons8' },
   { route: 'sums', color: '#7A6FD6', key: 'sums', preview: 'icons20' },
   { route: 'cm-numdots', color: '#4FB06D', key: 'cm-numdots', preview: 'icons8' },
   { route: 'cm-numhan', color: '#E85D75', key: 'cm-numhan', preview: 'icons8' },
