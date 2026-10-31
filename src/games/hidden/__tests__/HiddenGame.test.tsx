@@ -1307,6 +1307,7 @@ describe("HiddenGame win overlay and progression", () => {
 
     expect(saySpy).toHaveBeenCalledWith(t("en", "win.hiddenCoop"));
     expect(screen.getByText(t("en", "win.hiddenCoop"))).toBeDefined();
+    expect(screen.queryByTestId("hidden-turn-banner")).toBeNull();
 
     const nextScene = manifest.hidden[1];
     rerender(
@@ -1324,6 +1325,38 @@ describe("HiddenGame win overlay and progression", () => {
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("Bunny's turn!");
+  });
+
+  it("hides TurnBanner when round is won in 2P co-op mode", () => {
+    const scene = manifest.hidden[0];
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        sceneId={scene.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+    expect(screen.getByTestId("hidden-turn-banner")).toBeDefined();
+
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const id of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${id}`));
+    }
+
+    expect(screen.getByText(t("en", "win.hiddenCoop"))).toBeDefined();
+    expect(screen.queryByTestId("hidden-turn-banner")).toBeNull();
   });
 });
 
