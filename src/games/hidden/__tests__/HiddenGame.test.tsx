@@ -15,6 +15,7 @@ import { Animated } from "react-native";
 import { sfx } from "../../../sound";
 import { LangContext } from "../../../components/GameShell";
 import { Lang } from "../../../lang";
+import { MP_PLAYERS } from "../../../multiplayer";
 import { HiddenGame } from "../HiddenGame";
 
 describe("HiddenGame localization", () => {
@@ -102,13 +103,16 @@ describe("HiddenGame localization", () => {
   });
 
   it("speaks localized narration cues for solo play and 2P turn changes", () => {
-    const speakSpy = vi.fn();
+    const speakSpy = vi.fn((u?: { onend?: () => void }) => {
+      u?.onend?.();
+    });
     vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
     });
     vi.stubGlobal("SpeechSynthesisUtterance", class {
       text: string;
+      onend?: () => void;
       constructor(text: string) {
         this.text = text;
       }
@@ -167,8 +171,241 @@ describe("HiddenGame localization", () => {
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
     expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: "かくれてる ものを ぜんぶ みつけよう！",
+      }),
+    );
+    expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({ text: "きつねの ばん！" }),
     );
+  });
+
+  it("speaks instructional prompt on scene entrance in 2P mode before announcing player turn", async () => {
+    let currentlySpeaking: { text: string; onend?: () => void } | null = null;
+    let clobbered = false;
+    const completedSpeech: string[] = [];
+
+    const cancelSpy = vi.fn(() => {
+      if (currentlySpeaking) {
+        clobbered = true;
+        currentlySpeaking = null;
+      }
+    });
+
+    const speakSpy = vi.fn((u: { text: string; onend?: () => void }) => {
+      currentlySpeaking = u;
+      // Realistic simulation: utterance finishes after a tick if not cancelled mid-flight
+      setTimeout(() => {
+        if (currentlySpeaking === u) {
+          currentlySpeaking = null;
+          completedSpeech.push(u.text);
+          u.onend?.();
+        }
+      }, 10);
+    });
+
+    vi.stubGlobal("speechSynthesis", {
+      speak: speakSpy,
+      cancel: cancelSpy,
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
+      text: string;
+      onend?: () => void;
+      constructor(text: string) {
+        this.text = text;
+      }
+    });
+
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const saySpy = vi.spyOn(sound, "say");
+
+    render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        sceneId={manifest.hidden[0].id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    saySeqSpy.mockClear();
+    saySpy.mockClear();
+    speakSpy.mockClear();
+    cancelSpy.mockClear();
+    currentlySpeaking = null;
+    completedSpeech.length = 0;
+    clobbered = false;
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const expectedPrompt = t("ja", "hidden.prompt");
+    const expectedTurn0 = t(
+      "ja",
+      "hidden.turn",
+      { name: t("ja", MP_PLAYERS[0].name) },
+    );
+
+    // saySequence is called with both prompt and turn
+    expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn0]);
+
+    // Wait for the simulated sequence playback to complete
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    // Neither utterance was clobbered by an intervening cancel
+    expect(clobbered).toBe(false);
+    expect(completedSpeech).toEqual([expectedPrompt, expectedTurn0]);
+
+    // Finding an object switches turns and only speaks the next player's turn, not the prompt
+    saySeqSpy.mockClear();
+    saySpy.mockClear();
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    fireEvent.click(screen.getByTestId(`hidden-target-${targets[0]}`));
+
+    const expectedTurn1 = t(
+      "ja",
+      "hidden.turn",
+      { name: t("ja", MP_PLAYERS[1].name) },
+    );
+    expect(saySeqSpy).not.toHaveBeenCalled();
+    expect(saySpy).toHaveBeenCalledWith(expectedTurn1);
+  });
+
+  it("speaks instructional prompt and alternating player turn on subsequent scene without cancellation", async () => {
+    let clobbered = false;
+    let currentlySpeaking: { text: string; onend?: () => void } | null = null;
+    const completedSpeech: string[] = [];
+
+    const cancelSpy = vi.fn(() => {
+      if (currentlySpeaking) {
+        clobbered = true;
+        currentlySpeaking = null;
+      }
+    });
+
+    const speakSpy = vi.fn((u: { text: string; onend?: () => void }) => {
+      currentlySpeaking = u;
+      setTimeout(() => {
+        if (currentlySpeaking === u) {
+          currentlySpeaking = null;
+          completedSpeech.push(u.text);
+          u.onend?.();
+        }
+      }, 10);
+    });
+
+    vi.stubGlobal("speechSynthesis", {
+      speak: speakSpy,
+      cancel: cancelSpy,
+    });
+    vi.stubGlobal("SpeechSynthesisUtterance", class {
+      text: string;
+      onend?: () => void;
+      constructor(text: string) {
+        this.text = text;
+      }
+    });
+
+    const saySeqSpy = vi.spyOn(sound, "saySequence");
+    const saySpy = vi.spyOn(sound, "say");
+
+    const scene0 = manifest.hidden[0];
+    const { rerender } = render(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        sceneId={scene0.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    saySeqSpy.mockClear();
+    saySpy.mockClear();
+    speakSpy.mockClear();
+    cancelSpy.mockClear();
+    currentlySpeaking = null;
+    completedSpeech.length = 0;
+    clobbered = false;
+
+    // Start 2P mode
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const expectedPrompt = t("ja", "hidden.prompt");
+    const expectedTurn0 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[0].name),
+    });
+    expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn0]);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+    expect(clobbered).toBe(false);
+
+    // Complete scene 0
+    const checklist = screen.getByTestId("hidden-checklist");
+    const targets = Array.from(
+      checklist.querySelectorAll('[data-testid^="checklist-"]'),
+    )
+      .map((el) => el.getAttribute("data-testid")!.replace("checklist-", ""))
+      .filter((id) => !id.includes("-finder"));
+
+    for (const targetId of targets) {
+      fireEvent.click(screen.getByTestId(`hidden-target-${targetId}`));
+    }
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    // Advance to scene 1
+    saySeqSpy.mockClear();
+    saySpy.mockClear();
+    speakSpy.mockClear();
+    cancelSpy.mockClear();
+    currentlySpeaking = null;
+    completedSpeech.length = 0;
+    clobbered = false;
+
+    const scene1 = manifest.hidden[1];
+    rerender(
+      <HiddenGame
+        onHome={noop}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        sceneId={scene1.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    const expectedTurn1 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[1].name),
+    });
+
+    // saySequence is called with prompt and Bunny's turn (1)
+    expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn1]);
+
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 50));
+    });
+
+    // Verify neither utterance was clobbered by an intervening cancel
+    expect(clobbered).toBe(false);
+    expect(completedSpeech).toEqual([expectedPrompt, expectedTurn1]);
   });
 
   it("does not speak intro prompts when mode is null (ModePicker is visible)", () => {
