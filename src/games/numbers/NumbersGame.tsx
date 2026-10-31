@@ -49,6 +49,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   );
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [correctIdx, setCorrectIdx] = useState<number | null>(null);
+  const [isFinishing, setIsFinishing] = useState(false);
 
   const { epoch, isValid } = useLangEpoch(lang);
 
@@ -64,6 +65,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       lockTimerRef.current = null;
     }
     lockedRef.current = false;
+    setIsFinishing(false);
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
     setCorrectIdx(null);
@@ -83,8 +85,8 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
-  useWinLine(won, t(lang, "win.numbers"));
-  const elapsed = useElapsed(showTimer && !won, timerKey);
+  useWinLine(won && !isFinishing, t(lang, "win.numbers"));
+  const elapsed = useElapsed(showTimer && !won && !isFinishing, timerKey);
   const { width, height } = useWindowDimensions();
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const pulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (won) {
+    if (won || isFinishing) {
       pulse.setValue(1);
       return;
     }
@@ -117,15 +119,15 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       loop.stop();
       pulse.stopAnimation();
     };
-  }, [pulse, won]);
+  }, [pulse, won, isFinishing]);
 
   const onReplayPrompt = () => {
-    if (won || lockedRef.current) return;
+    if (won || isFinishing || lockedRef.current) return;
     saySequence(round.promptLines);
   };
 
   const onTile = (i: number) => {
-    if (won || lockedRef.current) return;
+    if (won || isFinishing || lockedRef.current) return;
     if (round.tiles[i].isAnswer) {
       lockedRef.current = true;
       sfx.good();
@@ -135,14 +137,18 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
         clearTimeout(errorTimerRef.current);
         errorTimerRef.current = null;
       }
+      const next = roundIdx + 1;
+      if (next >= roundsToWin) {
+        setIsFinishing(true);
+      }
+      setRoundIdx(next);
       if (lockTimerRef.current) clearTimeout(lockTimerRef.current);
       lockTimerRef.current = setTimeout(() => {
         if (!isValid()) return;
         lockedRef.current = false;
         lockTimerRef.current = null;
         setCorrectIdx(null);
-        const next = roundIdx + 1;
-        setRoundIdx(next);
+        setIsFinishing(false);
         if (next < roundsToWin) {
           setRound(
             makeNumberRound(rngRef.current, numSettings, lang, round.targetN),
@@ -178,6 +184,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
     setCorrectIdx(null);
+    setIsFinishing(false);
   };
 
   const cols = numSettings.tiles <= 6 ? 3 : numSettings.tiles <= 8 ? 4 : 3;
@@ -217,7 +224,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
           {lang !== "en" ? (
             <Pressable
               onPress={() => {
-                if (lockedRef.current) return;
+                if (lockedRef.current || won || isFinishing) return;
                 sfx.tap();
                 setScript(numSettings.useHan ? "arabic" : "han");
               }}
@@ -256,7 +263,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       <View style={styles.board}>
         <Pressable
           onPress={onReplayPrompt}
-          disabled={won}
+          disabled={won || isFinishing}
           accessibilityRole="button"
           accessibilityLabel={t(lang, "spell.hearAgain")}
           style={({ pressed }) => [
@@ -282,7 +289,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
         >
           {round.tiles.map((t, i) => (
             <Pressable
-              key={`${roundIdx}-${i}-${t.key}`}
+              key={`${round.targetKey}-${i}-${t.key}`}
               onPress={() => onTile(i)}
               testID={`numbers-tile-${i}`}
               accessibilityLabel={t.label}
@@ -313,7 +320,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
         </View>
       </View>
       <WinOverlay
-        visible={won}
+        visible={won && !isFinishing}
         message={t(lang, "win.numbers")}
         onNext={reset}
         nextLabel={t(lang, "overlay.playAgain")}
