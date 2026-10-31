@@ -116,6 +116,26 @@ describe("count with me", () => {
     }
   });
 
+  it("makeCountRound rerolls if both icon and count match previous round", () => {
+    let callCount = 0;
+    const rng = () => {
+      callCount++;
+      if (callCount <= 2) return 0;
+      if (callCount <= 4) return 0.9999;
+      return 0.5;
+    };
+    const { min, max } = countSettings("easy");
+    const prevIcon = CURRICULUM.critters[0];
+    const prevN = min;
+    const round = makeCountRound(rng, "easy", prevIcon, prevN);
+    expect(round.icon).not.toBe(prevIcon);
+    expect(round.n).not.toBe(prevN);
+    expect(round.icon).toBe(
+      CURRICULUM.critters[CURRICULUM.critters.length - 1],
+    );
+    expect(round.n).toBe(max);
+  });
+
   it("applyTap marks an uncounted item as tapped without mutating original", () => {
     const initial = [0, 0, 0];
     const next = applyTap(initial, 1);
