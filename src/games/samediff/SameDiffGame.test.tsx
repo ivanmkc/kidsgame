@@ -23,7 +23,8 @@ import { makeRng } from "../../rng";
 import { sfx } from "../../sound";
 import * as sound from "../../sound";
 import * as music from "../../music";
-import { LANGS } from "../../lang";
+import { type Lang, LANGS } from "../../lang";
+import { LangContext } from "../../components/GameShell";
 import { t } from "../../i18n";
 
 describe("SameDiffGame UI", () => {
@@ -449,19 +450,25 @@ describe("SameDiffGame UI", () => {
       /🎧 0\/\d+/,
     );
 
-    // Change language mid-round
+    // Change language mid-round: round restarts safely into listenA
     rerender(<SameDiffGame onHome={() => {}} difficulty="easy" lang="ja" />);
 
-    // Check instantly updated to Japanese labels and prompt
-    expect(screen.getByText("おなじ")).toBeTruthy();
-    expect(screen.getByText("ちがう")).toBeTruthy();
+    // Check instantly updated Japanese header title and prompt
     expect(screen.getByText("おなじ ちがう")).toBeTruthy();
     expect(screen.getByText("ふたつの メロディは おなじ？")).toBeTruthy();
     expect(screen.getByTestId("samediff-score").textContent).toMatch(
       /🎧 0\/\d+/,
     );
+    expect(screen.getByTestId("melody-dot-0")).toBeTruthy();
 
-    // Verify buttons are still present and we are still in pick phase
+    // Advance through the restarted listening sequence to reach pick phase
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    // Check updated Japanese labels on pick buttons in pick phase
+    expect(screen.getByText("おなじ")).toBeTruthy();
+    expect(screen.getByText("ちがう")).toBeTruthy();
     expect(screen.getByTestId("samediff-same")).toBeTruthy();
     expect(screen.getByTestId("samediff-diff")).toBeTruthy();
 
@@ -1200,6 +1207,92 @@ describe("SameDiffGame UI", () => {
       });
 
       expect(playSpy).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
+
+    it("restarts round and drops stale audio on language switch mid-round", () => {
+      vi.useFakeTimers();
+      const sayThenSpy = vi.spyOn(sound, "sayThen");
+      const saySeqSpy = vi.spyOn(sound, "saySequence");
+      const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+      const playSpy = vi.spyOn(music, "playSequence");
+
+      function LangHarness({ initialLang = "en" }: { initialLang?: Lang }) {
+        const [lang, setLang] = React.useState<Lang>(initialLang);
+        const cycleLang = () => {
+          setLang((l) =>
+            l === "en" ? "ja" : l === "ja" ? "cmn" : l === "cmn" ? "yue" : "en",
+          );
+        };
+        return (
+          <LangContext.Provider value={{ lang, onCycle: cycleLang }}>
+            <SameDiffGame onHome={() => {}} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      render(<LangHarness initialLang="en" />);
+
+      // Advance mount delay (400ms) to trigger first playRound
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+
+      expect(sayThenSpy).toHaveBeenCalledWith(
+        ["Listen..."],
+        expect.any(Function),
+        3000,
+      );
+
+      sayThenSpy.mockClear();
+      saySeqSpy.mockClear();
+      stopNarrationSpy.mockClear();
+      playSpy.mockClear();
+
+      // Switch language to Japanese mid-round via in-game header button while sayThen is pending
+      const langBtn = screen.getByTestId("lang-cycle");
+      act(() => {
+        fireEvent.click(langBtn);
+      });
+
+      // Old narration is stopped immediately
+      expect(stopNarrationSpy).toHaveBeenCalled();
+
+      // Old melody was dropped by !isValid() check in startMelody
+      expect(playSpy).not.toHaveBeenCalled();
+
+      // Japanese prompt is scheduled for the restarted round
+      expect(sayThenSpy).toHaveBeenCalledWith(
+        ["きいてね…"],
+        expect.any(Function),
+        3000,
+      );
+
+      // Shell title, subtitle, and score agree in Japanese
+      expect(screen.getByText("おなじ ちがう")).toBeTruthy();
+      expect(screen.getByText("ふたつの メロディは おなじ？")).toBeTruthy();
+      expect(screen.getByTestId("samediff-score").textContent).toMatch(
+        /🎧 0\/\d+/,
+      );
+
+      // Advance through Japanese sayThen and melody sequences to pick phase
+      act(() => {
+        vi.advanceTimersByTime(4200);
+      });
+
+      // Spoken pick prompt is Japanese only
+      expect(saySeqSpy).toHaveBeenCalledWith([
+        "ふたつの メロディは おなじ？",
+        "おなじ",
+        "ちがう",
+      ]);
+
+      // Choice buttons match Japanese labels
+      expect(screen.getByTestId("samediff-same")).toBeTruthy();
+      expect(screen.getByTestId("samediff-diff")).toBeTruthy();
+      expect(screen.getByText("おなじ")).toBeTruthy();
+      expect(screen.getByText("ちがう")).toBeTruthy();
 
       vi.useRealTimers();
     });
