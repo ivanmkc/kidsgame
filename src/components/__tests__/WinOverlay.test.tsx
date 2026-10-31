@@ -47,6 +47,11 @@ describe("WinOverlay", () => {
     vi.restoreAllMocks();
     window.location.hash = "";
     window.localStorage.clear();
+    delete (document.documentElement as unknown as { clientWidth?: number })
+      .clientWidth;
+    delete (document.documentElement as unknown as { clientHeight?: number })
+      .clientHeight;
+    window.dispatchEvent(new Event("resize"));
   });
 
   it("allows message to wrap up to 3 lines without capping at 2 lines", () => {
@@ -73,6 +78,31 @@ describe("WinOverlay", () => {
       />,
     );
     expect(html).toBe("");
+  });
+
+  it("enables flex wrapping in landscape layout to prevent overflow on compact screens", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 568,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 320,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    const alert = screen.getByRole("alert");
+    const content = alert.firstElementChild as HTMLElement;
+    expect(window.getComputedStyle(content).flexWrap).toBe("wrap");
   });
 
   it("renders action buttons with accessibility roles and testIDs", () => {
