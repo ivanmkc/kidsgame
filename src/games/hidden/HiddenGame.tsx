@@ -291,9 +291,10 @@ export function HiddenGame({
     return f && f.by !== null ? f.by : null;
   };
 
-  const turnBanner = coop ? (
-    <TurnBanner turn={turn} lang={lang} compact={isLandscape} />
-  ) : null;
+  const turnBanner =
+    coop && !won ? (
+      <TurnBanner turn={turn} lang={lang} compact={isLandscape} />
+    ) : null;
 
   const checklistChips = drawn.map((target) => {
     const done = foundIds.includes(target.id);
