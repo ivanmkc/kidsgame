@@ -88,7 +88,6 @@ export function HiddenGame({
   const turnRef = useRef<PlayerIx>(0);
   const findsRef = useRef<Set<string>>(new Set());
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
-  const omittedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const sceneChanged = sceneId !== (prevSceneId ?? undefined);
   const drawChanged = settings.hiddenDraw !== prevHiddenDraw;
@@ -99,10 +98,6 @@ export function HiddenGame({
     setFinds([]);
     findsRef.current = new Set();
     setHintId(null);
-    if (omittedHintTimer.current) {
-      clearTimeout(omittedHintTimer.current);
-      omittedHintTimer.current = null;
-    }
     if (sceneId && sceneChanged) {
       // starting player alternates each scene
       const s = nextTurn(starterRef.current);
@@ -126,7 +121,6 @@ export function HiddenGame({
 
   useEffect(
     () => () => {
-      if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
       stopNarration();
     },
     [],
@@ -236,7 +230,7 @@ export function HiddenGame({
     );
   }
 
-  const boxes = scene.targets.map((t) => ({ id: t.id, box: t }));
+  const boxes = drawn.map((t) => ({ id: t.id, box: t }));
   const ar = scene.w / scene.h;
 
   const { isLandscape, sceneWidth, sidebarWidth } = hiddenLayout(
@@ -257,24 +251,8 @@ export function HiddenGame({
 
   const onHit = (id: string) => {
     if (won || mode === null) return;
-    const isDrawn = drawn.some((t) => t.id === id);
-    if (!isDrawn) {
-      sfx.tap();
-      say(t(lang, "hidden.prompt"));
-      setHintId(id);
-      if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
-      omittedHintTimer.current = setTimeout(() => {
-        setHintId((h) => (h === id ? null : h));
-      }, 1500);
-      return;
-    }
     if (findsRef.current.has(id)) return; // synchronous de-dupe under burst taps
     findsRef.current.add(id);
-    if (omittedHintTimer.current) {
-      clearTimeout(omittedHintTimer.current);
-      omittedHintTimer.current = null;
-      setHintId(null);
-    }
     sfx.good();
     // Attribution-by-turn: the turn holder gets credit for ANY find —
     // helping is the mechanic. Stamp before flipping the turn.
@@ -419,7 +397,10 @@ export function HiddenGame({
             ringColors={ringColors}
             hintId={hintId}
             onHit={onHit}
-            onMiss={() => {}}
+            onMiss={() => {
+              sfx.tap();
+              say(t(lang, "hidden.prompt"));
+            }}
             testIDPrefix="hidden"
             lang={lang}
             disabled={won}
