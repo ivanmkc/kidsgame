@@ -56,7 +56,7 @@ const RHYTHM_PATTERNS: Record<Difficulty, PatternDef[]> = {
 };
 
 export function tolerancePct(d: Difficulty): number {
-  if (d === "easy") return 0.50; // generous tolerance for young children
+  if (d === "easy") return 0.5; // generous tolerance for young children
   if (d === "medium") return 0.35;
   return 0.25;
 }
@@ -99,7 +99,7 @@ export function checkEcho(
   }
 
   const tol = tolerancePct(d);
-  const minWindow = d === "easy" ? 0.20 : d === "medium" ? 0.12 : 0.08;
+  const minWindow = d === "easy" ? 0.2 : d === "medium" ? 0.12 : 0.08;
 
   if (round.gaps.length === 1) {
     const err = Math.abs(playerGaps[0] - round.gaps[0]);

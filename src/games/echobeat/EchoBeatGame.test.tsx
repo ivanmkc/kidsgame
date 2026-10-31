@@ -843,6 +843,23 @@ describe("EchoBeatGame", () => {
     vi.useRealTimers();
   });
 
+  it("clamps drum container scale on short landscape viewports to prevent layout occlusion", () => {
+    vi.useFakeTimers();
+    setViewport(667, 375);
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    const drumContainer = screen.getByTestId("echobeat-drum-container");
+    expect(drumContainer.style.transform).toBe("");
+
+    vi.useRealTimers();
+  });
+
   it("renders a single emoji in status card during celebration and retry without duplicating emojis", () => {
     vi.useFakeTimers();
     vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({

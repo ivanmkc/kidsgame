@@ -403,12 +403,11 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
           </View>
         )}
         <Animated.View
+          testID="echobeat-drum-container"
           style={
-            phase === "tap" && canTapDrum
+            phase === "tap" && canTapDrum && !shortH
               ? {
-                  transform: [
-                    { scale: Animated.multiply(drumScale, tempoPulseScale) },
-                  ],
+                  transform: [{ scale: drumScale }],
                 }
               : undefined
           }
