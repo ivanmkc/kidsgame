@@ -19,13 +19,14 @@ describe('coopDrawCount', () => {
     }
   });
 
-  it('even-ifies downward: 5 → 4 so easy draws fewer targets than medium', () => {
+  it('even-ifies downward: 3 → 2 and 5 → 4 so odd base draws an even target count', () => {
+    expect(coopDrawCount(3, 10)).toBe(2);
     expect(coopDrawCount(5, 10)).toBe(4);
   });
 
-  it('differentiates easy (5), medium (6), and hard (8) draw counts', () => {
+  it('differentiates easy (3), medium (5), and hard (8) draw counts', () => {
+    expect(coopDrawCount(3, 8)).toBe(2);
     expect(coopDrawCount(5, 8)).toBe(4);
-    expect(coopDrawCount(6, 8)).toBe(6);
     expect(coopDrawCount(8, 8)).toBe(8);
   });
 
@@ -133,7 +134,7 @@ describe('HiddenGame render with the 2P toggle OFF', () => {
     const mediumMatches = wizardScene.targets.filter((t) => mediumHtml.includes(`checklist-${t.id}`));
     const hardMatches = wizardScene.targets.filter((t) => hardHtml.includes(`checklist-${t.id}`));
 
-    expect(mediumMatches.length).toBe(6);
+    expect(mediumMatches.length).toBe(5);
     expect(hardMatches.length).toBe(8);
   });
 });

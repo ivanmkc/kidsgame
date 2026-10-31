@@ -755,7 +755,7 @@ describe("HiddenGame difficulty settings", () => {
     );
 
     expect(screen.queryByTestId("hidden-timer")).toBeNull();
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/3");
   });
 
   it("differentiates target count between easy and medium in 2P co-op mode", () => {
@@ -774,7 +774,7 @@ describe("HiddenGame difficulty settings", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/2");
     unmountEasy();
     cleanup();
 
@@ -790,7 +790,7 @@ describe("HiddenGame difficulty settings", () => {
       />,
     );
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
   });
 
   it("updates drawn target count and score chip when difficulty filter changes on an active scene, cleanly resetting round state", () => {
@@ -808,8 +808,8 @@ describe("HiddenGame difficulty settings", () => {
       />,
     );
 
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
-    expect(screen.getByTestId("hidden-checklist").children.length).toBe(5);
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/3");
+    expect(screen.getByTestId("hidden-checklist").children.length).toBe(3);
 
     // Find a target on easy
     const easyChips = Array.from(
@@ -819,9 +819,9 @@ describe("HiddenGame difficulty settings", () => {
       .getAttribute("data-testid")!
       .replace("checklist-", "");
     fireEvent.click(screen.getByTestId(`hidden-target-${foundId}`));
-    expect(screen.getByTestId("hidden-score").textContent).toContain("1/5");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/3");
 
-    // Switching filter to medium cleanly resets finds and resizes checklist to 6
+    // Switching filter to medium cleanly resets finds and resizes checklist to 5
     rerender(
       <HiddenGame
         onHome={noop}
@@ -833,8 +833,8 @@ describe("HiddenGame difficulty settings", () => {
       />,
     );
 
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/6");
-    expect(screen.getByTestId("hidden-checklist").children.length).toBe(6);
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(screen.getByTestId("hidden-checklist").children.length).toBe(5);
 
     // Switching filter to hard cleanly resets finds and resizes checklist to 8
     rerender(
@@ -898,17 +898,17 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       />,
     );
 
-    // Easy mode draws 5 checklist items
+    // Easy mode draws 3 checklist items
     const checklistItems = jungleScene.targets.filter(
       (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
     );
-    expect(checklistItems.length).toBe(5);
+    expect(checklistItems.length).toBe(3);
 
-    // 1 target is omitted from the checklist
+    // 3 targets are omitted from the checklist
     const omittedTargets = jungleScene.targets.filter(
       (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
     );
-    expect(omittedTargets.length).toBe(1);
+    expect(omittedTargets.length).toBe(3);
 
     // Hitboxes exist for all 6 targets in the artwork, including the omitted one
     for (const target of jungleScene.targets) {
@@ -960,7 +960,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
     )!;
 
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/3");
 
     goodSpy.mockClear();
     tapSpy.mockClear();
@@ -976,7 +976,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
 
     // Omitted target flashes a visual hint ring for players with sound off
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/3");
     expect(omittedBtn.children.length).toBeGreaterThan(0);
 
     // The visual flash clears after 1500ms
@@ -991,7 +991,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
 
     // It plays good and updates score
     expect(goodSpy).toHaveBeenCalled();
-    expect(screen.getByTestId("hidden-score").textContent).toContain("1/5");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/3");
     expect(drawnBtn.children.length).toBeGreaterThan(0);
   });
 
@@ -1015,7 +1015,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     const tapSpy = vi.spyOn(sfx, "tap");
     const saySpy = vi.spyOn(sound, "say");
 
-    // dinonest has 7 targets; in 2P easy, coopDrawCount(5, 7) draws 4 targets, leaving 3 omitted
+    // dinonest has 7 targets; in 2P easy, coopDrawCount(3, 7) draws 2 targets, leaving 5 omitted
     const dinoScene = manifest.hidden.find((h) => h.id === "dinonest")!;
     expect(dinoScene.targets.length).toBe(7);
 
@@ -1047,7 +1047,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("きつねの ばん！");
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/2");
 
     goodSpy.mockClear();
     tapSpy.mockClear();
@@ -1060,7 +1060,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(tapSpy).toHaveBeenCalled();
     expect(goodSpy).not.toHaveBeenCalled();
     expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
-    expect(screen.getByTestId("hidden-score").textContent).toContain("0/4");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("0/2");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("きつねの ばん！");
@@ -1070,7 +1070,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     fireEvent.click(drawnBtn);
 
     expect(goodSpy).toHaveBeenCalled();
-    expect(screen.getByTestId("hidden-score").textContent).toContain("1/4");
+    expect(screen.getByTestId("hidden-score").textContent).toContain("1/2");
     expect(
       screen.getByTestId("hidden-turn-banner").getAttribute("aria-label"),
     ).toBe("うさぎの ばん！");
@@ -1739,7 +1739,7 @@ describe("HiddenGame language switch", () => {
 
     // Initial English prompt is spoken via playClip (no speechSynthesis if asset exists),
     // but we can check the on-screen text update
-    expect(screen.getByText("🔎 0/5")).toBeDefined();
+    expect(screen.getByText("🔎 0/3")).toBeDefined();
 
     stopSpy.mockClear();
     speakSpy.mockClear();
@@ -1760,8 +1760,8 @@ describe("HiddenGame language switch", () => {
       }),
     );
 
-    // Board text labels should update (if any). The score chip is still "🔎 0/5".
-    expect(screen.getByText("🔎 0/5")).toBeDefined();
+    // Board text labels should update (if any). The score chip is still "🔎 0/3".
+    expect(screen.getByText("🔎 0/3")).toBeDefined();
     // The checklist items have accessibilityLabel "a11y.target".
     const checklist = screen.getByTestId("hidden-checklist");
     const targets = checklist.querySelectorAll('[data-testid^="checklist-"]');
