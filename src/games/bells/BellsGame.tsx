@@ -112,9 +112,6 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       glowTimer.current = null;
     }, 250);
     const prev = tappedRef.current;
-    const next = [...prev, idx];
-    tappedRef.current = next;
-    setTapped(next);
     const result = judgeTap(round, prev, idx);
     if (result === "wrong") {
       flashingRef.current = true;
@@ -129,28 +126,33 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
           playDemo(round);
         }, 800),
       );
-    } else if (result === "complete") {
-      sfx.good();
-      setSparkKey((k) => k + 1);
-      const nextScore = score + 1;
-      setScore(nextScore);
-      if (nextScore < total) {
-        demoTimers.current.push(
-          setTimeout(() => {
-            const nr = makeBellsRound(
-              rngRef.current,
-              difficulty,
-              round.sequence,
-            );
-            setRound(nr);
-          }, 600),
-        );
-      } else {
-        demoTimers.current.push(
-          setTimeout(() => {
-            setWon(true);
-          }, 600),
-        );
+    } else {
+      const next = [...prev, idx];
+      tappedRef.current = next;
+      setTapped(next);
+      if (result === "complete") {
+        sfx.good();
+        setSparkKey((k) => k + 1);
+        const nextScore = score + 1;
+        setScore(nextScore);
+        if (nextScore < total) {
+          demoTimers.current.push(
+            setTimeout(() => {
+              const nr = makeBellsRound(
+                rngRef.current,
+                difficulty,
+                round.sequence,
+              );
+              setRound(nr);
+            }, 600),
+          );
+        } else {
+          demoTimers.current.push(
+            setTimeout(() => {
+              setWon(true);
+            }, 600),
+          );
+        }
       }
     }
   };
