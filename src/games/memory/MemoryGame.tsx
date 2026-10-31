@@ -87,7 +87,7 @@ export function MemoryGame({
     },
   });
   const [timerKey, setTimerKey] = useState(0);
-  const showTimer = settingsFor(difficulty).timer && mode !== "2p";
+  const showTimer = settingsFor(difficulty).timer && mode === "solo";
   useSay(mode === null || duel ? null : t(lang, "card.memory.blurb"));
   useWinLine(won && !duel, t(lang, "win.memory"));
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
@@ -279,11 +279,11 @@ export function MemoryGame({
               lang={lang}
             />
           </View>
-        ) : (
+        ) : mode === "solo" ? (
           <Text style={styles.moves} testID="memory-moves">
             {t(lang, "memory.moves", { n: moves })}
           </Text>
-        )}
+        ) : null}
       </View>
       <WinOverlay
         visible={won}
