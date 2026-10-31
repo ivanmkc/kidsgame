@@ -1242,6 +1242,52 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('commits drag progress when interrupted by a pinch gesture', () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+    const trayBtn = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    if (trayBtn) {
+      act(() => { fireEvent.click(trayBtn); });
+    }
+
+    const placed = screen.getByTestId('sticker-placed-1');
+    expect(placed).toBeDefined();
+
+    const initialLeft = placed.style.left;
+    const initialTop = placed.style.top;
+
+    const t1 = { pageX: 50, pageY: 50, clientX: 50, clientY: 50, identifier: 0, target: placed };
+    const t2 = { pageX: 100, pageY: 100, clientX: 100, clientY: 100, identifier: 1, target: placed };
+
+    act(() => {
+      // Start drag with one finger
+      fireEvent.touchStart(placed, { touches: [t1], changedTouches: [t1] });
+      // Move 100px
+      fireEvent.touchMove(placed, {
+        touches: [{ ...t1, pageX: 150, pageY: 150 }],
+        changedTouches: [{ ...t1, pageX: 150, pageY: 150 }]
+      });
+      // Add second finger (pinch start)
+      fireEvent.touchStart(placed, {
+        touches: [{ ...t1, pageX: 150, pageY: 150 }, t2],
+        changedTouches: [t2]
+      });
+      fireEvent.touchMove(placed, {
+        touches: [{ ...t1, pageX: 150, pageY: 150 }, t2],
+        changedTouches: [t2]
+      });
+      // Release fingers
+      fireEvent.touchEnd(placed, { touches: [], changedTouches: [{ ...t1, pageX: 150, pageY: 150 }, t2] });
+    });
+
+    const newLeft = placed.style.left;
+    const newTop = placed.style.top;
+    expect(newLeft !== initialLeft || newTop !== initialTop).toBe(true);
+
+    unmount();
+  });
+
   it('transforms placed sticker via two-touch pinch/rotate gesture', () => {
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
