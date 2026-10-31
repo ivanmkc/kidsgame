@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import * as music from "../../../music";
@@ -126,9 +126,9 @@ describe("CarModeGame unmount", () => {
     expect(advanceSpy).not.toHaveBeenCalled();
   });
 
-  it("clears replay timers when unmounted during boops prompt replay", () => {
+  it("clears gap timer when unmounted during boops gap phase", () => {
     vi.useFakeTimers();
-    const sayThenSpy = vi.spyOn(sound, "sayThen");
+    const toRevealSpy = vi.spyOn(logic, "toReveal");
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({
       ...actual,
@@ -138,25 +138,12 @@ describe("CarModeGame unmount", () => {
 
     const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
 
-    // Advance past phase debounce
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-
-    sayThenSpy.mockClear();
-
-    // Tap to trigger replay
-    const tapBtn = screen.getByTestId("carmode-tap");
-    fireEvent.click(tapBtn);
-
-    expect(sayThenSpy).not.toHaveBeenCalled();
-
     unmount();
 
     // Fast-forward through all timers.
     vi.runAllTimers();
 
-    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(toRevealSpy).not.toHaveBeenCalled();
   });
 
   it("does not transition to gap when unmounted while sayThen is active during prompt", () => {
@@ -227,7 +214,7 @@ describe("CarModeGame unmount", () => {
     expect(toGapSpy).not.toHaveBeenCalled();
   });
 
-  it("does not transition to reveal when unmounted while sayThen is active during replay prompt", () => {
+  it("does not transition to reveal when unmounted during gap phase", () => {
     vi.useFakeTimers();
     const toRevealSpy = vi.spyOn(logic, "toReveal");
     const actual = logic.startState("rhyme", 42);
@@ -249,15 +236,6 @@ describe("CarModeGame unmount", () => {
     });
 
     const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
-
-    // Advance past phase debounce
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-
-    // Tap to trigger replay prompt
-    const tapBtn = screen.getByTestId("carmode-tap");
-    fireEvent.click(tapBtn);
 
     unmount();
 

@@ -684,10 +684,10 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByTestId("carmode-score").textContent).toContain("2/10");
   });
 
-  it("replays spoken prompt when tapped during gap phase for standard packs", () => {
+  it("advances to reveal when tapped during gap phase for standard packs", () => {
     vi.useFakeTimers();
+    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockReturnValue();
     const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
-    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
 
     const actual = logic.startState("rhyme", 42);
     vi.spyOn(logic, "startState").mockReturnValue({
@@ -703,17 +703,45 @@ describe("CarModeGame interactions", () => {
     });
 
     sayThenSpy.mockClear();
-    stopNarrationSpy.mockClear();
 
     const tapBtn = screen.getByTestId("carmode-tap");
     fireEvent.click(tapBtn);
 
-    expect(stopNarrationSpy).toHaveBeenCalled();
-    expect(sayThenSpy).toHaveBeenCalledWith(
-      actual.rounds[0].prompt,
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(saySequenceSpy).toHaveBeenCalledWith(
+      actual.rounds[0].reveal,
       expect.any(Function),
     );
-    expect(screen.getByText("Your turn!")).toBeDefined();
+    expect(sayThenSpy).not.toHaveBeenCalled();
+  });
+
+  it("repeated taps during gap phase advance to reveal and do not trap player in prompt replay", () => {
+    vi.useFakeTimers();
+    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
+
+    const actual = logic.startState("rhyme", 42);
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      phase: "gap",
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Advance past phase debounce
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    sayThenSpy.mockClear();
+
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+    fireEvent.click(tapBtn);
+    fireEvent.click(tapBtn);
+
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(screen.queryByText("Your turn!")).toBeNull();
+    expect(sayThenSpy).not.toHaveBeenCalled();
   });
 
   it("scales total rounds based on difficulty prop", () => {
@@ -721,10 +749,9 @@ describe("CarModeGame interactions", () => {
     expect(screen.getByTestId("carmode-score").textContent).toContain("1/3");
   });
 
-  it("replays boops notes and prompt when tapped during gap phase for boops pack", () => {
+  it("advances to reveal when tapped during gap phase for boops pack", () => {
     vi.useFakeTimers();
-    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
-    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const saySequenceSpy = vi.spyOn(sound, "saySequence").mockReturnValue();
 
     const actual = logic.startState("boops", 42);
     const testRounds = [...actual.rounds];
@@ -742,39 +769,14 @@ describe("CarModeGame interactions", () => {
       vi.advanceTimersByTime(400);
     });
 
-    sayThenSpy.mockClear();
-    stopNarrationSpy.mockClear();
-
     const tapBtn = screen.getByTestId("carmode-tap");
     fireEvent.click(tapBtn);
 
-    expect(stopNarrationSpy).toHaveBeenCalled();
-    expect(sayThenSpy).not.toHaveBeenCalled();
-
-    // Advance 50ms: note 0 fires, visual flash triggers
-    act(() => {
-      vi.advanceTimersByTime(50);
-    });
-    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
-    expect(sayThenSpy).not.toHaveBeenCalled();
-
-    // Advance 400ms: note 1 fires
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-    expect(screen.getByTestId("carmode-boop-flash")).toBeDefined();
-    expect(sayThenSpy).not.toHaveBeenCalled();
-
-    // Advance 400ms: sequence completes (onDone), prompt is spoken
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-
-    expect(sayThenSpy).toHaveBeenCalledWith(
-      testRounds[0].prompt,
+    expect(screen.getByText("Tap!")).toBeDefined();
+    expect(saySequenceSpy).toHaveBeenCalledWith(
+      testRounds[0].reveal,
       expect.any(Function),
     );
-    expect(screen.getByText("Your turn!")).toBeDefined();
   });
 
   it("calls playSequence with pentatonic notes at 150 BPM for boops pack", () => {
@@ -844,12 +846,8 @@ describe("CarModeGame interactions", () => {
     sound.setMuted(false);
   });
 
-  it("advances to reveal after gap tap even when audio is muted or sayThen completes via fallback", () => {
+  it("advances to reveal immediately on gap tap without waiting for gapMs timer", () => {
     vi.useFakeTimers();
-    // In sound.ts, sayThen uses a 600ms fallback when muted
-    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
-      setTimeout(done, 600);
-    });
 
     const actual = logic.startState("rhyme", 42);
     vi.spyOn(logic, "startState").mockReturnValue({
@@ -867,12 +865,7 @@ describe("CarModeGame interactions", () => {
     const tapBtn = screen.getByTestId("carmode-tap");
     fireEvent.click(tapBtn);
 
-    // Advance through sayThen 600ms fallback + gapMs (3000ms)
-    act(() => {
-      vi.advanceTimersByTime(600 + actual.rounds[0].gapMs);
-    });
-
-    // Reaches reveal phase hands-free even with muted/stalled audio
+    // Reaches reveal phase immediately on tap, without waiting for gapMs
     expect(screen.getByText("Tap!")).toBeDefined();
   });
   it("plays correct feedback sound based on silly round answer", () => {

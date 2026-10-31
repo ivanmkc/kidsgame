@@ -321,53 +321,6 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
     };
   }, [state.phase, state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const replayPrompt = useCallback(
-    (r: Round) => {
-      stopNarration();
-      if (gapTimerRef.current) {
-        clearTimeout(gapTimerRef.current);
-        gapTimerRef.current = null;
-      }
-      if (flashTimerRef.current) {
-        clearTimeout(flashTimerRef.current);
-        flashTimerRef.current = null;
-      }
-      setBoopFlash(false);
-      stopSequence();
-
-      const speakPrompt = () => {
-        sayThen(r.prompt, () => {
-          if (!isValid()) return;
-          if (
-            stateRef.current.phase === "gap" &&
-            currentRound(stateRef.current) === r
-          ) {
-            gapTimerRef.current = setTimeout(() => {
-              if (!isValid()) return;
-              applyStateTransition(toReveal(stateRef.current));
-            }, r.gapMs);
-          }
-        });
-      };
-
-      if (r.pack === "boops" && r.noteCount) {
-        playBoops(r.noteCount, () => {
-          if (!isValid()) return;
-          if (
-            stateRef.current.phase !== "gap" ||
-            currentRound(stateRef.current) !== r
-          ) {
-            return;
-          }
-          speakPrompt();
-        });
-      } else {
-        speakPrompt();
-      }
-    },
-    [applyStateTransition, isValid, playBoops],
-  );
-
   const onTap = useCallback(() => {
     if (Date.now() - phaseEnterTime.current < PHASE_DEBOUNCE_MS) {
       return;
@@ -388,22 +341,9 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
       return;
     }
 
-    if (current.phase === "gap") {
-      const r = currentRound(current);
-      if (r?.twoTapAnswer) {
-        const next = handleTap(current);
-        applyStateTransition(next);
-        return;
-      }
-      if (r) {
-        replayPrompt(r);
-        return;
-      }
-    }
-
     const next = handleTap(current);
     applyStateTransition(next);
-  }, [applyStateTransition, replayPrompt]);
+  }, [applyStateTransition]);
 
   const switchPack = useCallback(
     (id: PackId) => {
