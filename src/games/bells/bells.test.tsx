@@ -370,6 +370,50 @@ describe("BellsGame", () => {
     vi.useRealTimers();
   });
 
+  it("status card displays listen feedback and hides replay button during wrong flash penalty", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 1] for easy
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Complete initial demo
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const statusCard = screen.getByTestId("bells-status");
+    expect(statusCard.textContent).toContain("Your turn!");
+    expect(statusCard.textContent).toContain("👆");
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+
+    // Tap the wrong bell (bell 2 is wrong since sequence is [0, 1])
+    const bellWrong = screen.getByTestId("bell-2");
+    fireEvent.click(bellWrong);
+
+    // During the 800ms wrong flash penalty: status card says "Listen..." not "Your turn!", replay button hidden
+    expect(screen.queryByText("Your turn!")).toBeNull();
+    expect(statusCard.textContent).toContain("Listen...");
+    expect(statusCard.textContent).toContain("👂");
+    expect(screen.queryByTestId("replay-button")).toBeNull();
+
+    // Advance 800ms to end wrong flash and restart demo
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    // Replay demo finishes
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+    expect(statusCard.textContent).toContain("👆");
+    expect(screen.getByTestId("replay-button")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   it("correct sequence triggers success sound and advances round", () => {
     vi.useFakeTimers();
     vi.spyOn(Math, "random").mockReturnValue(0); // Sequence will be [0, 1] for easy
