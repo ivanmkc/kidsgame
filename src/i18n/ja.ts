@@ -403,6 +403,7 @@ export const JA: Table = {
   'story.hotLead': 'いきたい ほうを タップ！',
   'story.nextLead': 'つぎは どうなる？',
   'story.a11yFx': 'ここに たのしいものが あるよ',
+  'story.a11yScare': 'ここに なにかが かくれているよ',
   'carmode.tap': 'タップ！',
   'carmode.done': 'おしまい！',
   'carmode.pack.boops': 'ブープをかぞえよう',
