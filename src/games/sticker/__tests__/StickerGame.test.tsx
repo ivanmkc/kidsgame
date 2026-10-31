@@ -17,9 +17,29 @@ import {
 } from 'react-native';
 import { allSceneOptions } from '../../sceneOptions';
 import { StickerGame } from '../StickerGame';
+import { CHARACTER_ICONS } from '../../../assets/images';
 
 type FakeResponderEvent = Partial<GestureResponderEvent>;
 type FakeGestureState = Partial<PanResponderGestureState>;
+
+vi.mock('../../../assets/images', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  const { manifest } = await import('../../../manifest');
+  const charSet = new Set(manifest.characters ?? []);
+  const charProxy = new Proxy(
+    {},
+    {
+      get: (_t, prop) =>
+        typeof prop === 'string' && charSet.has(prop)
+          ? { uri: `character_${prop}.png` }
+          : undefined,
+    },
+  );
+  return {
+    ...actual,
+    CHARACTER_ICONS: charProxy,
+  };
+});
 
 // Intercept ScenePicker to verify props and simulate interactions
 let capturedPickerProps: {
@@ -238,6 +258,7 @@ describe('StickerGame', () => {
     expect(html).toContain('data-testid="sticker-stage"');
     expect(html).toContain('data-testid="sticker-clear"');
     expect(html).toContain('data-testid="sticker-tab-dressup"');
+    expect(html).toContain('data-testid="sticker-tab-characters"');
     expect(html).toContain('data-testid="sticker-tab-animals"');
     expect(html).toContain('data-testid="sticker-tab-nature"');
     expect(html).toContain('data-testid="sticker-tab-food"');
@@ -268,7 +289,7 @@ describe('StickerGame', () => {
     expect(sfxFlipSpy).toHaveBeenCalledOnce();
 
     // Test all tab buttons press and style
-    const tabs = ['dressup', 'animals', 'nature', 'food', 'things'];
+    const tabs = ['dressup', 'characters', 'animals', 'nature', 'food', 'things'];
     for (const tabId of tabs) {
       const tabBtn = capturedPressableProps[`sticker-tab-${tabId}`];
       expect(tabBtn).toBeDefined();
@@ -277,7 +298,7 @@ describe('StickerGame', () => {
       expect(tabBtn?.style).toContainEqual(expect.objectContaining({ minHeight: 44 }));
       tabBtn?.onPress?.();
     }
-    expect(sfxTapSpy).toHaveBeenCalledTimes(5);
+    expect(sfxTapSpy).toHaveBeenCalledTimes(6);
   });
 
   it('renders across various backdrop scenes with subtitle interpolation', () => {
@@ -1470,5 +1491,67 @@ describe('StickerGame', () => {
     unmount();
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
     stopNarrationSpy.mockRestore();
+  });
+
+  it('renders character tab items and drops character sticker onto stage', async () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const charTab = screen.getByTestId('sticker-tab-characters');
+    expect(charTab).toBeDefined();
+    act(() => {
+      fireEvent.click(charTab);
+    });
+
+    const princessTray = screen.getByTestId('sticker-tray-princess_pink');
+    expect(princessTray).toBeDefined();
+    expect(princessTray.getAttribute('aria-label')).toBe('Add pink princess sticker');
+
+    // Assert that the tray tile renders an image whose source matches CHARACTER_ICONS.princess_pink
+    const expectedUri = (CHARACTER_ICONS.princess_pink as unknown as { uri: string }).uri;
+    const trayImg = princessTray.querySelector('img');
+    expect(trayImg).not.toBeNull();
+    expect(trayImg?.getAttribute('src')).toBe(expectedUri);
+
+    const stageProps = capturedViewProps['sticker-stage'];
+    expect(stageProps).toBeDefined();
+    stageProps?.onLayout?.({} as unknown);
+
+    const dispatchTouch = (type: 'start' | 'move' | 'end', x: number, y: number) => {
+      const touch = { pageX: x, pageY: y, clientX: x, clientY: y, identifier: 0, target: princessTray };
+      if (type === 'start') {
+        fireEvent.touchStart(princessTray, { touches: [touch], changedTouches: [touch] });
+      } else if (type === 'move') {
+        fireEvent.touchMove(princessTray, { touches: [touch], changedTouches: [touch] });
+      } else {
+        fireEvent.touchEnd(princessTray, { touches: [], changedTouches: [touch] });
+      }
+    };
+
+    await act(async () => {
+      dispatchTouch('start', 100, 100);
+      await new Promise((r) => setTimeout(r, 210));
+      dispatchTouch('move', 50, 50);
+    });
+
+    // Assert that the drag ghost renders an image whose source matches CHARACTER_ICONS.princess_pink
+    const ghostImg = document.querySelector('[style*="z-index: 50"] img');
+    expect(ghostImg).not.toBeNull();
+    expect(ghostImg?.getAttribute('src')).toBe(expectedUri);
+
+    act(() => {
+      dispatchTouch('end', 50, 50);
+    });
+
+    const placedSticker = screen.getByTestId('sticker-placed-1');
+    expect(placedSticker).toBeDefined();
+
+    // Assert that the placed sticker renders an image whose source matches CHARACTER_ICONS.princess_pink
+    const placedImg = placedSticker.querySelector('img');
+    expect(placedImg).not.toBeNull();
+    expect(placedImg?.getAttribute('src')).toBe(expectedUri);
+
+    unmount();
   });
 });

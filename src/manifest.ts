@@ -155,6 +155,7 @@ export interface EscapeRoom {
 export interface Manifest {
   spotit: { icons: string[] };
   dressup?: string[];
+  characters?: string[];
   stories?: Story[];
   diff: DiffScene[];
   hidden: HiddenScene[];

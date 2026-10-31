@@ -14,16 +14,9 @@ import { YUE } from './i18n/yue';
 // module existed — English mode is the untouched baseline.
 export type UIKey =
   // ── Menu chrome ────────────────────────────────────────────────
-  | 'menu.heading'
-  | 'menu.word'
-  | 'menu.number'
-  | 'menu.grownups'
-  | 'menu.section.games'
-  | 'menu.section.word'
-  | 'menu.section.number'
-  | 'menu.section.music'
-  | 'badge.beta'
-  | 'menu.play'
+  | 'menu.heading' | 'menu.word' | 'menu.number' | 'menu.grownups'
+  | 'menu.section.games' | 'menu.section.word' | 'menu.section.number' | 'menu.section.music'
+  | 'badge.beta' | 'menu.play'
   | 'chip.sound' | 'chip.muted'
   | 'chip.twoPlayers' | 'chip.twoPlayersOn'
   | 'a11y.langCycle' | 'a11y.diffCycle'
@@ -41,14 +34,8 @@ export type UIKey =
   | 'install.iosHelp'
   | 'share.copied'
   // ── Difficulty filter chip ─────────────────────────────────────
-  | 'filter.all'
-  | 'filter.easy'
-  | 'filter.medium'
-  | 'filter.hard'
-  | 'filter.allLevels'
-  | 'filter.easyLevels'
-  | 'filter.mediumLevels'
-  | 'filter.hardLevels'
+  | 'filter.all' | 'filter.easy' | 'filter.medium' | 'filter.hard'
+  | 'filter.allLevels' | 'filter.easyLevels' | 'filter.mediumLevels' | 'filter.hardLevels'
   // ── Menu game cards: titles + blurbs ───────────────────────────
   | 'card.spotit.title'   | 'card.spotit.blurb'
   | 'card.diff.title'     | 'card.diff.blurb'
@@ -272,42 +259,29 @@ export type UIKey =
   | 'sticker.item.kimono' | 'sticker.item.raincoat' | 'sticker.item.party_hat' | 'sticker.item.police_cap'
   | 'sticker.item.fire_helmet' | 'sticker.item.chef_hat' | 'sticker.item.cowboy_hat' | 'sticker.item.space_helmet'
   | 'sticker.item.flower_crown' | 'sticker.item.scarf' | 'sticker.item.ballet_slippers' | 'sticker.item.rain_boots'
+  // ── Character sticker labels ────────────────────────────────────
+  | 'sticker.character.princess_pink' | 'sticker.character.princess_blue' | 'sticker.character.prince' | 'sticker.character.knight'
+  | 'sticker.character.fairy' | 'sticker.character.mermaid' | 'sticker.character.wizard' | 'sticker.character.ballerina'
+  | 'sticker.character.superhero_kid' | 'sticker.character.dragon' | 'sticker.character.mounted_knight' | 'sticker.character.princess_rider'
+  | 'sticker.character.queen' | 'sticker.character.police_officer' | 'sticker.character.firefighter' | 'sticker.character.doctor'
+  | 'sticker.character.astronaut' | 'sticker.character.chef' | 'sticker.character.pirate' | 'sticker.character.cowgirl'
+  | 'sticker.character.robot' | 'sticker.character.vet'
   | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
-  | 'rhyme.ask'
-  | 'rhyme.confirm'
-  | 'rhyme.comingSoon'
-  | 'letters.find'
-  | 'letters.sound'
-  | 'letters.findKana'
-  | 'numbers.findNumber'
-  | 'numbers.find'
-  | 'bingo.prompt'
-  | 'bingo.promptPhonics'
-  | 'bingo.confirmPhonics'
+  | 'rhyme.ask' | 'rhyme.confirm' | 'rhyme.comingSoon'
+  | 'letters.find' | 'letters.sound' | 'letters.findKana'
+  | 'numbers.findNumber' | 'numbers.find'
+  | 'bingo.prompt' | 'bingo.promptPhonics' | 'bingo.confirmPhonics'
   | 'story.tryAgain' | 'story.startOver' | 'story.readAgain' | 'story.allStories'
   | 'story.hotLead' | 'story.nextLead' | 'story.a11yFx'
   | 'carmode.tap' | 'carmode.done'
   | 'carmode.pack.boops' | 'carmode.pack.rhyme' | 'carmode.pack.simon'
   | 'carmode.pack.silly' | 'carmode.pack.whoami' | 'carmode.pack.animal'
   // ── Feedback modal ─────────────────────────────────────────────
-  | 'feedback.chip'
-  | 'feedback.title'
-  | 'feedback.broken'
-  | 'feedback.idea'
-  | 'feedback.placeholder'
-  | 'feedback.cancel'
-  | 'feedback.send'
-  | 'feedback.thanks'
+  | 'feedback.chip' | 'feedback.title' | 'feedback.broken' | 'feedback.idea'
+  | 'feedback.placeholder' | 'feedback.cancel' | 'feedback.send' | 'feedback.thanks'
   // ── Adult gate ─────────────────────────────────────────────────
-  | 'gate.title'
-  | 'gate.holdPrompt'
-  | 'gate.holdA11y'
-  | 'gate.holdButton'
-  | 'gate.cancel'
-  | 'gate.wordTitle'
-  | 'gate.wordPrompt'
-  | 'gate.wordPlaceholder'
-  | 'gate.continue'
+  | 'gate.title' | 'gate.holdPrompt' | 'gate.holdA11y' | 'gate.holdButton' | 'gate.cancel'
+  | 'gate.wordTitle' | 'gate.wordPrompt' | 'gate.wordPlaceholder' | 'gate.continue'
   // ── Lockdown settings ──────────────────────────────────────────
   | 'lockdown.title'
   | 'lockdown.subtitle'
@@ -688,6 +662,17 @@ export const EN: Table = {
   'sticker.item.cowboy_hat': 'cowboy hat', 'sticker.item.space_helmet': 'space helmet',
   'sticker.item.flower_crown': 'flower crown', 'sticker.item.scarf': 'scarf',
   'sticker.item.ballet_slippers': 'ballet slippers', 'sticker.item.rain_boots': 'rain boots',
+  'sticker.character.princess_pink': 'pink princess', 'sticker.character.princess_blue': 'blue princess',
+  'sticker.character.prince': 'prince', 'sticker.character.knight': 'knight',
+  'sticker.character.fairy': 'fairy', 'sticker.character.mermaid': 'mermaid',
+  'sticker.character.wizard': 'wizard', 'sticker.character.ballerina': 'ballerina',
+  'sticker.character.superhero_kid': 'superhero', 'sticker.character.dragon': 'dragon',
+  'sticker.character.mounted_knight': 'mounted knight', 'sticker.character.princess_rider': 'princess rider',
+  'sticker.character.queen': 'queen', 'sticker.character.police_officer': 'police officer',
+  'sticker.character.firefighter': 'firefighter', 'sticker.character.doctor': 'doctor',
+  'sticker.character.astronaut': 'astronaut', 'sticker.character.chef': 'chef',
+  'sticker.character.pirate': 'pirate', 'sticker.character.cowgirl': 'cowgirl',
+  'sticker.character.robot': 'robot', 'sticker.character.vet': 'vet',
   'memory.moves': 'Moves: {n}', 'memory.cardFaceDown': 'face-down card',
   'memory.foundPair': '{name} found a pair! Go again!',
   // Rhyme game prompts: EN interpolates {word} into the full sentence;
@@ -712,23 +697,16 @@ export const EN: Table = {
   'carmode.pack.simon': 'Simon Says', 'carmode.pack.silly': 'Silly or True?',
   'carmode.pack.whoami': 'Who Am I?', 'carmode.pack.animal': 'Animal Sound Safari',
 
-  'feedback.chip': '💬 Send Feedback',
-  'feedback.title': 'Tell us!',
-  'feedback.broken': "😵 Something's broken here",
-  'feedback.idea': '💡 I have an idea',
-  'feedback.placeholder': 'Tell us more (optional)',
-  'feedback.cancel': 'Cancel',
-  'feedback.send': 'Send 📨',
-  'feedback.thanks': 'Thank you! 💛',
+  'feedback.chip': '💬 Send Feedback', 'feedback.title': 'Tell us!',
+  'feedback.broken': "😵 Something's broken here", 'feedback.idea': '💡 I have an idea',
+  'feedback.placeholder': 'Tell us more (optional)', 'feedback.cancel': 'Cancel',
+  'feedback.send': 'Send 📨', 'feedback.thanks': 'Thank you! 💛',
   'gate.title': 'Parental Controls',
   'gate.holdPrompt': 'Press and hold the button below for 3 seconds to continue.',
   'gate.holdA11y': 'Hold for 3 seconds to access parental controls',
-  'gate.holdButton': 'Hold here',
-  'gate.cancel': 'Cancel',
-  'gate.wordTitle': 'One more step',
-  'gate.wordPrompt': 'To continue, type the word',
-  'gate.wordPlaceholder': 'Type the word here',
-  'gate.continue': 'Continue',
+  'gate.holdButton': 'Hold here', 'gate.cancel': 'Cancel',
+  'gate.wordTitle': 'One more step', 'gate.wordPrompt': 'To continue, type the word',
+  'gate.wordPlaceholder': 'Type the word here', 'gate.continue': 'Continue',
 
   'lockdown.title': 'Parental Controls',
   'lockdown.subtitle': 'Toggle off games or languages to hide them from your child.',
