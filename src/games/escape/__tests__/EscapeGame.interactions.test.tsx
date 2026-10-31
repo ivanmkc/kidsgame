@@ -346,4 +346,112 @@ describe("EscapeGame revealed item hit target", () => {
     vi.useRealTimers();
   });
 
+  it("does not re-trigger room intro speech when language is switched during win overlay", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => cb && cb());
+    vi.spyOn(sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sfx, "win").mockImplementation(() => {});
+
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    render(<LangHarness initialLang="en" sceneId={room.id} />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Solve toyroom to reach win overlay:
+    // 1. Pillow twice (reveal and collect key)
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    // 2. Chest twice (unlock with key and collect bone)
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    // 3. Pen to free puppy and win
+    fireEvent.click(screen.getByTestId("escape-spot-pen"));
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    vi.mocked(sound.say).mockClear();
+
+    // Switch language to Japanese via header language button while win overlay is active
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // The intro problem prompt (puppy trapped crying for help) must NOT be spoken
+    const jaIntro = room.t?.ja?.intro ?? room.intro;
+    expect(sound.say).not.toHaveBeenCalledWith(jaIntro);
+    expect(sound.say).not.toHaveBeenCalled();
+
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it("speaks the new room intro when advancing to next room after winning", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => cb && cb());
+    vi.spyOn(sfx, "tap").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sfx, "win").mockImplementation(() => {});
+
+    function FlowHarness() {
+      const [sceneId, setSceneId] = useState<string>("toyroom");
+      return (
+        <LangContext.Provider value={{ lang: "en", onCycle: noop }}>
+          <EscapeGame
+            onHome={noop}
+            onPickScene={(id) => setSceneId(id)}
+            onBackToPicker={noop}
+            sceneId={sceneId}
+            lang="en"
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<FlowHarness />);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Solve toyroom to win
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-pen"));
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    vi.mocked(sound.say).mockClear();
+
+    // Tap Next button on WinOverlay
+    const nextBtn = screen.getByTestId("play-again");
+    fireEvent.click(nextBtn);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Next room's intro must be spoken
+    const rooms = manifest.escape ?? [];
+    const nextRoom = rooms.find((r) => r.id !== "toyroom")!;
+    expect(sound.say).toHaveBeenCalledWith(nextRoom.intro);
+
+    cleanup();
+    vi.useRealTimers();
+  });
 });
