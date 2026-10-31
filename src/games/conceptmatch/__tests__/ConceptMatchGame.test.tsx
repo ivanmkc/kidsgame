@@ -11,6 +11,7 @@ import {
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
 import { ConceptMatchGame } from "../ConceptMatchGame";
+import { LangContext } from "../../../components/GameShell";
 import * as logic from "../logic";
 
 vi.mock("../../../sound", async (importOriginal) => {
@@ -18,6 +19,7 @@ vi.mock("../../../sound", async (importOriginal) => {
   return {
     ...actual,
     say: vi.fn(),
+    stopNarration: vi.fn(),
     sfx: {
       ...actual.sfx,
       good: vi.fn(),
@@ -802,5 +804,40 @@ describe("ConceptMatchGame", () => {
     expect(cards).toHaveLength(16);
     expect(screen.getByTestId("concept-score").textContent).toContain("0/8");
     expect(screen.getByText("Find all 8 pairs")).toBeDefined();
+  });
+
+  it("stops narration when lang is switched mid-round, preserving state (G5)", async () => {
+    function Wrapper() {
+      const [lang, setLang] = React.useState<"en" | "ja">("en");
+      return (
+        <LangContext.Provider value={{ lang, onCycle: () => setLang("ja") }}>
+          <ConceptMatchGame onHome={() => {}} difficulty="easy" lang={lang} deck="letters" />
+        </LangContext.Provider>
+      );
+    }
+    render(<Wrapper />);
+    
+    const cards = screen.getAllByRole("button").filter((el) =>
+      el.getAttribute("data-testid")?.startsWith("concept-card-"),
+    );
+    const firstCard = cards[0];
+    
+    await act(async () => {
+      fireEvent.click(firstCard);
+    });
+    
+    expect(sound.say).toHaveBeenCalled();
+    vi.mocked(sound.stopNarration).mockClear();
+    const scoreBefore = screen.getByTestId("concept-score").textContent;
+    expect(firstCard.getAttribute("aria-label")).not.toBe("face-down card");
+    
+    const switchBtn = screen.getByTestId("lang-cycle");
+    await act(async () => {
+      fireEvent.click(switchBtn);
+    });
+    
+    expect(sound.stopNarration).toHaveBeenCalled();
+    expect(screen.getByTestId("concept-score").textContent).toBe(scoreBefore);
+    expect(firstCard.getAttribute("aria-label")).not.toBe("face-down card");
   });
 });
