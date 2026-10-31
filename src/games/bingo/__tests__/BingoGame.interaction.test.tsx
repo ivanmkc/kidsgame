@@ -569,6 +569,64 @@ describe("Bingo mid-game language switch stale callback bug", () => {
     const promptAfter = screen.getByTestId("bingo-prompt");
     expect(promptAfter.textContent).toContain("りんご");
   });
+
+  it("cycling language on victory screen preserves WinOverlay, marked cells, and star score", async () => {
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "sayThen").mockImplementation((_lines, cb) => {
+      cb();
+    });
+    vi.spyOn(logic, "makeBoard").mockImplementation(
+      (_rng, _icons, _size, _mode, lang) =>
+        lang === "ja" ? mockBoardJa : mockBoardEn,
+    );
+
+    render(<LangHarness initialLang="en" />);
+
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Tap cells 0, 1, 2 to complete top row [0, 1, 2] and win
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-0"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-1"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("bingo-cell-2"));
+    });
+
+    // Verify WinOverlay is visible, score is ⭐ 3, and English win line was announced
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(screen.getByTestId("bingo-score").textContent).toBe("⭐ 3");
+    expect(saySpy).toHaveBeenCalledWith("BINGO! You got a line!");
+
+    // Tap language cycle button in header
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+    });
+
+    // WinOverlay must remain visible, score must remain ⭐ 3, and Japanese win line spoken
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(screen.getByTestId("bingo-score").textContent).toBe("⭐ 3");
+    expect(saySpy).toHaveBeenCalledWith("ビンゴ！ いちれつ そろったね！");
+
+    // The WinOverlay arms its buttons after 600ms
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    // Tapping Play Again restarts the game in Japanese
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("play-again"));
+    });
+
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.getByTestId("bingo-score").textContent).toBe("⭐ 0");
+    const prompt = screen.getByTestId("bingo-prompt");
+    expect(prompt.textContent).toContain("りんご");
+  });
 });
 
 test("switching language clears wrong tile wobble", async () => {
