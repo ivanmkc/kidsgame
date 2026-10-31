@@ -88,7 +88,7 @@ export function MemoryGame({
   });
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer && mode === "solo";
-  useSay(mode === null || duel ? null : t(lang, "card.memory.blurb"));
+  useSay(mode === null || duel || won ? null : t(lang, "card.memory.blurb"));
   useWinLine(won && !duel, t(lang, "win.memory"));
   const elapsed = useElapsed(showTimer && !won && mode !== null, timerKey);
 

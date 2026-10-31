@@ -738,6 +738,21 @@ describe("MemoryGame", () => {
       { key: 1, icon: "apple" },
     ]);
 
+    const speakSpy = vi.fn();
+    const origSynthesis = (window as unknown as { speechSynthesis: unknown }).speechSynthesis;
+    const origUtterance = (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance;
+    
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
     function Harness() {
       const [lang, setLang] = React.useState<Lang>("en");
       return (
@@ -763,10 +778,10 @@ describe("MemoryGame", () => {
     });
 
     expect(screen.getByTestId("win-overlay")).toBeDefined();
-    expect(sound.say).toHaveBeenCalledWith(t("en", "win.memory"));
 
     vi.mocked(sound.say).mockClear();
     vi.mocked(sound.stopNarration).mockClear();
+    speakSpy.mockClear();
 
     // Cycle language while win overlay is active
     await act(async () => {
@@ -774,7 +789,17 @@ describe("MemoryGame", () => {
     });
 
     expect(sound.stopNarration).toHaveBeenCalledTimes(1);
+    
+    // Check that we DO get the win line via sound.say mock (because useWinLine uses it)
     expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memory"));
+    
+    // Assert the pre-game blurb was NOT spoken (which uses real say -> speechSynthesis)
+    expect(speakSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("ja", "card.memory.blurb") })
+    );
+
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = origSynthesis;
+    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = origUtterance;
   });
 
   it("stops narration and speaks localized win recap when switching language on duel victory screen", async () => {
