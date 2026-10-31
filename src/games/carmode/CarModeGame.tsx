@@ -274,7 +274,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
 
   useEffect(() => {
     if (state.phase === "reveal" && round) {
-      if (round.answer !== undefined) {
+      if (round.answer !== undefined && state.playerAnswer !== undefined) {
         if (state.playerAnswer === round.answer) sfx.good();
         else sfx.boing();
       } else if (round.sfx === "boing") {
@@ -414,7 +414,11 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const isReveal = state.phase === "reveal";
   const hasAnswer = round && round.answer !== undefined;
   const isRight = isReveal && hasAnswer && state.playerAnswer === round?.answer;
-  const isWrong = isReveal && hasAnswer && state.playerAnswer !== round?.answer;
+  const isWrong =
+    isReveal &&
+    hasAnswer &&
+    state.playerAnswer !== undefined &&
+    state.playerAnswer !== round?.answer;
 
   return (
     <GameShell

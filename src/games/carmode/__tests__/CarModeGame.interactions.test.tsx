@@ -975,7 +975,7 @@ describe("CarModeGame interactions", () => {
     goodSpy.mockClear();
     boingSpy.mockClear();
 
-    // Test 0-tap timeout answer for silly round
+    // Test 0-tap timeout answer for silly round: reveals with round sfx, not penalized as wrong
     vi.spyOn(logic, "startState").mockReturnValue({
       ...actual,
       roundIdx: falseRoundIndex,
@@ -992,7 +992,32 @@ describe("CarModeGame interactions", () => {
 
     expect(boingSpy).toHaveBeenCalled();
     expect(goodSpy).not.toHaveBeenCalled();
-    expect(screen.getByTestId("carmode-emoji-wrong")).toBeDefined();
-    expect(screen.getByText("🔄")).toBeDefined();
+    expect(screen.queryByTestId("carmode-emoji-wrong")).toBeNull();
+    expect(screen.queryByTestId("carmode-emoji-right")).toBeNull();
+    expect(screen.getByText("👆")).toBeDefined();
+
+    cleanup();
+    goodSpy.mockClear();
+    boingSpy.mockClear();
+
+    // Test 0-tap timeout answer for true round: plays good chime, not penalized as wrong
+    vi.spyOn(logic, "startState").mockReturnValue({
+      ...actual,
+      roundIdx: trueRoundIndex,
+      phase: "gap",
+      pendingTaps: 0,
+    });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    act(() => {
+      vi.advanceTimersByTime(actual.rounds[trueRoundIndex].gapMs + 100);
+    });
+
+    expect(goodSpy).toHaveBeenCalled();
+    expect(boingSpy).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("carmode-emoji-wrong")).toBeNull();
+    expect(screen.queryByTestId("carmode-emoji-right")).toBeNull();
+    expect(screen.getByText("👆")).toBeDefined();
   });
 });
