@@ -692,7 +692,7 @@ describe("ConceptMatchGame", () => {
       "en",
       2,
       undefined,
-      true,
+      false,
     );
 
     rerender(<ConceptMatchGame deck="letters" difficulty="medium" lang="en" />);
@@ -913,6 +913,50 @@ describe("ConceptMatchGame", () => {
     expect(screen.getByText(t("en", "card.memory.title"))).toBeDefined();
     expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({ text: t("en", "card.memory.blurb") }),
+    );
+  });
+
+  it("passes groupSimilar false when resetting on easy difficulty", async () => {
+    const board: logic.ConceptMatchCard[] = [
+      {
+        key: "A-upper",
+        conceptId: "A",
+        display: { type: "text", text: "A" },
+        speech: "A",
+      },
+      {
+        key: "A-lower",
+        conceptId: "A",
+        display: { type: "text", text: "a" },
+        speech: "A",
+      },
+    ];
+    const buildBoardSpy = vi.spyOn(logic, "buildBoard").mockReturnValue(board);
+    render(<ConceptMatchGame deck="letters" difficulty="easy" pairs={1} />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("concept-card-A-upper"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("concept-card-A-lower"));
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(700);
+    });
+
+    const playAgainBtn = screen.getByTestId("play-again");
+    await act(async () => {
+      fireEvent.click(playAgainBtn);
+    });
+
+    expect(buildBoardSpy).toHaveBeenLastCalledWith(
+      expect.anything(),
+      "letters",
+      "en",
+      1,
+      undefined,
+      false,
     );
   });
 });
