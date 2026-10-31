@@ -7,6 +7,7 @@ import { sfx } from '../../../sound';
 import { manifest, Story } from '../../../manifest';
 import { LangContext } from '../../../components/GameShell';
 import { Lang } from '../../../lang';
+import { t } from '../../../i18n';
 import { StoryGame } from '../StoryGame';
 
 describe('StoryGame i18n', () => {
@@ -218,6 +219,20 @@ describe('StoryGame i18n', () => {
     });
 
     expect(saySpy).toHaveBeenCalledWith('ただの ふるい カラスさん！ しげみで ねてたんだって。すすもう、ミロ…');
+  });
+
+  it('localizes scare accessibility label across languages', () => {
+    const { rerender } = render(<StoryGame sceneId="whisper" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />);
+    expect(screen.getByTestId('story-scare').getAttribute('aria-label')).toBe(t('ja', 'story.a11yScare'));
+
+    rerender(<StoryGame sceneId="whisper" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="cmn" />);
+    expect(screen.getByTestId('story-scare').getAttribute('aria-label')).toBe(t('cmn', 'story.a11yScare'));
+
+    rerender(<StoryGame sceneId="whisper" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="yue" />);
+    expect(screen.getByTestId('story-scare').getAttribute('aria-label')).toBe(t('yue', 'story.a11yScare'));
+
+    rerender(<StoryGame sceneId="whisper" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />);
+    expect(screen.getByTestId('story-scare').getAttribute('aria-label')).toBe('Something is hiding here');
   });
 
   it('speaks localized fx line in Japanese when triggered', () => {

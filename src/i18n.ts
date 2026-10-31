@@ -272,7 +272,7 @@ export type UIKey =
   | 'numbers.findNumber' | 'numbers.find'
   | 'bingo.prompt' | 'bingo.promptPhonics' | 'bingo.confirmPhonics'
   | 'story.tryAgain' | 'story.startOver' | 'story.readAgain' | 'story.allStories'
-  | 'story.hotLead' | 'story.nextLead' | 'story.a11yFx'
+  | 'story.hotLead' | 'story.nextLead' | 'story.a11yFx' | 'story.a11yScare'
   | 'carmode.tap' | 'carmode.done'
   | 'carmode.pack.boops' | 'carmode.pack.rhyme' | 'carmode.pack.simon'
   | 'carmode.pack.silly' | 'carmode.pack.whoami' | 'carmode.pack.animal'
@@ -692,6 +692,7 @@ export const EN: Table = {
   'story.readAgain': 'The End! Read again 📖', 'story.allStories': 'All Stories 🏠',
   'story.hotLead': 'Tap where you want to go!', 'story.nextLead': 'What should happen next?',
   'story.a11yFx': 'Something fun is here',
+  'story.a11yScare': 'Something is hiding here',
   'carmode.tap': 'Tap!', 'carmode.done': 'All done!',
   'carmode.pack.boops': 'Count the Boops', 'carmode.pack.rhyme': 'Finish the Rhyme',
   'carmode.pack.simon': 'Simon Says', 'carmode.pack.silly': 'Silly or True?',

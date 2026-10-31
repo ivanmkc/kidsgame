@@ -481,8 +481,8 @@ function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; r
     }, scare.delay);
   };
 
-  const l = scare.x * scale;
-  const t = scare.y * scale;
+  const left = scare.x * scale;
+  const top = scare.y * scale;
   const w = scare.w * scale;
   const h = scare.h * scale;
   const popSize = Math.max(w, h) * 1.35;
@@ -491,10 +491,10 @@ function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; r
       <Pressable
         onPress={trigger}
         testID="story-scare"
-        accessibilityLabel="Something is hiding here"
+        accessibilityLabel={t(lang, 'story.a11yScare')}
         accessibilityRole="button"
         hitSlop={12}
-        style={{ position: 'absolute', left: l, top: t, width: w, height: h }}
+        style={{ position: 'absolute', left, top, width: w, height: h }}
       >
         {!popped ? (
           <Animated.View
@@ -509,8 +509,8 @@ function ScareSpot({ scare, reveal, scale, lang = 'en' }: { scare: StoryScare; r
           testID="story-scare-pop"
           style={{
             position: 'absolute',
-            left: l + w / 2 - popSize / 2,
-            top: t + h / 2 - popSize / 2,
+            left: left + w / 2 - popSize / 2,
+            top: top + h / 2 - popSize / 2,
             width: popSize,
             height: popSize,
             transform: [
