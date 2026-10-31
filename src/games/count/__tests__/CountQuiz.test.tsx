@@ -11,6 +11,7 @@ import {
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
+import { numberWord } from "../../../lang";
 import { CountGame } from "../CountGame";
 
 describe("CountGame quiz phase", () => {
@@ -52,6 +53,62 @@ describe("CountGame quiz phase", () => {
     });
 
     expect(saySpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("speaks incorrect numeral before re-prompting when wrong answer is picked", () => {
+    const saySpy = vi.spyOn(sound, "say").mockReturnValue();
+    let sayThenCb: (() => void) | undefined;
+    let inQuiz = false;
+    const sayThenSpy = vi
+      .spyOn(sound, "sayThen")
+      .mockImplementation((_lines, cb) => {
+        if (!inQuiz) {
+          cb?.();
+        } else {
+          sayThenCb = cb;
+        }
+      });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const critters = screen.queryAllByTestId(/count-critter/);
+    for (const c of critters) {
+      fireEvent.click(c);
+    }
+
+    inQuiz = true;
+
+    const choices = screen.queryAllByTestId(/count-choice-/);
+    const wrongChoice = choices.find(
+      (c) => !c.getAttribute("data-testid")?.includes("-answer"),
+    );
+    expect(wrongChoice).toBeDefined();
+    const wrongVal = Number(wrongChoice!.textContent);
+
+    saySpy.mockClear();
+    sayThenSpy.mockClear();
+    sayThenCb = undefined;
+
+    fireEvent.click(wrongChoice!);
+
+    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(saySpy).not.toHaveBeenCalled();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      [numberWord("en", wrongVal).t],
+      expect.any(Function),
+    );
+    expect(saySpy).not.toHaveBeenCalled();
+
+    act(() => {
+      sayThenCb?.();
+    });
+
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
   });
 
   it("clears pending wrong-answer timeout when correct answer is tapped immediately", () => {

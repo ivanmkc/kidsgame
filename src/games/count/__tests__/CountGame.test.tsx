@@ -24,7 +24,7 @@ import {
   stageCritterSize,
 } from "../logic";
 import { CURRICULUM } from "../../../curriculum/content";
-import { Lang } from "../../../lang";
+import { Lang, numberWord } from "../../../lang";
 import { makeRng } from "../../../rng";
 
 const capturedPressables: Record<
@@ -368,9 +368,14 @@ describe("logic: applyPickAnswer", () => {
     expect(deps.setRound).not.toHaveBeenCalled();
   });
 
-  it("handles wrong answers by playing sfx and setting wrong pick", () => {
+  it("handles wrong answers by playing sfx, setting wrong pick, and speaking numeral then prompt", () => {
     const sfxSpy = { good: vi.fn(), wrong: vi.fn() };
     const setWrongPick = vi.fn();
+    const saySpy = vi.fn();
+    let sayThenCb: (() => void) | undefined;
+    const sayThenSpy = vi.fn((lines: string[], cb: () => void) => {
+      sayThenCb = cb;
+    });
     const state = {
       won: false,
       phase: "quiz",
@@ -380,12 +385,16 @@ describe("logic: applyPickAnswer", () => {
       roundsToWin: 5,
       lang: "en" as const,
     };
+    const timeouts: Array<{ fn: () => void; ms: number }> = [];
     const deps = {
       sfx: sfxSpy,
-      say: vi.fn(),
-      sayThen: vi.fn(),
+      say: saySpy,
+      sayThen: sayThenSpy,
       clearTimeouts: vi.fn(),
-      setTimeout: vi.fn(() => setTimeout(() => {}, 0)),
+      setTimeout: vi.fn((fn: () => void, ms: number) => {
+        timeouts.push({ fn, ms });
+        return 0 as unknown as ReturnType<typeof setTimeout>;
+      }),
       makeNextRound: vi.fn(),
       setScore: vi.fn(),
       setLocked: vi.fn(),
@@ -397,9 +406,23 @@ describe("logic: applyPickAnswer", () => {
       setWon: vi.fn(),
     };
 
-    applyPickAnswer(dummyRound.answer + 1, state, deps);
+    const wrongVal = dummyRound.answer + 1;
+    applyPickAnswer(wrongVal, state, deps);
     expect(sfxSpy.wrong).toHaveBeenCalledTimes(1);
-    expect(setWrongPick).toHaveBeenCalledWith(dummyRound.answer + 1);
+    expect(setWrongPick).toHaveBeenCalledWith(wrongVal);
+
+    const speechTimeout = timeouts.find((t) => t.ms === 500);
+    expect(speechTimeout).toBeDefined();
+    speechTimeout!.fn();
+
+    expect(sayThenSpy).toHaveBeenCalledWith(
+      [numberWord("en", wrongVal).t],
+      expect.any(Function),
+    );
+    expect(saySpy).not.toHaveBeenCalled();
+
+    sayThenCb!();
+    expect(saySpy).toHaveBeenCalledWith(t("en", "shell.count.prompt"));
   });
 
   it("clears pending timeouts and resets wrong pick when correct answer is picked", () => {
