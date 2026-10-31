@@ -521,6 +521,10 @@ export const YUE: Table = {
   'hidden.scene.giant_kitchen': '巨人嘅廚房',
   'hidden.scene.witch_kitchen': '女巫嘅廚房',
 
+  'compare.prompt.more': '邊邊多啲呀？',
+  'compare.prompt.fewer': '邊邊少啲呀？',
+  'compare.praise': '啱晒！',
+
   'sums.plus': '加',
   'sums.question': '一共有幾多個呀？',
   'sums.praise': '啱晒！',
