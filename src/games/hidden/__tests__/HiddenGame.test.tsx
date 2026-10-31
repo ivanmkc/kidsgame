@@ -999,10 +999,11 @@ describe("HiddenGame mode picker on active scene", () => {
     unmountSubYue();
   });
 
-  it("provides valid nameT translations in ja, cmn, and yue for all hidden scenes", () => {
+  it("provides valid nameT translations in en, ja, cmn, and yue for all hidden scenes", () => {
     expect(manifest.hidden.length).toBe(38);
     for (const scene of manifest.hidden) {
       expect(scene.nameT).toBeDefined();
+      expect(scene.nameT?.en).toBeTruthy();
       expect(scene.nameT?.ja).toBeTruthy();
       expect(scene.nameT?.cmn).toBeTruthy();
       expect(scene.nameT?.yue).toBeTruthy();
