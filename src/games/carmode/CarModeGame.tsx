@@ -214,7 +214,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   const startRound = useCallback(
     (r: Round) => {
       if (r.pack === "boops" && r.noteCount) {
-        playBoops(r.noteCount, () => {
+        sayThen(r.prompt, () => {
           if (!isValid()) return;
           if (
             stateRef.current.phase !== "prompt" ||
@@ -222,7 +222,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
           ) {
             return;
           }
-          sayThen(r.prompt, () => {
+          playBoops(r.noteCount!, () => {
             if (!isValid()) return;
             if (
               stateRef.current.phase === "prompt" &&
@@ -507,7 +507,9 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                   accessibilityLabel={t(lang, `carmode.pack.${id}` as UIKey)}
                   testID={`carmode-pack-${id}`}
                 >
-                  <Text style={styles.packBtnText}>{t(lang, `carmode.pack.${id}` as UIKey)}</Text>
+                  <Text style={styles.packBtnText}>
+                    {t(lang, `carmode.pack.${id}` as UIKey)}
+                  </Text>
                 </Pressable>
               ))}
             </View>

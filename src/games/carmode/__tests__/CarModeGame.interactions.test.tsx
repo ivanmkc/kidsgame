@@ -126,6 +126,10 @@ describe("CarModeGame interactions", () => {
 
   it("ignores tap during prompt phase for boops to prevent skipping sequence", () => {
     vi.useFakeTimers();
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_t, cb) => {
+      sayThenCb = cb;
+    });
     const stopSequenceSpy = vi.spyOn(music, "stopSequence");
 
     const actual = logic.startState("boops", 42);
@@ -147,6 +151,11 @@ describe("CarModeGame interactions", () => {
     });
 
     render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Invoke sayThen callback to start boops
+    act(() => {
+      sayThenCb?.();
+    });
 
     // At t = 50ms: note 0 fires, visual flash cue is active with 🎵
     act(() => {
@@ -781,6 +790,10 @@ describe("CarModeGame interactions", () => {
 
   it("calls playSequence with pentatonic notes at 150 BPM for boops pack", () => {
     vi.useFakeTimers();
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_t, cb) => {
+      sayThenCb = cb;
+    });
     const playSequenceSpy = vi.spyOn(music, "playSequence");
     const actual = logic.startState("boops", 42);
     const testRounds = [...actual.rounds];
@@ -793,6 +806,11 @@ describe("CarModeGame interactions", () => {
     });
 
     render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Invoke sayThen callback to start boops
+    act(() => {
+      sayThenCb?.();
+    });
 
     expect(playSequenceSpy).toHaveBeenCalledWith(
       [
@@ -808,6 +826,10 @@ describe("CarModeGame interactions", () => {
 
   it("renders visual boop cues when muted satisfying R3 constraint", () => {
     vi.useFakeTimers();
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_t, cb) => {
+      sayThenCb = cb;
+    });
     sound.setMuted(true);
 
     const actual = logic.startState("boops", 42);
@@ -821,6 +843,11 @@ describe("CarModeGame interactions", () => {
     });
 
     render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Invoke sayThen callback to start boops
+    act(() => {
+      sayThenCb?.();
+    });
 
     // Note 0 visual cue at 50ms
     act(() => {
