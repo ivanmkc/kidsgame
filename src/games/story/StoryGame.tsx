@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SCENE_IMAGES } from '../../assets/images';
 import { ChunkyButton } from '../../components/ChunkyButton';
@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
 import { say, saySequence, sfx, stopNarration, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { filterStoriesByLang } from './logic';
+import { filterStoriesByLang, normalizeStoryNode } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -56,7 +56,8 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     animating.current = false;
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const node: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
+  const rawNode: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
+  const node: StoryNode | null = useMemo(() => normalizeStoryNode(rawNode), [rawNode]);
 
   // Precache what each choice leads to while the current page is read
   // aloud: warm the browser HTTP cache for the next scenes' images and
