@@ -368,6 +368,7 @@ export function ListenChooseGame({
       <WinOverlay
         visible={state.won}
         message={t(lang, "win.soundsWords")}
+        nextLabel={t(lang, "overlay.playAgain")}
         onNext={() => {
           if (!isValid()) return;
           lockedRef.current = false;

@@ -607,6 +607,9 @@ describe("ListenChooseGame", () => {
     });
 
     vi.mocked(sound.sayThen).mockClear();
+    expect(screen.getByTestId("play-again").textContent).toBe(
+      t("ja", "overlay.playAgain")
+    );
     fireEvent.click(screen.getByTestId("play-again"));
 
     // Spoke new target word in Japanese
