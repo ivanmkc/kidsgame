@@ -11,6 +11,7 @@ import {
 } from "@testing-library/react";
 import { BellsGame } from "./BellsGame";
 import * as music from "../../music";
+import * as sound from "../../sound";
 import { sfx } from "../../sound";
 import { t } from "../../i18n";
 import { makeBellsRound } from "./logic";
@@ -23,6 +24,7 @@ describe("BellsGame", () => {
   });
 
   beforeEach(() => {
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => done());
     let mockCancel: (() => void) | null = null;
     vi.spyOn(music, "playSequence").mockImplementation(
       (notes, bpm, onNote, onDone) => {
