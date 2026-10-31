@@ -23,6 +23,7 @@ describe("SumsGame fast-tap", () => {
     vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
     vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
     vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
     vi.spyOn(sound, "say").mockImplementation(() => {});
     vi.spyOn(sound, "saySequence").mockImplementation(() => {});
     vi.spyOn(sound, "sayThen").mockImplementation((texts, done) => {
@@ -667,6 +668,220 @@ describe("SumsGame", () => {
 
     // New round reverts to unsolved question mark with new addends
     expect(screen.getByTestId("sums-equation").textContent).toBe("4 + 1 = ?");
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("repeats the full equation prompt upon wrong answer feedback", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    const saySeqSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "frog",
+      a: 2,
+      b: 3,
+      sum: 5,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+        { x: 50, y: 50 },
+      ],
+      choices: [3, 4, 5],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    saySpy.mockClear();
+    saySeqSpy.mockClear();
+
+    const buttons = screen.getAllByRole("button");
+    const wrongBtn = buttons.find((b) => {
+      const tid = b.getAttribute("data-testid");
+      return tid && tid.startsWith("sums-choice-") && !tid.endsWith("-answer");
+    })!;
+    expect(wrongBtn).toBeDefined();
+
+    fireEvent.click(wrongBtn);
+    expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+    // After 500ms voice timer fires: repeats full equation sequence rather than only "How many now?"
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      "two",
+      "plus",
+      "three",
+      "How many now?",
+    ]);
+    expect(saySpy).not.toHaveBeenCalledWith("How many now?");
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("makes the equation banner an accessible button to replay the equation", () => {
+    vi.useFakeTimers();
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    const saySeqSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "cat",
+      a: 1,
+      b: 2,
+      sum: 3,
+      aPositions: [{ x: 10, y: 10 }],
+      bPositions: [
+        { x: 20, y: 20 },
+        { x: 30, y: 30 },
+      ],
+      choices: [2, 3, 4],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const equationBtn = screen.getByTestId("sums-equation");
+    expect(equationBtn.getAttribute("role")).toBe("button");
+    expect(equationBtn.getAttribute("aria-label")).toBe("1 + 2 = ?");
+
+    saySeqSpy.mockClear();
+    fireEvent.click(equationBtn);
+
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      "one",
+      "plus",
+      "two",
+      "How many now?",
+    ]);
+
+    unmount();
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("allows stage critters to be touch-counted with sequential badges, tap sfx, and spoken number words", () => {
+    vi.useFakeTimers();
+    const saySpy = vi.spyOn(sound, "say").mockImplementation(() => {});
+    vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "good").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "wrong").mockImplementation(() => {});
+    vi.spyOn(sound.sfx, "boing").mockImplementation(() => {});
+    const tapSpy = vi.spyOn(sound.sfx, "tap").mockImplementation(() => {});
+
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, cb) => {
+      sayThenCb = cb;
+    });
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "frog",
+      a: 2,
+      b: 1,
+      sum: 3,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [{ x: 30, y: 30 }],
+      choices: [2, 3, 4],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Initial state: locked during entrance
+    const critter0 = screen.getByTestId("sums-initial-0");
+    const critter1 = screen.getByTestId("sums-initial-1");
+    const critter2 = screen.getByTestId("sums-incoming-0");
+
+    expect(critter0.getAttribute("role")).toBe("button");
+    expect(critter0.getAttribute("aria-label")).toBe("frog");
+    expect(critter1.getAttribute("role")).toBe("button");
+    expect(critter1.getAttribute("aria-label")).toBe("frog");
+    expect(critter2.getAttribute("role")).toBe("button");
+    expect(critter2.getAttribute("aria-label")).toBe("frog");
+
+    // Before entrance finishes, tapping is locked
+    fireEvent.click(critter0);
+    expect(tapSpy).not.toHaveBeenCalled();
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // Advance past entrance animation
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    // Touch-count first critter
+    fireEvent.click(critter0);
+    expect(tapSpy).toHaveBeenCalledTimes(1);
+    expect(saySpy).toHaveBeenCalledWith("one");
+    expect(screen.getByTestId("sums-badge-0").textContent).toBe("1");
+
+    // Touch-count incoming critter (index 2)
+    fireEvent.click(critter2);
+    expect(tapSpy).toHaveBeenCalledTimes(2);
+    expect(saySpy).toHaveBeenCalledWith("two");
+    expect(screen.getByTestId("sums-badge-2").textContent).toBe("2");
+
+    // Repeated tap on already-tapped critter is ignored
+    fireEvent.click(critter0);
+    expect(tapSpy).toHaveBeenCalledTimes(2);
+
+    // Touch-count remaining critter (index 1)
+    fireEvent.click(critter1);
+    expect(tapSpy).toHaveBeenCalledTimes(3);
+    expect(saySpy).toHaveBeenCalledWith("three");
+    expect(screen.getByTestId("sums-badge-1").textContent).toBe("3");
+
+    // Answering correctly advances round and resets badges
+    const correctBtn = screen.getByTestId("sums-choice-3-answer");
+    fireEvent.click(correctBtn);
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "cat",
+      a: 1,
+      b: 1,
+      sum: 2,
+      aPositions: [{ x: 10, y: 10 }],
+      bPositions: [{ x: 20, y: 20 }],
+      choices: [1, 2, 3],
+    });
+
+    act(() => {
+      sayThenCb?.();
+    });
+
+    expect(screen.queryByTestId("sums-badge-0")).toBeNull();
+    expect(screen.queryByTestId("sums-badge-1")).toBeNull();
+    expect(screen.queryByTestId("sums-badge-2")).toBeNull();
 
     unmount();
     vi.useRealTimers();
