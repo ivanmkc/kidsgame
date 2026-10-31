@@ -1051,6 +1051,60 @@ describe('StickerGame', () => {
     }
   });
 
+  it('renders placed canvas stickers with accessible={true}, accessibilityRole="image", and localized accessibilityLabel', () => {
+    const cases: { lang: Lang; expectedDress: string; expectedLadybug: string }[] = [
+      {
+        lang: 'en',
+        expectedDress: 'pink dress',
+        expectedLadybug: 'ladybug',
+      },
+      {
+        lang: 'ja',
+        expectedDress: 'ピンクのドレス',
+        expectedLadybug: 'てんとうむし',
+      },
+      {
+        lang: 'cmn',
+        expectedDress: '粉色连衣裙',
+        expectedLadybug: '瓢虫',
+      },
+      {
+        lang: 'yue',
+        expectedDress: '粉紅色連身裙',
+        expectedLadybug: '甲蟲',
+      },
+    ];
+
+    for (const c of cases) {
+      const { unmount } = render(
+        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={c.lang} />,
+      );
+
+      const dressPink = screen.getByTestId('sticker-tray-dress_pink');
+      act(() => {
+        fireEvent.click(dressPink);
+      });
+
+      const placedDress = screen.getByTestId('sticker-placed-1');
+      expect(placedDress.getAttribute('role')).toBe('img');
+      expect(placedDress.getAttribute('aria-label')).toBe(c.expectedDress);
+      expect(placedDress.getAttribute('aria-label')).not.toContain('_');
+
+      fireEvent.click(screen.getByTestId('sticker-tab-animals'));
+      const ladybug = screen.getByTestId('sticker-tray-ladybug');
+      act(() => {
+        fireEvent.click(ladybug);
+      });
+
+      const placedLadybug = screen.getByTestId('sticker-placed-2');
+      expect(placedLadybug.getAttribute('role')).toBe('img');
+      expect(placedLadybug.getAttribute('aria-label')).toBe(c.expectedLadybug);
+      expect(placedLadybug.getAttribute('aria-label')).not.toContain('_');
+
+      unmount();
+    }
+  });
+
   it('resets magic state when sceneId changes', async () => {
     vi.spyOn(magic, 'resolvePublicImageUrl').mockReturnValue('https://example.com/image.png');
     vi.spyOn(magic, 'publicUrlReachable').mockResolvedValue(true);
@@ -1476,8 +1530,11 @@ describe('StickerGame', () => {
     expect(spokenUtterances).toContain(t('ja', 'card.sticker.blurb'));
     expect(spokenUtterances).not.toContain(t('en', 'card.sticker.blurb'));
 
-    // Placed sticker remains safely on stage without being corrupted
-    expect(screen.getByTestId('sticker-placed-1')).toBeDefined();
+    // Placed sticker remains safely on stage with updated localized accessibility label
+    const placed1 = screen.getByTestId('sticker-placed-1');
+    expect(placed1).toBeDefined();
+    expect(placed1.getAttribute('role')).toBe('img');
+    expect(placed1.getAttribute('aria-label')).toBe('ピンクのドレス');
 
     unmount();
   });

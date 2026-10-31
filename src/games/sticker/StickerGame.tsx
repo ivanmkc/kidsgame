@@ -310,6 +310,7 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                     lang={lang}
                   />
                 ) : null}
+                lang={lang}
               />
             );
           })}
@@ -490,7 +491,7 @@ function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
 }
 
 const DraggableSticker = React.memo(function DraggableSticker({
-  placed, stageW, stageH, onMove, onPop, onTransform, pending, magicButton,
+  placed, stageW, stageH, onMove, onPop, onTransform, pending, magicButton, lang = 'en',
 }: {
   placed: Placed;
   stageW: number;
@@ -500,6 +501,7 @@ const DraggableSticker = React.memo(function DraggableSticker({
   onTransform: (key: number, size: number, rotation: number) => void;
   pending?: boolean;
   magicButton?: React.ReactNode;
+  lang?: Lang;
 }) {
   const size = placed.size * stageW;
   // Gentle pulse while the model works — visual reassurance that
@@ -573,6 +575,9 @@ const DraggableSticker = React.memo(function DraggableSticker({
     <Animated.View
       {...responder.current.panHandlers}
       testID={`sticker-placed-${placed.key}`}
+      accessible={true}
+      accessibilityRole="image"
+      accessibilityLabel={stickerLabel(placed.icon, lang)}
       style={{
         position: 'absolute',
         left: placed.x * stageW,
