@@ -873,4 +873,57 @@ describe("NumbersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("ignores repeated rapid taps on the same wrong tile during error shake animation", () => {
+    vi.useFakeTimers();
+    try {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+
+      let wrongTile: HTMLElement | null = null;
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN) {
+          correctTile = tile;
+        } else if (!wrongTile) {
+          wrongTile = tile;
+        }
+      }
+      expect(wrongTile).not.toBeNull();
+      expect(correctTile).not.toBeNull();
+
+      vi.mocked(sound.sfx.wrong).mockClear();
+      vi.mocked(sound.saySequence).mockClear();
+
+      // Tap the wrong tile 4 times rapidly
+      fireEvent.click(wrongTile!);
+      fireEvent.click(wrongTile!);
+      fireEvent.click(wrongTile!);
+      fireEvent.click(wrongTile!);
+
+      expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+      expect(sound.saySequence).toHaveBeenCalledTimes(1);
+
+      // Advance timers past 450ms error shake
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+
+      // After error timer expires, tapping the wrong tile again triggers sfx.wrong
+      fireEvent.click(wrongTile!);
+      expect(sound.sfx.wrong).toHaveBeenCalledTimes(2);
+      expect(sound.saySequence).toHaveBeenCalledTimes(2);
+
+      // Immediate tap of correct tile works and clears wrong state
+      fireEvent.click(correctTile!);
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

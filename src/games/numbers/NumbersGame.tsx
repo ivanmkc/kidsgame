@@ -43,6 +43,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lockedRef = useRef(false);
+  const wrongIdxRef = useRef<number | null>(null);
   const [roundIdx, setRoundIdx] = useState(0);
   const [round, setRound] = useState<NumberRound>(() =>
     makeNumberRound(rngRef.current, numSettings, lang),
@@ -60,6 +61,15 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
 
   const { epoch, isValid } = useLangEpoch(lang);
 
+  const clearWrongTimer = () => {
+    if (errorTimerRef.current) {
+      clearTimeout(errorTimerRef.current);
+      errorTimerRef.current = null;
+    }
+    wrongIdxRef.current = null;
+    setWrongIdx(null);
+  };
+
   const mountedRef = useRef(false);
 
   // Lang or difficulty switch: rebuild the active round so prompt lines and tiles match the new settings.
@@ -68,10 +78,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       mountedRef.current = true;
       return;
     }
-    if (errorTimerRef.current) {
-      clearTimeout(errorTimerRef.current);
-      errorTimerRef.current = null;
-    }
+    clearWrongTimer();
     if (lockTimerRef.current) {
       clearTimeout(lockTimerRef.current);
       lockTimerRef.current = null;
@@ -79,7 +86,6 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     lockedRef.current = false;
     setIsFinishing(false);
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
-    setWrongIdx(null);
     setCorrectIdx(null);
   }, [epoch, difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -138,16 +144,12 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   };
 
   const onTile = (i: number) => {
-    if (won || isFinishing || lockedRef.current) return;
+    if (won || isFinishing || lockedRef.current || wrongIdxRef.current === i) return;
     if (round.tiles[i].isAnswer) {
       lockedRef.current = true;
+      clearWrongTimer();
       sfx.good();
-      setWrongIdx(null);
       setCorrectIdx(i);
-      if (errorTimerRef.current) {
-        clearTimeout(errorTimerRef.current);
-        errorTimerRef.current = null;
-      }
       const next = roundIdx + 1;
       if (next >= roundsToWin) {
         setIsFinishing(true);
@@ -168,22 +170,21 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
       }, SUCCESS_DELAY_MS);
     } else {
       sfx.wrong();
+      wrongIdxRef.current = i;
       setWrongIdx(i);
       if (errorTimerRef.current) clearTimeout(errorTimerRef.current);
       errorTimerRef.current = setTimeout(() => {
+        wrongIdxRef.current = null;
+        errorTimerRef.current = null;
         if (!isValid()) return;
         setWrongIdx((w) => (w === i ? null : w));
-        errorTimerRef.current = null;
       }, 450);
       saySequence(round.promptLines);
     }
   };
 
   const reset = () => {
-    if (errorTimerRef.current) {
-      clearTimeout(errorTimerRef.current);
-      errorTimerRef.current = null;
-    }
+    clearWrongTimer();
     if (lockTimerRef.current) {
       clearTimeout(lockTimerRef.current);
       lockTimerRef.current = null;
@@ -193,7 +194,6 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRoundIdx(0);
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
-    setWrongIdx(null);
     setCorrectIdx(null);
     setIsFinishing(false);
   };
