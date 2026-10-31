@@ -67,17 +67,14 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     setRoundIdx(0);
     setTimerKey((k) => k + 1);
   }
-  const showTimer = settingsFor(difficulty).timer;
+  const showTimer = settingsFor(difficulty).timer && started;
   const won = roundIdx >= roundsToWin;
   useWinLine(
     won && !isFinishing,
     t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"),
   );
   useSay(!started ? t(lang, "card.letters.blurb") : null);
-  const elapsed = useElapsed(
-    showTimer && !won && !isFinishing && started,
-    timerKey,
-  );
+  const elapsed = useElapsed(showTimer && !won && !isFinishing, timerKey);
   const { width, height } = useWindowDimensions();
 
   // Lang switch: rebuild the live round so prompt/caption re-skin immediately.
@@ -158,7 +155,14 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
   }, [round, won, isFinishing, started]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTile = (i: number) => {
-    if (!started || won || isFinishing || lockedRef.current || wrongIdxRef.current === i) return;
+    if (
+      !started ||
+      won ||
+      isFinishing ||
+      lockedRef.current ||
+      wrongIdxRef.current === i
+    )
+      return;
     if (round.tiles[i].isAnswer) {
       lockedRef.current = true;
       clearWrongTimer();
@@ -253,21 +257,23 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
       onBack={onHome}
       lang={lang}
       right={
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          {showTimer ? (
-            <TimerRing
-              elapsed={elapsed}
-              size={44}
-              stroke={5}
-              showLabel
-              testID="letters-timer"
+        started ? (
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {showTimer ? (
+              <TimerRing
+                elapsed={elapsed}
+                size={44}
+                stroke={5}
+                showLabel
+                testID="letters-timer"
+              />
+            ) : null}
+            <ScoreChip
+              label={`${chipEmoji} ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`}
+              testID="letters-score"
             />
-          ) : null}
-          <ScoreChip
-            label={`${chipEmoji} ${Math.min(roundIdx, roundsToWin)}/${roundsToWin}`}
-            testID="letters-score"
-          />
-        </View>
+          </View>
+        ) : undefined
       }
     >
       <View

@@ -747,7 +747,9 @@ describe("LettersGame", () => {
 
       // Switch to Medium (which has timer) to verify timer reset
       act(() => {
-        rerender(<LettersGame onHome={() => {}} difficulty="medium" lang="en" />);
+        rerender(
+          <LettersGame onHome={() => {}} difficulty="medium" lang="en" />,
+        );
       });
       expect(screen.getByTestId("letters-score").textContent).toBe("🔤 0/10");
       expect(screen.getByTestId("letters-timer").textContent).toBe("0:00");
@@ -1214,6 +1216,45 @@ describe("LettersGame", () => {
         configurable: true,
       });
       window.dispatchEvent(new Event("resize"));
+    }
+  });
+
+  it("hides timer ring and score chip on start screen until play button is pressed", () => {
+    vi.useFakeTimers();
+    try {
+      const { unmount } = render(
+        <LettersGame onHome={() => {}} difficulty="hard" lang="en" />,
+      );
+
+      // Pre-game start screen: header chrome is hidden on timed difficulties
+      expect(screen.queryByTestId("letters-timer")).toBeNull();
+      expect(screen.queryByTestId("letters-score")).toBeNull();
+      expect(screen.getByTestId("play-button")).toBeTruthy();
+
+      // Start the game
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      // Both timer ring and score chip are visible now
+      expect(screen.getByTestId("letters-score").textContent).toBe("👂 0/12");
+      expect(screen.getByTestId("letters-timer")).toBeTruthy();
+
+      unmount();
+
+      // Easy mode check: score chip appears after play, but timer ring is omitted
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+      expect(screen.queryByTestId("letters-timer")).toBeNull();
+      expect(screen.queryByTestId("letters-score")).toBeNull();
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      expect(screen.getByTestId("letters-score").textContent).toBe("🔤 0/8");
+      expect(screen.queryByTestId("letters-timer")).toBeNull();
+    } finally {
+      vi.useRealTimers();
     }
   });
 });
