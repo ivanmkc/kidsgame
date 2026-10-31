@@ -52,13 +52,14 @@ export function bingoLayout(
   const isLandscape = width > height;
   if (isLandscape) {
     // Landscape: prompt card is placed side-by-side with the grid, freeing
-    // vertical height so tiles maintain child-accessible touch targets (>= 64px).
-    const gap = size === 4 ? 8 : 10;
+    // vertical height so tiles maintain child-accessible touch targets (>= 64px
+    // on standard viewports, >= 38px on compact viewports).
+    const gap = size >= 5 ? 6 : size === 4 ? 8 : 10;
     const availH = height - 84 - 10;
     const availW = width - 32 - 20 - 220;
     const tileH = (availH - (size - 1) * gap) / size;
     const tileW = (availW - (size - 1) * gap) / size;
-    const tileSize = Math.max(44, Math.floor(Math.min(tileH, tileW, 130)));
+    const tileSize = Math.max(38, Math.floor(Math.min(tileH, tileW, 130)));
     return { tileSize, gap, isLandscape };
   }
 

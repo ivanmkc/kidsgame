@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { makeRng } from "../../../rng";
 import { manifest } from "../../../manifest";
 import { VOICE } from "../../../assets/voice";
-import { WORDS, soundsFor } from '../../../curriculum/content';
+import { WORDS, soundsFor } from "../../../curriculum/content";
 import {
   BingoBoard,
   bingoLayout,
@@ -288,6 +288,22 @@ describe("bingoLayout", () => {
     expect(l.isLandscape).toBe(true);
     expect(l.gap).toBe(10);
     expect(l.tileSize).toBeGreaterThanOrEqual(64);
+  });
+
+  it("landscape: uses gap 6 for 5x5 boards", () => {
+    const l = bingoLayout(844, 390, 5);
+    expect(l.isLandscape).toBe(true);
+    expect(l.gap).toBe(6);
+    expect(l.tileSize).toBe(54);
+  });
+
+  it("landscape (compact mobile): 5x5 board fits within available height with child-accessible tiles", () => {
+    const l = bingoLayout(568, 320, 5);
+    expect(l.isLandscape).toBe(true);
+    expect(l.gap).toBe(6);
+    expect(l.tileSize).toBe(40);
+    const totalGridHeight = 5 * l.tileSize + 4 * l.gap;
+    expect(totalGridHeight).toBeLessThanOrEqual(320 - 84 - 10);
   });
 });
 
