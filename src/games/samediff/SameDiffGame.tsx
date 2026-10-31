@@ -57,7 +57,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [sparkKeys, setSparkKeys] = useState({ same: 0, different: 0 });
   const gapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const replayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const lockedRef = useRef(false);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -70,7 +69,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       roundEpochRef.current++;
       if (gapTimer.current) clearTimeout(gapTimer.current);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
-      if (replayTimer.current) clearTimeout(replayTimer.current);
       stopSequence();
       stopNarration();
     };
@@ -82,8 +80,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     stopNarration();
     if (gapTimer.current) clearTimeout(gapTimer.current);
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
-    if (replayTimer.current) clearTimeout(replayTimer.current);
-    setActiveNote(null);
     wrongPickRef.current = null;
     setWrongPick(null);
     setCorrectPick(null);
@@ -216,7 +212,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     stopNarration();
     stopSequence();
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
-    if (replayTimer.current) clearTimeout(replayTimer.current);
     if (gapTimer.current) clearTimeout(gapTimer.current);
     lockedRef.current = false;
     firstTryRef.current = true;
