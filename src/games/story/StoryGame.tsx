@@ -11,7 +11,7 @@ import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
 import { say, saySequence, sfx, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
-import { filterStoriesByLang } from './logic';
+import { computeStoryImageDimensions, filterStoriesByLang } from './logic';
 
 interface Props {
   onHome: () => void;
@@ -146,8 +146,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const isEnd = !node.choices || node.choices.length === 0;
   const hasHots = !isEnd && node.choices!.every((c) => c.hot);
   // hotspot nodes have no button row below, so the picture gets the room
-  const imgW = Math.min(width - 24, (height - 84 - (hasHots ? 110 : 250)) * ar, 900);
-  const imgH = imgW / ar;
+  const { imgW, imgH } = computeStoryImageDimensions(width, height, hasHots, ar);
 
   const advance = (next: string) => {
     hist.current.push(nodeId);

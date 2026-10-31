@@ -49,12 +49,15 @@ vi.mock('../../../components/GameShell', () => ({
 
 const capturedPressables: FakePressableProps[] = [];
 const capturedPressableMap: Record<string, FakePressableProps> = {};
+let mockDimensions: { width: number; height: number } | null = null;
 
 vi.mock('react-native', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable = actual.Pressable as React.ComponentType<FakePressableProps>;
   return {
     ...actual,
+    useWindowDimensions: () =>
+      mockDimensions ?? (actual.useWindowDimensions as () => { width: number; height: number })(),
     Pressable: (props: Partial<React.ComponentProps<typeof ActualPressable>>) => {
       capturedPressables.push(props);
       if (typeof props.testID === 'string') {
@@ -69,6 +72,7 @@ describe('StoryGame', () => {
   const initialStoryCount = manifest.stories?.length ?? 0;
 
   beforeEach(() => {
+    mockDimensions = null;
     capturedPickerProps = null;
     capturedGameShellProps = null;
     capturedPressables.length = 0;
@@ -764,5 +768,25 @@ describe('StoryGame', () => {
     expect(saySeqSpy).toHaveBeenLastCalledWith(
       expect.arrayContaining(['いきたい ほうを タップ！'])
     );
+  });
+
+  it('does not collapse story illustration frame to negative or tiny dimensions on compact landscape viewports', () => {
+    mockDimensions = { width: 640, height: 320 };
+    const { getByTestId } = render(
+      <StoryGame
+        sceneId="luna"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />
+    );
+
+    const frame = getByTestId('story-frame');
+    expect(frame).toBeDefined();
+    const inner = frame.firstElementChild as HTMLElement;
+    expect(inner).toBeDefined();
+    expect(Number.parseFloat(inner.style.width)).toBeGreaterThanOrEqual(260);
+    expect(Number.parseFloat(inner.style.height)).toBeGreaterThanOrEqual(140);
   });
 });
