@@ -94,7 +94,6 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     if (remindTimer.current) clearTimeout(remindTimer.current);
     remindTimer.current = setTimeout(() => setReminded(false), 2600);
   };
-  const [, setCelebrate] = useState(0);
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
@@ -143,7 +142,6 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
       if (next.length === round.matchCount) {
         lockedRef.current = true;
         clearWrongTimer();
-        setCelebrate((c) => c + 1);
         const nextIdx = roundIdx + 1;
         if (remindTimer.current) clearTimeout(remindTimer.current);
         if (winTimer.current) clearTimeout(winTimer.current);
