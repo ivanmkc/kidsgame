@@ -807,3 +807,80 @@ it("clears win timeout on unmount during final round result phase", () => {
   roundSpy.mockRestore();
   vi.useRealTimers();
 });
+
+it("disables tap circle and ignores extra taps once all 8 beats are completed", () => {
+  vi.useFakeTimers();
+  const playDrumSpy = vi.spyOn(music, "playDrum");
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past 4-beat count-in (2400ms at 100 bpm)
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  const circle = screen.getByTestId("steadybeat-circle");
+
+  // Wait 1-beat pause before the first expected tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // Tap 8 times on each beat (every 600ms)
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+  }
+
+  // All 8 progress dots are filled and circle is disabled
+  expect(screen.getAllByTestId("steadybeat-tap-dot-filled")).toHaveLength(8);
+  expect(circle.getAttribute("aria-disabled")).toBe("true");
+
+  // Drum was played 4 times in listen phase + 8 times for player taps = 12 times
+  expect(playDrumSpy).toHaveBeenCalledTimes(12);
+
+  // Extra taps during the remaining wait window before totalTime expires
+  for (let i = 0; i < 5; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+  }
+
+  // Extra taps should not play drum sound
+  expect(playDrumSpy).toHaveBeenCalledTimes(12);
+
+  // Advance past tap evaluation (totalTime: 9 * 600 + 500 = 5900ms)
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // Round is evaluated with exactly 8 hits and no penalty for extra taps
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/4");
+  expect(screen.queryAllByText("☆")).toHaveLength(0);
+
+  roundSpy.mockRestore();
+  playDrumSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("evaluates canTap correctly across phases, tap counts, and won state", () => {
+  const round: logic.SteadyBeatRound = { bpm: 100, beatsPerRound: 8 };
+  expect(logic.canTap(round, 0, "tap", false)).toBe(true);
+  expect(logic.canTap(round, 7, "tap", false)).toBe(true);
+  expect(logic.canTap(round, 8, "tap", false)).toBe(false);
+  expect(logic.canTap(round, 9, "tap", false)).toBe(false);
+  expect(logic.canTap(round, 0, "listen", false)).toBe(false);
+  expect(logic.canTap(round, 0, "result", false)).toBe(false);
+  expect(logic.canTap(round, 0, "tap", true)).toBe(false);
+});
+
+

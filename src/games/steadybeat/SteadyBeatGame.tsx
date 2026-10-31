@@ -24,6 +24,8 @@ import {
   scoreTaps,
   passThreshold,
   SteadyBeatRound,
+  SteadyBeatPhase,
+  canTap,
 } from "./logic";
 
 interface Props {
@@ -39,7 +41,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
     makeSteadyBeatRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
-  const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
+  const [phase, setPhase] = useState<SteadyBeatPhase>("listen");
   const [listenBeat, setListenBeat] = useState<number | null>(0);
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
   const tapTimesRef = useRef(tapTimesMs);
@@ -52,6 +54,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listenPulse = useRef(new Animated.Value(1)).current;
   const [won, setWon] = useState(false);
+  const canTapCircle = canTap(round, tapTimesMs.length, phase, won);
   useWinLine(won, t(lang, "win.steadybeat" as never));
   useEffect(() => {
     return () => {
@@ -126,6 +129,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) {
       say(t(lang, "shell.steadybeat.sub"));
+      tapTimesRef.current = [];
       setTapTimesMs([]);
       setHits(0);
       setFlash(false);
@@ -174,9 +178,16 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   }, [phase, startMs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onTap = () => {
-    if (won || phase !== "tap") return;
+    if (!canTap(round, tapTimesRef.current.length, phase, won)) return;
     playDrum();
-    setTapTimesMs((prev) => [...prev, performance.now()]);
+    const now = performance.now();
+    tapTimesRef.current = [...tapTimesRef.current, now];
+    if (tapTimesRef.current.length >= round.beatsPerRound) {
+      pulseAnim.stopAnimation();
+    }
+    setTapTimesMs((prev) =>
+      prev.length >= round.beatsPerRound ? prev : [...prev, now],
+    );
   };
 
   const reset = () => {
@@ -189,6 +200,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);
+    tapTimesRef.current = [];
     setTapTimesMs([]);
     setHits(0);
     setListenBeat(0);
@@ -294,14 +306,14 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           testID="steadybeat-circle"
           accessibilityRole="button"
           accessibilityLabel={t(lang, "shell.steadybeat.sub")}
-          disabled={phase !== "tap"}
+          disabled={!canTapCircle}
           style={({ pressed }) => [
             styles.circle,
             shadows.lifted,
             phase === "listen" && !flash && styles.circleDimmed,
             phase === "listen" && flash && styles.circleFlash,
             phase === "listen" && flash && shadows.glowGold,
-            phase === "tap" && shadows.glowGold,
+            canTapCircle && shadows.glowGold,
             pressed && styles.circlePressed,
           ]}
         >
@@ -313,7 +325,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
                 transform: [
                   {
                     scale:
-                      phase === "tap"
+                      phase === "tap" && canTapCircle
                         ? pulseScale
                         : phase === "listen"
                           ? listenPulse
