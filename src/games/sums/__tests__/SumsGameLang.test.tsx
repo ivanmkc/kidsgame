@@ -273,6 +273,7 @@ describe("SumsGame language switch safety", () => {
 
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "butterfly",
+      bIcon: "frog",
       a: 2,
       b: 3,
       sum: 5,
