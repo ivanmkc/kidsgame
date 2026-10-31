@@ -905,4 +905,33 @@ describe("MemoryGame", () => {
       expect(card.getAttribute("aria-label")).toBe("face-down card");
     }
   });
+
+  it("constrains card sizing in mobile portrait 2P duel mode to avoid vertical viewport overflow", async () => {
+    setViewport(390, 844);
+    render(
+      <MemoryGame
+        onHome={vi.fn()}
+        difficulty="easy"
+        twoPlayerEnabled={true}
+        lang="en"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    const card = screen
+      .getAllByRole("button")
+      .find((el) => el.getAttribute("data-testid")?.startsWith("memory-card-"));
+    expect(card).toBeDefined();
+
+    // With extraPaddingH=128 for 2P duel chrome, card width on 390x844 is ~129.56px,
+    // constrained so that cards, halo, and player chips fit within the viewport.
+    // With previous extraPaddingH=92, card width was ~137.39px (>135px).
+    const cardStyle = card?.getAttribute("style") ?? "";
+    const match = cardStyle.match(/width:\s*([0-9.]+)px/);
+    expect(match).not.toBeNull();
+    const cardWidth = parseFloat(match![1]);
+    expect(cardWidth).toBeCloseTo(129.565, 1);
+    expect(cardWidth).toBeLessThan(135);
+  });
 });
