@@ -103,6 +103,23 @@ describe('makeSumChoices', () => {
       expect(choices).toContain(sum);
     }
   });
+
+  it("restricts choices to [2..maxSum] without exceeding ceiling or offering 1", () => {
+    for (const maxSum of [5, 7, 10]) {
+      for (let answer = 2; answer <= maxSum; answer++) {
+        for (let seed = 1; seed <= 50; seed++) {
+          const choices = makeSumChoices(makeRng(seed), answer, maxSum);
+          expect(choices).toHaveLength(3);
+          expect(new Set(choices).size).toBe(3);
+          expect(choices).toContain(answer);
+          for (const choice of choices) {
+            expect(choice).toBeGreaterThanOrEqual(2);
+            expect(choice).toBeLessThanOrEqual(maxSum);
+          }
+        }
+      }
+    }
+  });
 });
 
 describe('makeSumsRound', () => {
@@ -113,5 +130,21 @@ describe('makeSumsRound', () => {
     expect(round.aPositions).toHaveLength(round.a);
     expect(round.bPositions).toHaveLength(round.b);
     expect(round.choices).toContain(round.sum);
+  });
+
+  it("keeps round choices within [2..maxSum] on Easy and Hard tiers", () => {
+    for (const d of ["easy", "medium", "hard"] as const) {
+      const { maxSum } = sumsSettings(d);
+      for (let seed = 1; seed <= 200; seed++) {
+        const round = makeSumsRound(makeRng(seed), d);
+        expect(round.choices).toHaveLength(3);
+        expect(new Set(round.choices).size).toBe(3);
+        expect(round.choices).toContain(round.sum);
+        for (const choice of round.choices) {
+          expect(choice).toBeGreaterThanOrEqual(2);
+          expect(choice).toBeLessThanOrEqual(maxSum);
+        }
+      }
+    }
   });
 });
