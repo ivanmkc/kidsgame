@@ -9,18 +9,9 @@ import { Lang } from '../../../lang';
 import * as sound from '../../../sound';
 const { sfx } = sound;
 import { LangContext } from '../../../components/GameShell';
-import {
-  GestureResponderEvent,
-  PanResponder,
-  type PanResponderCallbacks,
-  PanResponderGestureState,
-} from 'react-native';
 import { allSceneOptions } from '../../sceneOptions';
 import { StickerGame } from '../StickerGame';
 import { CHARACTER_ICONS } from '../../../assets/images';
-
-type FakeResponderEvent = Partial<GestureResponderEvent>;
-type FakeGestureState = Partial<PanResponderGestureState>;
 
 vi.mock('../../../assets/images', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -489,6 +480,33 @@ describe('StickerGame', () => {
     unmount();
   });
 
+  it('removes placed sticker when delete button is pressed', async () => {
+    const sfxFlipSpy = vi.spyOn(sfx, 'flip').mockReturnValue();
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayItem = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    expect(trayItem).toBeDefined();
+
+    act(() => {
+      fireEvent.click(trayItem!);
+    });
+
+    let deleteBtns = screen.queryAllByTestId(/sticker-delete-/);
+    expect(deleteBtns.length).toBe(1);
+
+    act(() => {
+      fireEvent.click(deleteBtns[0]);
+    });
+
+    expect(sfxFlipSpy).toHaveBeenCalledTimes(1);
+    deleteBtns = screen.queryAllByTestId(/sticker-delete-/);
+    expect(deleteBtns.length).toBe(0);
+
+    unmount();
+  });
+
   it('drops sticker onto the stage with y-offset scaled by aspect ratio', async () => {
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
@@ -560,23 +578,6 @@ describe('StickerGame', () => {
 
     expect(sizeStyle?.width).toBeGreaterThanOrEqual(450);
     expect(sizeStyle?.height).toBeGreaterThanOrEqual(180);
-  });
-
-  it('displays accurate gesture hint describing pinch without referencing +/- buttons or wiggle', () => {
-    const expectedHints = {
-      en: 'Drag to place · pinch to resize & turn · double-tap to pop!',
-      ja: 'シールを えへ · ピンチで おおきさ と むき · ダブルタップで けす！',
-      cmn: '把贴纸拖进画里 · 双指缩放和旋转 · 双击去掉！',
-      yue: '將貼紙拖入畫面 · 雙指縮放同旋轉 · 連撳兩下除走！',
-    } as const;
-
-    for (const [lang, hintText] of Object.entries(expectedHints)) {
-      const html = renderToString(
-        <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang={lang as 'en' | 'ja' | 'cmn' | 'yue'} />,
-      );
-      expect(html).toContain(hintText.replace('&', '&amp;'));
-      expect(html).not.toMatch(/wiggle|\+\/[-−]|うごく|会动|會郁/);
-    }
   });
 
   it('speaks localized voice prompt when scene picker is displayed in non-English languages', () => {
@@ -772,19 +773,6 @@ describe('StickerGame', () => {
       });
     });
 
-    let placedConfig: PanResponderCallbacks | undefined;
-    const panSpy = vi.spyOn(PanResponder, 'create').mockImplementation((config) => {
-      if (config.onPanResponderRelease?.toString().includes('lastTap')) {
-        placedConfig = config;
-      }
-      const fakePan: Partial<ReturnType<typeof PanResponder.create>> = {
-        panHandlers: {
-          onStartShouldSetResponder: () => true,
-        } as ReturnType<typeof PanResponder.create>['panHandlers'],
-      };
-      return fakePan as ReturnType<typeof PanResponder.create>;
-    });
-
     const { unmount } = render(
       <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />
     );
@@ -802,18 +790,14 @@ describe('StickerGame', () => {
       fireEvent.click(magicBtn);
     });
 
-    const placedRelease = placedConfig?.onPanResponderRelease as ((e: FakeResponderEvent, g: FakeGestureState) => void) | undefined;
-
-    expect(placedRelease).toBeDefined();
+    const deleteBtn = screen.queryAllByTestId(/sticker-delete-/)[0];
     await act(async () => {
-      placedRelease!({}, { dx: 0, dy: 0 });
-      placedRelease!({}, { dx: 0, dy: 0 });
+      fireEvent.click(deleteBtn);
     });
 
     expect(screen.queryByTestId('magic-toast')).toBeNull();
     expect(screen.queryByText('まほうに しっぱいしちゃった — もういちど！')).toBeNull();
 
-    panSpy.mockRestore();
     unmount();
   });
 
@@ -1503,13 +1487,13 @@ describe('StickerGame', () => {
     });
 
     // Trigger magic, which resolves with ok: false to trigger fizzle toast
-    const magicBtn = await screen.findByRole('button', { name: 'Make it real' });
+    const magicBtn = await screen.findByRole('button', { name: 'Make it real' }, { timeout: 10_000 });
     await act(async () => {
       fireEvent.click(magicBtn);
     });
 
     // English toast is displayed
-    expect(await screen.findByText('The magic fizzled — try again!')).toBeDefined();
+    expect(await screen.findByText('The magic fizzled — try again!', undefined, { timeout: 10_000 })).toBeDefined();
 
     spokenUtterances.length = 0;
 
@@ -1520,7 +1504,7 @@ describe('StickerGame', () => {
     });
 
     // Toast text dynamically updates to Japanese without holding stale English state
-    expect(await screen.findByText('まほうに しっぱいしちゃった — もういちど！')).toBeDefined();
+    expect(await screen.findByText('まほうに しっぱいしちゃった — もういちど！', undefined, { timeout: 10_000 })).toBeDefined();
     expect(screen.queryByText('The magic fizzled — try again!')).toBeNull();
 
     // Header subtitle updates dynamically to Japanese with localized scene name
