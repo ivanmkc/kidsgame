@@ -107,8 +107,7 @@ export function EscapeGame({
   const room = rooms.find((r) => r.id === sceneId);
   const visible = rooms.filter((r) => inFilter(r.level, filter));
   const surprisePool = visible.length > 0 ? visible : rooms;
-  const effDifficulty =
-    filter !== "all" ? filter : (room?.level || difficulty);
+  const effDifficulty = filter !== "all" ? filter : room?.level || difficulty;
   const hintMs = escapeHintMs(effDifficulty);
   const [state, setState] = useState<EscapeState>(() => startState());
   const [hintSpot, setHintSpot] = useState<string | null>(null);
@@ -247,6 +246,7 @@ export function EscapeGame({
   }
 
   const onSpot = (hotspotId: string) => {
+    if (stateRef.current.done) return;
     lastAction.current = Date.now();
     setHintSpot(null);
     const h = room.hotspots.find((x) => x.id === hotspotId);
@@ -357,6 +357,7 @@ export function EscapeGame({
   };
 
   const onTray = (itemId: string) => {
+    if (state.done) return;
     lastAction.current = Date.now();
     sfx.tap();
     const item = room.items.find((i) => i.id === itemId);
@@ -459,13 +460,14 @@ export function EscapeGame({
             const box =
               (revealed ? (h.itemBox ?? h.sprite?.itemBbox) : undefined) ??
               h.box;
+            const inactive = used || state.done;
             return (
               <Pressable
                 key={h.id}
                 testID={`escape-spot-${h.id}`}
-                disabled={used}
+                disabled={inactive}
                 onPress={() => onSpot(h.id)}
-                accessibilityRole={used ? "none" : "button"}
+                accessibilityRole={inactive ? "none" : "button"}
                 accessibilityLabel={h.id}
                 style={{
                   position: "absolute",
@@ -473,11 +475,11 @@ export function EscapeGame({
                   top: (box.y - 8) * scale,
                   width: (box.w + 16) * scale,
                   height: (box.h + 16) * scale,
-                  pointerEvents: used ? "none" : "auto",
+                  pointerEvents: inactive ? "none" : "auto",
                 }}
               >
-                {revealed && <PulseRing strong />}
-                {!used &&
+                {revealed && !state.done && <PulseRing strong />}
+                {!inactive &&
                   !revealed &&
                   (hintSpot === h.id ? (
                     <PulseRing strong />
