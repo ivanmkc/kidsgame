@@ -44,6 +44,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     makeBellsRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
+  const [won, setWon] = useState(total === 0);
   const [phase, setPhase] = useState<"listen" | "play">("listen");
   const [glowIdx, setGlowIdx] = useState<number | null>(null);
   const [tapped, setTapped] = useState<number[]>([]);
@@ -51,7 +52,6 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const [wrongFlash, setWrongFlash] = useState(false);
   const flashingRef = useRef(false);
   const [sparkKey, setSparkKey] = useState(0);
-  const won = score >= total;
   useWinLine(won, t(lang, "win.bells"));
 
   const clearDemo = useCallback(() => {
@@ -133,8 +133,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       sfx.good();
       setSparkKey((k) => k + 1);
       const nextScore = score + 1;
+      setScore(nextScore);
       if (nextScore < total) {
-        setScore(nextScore);
         demoTimers.current.push(
           setTimeout(() => {
             const nr = makeBellsRound(
@@ -148,7 +148,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
       } else {
         demoTimers.current.push(
           setTimeout(() => {
-            setScore(nextScore);
+            setWon(true);
           }, 600),
         );
       }
@@ -168,6 +168,7 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     if (glowTimer.current) clearTimeout(glowTimer.current);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     flashingRef.current = false;
     tappedRef.current = [];
     setTapped([]);

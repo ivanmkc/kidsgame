@@ -46,21 +46,29 @@ describe("BellsGame", () => {
   });
 
   it("halts animations when won", () => {
-    let rounds = 5;
-    const roundsSpy = vi
-      .spyOn(bellsLogic, "roundsToWin")
-      .mockImplementation(() => rounds);
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const roundsSpy = vi.spyOn(bellsLogic, "roundsToWin").mockReturnValue(1);
     const loopSpy = vi.spyOn(Animated, "loop");
     const stopSpy = vi.spyOn(Animated.Value.prototype, "stopAnimation");
 
-    const { rerender, unmount } = render(
-      <BellsGame onHome={() => {}} difficulty="hard" lang="en" />,
+    const { unmount } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
     );
 
-    loopSpy.mockClear();
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
 
-    rounds = 0;
-    rerender(<BellsGame onHome={() => {}} difficulty="hard" lang="en" />);
+    loopSpy.mockClear();
+    stopSpy.mockClear();
+
+    fireEvent.click(screen.getByTestId("bell-0"));
+    fireEvent.click(screen.getByTestId("bell-1"));
+
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
 
     expect(stopSpy).toHaveBeenCalled();
     expect(loopSpy).not.toHaveBeenCalled();
@@ -69,6 +77,7 @@ describe("BellsGame", () => {
     stopSpy.mockRestore();
     roundsSpy.mockRestore();
     unmount();
+    vi.useRealTimers();
   });
 
   it("delays WinOverlay mount on final winning round by 600ms", () => {
@@ -96,16 +105,18 @@ describe("BellsGame", () => {
     const bell1 = screen.getByTestId("bell-1");
     fireEvent.click(bell1);
 
-    // Immediate tick: sfx.good fires, but WinOverlay is deferred
+    // Immediate tick: sfx.good fires, score counter increments immediately, but WinOverlay is deferred
     expect(goodSpy).toHaveBeenCalledTimes(1);
     expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("bells-score").textContent).toContain("1/1");
     expect(screen.queryByTestId("win-overlay")).toBeNull();
 
-    // At 599ms: WinOverlay has not mounted yet
+    // At 599ms: WinOverlay has not mounted yet, score chip reflects target
     act(() => {
       vi.advanceTimersByTime(599);
     });
     expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("bells-score").textContent).toContain("1/1");
     expect(screen.queryByTestId("win-overlay")).toBeNull();
 
     // At 600ms: WinOverlay mounts and sfx.win fires
@@ -248,6 +259,89 @@ describe("BellsGame", () => {
     expect(screen.getByTestId("replay-button")).toBeTruthy();
 
     unmount();
+    vi.useRealTimers();
+  });
+
+  it("increments score chip immediately to final target during sequence completion on winning round", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+    vi.spyOn(sfx, "good").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const midiToBellIndex: Record<number, number> = {
+      60: 0,
+      62: 1,
+      64: 2,
+      67: 3,
+      69: 4,
+    };
+
+    // Play through rounds 1 to 4 (total is 5 for easy)
+    for (let round = 0; round < 4; round++) {
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      const playSeqCalls = vi.mocked(music.playSequence).mock.calls;
+      const lastSeq = playSeqCalls[playSeqCalls.length - 1][0];
+      const seq = lastSeq.map((n) => midiToBellIndex[n.m]);
+      act(() => {
+        for (const idx of seq) {
+          fireEvent.click(screen.getByTestId(`bell-${idx}`));
+        }
+      });
+      expect(screen.getByTestId("bells-score").textContent).toContain(
+        `${round + 1}/5`,
+      );
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+    }
+
+    // Now on round 5 (winning round): advance through demo to play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByTestId("bells-score").textContent).toContain("4/5");
+
+    const playSeqCalls = vi.mocked(music.playSequence).mock.calls;
+    const winningSeq = playSeqCalls[playSeqCalls.length - 1][0].map(
+      (n) => midiToBellIndex[n.m],
+    );
+
+    // Tap the final sequence up to the last note
+    for (let i = 0; i < winningSeq.length - 1; i++) {
+      act(() => {
+        fireEvent.click(screen.getByTestId(`bell-${winningSeq[i]}`));
+      });
+      expect(screen.getByTestId("bells-score").textContent).toContain("4/5");
+    }
+
+    // Tap final note of winning round
+    act(() => {
+      fireEvent.click(
+        screen.getByTestId(`bell-${winningSeq[winningSeq.length - 1]}`),
+      );
+    });
+
+    // Score chip immediately increments to 5/5 before WinOverlay mounts
+    expect(screen.getByTestId("bells-score").textContent).toContain("5/5");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 599ms into celebration, score chip is still 5/5 and WinOverlay has not mounted
+    act(() => {
+      vi.advanceTimersByTime(599);
+    });
+    expect(screen.getByTestId("bells-score").textContent).toContain("5/5");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 600ms, WinOverlay mounts
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
     vi.useRealTimers();
   });
 });
