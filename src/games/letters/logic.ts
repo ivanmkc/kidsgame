@@ -325,3 +325,79 @@ export function speechLines(): string[] {
 export function shouldShowGlyph(misses: number, forceShow: boolean): boolean {
   return forceShow || misses >= 2;
 }
+
+export interface LettersLayout {
+  cols: number;
+  rows: number;
+  tile: number;
+  speakerSize: number;
+  speakerIconSize: number;
+  boardGap: number;
+  tileGap: number;
+  isLandscape: boolean;
+  shortH: boolean;
+}
+
+/**
+ * Responsive layout calculation for LettersGame.
+ * On compact landscape viewports (height < 500), scales down the speaker button,
+ * font sizes, and gaps, and adapts 12-tile mode from 4x3 to 6x2 so tiles remain
+ * well above the 44px minimum touch target without overflowing or colliding with
+ * the GameShell header.
+ */
+export function lettersLayout(
+  width: number,
+  height: number,
+  tileCount: number = 8,
+): LettersLayout {
+  const isLandscape = width > height;
+  const shortH = height < 500;
+
+  const cols =
+    isLandscape && tileCount >= 12
+      ? 6
+      : tileCount <= 6
+        ? 3
+        : 4;
+  const rows = Math.ceil(tileCount / cols);
+
+  const speakerSize = shortH ? 56 : 80;
+  const speakerIconSize = shortH ? 26 : 36;
+  const boardGap = shortH ? 10 : 16;
+  const tileGap = shortH ? 10 : 12;
+
+  // Header chrome height: on narrow landscape viewports (width < 620),
+  // GameShell's title and right chip cluster wrap to a second line (84px single-line
+  // + 8px rowGap + 44px chip row = 136px), whereas standard single-line headers occupy ~84px.
+  const headerHeight = shortH && width < 620 ? 136 : 84;
+
+  // Prompt card height: speaker button + padding + borders.
+  // Standard: 80px + 20px paddingVertical + 6px border = 106px.
+  // Compact (shortH): 56px + 12px paddingVertical + 6px border = 74px.
+  const promptHeight = shortH ? 74 : 106;
+
+  const availH = height - headerHeight - promptHeight - boardGap;
+  const maxTileByHeight = Math.floor((availH - (rows - 1) * tileGap) / rows);
+
+  const maxGridWidth =
+    isLandscape && cols >= 6
+      ? Math.min(width - 32, 640)
+      : Math.min(width - 32, 560);
+  const maxTileByWidth = Math.floor(
+    (maxGridWidth - (cols - 1) * tileGap) / cols,
+  );
+
+  const tile = Math.max(10, Math.min(maxTileByWidth, maxTileByHeight, 140));
+
+  return {
+    cols,
+    rows,
+    tile,
+    speakerSize,
+    speakerIconSize,
+    boardGap,
+    tileGap,
+    isLandscape,
+    shortH,
+  };
+}
