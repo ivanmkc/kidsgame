@@ -255,6 +255,48 @@ describe("EscapeGame", () => {
     expect(sfx.tap).not.toHaveBeenCalled();
   });
 
+  it("disables flavor hotspots behind win overlay when room is completed", () => {
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId={room.id}
+        lang="en"
+      />,
+    );
+
+    // Before winning, teddy flavor hotspot is active and pressable
+    const teddyBefore = screen.getByTestId("escape-spot-teddy");
+    expect(teddyBefore.getAttribute("aria-disabled")).not.toBe("true");
+    expect(teddyBefore.getAttribute("role")).toBe("button");
+    expect(teddyBefore.style.pointerEvents).toBe("auto");
+
+    // Solve the toyroom chain to win:
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-pillow"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-chest"));
+    fireEvent.click(screen.getByTestId("escape-spot-pen"));
+
+    // After winning, teddy flavor hotspot is disabled with role none and pointerEvents none
+    const teddyAfter = screen.getByTestId("escape-spot-teddy");
+    expect(teddyAfter.getAttribute("aria-disabled")).toBe("true");
+    expect(teddyAfter.getAttribute("role")).not.toBe("button");
+    expect(teddyAfter.style.pointerEvents).toBe("none");
+
+    // Tapping teddy does nothing (no feedback burst or sound)
+    vi.mocked(sound.say).mockClear();
+    vi.mocked(sfx.tap).mockClear();
+    fireEvent.click(teddyAfter);
+    expect(sound.say).not.toHaveBeenCalled();
+    expect(sfx.tap).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("escape-feedback-teddy")).toBeNull();
+  });
+
   it("renders FilterCycleChip and cycles difficulty filter on press", () => {
     const onFilter = vi.fn();
     render(
@@ -367,7 +409,7 @@ describe("EscapeGame", () => {
         onBackToPicker={noop}
         sceneId="toyroom"
         difficulty="hard" // global difficulty is hard
-        filter="easy"     // but filter is easy
+        filter="easy" // but filter is easy
         lang="en"
       />,
     );
