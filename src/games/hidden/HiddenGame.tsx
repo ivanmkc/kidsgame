@@ -33,7 +33,7 @@ import {
   nextTurn,
 } from "../../multiplayer";
 import { makeRng, sample } from "../../rng";
-import { sfx, useSay, say, stopNarration } from "../../sound";
+import { sfx, useSay, say, saySequence, stopNarration } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { Find, coopDrawCount, countFor } from "./coop";
 import { hiddenLayout } from "./logic";
@@ -78,12 +78,31 @@ export function HiddenGame({
   const [turn, setTurn] = useState<PlayerIx>(0);
   const [finds, setFinds] = useState<Find[]>([]); // solo stamps by:null
   const [hintId, setHintId] = useState<string | null>(null);
+  const [prevSceneId, setPrevSceneId] = useState<string | null>(null);
   // Synchronous mirrors: burst multi-touch fires several onPress before any
   // re-render — attribution and turn flow must not read stale state.
   const turnRef = useRef<PlayerIx>(0);
   const findsRef = useRef<Set<string>>(new Set());
   const starterRef = useRef<PlayerIx>(1); // first scene flips this to 0 (Foxy)
   const omittedHintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  if (sceneId !== (prevSceneId ?? undefined)) {
+    setPrevSceneId(sceneId ?? null);
+    setFinds([]);
+    findsRef.current = new Set();
+    setHintId(null);
+    if (omittedHintTimer.current) {
+      clearTimeout(omittedHintTimer.current);
+      omittedHintTimer.current = null;
+    }
+    if (sceneId) {
+      // starting player alternates each scene
+      const s = nextTurn(starterRef.current);
+      starterRef.current = s;
+      turnRef.current = s;
+      setTurn(s);
+    }
+  }
 
   const settings = settingsFor(effDifficulty);
   const showTimer = mode !== null && settings.timer && !coop;
@@ -98,20 +117,6 @@ export function HiddenGame({
   const won = finds.length === total && total > 0;
   const elapsed = useElapsed(showTimer && !!scene && !won, sceneId);
 
-  useEffect(() => {
-    setFinds([]);
-    findsRef.current = new Set();
-    setHintId(null);
-    if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
-    if (sceneId) {
-      // starting player alternates each scene
-      const s = nextTurn(starterRef.current);
-      starterRef.current = s;
-      turnRef.current = s;
-      setTurn(s);
-    }
-  }, [sceneId]);
-
   useEffect(
     () => () => {
       if (omittedHintTimer.current) clearTimeout(omittedHintTimer.current);
@@ -120,21 +125,37 @@ export function HiddenGame({
     [],
   );
 
-  // Team Hunt narration: speak each turn change (identity by voice, zero reading).
-  useSay(
-    coop && scene && !won
-      ? t(lang, "hidden.turn", { name: t(lang, MP_PLAYERS[turn].name) })
-      : null,
-  );
-  useSay(
-    mode === null
-      ? null
-      : scene
-        ? coop
-          ? null
-          : t(lang, "hidden.prompt")
-        : t(lang, "picker.hidden"),
-  );
+  useSay(mode === null || scene ? null : t(lang, "picker.hidden"));
+
+  const sceneEntranceKeyRef = useRef<string | null>(null);
+  const announcedTurnRef = useRef<PlayerIx | null>(null);
+  useEffect(() => {
+    if (mode === null || !scene || won) {
+      sceneEntranceKeyRef.current = null;
+      announcedTurnRef.current = null;
+      return;
+    }
+    const sceneKey = `${scene.id}:${mode}:${lang}`;
+    const prompt = t(lang, "hidden.prompt");
+    if (!coop) {
+      if (sceneEntranceKeyRef.current !== sceneKey) {
+        sceneEntranceKeyRef.current = sceneKey;
+        say(prompt);
+      }
+      return;
+    }
+    const turnText = t(lang, "hidden.turn", {
+      name: t(lang, MP_PLAYERS[turn].name),
+    });
+    if (sceneEntranceKeyRef.current !== sceneKey) {
+      sceneEntranceKeyRef.current = sceneKey;
+      announcedTurnRef.current = turn;
+      saySequence([prompt, turnText]);
+    } else if (announcedTurnRef.current !== turn) {
+      announcedTurnRef.current = turn;
+      say(turnText);
+    }
+  }, [mode, scene, coop, turn, won, lang]);
   useEffect(() => {
     if (won) say(t(lang, coop ? "win.hiddenCoop" : "win.hidden"));
   }, [won, coop, lang]); // eslint-disable-line react-hooks/exhaustive-deps
