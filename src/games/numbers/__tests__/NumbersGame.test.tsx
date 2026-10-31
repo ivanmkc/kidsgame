@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
@@ -11,7 +17,6 @@ import { NumbersGame } from "../NumbersGame";
 import * as logic from "../logic";
 
 describe("NumbersGame", () => {
-
   it("highlights the correct tile on tap before advancing the round", () => {
     vi.useFakeTimers();
     try {
@@ -40,10 +45,14 @@ describe("NumbersGame", () => {
       expect(correctTile!.className).not.toBe(initialClass);
 
       // Advance timer by SUCCESS_DELAY_MS
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
 
       // After round advances, the tile at this index resets its highlight
-      const resetTile = screen.getByTestId(correctTile!.getAttribute("data-testid")!);
+      const resetTile = screen.getByTestId(
+        correctTile!.getAttribute("data-testid")!,
+      );
       expect(resetTile.className).toBe(initialClass);
     } finally {
       vi.useRealTimers();
@@ -174,7 +183,9 @@ describe("NumbersGame", () => {
       }
       expect(correctTile).not.toBeNull();
       fireEvent.click(correctTile!);
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
 
       // Next round: prompt card remains Arabic numeral, and tiles remain Han numerals.
       const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
@@ -304,7 +315,9 @@ describe("NumbersGame", () => {
       );
       fireEvent.click(correctBtn2);
       expect(sound.sfx.good).toHaveBeenCalledTimes(1);
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
       expect(screen.getByTestId("numbers-score").textContent).toContain("1/8");
     } finally {
       vi.useRealTimers();
@@ -439,7 +452,9 @@ describe("NumbersGame", () => {
       expect(sound.saySequence).not.toHaveBeenCalled();
 
       // Past celebration lock, tapping prompt replays
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
       const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
       fireEvent.click(nextPromptEl);
       expect(sound.saySequence).toHaveBeenCalledTimes(2);
@@ -487,7 +502,9 @@ describe("NumbersGame", () => {
         }
         expect(correctTile).not.toBeNull();
         fireEvent.click(correctTile!);
-        act(() => { vi.advanceTimersByTime(400); });
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
       }
 
       vi.advanceTimersByTime(600);
@@ -547,6 +564,211 @@ describe("NumbersGame", () => {
       expect(parseFloat(tile.style.height)).toBeGreaterThanOrEqual(60);
     } finally {
       setViewport(origWidth, origHeight);
+    }
+  });
+
+  it("preserves round progress when language is switched mid-celebration", () => {
+    vi.useFakeTimers();
+    try {
+      function LangWrapper() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        return (
+          <LangContext.Provider
+            value={{
+              lang,
+              onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+            }}
+          >
+            <NumbersGame onHome={vi.fn()} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      render(<LangWrapper />);
+
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 0/8");
+
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+
+      let correctTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN) {
+          correctTile = tile;
+          break;
+        }
+      }
+      expect(correctTile).not.toBeNull();
+
+      // Tap correct tile
+      fireEvent.click(correctTile!);
+      expect(sound.sfx.good).toHaveBeenCalledTimes(1);
+
+      // Score advances immediately to 1/8
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 1/8");
+
+      // Switch language 100ms into the 400ms celebration delay
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+
+      // Advance past remaining time of celebration delay
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // Score must remain 1/8, not reset back to 0/8
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 1/8");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("delays WinOverlay on final winning round until 400ms celebration completes", () => {
+    vi.useFakeTimers();
+    try {
+      render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      // Play through first 7 rounds
+      for (let round = 0; round < 7; round++) {
+        const promptEl = screen.getByTestId(/^numbers-prompt-/);
+        const targetN = promptEl
+          .getAttribute("data-testid")!
+          .replace("numbers-prompt-n-", "");
+        let correctTile: HTMLElement | null = null;
+        for (let i = 0; i < 5; i++) {
+          const tile = screen.getByTestId(`numbers-tile-${i}`);
+          if (tile.getAttribute("aria-label") === targetN) {
+            correctTile = tile;
+            break;
+          }
+        }
+        expect(correctTile).not.toBeNull();
+        fireEvent.click(correctTile!);
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
+      }
+
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 7/8");
+
+      // Final round (round 8)
+      const promptEl8 = screen.getByTestId(/^numbers-prompt-/);
+      const targetN8 = promptEl8
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let correctTile8: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN8) {
+          correctTile8 = tile;
+          break;
+        }
+      }
+      expect(correctTile8).not.toBeNull();
+
+      // Tap winning tile
+      fireEvent.click(correctTile8!);
+      expect(sound.sfx.good).toHaveBeenCalled();
+
+      // Score advances immediately to 8/8
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 8/8");
+
+      // WinOverlay is NOT visible immediately on tap during celebration delay
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+      // Advance through celebration delay
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+
+      // WinOverlay is now visible
+      expect(screen.getByTestId("win-overlay")).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("preserves victory when language is switched during final round celebration", () => {
+    vi.useFakeTimers();
+    try {
+      function VictoryLangWrapper() {
+        const [lang, setLang] = React.useState<Lang>("en");
+        return (
+          <LangContext.Provider
+            value={{
+              lang,
+              onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+            }}
+          >
+            <NumbersGame onHome={vi.fn()} difficulty="easy" lang={lang} />
+          </LangContext.Provider>
+        );
+      }
+
+      render(<VictoryLangWrapper />);
+
+      // Play through first 7 rounds
+      for (let round = 0; round < 7; round++) {
+        const promptEl = screen.getByTestId(/^numbers-prompt-/);
+        const targetN = promptEl
+          .getAttribute("data-testid")!
+          .replace("numbers-prompt-n-", "");
+        let correctTile: HTMLElement | null = null;
+        for (let i = 0; i < 5; i++) {
+          const tile = screen.getByTestId(`numbers-tile-${i}`);
+          if (tile.getAttribute("aria-label") === targetN) {
+            correctTile = tile;
+            break;
+          }
+        }
+        expect(correctTile).not.toBeNull();
+        fireEvent.click(correctTile!);
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
+      }
+
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 7/8");
+
+      // Final round
+      const promptEl8 = screen.getByTestId(/^numbers-prompt-/);
+      const targetN8 = promptEl8
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let correctTile8: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") === targetN8) {
+          correctTile8 = tile;
+          break;
+        }
+      }
+      expect(correctTile8).not.toBeNull();
+
+      // Tap winning tile
+      fireEvent.click(correctTile8!);
+
+      // Switch language 100ms into celebration delay
+      act(() => {
+        vi.advanceTimersByTime(100);
+      });
+      fireEvent.click(screen.getByTestId("lang-cycle"));
+
+      // Advance timers past celebration delay
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      // WinOverlay should be visible, score 8/8 (victory not cancelled or forced extra round)
+      expect(screen.getByTestId("numbers-score").textContent).toBe("🔢 8/8");
+      expect(screen.getByTestId("win-overlay")).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
     }
   });
 });
