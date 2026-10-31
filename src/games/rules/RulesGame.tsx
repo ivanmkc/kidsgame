@@ -120,7 +120,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   }, [lang]);
 
   useEffect(() => {
-    if (won) return;
+    if (won || lockedRef.current) return;
     const line = round.isRecall
       ? rulesRecallLine(round.ruleNumber, lang)
       : round.rule.label;
