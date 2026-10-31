@@ -1,9 +1,17 @@
-import { describe, expect, it } from 'vitest';
-import { makeRng } from '../../../rng';
-import { MIN_STAGE_H, makeSumChoices, makeSumsRound, sumsLayout, sumsSettings } from '../logic';
+import { describe, expect, it } from "vitest";
+import { CURRICULUM } from "../../../curriculum/content";
+import { makeRng } from "../../../rng";
+import {
+  MIN_STAGE_H,
+  makeSumChoices,
+  makeSumsRound,
+  pickTwoCritters,
+  sumsLayout,
+  sumsSettings,
+} from "../logic";
 
-describe('sumsLayout', () => {
-  it('enforces minimum stage height floor on mobile landscape viewports', () => {
+describe("sumsLayout", () => {
+  it("enforces minimum stage height floor on mobile landscape viewports", () => {
     const androidLandscape = sumsLayout(800, 360, 10);
     expect(androidLandscape.isLandscape).toBe(true);
     expect(androidLandscape.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
@@ -20,7 +28,7 @@ describe('sumsLayout', () => {
     expect(compactLandscape.stageH).toBe(220);
   });
 
-  it('sizes critters so 3 rows on hard difficulty never vertically collide or overlap', () => {
+  it("sizes critters so 3 rows on hard difficulty never vertically collide or overlap", () => {
     const viewports = [
       { w: 800, h: 360 },
       { w: 667, h: 375 },
@@ -36,7 +44,7 @@ describe('sumsLayout', () => {
     }
   });
 
-  it('sizes critters so 4 rows on higher difficulties (total >= 16) never vertically collide or overlap', () => {
+  it("sizes critters so 4 rows on higher difficulties (total >= 16) never vertically collide or overlap", () => {
     const viewports = [
       { w: 800, h: 360 },
       { w: 667, h: 375 },
@@ -55,7 +63,7 @@ describe('sumsLayout', () => {
     }
   });
 
-  it('uses standard vertical layout and preserves stage height on portrait screens', () => {
+  it("uses standard vertical layout and preserves stage height on portrait screens", () => {
     const portrait360 = sumsLayout(360, 800, 5);
     expect(portrait360.isLandscape).toBe(false);
     expect(portrait360.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
@@ -66,7 +74,7 @@ describe('sumsLayout', () => {
     expect(compactPortrait.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
   });
 
-  it('uses standard spacious layout on tablet in landscape', () => {
+  it("uses standard spacious layout on tablet in landscape", () => {
     const tablet = sumsLayout(1024, 768, 10);
     expect(tablet.isLandscape).toBe(false);
     expect(tablet.stageH).toBe(403);
@@ -74,7 +82,7 @@ describe('sumsLayout', () => {
     expect(tablet.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
   });
 
-  it('clamps stageW to a minimum of 0 on extremely narrow viewports to avoid negative dimensions', () => {
+  it("clamps stageW to a minimum of 0 on extremely narrow viewports to avoid negative dimensions", () => {
     const narrowPortrait = sumsLayout(30, 600, 2);
     expect(narrowPortrait.stageW).toBeGreaterThanOrEqual(0);
     expect(narrowPortrait.isLandscape).toBe(false);
@@ -85,16 +93,16 @@ describe('sumsLayout', () => {
   });
 });
 
-describe('sumsSettings', () => {
-  it('returns appropriate rounds and maxSum per difficulty', () => {
-    expect(sumsSettings('easy')).toEqual({ rounds: 5, maxSum: 5 });
-    expect(sumsSettings('medium')).toEqual({ rounds: 6, maxSum: 7 });
-    expect(sumsSettings('hard')).toEqual({ rounds: 8, maxSum: 10 });
+describe("sumsSettings", () => {
+  it("returns appropriate rounds and maxSum per difficulty", () => {
+    expect(sumsSettings("easy")).toEqual({ rounds: 5, maxSum: 5 });
+    expect(sumsSettings("medium")).toEqual({ rounds: 6, maxSum: 7 });
+    expect(sumsSettings("hard")).toEqual({ rounds: 8, maxSum: 10 });
   });
 });
 
-describe('makeSumChoices', () => {
-  it('returns three unique choices containing the answer', () => {
+describe("makeSumChoices", () => {
+  it("returns three unique choices containing the answer", () => {
     const rng = makeRng(42);
     for (let sum = 2; sum <= 10; sum++) {
       const choices = makeSumChoices(rng, sum, 10);
@@ -122,14 +130,30 @@ describe('makeSumChoices', () => {
   });
 });
 
-describe('makeSumsRound', () => {
-  it('creates valid round with non-overlapping partitioned positions', () => {
+describe("makeSumsRound", () => {
+  it("creates valid round with non-overlapping partitioned positions and distinct icons", () => {
     const rng = makeRng(12345);
-    const round = makeSumsRound(rng, 'hard');
+    const round = makeSumsRound(rng, "hard");
     expect(round.a + round.b).toBe(round.sum);
     expect(round.aPositions).toHaveLength(round.a);
     expect(round.bPositions).toHaveLength(round.b);
     expect(round.choices).toContain(round.sum);
+    expect(round.icon).not.toBe(round.bIcon);
+    expect(CURRICULUM.critters).toContain(round.icon);
+    expect(CURRICULUM.critters).toContain(round.bIcon);
+    const maxAx = Math.max(...round.aPositions.map((p) => p.x));
+    const minBx = Math.min(...round.bPositions.map((p) => p.x));
+    expect(maxAx).toBeLessThanOrEqual(minBx);
+  });
+
+  it("pickTwoCritters returns two distinct curriculum critters", () => {
+    const rng = makeRng(99);
+    for (let i = 0; i < 50; i++) {
+      const [first, second] = pickTwoCritters(rng);
+      expect(first).not.toBe(second);
+      expect(CURRICULUM.critters).toContain(first);
+      expect(CURRICULUM.critters).toContain(second);
+    }
   });
 
   it("keeps round choices within [2..maxSum] on Easy and Hard tiers", () => {

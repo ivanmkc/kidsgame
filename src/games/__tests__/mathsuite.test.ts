@@ -559,6 +559,11 @@ describe("little sums", () => {
           expect(choice).toBeLessThanOrEqual(maxSum);
         }
         expect(CURRICULUM.critters).toContain(r.icon);
+        expect(CURRICULUM.critters).toContain(r.bIcon);
+        expect(r.bIcon).not.toBe(r.icon);
+        const maxAx = Math.max(...r.aPositions.map((p) => p.x));
+        const minBx = Math.min(...r.bPositions.map((p) => p.x));
+        expect(maxAx).toBeLessThanOrEqual(minBx);
       }
     });
   }

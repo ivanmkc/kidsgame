@@ -232,7 +232,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
           {round.bPositions.map((p, i) => (
             <Incoming
               key={`${score}-b-${i}`}
-              icon={round.icon}
+              icon={round.bIcon}
               size={critterSize}
               stageW={stageW}
               stageH={stageH}
