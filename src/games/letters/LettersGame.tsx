@@ -312,6 +312,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
               onPress={() => setCaptions((c) => !c)}
               testID="captions-toggle"
               accessibilityRole="button"
+              hitSlop={12}
               style={({ pressed }) => [
                 styles.captionsToggle,
                 shortH && styles.captionsToggleShort,
@@ -336,9 +337,6 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                 styles.prompt,
                 shadows.soft,
                 shortH && styles.promptShort,
-                shouldShowGlyph(misses, captions)
-                  ? null
-                  : styles.promptAudioOnly,
               ]}
               testID={`letters-prompt-${round.targetKey}`}
             >
@@ -386,6 +384,21 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
                   ) : null}
                 </View>
               )}
+              <Pressable
+                onPress={() => setCaptions((c) => !c)}
+                testID="captions-toggle"
+                accessibilityRole="button"
+                hitSlop={12}
+                style={({ pressed }) => [
+                  styles.captionsToggleMini,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.captionsToggleMiniText}>
+                  💬 {t(lang, "listenchoose.captions")}:{" "}
+                  {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
+                </Text>
+              </Pressable>
             </View>
             <View
               style={[
@@ -488,22 +501,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.inkSoft,
   },
+  captionsToggleMini: {
+    backgroundColor: colors.paper,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: colors.gold,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+  },
+  captionsToggleMiniText: {
+    fontFamily: fonts.body,
+    fontSize: 12,
+    color: colors.inkSoft,
+  },
   prompt: {
     backgroundColor: "#F7EDDA",
     borderRadius: 18,
     borderWidth: 3,
     borderColor: colors.gold,
-    paddingVertical: 10,
-    paddingHorizontal: 22,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
     alignItems: "center",
     flexDirection: "row",
-    gap: 16,
+    gap: 12,
     maxWidth: 520,
-  },
-  promptAudioOnly: {
-    borderRadius: 44,
-    paddingVertical: 4,
-    paddingHorizontal: 4,
   },
   speakerButton: {
     width: 80,
