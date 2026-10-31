@@ -51,7 +51,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const listenPulse = useRef(new Animated.Value(1)).current;
-  const won = score >= total;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.steadybeat" as never));
   useEffect(() => {
     return () => {
@@ -157,6 +157,10 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
             () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
             1200,
           );
+        } else {
+          transitionTimerRef.current = setTimeout(() => {
+            setWon(true);
+          }, 1200);
         }
       } else {
         sfx.wrong();
@@ -176,10 +180,15 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   };
 
   const reset = () => {
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
     if (flashTimer.current) clearTimeout(flashTimer.current);
     setFlash(false);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     setTapTimesMs([]);
     setHits(0);
     setListenBeat(0);
