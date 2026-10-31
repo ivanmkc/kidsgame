@@ -995,4 +995,42 @@ describe("LettersGame", () => {
       window.dispatchEvent(new Event("resize"));
     }
   });
+
+  it("allows pre-readers to toggle captions on and off mid-game during audio-only play", () => {
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, "makeLetterRound").mockImplementation(
+      (rng, tier, tileCount, avoidKey) => {
+        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+        generatedRounds.push(res);
+        return res;
+      },
+    );
+
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Start game without enabling captions on start screen
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // In audio-only mode: glyph is hidden, in-game captions toggle shows OFF
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
+    const inGameToggle = screen.getByTestId("captions-toggle");
+    expect(inGameToggle.textContent).toContain("OFF");
+
+    // Toggle captions ON mid-game
+    fireEvent.click(inGameToggle);
+
+    // Glyph is now visible and toggle displays ON
+    expect(screen.getByTestId("letters-glyph").textContent).toBe(
+      generatedRounds[0].targetDisplay,
+    );
+    expect(inGameToggle.textContent).toContain("ON");
+
+    // Toggle captions OFF mid-game
+    fireEvent.click(inGameToggle);
+
+    // Glyph is hidden again and toggle displays OFF
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
+    expect(inGameToggle.textContent).toContain("OFF");
+  });
 });
