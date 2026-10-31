@@ -14,7 +14,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { TimerRing, useElapsed } from "../../components/TimerRing";
 import { WinOverlay } from "../../components/WinOverlay";
 import { Difficulty, settingsFor } from "../../difficulty";
-import { Lang, numberWord, useLangEpoch } from "../../lang";
+import { Lang, numberWord } from "../../lang";
 import { t } from "../../i18n";
 import { Position } from "../count/logic";
 import { makeRng } from "../../rng";
@@ -33,7 +33,6 @@ interface Props {
  * Little Sums — a critters, then b more slide in. Kid picks the total.
  */
 export function SumsGame({ onHome, difficulty, lang }: Props) {
-  useLangEpoch(lang);
   const { rounds: roundsToWin } = sumsSettings(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SumsRound>(() =>
