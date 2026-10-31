@@ -564,8 +564,6 @@ const DraggableSticker = React.memo(function DraggableSticker({
         const { placed: pl, stageW: w, stageH: h, onMove: mv } = live.current;
         if (pinchStart.current) {
           pinchStart.current = null;
-          pan.current!.setValue({ x: 0, y: 0 });
-          return;
         }
         if (Math.abs(g.dx) + Math.abs(g.dy) >= 6) {
           const maxX = Math.max(0, 1 - pl.size - 14 / w);
