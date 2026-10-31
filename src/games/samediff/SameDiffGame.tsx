@@ -128,8 +128,14 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   }, []);
 
   useEffect(() => {
-    if (won) return;
     if (phase === "pick") {
+      lockedRef.current = false;
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (won) return;
+    if (phase === "pick" && !lockedRef.current) {
       saySequence([
         t(lang, "shell.samediff.sub"),
         t(lang, "music.same"),
@@ -137,12 +143,6 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       ]);
     }
   }, [phase, won, lang]);
-
-  useEffect(() => {
-    if (phase === "pick") {
-      lockedRef.current = false;
-    }
-  }, [phase]);
 
   useEffect(() => {
     if (!won) {
