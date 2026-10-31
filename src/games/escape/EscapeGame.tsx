@@ -144,6 +144,7 @@ export function EscapeGame({
   const { width } = useWindowDimensions();
   const stateRef = useRef(state);
   stateRef.current = state;
+  const prevSceneRef = useRef<string | undefined>(undefined);
   // ALL hooks above the early returns (repo hard rule).
   useEffect(() => {
     setState(startState());
@@ -156,7 +157,11 @@ export function EscapeGame({
   }, [sceneId]);
 
   useEffect(() => {
-    if (room) say(roomText(room, "intro", lang));
+    const isNewScene = sceneId !== prevSceneRef.current;
+    prevSceneRef.current = sceneId;
+    if (room && (isNewScene || !stateRef.current.done)) {
+      say(roomText(room, "intro", lang));
+    }
   }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Idle hint: after hintMs without progress, glow the next actionable spot
