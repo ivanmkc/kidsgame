@@ -16,7 +16,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { sfx } from "../../sound";
+import { sayThen, sfx, stopNarration } from "../../sound";
 import { playNote, playSequence, SeqNote, stopSequence } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -40,6 +40,9 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const demoTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const glowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isTransitioning = useRef(false);
+  const speechEpoch = useRef(0);
   const [round, setRound] = useState<BellsRound>(() =>
     makeBellsRound(rngRef.current, difficulty),
   );
@@ -88,18 +91,45 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   );
 
   useEffect(() => {
-    if (!won) {
-      flashingRef.current = false;
-      tappedRef.current = [];
-      setTapped([]);
+    return () => {
+      if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (won || isTransitioning.current) return;
+    const epoch = ++speechEpoch.current;
+
+    setPhase("listen");
+    setWrongFlash(false);
+    flashingRef.current = false;
+    if (glowTimer.current) clearTimeout(glowTimer.current);
+    setGlowIdx(null);
+    tappedRef.current = [];
+    setTapped([]);
+
+    clearDemo();
+    stopSequence();
+    stopNarration();
+
+    if (score === 0) {
+      sayThen([t(lang, "shell.bells.sub")], () => {
+        if (speechEpoch.current === epoch) {
+          playDemo(round);
+        }
+      });
+    } else {
       playDemo(round);
     }
+
     return () => {
+      speechEpoch.current++;
       clearDemo();
       if (glowTimer.current) clearTimeout(glowTimer.current);
       stopSequence();
+      stopNarration();
     };
-  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onBellTap = (idx: number) => {
     if (!canTap(round, tappedRef.current, phase, won, flashingRef.current))
@@ -132,25 +162,22 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
     } else if (result === "complete") {
       sfx.good();
       setSparkKey((k) => k + 1);
+      isTransitioning.current = true;
       const nextScore = score + 1;
       setScore(nextScore);
       if (nextScore < total) {
-        demoTimers.current.push(
-          setTimeout(() => {
-            const nr = makeBellsRound(
-              rngRef.current,
-              difficulty,
-              round.sequence,
-            );
-            setRound(nr);
-          }, 600),
-        );
+        if (transitionTimer.current) clearTimeout(transitionTimer.current);
+        transitionTimer.current = setTimeout(() => {
+          isTransitioning.current = false;
+          const nr = makeBellsRound(rngRef.current, difficulty, round.sequence);
+          setRound(nr);
+        }, 600);
       } else {
-        demoTimers.current.push(
-          setTimeout(() => {
-            setWon(true);
-          }, 600),
-        );
+        if (transitionTimer.current) clearTimeout(transitionTimer.current);
+        transitionTimer.current = setTimeout(() => {
+          isTransitioning.current = false;
+          setWon(true);
+        }, 600);
       }
     }
   };
@@ -166,6 +193,8 @@ export function BellsGame({ onHome, difficulty, lang }: Props) {
   const reset = () => {
     clearDemo();
     if (glowTimer.current) clearTimeout(glowTimer.current);
+    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    isTransitioning.current = false;
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setWon(false);

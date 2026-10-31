@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import { Animated } from "react-native";
 import * as music from "../../../music";
+import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { BellsGame } from "../BellsGame";
 import * as bellsLogic from "../logic";
@@ -21,6 +22,7 @@ describe("BellsGame", () => {
   });
 
   beforeEach(() => {
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => done());
     let mockCancel: (() => void) | null = null;
     vi.spyOn(music, "playSequence").mockImplementation(
       (notes, bpm, onNote, onDone) => {
@@ -43,6 +45,14 @@ describe("BellsGame", () => {
         mockCancel = null;
       }
     });
+  });
+
+  it("calls sayThen with instructional text on mount when score is 0", () => {
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(sound.sayThen).toHaveBeenCalledWith(
+      ["Listen, then play the tune back!"],
+      expect.any(Function),
+    );
   });
 
   it("halts animations when won", () => {
@@ -342,6 +352,29 @@ describe("BellsGame", () => {
     });
     expect(screen.getByTestId("win-overlay")).toBeTruthy();
 
+    vi.useRealTimers();
+  });
+
+  it("handles mid-round language switch safely and resets phase to listen", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    const { rerender } = render(
+      <BellsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    // Advance demo to transition from "listen" to "play" phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+    expect(screen.getByText("Your turn!")).toBeTruthy();
+
+    // Switch language mid-round
+    rerender(<BellsGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    // Assert that the game is reset to the listen phase
+    expect(screen.getByText("きいてね…")).toBeTruthy();
+    expect(screen.queryByText("Your turn!")).toBeNull();
+    
     vi.useRealTimers();
   });
 });
