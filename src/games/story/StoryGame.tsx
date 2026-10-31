@@ -9,7 +9,7 @@ import { ScenePicker } from '../../components/ScenePicker';
 import { Lang, useLangEpoch } from '../../lang';
 import { t } from '../../i18n';
 import { SCENE_AR, manifest, StoryChoice, StoryNode, StoryScare , StoryFx} from '../../manifest';
-import { say, saySequence, sfx, useSay } from '../../sound';
+import { say, saySequence, sfx, stopNarration, useSay } from '../../sound';
 import { colors, darken, fonts, shadows } from '../../theme';
 import { filterStoriesByLang } from './logic';
 
@@ -29,6 +29,12 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const stories = manifest.stories ?? [];
   const story = stories.find((s) => s.id === sceneId) ?? null;
   const [nodeId, setNodeId] = useState('start');
+
+  useEffect(() => {
+    return () => {
+      stopNarration();
+    };
+  }, []);
 
   // Tap-to-dive: choices with in-scene hotspots zoom the camera INTO the
   // tapped spot (door, slide, boat...) before the story advances.
@@ -101,6 +107,9 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     const lead = hots ? t(lang, 'story.hotLead') : t(lang, 'story.nextLead');
     const nodeText = (lang !== 'en' ? node.t?.[lang] : undefined) ?? node.text;
     saySequence(menu.length ? [nodeText, lead, ...menu] : [nodeText]);
+    return () => {
+      stopNarration();
+    };
   }, [node, lang]);
 
   useSay(story ? null : t(lang, 'picker.story'));
