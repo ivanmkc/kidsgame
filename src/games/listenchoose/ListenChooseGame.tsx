@@ -274,7 +274,8 @@ export function ListenChooseGame({
             {celebrate && (
               <View
                 testID="celebration"
-                style={[StyleSheet.absoluteFill, { pointerEvents: "none" }]}
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
               >
                 <SparkleBurst trigger={state.streak} count={8} size={28} />
               </View>
