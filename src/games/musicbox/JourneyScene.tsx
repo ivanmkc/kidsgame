@@ -77,6 +77,8 @@ export function JourneyScene({
     scrollTotal.current = 0;
     currentScrollX.current = 0;
     activePointers.current.clear();
+    vehicleIdle.setValue(0);
+    vehicleBounce.setValue(0);
 
     const loop = Animated.loop(
       Animated.sequence([

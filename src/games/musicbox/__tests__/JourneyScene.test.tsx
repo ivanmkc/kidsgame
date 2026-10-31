@@ -442,8 +442,6 @@ describe("JourneyScene accessibility", () => {
     unmount();
   });
 
-
-
   it("freePlay mode plays pentatonic scale without song melody constraints", () => {
     const playNoteSpy = vi.spyOn(music, "playNote");
     const { unmount } = render(
@@ -555,6 +553,43 @@ describe("JourneyScene accessibility", () => {
     // It should just play ONE note at velocity 1 (not a chord at velocity 0.7)
     expect(playNoteSpy).toHaveBeenCalledTimes(1);
     expect(playNoteSpy).toHaveBeenLastCalledWith(expect.any(Number), 1);
+
+    unmount();
+  });
+
+  it("resets vehicle idle and bounce animation values to 0 on scene re-initialization", () => {
+    const timingSpy = vi.spyOn(Animated, "timing");
+    const springSpy = vi.spyOn(Animated, "spring");
+
+    const { rerender, unmount } = render(
+      <JourneyScene scene={SCENES[0]} freePlay={false} lang="en" />,
+    );
+
+    expect(timingSpy).toHaveBeenCalled();
+    const capturedIdle = timingSpy.mock.calls[0][0] as Animated.Value;
+
+    const stage = screen.getByLabelText("Stage");
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    const bounceCall = springSpy.mock.calls.find((c) => c[1].friction === 4);
+    expect(bounceCall).toBeDefined();
+    const capturedBounce = bounceCall![0] as Animated.Value;
+
+    // Simulate in-flight animation values
+    capturedIdle.setValue(0.75);
+    capturedBounce.setValue(0.5);
+
+    const getVal = (v: Animated.Value): number =>
+      (v as unknown as { _value: number })._value;
+    expect(getVal(capturedIdle)).toBe(0.75);
+    expect(getVal(capturedBounce)).toBe(0.5);
+
+    // Re-initialize scene by toggling freePlay without unmounting
+    rerender(<JourneyScene scene={SCENES[0]} freePlay={true} lang="en" />);
+
+    expect(getVal(capturedIdle)).toBe(0);
+    expect(getVal(capturedBounce)).toBe(0);
 
     unmount();
   });
