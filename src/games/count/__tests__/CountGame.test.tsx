@@ -241,6 +241,18 @@ describe("CountGame", () => {
       "Tap every friend, then tell me how many",
     );
   });
+
+  it("stops narration on unmount to prevent audio leak across navigation", () => {
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const { unmount } = render(
+      <CountGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("logic: applyPickAnswer", () => {
