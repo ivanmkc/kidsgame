@@ -272,6 +272,29 @@ describe("MemoryGame", () => {
     );
   });
 
+  it("hides timer and moves while mode picker is open, and shows them after solo is chosen", async () => {
+    const onHome = vi.fn();
+    render(
+      <MemoryGame
+        onHome={onHome}
+        difficulty="medium"
+        twoPlayerEnabled={true}
+        lang="en"
+      />,
+    );
+
+    expect(screen.getByTestId("mode-picker")).toBeDefined();
+    expect(screen.queryByTestId("memory-timer")).toBeNull();
+    expect(screen.queryByTestId("memory-moves")).toBeNull();
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId("mp-choose-1p"));
+    });
+
+    expect(screen.getByTestId("memory-timer")).toBeDefined();
+    expect(screen.getByTestId("memory-moves")).toBeDefined();
+  });
+
   it("plays in 2P duel mode, updates player scores on matches, and allows rematch", async () => {
     const onHome = vi.fn();
     render(
