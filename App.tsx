@@ -235,7 +235,7 @@ export default function App() {
           lang={lang}
         />
       )}
-      {screen === 'carmode' && <CarModeGame onHome={goHome} lang={lang} />}
+      {screen === 'carmode' && <CarModeGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'bingo' && <BingoGame onHome={goHome} difficulty={difficulty} lang={lang} />}
       {screen === 'memory' && <MemoryGame onHome={goHome} difficulty={difficulty} twoPlayerEnabled={twoPlayer} lang={lang} />}
       {screen === 'shadow' && <ShadowGame onHome={goHome} difficulty={difficulty} lang={lang} />}
