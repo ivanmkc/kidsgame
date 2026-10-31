@@ -811,4 +811,50 @@ describe("MemoryGame", () => {
       t("ja", "win.memoryWinner", { name: t("ja", MP_PLAYERS[0].name) }),
     );
   });
+
+  it("resets elapsed timer to 0:00 and mounts fresh face-down cards on difficulty change mid-game", async () => {
+    const { rerender } = render(
+      <MemoryGame onHome={vi.fn()} difficulty="medium" lang="en" />,
+    );
+
+    const oldCards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
+    expect(oldCards).toHaveLength(12);
+
+    // Flip first card face up
+    await act(async () => {
+      fireEvent.click(oldCards[0]);
+    });
+    expect(oldCards[0].getAttribute("aria-label")).not.toBe("face-down card");
+
+    // Advance fake timers by 15 seconds
+    act(() => {
+      vi.advanceTimersByTime(15000);
+    });
+
+    const timer = screen.getByTestId("memory-timer");
+    expect(timer.textContent).toBe("0:15");
+
+    // Switch difficulty to Hard
+    rerender(<MemoryGame onHome={vi.fn()} difficulty="hard" lang="en" />);
+
+    // Timer resets to 0:00 and score resets for 8 pairs
+    expect(screen.getByTestId("memory-timer").textContent).toBe("0:00");
+    expect(screen.getByTestId("memory-score").textContent).toBe("🧠 0/8");
+
+    // Hard has 8 pairs = 16 cards, all fresh DOM instances and face-down
+    const newCards = screen
+      .getAllByRole("button")
+      .filter((el) =>
+        el.getAttribute("data-testid")?.startsWith("memory-card-"),
+      );
+    expect(newCards).toHaveLength(16);
+    for (const card of newCards) {
+      expect(oldCards).not.toContain(card);
+      expect(card.getAttribute("aria-label")).toBe("face-down card");
+    }
+  });
 });

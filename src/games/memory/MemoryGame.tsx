@@ -121,6 +121,7 @@ export function MemoryGame({
     // replace the board a frame after first paint (flicker + stale taps)
     if (prevPairs.current === pairs) return;
     prevPairs.current = pairs;
+    setTimerKey((k) => k + 1);
     setBoard(
       buildBoard(
         makeRng(Math.floor(Math.random() * 1e9)),
