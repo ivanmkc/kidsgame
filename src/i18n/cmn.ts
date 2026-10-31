@@ -521,6 +521,10 @@ export const CMN: Table = {
   'hidden.scene.giant_kitchen': '巨人的厨房',
   'hidden.scene.witch_kitchen': '女巫的厨房',
 
+  'compare.prompt.more': '哪边比较多？',
+  'compare.prompt.fewer': '哪边比较少？',
+  'compare.praise': '答对了！',
+
   'sums.plus': '加',
   'sums.question': '一共有几个？',
   'sums.praise': '答对了！',

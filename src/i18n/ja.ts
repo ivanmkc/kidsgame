@@ -522,6 +522,10 @@ export const JA: Table = {
   'hidden.scene.giant_kitchen': 'きょじん の だいどころ',
   'hidden.scene.witch_kitchen': 'まじょ の だいどころ',
 
+  'compare.prompt.more': 'おおい ほうは どっち？',
+  'compare.prompt.fewer': 'すくない ほうは どっち？',
+  'compare.praise': 'せいかい！',
+
   'sums.plus': 'たす',
   'sums.question': 'ぜんぶで いくつ？',
   'sums.praise': 'せいかい！',
