@@ -117,7 +117,7 @@ export function WinOverlay({
         accessibilityRole="alert"
       >
         <View style={landscape ? styles.rowLandscape : styles.colPortrait}>
-          <View style={styles.celebRow}>
+          <View style={landscape ? styles.celebRow : styles.celebColPortrait}>
             <View style={styles.starRow}>
               {starAnims.map((s, i) => (
                 <Animated.Text
@@ -233,8 +233,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   celebRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  celebColPortrait: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
+  },
   starRow: { flexDirection: "row", alignItems: "flex-end", gap: 2 },
-  textCol: { flexShrink: 1 },
+  textCol: { flexShrink: 1, maxWidth: "100%" },
   message: {
     fontFamily: fonts.display,
     color: colors.ink,

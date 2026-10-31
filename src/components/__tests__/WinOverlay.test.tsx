@@ -328,4 +328,62 @@ describe("WinOverlay", () => {
     fireEvent.click(screen.getByTestId("play-again"));
     expect(onNext).toHaveBeenCalledTimes(2);
   });
+
+  it("stacks star row above victory message in mobile portrait layout", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 390,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 844,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    render(
+      <WinOverlay
+        visible={true}
+        message="やったー！ わんちゃん じゆうに なった！ とっても うれしそう！"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+        lang="ja"
+      />,
+    );
+
+    const alert = screen.getByRole("alert");
+    const content = alert.firstElementChild as HTMLElement;
+    const celeb = content.firstElementChild as HTMLElement;
+    expect(window.getComputedStyle(celeb).flexDirection).toBe("column");
+    expect(
+      screen.getByText(
+        "やったー！ わんちゃん じゆうに なった！ とっても うれしそう！",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("keeps star row beside message in landscape layout", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 844,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 390,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    const alert = screen.getByRole("alert");
+    const content = alert.firstElementChild as HTMLElement;
+    const celeb = content.firstElementChild as HTMLElement;
+    expect(window.getComputedStyle(celeb).flexDirection).toBe("row");
+  });
 });
