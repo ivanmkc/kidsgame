@@ -21,6 +21,7 @@ vi.mock("../../../sound", () => ({
     good: vi.fn(),
     wrong: vi.fn(),
     tap: vi.fn(),
+    win: vi.fn(),
   },
 }));
 
@@ -271,6 +272,29 @@ describe("RulesGame", () => {
       expect(screen.getByTestId("rules-progress").textContent).toBe(
         t("en", "rules.progress", { found: 1, total: 2 }),
       );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("displays Play Again on the win overlay instead of Next Round when the game is won", () => {
+    vi.useFakeTimers();
+    try {
+      render(<RulesGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      // Play through all 10 rounds
+      for (let r = 0; r < 10; r++) {
+        const matchTiles = screen.getAllByTestId(/-y$/);
+        for (const tile of matchTiles) {
+          fireEvent.click(tile);
+        }
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      // Check win overlay button label
+      expect(screen.getByText("Play Again ▶️")).toBeTruthy();
     } finally {
       vi.useRealTimers();
     }
