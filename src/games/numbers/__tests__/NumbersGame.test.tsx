@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 import React from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as sound from "../../../sound";
 import { t } from "../../../i18n";
@@ -11,7 +17,6 @@ import { NumbersGame } from "../NumbersGame";
 import * as logic from "../logic";
 
 describe("NumbersGame", () => {
-
   it("highlights the correct tile on tap before advancing the round", () => {
     vi.useFakeTimers();
     try {
@@ -40,10 +45,14 @@ describe("NumbersGame", () => {
       expect(correctTile!.className).not.toBe(initialClass);
 
       // Advance timer by SUCCESS_DELAY_MS
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
 
       // After round advances, the tile at this index resets its highlight
-      const resetTile = screen.getByTestId(correctTile!.getAttribute("data-testid")!);
+      const resetTile = screen.getByTestId(
+        correctTile!.getAttribute("data-testid")!,
+      );
       expect(resetTile.className).toBe(initialClass);
     } finally {
       vi.useRealTimers();
@@ -174,7 +183,9 @@ describe("NumbersGame", () => {
       }
       expect(correctTile).not.toBeNull();
       fireEvent.click(correctTile!);
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
 
       // Next round: prompt card remains Arabic numeral, and tiles remain Han numerals.
       const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
@@ -304,7 +315,9 @@ describe("NumbersGame", () => {
       );
       fireEvent.click(correctBtn2);
       expect(sound.sfx.good).toHaveBeenCalledTimes(1);
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
       expect(screen.getByTestId("numbers-score").textContent).toContain("1/8");
     } finally {
       vi.useRealTimers();
@@ -439,7 +452,9 @@ describe("NumbersGame", () => {
       expect(sound.saySequence).not.toHaveBeenCalled();
 
       // Past celebration lock, tapping prompt replays
-      act(() => { vi.advanceTimersByTime(400); });
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
       const nextPromptEl = screen.getByTestId(/^numbers-prompt-/);
       fireEvent.click(nextPromptEl);
       expect(sound.saySequence).toHaveBeenCalledTimes(2);
@@ -487,7 +502,9 @@ describe("NumbersGame", () => {
         }
         expect(correctTile).not.toBeNull();
         fireEvent.click(correctTile!);
-        act(() => { vi.advanceTimersByTime(400); });
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
       }
 
       vi.advanceTimersByTime(600);
@@ -547,6 +564,154 @@ describe("NumbersGame", () => {
       expect(parseFloat(tile.style.height)).toBeGreaterThanOrEqual(60);
     } finally {
       setViewport(origWidth, origHeight);
+    }
+  });
+
+  it("rebuilds round and resets progress when difficulty changes mid-game", () => {
+    vi.useFakeTimers();
+    try {
+      function DifficultyWrapper() {
+        const [diff, setDiff] = React.useState<"easy" | "hard">("hard");
+        return (
+          <LangContext.Provider
+            value={{
+              lang: "en",
+              onCycle: () => {},
+            }}
+          >
+            <div>
+              <button data-testid="set-easy" onClick={() => setDiff("easy")}>
+                easy
+              </button>
+              <NumbersGame onHome={vi.fn()} difficulty={diff} lang="en" />
+            </div>
+          </LangContext.Provider>
+        );
+      }
+      render(<DifficultyWrapper />);
+
+      // Play 9 rounds on hard
+      for (let round = 0; round < 9; round++) {
+        const promptEl = screen.getByTestId(/^numbers-prompt-/);
+        const targetKey = promptEl
+          .getAttribute("data-testid")!
+          .replace("numbers-prompt-", "");
+        const targetN = targetKey.replace(/^[a-z]-/, "");
+
+        let correctTile: HTMLElement | null = null;
+        for (let i = 0; i < 9; i++) {
+          const tile = screen.queryByTestId(`numbers-tile-${i}`);
+          if (tile && tile.getAttribute("aria-label") === targetN) {
+            correctTile = tile;
+            break;
+          }
+        }
+        expect(correctTile).not.toBeNull();
+        fireEvent.click(correctTile!);
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
+      }
+
+      // Score should be 9/12
+      expect(screen.getByTestId("numbers-score").textContent).toContain("9/12");
+
+      vi.mocked(sound.saySequence).mockClear();
+
+      // Switch to easy
+      fireEvent.click(screen.getByTestId("set-easy"));
+
+      // Assert no win sounds played and win screen not shown
+      expect(sound.saySequence).not.toHaveBeenCalledWith(
+        expect.arrayContaining([expect.stringContaining("win")]),
+      );
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+      // Score should reset to 0/8
+      expect(screen.getByTestId("numbers-score").textContent).toContain("0/8");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("clears active timers when difficulty changes mid-game", () => {
+    vi.useFakeTimers();
+    try {
+      function DifficultyWrapper() {
+        const [diff, setDiff] = React.useState<"easy" | "hard">("hard");
+        return (
+          <LangContext.Provider
+            value={{
+              lang: "en",
+              onCycle: () => {},
+            }}
+          >
+            <div>
+              <button data-testid="set-easy" onClick={() => setDiff("easy")}>
+                easy
+              </button>
+              <button data-testid="set-hard" onClick={() => setDiff("hard")}>
+                hard
+              </button>
+              <NumbersGame onHome={vi.fn()} difficulty={diff} lang="en" />
+            </div>
+          </LangContext.Provider>
+        );
+      }
+      render(<DifficultyWrapper />);
+
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetN = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let correctTile: HTMLElement | null = null;
+      let wrongTile: HTMLElement | null = null;
+      for (let i = 0; i < 9; i++) {
+        const tile = screen.queryByTestId(`numbers-tile-${i}`);
+        if (tile) {
+          if (tile.getAttribute("aria-label") === targetN) {
+            correctTile = tile;
+          } else {
+            wrongTile = tile;
+          }
+        }
+      }
+      expect(correctTile).not.toBeNull();
+      expect(wrongTile).not.toBeNull();
+
+      // Trigger error timer
+      fireEvent.click(wrongTile!);
+      expect(sound.sfx.wrong).toHaveBeenCalled();
+
+      // Switch difficulty while error timer is active (450ms)
+      vi.advanceTimersByTime(100);
+      fireEvent.click(screen.getByTestId("set-easy"));
+
+      // Trigger lock timer on new round
+      const newPromptEl = screen.getByTestId(/^numbers-prompt-/);
+      const newTargetN = newPromptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let newCorrectTile: HTMLElement | null = null;
+      for (let i = 0; i < 5; i++) {
+        const tile = screen.queryByTestId(`numbers-tile-${i}`);
+        if (tile && tile.getAttribute("aria-label") === newTargetN) {
+          newCorrectTile = tile;
+          break;
+        }
+      }
+      expect(newCorrectTile).not.toBeNull();
+      fireEvent.click(newCorrectTile!);
+      expect(sound.sfx.good).toHaveBeenCalled();
+
+      // Switch difficulty while lock timer is active (400ms)
+      vi.advanceTimersByTime(100);
+      fireEvent.click(screen.getByTestId("set-hard"));
+
+      // Advance time fully to ensure no stale callbacks fire and crash
+      vi.advanceTimersByTime(1000);
+    } finally {
+      vi.useRealTimers();
     }
   });
 });
