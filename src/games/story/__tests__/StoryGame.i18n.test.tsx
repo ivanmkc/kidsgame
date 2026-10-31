@@ -253,6 +253,41 @@ describe('StoryGame i18n', () => {
     expect(saySpy).toHaveBeenCalledWith('Japanese fx line!');
   });
 
+  it('localizes accessibility label for FxSpot across languages', () => {
+    const fxStory: Story = {
+      id: 'test-fx-a11y',
+      title: 'Fx A11y Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Fx test node',
+          fx: [{ x: 0, y: 0, w: 10, h: 10, sting: 'boing' }],
+        },
+      },
+    };
+    manifest.stories?.push(fxStory);
+
+    const { rerender } = render(
+      <StoryGame sceneId="test-fx-a11y" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="ja" />,
+    );
+    expect(screen.getByTestId('story-fx').getAttribute('aria-label')).toBe('ここに たのしいものが あるよ');
+
+    rerender(
+      <StoryGame sceneId="test-fx-a11y" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="cmn" />,
+    );
+    expect(screen.getByTestId('story-fx').getAttribute('aria-label')).toBe('这里有好玩的');
+
+    rerender(
+      <StoryGame sceneId="test-fx-a11y" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="yue" />,
+    );
+    expect(screen.getByTestId('story-fx').getAttribute('aria-label')).toBe('呢度有好玩嘅嘢');
+
+    rerender(
+      <StoryGame sceneId="test-fx-a11y" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />,
+    );
+    expect(screen.getByTestId('story-fx').getAttribute('aria-label')).toBe('Something fun is here');
+  });
+
   it('falls back to English when non-English translations are missing', () => {
     const englishOnlyStory: Story = {
       id: 'test-en-only',

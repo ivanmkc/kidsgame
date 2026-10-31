@@ -379,6 +379,7 @@ export const CMN: Table = {
   'story.allStories': '所有故事 🏠',
   'story.hotLead': '想去哪就点哪！',
   'story.nextLead': '接下来会怎样？',
+  'story.a11yFx': '这里有好玩的',
   'carmode.tap': '点一点！',
   'carmode.done': '全部完成！',
   'carmode.pack.boops': '数数嘟嘟声',

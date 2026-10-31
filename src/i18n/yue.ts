@@ -379,6 +379,7 @@ export const YUE: Table = {
   'story.allStories': '所有故事 🏠',
   'story.hotLead': '想去邊就撳邊！',
   'story.nextLead': '跟住會點樣呢？',
+  'story.a11yFx': '呢度有好玩嘅嘢',
   'carmode.tap': '撳一撳！',
   'carmode.done': '全部搞掂！',
   'carmode.pack.boops': '數數嘟嘟聲',
