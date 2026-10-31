@@ -244,6 +244,72 @@ describe("LettersGame", () => {
     }
   });
 
+  it("keeps revealed hint glyph visible throughout celebration delay after correct tap", () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.LetterRound[] = [];
+      const origMakeLetterRound = logic.makeLetterRound;
+      vi.spyOn(logic, "makeLetterRound").mockImplementation(
+        (rng, tier, tileCount, avoidKey) => {
+          const res = origMakeLetterRound(rng, tier, tileCount, avoidKey);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        fireEvent.click(screen.getByTestId("play-button"));
+      });
+
+      const round1 = generatedRounds[0];
+      const wrongTile = round1.tiles.find((t) => !t.isAnswer)!;
+      const wrongBtn = screen.getByLabelText(wrongTile.label);
+
+      // Miss twice to reveal the hint glyph
+      act(() => {
+        fireEvent.click(wrongBtn);
+      });
+      act(() => {
+        vi.advanceTimersByTime(450);
+      });
+      act(() => {
+        fireEvent.click(wrongBtn);
+      });
+
+      expect(screen.getByTestId("letters-glyph").textContent).toBe(
+        round1.targetDisplay,
+      );
+
+      // Tap correct tile
+      const correctTile = round1.tiles[round1.answerIdx];
+      const correctBtn = screen.getByLabelText(correctTile.label);
+      act(() => {
+        fireEvent.click(correctBtn);
+      });
+
+      // 200ms into the 600ms celebration delay: round hasn't advanced, glyph remains visible
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      expect(generatedRounds).toHaveLength(1);
+      expect(screen.getByTestId("letters-glyph").textContent).toBe(
+        round1.targetDisplay,
+      );
+
+      // Advance past remaining celebration delay (400ms more = 600ms total)
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      expect(generatedRounds).toHaveLength(2);
+      // New round begins with misses reset, so glyph is hidden
+      expect(screen.queryByTestId("letters-glyph")).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("rebuilds the round and updates spoken prompt when language switches", () => {
     vi.useFakeTimers();
     try {
