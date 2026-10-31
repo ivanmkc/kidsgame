@@ -87,7 +87,6 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       wrongVoiceTimer.current = null;
     }
     clearWrongTimer();
-    lockedRef.current = false;
     setCorrectPick(null);
     saySequence([
       numberWord(lang, round.a).t,
