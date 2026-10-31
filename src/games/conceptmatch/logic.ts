@@ -1,6 +1,7 @@
 import { Difficulty } from "../../difficulty";
 import { t, UIKey } from "../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../lang";
+import { type CardKey } from "../../menuCards";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, wordFor } from "../../curriculum/content";
 
@@ -28,6 +29,18 @@ export type ConceptMatchDeck =
   | "shapes-objects"
   | "animals-sounds"
   | "mixed";
+
+export const DECK_TO_CARD_KEY: Record<ConceptMatchDeck, CardKey> = {
+  letters: "cm-letters",
+  "picture-word": "cm-picword",
+  "picture-spoken": "cm-picspeak",
+  "color-word": "cm-colors",
+  "numerals-han": "cm-numhan",
+  "numerals-dots": "cm-numdots",
+  "shapes-objects": "cm-shapes",
+  "animals-sounds": "cm-animals",
+  mixed: "cm-mixed",
+};
 
 export const ANIMALS: string[] = ["dog", "cat", "lion", "frog", "pig"];
 

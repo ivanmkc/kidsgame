@@ -9,7 +9,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import * as sound from "../../../sound";
-import { t } from "../../../i18n";
+import { t, UIKey } from "../../../i18n";
 import { ConceptMatchGame } from "../ConceptMatchGame";
 import * as logic from "../logic";
 
@@ -364,7 +364,7 @@ describe("ConceptMatchGame", () => {
     render(<ConceptMatchGame deck="letters" lang="ja" pairs={1} />);
 
     expect(speakSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
+      expect.objectContaining({ text: t("ja", "card.cm-letters.blurb") }),
     );
   });
 
@@ -613,7 +613,7 @@ describe("ConceptMatchGame", () => {
 
     // Initial render speaks the opening blurb
     expect(speakSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ text: t("en", "card.memory.blurb") }),
+      expect.objectContaining({ text: t("en", "card.cm-letters.blurb") }),
     );
     speakSpy.mockClear();
 
@@ -633,7 +633,7 @@ describe("ConceptMatchGame", () => {
 
     // Starting blurb must NOT be spoken on win screen
     expect(speakSpy).not.toHaveBeenCalledWith(
-      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
+      expect.objectContaining({ text: t("ja", "card.cm-letters.blurb") }),
     );
     // Win message must replay in the new language
     expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memory"));
@@ -802,5 +802,117 @@ describe("ConceptMatchGame", () => {
     expect(cards).toHaveLength(16);
     expect(screen.getByTestId("concept-score").textContent).toContain("0/8");
     expect(screen.getByText("Find all 8 pairs")).toBeDefined();
+  });
+
+  it("renders deck-specific shell title and speaks deck-specific instruction for each concept deck", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const decks: logic.ConceptMatchDeck[] = [
+      "letters",
+      "picture-word",
+      "picture-spoken",
+      "color-word",
+      "numerals-han",
+      "numerals-dots",
+      "shapes-objects",
+      "animals-sounds",
+      "mixed",
+    ];
+
+    for (const deck of decks) {
+      speakSpy.mockClear();
+      const cardKey = logic.DECK_TO_CARD_KEY[deck];
+      const expectedTitle = t("en", `card.${cardKey}.title` as UIKey);
+      const expectedBlurb = t("en", `card.${cardKey}.blurb` as UIKey);
+
+      const { unmount } = render(
+        <ConceptMatchGame deck={deck} pairs={2} lang="en" />,
+      );
+
+      expect(screen.getByText(expectedTitle)).toBeDefined();
+      expect(speakSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ text: expectedBlurb }),
+      );
+      unmount();
+    }
+  });
+
+  it("updates shell title and spoken blurb when deck prop changes dynamically", () => {
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    const { rerender } = render(
+      <ConceptMatchGame deck="animals-sounds" pairs={2} lang="en" />,
+    );
+
+    expect(
+      screen.getByText(t("en", "card.cm-animals.title")),
+    ).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("en", "card.cm-animals.blurb") }),
+    );
+
+    speakSpy.mockClear();
+    rerender(<ConceptMatchGame deck="shapes-objects" pairs={2} lang="en" />);
+
+    expect(
+      screen.getByText(t("en", "card.cm-shapes.title")),
+    ).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("en", "card.cm-shapes.blurb") }),
+    );
+  });
+
+  it("falls back to generic memory title and blurb when deck is unmapped", () => {
+    vi.spyOn(logic, "buildBoard").mockReturnValue([]);
+    const speakSpy = vi.fn();
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
+      speak: speakSpy,
+      cancel: vi.fn(),
+    };
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
+      text: string;
+      constructor(text: string) {
+        this.text = text;
+      }
+    };
+
+    render(
+      <ConceptMatchGame
+        deck={"unsupported-deck" as unknown as logic.ConceptMatchDeck}
+        pairs={2}
+        lang="en"
+      />,
+    );
+
+    expect(screen.getByText(t("en", "card.memory.title"))).toBeDefined();
+    expect(speakSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ text: t("en", "card.memory.blurb") }),
+    );
   });
 });

@@ -10,6 +10,7 @@ import {
   CONFUSING_LETTER_GROUPS,
   ConceptMatchCard,
   ConceptMatchDeck,
+  DECK_TO_CARD_KEY,
   SHAPES,
   buildBoard,
   isMatch,
@@ -1479,4 +1480,50 @@ describe("conceptmatch/logic", () => {
       expect(pairsForDifficulty("hard")).toBe(8);
     });
   });
+
+  describe("DECK_TO_CARD_KEY", () => {
+    const allDecks: ConceptMatchDeck[] = [
+      "letters",
+      "picture-word",
+      "picture-spoken",
+      "color-word",
+      "numerals-han",
+      "numerals-dots",
+      "shapes-objects",
+      "animals-sounds",
+      "mixed",
+    ];
+
+    it("maps all supported ConceptMatchDecks to their respective card keys", () => {
+      expect(DECK_TO_CARD_KEY).toEqual({
+        letters: "cm-letters",
+        "picture-word": "cm-picword",
+        "picture-spoken": "cm-picspeak",
+        "color-word": "cm-colors",
+        "numerals-han": "cm-numhan",
+        "numerals-dots": "cm-numdots",
+        "shapes-objects": "cm-shapes",
+        "animals-sounds": "cm-animals",
+        mixed: "cm-mixed",
+      });
+    });
+
+    it("ensures each deck maps to localized title and blurb keys in i18n", () => {
+      const langs: Lang[] = ["en", "ja", "cmn", "yue"];
+      for (const deck of allDecks) {
+        const cardKey = DECK_TO_CARD_KEY[deck];
+        expect(cardKey).toBeDefined();
+
+        for (const lang of langs) {
+          const title = t(lang, `card.${cardKey}.title` as UIKey);
+          const blurb = t(lang, `card.${cardKey}.blurb` as UIKey);
+          expect(title).toBeTruthy();
+          expect(blurb).toBeTruthy();
+          expect(title).not.toBe(`card.${cardKey}.title`);
+          expect(blurb).not.toBe(`card.${cardKey}.blurb`);
+        }
+      }
+    });
+  });
 });
+
