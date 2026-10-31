@@ -1,5 +1,6 @@
 import { Difficulty } from "../../difficulty";
 import { Lang } from "../../lang";
+import { t } from "../../i18n";
 import { Rng, randInt, shuffle } from "../../rng";
 import {
   Position,
@@ -134,28 +135,6 @@ export function plateCritterPos(
   return spriteLT(pos.x, pos.y, critterSize, width, height, padding);
 }
 
-// ---------- speech ----------
-
-export const MORE_PROMPT: Record<Lang, string> = {
-  en: "Tap the side with MORE!",
-  ja: "おおい ほうは どっち？",
-  cmn: "哪边比较多？",
-  yue: "邊邊多啲呀？",
-};
-
-export const FEWER_PROMPT: Record<Lang, string> = {
-  en: "Tap the side with FEWER!",
-  ja: "すくない ほうは どっち？",
-  cmn: "哪边比较少？",
-  yue: "邊邊少啲呀？",
-};
-
-export const PRAISE: Record<Lang, string> = {
-  en: "That's right!",
-  ja: "せいかい！",
-  cmn: "答对了！",
-  yue: "啱晒！",
-};
 
 /** Comparative feedback when a round is completed. */
 export function comparisonPhrase(
@@ -208,9 +187,9 @@ export function plateAccessibilityLabel(
 export function speechLines(): string[] {
   const s = new Set<string>();
   (["en", "ja", "cmn", "yue"] as Lang[]).forEach((L) => {
-    s.add(MORE_PROMPT[L]);
-    s.add(FEWER_PROMPT[L]);
-    s.add(PRAISE[L]);
+    s.add(t(L, 'compare.prompt.more'));
+    s.add(t(L, 'compare.prompt.fewer'));
+    s.add(t(L, 'compare.praise'));
     for (let a = 1; a <= 10; a++) {
       for (let b = 1; b <= 10; b++) {
         if (a > b) s.add(comparisonPhrase(L, 'more', a, b));
