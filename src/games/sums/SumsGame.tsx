@@ -39,6 +39,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<SumsRound>(() =>
     makeSumsRound(rngRef.current, difficulty),
   );
+  const [roundNo, setRoundNo] = useState(0);
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongPickRef = useRef<number | null>(null);
@@ -140,6 +141,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         if (nextScore < roundsToWin) {
           setRound(makeSumsRound(rngRef.current, difficulty));
           setSolved(false);
+          setRoundNo((n) => n + 1);
           clearWrongTimer();
         } else {
           setWon(true);
@@ -173,6 +175,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setRound(makeSumsRound(rngRef.current, difficulty));
+    setRoundNo((n) => n + 1);
     setScore(0);
     setCorrectPick(null);
     setSolved(false);
@@ -220,7 +223,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         >
           {round.aPositions.map((p, i) => (
             <StaticCritter
-              key={`${score}-a-${i}`}
+              key={`${roundNo}-a-${i}`}
               icon={round.icon}
               size={critterSize}
               stageW={stageW}
@@ -231,7 +234,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
           ))}
           {round.bPositions.map((p, i) => (
             <Incoming
-              key={`${score}-b-${i}`}
+              key={`${roundNo}-b-${i}`}
               icon={round.icon}
               size={critterSize}
               stageW={stageW}
