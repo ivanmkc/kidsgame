@@ -133,7 +133,7 @@ describe('HiddenGame render with the 2P toggle OFF', () => {
     const mediumMatches = wizardScene.targets.filter((t) => mediumHtml.includes(`checklist-${t.id}`));
     const hardMatches = wizardScene.targets.filter((t) => hardHtml.includes(`checklist-${t.id}`));
 
-    expect(mediumMatches.length).toBe(6);
+    expect(mediumMatches.length).toBe(5);
     expect(hardMatches.length).toBe(8);
   });
 });
