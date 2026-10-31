@@ -118,7 +118,9 @@ describe("SumsGame language switch safety", () => {
     expect(screen.getByTestId("sums-score").textContent).toContain("0/5");
 
     // Tap correct choice for round 1
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const correctBtn = buttons.find((b) =>
       b.getAttribute("data-testid")?.endsWith("-answer"),
@@ -154,7 +156,9 @@ describe("SumsGame language switch safety", () => {
     )!;
     expect(nextCorrectBtn).toBeDefined();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     fireEvent.click(nextCorrectBtn);
 
     // Score advances cleanly to 2/5 without skipped rounds or double-advance
@@ -173,7 +177,9 @@ describe("SumsGame language switch safety", () => {
     saySpy.mockClear();
     saySeqSpy.mockClear();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -230,7 +236,9 @@ describe("SumsGame language switch safety", () => {
 
     saySpy.mockClear();
 
-    act(() => { vi.advanceTimersByTime(3000); });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
     const buttons = screen.getAllByRole("button");
     const wrongBtn = buttons.find((b) => {
       const tid = b.getAttribute("data-testid");
@@ -256,6 +264,65 @@ describe("SumsGame language switch safety", () => {
       vi.advanceTimersByTime(1000);
     });
     expect(saySpy).not.toHaveBeenCalledWith(t("en", "sums.question"));
+    expect(screen.getByTestId("sums-score").textContent).toContain("1/5");
+  });
+
+  it("does not prematurely unlock answer choices when language is switched during incoming critter entrance animation", () => {
+    vi.useFakeTimers();
+    const goodSpy = vi.spyOn(sound.sfx, "good");
+
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "butterfly",
+      a: 2,
+      b: 3,
+      sum: 5,
+      aPositions: [
+        { x: 10, y: 10 },
+        { x: 20, y: 20 },
+      ],
+      bPositions: [
+        { x: 30, y: 30 },
+        { x: 40, y: 40 },
+        { x: 50, y: 50 },
+      ],
+      choices: [3, 4, 5],
+    });
+
+    render(<LangHarness initialLang="en" />);
+
+    const buttons = screen.getAllByRole("button");
+    const correctBtn = buttons.find((b) =>
+      b.getAttribute("data-testid")?.endsWith("-answer"),
+    )!;
+    expect(correctBtn).toBeDefined();
+
+    // At t=100ms, input is locked while critters are entering
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(correctBtn);
+    expect(goodSpy).not.toHaveBeenCalled();
+
+    // Switch language at t=200ms mid-entrance animation
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    const langBtn = screen.getByTestId("lang-cycle");
+    fireEvent.click(langBtn);
+
+    // At t=250ms, incoming critters are still animating; choices must remain locked
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    fireEvent.click(correctBtn);
+    expect(goodSpy).not.toHaveBeenCalled();
+
+    // After entrance animation finishes (400 + 3 * 250 + 420 = 1570ms; 250 + 1400 = 1650ms), choices unlock
+    act(() => {
+      vi.advanceTimersByTime(1400);
+    });
+    fireEvent.click(correctBtn);
+    expect(goodSpy).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("sums-score").textContent).toContain("1/5");
   });
 });
