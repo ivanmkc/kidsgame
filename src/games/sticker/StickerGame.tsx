@@ -32,7 +32,6 @@ interface Placed {
   rotation: number; // degrees
 }
 
-const BACKDROPS = allSceneOptions('all');
 const DRESSUP_SET = new Set(manifest.dressup ?? []);
 
 // Phase of the AI-magic call for a single placed sticker.
@@ -54,7 +53,7 @@ const TRAY_TABS: { id: string; emoji: string; nameKey: UIKey }[] = [
 // Free-play toy mode: no win state, no timer — just decorate a scene with
 // stickers. Tap a tray sticker to drop it, drag to move, double-tap to pop.
 export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
-  const backdrops = BACKDROPS;
+  const backdrops = useMemo(() => allSceneOptions('all', lang), [lang]);
   const picked = backdrops.find((b) => b.id === sceneId) ?? null;
   const [placed, setPlaced] = useState<Placed[]>([]);
   const [tab, setTab] = useState('dressup');
