@@ -185,7 +185,7 @@ describe("CarModeGame unmount", () => {
     expect(toGapSpy).not.toHaveBeenCalled();
   });
 
-  it("does not transition to gap when unmounted while sayThen is active after boops complete", () => {
+  it("does not transition to gap when unmounted while playBoops is active", () => {
     vi.useFakeTimers();
     const toGapSpy = vi.spyOn(logic, "toGap");
     const actual = logic.startState("boops", 42);
@@ -208,12 +208,12 @@ describe("CarModeGame unmount", () => {
 
     const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
 
-    // Fast-forward through the music boop sequence so playBoops completes and sayThen starts
+    // Fast-forward so sayThen finishes and playBoops starts, but unmount before playBoops completes
     act(() => {
-      vi.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(100);
     });
 
-    // sayThen is active; unmount component while in flight
+    // playBoops is active; unmount component while in flight
     unmount();
 
     // Fast-forward through all timers.

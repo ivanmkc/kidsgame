@@ -6,6 +6,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { t } from "../../../i18n";
@@ -256,13 +257,12 @@ describe("HiddenGame localization", () => {
     expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn0]);
 
     // Wait for the simulated sequence playback to complete
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 50));
+    await waitFor(() => {
+      expect(completedSpeech).toEqual([expectedPrompt, expectedTurn0]);
     });
 
     // Neither utterance was clobbered by an intervening cancel
     expect(clobbered).toBe(false);
-    expect(completedSpeech).toEqual([expectedPrompt, expectedTurn0]);
 
     // Finding an object switches turns and only speaks the next player's turn, not the prompt
     saySeqSpy.mockClear();
