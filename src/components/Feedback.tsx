@@ -114,7 +114,7 @@ export function FeedbackChip({
                     testID="feedback-broken"
                     accessibilityRole="button"
                     accessibilityLabel={t(lang, "feedback.broken")}
-                    aria-selected={kind === "broken"}
+                    aria-pressed={kind === "broken"}
                     style={[styles.kind, kind === "broken" && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>
@@ -129,7 +129,7 @@ export function FeedbackChip({
                     testID="feedback-idea"
                     accessibilityRole="button"
                     accessibilityLabel={t(lang, "feedback.idea")}
-                    aria-selected={kind === "idea"}
+                    aria-pressed={kind === "idea"}
                     style={[styles.kind, kind === "idea" && styles.kindOn]}
                   >
                     <Text style={styles.kindText}>
