@@ -16,7 +16,7 @@ vi.mock("react", async (importOriginal) => {
     useState: (init: unknown) => {
       callCount++;
       if (mockWon) {
-        // In BingoGame, call 3 is marked cells and call 6 is winLine.
+        // In BingoGame, call 3 is marked cells, call 6 is winLine, and call 7 is won.
         if (callCount === 3) {
           return [
             [true, true, true, false, false, false, false, false, false],
@@ -25,6 +25,9 @@ vi.mock("react", async (importOriginal) => {
         }
         if (callCount === 6) {
           return [[0, 1, 2], () => {}];
+        }
+        if (callCount === 7) {
+          return [true, () => {}];
         }
       }
       return actual.useState(init);
