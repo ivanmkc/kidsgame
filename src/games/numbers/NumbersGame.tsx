@@ -50,12 +50,24 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   const [wrongIdx, setWrongIdx] = useState<number | null>(null);
   const [correctIdx, setCorrectIdx] = useState<number | null>(null);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [timerKey, setTimerKey] = useState(0);
+  const [prevDifficulty, setPrevDifficulty] = useState(difficulty);
+  if (difficulty !== prevDifficulty) {
+    setPrevDifficulty(difficulty);
+    setRoundIdx(0);
+    setTimerKey((k) => k + 1);
+  }
 
   const { epoch, isValid } = useLangEpoch(lang);
 
-  // Lang switch: rebuild the active round so prompt lines and tiles match the new language.
+  const mountedRef = useRef(false);
+
+  // Lang or difficulty switch: rebuild the active round so prompt lines and tiles match the new settings.
   useEffect(() => {
-    if (epoch === 0) return;
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
     if (errorTimerRef.current) {
       clearTimeout(errorTimerRef.current);
       errorTimerRef.current = null;
@@ -69,7 +81,7 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     setRound(makeNumberRound(rngRef.current, numSettings, lang));
     setWrongIdx(null);
     setCorrectIdx(null);
-  }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [epoch, difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     return () => {
@@ -82,7 +94,6 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     setRound((cur) => reskinNumberRound(cur, numSettings.useHan));
   }, [numSettings.useHan]);
-  const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   const won = roundIdx >= roundsToWin;
   useWinLine(won && !isFinishing, t(lang, "win.numbers"));
