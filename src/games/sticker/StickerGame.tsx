@@ -52,7 +52,7 @@ const TRAY_TABS: { id: string; emoji: string; nameKey: UIKey }[] = [
 ];
 
 // Free-play toy mode: no win state, no timer — just decorate a scene with
-// stickers. Tap a tray sticker to drop it, drag to move, double-tap to pop.
+// stickers. Tap a tray sticker to drop it, drag to move, tap ✕ to delete.
 export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang = 'en' }: Props) {
   const backdrops = useMemo(() => allSceneOptions('all', lang), [lang]);
   const picked = backdrops.find((b) => b.id === sceneId) ?? null;
@@ -298,7 +298,6 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                 stageW={stageW}
                 stageH={stageH}
                 onMove={moveSticker}
-                onPop={popSticker}
                 onTransform={transformSticker}
                 pending={phase === 'pending'}
                 magicButton={magicVisible ? (
@@ -311,6 +310,21 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
                   />
                 ) : null}
                 lang={lang}
+                deleteButton={
+                  <Pressable
+                    testID={`sticker-delete-${s.key}`}
+                    accessibilityLabel={t(lang, 'sticker.clear')}
+                    accessibilityRole="button"
+                    onPress={() => popSticker(s.key)}
+                    style={({ pressed }) => [
+                      styles.deleteBtn,
+                      shadows.soft,
+                      pressed && { transform: [{ scale: 0.92 }] },
+                    ]}
+                  >
+                    <Text style={styles.deleteBtnText}>✕</Text>
+                  </Pressable>
+                }
               />
             );
           })}
@@ -369,7 +383,6 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
               />
             ))}
           </ScrollView>
-          <Text style={styles.hint}>{t(lang, 'sticker.hint')}</Text>
         </View>
       </View>
       {ghost ? (
@@ -491,16 +504,16 @@ function TrayItem({ icon, onTap, onDragMove, onDrop, lang = 'en' }: {
 }
 
 const DraggableSticker = React.memo(function DraggableSticker({
-  placed, stageW, stageH, onMove, onPop, onTransform, pending, magicButton, lang = 'en',
+  placed, stageW, stageH, onMove, onTransform, pending, magicButton, deleteButton, lang = 'en',
 }: {
   placed: Placed;
   stageW: number;
   stageH: number;
   onMove: (key: number, x: number, y: number) => void;
-  onPop: (key: number) => void;
   onTransform: (key: number, size: number, rotation: number) => void;
   pending?: boolean;
   magicButton?: React.ReactNode;
+  deleteButton?: React.ReactNode;
   lang?: Lang;
 }) {
   const size = placed.size * stageW;
@@ -520,12 +533,11 @@ const DraggableSticker = React.memo(function DraggableSticker({
   }, [pending, pulse]);
   // The PanResponder is created ONCE; everything it needs at release time
   // flows through refs so re-renders never rebuild gesture plumbing.
-  const live = useRef({ placed, stageW, stageH, onMove, onPop, onTransform });
-  live.current = { placed, stageW, stageH, onMove, onPop, onTransform };
+  const live = useRef({ placed, stageW, stageH, onMove, onTransform });
+  live.current = { placed, stageW, stageH, onMove, onTransform };
   const pinchStart = useRef<{ t: Touch2; size: number; rotation: number } | null>(null);
   const pan = useRef<Animated.ValueXY | null>(null);
   if (!pan.current) pan.current = new Animated.ValueXY({ x: 0, y: 0 });
-  const lastTap = useRef(0);
   const responder = useRef<ReturnType<typeof PanResponder.create> | null>(null);
   if (!responder.current) {
     responder.current = PanResponder.create({
@@ -549,17 +561,13 @@ const DraggableSticker = React.memo(function DraggableSticker({
         Animated.event([null, { dx: pan.current!.x, dy: pan.current!.y }], { useNativeDriver: false })(e, g);
       },
       onPanResponderRelease: (_e, g) => {
-        const { placed: pl, stageW: w, stageH: h, onMove: mv, onPop: pop } = live.current;
+        const { placed: pl, stageW: w, stageH: h, onMove: mv } = live.current;
         if (pinchStart.current) {
           pinchStart.current = null;
           pan.current!.setValue({ x: 0, y: 0 });
           return;
         }
-        if (Math.abs(g.dx) + Math.abs(g.dy) < 6) {
-          const now = Date.now();
-          if (now - lastTap.current < 350) pop(pl.key);
-          lastTap.current = now;
-        } else {
+        if (Math.abs(g.dx) + Math.abs(g.dy) >= 6) {
           const maxX = Math.max(0, 1 - pl.size - 14 / w);
           const maxY = Math.max(14 / h, 1 - pl.size * (w / h));
           mv(pl.key,
@@ -595,6 +603,11 @@ const DraggableSticker = React.memo(function DraggableSticker({
       {magicButton ? (
         <View pointerEvents="box-none" style={styles.magicSlot}>
           {magicButton}
+        </View>
+      ) : null}
+      {deleteButton ? (
+        <View pointerEvents="box-none" style={styles.deleteSlot}>
+          {deleteButton}
         </View>
       ) : null}
     </Animated.View>
@@ -698,12 +711,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   clearText: { fontFamily: fonts.display, fontSize: 14, color: colors.ink },
-  hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 12 },
   // A slot anchored to the top-right corner of the sticker that lives
   // OUTSIDE the sticker's PanResponder-active area: pointerEvents="box-none"
-  // means drag/pinch/pop keep working on the sticker itself, but the button
+  // means drag/pinch keep working on the sticker itself, but the button
   // inside can still receive taps.
   magicSlot: { position: 'absolute', top: -14, right: -14, alignItems: 'flex-end' },
+  deleteSlot: { position: 'absolute', top: -14, left: -14, alignItems: 'flex-start' },
+  deleteBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.paper,
+    borderWidth: 2,
+    borderColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteBtnText: {
+    fontFamily: fonts.display,
+    fontSize: 16,
+    color: colors.inkSoft,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
   magicBtn: {
     width: 44,
     height: 44,
