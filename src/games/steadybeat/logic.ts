@@ -26,6 +26,18 @@ export function roundsToWin(d: Difficulty): number {
   return 6;
 }
 
+export type SteadyBeatPhase = "listen" | "tap" | "result";
+
+export function canTap(
+  round: SteadyBeatRound,
+  tapCount: number,
+  phase: SteadyBeatPhase,
+  won = false,
+): boolean {
+  if (won || phase !== "tap") return false;
+  return tapCount < round.beatsPerRound;
+}
+
 export function makeSteadyBeatRound(rng: Rng, d: Difficulty): SteadyBeatRound {
   const [lo, hi] = bpmRange(d);
   const bpm = lo + randInt(rng, hi - lo + 1);
