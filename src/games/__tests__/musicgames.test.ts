@@ -34,6 +34,7 @@ import {
   passThreshold,
   windowMs,
   speechLines as steadySpeechLines,
+  canTap as steadyCanTap,
 } from "../steadybeat/logic";
 import {
   makeSameDiffRound,
@@ -496,6 +497,18 @@ describe("steady beat", () => {
     const lines = steadySpeechLines();
     expect(lines.length).toBeGreaterThanOrEqual(8);
     expect(new Set(lines).size).toBe(lines.length);
+  });
+
+  it("canTap allows taps during tap phase while under beatsPerRound", () => {
+    const rng = makeRng(42);
+    const r = makeSteadyBeatRound(rng, "easy");
+    expect(steadyCanTap(r, 0, "tap")).toBe(true);
+    expect(steadyCanTap(r, 7, "tap")).toBe(true);
+    expect(steadyCanTap(r, 8, "tap")).toBe(false);
+    expect(steadyCanTap(r, 9, "tap")).toBe(false);
+    expect(steadyCanTap(r, 4, "listen")).toBe(false);
+    expect(steadyCanTap(r, 4, "result")).toBe(false);
+    expect(steadyCanTap(r, 4, "tap", true)).toBe(false);
   });
 });
 
