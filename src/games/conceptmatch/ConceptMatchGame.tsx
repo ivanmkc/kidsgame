@@ -5,7 +5,7 @@ import { GameShell, ScoreChip } from "../../components/GameShell";
 import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
 import { WinOverlay } from "../../components/WinOverlay";
 import { useMemoryLogic } from "../../components/useMemoryLogic";
-import { t } from "../../i18n";
+import { t, UIKey } from "../../i18n";
 import { Lang } from "../../lang";
 import { makeRng } from "../../rng";
 import { say, sfx, useSay } from "../../sound";
@@ -14,6 +14,7 @@ import { Difficulty } from "../../difficulty";
 import {
   ConceptMatchCard,
   ConceptMatchDeck,
+  DECK_TO_CARD_KEY,
   buildBoard,
   isMatch,
   pairsForDifficulty,
@@ -36,6 +37,7 @@ export function ConceptMatchGame({
   difficulty = "medium",
 }: ConceptMatchGameProps) {
   const activePairs = pairs ?? pairsForDifficulty(difficulty, deck);
+  const cardKey = (deck && DECK_TO_CARD_KEY[deck]) ?? "memory";
 
   const [captions, setCaptions] = useState(false);
   const [roundKey, setRoundKey] = useState(0);
@@ -59,7 +61,7 @@ export function ConceptMatchGame({
       },
     });
 
-  useSay(won ? null : t(lang, "card.memory.blurb"));
+  useSay(won ? null : t(lang, `card.${cardKey}.blurb` as UIKey));
 
   const prevDeck = useRef(deck);
   const prevPairs = useRef(activePairs);
@@ -130,7 +132,7 @@ export function ConceptMatchGame({
 
   return (
     <GameShell
-      title={t(lang, "shell.memory.title")}
+      title={t(lang, `card.${cardKey}.title` as UIKey)}
       subtitle={t(lang, "shell.memory.sub", { n: totalPairs })}
       onBack={onHome ?? (() => {})}
       lang={lang}
