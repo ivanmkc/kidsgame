@@ -94,7 +94,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
       makeRound(rngRef.current, gameWordsRef.current[0], decoys, alphabet),
     );
     setGameKey((k) => k + 1);
-  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lang, difficulty]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const wordCount = gameWordsRef.current.length;
   const won = wordCount > 0 && wordIdx >= wordCount;
