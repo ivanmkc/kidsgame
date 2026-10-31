@@ -15,7 +15,7 @@ import { Lang } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sfx } from "../../sound";
+import { say, sayThen, sfx } from "../../sound";
 import { playDrum } from "../../music";
 import { useWinLine } from "../winlines";
 import {
@@ -23,6 +23,9 @@ import {
   roundsToWin,
   scoreTaps,
   passThreshold,
+  evaluateRhythm,
+  getInstructionalFeedback,
+  RhythmEvaluation,
   SteadyBeatRound,
 } from "./logic";
 
@@ -39,6 +42,8 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
     makeSteadyBeatRound(rngRef.current, difficulty),
   );
   const [score, setScore] = useState(0);
+  const [instructionalFeedback, setInstructionalFeedback] =
+    useState<RhythmEvaluation | null>(null);
   const [phase, setPhase] = useState<"listen" | "tap" | "result">("listen");
   const [listenBeat, setListenBeat] = useState<number | null>(0);
   const [tapTimesMs, setTapTimesMs] = useState<number[]>([]);
@@ -129,8 +134,13 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       setTapTimesMs([]);
       setHits(0);
       setFlash(false);
+      setInstructionalFeedback(null);
       const cleanup = startMetronome(round);
       return () => {
+        if (transitionTimerRef.current) {
+          clearTimeout(transitionTimerRef.current);
+          transitionTimerRef.current = null;
+        }
         cleanup();
         pulseAnim.stopAnimation();
       };
@@ -148,21 +158,26 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
       setPhase("result");
       const threshold = passThreshold(difficulty);
       if (result.hits / result.total >= threshold) {
+        setInstructionalFeedback(null);
         sfx.good();
         setSparkKey((k) => k + 1);
         const nextScore = score + 1;
         setScore(nextScore);
         if (nextScore < total) {
-          transitionTimerRef.current = setTimeout(
-            () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
-            1200,
-          );
+          transitionTimerRef.current = setTimeout(() => {
+            transitionTimerRef.current = null;
+            setRound(makeSteadyBeatRound(rngRef.current, difficulty));
+          }, 1200);
         }
       } else {
         sfx.wrong();
-        transitionTimerRef.current = setTimeout(
-          () => setRound(makeSteadyBeatRound(rngRef.current, difficulty)),
-          1200,
+        const evaluation = evaluateRhythm(round, tapTimesRef.current);
+        setInstructionalFeedback(evaluation);
+        sayThen(
+          getInstructionalFeedback(round, lang, tapTimesRef.current),
+          () => {
+            setRound((prev) => ({ ...prev }));
+          },
         );
       }
     }, totalTime);
@@ -177,12 +192,17 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
 
   const reset = () => {
     if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
     setFlash(false);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
     setTapTimesMs([]);
     setHits(0);
     setListenBeat(0);
+    setInstructionalFeedback(null);
     setRound(makeSteadyBeatRound(rngRef.current, difficulty));
   };
 
@@ -269,8 +289,38 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
             </View>
           </View>
         ) : phase === "result" ? (
-          <View style={[styles.statusCard, shadows.soft]}>
+          <View style={[styles.statusCard, shadows.soft, styles.resultCard]}>
             <View style={styles.resultRow}>{resultStars}</View>
+            {instructionalFeedback && (
+              <Text
+                testID="steadybeat-instructional-feedback"
+                style={[
+                  styles.instructionalText,
+                  {
+                    color:
+                      instructionalFeedback === "fast"
+                        ? "#E8874F"
+                        : instructionalFeedback === "slow"
+                          ? "#5DA9E8"
+                          : colors.ink,
+                  },
+                ]}
+              >
+                {instructionalFeedback === "fast"
+                  ? "🐰 "
+                  : instructionalFeedback === "slow"
+                    ? "🐢 "
+                    : "👂 "}
+                {t(
+                  lang,
+                  instructionalFeedback === "fast"
+                    ? "music.fast"
+                    : instructionalFeedback === "slow"
+                      ? "music.slow"
+                      : "music.listen",
+                )}
+              </Text>
+            )}
           </View>
         ) : (
           <View style={[styles.statusCard, shadows.soft, styles.yourTurnCard]}>
@@ -389,6 +439,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   resultRow: { flexDirection: "row", gap: 4 },
+  resultCard: {
+    flexDirection: "column",
+    gap: 6,
+    paddingVertical: 8,
+  },
+  instructionalText: {
+    fontFamily: fonts.display,
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
   resultStar: { fontSize: 22 },
   circle: {
     width: 180,
