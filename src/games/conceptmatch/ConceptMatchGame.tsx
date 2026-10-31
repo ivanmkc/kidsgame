@@ -38,6 +38,7 @@ export function ConceptMatchGame({
 }: ConceptMatchGameProps) {
   const activePairs = pairs ?? pairsForDifficulty(difficulty, deck);
   const cardKey = (deck && DECK_TO_CARD_KEY[deck]) ?? "memory";
+  const groupSimilar = difficulty !== "easy";
 
   const [captions, setCaptions] = useState(false);
   const [roundKey, setRoundKey] = useState(0);
@@ -48,7 +49,7 @@ export function ConceptMatchGame({
       lang,
       activePairs,
       undefined,
-      true,
+      groupSimilar,
     ),
   );
 
@@ -66,17 +67,20 @@ export function ConceptMatchGame({
   const prevDeck = useRef(deck);
   const prevPairs = useRef(activePairs);
   const prevLang = useRef(lang);
+  const prevDifficulty = useRef(difficulty);
 
   useEffect(() => {
     const deckChanged = prevDeck.current !== deck;
     const pairsChanged = prevPairs.current !== activePairs;
     const langChanged = prevLang.current !== lang;
+    const difficultyChanged = prevDifficulty.current !== difficulty;
 
     prevDeck.current = deck;
     prevPairs.current = activePairs;
     prevLang.current = lang;
+    prevDifficulty.current = difficulty;
 
-    if (deckChanged || pairsChanged) {
+    if (deckChanged || pairsChanged || difficultyChanged) {
       setBoard(
         buildBoard(
           makeRng(Math.floor(Math.random() * 1e9)),
@@ -84,7 +88,7 @@ export function ConceptMatchGame({
           lang,
           activePairs,
           undefined,
-          true,
+          groupSimilar,
         ),
       );
       reset();
@@ -94,7 +98,7 @@ export function ConceptMatchGame({
     if (langChanged) {
       setBoard((currentBoard) => updateBoardLang(currentBoard, deck, lang));
     }
-  }, [deck, lang, activePairs, reset]);
+  }, [deck, lang, activePairs, difficulty, groupSimilar, reset]);
 
   useEffect(() => {
     if (won) {
@@ -111,11 +115,11 @@ export function ConceptMatchGame({
         lang,
         activePairs,
         undefined,
-        true,
+        groupSimilar,
       ),
     );
     reset();
-  }, [deck, lang, activePairs, reset]);
+  }, [deck, lang, activePairs, groupSimilar, reset]);
 
   const handleFlip = useCallback(
     (card: ConceptMatchCard) => {
