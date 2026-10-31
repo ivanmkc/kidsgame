@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-EDIT_MODEL = "gemini-nano-banana-2.1"
+EDIT_MODEL = ("gemini-3-pro-image", "gemini-nano-banana-2.1")
 JUDGE_MODEL = "gemini-3.6-flash"
 PROJECT = "adk-coding-agents"
 LOCATION = "global"
@@ -109,24 +109,25 @@ def _gemini_edit(img: Image.Image, prompt: str, attempts: int = 3) -> Image.Imag
     from google.genai import types
     last = None
     for i in range(attempts):
-        try:
-            resp = _client().models.generate_content(
-                model=EDIT_MODEL,
-                contents=[prompt, types.Part.from_bytes(
-                    data=_png_bytes(img), mime_type="image/png")],
-                config=types.GenerateContentConfig(
-                    response_modalities=["IMAGE", "TEXT"]),
-            )
-            for cand in (resp.candidates or []):
-                for part in (cand.content.parts or []):
-                    if getattr(part, "inline_data", None) and \
-                       part.inline_data.mime_type.startswith("image/"):
-                        return Image.open(
-                            io.BytesIO(part.inline_data.data)).convert("RGB")
-            last = RuntimeError("no image in response")
-        except Exception as e:
-            last = e
-            _reset_client()
+        for model in EDIT_MODEL:
+            try:
+                resp = _client().models.generate_content(
+                    model=model,
+                    contents=[prompt, types.Part.from_bytes(
+                        data=_png_bytes(img), mime_type="image/png")],
+                    config=types.GenerateContentConfig(
+                        response_modalities=["IMAGE", "TEXT"]),
+                )
+                for cand in (resp.candidates or []):
+                    for part in (cand.content.parts or []):
+                        if getattr(part, "inline_data", None) and \
+                           part.inline_data.mime_type.startswith("image/"):
+                            return Image.open(
+                                io.BytesIO(part.inline_data.data)).convert("RGB")
+                last = RuntimeError(f"no image in response from {model}")
+            except Exception as e:
+                last = e
+                _reset_client()
         wait = 3 * (i + 1)
         print(f"  WARN edit attempt {i + 1}: {type(last).__name__}: "
               f"{str(last)[:100]}; retry in {wait}s", file=sys.stderr)
