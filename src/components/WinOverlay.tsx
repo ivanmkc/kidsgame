@@ -174,7 +174,7 @@ export function WinOverlay({
             />
             {nextCard ? (
               <ChunkyButton
-                label={`▶️ ${t(lang, `card.${nextCard.key}.title` as UIKey)}`}
+                label={`🚀 ${t(lang, `card.${nextCard.key}.title` as UIKey)}`}
                 color={nextCard.color}
                 darkColor={darken(nextCard.color)}
                 onPress={() => armed && navigate(nextCard.route)}

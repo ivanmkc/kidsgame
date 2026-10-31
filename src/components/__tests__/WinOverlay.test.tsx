@@ -172,7 +172,7 @@ describe("WinOverlay", () => {
 
     const nextGameBtn = screen.getByTestId("next-game");
     expect(nextGameBtn).toBeTruthy();
-    expect(nextGameBtn.textContent).toContain("▶️ Word Builder");
+    expect(nextGameBtn.textContent).toContain("🚀 Word Builder");
 
     // Clicking before arming does not navigate
     fireEvent.click(nextGameBtn);
@@ -194,7 +194,7 @@ describe("WinOverlay", () => {
     expect(screen.getByTestId("active-screen").textContent).toBe("letters");
     const nextGameBtn = screen.getByTestId("next-game");
     expect(nextGameBtn).toBeTruthy();
-    expect(nextGameBtn.textContent).toContain("▶️ Word Builder");
+    expect(nextGameBtn.textContent).toContain("🚀 Word Builder");
 
     // Advance past 600ms arming window
     act(() => {
@@ -261,7 +261,27 @@ describe("WinOverlay", () => {
 
     const nextGameBtn = screen.getByTestId("next-game");
     expect(nextGameBtn).toBeTruthy();
-    expect(nextGameBtn.textContent).toContain("▶️ ことばづくり");
+    expect(nextGameBtn.textContent).toContain("🚀 ことばづくり");
+  });
+
+  it("uses distinct icons for play-again and curriculum next-game progression", () => {
+    window.location.hash = "#/letters";
+    render(
+      <WinOverlay
+        visible={true}
+        message="Great job!"
+        nextLabel="Play Again ▶️"
+        onNext={vi.fn()}
+        onHome={vi.fn()}
+      />,
+    );
+
+    const playAgainBtn = screen.getByTestId("play-again");
+    const nextGameBtn = screen.getByTestId("next-game");
+
+    expect(playAgainBtn.textContent).toContain("▶️");
+    expect(nextGameBtn.textContent).toContain("🚀");
+    expect(nextGameBtn.textContent).not.toContain("▶️");
   });
 
   it("keeps buttons disarmed on the first frame when transitioning back to visible", () => {
