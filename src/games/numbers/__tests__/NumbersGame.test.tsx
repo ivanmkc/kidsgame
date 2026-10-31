@@ -771,4 +771,106 @@ describe("NumbersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("resets round count and timer on difficulty change without jumping to win", () => {
+    vi.useFakeTimers();
+    try {
+      const generatedRounds: logic.NumberRound[] = [];
+      const origMakeNumberRound = logic.makeNumberRound;
+      vi.spyOn(logic, "makeNumberRound").mockImplementation(
+        (rng, settings, lang, avoidN) => {
+          const res = origMakeNumberRound(rng, settings, lang, avoidN);
+          generatedRounds.push(res);
+          return res;
+        },
+      );
+
+      const { rerender } = render(
+        <NumbersGame onHome={vi.fn()} difficulty="hard" lang="en" />,
+      );
+
+      // Verify Hard mode tile count (9 tiles) and timer display
+      expect(screen.queryAllByTestId(/^numbers-tile-/)).toHaveLength(9);
+      expect(screen.getByTestId("numbers-timer")).toBeTruthy();
+
+      // Advance timer by 5 seconds on Hard
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(screen.getByTestId("numbers-timer").textContent).toBe("0:05");
+
+      // Complete 8 rounds on Hard (out of 12)
+      for (let r = 0; r < 8; r++) {
+        const round = generatedRounds[r];
+        const correctTile = round.tiles[round.answerIdx];
+        const tileIdx = round.tiles.indexOf(correctTile);
+        act(() => {
+          fireEvent.click(screen.getByTestId(`numbers-tile-${tileIdx}`));
+        });
+        act(() => {
+          vi.advanceTimersByTime(400);
+        });
+      }
+
+      expect(screen.getByTestId("numbers-score").textContent).toContain("8/12");
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+      // Switch difficulty to Easy (which requires 8 rounds to win)
+      rerender(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      // Must not trigger instant win
+      expect(screen.queryByTestId("win-overlay")).toBeNull();
+      // Round progress resets to 0/8
+      expect(screen.getByTestId("numbers-score").textContent).toContain("0/8");
+      // Tile count resets to Easy mode (5 tiles)
+      expect(screen.queryAllByTestId(/^numbers-tile-/)).toHaveLength(5);
+      // Easy mode does not display timer
+      expect(screen.queryByTestId("numbers-timer")).toBeNull();
+
+      // Switch to Hard (which has timer) to verify timer reset to 0:00 and 9 tiles
+      rerender(<NumbersGame onHome={vi.fn()} difficulty="hard" lang="en" />);
+
+      expect(screen.getByTestId("numbers-score").textContent).toContain("0/12");
+      expect(screen.queryAllByTestId(/^numbers-tile-/)).toHaveLength(9);
+      expect(screen.getByTestId("numbers-timer").textContent).toBe("0:00");
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels stale in-flight timers when difficulty switches mid-round", () => {
+    vi.useFakeTimers();
+    try {
+      const { rerender } = render(
+        <NumbersGame onHome={vi.fn()} difficulty="hard" lang="en" />,
+      );
+
+      // Find a wrong tile
+      const promptEl = screen.getByTestId(/^numbers-prompt-/);
+      const targetKey = promptEl
+        .getAttribute("data-testid")!
+        .replace("numbers-prompt-n-", "");
+      let wrongTile: HTMLElement | null = null;
+      for (let i = 0; i < 9; i++) {
+        const tile = screen.getByTestId(`numbers-tile-${i}`);
+        if (tile.getAttribute("aria-label") !== targetKey) {
+          wrongTile = tile;
+          break;
+        }
+      }
+      expect(wrongTile).not.toBeNull();
+
+      // Tap wrong tile to schedule errorTimer (450ms)
+      fireEvent.click(wrongTile!);
+      expect(sound.sfx.wrong).toHaveBeenCalledTimes(1);
+
+      // Switch difficulty to Easy (which has no elapsed timer running)
+      rerender(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+
+      // Stale error timer cancelled, and Easy has no timer ring
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
