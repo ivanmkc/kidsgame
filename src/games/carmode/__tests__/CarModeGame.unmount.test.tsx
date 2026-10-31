@@ -59,10 +59,14 @@ describe("CarModeGame unmount", () => {
     vi.restoreAllMocks();
   });
 
-  it("clears boop sequence and does not trigger prompt when unmounted early", () => {
+  it("stops prompt and does not play boop sequence when unmounted early", () => {
     vi.useFakeTimers();
-    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
-    const stopSequenceSpy = vi.spyOn(music, "stopSequence");
+    let sayThenCb: (() => void) | undefined;
+    vi.spyOn(sound, "sayThen").mockImplementation((_t, cb) => {
+      sayThenCb = cb;
+    });
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+    const playSequenceSpy = vi.spyOn(music, "playSequence");
 
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({
@@ -84,16 +88,20 @@ describe("CarModeGame unmount", () => {
 
     const { unmount } = render(<CarModeGame onHome={() => {}} lang="en" />);
 
-    // Unmount the component immediately!
+    // Unmount the component while prompt is still speaking!
     unmount();
 
-    expect(stopSequenceSpy).toHaveBeenCalled();
+    expect(stopNarrationSpy).toHaveBeenCalled();
+
+    // Now if the speech callback fires (which could happen if mock clears late or something),
+    // it shouldn't trigger the boops because component is unmounted (isValid() check).
+    sayThenCb?.();
 
     // Fast-forward through all timers.
     vi.runAllTimers();
 
-    // We shouldn't have said the prompt because the sequence was cancelled on unmount!
-    expect(sayThenSpy).not.toHaveBeenCalled();
+    // We shouldn't have played the boops!
+    expect(playSequenceSpy).not.toHaveBeenCalled();
   });
 
   it("stops narration when unmounted", () => {
