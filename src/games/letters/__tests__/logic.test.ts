@@ -5,6 +5,7 @@ import {
   KANA_POOL,
   LETTER_SOUNDS,
   kanaConfusableGroup,
+  lettersLayout,
   makeLetterRound,
   settingsForLetters,
   shouldShowGlyph,
@@ -230,5 +231,98 @@ describe("speechLines", () => {
     // JA never plays alphabet or phonics sound tiers
     expect(lineSet.has(t("ja", "letters.find", { letter: "A" }))).toBe(false);
     expect(lineSet.has(t("ja", "letters.sound", { sound: "aa" }))).toBe(false);
+  });
+});
+
+describe("lettersLayout", () => {
+  it("scales down prompt and sizes tiles appropriately on compact mobile landscape (568x320)", () => {
+    // 8 tiles mode (Medium mode)
+    const layout8 = lettersLayout(568, 320, 8);
+    expect(layout8.shortH).toBe(true);
+    expect(layout8.isLandscape).toBe(true);
+    expect(layout8.cols).toBe(4);
+    expect(layout8.rows).toBe(2);
+    expect(layout8.speakerSize).toBe(56);
+    expect(layout8.speakerIconSize).toBe(26);
+    expect(layout8.boardGap).toBe(10);
+    expect(layout8.tileGap).toBe(10);
+    // Tile size must remain playable and well above 44px
+    expect(layout8.tile).toBeGreaterThanOrEqual(44);
+    expect(layout8.tile).toBe(45);
+
+    // Total vertical height of board content + wrapped header must not overflow 320px
+    const headerHeight = 136;
+    const promptHeight = 74;
+    const boardContentH =
+      promptHeight +
+      layout8.boardGap +
+      (layout8.rows * layout8.tile + (layout8.rows - 1) * layout8.tileGap);
+    expect(headerHeight + boardContentH).toBeLessThanOrEqual(320);
+  });
+
+  it("adapts 12 tiles in landscape to 6 columns x 2 rows, keeping tiles above 44px", () => {
+    // 12 tiles mode (Japanese Hard mode) on 568x320 landscape
+    const layout12 = lettersLayout(568, 320, 12);
+    expect(layout12.shortH).toBe(true);
+    expect(layout12.isLandscape).toBe(true);
+    expect(layout12.cols).toBe(6);
+    expect(layout12.rows).toBe(2);
+    // Tiles must not shrink to unplayable 27px; they should be well above 44px
+    expect(layout12.tile).toBeGreaterThanOrEqual(44);
+    expect(layout12.tile).toBe(45);
+  });
+
+  it("preserves 4 columns x 3 rows for 12 tiles in portrait orientation", () => {
+    // Standard phone portrait (375x667)
+    const layout = lettersLayout(375, 667, 12);
+    expect(layout.shortH).toBe(false);
+    expect(layout.isLandscape).toBe(false);
+    expect(layout.cols).toBe(4);
+    expect(layout.rows).toBe(3);
+    expect(layout.speakerSize).toBe(80);
+    expect(layout.speakerIconSize).toBe(36);
+    expect(layout.boardGap).toBe(16);
+    expect(layout.tileGap).toBe(12);
+    expect(layout.tile).toBeGreaterThanOrEqual(44);
+  });
+
+  it("sizes tiles for easy mode (6 tiles) across landscape and portrait", () => {
+    const landscape = lettersLayout(568, 320, 6);
+    expect(landscape.cols).toBe(3);
+    expect(landscape.rows).toBe(2);
+    expect(landscape.tile).toBe(45);
+
+    const portrait = lettersLayout(375, 667, 6);
+    expect(portrait.cols).toBe(3);
+    expect(portrait.rows).toBe(2);
+  });
+
+  it("computes responsive layout on modern landscape phones (667x375 and 844x390)", () => {
+    const seLandscape = lettersLayout(667, 375, 8);
+    expect(seLandscape.shortH).toBe(true);
+    expect(seLandscape.cols).toBe(4);
+    expect(seLandscape.rows).toBe(2);
+    expect(seLandscape.tile).toBeGreaterThanOrEqual(80);
+
+    const modernLandscape = lettersLayout(844, 390, 12);
+    expect(modernLandscape.shortH).toBe(true);
+    expect(modernLandscape.cols).toBe(6);
+    expect(modernLandscape.rows).toBe(2);
+    expect(modernLandscape.tile).toBeGreaterThanOrEqual(80);
+  });
+
+  it("handles tablet landscape and compact portrait dimensions", () => {
+    const tablet = lettersLayout(1024, 768, 12);
+    expect(tablet.shortH).toBe(false);
+    expect(tablet.isLandscape).toBe(true);
+    expect(tablet.cols).toBe(6);
+    expect(tablet.rows).toBe(2);
+    expect(tablet.speakerSize).toBe(80);
+
+    const compactPortrait = lettersLayout(320, 480, 8);
+    expect(compactPortrait.shortH).toBe(true);
+    expect(compactPortrait.isLandscape).toBe(false);
+    expect(compactPortrait.cols).toBe(4);
+    expect(compactPortrait.rows).toBe(2);
   });
 });
