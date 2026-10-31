@@ -3,11 +3,11 @@ import { Rng, shuffle } from "../../rng";
 import { WORDS, wordFor } from "../../curriculum/content";
 import { CATEGORY_CONFLICTS, CATEGORY_TEXT } from "../iconCategories";
 import { CURRICULUM } from "../../curriculum/content";
-import { t } from "../../i18n";
+import { t, UIKey } from "../../i18n";
 
 export interface Rule {
   category: string;
-  label: string; // "Tap all the ANIMALS!"
+  labelKey: UIKey;
 }
 
 export interface RulesRound {
@@ -22,7 +22,7 @@ export function makeRules(rng: Rng, count: number): Rule[] {
   const cats = shuffle(rng, Object.keys(CATEGORY_TEXT));
   return Array.from({ length: count }, (_, i) => {
     const category = cats[i % cats.length];
-    return { category, label: CATEGORY_TEXT[category].tap };
+    return { category, labelKey: CATEGORY_TEXT[category].tap };
   });
 }
 
