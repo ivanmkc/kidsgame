@@ -71,9 +71,9 @@ describe("LettersGame", () => {
       });
 
       expect(sfx.good).toHaveBeenCalledTimes(1);
-      // Immediately on click: celebration delay is active, round has not advanced yet
+      // Immediately on click: celebration delay is active, score advances immediately
       expect(makeRoundSpy).toHaveBeenCalledTimes(1);
-      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
 
       // Advance through celebration delay
       act(() => {
@@ -125,7 +125,7 @@ describe("LettersGame", () => {
         fireEvent.click(correctBtn);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
-      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
 
       // Fast-forward past celebration delay
       act(() => {
@@ -765,8 +765,8 @@ describe("LettersGame", () => {
       // Celebration active: SparkleBurst rendered on the correct tile
       expect(correctBtn.textContent).toMatch(/✨|⭐/);
 
-      // Score has not advanced yet
-      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+      // Score advances immediately upon correct tap
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
 
       // Tapping another tile during celebration is locked out
       act(() => {
@@ -774,11 +774,12 @@ describe("LettersGame", () => {
       });
       expect(sfx.wrong).not.toHaveBeenCalled();
 
-      // At 599ms: still in celebration
+      // At 599ms: still in celebration, round has not advanced yet
       act(() => {
         vi.advanceTimersByTime(599);
       });
-      expect(screen.getByTestId("letters-score").textContent).toContain("0/8");
+      expect(screen.getByTestId("letters-score").textContent).toContain("1/8");
+      expect(generatedRounds).toHaveLength(1);
 
       // At 600ms: celebration finishes and round advances
       act(() => {
@@ -841,7 +842,7 @@ describe("LettersGame", () => {
     }
   });
 
-  it("clears celebration timer and resets state when language switches mid-celebration", () => {
+  it("preserves round progress and resets round when language switches mid-celebration", () => {
     vi.useFakeTimers();
     try {
       function LettersGameTestWrapper() {
@@ -880,6 +881,7 @@ describe("LettersGame", () => {
         fireEvent.click(correctBtn);
       });
       expect(sfx.good).toHaveBeenCalledTimes(1);
+      expect(screen.getByTestId("letters-score").textContent).toBe("🔤 1/8");
 
       // Switch language 200ms into celebration
       act(() => {
@@ -894,8 +896,17 @@ describe("LettersGame", () => {
         vi.advanceTimersByTime(500);
       });
 
-      // Round should be reset for new language, score still 0/8
-      expect(screen.getByTestId("letters-score").textContent).toBe("🈶 0/8");
+      // Round should be reset for new language, earned round progress preserved (1/8)
+      expect(screen.getByTestId("letters-score").textContent).toBe("🈶 1/8");
+
+      // New Japanese round is playable and advances score
+      const round2 = generatedRounds[1];
+      const correctTile2 = round2.tiles[round2.answerIdx];
+      const correctBtn2 = screen.getByLabelText(correctTile2.label);
+      act(() => {
+        fireEvent.click(correctBtn2);
+      });
+      expect(screen.getByTestId("letters-score").textContent).toBe("🈶 2/8");
     } finally {
       vi.useRealTimers();
     }
