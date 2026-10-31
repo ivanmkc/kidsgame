@@ -452,10 +452,11 @@ describe("DiffGame", () => {
     unmountSubYue();
   });
 
-  it("provides valid nameT translations in ja, cmn, and yue for all diff scenes", () => {
+  it("provides valid nameT translations in en, ja, cmn, and yue for all diff scenes", () => {
     expect(manifest.diff.length).toBe(21);
     for (const scene of manifest.diff) {
       expect(scene.nameT).toBeDefined();
+      expect(scene.nameT?.en).toBeTruthy();
       expect(scene.nameT?.ja).toBeTruthy();
       expect(scene.nameT?.cmn).toBeTruthy();
       expect(scene.nameT?.yue).toBeTruthy();

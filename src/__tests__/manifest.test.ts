@@ -1,5 +1,6 @@
 import { describe, test, expect, vi, afterEach } from 'vitest';
-import { pickScene, baseImage } from '../manifest';
+import { t, UIKey } from '../i18n';
+import { baseImage, manifest, pickScene } from '../manifest';
 
 describe('pickScene', () => {
   afterEach(() => {
@@ -50,3 +51,20 @@ describe('baseImage', () => {
     expect(baseImage({ id: '1', name: '1', w: 100, h: 100, imageA: 'bar.png' })).toBe('bar.png');
   });
 });
+
+describe('manifest', () => {
+  test('provides English nameT translations for diff and hidden scenes', () => {
+    expect(manifest.diff.length).toBeGreaterThan(0);
+    for (const scene of manifest.diff) {
+      expect(scene.nameT?.en).toBeDefined();
+      expect(scene.nameT?.en).toBe(t('en', `diff.scene.${scene.id}` as UIKey));
+    }
+
+    expect(manifest.hidden.length).toBeGreaterThan(0);
+    for (const scene of manifest.hidden) {
+      expect(scene.nameT?.en).toBeDefined();
+      expect(scene.nameT?.en).toBe(t('en', `hidden.scene.${scene.id}` as UIKey));
+    }
+  });
+});
+
