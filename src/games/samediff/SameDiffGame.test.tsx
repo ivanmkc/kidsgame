@@ -888,6 +888,79 @@ describe("SameDiffGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("maintains completed round note cues during 1000ms celebration without prematurely leaking next round cues", () => {
+    vi.useFakeTimers();
+    const roundSame: SameDiffRound = {
+      phraseIdx: 0,
+      phraseA: [
+        { m: 60, b: 1 },
+        { m: 64, b: 1 },
+        { m: 67, b: 1 },
+      ],
+      phraseB: [
+        { m: 60, b: 1 },
+        { m: 64, b: 1 },
+        { m: 67, b: 1 },
+      ],
+      answer: "same",
+    };
+    const roundDiff: SameDiffRound = {
+      phraseIdx: 1,
+      phraseA: [
+        { m: 60, b: 1 },
+        { m: 64, b: 1 },
+        { m: 67, b: 1 },
+      ],
+      phraseB: [
+        { m: 60, b: 1 },
+        { m: 64, b: 1 },
+        { m: 72, b: 1 },
+      ],
+      answer: "different",
+    };
+
+    vi.spyOn(logic, "makeSameDiffRound")
+      .mockReturnValueOnce(roundSame)
+      .mockReturnValueOnce(roundDiff);
+
+    render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance to pick phase of round 1
+    act(() => {
+      vi.advanceTimersByTime(4200);
+    });
+
+    // Before tap: Round 1 is "same", so melody 0 and melody 1 have matching stem heights
+    expect(screen.getByTestId("melody-0-stem-2").style.height).toBe("26px");
+    expect(screen.getByTestId("melody-1-stem-2").style.height).toBe("26px");
+
+    // Player taps "Same" (the correct answer)
+    const sameBtn = screen.getByTestId("samediff-same");
+    act(() => {
+      fireEvent.click(sameBtn);
+    });
+
+    // During the 1000ms celebration delay (e.g. at 500ms):
+    // Stems must stay on the completed round's visual cues (both 26px)
+    // and NOT jump to Round 2's notes (which would make stem-0-2 18px)
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByTestId("melody-0-stem-2").style.height).toBe("26px");
+    expect(screen.getByTestId("melody-1-stem-2").style.height).toBe("26px");
+
+    // Advance remaining 500ms to complete the transition delay
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // At 1000ms: round 2 begins in listenA phase, so phrase B track resets to placeholders
+    expect(screen.getByTestId("melody-1-placeholder-0")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
+
   describe("voice guidance and speechLines", () => {
     it("speechLines exports unique non-empty phrases spanning all four languages", () => {
       const lines = speechLines();
