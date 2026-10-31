@@ -268,6 +268,7 @@ export type UIKey =
   | 'sticker.character.robot' | 'sticker.character.vet'
   | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
   | 'rhyme.ask' | 'rhyme.confirm' | 'rhyme.comingSoon'
+  | 'sounds.ask'
   | 'letters.find' | 'letters.sound' | 'letters.findKana'
   | 'numbers.findNumber' | 'numbers.find'
   | 'bingo.prompt' | 'bingo.promptPhonics' | 'bingo.confirmPhonics'
@@ -680,6 +681,7 @@ export const EN: Table = {
   'rhyme.ask': 'Which one rhymes with {word}?',
   'rhyme.confirm': 'They rhyme!',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
+  'sounds.ask': 'Which one starts with {sound}?',
   'letters.find': 'Find the letter {letter}!',
   'letters.sound': 'Which letter says {sound}?',
   'letters.findKana': 'Find the kana {kana}!',

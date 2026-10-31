@@ -388,6 +388,7 @@ export const JA: Table = {
   'rhyme.ask': 'おなじ おとで おわるのは どれ？',
   'rhyme.confirm': 'おなじ おと！',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
+  'sounds.ask': 'どれかな？ {word}',
   'letters.find': '「{letter}」をさがして！',
   'letters.sound': '「{sound}」の おとの もじは どれ？',
   'letters.findKana': '「{kana}」をさがして！',

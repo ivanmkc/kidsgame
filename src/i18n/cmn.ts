@@ -387,6 +387,7 @@ export const CMN: Table = {
   'rhyme.ask': '哪个词的结尾一样？',
   'rhyme.confirm': '押韵！',
   'rhyme.comingSoon': '更多押韵马上就来！🎶',
+  'sounds.ask': '哪一个是 {word}？',
   'letters.find': '找一找字母 {letter}！',
   'letters.sound': '哪个字母发 {sound} 的音？',
   'letters.findKana': '找一找假名 {kana}！',
