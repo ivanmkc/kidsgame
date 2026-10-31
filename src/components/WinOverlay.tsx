@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    flexWrap: "wrap",
     gap: 16,
   },
   celebRow: { flexDirection: "row", alignItems: "center", gap: 12 },
