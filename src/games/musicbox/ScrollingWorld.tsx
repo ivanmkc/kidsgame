@@ -52,17 +52,17 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
         <Image
           source={bgSrc}
           style={{ width: STRIP_W, height: TALL }}
-          resizeMode="stretch"
+          resizeMode="cover"
         />
         <Image
           source={bgSrc}
           style={{ width: STRIP_W, height: TALL }}
-          resizeMode="stretch"
+          resizeMode="cover"
         />
         <Image
           source={bgSrc}
           style={{ width: STRIP_W, height: TALL }}
-          resizeMode="stretch"
+          resizeMode="cover"
         />
       </Animated.View>
 
@@ -79,9 +79,9 @@ export function ScrollingWorld({ scrollX, scene }: Props) {
           },
         ]}
       >
-        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
-        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
-        <Image source={midSrc} style={styles.midImg} resizeMode="stretch" />
+        <Image source={midSrc} style={styles.midImg} resizeMode="cover" />
+        <Image source={midSrc} style={styles.midImg} resizeMode="cover" />
+        <Image source={midSrc} style={styles.midImg} resizeMode="cover" />
       </Animated.View>
 
       {/* Foreground meadow: bottom portion */}
