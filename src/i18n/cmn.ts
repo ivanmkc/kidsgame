@@ -385,6 +385,7 @@ export const CMN: Table = {
   'memory.cardFaceDown': '盖着的卡片',
   'memory.foundPair': '{name}找到了一对！再来一次！',
   'rhyme.ask': '哪个词的结尾一样？',
+  'sounds.ask': '哪一个是？',
   'rhyme.confirm': '押韵！',
   'rhyme.comingSoon': '更多押韵马上就来！🎶',
   'letters.find': '找一找字母 {letter}！',

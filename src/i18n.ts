@@ -267,7 +267,7 @@ export type UIKey =
   | 'sticker.character.astronaut' | 'sticker.character.chef' | 'sticker.character.pirate' | 'sticker.character.cowgirl'
   | 'sticker.character.robot' | 'sticker.character.vet'
   | 'memory.moves' | 'memory.cardFaceDown' | 'memory.foundPair'
-  | 'rhyme.ask' | 'rhyme.confirm' | 'rhyme.comingSoon'
+  | 'rhyme.ask' | 'sounds.ask' | 'rhyme.confirm' | 'rhyme.comingSoon'
   | 'letters.find' | 'letters.sound' | 'letters.findKana'
   | 'numbers.findNumber' | 'numbers.find'
   | 'bingo.prompt' | 'bingo.promptPhonics' | 'bingo.confirmPhonics'
@@ -678,6 +678,7 @@ export const EN: Table = {
   // Rhyme game prompts: EN interpolates {word} into the full sentence;
   // non-EN pairs this fixed question clip with the target word clip.
   'rhyme.ask': 'Which one rhymes with {word}?',
+  'sounds.ask': '',
   'rhyme.confirm': 'They rhyme!',
   'rhyme.comingSoon': 'More rhymes coming soon! 🎶',
   'letters.find': 'Find the letter {letter}!',

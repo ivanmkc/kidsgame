@@ -386,6 +386,7 @@ export const JA: Table = {
   'memory.cardFaceDown': 'うらがえしのカード',
   'memory.foundPair': '{name}が ペアを みつけたよ！ もういっかい！',
   'rhyme.ask': 'おなじ おとで おわるのは どれ？',
+  'sounds.ask': 'どれかな？',
   'rhyme.confirm': 'おなじ おと！',
   'rhyme.comingSoon': 'ライムを もっと じゅんびちゅう！ 🎶',
   'letters.find': '「{letter}」をさがして！',
