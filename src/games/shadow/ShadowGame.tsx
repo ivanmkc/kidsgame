@@ -135,7 +135,10 @@ export function ShadowGame({ onHome, difficulty, lang = "en" }: Props) {
   }, [difficulty, isChanging]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { width, height } = useWindowDimensions();
-  const shadowSize = Math.min(width - 100, height - 84 - 210, 280);
+  const shadowSize = Math.max(
+    64,
+    Math.min(width - 100, height - 84 - 210, 280),
+  );
   const optionSize = Math.min(
     (Math.min(width, 640) - 32 - (diff.choices - 1) * 14) / diff.choices,
     108,

@@ -21,6 +21,24 @@ describe("ShadowGame", () => {
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it("clamps shadowSize on short viewports", () => {
+    vi.stubGlobal("innerWidth", 400);
+    vi.stubGlobal("innerHeight", 250);
+    fireEvent(window, new Event("resize"));
+
+    const { container } = render(
+      <ShadowGame onHome={noop} difficulty="easy" lang="en" />,
+    );
+
+    const answerCard = container.querySelector(
+      '[data-testid^="shadow-answer-"]',
+    );
+    expect(answerCard).toBeTruthy();
+    expect((answerCard as HTMLElement).style.width).toBe("112px");
+    expect((answerCard as HTMLElement).style.height).toBe("112px");
   });
 
   it("renders correctly across all languages", () => {
