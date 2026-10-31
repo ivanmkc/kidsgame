@@ -110,13 +110,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     // In scene picker with Japanese
     const { unmount: unmountPicker } = render(
@@ -208,13 +211,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: cancelSpy,
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const saySpy = vi.spyOn(sound, "say");
@@ -242,11 +248,9 @@ describe("HiddenGame localization", () => {
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
 
     const expectedPrompt = t("ja", "hidden.prompt");
-    const expectedTurn0 = t(
-      "ja",
-      "hidden.turn",
-      { name: t("ja", MP_PLAYERS[0].name) },
-    );
+    const expectedTurn0 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[0].name),
+    });
 
     // saySequence is called with both prompt and turn
     expect(saySeqSpy).toHaveBeenCalledWith([expectedPrompt, expectedTurn0]);
@@ -272,11 +276,9 @@ describe("HiddenGame localization", () => {
 
     fireEvent.click(screen.getByTestId(`hidden-target-${targets[0]}`));
 
-    const expectedTurn1 = t(
-      "ja",
-      "hidden.turn",
-      { name: t("ja", MP_PLAYERS[1].name) },
-    );
+    const expectedTurn1 = t("ja", "hidden.turn", {
+      name: t("ja", MP_PLAYERS[1].name),
+    });
     expect(saySeqSpy).not.toHaveBeenCalled();
     expect(saySpy).toHaveBeenCalledWith(expectedTurn1);
   });
@@ -308,13 +310,16 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: cancelSpy,
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      onend?: () => void;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        onend?: () => void;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const saySpy = vi.spyOn(sound, "say");
@@ -414,12 +419,15 @@ describe("HiddenGame localization", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     // In picker with 2P enabled (mode === null)
     const { unmount: unmountPicker } = render(
@@ -800,7 +808,7 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     cleanup();
   });
 
-  it("registers hitboxes for all targets present in scene artwork including those omitted from checklist", () => {
+  it("registers hitboxes only for targets drawn in the checklist and not omitted decoys", () => {
     const jungleScene = manifest.hidden.find((h) => h.id === "jungle")!;
     expect(jungleScene.targets.length).toBe(6);
 
@@ -827,26 +835,32 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     );
     expect(omittedTargets.length).toBe(1);
 
-    // Hitboxes exist for all 6 targets in the artwork, including the omitted one
-    for (const target of jungleScene.targets) {
+    // Hitboxes exist for the 5 drawn targets, but not for the omitted decoy
+    for (const target of checklistItems) {
       const button = screen.getByTestId(`hidden-target-${target.id}`);
       expect(button).toBeDefined();
       expect(button.getAttribute("role")).toBe("button");
     }
+    for (const target of omittedTargets) {
+      expect(screen.queryByTestId(`hidden-target-${target.id}`)).toBeNull();
+    }
   });
 
-  it("acknowledges omitted targets with sfx.tap and instructional guidance without advancing finds", () => {
+  it("acknowledges misses with sfx.tap and instructional guidance on backdrop tap without advancing finds", () => {
     const speakSpy = vi.fn();
     vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -867,9 +881,6 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       />,
     );
 
-    const omittedTarget = jungleScene.targets.find(
-      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
-    )!;
     const drawnTarget = jungleScene.targets.find(
       (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
     )!;
@@ -879,25 +890,21 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     goodSpy.mockClear();
     tapSpy.mockClear();
     saySpy.mockClear();
+    const sequenceSpy = vi.spyOn(Animated, "sequence");
 
-    // Tap the omitted target
-    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
-    fireEvent.click(omittedBtn);
+    // Tap backdrop (miss/omitted decoy tap)
+    fireEvent.click(screen.getByTestId("hidden-backdrop"));
 
     // It plays tap and speaks guidance
     expect(tapSpy).toHaveBeenCalled();
     expect(goodSpy).not.toHaveBeenCalled();
     expect(saySpy).toHaveBeenCalledWith(t("ja", "hidden.prompt"));
 
-    // Omitted target flashes a visual hint ring for players with sound off
+    // Miss does not advance score
     expect(screen.getByTestId("hidden-score").textContent).toContain("0/5");
-    expect(omittedBtn.children.length).toBeGreaterThan(0);
 
-    // The visual flash clears after 1500ms
-    act(() => {
-      vi.advanceTimersByTime(1500);
-    });
-    expect(omittedBtn.children.length).toBe(0);
+    // Visual cue for sound-off playability (R3): triggers screen shake on backdrop miss
+    expect(sequenceSpy).toHaveBeenCalled();
 
     // Now tap an active checklist target
     const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
@@ -909,18 +916,21 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     expect(drawnBtn.children.length).toBeGreaterThan(0);
   });
 
-  it("in 2P co-op mode, tapping an omitted target does not advance player turn", () => {
+  it("in 2P co-op mode, tapping the backdrop does not advance player turn", () => {
     const speakSpy = vi.fn();
     vi.stubGlobal("speechSynthesis", {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const goodSpy = vi.spyOn(sfx, "good");
     const tapSpy = vi.spyOn(sfx, "tap");
@@ -945,11 +955,6 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
 
     fireEvent.click(screen.getByTestId("mp-choose-2p"));
 
-    const omittedTarget = dinoScene.targets.find(
-      (t) => screen.queryByTestId(`checklist-${t.id}`) === null,
-    )!;
-    expect(omittedTarget).toBeDefined();
-
     const drawnTarget = dinoScene.targets.find(
       (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
     )!;
@@ -964,9 +969,8 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     tapSpy.mockClear();
     saySpy.mockClear();
 
-    // Tap omitted target
-    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
-    fireEvent.click(omittedBtn);
+    // Tap backdrop (miss/omitted decoy tap)
+    fireEvent.click(screen.getByTestId("hidden-backdrop"));
 
     expect(tapSpy).toHaveBeenCalled();
     expect(goodSpy).not.toHaveBeenCalled();
@@ -987,9 +991,11 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
     ).toBe("うさぎの ばん！");
   });
 
-  it("clears hint ring immediately if a valid checklist target is tapped before omitted flash timer expires", () => {
+  it("does not show hint ring on decoy target tap in 2P co-op mode and shakes the scene", () => {
     const toyboxScene = manifest.hidden.find((h) => h.id === "toybox")!;
     expect(toyboxScene.targets.length).toBe(7);
+
+    const sequenceSpy = vi.spyOn(Animated, "sequence");
 
     // Hard 2P mode has auto-hints disabled (hiddenHintSecs: Infinity)
     // and draws coopDrawCount(8, 7) = 6 targets, leaving 1 omitted target.
@@ -1014,27 +1020,20 @@ describe("HiddenGame scene target hitboxes and omitted target guidance", () => {
       (t) => screen.queryByTestId(`checklist-${t.id}`) !== null,
     )!;
 
-    const omittedBtn = screen.getByTestId(`hidden-target-${omittedTarget.id}`);
+    // Omitted decoy target has no hitbox button
+    expect(
+      screen.queryByTestId(`hidden-target-${omittedTarget.id}`),
+    ).toBeNull();
+
     const drawnBtn = screen.getByTestId(`hidden-target-${drawnTarget.id}`);
 
-    // Tap omitted target -> visual HintRing flashes
-    fireEvent.click(omittedBtn);
-    expect(omittedBtn.children.length).toBeGreaterThan(0);
+    // Tap backdrop -> no visual HintRing, but visual shake triggers
+    fireEvent.click(screen.getByTestId("hidden-backdrop"));
+    expect(sequenceSpy).toHaveBeenCalledTimes(1);
 
-    // Before 1500ms timer elapses, tap a real checklist target
-    act(() => {
-      vi.advanceTimersByTime(200);
-    });
+    // Real checklist target displays found ring when tapped
     fireEvent.click(drawnBtn);
-
-    // Omitted target hint ring must be cleared immediately, not stuck permanently
-    expect(omittedBtn.children.length).toBe(0);
-
-    // Advance time past the original 1500ms
-    act(() => {
-      vi.advanceTimersByTime(2000);
-    });
-    expect(omittedBtn.children.length).toBe(0);
+    expect(drawnBtn.children.length).toBeGreaterThan(0);
   });
 });
 
@@ -1584,12 +1583,15 @@ describe("HiddenGame language switch", () => {
       speak: speakSpy,
       cancel: vi.fn(),
     });
-    vi.stubGlobal("SpeechSynthesisUtterance", class {
-      text: string;
-      constructor(text: string) {
-        this.text = text;
-      }
-    });
+    vi.stubGlobal(
+      "SpeechSynthesisUtterance",
+      class {
+        text: string;
+        constructor(text: string) {
+          this.text = text;
+        }
+      },
+    );
 
     const stopSpy = vi.spyOn(sound, "stopNarration");
 
@@ -1621,7 +1623,7 @@ describe("HiddenGame language switch", () => {
 
     // Switch language mid-round through the same path the in-game button uses
     fireEvent.click(screen.getByTestId("lang-cycle"));
-    
+
     // Prove no old-language timer fires
     vi.advanceTimersByTime(30000);
 
@@ -1683,7 +1685,7 @@ describe("HiddenGame language switch", () => {
 
     // Switch language on win overlay through the same path the in-game button uses
     fireEvent.click(screen.getByTestId("lang-cycle"));
-    
+
     // Prove no old-language timer fires
     vi.advanceTimersByTime(30000);
 
