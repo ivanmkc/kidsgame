@@ -16,7 +16,7 @@ import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sfx, stopNarration } from "../../sound";
+import { say, sfx, stopNarration, useSay } from "../../sound";
 import {
   LetterRound,
   makeLetterRound,
@@ -72,6 +72,7 @@ export function LettersGame({ onHome, difficulty, lang }: Props) {
     won && !isFinishing,
     t(lang, tier === "kana" ? "win.lettersKana" : "win.letters"),
   );
+  useSay(!started ? t(lang, "card.letters.blurb") : null);
   const elapsed = useElapsed(
     showTimer && !won && !isFinishing && started,
     timerKey,

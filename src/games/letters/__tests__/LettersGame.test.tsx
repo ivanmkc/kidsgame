@@ -15,18 +15,26 @@ import { t } from "../../../i18n";
 import { Lang } from "../../../lang";
 import * as logic from "../logic";
 import { KANA_POOL } from "../logic";
-import { sfx, say, stopNarration } from "../../../sound";
+import { sfx, say, stopNarration, useSay } from "../../../sound";
 
-vi.mock("../../../sound", () => ({
-  say: vi.fn(),
-  stopNarration: vi.fn(),
-  sfx: {
-    good: vi.fn(),
-    wrong: vi.fn(),
-    tap: vi.fn(),
-    win: vi.fn(),
-  },
-}));
+vi.mock("../../../sound", () => {
+  const say = vi.fn();
+  return {
+    say,
+    useSay: vi.fn((text: string | null) => {
+      React.useEffect(() => {
+        if (text) say(text);
+      }, [text]);
+    }),
+    stopNarration: vi.fn(),
+    sfx: {
+      good: vi.fn(),
+      wrong: vi.fn(),
+      tap: vi.fn(),
+      win: vi.fn(),
+    },
+  };
+});
 
 describe("LettersGame", () => {
   beforeEach(() => {
@@ -336,6 +344,9 @@ describe("LettersGame", () => {
       );
 
       render(<LettersGameTestWrapper />);
+
+      expect(say).toHaveBeenCalledWith(t("en", "card.letters.blurb"));
+      vi.mocked(say).mockClear();
 
       act(() => {
         fireEvent.click(screen.getByTestId("play-button"));
@@ -1060,5 +1071,54 @@ describe("LettersGame", () => {
       });
       window.dispatchEvent(new Event("resize"));
     }
+  });
+
+  it("speaks the gameplay blurb aloud on mount on the initial start screen for pre-readers", () => {
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(say).toHaveBeenCalledWith(t("en", "card.letters.blurb"));
+  });
+
+  it.each(["en", "ja", "cmn", "yue"] as const)(
+    "speaks localized gameplay blurb on start screen in %s",
+    (locale) => {
+      render(<LettersGame onHome={() => {}} difficulty="easy" lang={locale} />);
+      expect(say).toHaveBeenCalledWith(t(locale, "card.letters.blurb"));
+    },
+  );
+
+  it("speaks updated blurb when language switches while on start screen", () => {
+    const { rerender } = render(
+      <LettersGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(say).toHaveBeenCalledWith(t("en", "card.letters.blurb"));
+
+    vi.mocked(say).mockClear();
+    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
+    expect(say).toHaveBeenCalledWith(t("ja", "card.letters.blurb"));
+
+    vi.mocked(say).mockClear();
+    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(say).toHaveBeenCalledWith(t("cmn", "card.letters.blurb"));
+
+    vi.mocked(say).mockClear();
+    rerender(<LettersGame onHome={() => {}} difficulty="easy" lang="yue" />);
+    expect(say).toHaveBeenCalledWith(t("yue", "card.letters.blurb"));
+  });
+
+  it("speaks round prompt and sets useSay to null when starting the game from start screen", () => {
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+    expect(say).toHaveBeenCalledWith(t("en", "card.letters.blurb"));
+    expect(useSay).toHaveBeenCalledWith(t("en", "card.letters.blurb"));
+
+    vi.mocked(say).mockClear();
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    expect(useSay).toHaveBeenLastCalledWith(null);
+    expect(say).toHaveBeenCalledTimes(1);
+    expect(say).toHaveBeenCalledWith(
+      expect.stringMatching(/^Find the letter [A-Za-z]!/),
+    );
   });
 });
