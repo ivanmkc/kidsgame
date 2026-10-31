@@ -9,9 +9,28 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { SumsGame } from "../SumsGame";
+import { SPOTIT_ICONS } from "../../../assets/images";
 import * as sound from "../../../sound";
 import * as logic from "../logic";
 import { t } from "../../../i18n";
+
+vi.mock("../../../assets/images", () => {
+  const p = new Proxy(
+    {},
+    {
+      get: (_target, prop: string) => ({ uri: `${prop}.png` }),
+    },
+  );
+  return {
+    SPOTIT_ICONS: p,
+    SPOTIT_SHADOWS: p,
+    SCENE_IMAGES: p,
+    SCENE_THUMBS: p,
+    UI_IMAGES: p,
+    DRESSUP_ICONS: p,
+    RHYME_SPRITES: {},
+  };
+});
 
 afterEach(() => {
   cleanup();
@@ -317,6 +336,7 @@ describe("SumsGame", () => {
 
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "frog",
+      bIcon: "butterfly",
       a: 5,
       b: 5,
       sum: 10,
@@ -383,6 +403,7 @@ describe("SumsGame", () => {
 
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "butterfly",
+      bIcon: "frog",
       a: 2,
       b: 3,
       sum: 5,
@@ -445,6 +466,7 @@ describe("SumsGame", () => {
 
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "butterfly",
+      bIcon: "frog",
       a: 2,
       b: 2,
       sum: 4,
@@ -597,6 +619,7 @@ describe("SumsGame", () => {
 
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "butterfly",
+      bIcon: "frog",
       a: 2,
       b: 3,
       sum: 5,
@@ -649,6 +672,7 @@ describe("SumsGame", () => {
     // Next round begins after praise finishes
     vi.spyOn(logic, "makeSumsRound").mockReturnValue({
       icon: "frog",
+      bIcon: "butterfly",
       a: 4,
       b: 1,
       sum: 5,
@@ -670,6 +694,65 @@ describe("SumsGame", () => {
 
     unmount();
     vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("renders distinct icons for initial addend a and incoming addend b", () => {
+    vi.spyOn(logic, "makeSumsRound").mockReturnValue({
+      icon: "frog",
+      bIcon: "butterfly",
+      a: 2,
+      b: 3,
+      sum: 5,
+      aPositions: [
+        { x: 15, y: 25 },
+        { x: 25, y: 65 },
+      ],
+      bPositions: [
+        { x: 60, y: 20 },
+        { x: 75, y: 50 },
+        { x: 85, y: 75 },
+      ],
+      choices: [4, 5, 6],
+    });
+
+    const { unmount } = render(
+      <SumsGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    const initial0 = screen.getByTestId("sums-initial-0");
+    const initial1 = screen.getByTestId("sums-initial-1");
+    const incoming0 = screen.getByTestId("sums-incoming-0");
+    const incoming1 = screen.getByTestId("sums-incoming-1");
+    const incoming2 = screen.getByTestId("sums-incoming-2");
+
+    const getSource = (el: HTMLElement): string => {
+      const img =
+        el.tagName.toLowerCase() === "img" ? el : el.querySelector("img");
+      if (img?.getAttribute("src")) return img.getAttribute("src")!;
+      const bg =
+        el.style.backgroundImage ||
+        el.querySelector("div")?.style.backgroundImage;
+      return bg || "";
+    };
+
+    const frogSrc = (SPOTIT_ICONS.frog as unknown as { uri: string }).uri;
+    const butterflySrc = (SPOTIT_ICONS.butterfly as unknown as { uri: string })
+      .uri;
+
+    // Initial addend critters display SPOTIT_ICONS.frog
+    expect(getSource(initial0)).toContain(frogSrc);
+    expect(getSource(initial1)).toContain(frogSrc);
+
+    // Incoming addend critters display SPOTIT_ICONS.butterfly
+    expect(getSource(incoming0)).toContain(butterflySrc);
+    expect(getSource(incoming1)).toContain(butterflySrc);
+    expect(getSource(incoming2)).toContain(butterflySrc);
+
+    // Initial and incoming icons are visually distinct
+    expect(getSource(incoming0)).not.toBe(getSource(initial0));
+
+    unmount();
     vi.restoreAllMocks();
   });
 });
