@@ -92,7 +92,11 @@ export function SpawnedObject({ entry, scrollX, onTapSpawn, lang }: Props) {
       toValue: 1,
       friction: 4,
       useNativeDriver: true,
-    }).start(() => wiggle.setValue(0));
+    }).start(({ finished }) => {
+      if (finished) {
+        wiggle.setValue(0);
+      }
+    });
     onTapSpawn?.(entry);
   }, [entry, onTapSpawn, wiggle]);
 
