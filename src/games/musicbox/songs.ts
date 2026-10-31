@@ -7,7 +7,7 @@ export interface SongNote { m: number; b: number }
 export interface Song {
   id: string;
   emoji: string;
-  /** i18n key suffix — titles live in i18n.ts as `song.<id>.title` */
+  /** i18n key suffix — titles live in i18n.ts as `song.<id>` */
   notes: SongNote[];
 }
 
