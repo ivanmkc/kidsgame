@@ -6,13 +6,16 @@ import { Position, scatterPositions } from "../count/logic";
 import { CURRICULUM } from "../../curriculum/content";
 
 export interface SumsRound {
+  /** Icon for the initial `a` critters. */
   icon: string;
+  /** Distinct icon for the incoming `b` critters. */
+  bIcon: string;
   a: number;
   b: number;
   sum: number;
-  /** positions for the initial `a` critters. */
+  /** positions for the initial `a` critters (spatially partitioned to the left). */
   aPositions: Position[];
-  /** positions for the incoming `b` critters (animate in after 250ms stagger). */
+  /** positions for the incoming `b` critters (spatially partitioned to the right). */
   bPositions: Position[];
   /** three unique integers — one is `sum`. */
   choices: number[];
@@ -98,23 +101,32 @@ export function makeSumChoices(
   return shuffle(rng, [answer, ...others]);
 }
 
+/** Pick two distinct critters from the curriculum pool for the two addends. */
+export function pickTwoCritters(rng: Rng): [string, string] {
+  const pool = shuffle(rng, CURRICULUM.critters);
+  return [pool[0], pool[1]];
+}
+
 export function makeSumsRound(rng: Rng, d: Difficulty): SumsRound {
   const { maxSum } = sumsSettings(d);
   // sum in [2..maxSum]; a,b >= 1 with a + b = sum
   const sum = 2 + randInt(rng, maxSum - 1);
   const a = 1 + randInt(rng, sum - 1);
   const b = sum - a;
-  const icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
-  // one scatter for all sum critters then split — keeps them from stacking
-  const all = scatterPositions(rng, sum);
+  const [icon, bIcon] = pickTwoCritters(rng);
+  // one scatter for all sum critters then sort by x so the two addends are
+  // spatially partitioned (a on left, b on right) while preserving minimum
+  // pair separation across all critters.
+  const all = scatterPositions(rng, sum).sort((p1, p2) =>
+    p1.x !== p2.x ? p1.x - p2.x : p1.y - p2.y,
+  );
   const aPositions = all.slice(0, a);
   const bPositions = all.slice(a);
   const choices = makeSumChoices(rng, sum, maxSum);
-  return { icon, a, b, sum, aPositions, bPositions, choices };
+  return { icon, bIcon, a, b, sum, aPositions, bPositions, choices };
 }
 
 // ---------- speech ----------
-
 
 /** Every game-specific literal this game will speak, across all four langs.
  *  Number words are shared across the suite (orchestrator's pool). */
