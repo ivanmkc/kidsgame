@@ -676,3 +676,134 @@ it("scores all 8 hits when player taps along starting immediately on the downbea
   roundSpy.mockRestore();
   vi.useRealTimers();
 });
+
+it("delays WinOverlay mount on final winning round by 1200ms without sfx collision", () => {
+  vi.useFakeTimers();
+  vi.spyOn(logic, "roundsToWin").mockReturnValue(1);
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+  const goodSpy = vi.spyOn(sound.sfx, "good");
+  const winSpy = vi.spyOn(sound.sfx, "win");
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past listen phase (4 beats at 100 bpm = 2400ms)
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  const circle = screen.getByTestId("steadybeat-circle");
+
+  // Wait 1-beat pause before first tap
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  // Tap 8 times to pass the round
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+  }
+
+  // Advance time to reach exactly totalTime (5400ms elapsed + 500ms = 5900ms)
+  act(() => {
+    vi.advanceTimersByTime(500);
+  });
+
+  // Immediate evaluation tick: sfx.good fires, score increments, result stars show, but WinOverlay is deferred
+  expect(goodSpy).toHaveBeenCalledTimes(1);
+  expect(winSpy).not.toHaveBeenCalled();
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/1");
+  expect(screen.queryAllByText("☆")).toHaveLength(0);
+  expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+  // At 1199ms: WinOverlay has not mounted yet, stars are still visible, sfx.win has not fired
+  act(() => {
+    vi.advanceTimersByTime(1199);
+  });
+  expect(winSpy).not.toHaveBeenCalled();
+  expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+  // At 1200ms: WinOverlay mounts and sfx.win fires without clashing with sfx.good
+  act(() => {
+    vi.advanceTimersByTime(1);
+  });
+  expect(winSpy).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+  // Play again button arms after 600ms entrance animation
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+  const playAgain = screen.getByTestId("play-again");
+  act(() => {
+    fireEvent.click(playAgain);
+  });
+
+  // Win overlay closes and new game starts
+  expect(screen.queryByTestId("win-overlay")).toBeNull();
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("0/1");
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
+
+it("clears win timeout on unmount during final round result phase", () => {
+  vi.useFakeTimers();
+  vi.spyOn(logic, "roundsToWin").mockReturnValue(1);
+  const roundSpy = vi.spyOn(logic, "makeSteadyBeatRound").mockReturnValue({
+    bpm: 100,
+    beatsPerRound: 8,
+  });
+  const winSpy = vi.spyOn(sound.sfx, "win");
+
+  const { unmount } = render(
+    <SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />,
+  );
+
+  // Advance past listen phase
+  act(() => {
+    vi.advanceTimersByTime(2400);
+  });
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  act(() => {
+    vi.advanceTimersByTime(600);
+  });
+
+  for (let i = 0; i < 8; i++) {
+    act(() => {
+      fireEvent.click(circle);
+    });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+  }
+
+  // Advance time to reach exactly totalTime (5400ms elapsed + 500ms = 5900ms)
+  act(() => {
+    vi.advanceTimersByTime(500);
+  });
+
+  expect(screen.getByTestId("steadybeat-score").textContent).toContain("1/1");
+  expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+  unmount();
+
+  // Advance past 1200ms win delay
+  act(() => {
+    vi.advanceTimersByTime(1200);
+  });
+
+  expect(winSpy).not.toHaveBeenCalled();
+
+  roundSpy.mockRestore();
+  vi.useRealTimers();
+});
