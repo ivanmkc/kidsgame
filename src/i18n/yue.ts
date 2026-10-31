@@ -387,6 +387,7 @@ export const YUE: Table = {
   'rhyme.ask': '邊個字尾音一樣呀？',
   'rhyme.confirm': '好啱音！',
   'rhyme.comingSoon': '更多押韻就快嚟！🎶',
+  'sounds.ask': '邊個係 {word}？',
   'letters.find': '搵一搵字母 {letter}！',
   'letters.sound': '邊個字母發 {sound} 嘅音？',
   'letters.findKana': '搵一搵假名 {kana}！',

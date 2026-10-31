@@ -1,6 +1,7 @@
 // First Sounds (EN phonics) / First Words (JA/cmn/yue localised).
 // Distractors in every mode carry DISTINCT phonic sounds so that even in
 // non-EN modes the tile set can't accidentally offer two "duh" answers.
+import { t } from "../../i18n";
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, soundsFor, wordFor } from "../../curriculum/content";
@@ -108,13 +109,6 @@ export function soundsLayout(
   return { gap, tile, gridWidth };
 }
 
-const ASK: Record<Lang, string> = {
-  en: "", // EN builds a full "Which one starts with X?" line
-  ja: "どれかな？",
-  cmn: "哪一个是？",
-  yue: "邊個係？",
-};
-
 function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
@@ -131,10 +125,10 @@ export function resolveSoundsPrompts(
   lang: Lang,
 ): SoundsPrompts {
   if (lang === "en") {
-    const promptLines = [`Which one starts with ${target.sound}?`];
+    const prompt = t("en", "sounds.ask", { sound: target.sound });
     return {
-      promptLines,
-      displayPrompt: promptLines[0],
+      promptLines: [prompt],
+      displayPrompt: prompt,
       confirmLines: [
         `${capitalize(target.en)}!`,
         `${capitalize(target.en)} starts with ${target.sound}!`,
@@ -142,9 +136,10 @@ export function resolveSoundsPrompts(
     };
   }
   const w = wordFor(target, lang);
+  const prompt = t(lang, "sounds.ask", { word: w.text });
   return {
-    promptLines: [ASK[lang], w.text],
-    displayPrompt: `${ASK[lang]} ${w.text}`,
+    promptLines: [prompt],
+    displayPrompt: prompt,
     confirmLines: [`${w.text}！`],
     caption: w.roman,
   };
@@ -224,17 +219,16 @@ export function speechLines(): string[] {
   for (const w of WORDS) {
     if (!seenSound.has(w.sound)) {
       seenSound.add(w.sound);
-      s.add(`Which one starts with ${w.sound}?`);
+      s.add(t("en", "sounds.ask", { sound: w.sound }));
     }
     s.add(`${capitalize(w.en)}!`);
     s.add(`${capitalize(w.en)} starts with ${w.sound}!`);
   }
-  // Non-EN: fixed ask word + per-entry localized word + confirm chime.
+  // Non-EN: combined prompt per word + confirm chime.
   for (const lang of ["ja", "cmn", "yue"] as const) {
-    s.add(ASK[lang]);
     for (const w of WORDS) {
       const loc = wordFor(w, lang);
-      s.add(loc.text);
+      s.add(t(lang, "sounds.ask", { word: loc.text }));
       s.add(`${loc.text}！`);
     }
   }

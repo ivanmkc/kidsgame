@@ -86,13 +86,6 @@ export function settingsForBingo(
   return { gridSize: 4, mode: "name" };
 }
 
-const NAME_ASK: Record<Lang, string> = {
-  en: "",
-  ja: "さがしてね",
-  cmn: "找一找",
-  yue: "搵一搵",
-};
-
 function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
@@ -109,15 +102,8 @@ export function tileLabel(icon: string, lang: Lang): string {
 
 function namePromptLines(icon: string, lang: Lang): string[] {
   const entry = entryFor(icon);
-  if (lang === "en") {
-    return [t("en", "bingo.prompt", { word: entry ? entry.en : icon })];
-  }
-  if (!entry) {
-    return [t("en", "bingo.prompt", { word: icon })];
-  }
-  const w = wordFor(entry, lang);
-  const ask = NAME_ASK[lang];
-  return [ask, `${w.text}！`];
+  const word = entry ? wordFor(entry, lang).text : icon;
+  return [t(lang, "bingo.prompt", { word })];
 }
 
 function nameConfirmLines(icon: string, lang: Lang): string[] {
@@ -303,7 +289,6 @@ export function speechLines(): string[] {
   const s = new Set<string>();
   for (const lang of ["en", "ja", "cmn", "yue"] as const) {
     s.add(BINGO_SHOUT[lang]);
-    if (lang !== "en") s.add(NAME_ASK[lang]);
     for (const w of WORDS) {
       for (const l of namePromptLines(w.icon, lang)) s.add(l);
       for (const l of nameConfirmLines(w.icon, lang)) s.add(l);

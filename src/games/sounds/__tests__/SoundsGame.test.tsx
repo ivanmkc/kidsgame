@@ -80,7 +80,9 @@ describe("SoundsGame language switch safety", () => {
     expect(jaPromptText).toContain("どれかな？");
 
     // Japanese prompt is spoken via saySequence
-    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^どれかな？\s+.+$/),
+    ]);
 
     // Board tiles update to localized Japanese labels
     const currentTiles = screen
@@ -147,7 +149,9 @@ describe("SoundsGame language switch safety", () => {
     expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
 
     // Japanese prompt is spoken for the active round
-    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^どれかな？\s+.+$/),
+    ]);
   });
 
   it("re-speaks prompt in current language on incorrect tile tap after language switch", () => {
@@ -174,7 +178,9 @@ describe("SoundsGame language switch safety", () => {
     fireEvent.click(incorrectTile);
 
     expect(wrongSpy).toHaveBeenCalledTimes(1);
-    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^どれかな？\s+.+$/),
+    ]);
 
     act(() => {
       vi.advanceTimersByTime(500);
@@ -367,7 +373,9 @@ describe("SoundsGame prompt replay affordance", () => {
     );
 
     fireEvent.click(speakerBtn);
-    expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
+    expect(saySeqSpy).toHaveBeenCalledWith([
+      expect.stringMatching(/^どれかな？\s+.+$/),
+    ]);
   });
 
   it("ignores replay taps while transition lock is active", () => {
