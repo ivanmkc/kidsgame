@@ -130,11 +130,6 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Wait 1-beat pause before expecting the first tap
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
-
   // Tap 8 times on each beat (every 600ms, starting immediately when Your turn appears)
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -145,7 +140,7 @@ it("evaluates taps correctly and increments score when tapping on the beat", () 
     });
   }
 
-  // Advance time past totalTime (9 * 600 + 500 = 5900ms; currently elapsed in tap phase is 5400ms)
+  // Advance time past totalTime (8 * 600 + 500 = 5300ms; currently elapsed in tap phase is 4800ms)
   act(() => {
     vi.advanceTimersByTime(600);
   });
@@ -174,7 +169,7 @@ it("evaluates to 0 hits and does not increment score when no taps are made", () 
 
   expect(screen.getByText("Your turn!")).toBeTruthy();
 
-  // No taps made, advance past tap phase evaluation timer (9 * 600 + 500 = 5900ms)
+  // No taps made, advance past tap phase evaluation timer (8 * 600 + 500 = 5300ms)
   act(() => {
     vi.advanceTimersByTime(6000);
   });
@@ -470,11 +465,6 @@ it("clears round advance timeout on unmount during result phase after passed rou
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Wait 1-beat pause before expecting the first tap
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
-
   // Tap 8 times on each beat to pass the round
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -485,7 +475,7 @@ it("clears round advance timeout on unmount during result phase after passed rou
     });
   }
 
-  // Advance past tap phase evaluation timer (9 * 600 + 500 = 5900ms total tap time; 5400ms elapsed + 600ms = 6000ms)
+  // Advance past tap phase evaluation timer (8 * 600 + 500 = 5300ms total tap time; 4800ms elapsed + 600ms = 5400ms)
   act(() => {
     vi.advanceTimersByTime(600);
   });
@@ -521,10 +511,6 @@ it("advances to next round after 1200ms result phase when round is passed", () =
   });
 
   const circle = screen.getByTestId("steadybeat-circle");
-  // Wait 1-beat pause before the first expected tap
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
 
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -649,11 +635,6 @@ it("scores all 8 hits when player taps along starting immediately on the downbea
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Wait 1-beat pause before the first expected tap
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
-
   // Player taps immediately at 2400ms (downbeat), then 7 more times every 600ms
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -697,11 +678,6 @@ it("delays WinOverlay mount on final winning round by 1200ms without sfx collisi
   expect(screen.getByText("Your turn!")).toBeTruthy();
   const circle = screen.getByTestId("steadybeat-circle");
 
-  // Wait 1-beat pause before first tap
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
-
   // Tap 8 times to pass the round
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -712,7 +688,7 @@ it("delays WinOverlay mount on final winning round by 1200ms without sfx collisi
     });
   }
 
-  // Advance time to reach exactly totalTime (5400ms elapsed + 500ms = 5900ms)
+  // Advance time to reach exactly totalTime (4800ms elapsed + 500ms = 5300ms)
   act(() => {
     vi.advanceTimersByTime(500);
   });
@@ -774,9 +750,6 @@ it("clears win timeout on unmount during final round result phase", () => {
   });
 
   const circle = screen.getByTestId("steadybeat-circle");
-  act(() => {
-    vi.advanceTimersByTime(600);
-  });
 
   for (let i = 0; i < 8; i++) {
     act(() => {
@@ -787,7 +760,7 @@ it("clears win timeout on unmount during final round result phase", () => {
     });
   }
 
-  // Advance time to reach exactly totalTime (5400ms elapsed + 500ms = 5900ms)
+  // Advance time to reach exactly totalTime (4800ms elapsed + 500ms = 5300ms)
   act(() => {
     vi.advanceTimersByTime(500);
   });

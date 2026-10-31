@@ -104,7 +104,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           setPhase("tap");
           say(t(lang, "music.yourTurn" as never));
           const tapBeatMs = 60000 / r.bpm;
-          setStartMs(performance.now() + tapBeatMs);
+          setStartMs(performance.now());
           pulseAnim.setValue(0);
           Animated.loop(
             Animated.timing(pulseAnim, {
@@ -144,7 +144,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (phase !== "tap") return;
     const beatMs = 60000 / round.bpm;
-    const totalTime = (round.beatsPerRound + 1) * beatMs + 500;
+    const totalTime = round.beatsPerRound * beatMs + 500;
     const timer = setTimeout(() => {
       pulseAnim.stopAnimation();
       const result = scoreTaps(round, tapTimesRef.current, startMs, difficulty);
