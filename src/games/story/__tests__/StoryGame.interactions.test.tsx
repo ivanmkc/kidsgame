@@ -294,6 +294,9 @@ describe('StoryGame choice navigation and redo history', () => {
 
     // 1. Advance to forest
     fireEvent.click(screen.getByTestId('story-choice-forest'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     expect(screen.getByTestId('story-text-forest')).toBeDefined();
 
     // 2. Go back with ArrowLeft
@@ -302,6 +305,9 @@ describe('StoryGame choice navigation and redo history', () => {
 
     // 3. Choose castle instead
     fireEvent.click(screen.getByTestId('story-choice-castle'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     expect(screen.getByTestId('story-text-castle')).toBeDefined();
 
     // 4. Press ArrowRight (redo) - should not jump back to forest
@@ -349,6 +355,9 @@ describe('StoryGame choice navigation and redo history', () => {
 
     // 1. Advance to apple
     fireEvent.click(screen.getByTestId('story-choice-apple'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     expect(screen.getByTestId('story-text-apple')).toBeDefined();
 
     // 2. Go back with ArrowLeft
@@ -357,6 +366,9 @@ describe('StoryGame choice navigation and redo history', () => {
 
     // 3. Choose berry instead
     fireEvent.click(screen.getByTestId('story-choice-berry'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
     expect(screen.getByTestId('story-text-berry')).toBeDefined();
 
     // 4. Press ArrowRight (redo) - should not jump back to apple
@@ -399,13 +411,190 @@ describe('StoryGame choice navigation and redo history', () => {
       />,
     );
 
-    // Rapid double-tap
+    // Rapid double-tap on the choice button
     fireEvent.click(screen.getByTestId('story-choice-forest'));
-    // Instantly tap where the next scene's choice will appear
-    fireEvent.click(screen.getByTestId('story-choice-castle'));
+    fireEvent.click(screen.getByTestId('story-choice-forest'));
+
+    // During the delay, the scene has not advanced yet
+    expect(screen.queryByTestId('story-text-forest')).toBeNull();
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // Advance past the delay
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
 
     // Ensure we are only on the first chosen scene, not skipped to the second
     expect(screen.getByTestId('story-text-forest')).toBeDefined();
     expect(screen.queryByTestId('story-text-castle')).toBeNull();
+  });
+
+  it('delays advance in pickChoice so spoken choice confirmation plays before next scene narration', () => {
+    const saySpy = vi.spyOn(sound, 'say');
+    const saySeqSpy = vi.spyOn(sound, 'saySequence');
+
+    const testStory: Story = {
+      id: 'test-speech-delay',
+      title: 'Speech Delay Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Where shall we go?',
+          choices: [{ label: 'Climb the anemone cluster', next: 'anemone' }],
+        },
+        anemone: {
+          image: 'story/luna_start.jpg',
+          text: 'The anemones are soft and warm.',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStory);
+
+    render(
+      <StoryGame
+        sceneId="test-speech-delay"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Initial scene spoken
+    expect(saySeqSpy).toHaveBeenCalledWith(['Where shall we go?', 'What should happen next?', 'Climb the anemone cluster']);
+    expect(saySpy).not.toHaveBeenCalled();
+
+    // Click choice
+    fireEvent.click(screen.getByTestId('story-choice-anemone'));
+
+    // Spoken choice confirmation fires immediately
+    expect(saySpy).toHaveBeenCalledWith('Climb the anemone cluster');
+    // But next scene narration has NOT fired yet, and screen has not changed
+    expect(saySeqSpy).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('story-text-anemone')).toBeNull();
+
+    // After 400ms delay, next scene advances and speaks its narration
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(screen.getByTestId('story-text-anemone')).toBeDefined();
+    expect(saySeqSpy).toHaveBeenCalledTimes(2);
+    expect(saySeqSpy).toHaveBeenLastCalledWith(['The anemones are soft and warm.']);
+  });
+
+  it('cancels pending choice advance if user navigates back during delay', () => {
+    const testStory: Story = {
+      id: 'test-cancel-delay',
+      title: 'Cancel Delay Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Start node',
+          choices: [{ label: 'Go to A', next: 'nodeA' }],
+        },
+        nodeA: {
+          image: 'story/luna_start.jpg',
+          text: 'Node A',
+          choices: [{ label: 'Go to B', next: 'nodeB' }],
+        },
+        nodeB: {
+          image: 'story/luna_start.jpg',
+          text: 'Node B',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStory);
+
+    render(
+      <StoryGame
+        sceneId="test-cancel-delay"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Advance to nodeA
+    fireEvent.click(screen.getByTestId('story-choice-nodeA'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(screen.getByTestId('story-text-nodeA')).toBeDefined();
+
+    // Tap choice to go to nodeB, but navigate back before 400ms
+    fireEvent.click(screen.getByTestId('story-choice-nodeB'));
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // Even after 400ms, it should stay at start, not jump to nodeB
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+    expect(screen.queryByTestId('story-text-nodeB')).toBeNull();
+  });
+
+  it('resets animating state when user navigates back during delay on the start page with empty history', () => {
+    const testStory: Story = {
+      id: 'test-cancel-start-delay',
+      title: 'Cancel Start Delay Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Start node',
+          choices: [
+            { label: 'Option 1', next: 'opt1' },
+            { label: 'Option 2', next: 'opt2' },
+          ],
+        },
+        opt1: {
+          image: 'story/luna_start.jpg',
+          text: 'Option 1 text',
+          choices: [],
+        },
+        opt2: {
+          image: 'story/luna_start.jpg',
+          text: 'Option 2 text',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStory);
+
+    render(
+      <StoryGame
+        sceneId="test-cancel-start-delay"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Tap Option 1 on the start page (hist is empty)
+    fireEvent.click(screen.getByTestId('story-choice-opt1'));
+
+    // Navigate back while pickTimer is running (hist.pop() is undefined)
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+
+    // Since hist was empty, we are still on the start node
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // After timer would have fired, we are still on start node
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+    expect(screen.queryByTestId('story-text-opt1')).toBeNull();
+
+    // Verify game is not bricked: tapping Option 2 works and advances
+    fireEvent.click(screen.getByTestId('story-choice-opt2'));
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    expect(screen.getByTestId('story-text-opt2')).toBeDefined();
   });
 });
