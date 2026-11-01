@@ -887,6 +887,106 @@ describe("OddOneGame", () => {
       expect(tiles[0]?.getAttribute("aria-label")).toBe("いぬ");
       expect(tiles[3]?.getAttribute("aria-label")).toBe("りんご");
     });
+
+    it("does not speak the prompt if language changes during the celebration timeout", () => {
+      vi.useFakeTimers();
+      try {
+        const rounds: logic.OddOneRound[] = [
+          {
+            baseCategory: "animals",
+            oddCategory: "food",
+            odd: "apple",
+            items: ["dog", "cat", "lion", "apple"],
+            oddIndex: 3,
+          },
+          {
+            baseCategory: "food",
+            oddCategory: "animals",
+            odd: "dog",
+            items: ["apple", "banana", "strawberry", "dog"],
+            oddIndex: 3,
+          },
+        ];
+        let roundIndex = 0;
+        vi.spyOn(logic, "makeOddOneRound").mockImplementation(
+          () => rounds[roundIndex++ % 2],
+        );
+
+        function Harness() {
+          const [lang, setLang] = React.useState<Lang>("en");
+          return (
+            <LangContext.Provider
+              value={{
+                lang,
+                onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+              }}
+            >
+              <OddOneGame onHome={() => {}} difficulty="easy" lang={lang} />
+            </LangContext.Provider>
+          );
+        }
+
+        const { container } = render(<Harness />);
+        vi.mocked(say).mockClear();
+
+        const correctBtn = container.querySelector(
+          '[data-testid$="-odd"]',
+        ) as HTMLElement;
+        expect(correctBtn).toBeTruthy();
+
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+
+        const langBtn = container.querySelector(
+          '[data-testid="lang-cycle"]',
+        ) as HTMLElement;
+        expect(langBtn).toBeTruthy();
+
+        act(() => {
+          fireEvent.click(langBtn);
+        });
+
+        // the prompt should not be spoken during celebration
+        const calls = vi.mocked(say).mock.calls.map((c) => c[0]);
+        // The prompt in JA or EN contains "?" or "は？" or "Which".
+        expect(calls.some((c) => c.includes("？") || c.includes("?"))).toBe(
+          false,
+        );
+        vi.mocked(say).mockClear();
+
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+
+        // After the new round starts, we should verify it uses the new language (Japanese)
+        // 1. Spoken prompt
+        expect(say).toHaveBeenCalledWith(t("ja", "oddone.not.food"));
+
+        // 2. Banner text
+        const banner = container.querySelector(
+          '[data-testid^="oddone-question-"]',
+        ) as HTMLElement;
+        expect(banner.textContent).toBe("🔊 " + t("ja", "oddone.not.food"));
+
+        // 3. Tile accessibility labels
+        const tiles = container.querySelectorAll(
+          '[data-testid^="oddone-item-"]',
+        );
+        expect(tiles[0]?.getAttribute("aria-label")).toBe(
+          logic.itemLabel("apple", "ja"),
+        ); // りんご
+        expect(tiles[3]?.getAttribute("aria-label")).toBe(
+          logic.itemLabel("dog", "ja"),
+        ); // いぬ
+
+        // 4. Round counter (ScoreChip)
+        const score = container.querySelector('[data-testid="oddone-score"]');
+        expect(score?.textContent).toBe("🔍 1/10");
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   it("calls stopNarration on unmount to prevent audio leak across navigation", () => {
