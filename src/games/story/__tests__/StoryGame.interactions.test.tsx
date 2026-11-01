@@ -597,4 +597,55 @@ describe('StoryGame choice navigation and redo history', () => {
     });
     expect(screen.getByTestId('story-text-opt2')).toBeDefined();
   });
+
+  it('shows pressing the speaker button calls say without advancing the story', () => {
+    const saySpy = vi.spyOn(sound, 'say');
+    const testSpeakerStory: Story = {
+      id: 'test-speaker-button',
+      title: 'Speaker Button Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Where shall we go?',
+          choices: [
+            { label: 'Forest', next: 'forest' },
+            { label: 'Castle', next: 'castle' },
+          ],
+        },
+        forest: {
+          image: 'story/luna_start.jpg',
+          text: 'In the deep forest',
+          choices: [],
+        },
+        castle: {
+          image: 'story/luna_start.jpg',
+          text: 'In the grand castle',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testSpeakerStory);
+
+    render(
+      <StoryGame
+        sceneId="test-speaker-button"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Click speaker button for Forest
+    fireEvent.click(screen.getByTestId('story-choice-say-forest'));
+
+    // Should call say('Forest')
+    expect(saySpy).toHaveBeenCalledWith('Forest');
+
+    // Should not advance story
+    expect(screen.queryByTestId('story-text-start')).not.toBeNull();
+
+    // Still shows choices
+    expect(screen.queryByTestId('story-choice-forest')).not.toBeNull();
+  });
 });
