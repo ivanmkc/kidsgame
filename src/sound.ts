@@ -225,7 +225,10 @@ function playClip(text: string, token: number, onEnded?: () => void): void {
       return;
     }
     // Web Speech fallback for lines the pre-render pipeline missed.
-    if (!window.speechSynthesis) return;
+    if (!window.speechSynthesis) {
+      if (onEnded && token === currentToken) setTimeout(onEnded, 0);
+      return;
+    }
     const u = new SpeechSynthesisUtterance(spoken);
     u.lang = speechLang === 'ja' ? 'ja-JP' : speechLang === 'cmn' ? 'zh-CN' : speechLang === 'yue' ? 'zh-HK' : 'en-US';
     u.rate = 1.0;

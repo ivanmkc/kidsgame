@@ -128,6 +128,19 @@ describe("sound sayThen", () => {
     expect(done).toHaveBeenCalledTimes(1);
   });
 
+  it("fires done immediately when TTS is unavailable and text has no pre-rendered clip", () => {
+    const done = vi.fn();
+    // A string not present in the VOICE dictionary
+    sound.sayThen(["Some unknown text without audio fallback"], done);
+
+    expect(done).not.toHaveBeenCalled();
+
+    // The asynchronous fallback via setTimeout(onEnded, 0) should fire immediately
+    vi.advanceTimersByTime(1);
+
+    expect(done).toHaveBeenCalledTimes(1);
+  });
+
   it("does not prematurely resolve active sayThen on first gesture until audio ends", () => {
     let unlocked = false;
     playImpl = () =>
