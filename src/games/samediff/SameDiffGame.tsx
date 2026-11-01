@@ -37,11 +37,12 @@ interface Props {
 }
 
 export function SameDiffGame({ onHome, difficulty, lang }: Props) {
-  useLangEpoch(lang);
+  const { isValid } = useLangEpoch(lang);
   const { width, height } = useWindowDimensions();
   const { isLandscape } = sameDiffLayout(width, height);
   const langRef = useRef(lang);
   langRef.current = lang;
+  const hasMountedRef = useRef(false);
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SameDiffRound>(() =>
@@ -62,6 +63,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const gapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const lockedRef = useRef(false);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -72,6 +74,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     return () => {
       roundEpochRef.current++;
+      if (startTimer.current) clearTimeout(startTimer.current);
       if (gapTimer.current) clearTimeout(gapTimer.current);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       if (replayTimer.current) clearTimeout(replayTimer.current);
@@ -84,6 +87,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     const epoch = ++roundEpochRef.current;
     stopSequence();
     stopNarration();
+    if (startTimer.current) clearTimeout(startTimer.current);
     if (gapTimer.current) clearTimeout(gapTimer.current);
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
     if (replayTimer.current) clearTimeout(replayTimer.current);
@@ -94,6 +98,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     setPhase("listenA");
 
     const startMelody = () => {
+      if (!isValid()) return;
       if (roundEpochRef.current !== epoch) return;
       playSequence(
         r.phraseA,
@@ -106,6 +111,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
           setActiveNote(null);
           setPhase("listenB");
           gapTimer.current = setTimeout(() => {
+            if (!isValid()) return;
             if (roundEpochRef.current !== epoch) return;
             playSequence(
               r.phraseB,
@@ -129,7 +135,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     } else {
       sayThen([t(langRef.current, "music.listen")], startMelody, 3000);
     }
-  }, []);
+  }, [isValid]);
 
   useEffect(() => {
     if (won) return;
@@ -151,15 +157,25 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (!won) {
       const delay = phase === "transition" ? 1000 : 400;
-      const timer = setTimeout(() => playRound(round), delay);
+      startTimer.current = setTimeout(() => playRound(round), delay);
       return () => {
-        clearTimeout(timer);
+        if (startTimer.current) clearTimeout(startTimer.current);
         if (gapTimer.current) clearTimeout(gapTimer.current);
         if (wrongTimer.current) clearTimeout(wrongTimer.current);
         stopSequence();
       };
     }
-  }, [round, won, playRound]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [round, won]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    if (!won) {
+      playRound(round);
+    }
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (picked: "same" | "different") => {
     if (won || phase !== "pick" || lockedRef.current) return;
@@ -222,6 +238,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
     if (replayTimer.current) clearTimeout(replayTimer.current);
     if (gapTimer.current) clearTimeout(gapTimer.current);
+    if (startTimer.current) clearTimeout(startTimer.current);
     lockedRef.current = false;
     firstTryRef.current = true;
     setPhase("listenA");
