@@ -70,6 +70,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
       langMounted.current = true;
       return;
     }
+    if (won) return;
     const s = settingsForBingo(difficulty, lang);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     boardRef.current = makeBoard(
