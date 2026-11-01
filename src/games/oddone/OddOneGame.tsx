@@ -54,7 +54,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer;
   useWinLine(won, t(lang, "win.oddone"));
-  const elapsed = useElapsed(showTimer && !won, timerKey);
+  const elapsed = useElapsed(showTimer && !won && score < roundsToWin, timerKey);
   const roundClosedRef = useRef(false);
   const celebrateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

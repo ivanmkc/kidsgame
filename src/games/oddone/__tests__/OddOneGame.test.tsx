@@ -330,6 +330,63 @@ describe("OddOneGame", () => {
     }
   });
 
+  it("stops the timer immediately on final round answer during celebration delay", () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="medium" lang="en" />,
+      );
+
+      const timerEl = container.querySelector('[data-testid="oddone-timer"]');
+      expect(timerEl).toBeTruthy();
+      expect(timerEl?.textContent).toContain("0:00");
+
+      act(() => {
+        vi.advanceTimersByTime(5000);
+      });
+      expect(timerEl?.textContent).toContain("0:05");
+
+      for (let r = 0; r < 11; r++) {
+        const correctBtn = container.querySelector(
+          '[data-testid$="-odd"]',
+        ) as HTMLElement;
+        act(() => {
+          fireEvent.click(correctBtn);
+        });
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      // When score reaches 12 (roundsToWin), score < roundsToWin becomes false,
+      // so elapsed stops. 5000ms + 11 * 600ms = 11600ms = 0:11.
+      const timeBeforeFinal = timerEl?.textContent;
+      expect(timeBeforeFinal).toEqual("0:11");
+
+      const winningBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      act(() => {
+        fireEvent.click(winningBtn);
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+      const timeDuringCelebration = timerEl?.textContent;
+
+      act(() => {
+        vi.advanceTimersByTime(300);
+      });
+      const timeAfterCelebration = timerEl?.textContent;
+
+      expect(timeDuringCelebration).toEqual(timeBeforeFinal);
+      expect(timeAfterCelebration).toEqual(timeBeforeFinal);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("renders question banner as a button and replays prompt audio on tap", () => {
     const { container } = render(
       <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
