@@ -425,7 +425,7 @@ describe("SameDiffGame UI", () => {
     );
     expect(
       screen.getByTestId("samediff-replay").getAttribute("aria-label"),
-    ).toBe("🔊 タップでもういちど聞く");
+    ).toBe("🔊 タップでもういちどきく");
 
     vi.useRealTimers();
   });

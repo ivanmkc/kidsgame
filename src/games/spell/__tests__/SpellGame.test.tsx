@@ -444,7 +444,9 @@ describe("SpellGame", () => {
     expect(jaSpeaker.getAttribute("aria-label")).toBe(
       t("ja", "spell.hearAgain"),
     );
+    expect(jaSpeaker.getAttribute("aria-label")).toBe("🔊 タップでもういちどきく");
     expect(jaSpeaker.getAttribute("aria-label")).not.toContain("Hear the word");
+    expect(screen.getByText("🔊 タップでもういちどきく")).toBeDefined();
 
     const jaTile = screen.getByTestId("spell-tile-10");
     expect(jaTile.getAttribute("aria-label")).toBe("ね");
