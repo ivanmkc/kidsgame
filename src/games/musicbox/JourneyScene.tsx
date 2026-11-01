@@ -190,10 +190,12 @@ export function JourneyScene({
       const touch = e.nativeEvent;
       const x =
         touch.offsetX ??
+        (touch as unknown as { x?: number }).x ??
         (touch as unknown as { locationX?: number }).locationX ??
         stageSize.current.w * (0.2 + 0.6 * Math.random());
       const y =
         touch.offsetY ??
+        (touch as unknown as { y?: number }).y ??
         (touch as unknown as { locationY?: number }).locationY ??
         stageSize.current.h * 0.5;
       doTap(x, y, fingerCount);
