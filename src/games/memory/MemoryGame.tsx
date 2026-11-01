@@ -36,7 +36,7 @@ export function MemoryGame({
   twoPlayerEnabled,
   lang = "en",
 }: Props) {
-  useLangEpoch(lang);
+  const { isValid } = useLangEpoch(lang);
   const settings = settingsFor(difficulty);
   const pairs = settings.memoryPairs;
   // All hooks unconditionally at top; ModePicker is conditional JSX in the
@@ -81,6 +81,7 @@ export function MemoryGame({
       if (duel) sfx.wrong();
     },
     onTurnChange: (next) => {
+      if (!isValid()) return;
       if (duel) {
         say(t(lang, "hidden.turn", { name: t(lang, MP_PLAYERS[next].name) }));
       }
