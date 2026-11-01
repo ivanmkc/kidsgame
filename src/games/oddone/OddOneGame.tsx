@@ -79,7 +79,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
   // Speak on EVERY round — keyed on the round object, not the text, so a
   // repeated category still gets read aloud (kids play entirely by ear).
   useEffect(() => {
-    if (!won) say(prompt);
+    if (!won && !roundClosedRef.current) say(prompt);
   }, [round, lang, won]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPick = (idx: number) => {
