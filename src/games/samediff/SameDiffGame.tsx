@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { WinOverlay } from "../../components/WinOverlay";
@@ -26,6 +27,7 @@ import {
   SameDiffRound,
   phrasePitchRatios,
   getInstructionalFeedback,
+  sameDiffLayout,
 } from "./logic";
 
 interface Props {
@@ -36,6 +38,8 @@ interface Props {
 
 export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   useLangEpoch(lang);
+  const { width, height } = useWindowDimensions();
+  const { isLandscape } = sameDiffLayout(width, height);
   const langRef = useRef(lang);
   langRef.current = lang;
   const total = roundsToWin(difficulty);
@@ -298,14 +302,33 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         <ScoreChip label={`🎧 ${score}/${total}`} testID="samediff-score" />
       }
     >
-      <View style={styles.board}>
-        <View style={[styles.listenCard, shadows.soft]}>
+      <View
+        testID="samediff-board"
+        style={[styles.board, isLandscape && styles.boardLandscape]}
+      >
+        <View
+          testID="samediff-listen-card"
+          style={[
+            styles.listenCard,
+            shadows.soft,
+            isLandscape && styles.listenCardLandscape,
+          ]}
+        >
           <Animated.Text
-            style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
+            style={[
+              styles.listenEmoji,
+              isLandscape && styles.listenEmojiLandscape,
+              { transform: [{ scale: earPulse }] },
+            ]}
           >
             👂
           </Animated.Text>
-          <View style={styles.melodyRows}>
+          <View
+            style={[
+              styles.melodyRows,
+              isLandscape && styles.melodyRowsLandscape,
+            ]}
+          >
             <View style={styles.melodyRow} testID="melody-row-0">
               <View
                 testID="melody-dot-0"
@@ -399,7 +422,13 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
           </View>
         </View>
         {(phase === "pick" || phase === "transition") && (
-          <View style={styles.pickContainer}>
+          <View
+            testID="samediff-pick-container"
+            style={[
+              styles.pickContainer,
+              isLandscape && styles.pickContainerLandscape,
+            ]}
+          >
             <Pressable
               onPress={replay}
               testID="samediff-replay"
@@ -408,16 +437,30 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
               style={({ pressed }) => [
                 styles.replayBtn,
                 shadows.soft,
+                isLandscape && styles.replayBtnLandscape,
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={styles.replayText}>🔊</Text>
+              <Text
+                style={[
+                  styles.replayText,
+                  isLandscape && styles.replayTextLandscape,
+                ]}
+              >
+                🔊
+              </Text>
             </Pressable>
-            <View style={styles.pickRow}>
+            <View
+              style={[
+                styles.pickRow,
+                isLandscape && styles.pickRowLandscape,
+              ]}
+            >
               <Animated.View
                 style={[
                   { transform: [{ scale: pickScale }] },
                   styles.pickBtnWrapper,
+                  isLandscape && styles.pickBtnWrapperLandscape,
                 ]}
               >
                 <Pressable
@@ -428,6 +471,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   aria-selected={correctPick === "same"}
                   style={({ pressed }) => [
                     styles.pickBtn,
+                    isLandscape && styles.pickBtnLandscape,
                     {
                       backgroundColor:
                         wrongPick === "same"
@@ -447,8 +491,21 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.pickEmoji}>👯</Text>
-                  <Text style={[styles.pickLabel, { color: "#5FBF6E" }]}>
+                  <Text
+                    style={[
+                      styles.pickEmoji,
+                      isLandscape && styles.pickEmojiLandscape,
+                    ]}
+                  >
+                    👯
+                  </Text>
+                  <Text
+                    style={[
+                      styles.pickLabel,
+                      isLandscape && styles.pickLabelLandscape,
+                      { color: "#5FBF6E" },
+                    ]}
+                  >
                     {t(lang, "music.same")}
                   </Text>
                   {phase === "transition" &&
@@ -466,6 +523,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 style={[
                   { transform: [{ scale: pickScale }] },
                   styles.pickBtnWrapper,
+                  isLandscape && styles.pickBtnWrapperLandscape,
                 ]}
               >
                 <Pressable
@@ -476,6 +534,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   aria-selected={correctPick === "different"}
                   style={({ pressed }) => [
                     styles.pickBtn,
+                    isLandscape && styles.pickBtnLandscape,
                     {
                       backgroundColor:
                         wrongPick === "different"
@@ -495,8 +554,21 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.pickEmoji}>🔀</Text>
-                  <Text style={[styles.pickLabel, { color: "#E89B4F" }]}>
+                  <Text
+                    style={[
+                      styles.pickEmoji,
+                      isLandscape && styles.pickEmojiLandscape,
+                    ]}
+                  >
+                    🔀
+                  </Text>
+                  <Text
+                    style={[
+                      styles.pickLabel,
+                      isLandscape && styles.pickLabelLandscape,
+                      { color: "#E89B4F" },
+                    ]}
+                  >
                     {t(lang, "music.different")}
                   </Text>
                   {phase === "transition" &&
@@ -650,4 +722,50 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   replayText: { fontSize: 36 },
+  boardLandscape: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  listenCardLandscape: {
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    gap: 6,
+    borderRadius: 20,
+  },
+  listenEmojiLandscape: {
+    fontSize: 32,
+  },
+  melodyRowsLandscape: {
+    gap: 6,
+  },
+  pickContainerLandscape: {
+    gap: 8,
+    maxWidth: 320,
+  },
+  replayBtnLandscape: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+  },
+  replayTextLandscape: {
+    fontSize: 26,
+  },
+  pickRowLandscape: {
+    gap: 12,
+  },
+  pickBtnWrapperLandscape: {
+    maxWidth: 140,
+  },
+  pickBtnLandscape: {
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    gap: 4,
+  },
+  pickEmojiLandscape: {
+    fontSize: 36,
+  },
+  pickLabelLandscape: {
+    fontSize: 18,
+  },
 });

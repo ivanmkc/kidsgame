@@ -194,3 +194,12 @@ export function speechLines(): string[] {
   }
   return [...new Set(out)];
 }
+
+export interface SameDiffLayout {
+  isLandscape: boolean;
+}
+
+export function sameDiffLayout(width: number, height: number): SameDiffLayout {
+  const isLandscape = width > height && height > 0 && height < 500;
+  return { isLandscape };
+}
