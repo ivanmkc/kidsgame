@@ -913,6 +913,160 @@ describe("EchoBeatGame", () => {
 
     vi.useRealTimers();
   });
+
+  it("delays WinOverlay mount and sfx.win by 800ms on final round completion to show celebration sparkles", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+    const goodSpy = vi.spyOn(sound.sfx, "good");
+    const winSpy = vi.spyOn(sound.sfx, "win");
+
+    render(<EchoBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance past initial speech and demo into tap phase
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Complete rounds 1 through 5 (score reaches 5/6)
+    for (let r = 0; r < 5; r++) {
+      act(() => {
+        fireEvent.click(drum);
+        vi.advanceTimersByTime(400);
+        fireEvent.click(drum);
+      });
+      // Advance past celebration (800ms)
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      // Advance past next round demo (2000ms)
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+    }
+
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("5/6");
+    goodSpy.mockClear();
+    winSpy.mockClear();
+
+    // Round 6: tap rhythm to complete final winning round
+    act(() => {
+      fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
+      fireEvent.click(drum);
+    });
+
+    // Immediately at 0ms: sfx.good fires, score is 6/6, celebration 🎉 shows,
+    // but WinOverlay has NOT mounted yet and sfx.win has NOT fired
+    expect(goodSpy).toHaveBeenCalledTimes(1);
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("6/6");
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // At 799ms: celebration is still visible, WinOverlay still deferred
+    act(() => {
+      vi.advanceTimersByTime(799);
+    });
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+    expect(screen.getAllByText("🎉").length).toBeGreaterThan(0);
+
+    // At 800ms: celebration timer fires, WinOverlay mounts and sfx.win plays without clashing
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(winSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+
+    // Advance through WinOverlay entrance animation (600ms) to arm Play Again
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    const playAgain = screen.getByTestId("play-again");
+    expect(playAgain).toBeTruthy();
+
+    // Clicking Play Again resets score to 0 and clears WinOverlay
+    act(() => {
+      fireEvent.click(playAgain);
+    });
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("0/6");
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it("preserves win transition when language is switched during final round celebration", () => {
+    vi.useFakeTimers();
+    vi.spyOn(logic, "makeEchoBeatRound").mockImplementation(() => ({
+      gaps: [0.4],
+      hitCount: 2,
+    }));
+    const winSpy = vi.spyOn(sound.sfx, "win");
+
+    render(<LangHarness initialLang="en" />);
+
+    // Advance past initial speech and demo into tap phase
+    act(() => {
+      vi.advanceTimersByTime(2500);
+    });
+
+    const drum = screen.getByTestId("echobeat-drum");
+
+    // Complete rounds 1 through 5 (score reaches 5/6)
+    for (let r = 0; r < 5; r++) {
+      act(() => {
+        fireEvent.click(drum);
+        vi.advanceTimersByTime(400);
+        fireEvent.click(drum);
+      });
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      act(() => {
+        vi.advanceTimersByTime(2000);
+      });
+    }
+
+    expect(screen.getByTestId("echobeat-score").textContent).toContain("5/6");
+    winSpy.mockClear();
+
+    // Round 6: tap rhythm to complete final winning round
+    act(() => {
+      fireEvent.click(drum);
+      vi.advanceTimersByTime(400);
+      fireEvent.click(drum);
+    });
+
+    // 200ms into the 800ms celebration, switch language to Japanese
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    const langBtn = screen.getByTestId("lang-cycle");
+    act(() => {
+      fireEvent.click(langBtn);
+    });
+
+    // WinOverlay has not mounted yet (only 200ms elapsed)
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("win-overlay")).toBeNull();
+
+    // Advance remaining 600ms of celebration
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    // WinOverlay mounts in Japanese and sfx.win fires
+    expect(winSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("win-overlay")).toBeTruthy();
+    expect(screen.getByText("リズムスター！ かんぺきな エコー！")).toBeTruthy();
+
+    vi.useRealTimers();
+  });
 });
 
 function LangHarness({
