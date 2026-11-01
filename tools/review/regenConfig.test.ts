@@ -12,7 +12,7 @@ describe('REGEN_MODELS', () => {
   test('REGEN_MODELS.image equals NBP_MODEL in tools/gen/nbp.py', () => {
     const nbpPath = path.resolve(process.cwd(), 'tools/gen/nbp.py');
     const nbpSource = fs.readFileSync(nbpPath, 'utf-8');
-    const match = nbpSource.match(/NBP_MODEL\s*=\s*["']([^"']+)["']/);
+    const match = nbpSource.match(/NBP_MODEL\s*=\s*\([^,]+,\s*["']([^"']+)["']/);
     expect(match).not.toBeNull();
     expect(REGEN_MODELS.image).toBe(match![1]);
   });
