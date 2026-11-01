@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   advance,
   currentRound,
+  filterRoundsByDifficulty,
   isComplete,
   nextPack,
   progress,
@@ -160,6 +161,18 @@ describe("silly pack specifics", () => {
     for (const r of rounds) {
       expect(typeof r.answer).toBe("boolean");
     }
+  });
+
+  it("assigns foundational sensory facts and simple animal motions to easy, not hard", () => {
+    const easyRounds = filterRoundsByDifficulty(rounds, "silly", "easy");
+    const hardRounds = filterRoundsByDifficulty(rounds, "silly", "hard");
+    const easyPrompts = easyRounds.map((r) => r.prompt[0]);
+    const hardPrompts = hardRounds.map((r) => r.prompt[0]);
+
+    expect(easyPrompts).toContain("Water is wet!");
+    expect(easyPrompts).toContain("Rabbits hop!");
+    expect(hardPrompts).not.toContain("Water is wet!");
+    expect(hardPrompts).not.toContain("Rabbits hop!");
   });
 });
 
