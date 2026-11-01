@@ -176,6 +176,27 @@ describe("makeLetterRound: kana tier", () => {
   });
 });
 
+describe("makeLetterRound: mixed tier confusable scaffolding", () => {
+  it("includes D as a distractor when target is B in medium mixed tier rounds", () => {
+    let bTargetCount = 0;
+    let bWithDDistractorCount = 0;
+    for (let seed = 1; seed <= 500; seed++) {
+      const r = makeLetterRound(makeRng(seed), "mixed", 8, undefined, "en");
+      // Check if target is B or b
+      if (r.targetDisplay.toUpperCase() === "B") {
+        bTargetCount++;
+        const tileLabels = r.tiles.map((t) => t.label.toUpperCase());
+        if (tileLabels.includes("D")) {
+          bWithDDistractorCount++;
+        }
+      }
+    }
+    expect(bTargetCount).toBeGreaterThan(0);
+    // With confusable bias, D should appear frequently as a distractor for B
+    expect(bWithDDistractorCount / bTargetCount).toBeGreaterThan(0.5);
+  });
+});
+
 describe("makeLetterRound: prompt line localization", () => {
   it("localizes upper/mixed tier prompt across all languages", () => {
     const rng = () => 0;

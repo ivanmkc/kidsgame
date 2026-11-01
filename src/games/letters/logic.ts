@@ -80,7 +80,7 @@ const ALL_LETTERS: string[] = [
 // forbidden set on E (E asks for visually DISSIMILAR distractors).
 export const LETTER_CONFUSABLES: string[][] = [
   ["E", "F"],
-  ["B", "P", "R"],
+  ["B", "D", "P", "R"],
   ["O", "Q", "C"],
   ["M", "N", "W"],
   ["I", "L", "J"],
