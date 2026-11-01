@@ -13,6 +13,8 @@ import {
   DECK_TO_CARD_KEY,
   SHAPES,
   buildBoard,
+  hasCaptionableCards,
+  isCaptionableCard,
   isMatch,
   pairsForDifficulty,
   rhymeKeyFor,
@@ -805,7 +807,6 @@ describe("conceptmatch/logic", () => {
           expect(audioCard?.speech).toBe(expectedSound);
           expect(audioCard?.display).toEqual({
             type: "audio",
-            text: expectedSound,
           });
         }
       });
@@ -824,7 +825,6 @@ describe("conceptmatch/logic", () => {
               expect(card.speech).toBe(expectedName);
             } else if (card.display.type === "audio") {
               expect(card.speech).toBe(expectedSound);
-              expect(card.display.text).toBe(expectedSound);
             }
           }
         }
@@ -866,18 +866,6 @@ describe("conceptmatch/logic", () => {
         const board1 = buildBoard(makeRng(1), "animals-sounds", "en", 3);
         const board2 = buildBoard(makeRng(2), "animals-sounds", "en", 3);
         expect(board1).not.toEqual(board2);
-      });
-
-      it("satisfies R3 by including visual onomatopoeia text on audio sound cards", () => {
-        const board = buildBoard(makeRng(1), "animals-sounds", "en", 5);
-        const audioCards = board.filter((c) => c.display.type === "audio");
-        expect(audioCards).toHaveLength(5);
-        for (const card of audioCards) {
-          if (card.display.type === "audio") {
-            expect(card.display.text).toBeTruthy();
-            expect(card.display.text).toBe(card.speech);
-          }
-        }
       });
 
       it("caps at 5 pairs when requested pairs exceeds pool size", () => {
@@ -1367,12 +1355,12 @@ describe("conceptmatch/logic", () => {
       const soundCard: ConceptMatchCard = {
         key: "dog-sound",
         conceptId: "dog",
-        display: { type: "audio", text: "woof" },
+        display: { type: "audio" },
         speech: "woof",
       };
       const updatedSound = updateCardLang(soundCard, "animals-sounds", "ja");
       expect(updatedSound.speech).toBe("わんわん");
-      expect(updatedSound.display).toEqual({ type: "audio", text: "わんわん" });
+      expect(updatedSound.display).toEqual({ type: "audio" });
 
       const animalCard: ConceptMatchCard = {
         key: "dog-icon",
@@ -1553,6 +1541,113 @@ describe("conceptmatch/logic", () => {
           expect(blurb).not.toBe(`card.${cardKey}.blurb`);
         }
       }
+    });
+  });
+
+  describe("captionable cards", () => {
+    it("identifies all audio cards as captionable", () => {
+      const audioCard: ConceptMatchCard = {
+        key: "apple-audio",
+        conceptId: "apple",
+        display: { type: "audio" },
+        speech: "apple",
+      };
+      expect(isCaptionableCard(audioCard)).toBe(true);
+
+      const soundCard: ConceptMatchCard = {
+        key: "dog-sound",
+        conceptId: "dog",
+        display: { type: "audio" },
+        speech: "woof",
+      };
+      expect(isCaptionableCard(soundCard)).toBe(true);
+
+      const textCard: ConceptMatchCard = {
+        key: "A-upper",
+        conceptId: "A",
+        display: { type: "text", text: "A" },
+        speech: "A",
+      };
+      expect(isCaptionableCard(textCard)).toBe(false);
+
+      const iconCard: ConceptMatchCard = {
+        key: "dog-icon",
+        conceptId: "dog",
+        display: { type: "icon", icon: "dog" },
+        speech: "dog",
+      };
+      expect(isCaptionableCard(iconCard)).toBe(false);
+
+      const colorCard: ConceptMatchCard = {
+        key: "red-color",
+        conceptId: "red",
+        display: { type: "color", color: "#E53935" },
+        speech: "red",
+      };
+      expect(isCaptionableCard(colorCard)).toBe(false);
+
+      const dotsCard: ConceptMatchCard = {
+        key: "3-dots",
+        conceptId: "3",
+        display: { type: "dots", count: 3 },
+        speech: "three",
+      };
+      expect(isCaptionableCard(dotsCard)).toBe(false);
+    });
+
+    it("returns false for boards without captionable audio cards", () => {
+      const nonCaptionableDecks: ConceptMatchDeck[] = [
+        "letters",
+        "picture-word",
+        "color-word",
+        "numerals-han",
+        "numerals-dots",
+        "shapes-objects",
+      ];
+      for (const deck of nonCaptionableDecks) {
+        const board = buildBoard(makeRng(42), deck, "en", 2);
+        expect(hasCaptionableCards(board)).toBe(false);
+      }
+      expect(hasCaptionableCards([])).toBe(false);
+    });
+
+    it("returns true for boards with captionable audio cards (picture-spoken)", () => {
+      const board = buildBoard(makeRng(42), "picture-spoken", "en", 2);
+      expect(hasCaptionableCards(board)).toBe(true);
+    });
+
+    it("evaluates mixed boards accurately based on presence of captionable cards", () => {
+      const boardWithAudio: ConceptMatchCard[] = [
+        {
+          key: "apple-icon",
+          conceptId: "apple",
+          display: { type: "icon", icon: "apple" },
+          speech: "apple",
+        },
+        {
+          key: "apple-audio",
+          conceptId: "apple",
+          display: { type: "audio" },
+          speech: "apple",
+        },
+      ];
+      expect(hasCaptionableCards(boardWithAudio)).toBe(true);
+
+      const boardWithoutAudio: ConceptMatchCard[] = [
+        {
+          key: "apple-icon",
+          conceptId: "apple",
+          display: { type: "icon", icon: "apple" },
+          speech: "apple",
+        },
+        {
+          key: "apple-word",
+          conceptId: "apple",
+          display: { type: "text", text: "apple" },
+          speech: "apple",
+        },
+      ];
+      expect(hasCaptionableCards(boardWithoutAudio)).toBe(false);
     });
   });
 });

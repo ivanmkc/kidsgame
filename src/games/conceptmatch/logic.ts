@@ -9,7 +9,7 @@ export type CardDisplay =
   | { type: "text"; text: string }
   | { type: "icon"; icon: string }
   | { type: "color"; color: string }
-  | { type: "audio"; text?: string }
+  | { type: "audio" }
   | { type: "dots"; count: number };
 
 export interface ConceptMatchCard {
@@ -106,6 +106,21 @@ export const ALPHABET: string[] = [
 
 export function isMatch(a: ConceptMatchCard, b: ConceptMatchCard): boolean {
   return a.conceptId === b.conceptId;
+}
+
+/**
+ * Returns true if the card is an audio card whose visual text is hidden
+ * unless captions are enabled.
+ */
+export function isCaptionableCard(card: ConceptMatchCard): boolean {
+  return card.display.type === "audio";
+}
+
+/**
+ * Returns true if the board contains at least one captionable card.
+ */
+export function hasCaptionableCards(board: ConceptMatchCard[]): boolean {
+  return board.some(isCaptionableCard);
 }
 
 /**
@@ -466,7 +481,7 @@ export function buildBoard(
         {
           key: `${animal}-sound`,
           conceptId: animal,
-          display: { type: "audio", text: sound },
+          display: { type: "audio" },
           speech: sound,
         },
       ];
@@ -577,7 +592,7 @@ export function updateCardLang(
       const sound = t(lang, `sound.${card.conceptId}` as UIKey);
       return {
         ...card,
-        display: { type: "audio", text: sound },
+        display: { type: "audio" },
         speech: sound,
       };
     }
