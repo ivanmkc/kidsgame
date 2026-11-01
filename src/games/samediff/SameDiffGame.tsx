@@ -47,6 +47,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [round, setRound] = useState<SameDiffRound>(() =>
     makeSameDiffRound(rngRef.current, difficulty),
   );
+  const [displayRound, setDisplayRound] = useState<SameDiffRound>(round);
   const historyRef = useRef<number[]>([round.phraseIdx]);
   const [score, setScore] = useState(0);
   const [phase, setPhase] = useState<
@@ -91,6 +92,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     wrongPickRef.current = null;
     setWrongPick(null);
     setCorrectPick(null);
+    setDisplayRound(r);
     setPhase("listenA");
 
     const startMelody = () => {
@@ -236,6 +238,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     const firstRound = makeSameDiffRound(rngRef.current, difficulty);
     historyRef.current = [firstRound.phraseIdx];
     setRound(firstRound);
+    setDisplayRound(firstRound);
   };
 
   const earPulse = useRef(new Animated.Value(1)).current;
@@ -289,8 +292,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     inputRange: [0, 1],
     outputRange: [1, 1.04],
   });
-  const ratiosA = phrasePitchRatios(round, round.phraseA);
-  const ratiosB = phrasePitchRatios(round, round.phraseB);
+  const ratiosA = phrasePitchRatios(displayRound, displayRound.phraseA);
+  const ratiosB = phrasePitchRatios(displayRound, displayRound.phraseB);
 
   return (
     <GameShell
