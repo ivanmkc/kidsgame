@@ -71,7 +71,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
   const currentRoundIdx = difficulty !== prevDifficulty ? 0 : roundIdx;
   const won = currentRoundIdx >= roundsToWin;
   useWinLine(won, t(lang, lang === "en" ? "win.sounds" : "win.soundsWords"));
-  const { isValid } = useLangEpoch(lang);
+  useLangEpoch(lang);
   const elapsed = useElapsed(showTimer && !won && !isFinishing, timerKey);
   const { width, height } = useWindowDimensions();
 
@@ -116,7 +116,7 @@ export function SoundsGame({ onHome, difficulty, lang }: Props) {
       sayThen(prompts.confirmLines, () => {
         lockedRef.current = false;
         setCorrectIdx(null);
-        if (!isValid() || epoch !== roundEpochRef.current) return;
+        if (epoch !== roundEpochRef.current) return;
         setRoundIdx(nextIdx);
         if (nextIdx < roundsToWin) {
           setRound(
