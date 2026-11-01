@@ -63,7 +63,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const [roundIndex, setRoundIndex] = useState(0);
   const firstTryRef = useRef(true);
   const won = roundIndex >= total;
-  useWinLine(won, t(lang, "win.samediff" as never));
+  useWinLine(won, t(lang, "win.samediff"));
 
   useEffect(() => {
     return () => {
@@ -290,8 +290,8 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
 
   return (
     <GameShell
-      title={t(lang, "shell.samediff.title" as never)}
-      subtitle={t(lang, "shell.samediff.sub" as never)}
+      title={t(lang, "shell.samediff.title")}
+      subtitle={t(lang, "shell.samediff.sub")}
       onBack={onHome}
       lang={lang}
       right={
@@ -449,7 +449,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 >
                   <Text style={styles.pickEmoji}>👯</Text>
                   <Text style={[styles.pickLabel, { color: "#5FBF6E" }]}>
-                    {t(lang, "music.same" as never)}
+                    {t(lang, "music.same")}
                   </Text>
                   {phase === "transition" &&
                   correctPick === "same" &&
@@ -497,7 +497,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                 >
                   <Text style={styles.pickEmoji}>🔀</Text>
                   <Text style={[styles.pickLabel, { color: "#E89B4F" }]}>
-                    {t(lang, "music.different" as never)}
+                    {t(lang, "music.different")}
                   </Text>
                   {phase === "transition" &&
                   correctPick === "different" &&
@@ -516,7 +516,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       </View>
       <WinOverlay
         visible={won}
-        message={t(lang, "win.samediff" as never)}
+        message={t(lang, "win.samediff")}
         onNext={reset}
         nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
