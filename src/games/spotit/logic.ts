@@ -95,10 +95,17 @@ export interface SpotItRound {
   answer: number; // the shared symbol index
 }
 
-export function dealRound(rng: Rng, deck: Card[]): SpotItRound {
-  const i = randInt(rng, deck.length);
-  let j = randInt(rng, deck.length - 1);
-  if (j >= i) j += 1;
+export function dealRound(rng: Rng, deck: Card[], played: Set<string> = new Set()): SpotItRound {
+  let i = 0, j = 1;
+  for (let tries = 0; tries < 500; tries++) {
+    i = randInt(rng, deck.length);
+    j = randInt(rng, deck.length - 1);
+    if (j >= i) j += 1;
+    const pairId = `${Math.min(i, j)},${Math.max(i, j)}`;
+    if (tries < 499 && played.has(pairId)) continue;
+    played.add(pairId);
+    break;
+  }
   const top = shuffle(rng, deck[i]);
   const bottom = shuffle(rng, deck[j]);
   return { top, bottom, answer: sharedSymbol(top, bottom) };
@@ -117,26 +124,43 @@ export interface DuelRound {
 /** Three distinct cards; each kid hunts a different answer (no copy-sniping).
  *  If both answers collide, redraw b — bounded, then fall through (playable,
  *  just less ideal). */
-export function dealDuelRound(rng: Rng, deck: Card[]): DuelRound {
-  const i = randInt(rng, deck.length);
-  let j = randInt(rng, deck.length - 1);
-  if (j >= i) j += 1;
+export function dealDuelRound(rng: Rng, deck: Card[], played: Set<string> = new Set()): DuelRound {
+  let i = 0, j = 1, kIdx = 2;
+  for (let outerTries = 0; outerTries < 500; outerTries++) {
+    i = randInt(rng, deck.length);
+    j = randInt(rng, deck.length - 1);
+    if (j >= i) j += 1;
+    const answerA = sharedSymbol(deck[j], deck[i]);
+
+    const lo = Math.min(i, j);
+    const hi = Math.max(i, j);
+    kIdx = j;
+    let answerB = answerA;
+
+    for (let tries = 0; tries < 10; tries++) {
+      let k = randInt(rng, deck.length - 2); // skip i and j: always 3 distinct cards
+      if (k >= lo) k += 1;
+      if (k >= hi) k += 1;
+      answerB = sharedSymbol(deck[k], deck[i]);
+      kIdx = k;
+      if (answerB !== answerA) break;
+    }
+
+    const combo = [i, j, kIdx].sort((x, y) => x - y).join(",");
+    if (outerTries < 499 && played.has(combo)) continue;
+    played.add(combo);
+    break;
+  }
   const center = shuffle(rng, deck[i]);
   const a = shuffle(rng, deck[j]);
-  const answerA = sharedSymbol(a, center);
-  const lo = Math.min(i, j);
-  const hi = Math.max(i, j);
-  let b = a;
-  let answerB = answerA;
-  for (let tries = 0; tries < 10; tries++) {
-    let k = randInt(rng, deck.length - 2); // skip i and j: always 3 distinct cards
-    if (k >= lo) k += 1;
-    if (k >= hi) k += 1;
-    b = shuffle(rng, deck[k]);
-    answerB = sharedSymbol(b, center);
-    if (answerB !== answerA) break;
-  }
-  return { center, a, b, answerA, answerB };
+  const b = shuffle(rng, deck[kIdx]);
+  return { 
+    center, 
+    a, 
+    b, 
+    answerA: sharedSymbol(a, center), 
+    answerB: sharedSymbol(b, center) 
+  };
 }
 
 /** Rubber-band: a kid leading by >=2 waits a beat before her redeal. */

@@ -58,9 +58,10 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
     bShared: layoutSlots(rngRef.current, cardCount),
   });
 
+  const playedPairsRef = useRef<Set<string>>(new Set());
   const [phase, setPhase] = useState<Phase>('ready');
   const [count, setCount] = useState(3);
-  const [round, setRound] = useState<DuelRound>(() => dealDuelRound(rngRef.current, deck));
+  const [round, setRound] = useState<DuelRound>(() => dealDuelRound(rngRef.current, deck, playedPairsRef.current));
   const [slots, setSlots] = useState<ZoneSlots>(newSlots);
   const [roundKey, setRoundKey] = useState(0);
   const [scores, setScores] = useState({ a: 0, b: 0 });
@@ -126,7 +127,7 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
   }, [phase, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const redeal = () => {
-    setRound(dealDuelRound(rngRef.current, deck));
+    setRound(dealDuelRound(rngRef.current, deck, playedPairsRef.current));
     setSlots(newSlots());
     setRoundKey((k) => k + 1);
     setWrongFlash({ a: null, b: null });
@@ -139,7 +140,8 @@ export function SpotItDuel({ onHome, difficulty, seed, lang = 'en' }: Props) {
 
   const rematch = () => {
     setScores({ a: 0, b: 0 });
-    setRound(dealDuelRound(rngRef.current, deck));
+    playedPairsRef.current.clear();
+    setRound(dealDuelRound(rngRef.current, deck, playedPairsRef.current));
     setSlots(newSlots());
     setRoundKey((k) => k + 1);
     setWrongFlash({ a: null, b: null });

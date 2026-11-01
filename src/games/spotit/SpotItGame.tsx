@@ -85,8 +85,9 @@ function SpotItSolo({
   const deck = useMemo(() => buildDeck(order), [order]);
   const roundsToWin = settingsFor(difficulty).spotitRounds;
   const rngRef = useRef(makeRng(seed ?? Math.floor(Math.random() * 1e9)));
+  const playedPairsRef = useRef<Set<string>>(new Set());
   const roundClosedRef = useRef(false);
-  const [round, setRound] = useState(() => dealRound(rngRef.current, deck));
+  const [round, setRound] = useState(() => dealRound(rngRef.current, deck, playedPairsRef.current));
   const [slots, setSlots] = useState<{ top: Slot[]; bottom: Slot[] }>(() => ({
     top: layoutSlots(rngRef.current, cardCount),
     bottom: layoutSlots(rngRef.current, cardCount),
@@ -130,7 +131,7 @@ function SpotItSolo({
   const mmss = fmtTime(elapsed);
 
   const nextRound = () => {
-    setRound(dealRound(rngRef.current, deck));
+    setRound(dealRound(rngRef.current, deck, playedPairsRef.current));
     setSlots({
       top: layoutSlots(rngRef.current, cardCount),
       bottom: layoutSlots(rngRef.current, cardCount),
@@ -186,6 +187,7 @@ function SpotItSolo({
       winTimerRef.current = null;
     }
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
+    playedPairsRef.current.clear();
     roundClosedRef.current = false;
     setScore(0);
     setMatchEnd(false);
