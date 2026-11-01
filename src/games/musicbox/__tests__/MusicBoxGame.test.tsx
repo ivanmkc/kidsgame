@@ -74,7 +74,7 @@ describe("MusicBoxGame rendering", () => {
     );
 
     expect(
-      screen.getByText("Tap anywhere to play the next note!"),
+      screen.getByText("Tap, tap, tap anywhere to play the song!"),
     ).toBeDefined();
 
     unmount();

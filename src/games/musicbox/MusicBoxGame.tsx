@@ -101,7 +101,7 @@ export function MusicBoxGame({
         lang,
         settings.musicboxFreePlay
           ? "musicbox.introFree"
-          : "shell.musicbox.subPlay",
+          : "musicbox.intro",
       )}
       onBack={onBackToPicker}
       backKind="picker"
