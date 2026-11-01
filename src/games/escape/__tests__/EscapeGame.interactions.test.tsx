@@ -15,6 +15,8 @@ import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import { EscapeGame } from "../EscapeGame";
 import { SpriteCanvas } from "../SpriteCanvas";
+import { manifest } from "../../../manifest";
+
 
 const noop = () => {};
 
@@ -456,4 +458,56 @@ describe("EscapeGame revealed item hit target", () => {
     cleanup();
     vi.useRealTimers();
   });
+
+  it("handles language switch safely mid-round after interacting with a hotspot", () => {
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+    const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+
+    const rooms = manifest.escape ?? [];
+    const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+    const pillow = room.hotspots.find((h) => h.id === "pillow")!;
+    const keyItem = room.items.find((i) => i.id === "key")!;
+    const jaLabel = keyItem.t?.ja ?? keyItem.label;
+
+
+    const { rerender } = render(
+      <EscapeGame
+        onHome={noop}
+        sceneId={room.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // Interact with a hotspot (pillow) to reveal key
+    const pillowSpot = screen.getByTestId("escape-spot-pillow");
+    fireEvent.click(pillowSpot);
+
+    // Should play English sayFound
+    expect(sound.say).toHaveBeenCalledWith(pillow.sayFound);
+
+    // Switch language prop mid-round to 'ja'
+    rerender(
+      <EscapeGame
+        onHome={noop}
+        sceneId={room.id}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="ja"
+      />,
+    );
+
+    // Old speech should be stopped safely
+    expect(stopNarrationSpy).toHaveBeenCalled();
+
+    // Tap revealed item spot again to collect it
+    vi.mocked(sound.say).mockClear();
+    fireEvent.click(pillowSpot);
+
+    // Should speak Japanese item label, not old-language speech
+    expect(sound.say).toHaveBeenCalledWith(jaLabel);
+  });
 });
+
+
