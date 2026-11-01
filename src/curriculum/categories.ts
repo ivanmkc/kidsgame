@@ -1,16 +1,30 @@
+import { UIKey } from '../i18n';
+
 // Visual categories for the 31 sticker icons — used to pick distractors
 // that are genuinely confusable (an animal among animals, not among cars).
 export const ICON_CATEGORIES: Record<string, string[]> = {
   animals: [
-    'dog', 'cat', 'lion', 'frog', 'panda', 'fox', 'monkey', 'pig',
-    'rabbit', 'koala', 'unicorn', 'octopus', 'crab', 'fish', 'butterfly', 'ladybug',
+    'dog',
+    'cat',
+    'lion',
+    'frog',
+    'panda',
+    'fox',
+    'monkey',
+    'pig',
+    'rabbit',
+    'koala',
+    'unicorn',
+    'octopus',
+    'crab',
+    'fish',
+    'butterfly',
+    'ladybug',
   ],
   nature: ['blossom', 'sunflower', 'rainbow', 'star'],
   food: ['apple', 'banana', 'strawberry', 'pizza', 'icecream'],
   things: ['balloon', 'car', 'plane', 'rocket', 'soccer', 'gift'],
 };
-
-import { UIKey } from '../i18n';
 
 // One home for how each category is worded to kids — Rule Time's "tap"
 // labels and Odd One Out's "which is not" questions must describe the same

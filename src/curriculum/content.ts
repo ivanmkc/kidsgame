@@ -1,20 +1,21 @@
-import { ICON_CATEGORIES } from '../games/iconCategories';
-export * from './words';
-export { default as WORD_LEVELS } from './wordLevels.json';
+import { ICON_CATEGORIES } from "./categories";
+export * from "./categories";
+export * from "./words";
+export { default as WORD_LEVELS } from "./wordLevels.json";
 
 export const CURRICULUM = {
   categories: ICON_CATEGORIES,
   critters: [
-    'dog',
-    'cat',
-    'frog',
-    'rabbit',
-    'fish',
-    'butterfly',
-    'apple',
-    'strawberry',
-    'star',
-    'balloon',
+    "dog",
+    "cat",
+    "frog",
+    "rabbit",
+    "fish",
+    "butterfly",
+    "apple",
+    "strawberry",
+    "star",
+    "balloon",
   ],
   numbers: {
     count: {
