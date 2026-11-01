@@ -62,6 +62,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   );
   const [celebrate, setCelebrate] = useState(0);
   const [gameKey, setGameKey] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
 
   const [boopFlash, setBoopFlash] = useState(false);
 
@@ -248,10 +249,10 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
   );
 
   useEffect(() => {
-    if (state.phase === "prompt" && round) {
+    if (state.phase === "prompt" && round && hasStarted) {
       startRound(round);
     }
-  }, [state.roundIdx, gameKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [state.roundIdx, gameKey, hasStarted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (state.phase === "gap" && round) {
@@ -329,6 +330,12 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
     sfx.tap();
     primeMusic();
 
+    if (!hasStarted) {
+      setHasStarted(true);
+      phaseEnterTime.current = Date.now();
+      return;
+    }
+
     const current = stateRef.current;
     if (isComplete(current)) return;
 
@@ -343,7 +350,7 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
 
     const next = handleTap(current);
     applyStateTransition(next);
-  }, [applyStateTransition]);
+  }, [applyStateTransition, hasStarted]);
 
   const switchPack = useCallback(
     (id: PackId) => {
@@ -469,24 +476,28 @@ export function CarModeGame({ onHome, lang, difficulty }: Props) {
                       : undefined
                 }
               >
-                {boopFlash
-                  ? "🎵"
-                  : state.phase === "prompt"
-                    ? "👂"
-                    : state.phase === "gap"
-                      ? "🤔"
-                      : isRight
-                        ? "⭐️"
-                        : isWrong
-                          ? "🔄"
-                          : "👆"}
+                {!hasStarted
+                  ? "▶️"
+                  : boopFlash
+                    ? "🎵"
+                    : state.phase === "prompt"
+                      ? "👂"
+                      : state.phase === "gap"
+                        ? "🤔"
+                        : isRight
+                          ? "⭐️"
+                          : isWrong
+                            ? "🔄"
+                            : "👆"}
               </Text>
               <Text style={styles.phaseText}>
-                {state.phase === "prompt"
-                  ? t(lang, "music.listen")
-                  : state.phase === "gap"
-                    ? t(lang, "music.yourTurn")
-                    : t(lang, "carmode.tap")}
+                {!hasStarted
+                  ? t(lang, "carmode.tap")
+                  : state.phase === "prompt"
+                    ? t(lang, "music.listen")
+                    : state.phase === "gap"
+                      ? t(lang, "music.yourTurn")
+                      : t(lang, "carmode.tap")}
               </Text>
             </Animated.View>
           </Pressable>

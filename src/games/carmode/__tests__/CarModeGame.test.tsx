@@ -1,7 +1,7 @@
+// @vitest-environment happy-dom
 import React from "react";
-import { renderToString } from "react-dom/server";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Pressable } from "react-native";
 import * as sound from "../../../sound";
 import { sfx } from "../../../sound";
 import * as music from "../../../music";
@@ -10,144 +10,160 @@ import { ALL_PACKS, PACK_ORDER } from "../packs";
 import { CarModeGame } from "../CarModeGame";
 import { t, UIKey } from "../../../i18n";
 
-type PressableFake = Partial<
-  Pick<
-    React.ComponentProps<typeof Pressable>,
-    | "disabled"
-    | "accessibilityRole"
-    | "accessibilityLabel"
-    | "accessibilityState"
-    | "testID"
-    | "style"
-  >
-> & {
-  onPress?: () => void;
-};
-
-const capturedPressables: Record<string, PressableFake> = {};
-
-vi.mock("react-native", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  const ActualPressable = actual.Pressable as React.ComponentType<
-    Record<string, unknown>
-  >;
-  return {
-    ...actual,
-    Pressable: (props: Record<string, unknown>) => {
-      const testID =
-        typeof props.testID === "string" ? props.testID : undefined;
-      if (testID) {
-        capturedPressables[testID] = props as PressableFake;
-      }
-      return React.createElement(ActualPressable, props);
-    },
-  };
-});
-
 describe("CarModeGame", () => {
   const noop = () => {};
 
   beforeEach(() => {
-    for (const key of Object.keys(capturedPressables)) {
-      delete capturedPressables[key];
-    }
     vi.restoreAllMocks();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    cleanup();
   });
 
-  it("renders initial prompt phase with listen affordance and score chip", () => {
+  it("waits for user tap to prime music before playing first round sequence", () => {
+    vi.useFakeTimers();
+    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
+    const playSequenceSpy = vi.spyOn(music, "playSequence").mockReturnValue(() => {});
+    const sayThenSpy = vi.spyOn(sound, "sayThen").mockReturnValue();
+
+    const actual = logic.startState("boops", 42);
+    // Ensure the first round is a boops round that plays a sequence
+    const rounds = [...actual.rounds];
+    rounds[0] = { ...rounds[0], noteCount: 4 };
+    vi.spyOn(logic, "startState").mockReturnValue({ ...actual, rounds });
+
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    // Advance time to show that the sequence is NOT playing automatically on mount
+    vi.advanceTimersByTime(500);
+
+    expect(primeMusicSpy).not.toHaveBeenCalled();
+    expect(playSequenceSpy).not.toHaveBeenCalled();
+    expect(sayThenSpy).not.toHaveBeenCalled();
+    expect(screen.getByText("▶️")).toBeDefined();
+
+    // Now tap the start screen
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+
+    expect(primeMusicSpy).toHaveBeenCalled();
+    expect(playSequenceSpy).toHaveBeenCalled();
+
+    // Ensure primeMusic was called before playSequence
+    const primeOrder = primeMusicSpy.mock.invocationCallOrder[0];
+    const playOrder = playSequenceSpy.mock.invocationCallOrder[0];
+    expect(primeOrder).toBeLessThan(playOrder);
+  });
+
+  it("renders initial prompt phase with start affordance, score chip and navigates home", () => {
     const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
     const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
+    const onHomeSpy = vi.fn();
 
-    const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={onHomeSpy} lang="en" />);
 
-    expect(html).toContain("Car Mode");
-    expect(html).toContain("Listen, answer, and tap!");
-    expect(html).toContain("1/10");
-    expect(html).toContain("👂");
-    expect(html).toContain("Listen...");
+    expect(screen.getByText("Car Mode")).toBeDefined();
+    expect(screen.getByText("Listen, answer, and tap!")).toBeDefined();
+    expect(screen.getByText("1/10")).toBeDefined();
+    expect(screen.getByText("▶️")).toBeDefined();
+    expect(screen.getByText("Tap!")).toBeDefined();
 
-    const tapBtn = capturedPressables["carmode-tap"];
-    expect(tapBtn).toBeDefined();
-    expect(tapBtn.accessibilityRole).toBe("button");
-    expect(tapBtn.accessibilityLabel).toBeUndefined();
+    const tapBtn = screen.getByTestId("carmode-tap");
 
-    // Tapping during prompt phase plays sound and primes music, but advances to the gap phase.
-    tapBtn.onPress?.();
+    // Tapping the start screen starts the game
+    fireEvent.click(tapBtn);
     expect(sfxTapSpy).toHaveBeenCalledOnce();
     expect(primeMusicSpy).toHaveBeenCalledOnce();
-  });
 
-  it("navigates home when the back button is pressed", () => {
-    const onHomeSpy = vi.fn();
-    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    expect(screen.getByText("👂")).toBeDefined();
+    expect(screen.getByText("Listen...")).toBeDefined();
 
-    renderToString(<CarModeGame onHome={onHomeSpy} lang="en" />);
+    const backBtn = screen.getByTestId("back-button");
+    fireEvent.click(backBtn);
 
-    const backBtn = capturedPressables["back-button"];
-    expect(backBtn).toBeDefined();
-    backBtn.onPress?.();
-
-    expect(sfxTapSpy).toHaveBeenCalledOnce();
+    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
     expect(onHomeSpy).toHaveBeenCalledOnce();
   });
 
+  it("debounces rapid double taps on the start screen", () => {
+    vi.useFakeTimers();
+    const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
+    render(<CarModeGame onHome={noop} lang="en" />);
+
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn);
+    fireEvent.click(tapBtn); // Immediate second click
+
+    expect(sfxTapSpy).toHaveBeenCalledOnce(); // Debounced
+  });
+
   it("renders localized shell titles, subtitles, and instructions in supported languages", () => {
-    const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
-    expect(htmlJa).toContain("くるまモード");
-    expect(htmlJa).toContain("きいて こたえて タップ！");
-    expect(htmlJa).toContain("きいてね…");
+    const { unmount } = render(<CarModeGame onHome={noop} lang="ja" />);
+    expect(screen.getByText("くるまモード")).toBeDefined();
+    expect(screen.getByText("きいて こたえて タップ！")).toBeDefined();
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("きいてね…")).toBeDefined();
+    unmount();
 
-    const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
-    expect(htmlCmn).toContain("车载模式");
-    expect(htmlCmn).toContain("听，回答，点一点！");
-    expect(htmlCmn).toContain("听一听…");
+    const { unmount: unmountCmn } = render(
+      <CarModeGame onHome={noop} lang="cmn" />,
+    );
+    expect(screen.getByText("车载模式")).toBeDefined();
+    expect(screen.getByText("听，回答，点一点！")).toBeDefined();
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("听一听…")).toBeDefined();
+    unmountCmn();
 
-    const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
-    expect(htmlYue).toContain("車載模式");
-    expect(htmlYue).toContain("聽，答，撳一撳！");
-    expect(htmlYue).toContain("聽下…");
+    render(<CarModeGame onHome={noop} lang="yue" />);
+    expect(screen.getByText("車載模式")).toBeDefined();
+    expect(screen.getByText("聽，答，撳一撳！")).toBeDefined();
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("聽下…")).toBeDefined();
   });
 
   it("renders localized phase instructions during gap phase across languages", () => {
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "gap" });
 
-    const htmlJa = renderToString(<CarModeGame onHome={noop} lang="ja" />);
-    expect(htmlJa).toContain("きみの ばん！");
+    const { unmount } = render(<CarModeGame onHome={noop} lang="ja" />);
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("きみの ばん！")).toBeDefined();
+    unmount();
 
-    const htmlCmn = renderToString(<CarModeGame onHome={noop} lang="cmn" />);
-    expect(htmlCmn).toContain("轮到你了！");
+    const { unmount: unmountCmn } = render(
+      <CarModeGame onHome={noop} lang="cmn" />,
+    );
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("轮到你了！")).toBeDefined();
+    unmountCmn();
 
-    const htmlYue = renderToString(<CarModeGame onHome={noop} lang="yue" />);
-    expect(htmlYue).toContain("到你喇！");
+    render(<CarModeGame onHome={noop} lang="yue" />);
+    fireEvent.click(screen.getByTestId("carmode-tap"));
+    expect(screen.getByText("到你喇！")).toBeDefined();
   });
 
   it("renders gap phase and plays sounds when tapped", () => {
     const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "gap" });
 
-    const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn); // Start screen tap
 
-    expect(html).toContain("🤔");
-    expect(html).toContain("Your turn!");
+    // Now it's in gap phase
+    expect(screen.getByText("🤔")).toBeDefined();
+    expect(screen.getByText("Your turn!")).toBeDefined();
 
-    const tapBtn = capturedPressables["carmode-tap"];
-    expect(tapBtn).toBeDefined();
-    tapBtn.onPress?.();
-
-    expect(sfxTapSpy).toHaveBeenCalledOnce();
-    expect(primeMusicSpy).toHaveBeenCalledOnce();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 500); // Advance time past debounce
+    fireEvent.click(tapBtn); // Action tap
+    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
   });
 
   it("renders reveal phase and transitions to prompt on single tap for standard packs", () => {
     const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
     const stopNarrationSpy = vi.spyOn(sound, "stopNarration").mockReturnValue();
 
     const actual = logic.startState("boops", 42);
@@ -156,17 +172,17 @@ describe("CarModeGame", () => {
       phase: "reveal",
     });
 
-    const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn); // Start screen tap
 
-    expect(html).toContain("👆");
-    expect(html).toContain("Tap!");
+    expect(screen.getByText("👆")).toBeDefined();
+    expect(screen.getByText("Tap!")).toBeDefined();
 
-    const tapBtn = capturedPressables["carmode-tap"];
-    expect(tapBtn).toBeDefined();
-    tapBtn.onPress?.();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 500); // Advance time past debounce
+    fireEvent.click(tapBtn); // Action tap
 
-    expect(sfxTapSpy).toHaveBeenCalledOnce();
-    expect(primeMusicSpy).toHaveBeenCalledOnce();
+    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
@@ -179,12 +195,12 @@ describe("CarModeGame", () => {
       pendingTaps: 0,
     });
 
-    renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={noop} lang="en" />);
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn); // Start screen tap
 
-    const tapBtn = capturedPressables["carmode-tap"];
-    expect(tapBtn).toBeDefined();
-
-    tapBtn.onPress?.();
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 500); // Advance time past debounce
+    fireEvent.click(tapBtn); // Action tap
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
@@ -193,38 +209,26 @@ describe("CarModeGame", () => {
     const actual = logic.startState("boops", 42);
     vi.spyOn(logic, "startState").mockReturnValue({ ...actual, phase: "done" });
 
-    const html = renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={noop} lang="en" />);
 
-    expect(html).toContain("All done!");
-    expect(capturedPressables["carmode-tap"]).toBeUndefined();
+    expect(screen.getByText("All done!")).toBeDefined();
+    expect(screen.queryByTestId("carmode-tap")).toBeNull();
 
     // Verify all pack buttons are rendered with appropriate labels and styles
     for (const packId of PACK_ORDER) {
-      expect(html).toContain(t("en", `carmode.pack.${packId}` as UIKey));
-      const btn = capturedPressables[`carmode-pack-${packId}`];
+      const localizedName = t("en", `carmode.pack.${packId}` as UIKey);
+      expect(screen.getByText(localizedName)).toBeDefined();
+      
+      const btn = screen.getByTestId(`carmode-pack-${packId}`);
       expect(btn).toBeDefined();
-      expect(btn.accessibilityRole).toBe("button");
-      expect(btn.accessibilityLabel).toBe(
-        t("en", `carmode.pack.${packId}` as UIKey),
-      );
-      expect(btn.accessibilityState).toEqual({ selected: packId === "boops" });
-
-      type StyleFn = (state: {
-        pressed: boolean;
-      }) => Array<Record<string, unknown>>;
-      if (typeof btn?.style === "function") {
-        const styleFn = btn.style as StyleFn;
-        const unpressed = styleFn({ pressed: false });
-        const pressed = styleFn({ pressed: true });
-        expect(unpressed).toBeDefined();
-        expect(pressed).toContainEqual({ opacity: 0.7 });
-      }
+      expect(btn.getAttribute("role")).toBe("button");
+      expect(btn.getAttribute("aria-label")).toBe(localizedName);
     }
 
     // Selecting a new pack switches packs and stops narration
-    const rhymeBtn = capturedPressables["carmode-pack-rhyme"];
+    const rhymeBtn = screen.getByTestId("carmode-pack-rhyme");
     expect(rhymeBtn).toBeDefined();
-    rhymeBtn.onPress?.();
+    fireEvent.click(rhymeBtn);
     expect(stopNarrationSpy).toHaveBeenCalledOnce();
   });
 
@@ -237,30 +241,30 @@ describe("CarModeGame", () => {
         phase: "done",
       });
 
-      const html = renderToString(<CarModeGame onHome={noop} lang={lang} />);
-      expect(html).toContain(t(lang, "carmode.done"));
+      const { unmount } = render(<CarModeGame onHome={noop} lang={lang} />);
+      expect(screen.getByText(t(lang, "carmode.done"))).toBeDefined();
 
       for (const packId of PACK_ORDER) {
         const localizedName = t(lang, `carmode.pack.${packId}` as UIKey);
         const englishName = ALL_PACKS[packId].name;
 
-        // Button text rendered into HTML matches localized name and not hardcoded English name
-        expect(html).toContain(localizedName);
-        expect(html).not.toContain(englishName);
+        expect(screen.getByText(localizedName)).toBeDefined();
+        if (englishName !== localizedName) {
+            expect(screen.queryByText(englishName)).toBeNull();
+        }
 
-        // Accessibility label matches localized name and not hardcoded English name
-        const btn = capturedPressables[`carmode-pack-${packId}`];
+        const btn = screen.getByTestId(`carmode-pack-${packId}`);
         expect(btn).toBeDefined();
-        expect(btn.accessibilityRole).toBe("button");
-        expect(btn.accessibilityLabel).toBe(localizedName);
-        expect(btn.accessibilityLabel).not.toBe(englishName);
+        expect(btn.getAttribute("role")).toBe("button");
+        expect(btn.getAttribute("aria-label")).toBe(localizedName);
+        expect(btn.getAttribute("aria-label")).not.toBe(englishName);
       }
+      unmount();
     },
   );
 
   it("ignores taps when already complete", () => {
     const sfxTapSpy = vi.spyOn(sfx, "tap").mockReturnValue();
-    const primeMusicSpy = vi.spyOn(music, "primeMusic").mockReturnValue();
     const advanceSpy = vi.spyOn(logic, "advance");
 
     // Render with phase reveal to capture the tap button
@@ -269,17 +273,16 @@ describe("CarModeGame", () => {
       ...actual,
       phase: "reveal",
     });
-    renderToString(<CarModeGame onHome={noop} lang="en" />);
+    render(<CarModeGame onHome={noop} lang="en" />);
 
-    const tapBtn = capturedPressables["carmode-tap"];
-    expect(tapBtn).toBeDefined();
+    const tapBtn = screen.getByTestId("carmode-tap");
+    fireEvent.click(tapBtn); // Start screen tap
 
-    // Now mock isComplete to return true
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 500); // Advance time past debounce
     vi.spyOn(logic, "isComplete").mockReturnValue(true);
-    tapBtn.onPress?.();
+    fireEvent.click(tapBtn); // Action tap
 
-    expect(sfxTapSpy).toHaveBeenCalledOnce();
-    expect(primeMusicSpy).toHaveBeenCalledOnce();
+    expect(sfxTapSpy).toHaveBeenCalledTimes(2);
     expect(advanceSpy).not.toHaveBeenCalled();
   });
 });

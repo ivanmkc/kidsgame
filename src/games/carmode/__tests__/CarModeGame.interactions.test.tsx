@@ -20,6 +20,20 @@ import { CarModeGame } from "../CarModeGame";
 
 const noop = () => {};
 
+const renderAndStart = (ui: React.ReactElement) => {
+  const result = render(ui);
+  if (screen.queryByText("▶️")) {
+    const origNow = Date.now;
+    Date.now = () => origNow() - 500;
+    try {
+      fireEvent.click(screen.getByTestId("carmode-tap"));
+    } finally {
+      Date.now = origNow;
+    }
+  }
+  return result;
+};
+
 describe("CarModeGame interactions", () => {
   let activeCancel: (() => void) | null = null;
 
@@ -79,7 +93,7 @@ describe("CarModeGame interactions", () => {
       setTimeout(cb, 100);
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Listen...")).toBeDefined();
 
@@ -99,7 +113,7 @@ describe("CarModeGame interactions", () => {
     const actual = logic.startState("silly", 42);
     vi.spyOn(logic, "startState").mockReturnValue(actual);
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Listen...")).toBeDefined();
 
@@ -114,7 +128,7 @@ describe("CarModeGame interactions", () => {
     const actual = logic.startState("silly", 42);
     vi.spyOn(logic, "startState").mockReturnValue(actual);
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Listen...")).toBeDefined();
 
@@ -150,7 +164,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Invoke sayThen callback to start boops
     act(() => {
@@ -199,7 +213,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Tap!")).toBeDefined();
     expect(screen.getByTestId("carmode-score").textContent).toContain("1/24");
@@ -220,7 +234,7 @@ describe("CarModeGame interactions", () => {
     };
     vi.spyOn(logic, "startState").mockReturnValueOnce(lastRoundState);
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.queryAllByText("🎉")).toHaveLength(0);
 
@@ -241,7 +255,7 @@ describe("CarModeGame interactions", () => {
     const actual = logic.startState("silly", 42);
     vi.spyOn(logic, "startState").mockReturnValue(actual);
 
-    render(<CarModeGame onHome={noop} lang="ja" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="ja" />);
 
     expect(screen.getByText("きいてね…")).toBeDefined();
 
@@ -252,7 +266,7 @@ describe("CarModeGame interactions", () => {
   });
 
   it("exposes localized phase text to screen readers on main button without hardcoded English label", () => {
-    render(<CarModeGame onHome={noop} lang="ja" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="ja" />);
 
     expect(
       screen.queryByRole("button", { name: "Tap to continue" }),
@@ -276,7 +290,7 @@ describe("CarModeGame interactions", () => {
         pendingTaps: 0,
       });
 
-      render(<CarModeGame onHome={noop} lang={lang} />);
+      renderAndStart(<CarModeGame onHome={noop} lang={lang} />);
       const tapBtn = screen.getByTestId("carmode-tap");
       expect(within(tapBtn).getByText(expected)).toBeDefined();
       expect(within(tapBtn).queryByText("Tap!")).toBeNull();
@@ -296,7 +310,7 @@ describe("CarModeGame interactions", () => {
         phase: "done",
       });
 
-      render(<CarModeGame onHome={noop} lang={lang} />);
+      renderAndStart(<CarModeGame onHome={noop} lang={lang} />);
       expect(screen.getByText(expected)).toBeDefined();
       expect(screen.queryByText("All done!")).toBeNull();
 
@@ -341,7 +355,7 @@ describe("CarModeGame interactions", () => {
       );
     }
 
-    render(<LangHarness initialLang="en" />);
+    renderAndStart(<LangHarness initialLang="en" />);
 
     expect(screen.getByText("Car Mode")).toBeDefined();
     expect(screen.getByText("Listen...")).toBeDefined();
@@ -408,7 +422,7 @@ describe("CarModeGame interactions", () => {
       );
     }
 
-    render(<LangHarness initialLang="en" />);
+    renderAndStart(<LangHarness initialLang="en" />);
 
     // Advance to gap phase by waiting out boops sequence
     act(() => {
@@ -456,7 +470,7 @@ describe("CarModeGame interactions", () => {
     };
     startStateSpy.mockReturnValue(doneState);
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
     expect(screen.getByText("All done!")).toBeDefined();
 
     stopNarrationSpy.mockClear();
@@ -483,7 +497,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 1,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
     const tapBtn = screen.getByTestId("carmode-tap");
 
     // Advance past debounce window
@@ -533,7 +547,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
     const tapBtn = screen.getByTestId("carmode-tap");
 
     // Advance past initial debounce
@@ -583,7 +597,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Tap!")).toBeDefined();
     expect(screen.getByTestId("carmode-score").textContent).toContain("1/10");
@@ -617,7 +631,7 @@ describe("CarModeGame interactions", () => {
     };
     vi.spyOn(logic, "startState").mockReturnValueOnce(lastRoundState);
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Tap!")).toBeDefined();
     expect(screen.queryByText("All done!")).toBeNull();
@@ -643,7 +657,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     expect(screen.getByText("Tap!")).toBeDefined();
 
@@ -670,7 +684,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance 500ms past speech and debounce
     act(() => {
@@ -704,7 +718,7 @@ describe("CarModeGame interactions", () => {
       phase: "gap",
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance past phase debounce
     act(() => {
@@ -734,7 +748,7 @@ describe("CarModeGame interactions", () => {
       phase: "gap",
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance past phase debounce
     act(() => {
@@ -754,7 +768,7 @@ describe("CarModeGame interactions", () => {
   });
 
   it("scales total rounds based on difficulty prop", () => {
-    render(<CarModeGame onHome={noop} lang="en" difficulty="easy" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" difficulty="easy" />);
     expect(screen.getByTestId("carmode-score").textContent).toContain("1/3");
   });
 
@@ -771,7 +785,7 @@ describe("CarModeGame interactions", () => {
       phase: "gap",
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance past phase debounce
     act(() => {
@@ -805,7 +819,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Invoke sayThen callback to start boops
     act(() => {
@@ -842,7 +856,7 @@ describe("CarModeGame interactions", () => {
       roundIdx: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Invoke sayThen callback to start boops
     act(() => {
@@ -882,7 +896,7 @@ describe("CarModeGame interactions", () => {
       phase: "gap",
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance past phase debounce
     act(() => {
@@ -913,7 +927,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    const { unmount } = render(<CarModeGame onHome={noop} lang="en" />);
+    const { unmount } = renderAndStart(<CarModeGame onHome={noop} lang="en" />);
     const tapBtn = screen.getByTestId("carmode-tap");
 
     act(() => {
@@ -945,7 +959,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    const { unmount: unmount2 } = render(
+    const { unmount: unmount2 } = renderAndStart(
       <CarModeGame onHome={noop} lang="en" />,
     );
     const tapBtn2 = screen.getByTestId("carmode-tap");
@@ -979,7 +993,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
     const tapBtn3 = screen.getByTestId("carmode-tap");
 
     act(() => {
@@ -1010,7 +1024,7 @@ describe("CarModeGame interactions", () => {
       pendingTaps: 0,
     });
 
-    render(<CarModeGame onHome={noop} lang="en" />);
+    renderAndStart(<CarModeGame onHome={noop} lang="en" />);
 
     // Advance through the entire gap time with 0 taps
     act(() => {
