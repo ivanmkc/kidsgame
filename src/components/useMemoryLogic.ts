@@ -12,6 +12,7 @@ export interface UseMemoryLogicOptions<T extends { key: number | string }> {
   onMatch?: (cardA: T, cardB: T, scorer?: PlayerIx, isLastPair?: boolean) => void;
   onMismatch?: () => void;
   onTurnChange?: (nextTurn: PlayerIx) => void;
+  onFlipCard?: (card: T) => void;
   duel?: boolean;
   disabled?: boolean;
   initialTurn?: PlayerIx;
@@ -36,6 +37,7 @@ export function useMemoryLogic<T extends { key: number | string }>({
   onMatch,
   onMismatch,
   onTurnChange,
+  onFlipCard,
   duel = false,
   disabled = false,
   initialTurn,
@@ -98,6 +100,7 @@ export function useMemoryLogic<T extends { key: number | string }>({
       const next = [...faceUpRef.current, card.key];
       faceUpRef.current = next;
       setFaceUp(next);
+      onFlipCard?.(card);
 
       if (next.length === 2) {
         setMoves((m) => m + 1);
@@ -148,7 +151,7 @@ export function useMemoryLogic<T extends { key: number | string }>({
         }
       }
     },
-    [board, disabled, duel, isMatch, onMatch, onMismatch, onTurnChange],
+    [board, disabled, duel, isMatch, onMatch, onMismatch, onTurnChange, onFlipCard],
   );
 
   return {
