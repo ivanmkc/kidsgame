@@ -121,14 +121,15 @@ export function glyphTwinsOf(label: string): string[] {
   return GLYPH_TWINS[label] ?? [];
 }
 
-// Dedup (letter, sound) pairs so each SOUND maps to exactly one letter —
-// otherwise "Which letter says kuh?" has two right answers (C and K).
+// Dedup (letter, sound) pairs by letter so each letter maps to its initial sound.
+// Distractors are filtered by sound in makeLetterRound so letters sharing a sound
+// (e.g. C and K) never appear on the same board.
 export const LETTER_SOUNDS: { letter: string; sound: string }[] = (() => {
-  const seenSound = new Set<string>();
+  const seenLetter = new Set<string>();
   const out: { letter: string; sound: string }[] = [];
   for (const w of [...WORDS, ...RHYME_WORDS]) {
-    if (!seenSound.has(w.sound)) {
-      seenSound.add(w.sound);
+    if (!seenLetter.has(w.letter)) {
+      seenLetter.add(w.letter);
       out.push({ letter: w.letter, sound: w.sound });
     }
   }
@@ -228,7 +229,7 @@ export function makeLetterRound(
     const target = candidates[pickIndex(rng, candidates.length)];
     // Distractors: other letters with DIFFERENT sounds so exactly one tile
     // answers "Which letter says X?".
-    const others = LETTER_SOUNDS.filter((s) => s.letter !== target.letter);
+    const others = LETTER_SOUNDS.filter((s) => s.sound !== target.sound);
     const distractors = shuffle(rng, others).slice(0, tileCount - 1);
     const tiles: LetterTile[] = shuffle(rng, [
       { key: target.letter, label: target.letter, isAnswer: true },
@@ -353,12 +354,7 @@ export function lettersLayout(
   const isLandscape = width > height;
   const shortH = height < 500;
 
-  const cols =
-    isLandscape && tileCount >= 12
-      ? 6
-      : tileCount <= 6
-        ? 3
-        : 4;
+  const cols = isLandscape && tileCount >= 12 ? 6 : tileCount <= 6 ? 3 : 4;
   const rows = Math.ceil(tileCount / cols);
 
   const speakerSize = shortH ? 56 : 80;
