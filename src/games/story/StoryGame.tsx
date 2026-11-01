@@ -329,7 +329,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
                 label={t(lang, 'story.tryAgain')}
                 color={colors.gold}
                 darkColor={darken(colors.gold)}
-                onPress={() => { hist.current = []; redo.current = []; setNodeId('start'); }}
+                onPress={goBack}
                 testID="story-try-again"
                 minWidth={230}
               />
