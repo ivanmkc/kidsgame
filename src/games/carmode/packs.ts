@@ -133,7 +133,9 @@ function simonRounds(): Round[] {
 }
 
 // ── Silly or True? ──────────────────────────────────────────────────
-// Difficulty rule: by how familiar the fact is.
+// Difficulty rule: by how familiar the fact is. Foundational toddler sensory
+// truths ("Water is wet!") and familiar animal motions ("Rabbits hop!") are
+// assigned to easy, while hard is reserved for counting or scientific concepts.
 interface SillyRound {
   statement: string;
   isSilly: boolean;
@@ -161,9 +163,9 @@ const SILLY_STATEMENTS: SillyRound[] = [
   { statement: "Giraffes have long necks!", isSilly: false, level: "hard" },
   { statement: "Cars eat sandwiches!", isSilly: true, level: "medium" },
   { statement: "Babies can ride bicycles!", isSilly: true, level: "hard" },
-  { statement: "Rabbits hop!", isSilly: false, level: "hard" },
+  { statement: 'Rabbits hop!', isSilly: false, level: 'easy' },
   { statement: "Shoes grow on trees!", isSilly: true, level: "hard" },
-  { statement: "Water is wet!", isSilly: false, level: "hard" },
+  { statement: 'Water is wet!', isSilly: false, level: 'easy' },
   { statement: "Rocks can sing!", isSilly: true, level: "hard" },
 ];
 
