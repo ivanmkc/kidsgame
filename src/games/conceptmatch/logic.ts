@@ -394,7 +394,9 @@ export function buildBoard(
 
   if (deck === "numerals-han") {
     const pool = shuffle(rng, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-    const chosen = pool.slice(0, pairs);
+    const chosen = pool
+      .filter((n) => !excludedConcepts?.has(String(n)))
+      .slice(0, pairs);
     const cards: ConceptMatchCard[] = chosen.flatMap((n) => {
       const speech = numberWord(lang, n).t;
       return [
@@ -417,7 +419,9 @@ export function buildBoard(
 
   if (deck === "numerals-dots") {
     const pool = shuffle(rng, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
-    const chosen = pool.slice(0, pairs);
+    const chosen = pool
+      .filter((n) => !excludedConcepts?.has(String(n)))
+      .slice(0, pairs);
     const cards: ConceptMatchCard[] = chosen.flatMap((n) => {
       const speech = numberWord(lang, n).t;
       return [
@@ -440,7 +444,9 @@ export function buildBoard(
 
   if (deck === "shapes-objects") {
     const pool = shuffle(rng, SHAPES);
-    const chosen = pool.slice(0, pairs);
+    const chosen = pool
+      .filter((entry) => !excludedConcepts?.has(entry.shape))
+      .slice(0, pairs);
     const cards: ConceptMatchCard[] = chosen.flatMap((entry) => {
       const speech = t(lang, `shape.${entry.shape}` as UIKey);
       return [
@@ -463,7 +469,9 @@ export function buildBoard(
 
   if (deck === "animals-sounds") {
     const pool = shuffle(rng, ANIMALS);
-    const chosen = pool.slice(0, pairs);
+    const chosen = pool
+      .filter((animal) => !excludedConcepts?.has(animal))
+      .slice(0, pairs);
     const cards: ConceptMatchCard[] = chosen.flatMap((animal) => {
       const entry = WORDS.find((w) => w.icon === animal);
       if (!entry) {
@@ -495,6 +503,10 @@ export function buildBoard(
       "picture-word",
       "picture-spoken",
       "color-word",
+      "numerals-han",
+      "numerals-dots",
+      "shapes-objects",
+      "animals-sounds",
     ];
     const shuffledDecks = shuffle(rng, availableDecks);
     const numDecks = shuffledDecks.length;
@@ -612,6 +624,22 @@ export function updateCardLang(
   if (deck === "mixed") {
     if (COLORS.some((c) => c.id === card.conceptId)) {
       return updateCardLang(card, "color-word", lang);
+    }
+    const num = Number(card.conceptId);
+    if (Number.isFinite(num) && card.conceptId.trim() !== "") {
+      return updateCardLang(card, "numerals-han", lang);
+    }
+    if (SHAPES.some((s) => s.shape === card.conceptId)) {
+      if (card.key.endsWith("-word") || card.key.endsWith("-audio")) {
+        return updateCardLang(card, "picture-word", lang);
+      }
+      return updateCardLang(card, "shapes-objects", lang);
+    }
+    if (ANIMALS.includes(card.conceptId)) {
+      if (card.key.endsWith("-word") || card.key.endsWith("-audio")) {
+        return updateCardLang(card, "picture-word", lang);
+      }
+      return updateCardLang(card, "animals-sounds", lang);
     }
     if (WORDS.some((w) => w.icon === card.conceptId)) {
       return updateCardLang(card, "picture-word", lang);

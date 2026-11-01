@@ -892,7 +892,7 @@ describe("conceptmatch/logic", () => {
         expect(displays.size).toBeGreaterThan(1);
       });
 
-      it("contains a mixture of letters, vocabulary, and color pairs", () => {
+      it("contains a mixture of concept deck pairs", () => {
         const rng = makeRng(77);
         const board = buildBoard(rng, "mixed", "en", 6);
 
@@ -901,15 +901,59 @@ describe("conceptmatch/logic", () => {
         const hasColor = board.some((c) =>
           COLORS.some((color) => color.id === c.conceptId),
         );
-        const hasWord = board.some((c) =>
-          WORDS.some((w) => w.icon === c.conceptId),
+        const hasNumeral = board.some((c) =>
+          Number.isFinite(Number(c.conceptId)),
+        );
+        const hasShape = board.some((c) =>
+          SHAPES.some((s) => s.shape === c.conceptId),
+        );
+        const hasAnimal = board.some((c) => ANIMALS.includes(c.conceptId));
+        const hasWord = board.some(
+          (c) =>
+            WORDS.some((w) => w.icon === c.conceptId) &&
+            !ANIMALS.includes(c.conceptId) &&
+            !SHAPES.some((s) => s.shape === c.conceptId),
         );
 
-        // For 6 pairs across 4 subdecks, at least 2 of these categories must be present
-        const categoriesPresent = [hasLetter, hasColor, hasWord].filter(
-          Boolean,
-        ).length;
+        const categoriesPresent = [
+          hasLetter,
+          hasColor,
+          hasNumeral,
+          hasShape,
+          hasAnimal,
+          hasWord,
+        ].filter(Boolean).length;
         expect(categoriesPresent).toBeGreaterThanOrEqual(2);
+      });
+
+      it("draws pairs across all 8 concept decks over multiple runs", () => {
+        const observedDecks = new Set<string>();
+        for (let seed = 0; seed < 50; seed++) {
+          const board = buildBoard(makeRng(seed), "mixed", "en", 8);
+          for (const card of board) {
+            if (ALPHABET.includes(card.conceptId)) {
+              observedDecks.add("letters");
+            } else if (COLORS.some((c) => c.id === card.conceptId)) {
+              observedDecks.add("color-word");
+            } else if (card.key.endsWith("-dots")) {
+              observedDecks.add("numerals-dots");
+            } else if (card.key.endsWith("-han")) {
+              observedDecks.add("numerals-han");
+            } else if (
+              card.key.endsWith("-shape") ||
+              card.key.endsWith("-object")
+            ) {
+              observedDecks.add("shapes-objects");
+            } else if (card.key.endsWith("-sound")) {
+              observedDecks.add("animals-sounds");
+            } else if (card.key.endsWith("-word")) {
+              observedDecks.add("picture-word");
+            } else if (card.key.endsWith("-audio")) {
+              observedDecks.add("picture-spoken");
+            }
+          }
+        }
+        expect(observedDecks.size).toBe(8);
       });
 
       it("produces exactly 2 matching cards for each conceptId", () => {
@@ -1251,7 +1295,7 @@ describe("conceptmatch/logic", () => {
               true,
             );
             const concepts = new Set(board.map((c) => c.conceptId));
-            
+
             let matchCount = 0;
             for (const rc of rhymingConcepts) {
               if (concepts.has(rc)) {
@@ -1421,7 +1465,7 @@ describe("conceptmatch/logic", () => {
       );
     });
 
-    it("updates color and word cards while preserving letters in mixed deck", () => {
+    it("updates cards across all subdecks correctly in mixed deck", () => {
       const board = buildBoard(makeRng(123), "mixed", "en", 6);
       const updated = updateBoardLang(board, "mixed", "ja");
       expect(updated).toHaveLength(board.length);
@@ -1438,6 +1482,32 @@ describe("conceptmatch/logic", () => {
           if (card.display.type === "text") {
             expect(card.display.text).toBe(expectedWord);
           }
+        } else if (Number.isFinite(Number(card.conceptId))) {
+          const expectedSpeech = numberWord("ja", Number(card.conceptId)).t;
+          expect(card.speech).toBe(expectedSpeech);
+        } else if (
+          card.key.endsWith("-shape") ||
+          card.key.endsWith("-object") ||
+          (SHAPES.some((s) => s.shape === card.conceptId) &&
+            !card.key.endsWith("-word") &&
+            !card.key.endsWith("-audio"))
+        ) {
+          const expectedSpeech = t("ja", `shape.${card.conceptId}` as UIKey);
+          expect(card.speech).toBe(expectedSpeech);
+        } else if (
+          card.key.endsWith("-sound") ||
+          (ANIMALS.includes(card.conceptId) &&
+            !card.key.endsWith("-word") &&
+            !card.key.endsWith("-audio"))
+        ) {
+          if (card.key.endsWith("-sound") || card.display.type === "audio") {
+            const expectedSound = t("ja", `sound.${card.conceptId}` as UIKey);
+            expect(card.speech).toBe(expectedSound);
+          } else {
+            const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+            const expectedWord = wordFor(entry, "ja").text;
+            expect(card.speech).toBe(expectedWord);
+          }
         } else if (WORDS.some((w) => w.icon === card.conceptId)) {
           const entry = WORDS.find((w) => w.icon === card.conceptId)!;
           const expectedWord = wordFor(entry, "ja").text;
@@ -1447,6 +1517,75 @@ describe("conceptmatch/logic", () => {
           }
         }
       }
+    });
+
+    it("correctly delegates mixed cards from numerals, shapes, animals, colors, and words on language change", () => {
+      // 1. Numerals card
+      const numCard: ConceptMatchCard = {
+        key: "3-arabic",
+        conceptId: "3",
+        display: { type: "text", text: "3" },
+        speech: "three",
+      };
+      expect(updateCardLang(numCard, "mixed", "ja").speech).toBe(
+        numberWord("ja", 3).t,
+      );
+
+      // 2. Shapes card
+      const shapeCard: ConceptMatchCard = {
+        key: "circle-shape",
+        conceptId: "circle",
+        display: { type: "icon", icon: "circle" },
+        speech: "circle",
+      };
+      expect(updateCardLang(shapeCard, "mixed", "ja").speech).toBe(
+        t("ja", "shape.circle"),
+      );
+
+      // 3. Animal sound card
+      const soundCard: ConceptMatchCard = {
+        key: "dog-sound",
+        conceptId: "dog",
+        display: { type: "audio" },
+        speech: "woof",
+      };
+      expect(updateCardLang(soundCard, "mixed", "ja").speech).toBe(
+        t("ja", "sound.dog"),
+      );
+
+      // 4. Animal icon card
+      const animalIconCard: ConceptMatchCard = {
+        key: "dog-icon",
+        conceptId: "dog",
+        display: { type: "icon", icon: "dog" },
+        speech: "dog",
+      };
+      const dogEntry = WORDS.find((w) => w.icon === "dog")!;
+      expect(updateCardLang(animalIconCard, "mixed", "ja").speech).toBe(
+        wordFor(dogEntry, "ja").text,
+      );
+
+      // 5. Color card
+      const colorCard: ConceptMatchCard = {
+        key: "red-word",
+        conceptId: "red",
+        display: { type: "text", text: "red" },
+        speech: "red",
+      };
+      const updatedColor = updateCardLang(colorCard, "mixed", "ja");
+      expect(updatedColor.speech).toBe(t("ja", "color.red"));
+      expect(
+        updatedColor.display.type === "text" && updatedColor.display.text,
+      ).toBe(t("ja", "color.red"));
+
+      // 6. Letter card (preserved)
+      const letterCard: ConceptMatchCard = {
+        key: "A-upper",
+        conceptId: "A",
+        display: { type: "text", text: "A" },
+        speech: "A",
+      };
+      expect(updateCardLang(letterCard, "mixed", "ja")).toEqual(letterCard);
     });
   });
 
@@ -1651,4 +1790,3 @@ describe("conceptmatch/logic", () => {
     });
   });
 });
-
