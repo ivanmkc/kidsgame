@@ -146,6 +146,52 @@ vi.mock('react-native', async (importOriginal) => {
 });
 
 describe('StickerGame', () => {
+  it('enforces minX boundary matching the delete button overhang (14px) when dropping a sticker', async () => {
+    const { unmount } = render(
+      <StickerGame sceneId="d-farm" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />
+    );
+
+    const trayItem = screen.getAllByRole('button').find(b => b.getAttribute('data-testid')?.startsWith('sticker-tray-'));
+    expect(trayItem).toBeDefined();
+
+    const stageProps = capturedViewProps['sticker-stage'];
+    stageProps?.onLayout?.({} as unknown);
+
+    const dispatchTouch = (type: 'start' | 'move' | 'end', x: number, y: number) => {
+      const touch = { pageX: x, pageY: y, clientX: x, clientY: y, identifier: 0, target: trayItem! };
+      if (type === 'start') {
+        fireEvent.touchStart(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else if (type === 'move') {
+        fireEvent.touchMove(trayItem!, { touches: [touch], changedTouches: [touch] });
+      } else {
+        fireEvent.touchEnd(trayItem!, { touches: [], changedTouches: [touch] });
+      }
+    };
+
+    await act(async () => {
+      dispatchTouch('start', 100, 100);
+      await new Promise((r) => setTimeout(r, 210));
+      // Drop exactly at the top-left corner of the stage (10, 20)
+      dispatchTouch('move', 10, 20);
+    });
+    act(() => {
+      dispatchTouch('end', 10, 20);
+    });
+
+    const stickers = screen.getAllByTestId(/sticker-placed-/);
+    expect(stickers.length).toBeGreaterThan(0);
+    const placed = stickers[0];
+    
+    const newLeft = parseFloat(placed.style.left);
+    const newTop = parseFloat(placed.style.top);
+    
+    // Both X and Y should be clamped to 14
+    expect(newLeft).toBeCloseTo(14, 1);
+    expect(newTop).toBeCloseTo(14, 1);
+    
+    unmount();
+  });
+
   beforeEach(() => {
     mockDimensions = null;
     capturedPickerProps = null;
@@ -1228,16 +1274,16 @@ describe('StickerGame', () => {
     const touch = { pageX: 50, pageY: 50, clientX: 50, clientY: 50, identifier: 0, target: placed };
     act(() => {
       fireEvent.touchStart(placed, { touches: [touch], changedTouches: [touch] });
-      fireEvent.touchMove(placed, { touches: [{ ...touch, pageX: 9999, pageY: -9999 }], changedTouches: [{ ...touch, pageX: 9999, pageY: -9999 }] });
-      fireEvent.touchEnd(placed, { touches: [], changedTouches: [{ ...touch, pageX: 9999, pageY: -9999 }] });
+      // Drag top-left to check the 14px boundary for both X and Y
+      fireEvent.touchMove(placed, { touches: [{ ...touch, pageX: -9999, pageY: -9999 }], changedTouches: [{ ...touch, pageX: -9999, pageY: -9999 }] });
+      fireEvent.touchEnd(placed, { touches: [], changedTouches: [{ ...touch, pageX: -9999, pageY: -9999 }] });
     });
 
     const newLeft = parseFloat(placed.style.left);
     const newTop = parseFloat(placed.style.top);
 
     expect(newTop).toBeCloseTo(14, 1);
-    expect(newLeft).toBeLessThan(2000);
-    expect(newLeft).toBeGreaterThan(0);
+    expect(newLeft).toBeCloseTo(14, 1);
 
     unmount();
   });

@@ -232,14 +232,14 @@ export function StickerGame({ onHome, sceneId, onPickScene, onBackToPicker, lang
   const addSticker = (icon: string, at?: { x: number; y: number }) => {
     sfx.tap();
     const size = 0.09 + Math.random() * 0.03;
-    const maxX = Math.max(0, 1 - size - 14 / stageW);
+    const maxX = Math.max(14 / stageW, 1 - size - 14 / stageW);
     const maxY = Math.max(14 / stageH, 1 - size * (stageW / stageH));
     setPlaced((p) => [
       ...p,
       {
         key: nextKey.current++,
         icon,
-        x: at ? Math.min(maxX, Math.max(0, at.x)) : 0.3 + Math.random() * 0.4,
+        x: at ? Math.min(maxX, Math.max(14 / stageW, at.x)) : 0.3 + Math.random() * 0.4,
         y: at ? Math.min(maxY, Math.max(14 / stageH, at.y)) : 0.3 + Math.random() * 0.35,
         size,
         rotation: 0,
@@ -568,10 +568,10 @@ const DraggableSticker = React.memo(function DraggableSticker({
           return;
         }
         if (Math.abs(g.dx) + Math.abs(g.dy) >= 6) {
-          const maxX = Math.max(0, 1 - pl.size - 14 / w);
+          const maxX = Math.max(14 / w, 1 - pl.size - 14 / w);
           const maxY = Math.max(14 / h, 1 - pl.size * (w / h));
           mv(pl.key,
-             Math.min(maxX, Math.max(0, pl.x + g.dx / w)),
+             Math.min(maxX, Math.max(14 / w, pl.x + g.dx / w)),
              Math.min(maxY, Math.max(14 / h, pl.y + g.dy / h)));
         }
         pan.current!.setValue({ x: 0, y: 0 });
