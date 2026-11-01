@@ -19,7 +19,7 @@ import { Lang, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
-import { saySequence, sayThen, sfx } from "../../sound";
+import { saySequence, sayThen, sfx, stopNarration } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
 import { useWinLine } from "../winlines";
 import {
@@ -105,6 +105,7 @@ export function BingoGame({ onHome, difficulty, lang }: Props) {
 
   useEffect(
     () => () => {
+      stopNarration();
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
     },
     [],
