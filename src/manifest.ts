@@ -1,6 +1,7 @@
 import raw from './assets/manifest.json';
 import { HIDDEN_LEVELS } from './hiddenLevels';
 import { t, UIKey } from './i18n';
+import { LANGS } from './lang';
 
 export interface Box {
   x: number;
@@ -164,23 +165,20 @@ export interface Manifest {
 
 const rawManifest = raw as unknown as Manifest;
 
+function sceneNameT(prefix: 'diff' | 'hidden', sceneId: string): Record<string, string> {
+  const key = `${prefix}.scene.${sceneId}` as UIKey;
+  return Object.fromEntries(LANGS.map(({ id }) => [id, t(id, key)]));
+}
+
 export const manifest: Manifest = {
   ...rawManifest,
   diff: rawManifest.diff.map((scene) => ({
     ...scene,
-    nameT: scene.nameT ?? {
-      ja: t('ja', `diff.scene.${scene.id}` as UIKey),
-      cmn: t('cmn', `diff.scene.${scene.id}` as UIKey),
-      yue: t('yue', `diff.scene.${scene.id}` as UIKey),
-    },
+    nameT: scene.nameT ?? sceneNameT('diff', scene.id),
   })),
   hidden: rawManifest.hidden.map((scene) => ({
     ...scene,
-    nameT: scene.nameT ?? {
-      ja: t('ja', `hidden.scene.${scene.id}` as UIKey),
-      cmn: t('cmn', `hidden.scene.${scene.id}` as UIKey),
-      yue: t('yue', `hidden.scene.${scene.id}` as UIKey),
-    },
+    nameT: scene.nameT ?? sceneNameT('hidden', scene.id),
     level: scene.level ?? HIDDEN_LEVELS[scene.id],
   })),
 };
