@@ -425,6 +425,37 @@ describe("sound module", () => {
       const s = await import("../sound");
       expect(s.isMuted()).toBe(false);
     });
+
+    it("does not crash when window.localStorage access throws SecurityError on setMuted", async () => {
+      vi.resetModules();
+      const fakeWindow = {
+        speechSynthesis: { speak: speakMock, cancel: cancelMock },
+        get localStorage(): Storage {
+          throw new Error("SecurityError");
+        },
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+      vi.stubGlobal("window", fakeWindow);
+      const s = await import("../sound");
+      expect(() => s.setMuted(true)).not.toThrow();
+      expect(s.isMuted()).toBe(true);
+      expect(() => s.setMuted(false)).not.toThrow();
+      expect(s.isMuted()).toBe(false);
+    });
+
+    it("does not crash when window.localStorage is undefined on setMuted", async () => {
+      vi.resetModules();
+      const fakeWindow = {
+        speechSynthesis: { speak: speakMock, cancel: cancelMock },
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      };
+      vi.stubGlobal("window", fakeWindow);
+      const s = await import("../sound");
+      expect(() => s.setMuted(true)).not.toThrow();
+      expect(s.isMuted()).toBe(true);
+    });
   });
 
   describe("escape room audio clip availability", () => {
