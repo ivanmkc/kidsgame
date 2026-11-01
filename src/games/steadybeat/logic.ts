@@ -79,6 +79,31 @@ export function passThreshold(d: Difficulty): number {
   return 0.75;
 }
 
+export interface SteadyBeatLayout {
+  circleSize: number;
+  gap: number;
+}
+
+export function steadyBeatLayout(height: number): SteadyBeatLayout {
+  if (height >= 480) {
+    return {
+      circleSize: 180,
+      gap: 28,
+    };
+  }
+
+  const gap = height < 360 ? 10 : 14;
+  // Available height for circle: total viewport height minus GameShell chrome (84px),
+  // status card (~60px), tap progress dots (~28px), and 2 vertical gaps.
+  const maxCircle = Math.floor(height - 84 - 60 - 28 - gap * 2);
+  const circleSize = Math.max(90, Math.min(140, maxCircle));
+
+  return {
+    circleSize,
+    gap,
+  };
+}
+
 /** Voice-clip contract: every spoken line, all langs. */
 export function speechLines(): string[] {
   const out: string[] = [];

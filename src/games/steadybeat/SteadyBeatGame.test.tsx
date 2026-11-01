@@ -15,10 +15,41 @@ import { Lang } from "../../lang";
 import { SteadyBeatGame } from "./SteadyBeatGame";
 import * as logic from "./logic";
 
+function setViewport(width: number, height: number) {
+  Object.defineProperty(window, "innerWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(window, "innerHeight", {
+    value: height,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: width,
+    configurable: true,
+  });
+  Object.defineProperty(document.documentElement, "clientHeight", {
+    value: height,
+    configurable: true,
+  });
+  if (window.visualViewport) {
+    Object.defineProperty(window.visualViewport, "width", {
+      value: width,
+      configurable: true,
+    });
+    Object.defineProperty(window.visualViewport, "height", {
+      value: height,
+      configurable: true,
+    });
+  }
+  window.dispatchEvent(new Event("resize"));
+}
+
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
   sound.setMuted(false);
+  setViewport(1024, 768);
 });
 it("renders progress dots correctly during the tap phase", () => {
   vi.useFakeTimers();
@@ -882,5 +913,117 @@ it("evaluates canTap correctly across phases, tap counts, and won state", () => 
   expect(logic.canTap(round, 0, "result", false)).toBe(false);
   expect(logic.canTap(round, 0, "tap", true)).toBe(false);
 });
+
+it("scales down circle and gap on compact viewports", () => {
+  const seLandscape = logic.steadyBeatLayout(375);
+  expect(seLandscape.circleSize).toBe(140);
+  expect(seLandscape.gap).toBe(14);
+
+  const androidLandscape = logic.steadyBeatLayout(360);
+  expect(androidLandscape.circleSize).toBe(140);
+  expect(androidLandscape.gap).toBe(14);
+
+  const compactLandscape = logic.steadyBeatLayout(320);
+  expect(compactLandscape.circleSize).toBe(128);
+  expect(compactLandscape.gap).toBe(10);
+});
+
+it("preserves 180px circle and 28px gap on portrait and tablet screens", () => {
+  const portrait375 = logic.steadyBeatLayout(667);
+  expect(portrait375.circleSize).toBe(180);
+  expect(portrait375.gap).toBe(28);
+
+  const portrait390 = logic.steadyBeatLayout(844);
+  expect(portrait390.circleSize).toBe(180);
+  expect(portrait390.gap).toBe(28);
+
+  const tablet = logic.steadyBeatLayout(768);
+  expect(tablet.circleSize).toBe(180);
+  expect(tablet.gap).toBe(28);
+});
+
+it("fits total content height within compact mobile landscape viewports without clipping", () => {
+  // GameShell header (74px) + root bottom padding (10px) = 84px chrome.
+  // Status card (~60px), tap progress dots (~28px), circle (circleSize), and 2 vertical gaps.
+  const heights = [320, 360, 375, 390, 414, 428];
+  for (const h of heights) {
+    const layout = logic.steadyBeatLayout(h);
+    const totalHeight = 84 + 60 + 28 + layout.circleSize + layout.gap * 2;
+    expect(totalHeight).toBeLessThanOrEqual(h);
+  }
+});
+
+it("renders compact 140px circle and 14px gap on 667x375 landscape viewport", () => {
+  setViewport(667, 375);
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.style.width).toBe("140px");
+  expect(circle.style.height).toBe("140px");
+
+  const board = screen.getByTestId("steadybeat-board");
+  expect(board.style.gap).toBe("14px");
+});
+
+it("renders scaled 128px circle and 10px gap on 568x320 landscape viewport without clipping dots", () => {
+  vi.useFakeTimers();
+  setViewport(568, 320);
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past 4-beat count-in to tap phase
+  act(() => {
+    vi.advanceTimersByTime(5000);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  expect(screen.getAllByTestId("steadybeat-tap-dot-empty")).toHaveLength(8);
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.style.width).toBe("128px");
+  expect(circle.style.height).toBe("128px");
+
+  const board = screen.getByTestId("steadybeat-board");
+  expect(board.style.gap).toBe("10px");
+
+  vi.useRealTimers();
+});
+
+it("renders all 8 tap progress dots in tap phase on compact landscape viewport without overflow", () => {
+  vi.useFakeTimers();
+  setViewport(667, 375);
+
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  // Advance past 4-beat count-in to tap phase
+  act(() => {
+    vi.advanceTimersByTime(5000);
+  });
+
+  expect(screen.getByText("Your turn!")).toBeTruthy();
+  expect(screen.getAllByTestId("steadybeat-tap-dot-empty")).toHaveLength(8);
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.style.width).toBe("140px");
+  expect(circle.style.height).toBe("140px");
+
+  const board = screen.getByTestId("steadybeat-board");
+  expect(board.style.gap).toBe("14px");
+
+  vi.useRealTimers();
+});
+
+it("renders default 180px circle and 28px gap on standard viewport", () => {
+  setViewport(1024, 768);
+  render(<SteadyBeatGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+  const circle = screen.getByTestId("steadybeat-circle");
+  expect(circle.style.width).toBe("180px");
+  expect(circle.style.height).toBe("180px");
+
+  const board = screen.getByTestId("steadybeat-board");
+  expect(board.style.gap).toBe("28px");
+});
+
 
 

@@ -5,6 +5,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { GameShell, ScoreChip } from "../../components/GameShell";
@@ -26,6 +27,7 @@ import {
   SteadyBeatRound,
   SteadyBeatPhase,
   canTap,
+  steadyBeatLayout,
 } from "./logic";
 
 interface Props {
@@ -35,6 +37,8 @@ interface Props {
 }
 
 export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
+  const { height } = useWindowDimensions();
+  const { circleSize, gap } = steadyBeatLayout(height);
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const [round, setRound] = useState<SteadyBeatRound>(() =>
@@ -259,7 +263,7 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
         <ScoreChip label={`💓 ${score}/${total}`} testID="steadybeat-score" />
       }
     >
-      <View style={styles.board}>
+      <View testID="steadybeat-board" style={[styles.board, { gap }]}>
         {phase === "listen" ? (
           <View style={[styles.statusCard, shadows.soft]}>
             <Animated.Text
@@ -309,6 +313,11 @@ export function SteadyBeatGame({ onHome, difficulty, lang }: Props) {
           disabled={!canTapCircle}
           style={({ pressed }) => [
             styles.circle,
+            {
+              width: circleSize,
+              height: circleSize,
+              borderRadius: circleSize / 2,
+            },
             shadows.lifted,
             phase === "listen" && !flash && styles.circleDimmed,
             phase === "listen" && flash && styles.circleFlash,
@@ -387,7 +396,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 28,
     paddingHorizontal: 16,
   },
   statusCard: {
@@ -412,9 +420,6 @@ const styles = StyleSheet.create({
   resultRow: { flexDirection: "row", gap: 4 },
   resultStar: { fontSize: 22 },
   circle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
     backgroundColor: "#9B7EDE",
     borderWidth: 6,
     borderColor: "#7A5BBF",
