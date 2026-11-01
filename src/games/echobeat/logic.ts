@@ -104,7 +104,7 @@ export function checkEcho(
   if (round.gaps.length === 1) {
     const err = Math.abs(playerGaps[0] - round.gaps[0]);
     const allowedErr = Math.max(round.gaps[0] * tol, minWindow);
-    return { countCorrect, timingCorrect: err <= allowedErr };
+    return { countCorrect, timingCorrect: err < allowedErr };
   }
 
   const expectedTotal = round.gaps.reduce((a, b) => a + b, 0);
@@ -128,7 +128,7 @@ export function checkEcho(
     const actualNormalized = playerGaps[i] / tempoScale;
     const err = Math.abs(actualNormalized - expected);
     const allowedErr = Math.max(expected * tol, minWindow);
-    if (err > allowedErr) {
+    if (err >= allowedErr) {
       timingCorrect = false;
       break;
     }
