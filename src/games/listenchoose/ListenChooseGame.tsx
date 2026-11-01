@@ -154,7 +154,6 @@ export function ListenChooseGame({
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       celebrateTimerRef.current = setTimeout(() => {
         if (!isValid()) return;
-        lockedRef.current = false;
         setCelebrate(false);
         setCorrectIcon(null);
         const next = updateGameState(
@@ -164,6 +163,7 @@ export function ListenChooseGame({
           difficulty,
           lang,
         );
+        lockedRef.current = next.won;
         setGameState(next);
         if (!next.won) {
           if (!isValid()) return;
@@ -357,6 +357,7 @@ export function ListenChooseGame({
                   }
                   correct={correctIcon === choice.icon}
                   wobble={wobbleIcon === choice.icon}
+                  disabled={lockedRef.current}
                   onPress={() => onPick(choice)}
                   layout={layout}
                 />
@@ -397,6 +398,7 @@ function ChoiceCard({
   highlight,
   correct,
   wobble,
+  disabled,
   onPress,
   layout = listenChooseLayout(0, 800),
 }: {
@@ -406,6 +408,7 @@ function ChoiceCard({
   highlight: boolean;
   correct: boolean;
   wobble: boolean;
+  disabled?: boolean;
   onPress: () => void;
   layout?: ListenChooseLayout;
 }) {
@@ -475,11 +478,13 @@ function ChoiceCard({
     >
       <Pressable
         onPress={onPress}
+        disabled={disabled}
         testID={`choice-${choice.icon}`}
         accessibilityLabel={label}
         accessibilityRole="button"
-        accessibilityState={{ selected: highlight }}
+        accessibilityState={{ selected: highlight, disabled }}
         aria-selected={highlight}
+        aria-disabled={disabled}
         style={({ pressed }) => [
           styles.choiceCard,
           layout.shortH && styles.choiceCardShort,
