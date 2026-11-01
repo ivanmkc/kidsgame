@@ -1257,4 +1257,71 @@ describe("LettersGame", () => {
       vi.useRealTimers();
     }
   });
+
+  it("allows toggling captions ON and OFF during active gameplay", () => {
+    const generatedRounds: logic.LetterRound[] = [];
+    const origMakeLetterRound = logic.makeLetterRound;
+    vi.spyOn(logic, "makeLetterRound").mockImplementation(
+      (rng, tier, tileCount, avoidKey, lang) => {
+        const res = origMakeLetterRound(rng, tier, tileCount, avoidKey, lang);
+        generatedRounds.push(res);
+        return res;
+      },
+    );
+
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Start screen toggle defaults to OFF
+    expect(screen.getByTestId("captions-toggle").textContent).toContain("OFF");
+
+    // Start the game
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    // In active game, glyph is hidden initially
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
+
+    // In-game captions toggle is present and shows OFF
+    const inGameToggle = screen.getByTestId("captions-toggle");
+    expect(inGameToggle.textContent).toContain("OFF");
+
+    // Turn captions ON mid-game
+    act(() => {
+      fireEvent.click(inGameToggle);
+    });
+
+    expect(inGameToggle.textContent).toContain("ON");
+    const round1 = generatedRounds[0];
+    expect(screen.getByTestId("letters-glyph").textContent).toBe(
+      round1.targetDisplay,
+    );
+
+    // Turn captions OFF mid-game
+    act(() => {
+      fireEvent.click(inGameToggle);
+    });
+
+    expect(inGameToggle.textContent).toContain("OFF");
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
+  });
+
+  it("localizes the in-game captions toggle in Japanese", () => {
+    render(<LettersGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+    act(() => {
+      fireEvent.click(screen.getByTestId("play-button"));
+    });
+
+    const inGameToggle = screen.getByTestId("captions-toggle");
+    expect(inGameToggle.textContent).toContain("オフ");
+    expect(screen.queryByTestId("letters-glyph")).toBeNull();
+
+    act(() => {
+      fireEvent.click(inGameToggle);
+    });
+
+    expect(inGameToggle.textContent).toContain("オン");
+    expect(screen.queryByTestId("letters-glyph")).toBeTruthy();
+  });
 });
