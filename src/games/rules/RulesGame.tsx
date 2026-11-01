@@ -306,7 +306,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
         visible={won}
         message={t(lang, "win.rules")}
         onNext={reset}
-        nextLabel={t(lang, "overlay.nextRound")}
+        nextLabel={t(lang, "overlay.playAgain")}
         onHome={onHome}
         lang={lang}
       />
