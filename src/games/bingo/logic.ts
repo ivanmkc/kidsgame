@@ -272,21 +272,9 @@ export function checkBingo(marked: boolean[], size: number): number[] | null {
   return null;
 }
 
-const BINGO_SHOUT: Record<Lang, string> = {
-  en: "BINGO!",
-  ja: "ビンゴ！",
-  cmn: "宾果！",
-  yue: "BINGO!",
-};
-
-export function bingoShout(lang: Lang): string {
-  return BINGO_SHOUT[lang];
-}
-
 export function speechLines(): string[] {
   const s = new Set<string>();
   for (const lang of ["en", "ja", "cmn", "yue"] as const) {
-    s.add(BINGO_SHOUT[lang]);
     if (lang !== "en") s.add(NAME_ASK[lang]);
     for (const w of WORDS) {
       for (const l of namePromptLines(w.icon, lang)) s.add(l);
