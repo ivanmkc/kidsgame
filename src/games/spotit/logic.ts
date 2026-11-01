@@ -43,11 +43,11 @@ export type Card = number[]; // indices into SYMBOLS, n+1 per card
 
 export function orderForDifficulty(difficulty?: Difficulty): number {
   switch (difficulty) {
-    case 'easy':
+    case "easy":
       return 2;
-    case 'hard':
+    case "hard":
       return 5;
-    case 'medium':
+    case "medium":
     case undefined:
       return 3;
     default: {
@@ -173,10 +173,16 @@ export function symbolLabel(iconName: string, lang: Lang): string {
 
 export function computeSoloCardSize(width: number, height: number): number {
   const isLandscape = width > height;
-  const availH = height - 84;
-  return isLandscape
-    ? Math.max(0, Math.min(availH - 24, (width - 3 * 24) / 2, 460))
-    : Math.max(0, Math.min((availH - 60) / 2, width - 40, 400));
+  if (isLandscape) {
+    const availH = height - 84;
+    return Math.max(0, Math.min(availH - 24, (width - 3 * 24) / 2, 460));
+  }
+  // On narrow portrait viewports (e.g. mobile phones with width <= 390),
+  // GameShell header chips wrap onto a second line, occupying ~120px instead of 84px.
+  // We subtract 96px for the 24px TimerRing, dividers, and safety margins.
+  const headerH = width <= 390 ? 120 : 84;
+  const availH = height - headerH;
+  return Math.max(0, Math.min((availH - 96) / 2, width - 40, 400));
 }
 
 export function computeDuelCardSize(width: number, height: number): number {
