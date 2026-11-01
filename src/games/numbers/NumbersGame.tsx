@@ -144,7 +144,8 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
   };
 
   const onTile = (i: number) => {
-    if (won || isFinishing || lockedRef.current || wrongIdxRef.current === i) return;
+    if (won || isFinishing || lockedRef.current || wrongIdxRef.current === i)
+      return;
     if (round.tiles[i].isAnswer) {
       lockedRef.current = true;
       clearWrongTimer();
@@ -198,7 +199,16 @@ export function NumbersGame({ onHome, difficulty, lang }: Props) {
     setIsFinishing(false);
   };
 
-  const cols = numSettings.tiles <= 6 ? 3 : numSettings.tiles <= 8 ? 4 : 3;
+  const isLandscape = width > height;
+  const cols = isLandscape
+    ? numSettings.tiles <= 6
+      ? 3
+      : 5
+    : numSettings.tiles <= 6
+      ? 3
+      : numSettings.tiles <= 8
+        ? 4
+        : 3;
   const rows = Math.ceil(numSettings.tiles / cols);
   const gap = 12;
   const tile = Math.max(

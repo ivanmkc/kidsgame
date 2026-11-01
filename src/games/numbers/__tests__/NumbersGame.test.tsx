@@ -569,6 +569,74 @@ describe("NumbersGame", () => {
     }
   });
 
+  it("uses 5 columns in landscape for Hard mode to fit in 2 rows without overflowing", () => {
+    const origWidth = window.innerWidth;
+    const origHeight = window.innerHeight;
+    const setViewport = (width: number, height: number) => {
+      Object.defineProperty(window, "innerWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: height,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: height,
+        configurable: true,
+      });
+      if (window.visualViewport) {
+        Object.defineProperty(window.visualViewport, "width", {
+          value: width,
+          configurable: true,
+        });
+        Object.defineProperty(window.visualViewport, "height", {
+          value: height,
+          configurable: true,
+        });
+      }
+      window.dispatchEvent(new Event("resize"));
+    };
+
+    try {
+      // Compact mobile landscape (e.g. 640x360)
+      setViewport(640, 360);
+      const { unmount } = render(
+        <NumbersGame onHome={vi.fn()} difficulty="hard" lang="en" />,
+      );
+      const tile = screen.getByTestId("numbers-tile-0");
+      const grid = tile.parentElement!;
+      const tileWidth = parseFloat(tile.style.width);
+      const gridWidth = parseFloat(grid.style.width);
+      const landscapeCols = Math.round((gridWidth + 12) / (tileWidth + 12));
+      expect(landscapeCols).toBe(5);
+      const landscapeRows = Math.ceil(9 / landscapeCols);
+      expect(landscapeRows).toBe(2);
+
+      unmount();
+
+      // Mobile portrait (e.g. 360x640) keeps 3 columns for 3x3 grid
+      setViewport(360, 640);
+      render(<NumbersGame onHome={vi.fn()} difficulty="hard" lang="en" />);
+      const portraitTile = screen.getByTestId("numbers-tile-0");
+      const portraitGrid = portraitTile.parentElement!;
+      const portraitTileWidth = parseFloat(portraitTile.style.width);
+      const portraitGridWidth = parseFloat(portraitGrid.style.width);
+      const portraitCols = Math.round(
+        (portraitGridWidth + 12) / (portraitTileWidth + 12),
+      );
+      expect(portraitCols).toBe(3);
+      const portraitRows = Math.ceil(9 / portraitCols);
+      expect(portraitRows).toBe(3);
+    } finally {
+      setViewport(origWidth, origHeight);
+    }
+  });
+
   it("preserves round progress when language is switched mid-celebration", () => {
     vi.useFakeTimers();
     try {
