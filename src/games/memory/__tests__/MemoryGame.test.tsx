@@ -132,6 +132,28 @@ describe("MemoryGame", () => {
     expect(movesText.textContent).toContain("1");
   });
 
+  it("plays tap sound and speaks vocabulary word when card is flipped", async () => {
+    render(<MemoryGame onHome={vi.fn()} difficulty="easy" lang="en" />);
+    
+    const cards = screen
+      .getAllByRole("button")
+      .filter((el) => el.getAttribute("data-testid")?.startsWith("memory-card-"));
+
+    vi.mocked(sound.sfx.tap).mockClear();
+    vi.mocked(sound.say).mockClear();
+
+    await act(async () => {
+      fireEvent.click(cards[0]);
+    });
+
+    expect(sound.sfx.tap).toHaveBeenCalledTimes(1);
+    expect(sound.say).toHaveBeenCalledTimes(1);
+    
+    // The vocabulary word is the aria-label of the flipped card
+    const label = cards[0].getAttribute("aria-label");
+    expect(sound.say).toHaveBeenCalledWith(label);
+  });
+
   it("localizes face-down card accessibility labels via i18n in non-English mode", () => {
     const onHome = vi.fn();
     render(<MemoryGame onHome={onHome} difficulty="easy" lang="ja" />);

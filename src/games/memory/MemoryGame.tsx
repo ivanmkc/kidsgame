@@ -86,6 +86,10 @@ export function MemoryGame({
         say(t(lang, "hidden.turn", { name: t(lang, MP_PLAYERS[next].name) }));
       }
     },
+    onFlipCard: (card) => {
+      sfx.tap();
+      say(cardLabel(card.icon, lang));
+    },
   });
   const [timerKey, setTimerKey] = useState(0);
   const showTimer = settingsFor(difficulty).timer && mode === "solo";
