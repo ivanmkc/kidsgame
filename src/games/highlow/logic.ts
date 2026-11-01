@@ -10,9 +10,18 @@ export interface HighLowRound {
 
 const BASE_MIDI = 60; // middle C
 
-function intervalFor(d: Difficulty): number {
-  if (d === "easy") return 12;
-  if (d === "medium") return 7;
+function intervalFor(d: Difficulty, roundIndex: number): number {
+  if (d === "easy") {
+    // Easy: 8 rounds. Rounds 1-4: 12 semitones (octave); rounds 5-8: 9 semitones.
+    return roundIndex < 4 ? 12 : 9;
+  }
+  if (d === "medium") {
+    // Medium: 10 rounds. Rounds 1-4: 7 semitones; rounds 5-7: 5 semitones; rounds 8-10: 4 semitones.
+    if (roundIndex < 4) return 7;
+    if (roundIndex < 7) return 5;
+    return 4;
+  }
+  // Hard: 12 rounds. Fixed at 3 semitones.
   return 3;
 }
 
@@ -25,8 +34,12 @@ export function roundsToWin(d: Difficulty): number {
 /** The kid hears note A then note B and taps ↗️ HIGHER or ↘️ LOWER for where
  *  the SECOND note landed. The answer must therefore fall out of the two
  *  notes — never a coin flip, or the round is unwinnable by listening. */
-export function makeHighLowRound(rng: Rng, d: Difficulty): HighLowRound {
-  const interval = intervalFor(d);
+export function makeHighLowRound(
+  rng: Rng,
+  d: Difficulty,
+  roundIndex: number,
+): HighLowRound {
+  const interval = intervalFor(d, roundIndex);
   const base = BASE_MIDI + randInt(rng, 13) - 6;
   const secondIsHigher = rng() < 0.5;
   const noteA = secondIsHigher ? base : base + interval;

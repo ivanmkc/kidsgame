@@ -19,11 +19,44 @@ describe("highlow logic", () => {
     for (let seed = 1; seed <= 30; seed++) {
       for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
-        const r = makeHighLowRound(rng, d);
+        const r = makeHighLowRound(rng, d, 0);
         expect(r.noteA).not.toBe(r.noteB);
         expect(Math.abs(r.noteB - r.noteA)).toBeGreaterThan(0);
         expect(["high", "low"]).toContain(correctAnswer(r));
       }
+    }
+  });
+
+  it("scaffolds interval widths across session round progress", () => {
+    const rng = makeRng(123);
+    // Easy: 8 rounds. Rounds 1-4: 12 semitones, Rounds 5-8: 9 semitones.
+    for (let i = 0; i < 4; i++) {
+      const r = makeHighLowRound(rng, "easy", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(12);
+    }
+    for (let i = 4; i < 8; i++) {
+      const r = makeHighLowRound(rng, "easy", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(9);
+    }
+
+    // Medium: 10 rounds. Rounds 1-4: 7; Rounds 5-7: 5; Rounds 8-10: 4.
+    for (let i = 0; i < 4; i++) {
+      const r = makeHighLowRound(rng, "medium", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(7);
+    }
+    for (let i = 4; i < 7; i++) {
+      const r = makeHighLowRound(rng, "medium", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(5);
+    }
+    for (let i = 7; i < 10; i++) {
+      const r = makeHighLowRound(rng, "medium", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(4);
+    }
+
+    // Hard: 12 rounds. Fixed at 3 semitones.
+    for (let i = 0; i < 12; i++) {
+      const r = makeHighLowRound(rng, "hard", i);
+      expect(Math.abs(r.noteB - r.noteA)).toBe(3);
     }
   });
 
@@ -300,7 +333,7 @@ describe("highlow logic", () => {
       for (let seed = 1; seed <= 50; seed++) {
         for (const d of ["easy", "medium", "hard"] as const) {
           const rng = makeRng(seed);
-          const r = makeHighLowRound(rng, d);
+          const r = makeHighLowRound(rng, d, 0);
           const y0 = melodyDotOffsetY(r, 0);
           const y1 = melodyDotOffsetY(r, 1);
           if (correctAnswer(r) === "high") {
