@@ -120,7 +120,7 @@ describe("SoundsGame language switch safety", () => {
     expect(confirmLines).toEqual([expect.stringMatching(/！$/)]);
   });
 
-  it("drops pending confirmation callback and does not advance round if language switches during praise", () => {
+  it("advances round and increments score if language switches during praise", () => {
     vi.useFakeTimers();
     const saySeqSpy = vi.spyOn(sound, "saySequence");
     const goodSpy = vi.spyOn(sound.sfx, "good");
@@ -143,10 +143,10 @@ describe("SoundsGame language switch safety", () => {
     const langBtn = screen.getByTestId("lang-cycle");
     fireEvent.click(langBtn);
 
-    // Old sayThen callback was cancelled by useLangEpoch and dropped by !isValid()
-    expect(screen.getByTestId("sounds-score").textContent).toContain("0/8");
+    // Old sayThen callback fires and advances the round
+    expect(screen.getByTestId("sounds-score").textContent).toContain("1/8");
 
-    // Japanese prompt is spoken for the active round
+    // Japanese prompt is spoken for the new round
     expect(saySeqSpy).toHaveBeenCalledWith(["どれかな？", expect.any(String)]);
   });
 
@@ -294,9 +294,10 @@ describe("SoundsGame round transition lock", () => {
     // sayThen callback was executed by saySequence cancellation
     expect(sayThenCallback).toBeNull();
 
-    // Current round is active and interactive in new language
+    // Round has advanced, so we interact with the new round
+    const round2 = generatedRounds[1];
     const currentCorrectTile = screen.getByTestId(
-      `sounds-tile-${round1.answerIdx}`,
+      `sounds-tile-${round2.answerIdx}`,
     );
     fireEvent.click(currentCorrectTile);
     expect(goodSpy).toHaveBeenCalledTimes(2);
