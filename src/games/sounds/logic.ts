@@ -4,6 +4,7 @@
 import { Lang } from "../../lang";
 import { Rng, shuffle } from "../../rng";
 import { WORDS, WordEntry, soundsFor, wordFor } from "../../curriculum/content";
+import { t } from "../../i18n";
 
 export interface SoundsTile {
   key: string;
@@ -110,13 +111,6 @@ export function soundsLayout(
   return { gap, tile, gridWidth };
 }
 
-const ASK: Record<Lang, string> = {
-  en: "", // EN builds a full "Which one starts with X?" line
-  ja: "どれかな？",
-  cmn: "哪一个是？",
-  yue: "邊個係？",
-};
-
 function capitalize(s: string): string {
   return s.length ? s[0].toUpperCase() + s.slice(1) : s;
 }
@@ -143,10 +137,11 @@ export function resolveSoundsPrompts(
       ],
     };
   }
+  const ask = t(lang, "sounds.ask");
   const w = wordFor(target, lang);
   return {
-    promptLines: [ASK[lang], w.text],
-    displayPrompt: `${ASK[lang]} ${w.text}`,
+    promptLines: [ask, w.text],
+    displayPrompt: `${ask} ${w.text}`,
     confirmLines: [`${w.text}！`],
     caption: w.roman,
   };
@@ -233,7 +228,7 @@ export function speechLines(): string[] {
   }
   // Non-EN: fixed ask word + per-entry localized word + confirm chime.
   for (const lang of ["ja", "cmn", "yue"] as const) {
-    s.add(ASK[lang]);
+    s.add(t(lang, "sounds.ask"));
     for (const w of WORDS) {
       const loc = wordFor(w, lang);
       s.add(loc.text);

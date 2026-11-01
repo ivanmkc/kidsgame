@@ -385,6 +385,7 @@ export const YUE: Table = {
   'memory.cardFaceDown': '蓋住嘅卡片',
   'memory.foundPair': '{name}搵到一對！再嚟多次！',
   'rhyme.ask': '邊個字尾音一樣呀？',
+  'sounds.ask': '邊個係？',
   'rhyme.confirm': '好啱音！',
   'rhyme.comingSoon': '更多押韻就快嚟！🎶',
   'letters.find': '搵一搵字母 {letter}！',
