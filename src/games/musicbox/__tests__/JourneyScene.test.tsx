@@ -14,6 +14,7 @@ import { JourneyScene } from "../JourneyScene";
 import { ScrollingWorld } from "../ScrollingWorld";
 import { SpawnedObject, SpawnEntry } from "../SpawnedObject";
 import * as music from "../../../music";
+import { sfx } from "../../../sound";
 
 vi.mock("../../assets/images", () => {
   const p = new Proxy({}, { get: () => ({ uri: "stub.png" }) });
@@ -630,6 +631,108 @@ describe("JourneyScene accessibility", () => {
 
     // Normal completion callback
     bounceAnimCallback!({ finished: true });
+    expect(setValueSpy).toHaveBeenCalledWith(0);
+
+    unmount();
+  });
+
+  it("celebrates song melody loop completion with chime, confetti, and vehicle flourish", () => {
+    const winSpy = vi.spyOn(sfx, "win");
+    const timingSpy = vi.spyOn(Animated, "timing");
+
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Twinkle has 42 notes. Taps 1 to 41 are intermediate notes.
+    for (let i = 1; i <= 41; i++) {
+      fireEvent.pointerDown(stage, { pointerId: 1 });
+      fireEvent.pointerUp(stage, { pointerId: 1 });
+    }
+
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.queryAllByText("🎉")).toHaveLength(0);
+
+    // Tap 42 completes the song melody loop
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(winSpy).toHaveBeenCalledTimes(1);
+    expect(screen.queryAllByText("🎉").length).toBeGreaterThan(0);
+
+    const flourishCall = timingSpy.mock.calls.find(
+      (c) => c[1]?.duration === 900,
+    );
+    expect(flourishCall).toBeDefined();
+
+    // Tap 43 begins loop 2 seamlessly without double-celebrating
+    fireEvent.pointerDown(stage, { pointerId: 1 });
+    fireEvent.pointerUp(stage, { pointerId: 1 });
+
+    expect(winSpy).toHaveBeenCalledTimes(1);
+
+    unmount();
+  });
+
+  it("does not celebrate song loop in free play mode", () => {
+    const winSpy = vi.spyOn(sfx, "win");
+
+    const { unmount } = render(
+      <JourneyScene scene={SCENES[0]} freePlay={true} lang="en" />,
+    );
+    const stage = screen.getByLabelText("Stage");
+
+    // Tap 42 times in free play mode
+    for (let i = 1; i <= 42; i++) {
+      fireEvent.pointerDown(stage, { pointerId: 1 });
+      fireEvent.pointerUp(stage, { pointerId: 1 });
+    }
+
+    expect(winSpy).not.toHaveBeenCalled();
+    expect(screen.queryAllByText("🎉")).toHaveLength(0);
+
+    unmount();
+  });
+
+  it("does not reset vehicleFlourish to 0 when flourish animation is interrupted ({ finished: false })", () => {
+    let flourishCallback:
+      | ((result: { finished: boolean }) => void)
+      | undefined;
+    let flourishValue: Animated.Value | undefined;
+
+    const originalTiming = Animated.timing;
+    vi.spyOn(Animated, "timing").mockImplementation((value, config) => {
+      const anim = originalTiming(value, config);
+      if (config.duration === 900) {
+        flourishValue = value as Animated.Value;
+        const originalStart = anim.start.bind(anim);
+        anim.start = (cb?: (result: { finished: boolean }) => void) => {
+          flourishCallback = cb;
+          return originalStart(cb);
+        };
+      }
+      return anim;
+    });
+
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    // Tap 42 times to trigger flourish
+    for (let i = 1; i <= 42; i++) {
+      fireEvent.pointerDown(stage, { pointerId: 1 });
+      fireEvent.pointerUp(stage, { pointerId: 1 });
+    }
+
+    expect(flourishValue).toBeDefined();
+    expect(flourishCallback).toBeDefined();
+
+    const setValueSpy = vi.spyOn(flourishValue!, "setValue");
+
+    // Interrupted completion callback
+    flourishCallback!({ finished: false });
+    expect(setValueSpy).not.toHaveBeenCalled();
+
+    // Normal completion callback
+    flourishCallback!({ finished: true });
     expect(setValueSpy).toHaveBeenCalledWith(0);
 
     unmount();
