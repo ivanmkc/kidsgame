@@ -106,7 +106,8 @@ export function EscapeGame({
   const rooms = manifest.escape ?? [];
   const room = rooms.find((r) => r.id === sceneId);
   const visible = rooms.filter((r) => inFilter(r.level, filter));
-  const surprisePool = visible.length > 0 ? visible : rooms;
+  const hasMatching = visible.length > 0;
+  const surprisePool = hasMatching ? visible : rooms;
   const effDifficulty = filter !== "all" ? filter : room?.level || difficulty;
   const hintMs = escapeHintMs(effDifficulty);
   const [state, setState] = useState<EscapeState>(() => startState());
@@ -225,7 +226,7 @@ export function EscapeGame({
             name: r.nameT?.[lang] ?? r.name,
             image: r.image,
             level: r.level,
-            dimmed: !inFilter(r.level, filter),
+            dimmed: hasMatching && !inFilter(r.level, filter),
           }))}
           onPick={onPickScene}
           onSurprise={() =>
@@ -487,7 +488,7 @@ export function EscapeGame({
                   !revealed &&
                   (hintSpot === h.id ? (
                     <PulseRing strong />
-                  ) : h.kind !== "search" ? (
+                  ) : h.kind !== "search" && effDifficulty !== "hard" ? (
                     <PulseRing dim={!actionable} />
                   ) : null)}
                 {used ? <SparkleBurst trigger="found" /> : null}
