@@ -4,7 +4,46 @@ import {
   computeDuelCardSize,
   soloHintDelayMs,
   shouldShowSoloHintOnWrong,
+  dealRound,
+  dealDuelRound,
+  buildDeck,
 } from "../logic";
+import { makeRng } from "../../../rng";
+
+describe("dealRound and dealDuelRound", () => {
+  it("avoids dealing the same pair twice when given a history", () => {
+    const deck = buildDeck(2); // 7 cards, 21 combinations
+    const rng = makeRng(123);
+    const played = new Set<string>();
+    
+    const seenCombos = new Set<string>();
+    for (let i = 0; i < 15; i++) {
+      const { top, bottom } = dealRound(rng, deck, played);
+      const topStr = [...top].sort().join("");
+      const botStr = [...bottom].sort().join("");
+      const combo = [topStr, botStr].sort().join("-");
+      expect(seenCombos.has(combo)).toBe(false);
+      seenCombos.add(combo);
+    }
+  });
+
+  it("avoids dealing the same triple twice in duel mode", () => {
+    const deck = buildDeck(2); // 7 cards, 28 valid triples
+    const rng = makeRng(456);
+    const played = new Set<string>();
+    
+    const seenCombos = new Set<string>();
+    for (let i = 0; i < 15; i++) {
+      const { center, a, b } = dealDuelRound(rng, deck, played);
+      const cStr = [...center].sort().join("");
+      const aStr = [...a].sort().join("");
+      const bStr = [...b].sort().join("");
+      const combo = [cStr, aStr, bStr].sort().join("-");
+      expect(seenCombos.has(combo)).toBe(false);
+      seenCombos.add(combo);
+    }
+  });
+});
 
 describe("computeSoloCardSize", () => {
   it("prevents negative sizes on extremely small viewports", () => {
