@@ -164,9 +164,10 @@ export function phrasePitchRatios(
   round: SameDiffRound,
   phrase: SeqNote[],
 ): number[] {
-  let minM = round.phraseA[0]?.m ?? 60;
+  const allNotes = [...round.phraseA, ...round.phraseB];
+  let minM = allNotes[0]?.m ?? 60;
   let maxM = minM;
-  for (const n of round.phraseA) {
+  for (const n of allNotes) {
     if (n.m < minM) minM = n.m;
     if (n.m > maxM) maxM = n.m;
   }
