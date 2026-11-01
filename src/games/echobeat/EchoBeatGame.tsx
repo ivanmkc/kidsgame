@@ -60,7 +60,7 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const speechEpoch = useRef(0);
-  const won = score >= total;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.echobeat" as never));
 
   const tempoPulseAnim = useRef(new Animated.Value(0)).current;
@@ -186,6 +186,11 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
             setResult(null);
             setRound(makeEchoBeatRound(rngRef.current, difficulty));
           }, 800);
+        } else {
+          transitionTimer.current = setTimeout(() => {
+            transitionTimer.current = null;
+            setWon(true);
+          }, 800);
         }
       } else {
         stopTempoPulse();
@@ -229,13 +234,17 @@ export function EchoBeatGame({ onHome, difficulty, lang }: Props) {
     speechEpoch.current++;
     if (flashTimer.current) clearTimeout(flashTimer.current);
     if (resultTimer.current) clearTimeout(resultTimer.current);
-    if (transitionTimer.current) clearTimeout(transitionTimer.current);
+    if (transitionTimer.current) {
+      clearTimeout(transitionTimer.current);
+      transitionTimer.current = null;
+    }
     stopNarration();
     stopSequence();
     stopTempoPulse();
     setFlash(null);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
     setScore(0);
+    setWon(false);
     tapTimesRef.current = [];
     tapCountRef.current = 0;
     setTapCount(0);
