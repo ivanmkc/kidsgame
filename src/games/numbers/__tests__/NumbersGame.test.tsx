@@ -146,11 +146,13 @@ describe("NumbersGame", () => {
 
   it("toggles script between Arabic and Han when clicked", () => {
     render(<NumbersGame onHome={vi.fn()} difficulty="easy" lang="ja" />);
+    expect(screen.getByText("すうじさがし")).toBeDefined();
     const btn = screen.getByTestId("numbers-script");
     expect(btn.textContent).toBe("123");
     fireEvent.click(btn);
     expect(sound.sfx.tap).toHaveBeenCalled();
     expect(btn.textContent).toBe("一二三");
+    expect(screen.getByText("すうじさがし（かんすうじ）")).toBeDefined();
   });
 
   it("keeps prompt card as Arabic numeral across rounds after toggling to Han script", () => {

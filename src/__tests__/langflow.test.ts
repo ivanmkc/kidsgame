@@ -133,6 +133,14 @@ describe('i18n table completeness', () => {
     expect(Object.keys(CMN).sort()).toEqual(enKeys);
     expect(Object.keys(YUE).sort()).toEqual(enKeys);
   });
+
+  it('Japanese numbers Han title and hearAgain strings do not contain Kanji', () => {
+    const kanjiRegex = /[\u4e00-\u9faf\u3400-\u4dbf]/;
+    expect(JA['shell.numbers.titleHan']).toBe('すうじさがし（かんすうじ）');
+    expect(JA['shell.numbers.titleHan']).not.toMatch(kanjiRegex);
+    expect(JA['spell.hearAgain']).toBe('🔊 タップでもういちどきく');
+    expect(JA['spell.hearAgain']).not.toMatch(kanjiRegex);
+  });
 });
 
 // ── (b) Static-analysis regression guard ─────────────────────────────────
