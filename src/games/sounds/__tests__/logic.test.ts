@@ -170,6 +170,20 @@ describe("soundsLayout 6 tiles", () => {
     const l3 = soundsLayout(1024, 768, 6);
     expect(l3.tile).toBeGreaterThan(0);
   });
+
+  it("constrains 6 tiles on narrow mobile portrait screens (320x568) to prevent vertical overflow", () => {
+    const layout = soundsLayout(320, 568, 6);
+    expect(layout.tile).toBeCloseTo(86.67, 1);
+    expect(layout.gridWidth).toBe(288);
+    // Grid height must leave enough vertical space for the wrapped 2-line header chips
+    // (~122-130px) and prompt card with romanization captions (~130-150px)
+    // within the 568px viewport height without overlapping header or overflowing screen.
+    const rows = 2;
+    const gridHeight = rows * layout.tile + (rows - 1) * layout.gap;
+    const headerAllowance = 130;
+    const promptAllowance = 150;
+    expect(gridHeight + headerAllowance + promptAllowance).toBeLessThanOrEqual(568);
+  });
 });
 
 describe("resolveSoundsPrompts", () => {
