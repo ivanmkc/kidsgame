@@ -3,7 +3,27 @@ import { t, UIKey } from "../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../lang";
 import { type CardKey } from "../../menuCards";
 import { Rng, shuffle } from "../../rng";
-import { WORDS, WordEntry, wordFor } from "../../curriculum/content";
+import {
+  RHYME_WORDS,
+  WORDS,
+  WordEntry,
+  wordFor,
+} from "../../curriculum/content";
+import { SPOTIT_ICONS, RHYME_SPRITES } from "../../assets/images";
+
+export const MAPPED_RHYME_WORDS: WordEntry[] = RHYME_WORDS.filter(
+  (rw) =>
+    Object.prototype.hasOwnProperty.call(SPOTIT_ICONS, rw.icon) ||
+    Object.prototype.hasOwnProperty.call(RHYME_SPRITES, rw.icon),
+).map((rw) => ({
+  ...rw,
+  ja: "",
+  jaR: "",
+  cmn: "",
+  cmnR: "",
+  yue: "",
+  yueR: "",
+}));
 
 export type CardDisplay =
   | { type: "text"; text: string }
@@ -264,7 +284,8 @@ export function buildBoard(
   }
 
   if (deck === "picture-word" || deck === "picture-spoken") {
-    const validWords = WORDS.filter((entry) =>
+    const baseWords = lang === "en" ? [...WORDS, ...MAPPED_RHYME_WORDS] : WORDS;
+    const validWords = baseWords.filter((entry) =>
       Boolean(wordFor(entry, lang).text),
     );
     const chosen: WordEntry[] = [];
@@ -538,7 +559,7 @@ export function updateCardLang(
   card: ConceptMatchCard,
   deck: ConceptMatchDeck,
   lang: Lang,
-): ConceptMatchCard {
+): ConceptMatchCard | null {
   if (deck === "color-word") {
     const word = t(lang, `color.${card.conceptId}` as UIKey);
     return {
@@ -552,11 +573,17 @@ export function updateCardLang(
   }
 
   if (deck === "picture-word" || deck === "picture-spoken") {
-    const entry = WORDS.find((w) => w.icon === card.conceptId);
+    let entry = WORDS.find((w) => w.icon === card.conceptId);
+    if (!entry) {
+      entry = MAPPED_RHYME_WORDS.find((w) => w.icon === card.conceptId);
+    }
     if (!entry) {
       throw new Error(`Word entry not found for concept: ${card.conceptId}`);
     }
     const word = wordFor(entry, lang).text;
+    if (!word) {
+      return null;
+    }
     return {
       ...card,
       display:
@@ -613,7 +640,10 @@ export function updateCardLang(
     if (COLORS.some((c) => c.id === card.conceptId)) {
       return updateCardLang(card, "color-word", lang);
     }
-    if (WORDS.some((w) => w.icon === card.conceptId)) {
+    if (
+      WORDS.some((w) => w.icon === card.conceptId) ||
+      MAPPED_RHYME_WORDS.some((w) => w.icon === card.conceptId)
+    ) {
       return updateCardLang(card, "picture-word", lang);
     }
     return card;
@@ -626,6 +656,12 @@ export function updateBoardLang(
   board: ConceptMatchCard[],
   deck: ConceptMatchDeck,
   lang: Lang,
-): ConceptMatchCard[] {
-  return board.map((card) => updateCardLang(card, deck, lang));
+): ConceptMatchCard[] | null {
+  const newBoard: ConceptMatchCard[] = [];
+  for (const card of board) {
+    const updated = updateCardLang(card, deck, lang);
+    if (!updated) return null;
+    newBoard.push(updated);
+  }
+  return newBoard;
 }

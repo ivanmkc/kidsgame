@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { SHAPE_ICONS, SPOTIT_ICONS } from "../../assets/images";
+import { SHAPE_ICONS, SPOTIT_ICONS, RHYME_SPRITES } from "../../assets/images";
 import { GameShell, ScoreChip } from "../../components/GameShell";
 import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
 import { WinOverlay } from "../../components/WinOverlay";
@@ -97,9 +97,24 @@ export function ConceptMatchGame({
     }
 
     if (langChanged) {
-      setBoard((currentBoard) => updateBoardLang(currentBoard, deck, lang));
+      const newBoard = updateBoardLang(board, deck, lang);
+      if (newBoard) {
+        setBoard(newBoard);
+      } else {
+        setBoard(
+          buildBoard(
+            makeRng(Math.floor(Math.random() * 1e9)),
+            deck,
+            lang,
+            activePairs,
+            undefined,
+            groupSimilar,
+          ),
+        );
+        reset();
+      }
     }
-  }, [deck, lang, activePairs, difficulty, groupSimilar, reset]);
+  }, [deck, lang, activePairs, difficulty, groupSimilar, reset, board]);
 
   useEffect(() => {
     if (won) {
@@ -208,7 +223,11 @@ export function ConceptMatchGame({
   );
 }
 
-function renderCardFace(card: ConceptMatchCard, size: number, captions: boolean) {
+function renderCardFace(
+  card: ConceptMatchCard,
+  size: number,
+  captions: boolean,
+) {
   const { display } = card;
   switch (display.type) {
     case "text":
@@ -233,7 +252,8 @@ function renderCardFace(card: ConceptMatchCard, size: number, captions: boolean)
     case "icon": {
       const iconSource =
         SPOTIT_ICONS[display.icon] ??
-        (SHAPE_ICONS as Record<string, number>)[display.icon];
+        (SHAPE_ICONS as Record<string, number>)[display.icon] ??
+        RHYME_SPRITES[display.icon];
       if (!iconSource) {
         throw new Error(`Missing icon asset for concept: ${display.icon}`);
       }

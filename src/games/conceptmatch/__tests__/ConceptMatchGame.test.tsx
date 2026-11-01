@@ -29,18 +29,37 @@ vi.mock("../../../sound", async (importOriginal) => {
 });
 
 vi.mock("../../../assets/images", () => {
-  const p = new Proxy(
+  const spotitProxy = new Proxy(
     {},
     {
       get: (_target, prop) => {
-        if (prop === "nonexistent-icon") return undefined;
+        if (prop === "nonexistent-icon" || prop === "sun") return undefined;
         return { uri: "stub.png" };
       },
     },
   );
+  const shapesProxy = new Proxy(
+    {},
+    {
+      get: (_target, prop) => {
+        if (prop === "nonexistent-icon" || prop === "sun") return undefined;
+        return { uri: "stub.png" };
+      },
+    },
+  );
+  const rhymeProxy = new Proxy(
+    {},
+    {
+      get: (_target, prop) => {
+        if (prop === "nonexistent-icon") return undefined;
+        return { uri: "rhyme-stub.png" };
+      },
+    },
+  );
   return {
-    SPOTIT_ICONS: p,
-    SHAPE_ICONS: p,
+    SPOTIT_ICONS: spotitProxy,
+    SHAPE_ICONS: shapesProxy,
+    RHYME_SPRITES: rhymeProxy,
   };
 });
 
@@ -290,7 +309,7 @@ describe("ConceptMatchGame", () => {
 
     // Toggle captions on to satisfy R3
     fireEvent.click(screen.getByTestId("captions-toggle"));
-    
+
     expect(
       screen.getByTestId("card-audio-text-apple-audio").textContent,
     ).toBe("apple");
@@ -878,9 +897,7 @@ describe("ConceptMatchGame", () => {
       <ConceptMatchGame deck="animals-sounds" pairs={2} lang="en" />,
     );
 
-    expect(
-      screen.getByText(t("en", "card.cm-animals.title")),
-    ).toBeDefined();
+    expect(screen.getByText(t("en", "card.cm-animals.title"))).toBeDefined();
     expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({ text: t("en", "card.cm-animals.blurb") }),
     );
@@ -888,9 +905,7 @@ describe("ConceptMatchGame", () => {
     speakSpy.mockClear();
     rerender(<ConceptMatchGame deck="shapes-objects" pairs={2} lang="en" />);
 
-    expect(
-      screen.getByText(t("en", "card.cm-shapes.title")),
-    ).toBeDefined();
+    expect(screen.getByText(t("en", "card.cm-shapes.title"))).toBeDefined();
     expect(speakSpy).toHaveBeenCalledWith(
       expect.objectContaining({ text: t("en", "card.cm-shapes.blurb") }),
     );
@@ -968,5 +983,74 @@ describe("ConceptMatchGame", () => {
       undefined,
       false,
     );
+  });
+
+  it("resolves icon source from RHYME_SPRITES when not present in SPOTIT_ICONS or SHAPE_ICONS", () => {
+    const rhymeBoard: logic.ConceptMatchCard[] = [
+      {
+        key: "sun-icon",
+        conceptId: "sun",
+        display: { type: "icon", icon: "sun" },
+        speech: "sun",
+      },
+      {
+        key: "sun-word",
+        conceptId: "sun",
+        display: { type: "text", text: "sun" },
+        speech: "sun",
+      },
+    ];
+    vi.spyOn(logic, "buildBoard").mockReturnValue(rhymeBoard);
+
+    render(<ConceptMatchGame deck="picture-word" pairs={1} />);
+
+    const img = screen.getByTestId("card-icon-sun-icon");
+    expect(img).toBeDefined();
+    expect(img.innerHTML).toContain("rhyme-stub.png");
+  });
+
+  it("rebuilds the board and resets progress on mid-game language switch if concepts are unsupported", async () => {
+    // Force the board to have an English-only rhyme word
+    const mockBoard: logic.ConceptMatchCard[] = [
+      {
+        key: "dog-word",
+        conceptId: "dog",
+        display: { type: "text", text: "dog" },
+        speech: "dog",
+      },
+      {
+        key: "dog-icon",
+        conceptId: "dog",
+        display: { type: "icon", icon: "dog" },
+        speech: "dog",
+      },
+    ];
+    vi.spyOn(logic, "buildBoard").mockReturnValueOnce(mockBoard);
+    // updateBoardLang returns null when a translation is missing
+    vi.spyOn(logic, "updateBoardLang").mockReturnValueOnce(null);
+
+    const { rerender } = render(
+      <ConceptMatchGame
+        deck="picture-word"
+        lang="en"
+        difficulty="easy"
+        pairs={1}
+      />,
+    );
+
+    // Switch language to 'ja' where 'sun' is unsupported (missing translation)
+    await act(async () => {
+      rerender(
+        <ConceptMatchGame
+          deck="picture-word"
+          lang="ja"
+          difficulty="easy"
+          pairs={1}
+        />,
+      );
+    });
+
+    // Should call buildBoard again because of the unsupported concept
+    expect(vi.mocked(logic.buildBoard)).toHaveBeenCalledTimes(2);
   });
 });
