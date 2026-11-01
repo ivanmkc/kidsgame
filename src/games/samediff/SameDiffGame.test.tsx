@@ -1016,6 +1016,52 @@ describe("SameDiffGame UI", () => {
       vi.useRealTimers();
     });
 
+    it("does not re-narrate the main prompt when language changes during wrong-guess timeout", () => {
+      vi.useFakeTimers();
+      const saySeqSpy = vi.spyOn(sound, "saySequence").mockImplementation(() => {});
+
+      const roundSame: SameDiffRound = {
+        phraseIdx: 0,
+        phraseA: [{ m: 60, b: 1 }],
+        phraseB: [{ m: 60, b: 1 }],
+        answer: "same",
+      };
+      vi.spyOn(logic, "makeSameDiffRound").mockReturnValue(roundSame);
+
+      const { rerender } = render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(4200); // Advance to "pick" phase
+      });
+
+      saySeqSpy.mockClear();
+
+      // Pick wrong
+      const diffBtn = screen.getByTestId("samediff-diff");
+      act(() => {
+        fireEvent.click(diffBtn);
+      });
+
+      expect(saySeqSpy).toHaveBeenCalledWith(["Same"]);
+      saySeqSpy.mockClear();
+
+      // Change language immediately (before 500ms timeout)
+      rerender(<SameDiffGame onHome={() => {}} difficulty="easy" lang="ja" />);
+
+      // Effect should not have fired saySequence again for main prompt
+      expect(saySeqSpy).not.toHaveBeenCalled();
+
+      // Complete the 500ms timeout
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+      
+      // Still no prompt re-narration
+      expect(saySeqSpy).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
+
     it("speaks instructional feedback via saySequence on wrong choices", () => {
       vi.useFakeTimers();
       const saySeqSpy = vi
