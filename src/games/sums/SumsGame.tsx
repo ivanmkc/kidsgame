@@ -20,7 +20,15 @@ import { Position } from "../count/logic";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
 import { sayThen, saySequence, sfx, say, stopNarration } from "../../sound";
-import { SumsRound, makeSumsRound, sumsLayout, sumsSettings } from "./logic";
+import {
+  SumsRound,
+  applyTap,
+  critterLabel,
+  equationWords,
+  makeSumsRound,
+  sumsLayout,
+  sumsSettings,
+} from "./logic";
 import { useWinLine } from "../winlines";
 
 interface Props {
@@ -40,6 +48,17 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     makeSumsRound(rngRef.current, difficulty),
   );
   const [roundNo, setRoundNo] = useState(0);
+  const [tapped, setTapped] = useState<number[]>(() =>
+    Array.from({ length: round.sum }, () => 0),
+  );
+  const tappedRef = useRef(tapped);
+  tappedRef.current = tapped;
+
+  const resetTapped = (sum: number) => {
+    const fresh = Array.from({ length: sum }, () => 0);
+    tappedRef.current = fresh;
+    setTapped(fresh);
+  };
   const [score, setScore] = useState(0);
   const [wrongPick, setWrongPick] = useState<number | null>(null);
   const wrongPickRef = useRef<number | null>(null);
@@ -89,12 +108,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     }
     clearWrongTimer();
     setCorrectPick(null);
-    saySequence([
-      numberWord(lang, round.a).t,
-      t(lang, "sums.plus"),
-      numberWord(lang, round.b).t,
-      t(lang, "sums.question"),
-    ]);
+    saySequence(equationWords(round, lang));
   }, [round, lang, won]);
 
   // Play a soft boing for each incoming critter (staggered 250ms). The
@@ -120,6 +134,30 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     return clearBoingTimers;
   }, [round, won]);
 
+  const tapCritter = (idx: number) => {
+    if (won || lockedRef.current) return;
+    const next = applyTap(tappedRef.current, idx);
+    if (next === tappedRef.current) return;
+    if (wrongVoiceTimer.current) {
+      clearTimeout(wrongVoiceTimer.current);
+      wrongVoiceTimer.current = null;
+    }
+    tappedRef.current = next;
+    setTapped(next);
+    const count = next.filter((x) => x > 0).length;
+    sfx.tap();
+    say(numberWord(lang, count).t);
+  };
+
+  const replayEquation = () => {
+    if (won || lockedRef.current) return;
+    if (wrongVoiceTimer.current) {
+      clearTimeout(wrongVoiceTimer.current);
+      wrongVoiceTimer.current = null;
+    }
+    saySequence(equationWords(round, lang));
+  };
+
   const pickAnswer = (v: number) => {
     if (won || lockedRef.current || wrongPickRef.current === v) return;
     if (v === round.sum) {
@@ -139,7 +177,9 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
         lockedRef.current = false;
         setCorrectPick(null);
         if (nextScore < roundsToWin) {
-          setRound(makeSumsRound(rngRef.current, difficulty));
+          const next = makeSumsRound(rngRef.current, difficulty);
+          setRound(next);
+          resetTapped(next.sum);
           setSolved(false);
           setRoundNo((n) => n + 1);
           clearWrongTimer();
@@ -159,7 +199,7 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
       }, 450);
       if (wrongVoiceTimer.current) clearTimeout(wrongVoiceTimer.current);
       wrongVoiceTimer.current = setTimeout(() => {
-        say(t(lang, "sums.question"));
+        saySequence(equationWords(round, lang));
         wrongVoiceTimer.current = null;
       }, 500);
     }
@@ -174,8 +214,10 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
     clearWrongTimer();
     setTimerKey((k) => k + 1);
     rngRef.current = makeRng(Math.floor(Math.random() * 1e9));
-    setRound(makeSumsRound(rngRef.current, difficulty));
+    const next = makeSumsRound(rngRef.current, difficulty);
+    setRound(next);
     setRoundNo((n) => n + 1);
+    resetTapped(next.sum);
     setScore(0);
     setCorrectPick(null);
     setSolved(false);
@@ -222,37 +264,56 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
           testID={`sums-stage-${round.a}+${round.b}`}
         >
           {round.aPositions.map((p, i) => (
-            <StaticCritter
+            <Critter
               key={`${roundNo}-a-${i}`}
               icon={round.icon}
+              lang={lang}
+              order={tapped[i]}
               size={critterSize}
               stageW={stageW}
               stageH={stageH}
               pos={p}
+              onTap={() => tapCritter(i)}
               testID={`sums-initial-${i}`}
+              badgeTestID={`sums-badge-${i}`}
             />
           ))}
           {round.bPositions.map((p, i) => (
-            <Incoming
+            <Critter
               key={`${roundNo}-b-${i}`}
-              icon={round.bIcon}
+              icon={round.bIcon ?? round.icon}
+              lang={lang}
+              order={tapped[round.a + i]}
               size={critterSize}
               stageW={stageW}
               stageH={stageH}
               pos={p}
               delay={400 + i * 250}
+              onTap={() => tapCritter(round.a + i)}
               testID={`sums-incoming-${i}`}
+              badgeTestID={`sums-badge-${round.a + i}`}
             />
           ))}
         </View>
         <View
           style={[styles.controls, isLandscape && styles.controlsLandscape]}
         >
-          <View style={[styles.equation, shadows.soft]}>
-            <Text style={styles.equationText} testID="sums-equation">
+          <Pressable
+            disabled={won}
+            onPress={replayEquation}
+            testID="sums-equation"
+            accessibilityRole="button"
+            accessibilityLabel={`${round.a} + ${round.b} = ${solved ? round.sum : "?"}`}
+            style={({ pressed }) => [
+              styles.equation,
+              shadows.soft,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text style={styles.equationText}>
               {round.a} + {round.b} = {solved ? round.sum : "?"}
             </Text>
-          </View>
+          </Pressable>
           <View
             style={[styles.choiceRow, isLandscape && styles.choiceRowLandscape]}
           >
@@ -291,83 +352,112 @@ export function SumsGame({ onHome, difficulty, lang }: Props) {
   );
 }
 
-interface CritterViewProps {
+interface CritterProps {
   icon: string;
+  lang: Lang;
+  order: number;
   size: number;
   stageW: number;
   stageH: number;
   pos: Position;
+  delay?: number;
+  onTap: () => void;
   testID: string;
+  badgeTestID?: string;
 }
 
-function StaticCritter({
+function Critter({
   icon,
-  size,
-  stageW,
-  stageH,
-  pos,
-  testID,
-}: CritterViewProps) {
-  return (
-    <Image
-      source={SPOTIT_ICONS[icon]}
-      testID={testID}
-      style={{
-        position: "absolute",
-        ...spriteLT(pos.x, pos.y, size, stageW, stageH),
-        width: size,
-        height: size,
-      }}
-      resizeMode="contain"
-    />
-  );
-}
-
-interface IncomingProps extends CritterViewProps {
-  delay: number;
-}
-
-function Incoming({
-  icon,
+  lang,
+  order,
   size,
   stageW,
   stageH,
   pos,
   delay,
+  onTap,
   testID,
-}: IncomingProps) {
-  const t = useRef(new Animated.Value(0)).current;
+  badgeTestID,
+}: CritterProps) {
+  const isIncoming = delay !== undefined;
+  const enter = useRef(new Animated.Value(isIncoming ? 0 : 1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const wasTapped = useRef(false);
+  const isTapped = order > 0;
+
   useEffect(() => {
-    t.setValue(0);
-    Animated.timing(t, {
-      toValue: 1,
-      duration: 420,
-      delay,
-      useNativeDriver: true,
-    }).start();
-  }, [t, delay]);
-  const translateY = t.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-60, 0],
-  });
+    if (isIncoming) {
+      enter.setValue(0);
+      Animated.timing(enter, {
+        toValue: 1,
+        duration: 420,
+        delay,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [enter, delay, isIncoming]);
+
+  useEffect(() => {
+    if (isTapped && !wasTapped.current) {
+      wasTapped.current = true;
+      scale.setValue(1.35);
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 4,
+      }).start();
+    } else if (!isTapped && wasTapped.current) {
+      wasTapped.current = false;
+      scale.setValue(1);
+    }
+  }, [isTapped, scale]);
+
+  const { left, top } = spriteLT(pos.x, pos.y, size, stageW, stageH);
+  const translateY = isIncoming
+    ? enter.interpolate({
+        inputRange: [0, 1],
+        outputRange: [-60, 0],
+      })
+    : 0;
+
   return (
-    <Animated.View
+    <Pressable
+      onPress={onTap}
       testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={critterLabel(icon, lang)}
       style={{
         position: "absolute",
-        ...spriteLT(pos.x, pos.y, size, stageW, stageH),
+        left,
+        top,
         width: size,
         height: size,
-        opacity: t,
-        transform: [{ translateY }],
       }}
     >
-      <Image
-        source={SPOTIT_ICONS[icon]}
-        style={{ width: "100%", height: "100%" }}
-        resizeMode="contain"
-      />
-    </Animated.View>
+      <Animated.View
+        style={{
+          width: size,
+          height: size,
+          opacity: enter,
+          transform: [{ translateY }, { scale }],
+        }}
+      >
+        <Image
+          source={SPOTIT_ICONS[icon]}
+          style={{
+            width: "100%",
+            height: "100%",
+            opacity: isTapped ? 0.55 : 1,
+          }}
+          resizeMode="contain"
+        />
+        {isTapped ? (
+          <View style={styles.badge} testID={badgeTestID}>
+            <Text style={styles.badgeText}>{order}</Text>
+          </View>
+        ) : null}
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -436,4 +526,25 @@ const styles = StyleSheet.create({
   },
   choiceText: { fontFamily: fonts.display, fontSize: 34, color: colors.ink },
   pressed: { transform: [{ scale: 0.94 }] },
+  badge: {
+    position: "absolute",
+    right: -4,
+    top: -4,
+    minWidth: 24,
+    height: 24,
+    borderRadius: 12,
+    paddingHorizontal: 4,
+    backgroundColor: colors.green,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: colors.paper,
+    pointerEvents: "none",
+  },
+  badgeText: {
+    color: colors.paper,
+    fontFamily: fonts.display,
+    fontSize: 14,
+    lineHeight: 16,
+  },
 });

@@ -1,9 +1,9 @@
 import { Difficulty } from "../../difficulty";
 import { t } from "../../i18n";
-import { Lang } from "../../lang";
+import { Lang, numberWord } from "../../lang";
 import { Rng, randInt, shuffle } from "../../rng";
 import { Position, scatterPositions } from "../count/logic";
-import { CURRICULUM } from "../../curriculum/content";
+import { CURRICULUM, WORDS, wordFor } from "../../curriculum/content";
 
 export interface SumsRound {
   /** Icon for the initial `a` critters. */
@@ -124,6 +124,41 @@ export function makeSumsRound(rng: Rng, d: Difficulty): SumsRound {
   const bPositions = all.slice(a);
   const choices = makeSumChoices(rng, sum, maxSum);
   return { icon, bIcon, a, b, sum, aPositions, bPositions, choices };
+}
+
+/** Localized screen-reader label for a sum critter. */
+export function critterLabel(icon: string, lang: Lang): string {
+  const entry = WORDS.find((w) => w.icon === icon);
+  if (!entry) throw new Error(`Unknown critter icon: ${icon}`);
+  return wordFor(entry, lang).text;
+}
+
+/**
+ * Mark a critter as tapped with the next sequential count (1, 2, ...).
+ * Returns the original array untouched if the critter is already tapped or
+ * index is out of bounds, so React can skip re-rendering.
+ */
+export function applyTap(tapped: number[], index: number): number[] {
+  if (index < 0 || index >= tapped.length || tapped[index] > 0) {
+    return tapped;
+  }
+  const next = tapped.slice();
+  const nextCount = tapped.filter((n) => n > 0).length + 1;
+  next[index] = nextCount;
+  return next;
+}
+
+/** The spoken equation prompt tokens for a round. */
+export function equationWords(
+  round: { a: number; b: number },
+  lang: Lang,
+): string[] {
+  return [
+    numberWord(lang, round.a).t,
+    t(lang, "sums.plus"),
+    numberWord(lang, round.b).t,
+    t(lang, "sums.question"),
+  ];
 }
 
 // ---------- speech ----------

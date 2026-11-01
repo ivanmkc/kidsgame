@@ -3,6 +3,9 @@ import { CURRICULUM } from "../../../curriculum/content";
 import { makeRng } from "../../../rng";
 import {
   MIN_STAGE_H,
+  applyTap,
+  critterLabel,
+  equationWords,
   makeSumChoices,
   makeSumsRound,
   pickTwoCritters,
@@ -170,5 +173,65 @@ describe("makeSumsRound", () => {
         }
       }
     }
+  });
+});
+
+describe('applyTap', () => {
+  it('assigns next sequential count to untapped critter', () => {
+    const initial = [0, 0, 0, 0];
+    const first = applyTap(initial, 1);
+    expect(first).toEqual([0, 1, 0, 0]);
+
+    const second = applyTap(first, 3);
+    expect(second).toEqual([0, 1, 0, 2]);
+
+    const third = applyTap(second, 0);
+    expect(third).toEqual([3, 1, 0, 2]);
+  });
+
+  it('returns same array reference when tapping already-tapped critter', () => {
+    const state = [0, 1, 0, 2];
+    expect(applyTap(state, 1)).toBe(state);
+    expect(applyTap(state, 3)).toBe(state);
+  });
+
+  it('returns same array reference when index is out of bounds', () => {
+    const state = [0, 1, 0];
+    expect(applyTap(state, -1)).toBe(state);
+    expect(applyTap(state, 3)).toBe(state);
+    expect(applyTap(state, 99)).toBe(state);
+  });
+});
+
+describe('critterLabel', () => {
+  it('returns localized label across supported languages', () => {
+    expect(critterLabel('frog', 'en')).toBe('frog');
+    expect(critterLabel('frog', 'ja')).toBe('かえる');
+    expect(critterLabel('cat', 'cmn')).toBe('猫');
+    expect(critterLabel('cat', 'yue')).toBe('貓');
+  });
+
+  it('throws for unknown critter icon', () => {
+    expect(() => critterLabel('unknown_creature', 'en')).toThrow(
+      'Unknown critter icon: unknown_creature',
+    );
+  });
+});
+
+describe('equationWords', () => {
+  it('produces the four tokens for equation speech', () => {
+    const round = { a: 2, b: 3 };
+    expect(equationWords(round, 'en')).toEqual([
+      'two',
+      'plus',
+      'three',
+      'How many now?',
+    ]);
+    expect(equationWords(round, 'ja')).toEqual([
+      'に',
+      'たす',
+      'さん',
+      'ぜんぶで いくつ？',
+    ]);
   });
 });
