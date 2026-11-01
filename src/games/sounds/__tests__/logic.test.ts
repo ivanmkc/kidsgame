@@ -7,6 +7,7 @@ import {
   resolveSoundsPrompts,
   settingsForSounds,
   soundsLayout,
+  speechLines,
 } from "../logic";
 
 describe("soundsLayout", () => {
@@ -200,5 +201,42 @@ describe("resolveSoundsPrompts", () => {
       "Cat!",
       "Cat starts with kuh!",
     ]);
+  });
+
+  it("returns newly combined translated prompts as single prompt line", () => {
+    const cat = WORDS.find((w) => w.en === "cat")!;
+    expect(resolveSoundsPrompts(cat, "ja").promptLines).toEqual([
+      "どれかな？ ねこ",
+    ]);
+    expect(resolveSoundsPrompts(cat, "ja").displayPrompt).toBe(
+      "どれかな？ ねこ",
+    );
+    expect(resolveSoundsPrompts(cat, "cmn").promptLines).toEqual([
+      "哪一个是 猫？",
+    ]);
+    expect(resolveSoundsPrompts(cat, "cmn").displayPrompt).toBe("哪一个是 猫？");
+    expect(resolveSoundsPrompts(cat, "yue").promptLines).toEqual([
+      "邊個係 貓？",
+    ]);
+    expect(resolveSoundsPrompts(cat, "yue").displayPrompt).toBe("邊個係 貓？");
+    expect(resolveSoundsPrompts(cat, "en").promptLines).toEqual([
+      "Which one starts with kuh?",
+    ]);
+    expect(resolveSoundsPrompts(cat, "en").displayPrompt).toBe(
+      "Which one starts with kuh?",
+    );
+  });
+});
+
+describe("speechLines", () => {
+  it("returns newly combined translated prompts across languages without standalone carrier strings", () => {
+    const lines = speechLines();
+    expect(lines).toContain("Which one starts with kuh?");
+    expect(lines).toContain("どれかな？ ねこ");
+    expect(lines).toContain("哪一个是 猫？");
+    expect(lines).toContain("邊個係 貓？");
+    expect(lines).not.toContain("どれかな？");
+    expect(lines).not.toContain("哪一个是？");
+    expect(lines).not.toContain("邊個係？");
   });
 });

@@ -368,9 +368,29 @@ describe("speechLines", () => {
   it("includes name-mode prompts", () => {
     const lines = speechLines();
     expect(lines).toContain("Find the dog!");
-    expect(lines).toContain("さがしてね");
-    expect(lines).toContain("找一找");
-    expect(lines).toContain("搵一搵");
+    expect(lines).toContain("さがしてね いぬ！");
+    expect(lines).toContain("找一找 狗！");
+    expect(lines).toContain("搵一搵 狗！");
+    expect(lines).not.toContain("さがしてね");
+    expect(lines).not.toContain("找一找");
+    expect(lines).not.toContain("搵一搵");
+  });
+
+  it("every promptLines and confirmLines entry on generated name boards is in speechLines", () => {
+    const manifestLines = new Set(speechLines());
+    for (const lang of ["en", "ja", "cmn", "yue"] as const) {
+      for (let seed = 1; seed <= 20; seed++) {
+        const b = boardWith(seed, 3, "name", lang);
+        for (const call of b.calls) {
+          for (const line of call.promptLines) {
+            expect(manifestLines.has(line)).toBe(true);
+          }
+          for (const line of call.confirmLines) {
+            expect(manifestLines.has(line)).toBe(true);
+          }
+        }
+      }
+    }
   });
 
   it("includes phonics prompts", () => {
