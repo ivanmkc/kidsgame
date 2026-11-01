@@ -134,7 +134,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
           wrongTimeoutsRef.current.forEach(clearTimeout);
           wrongTimeoutsRef.current = [];
         },
-        makeNextRound: () => makeCountRound(rngRef.current, difficulty),
+        makeNextRound: () =>
+          makeCountRound(rngRef.current, difficulty, round.icon, round.n),
         setScore,
         setRoundNo,
         setLocked: (l: boolean) => {

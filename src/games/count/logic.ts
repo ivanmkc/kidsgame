@@ -114,10 +114,21 @@ export function makeCountChoices(
   return shuffle(rng, [answer, ...others]);
 }
 
-export function makeCountRound(rng: Rng, d: Difficulty): CountRound {
+export function makeCountRound(
+  rng: Rng,
+  d: Difficulty,
+  prevIcon?: string,
+  prevN?: number,
+): CountRound {
   const { min, max } = countSettings(d);
-  const icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
-  const n = min + randInt(rng, max - min + 1);
+  let icon: string;
+  let n: number;
+  let guard = 0;
+  do {
+    icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
+    n = min + randInt(rng, max - min + 1);
+  } while (icon === prevIcon && n === prevN && guard++ < 200);
+
   const positions = scatterPositions(rng, n);
   const choices = makeCountChoices(rng, n, max);
   return { icon, n, positions, choices, answer: n };
