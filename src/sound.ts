@@ -21,7 +21,7 @@ export function isMuted(): boolean {
 
 export function setMuted(m: boolean): void {
   muted = m;
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
     try { window.localStorage.setItem(KEY, m ? 'muted' : 'on'); } catch { /* non-fatal */ }
   }
 }
