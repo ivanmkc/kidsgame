@@ -458,6 +458,9 @@ export const JA: Table = {
   'sound.lion': 'がおー',
   'sound.frog': 'けろけろ',
   'sound.pig': 'ぶーぶー',
+  'sound.fox': 'こんこん',
+  'sound.rabbit': 'ぴょんぴょん',
+  'sound.panda': 'きゅーきゅー',
 
   // Diff scene names
   'diff.scene.farm': 'ぼくじょう',

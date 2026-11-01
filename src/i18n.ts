@@ -297,6 +297,7 @@ export type UIKey =
   | 'shape.circle' | 'shape.square' | 'shape.triangle' | 'shape.star'
   // ── Animals & Sounds ───────────────────────────────────────────
   | 'sound.dog' | 'sound.cat' | 'sound.lion' | 'sound.frog' | 'sound.pig'
+  | 'sound.fox' | 'sound.rabbit' | 'sound.panda'
   // ── Diff scene names ─────────────────────────────────────────────
   | 'diff.scene.farm' | 'diff.scene.ocean' | 'diff.scene.princess' | 'diff.scene.unicorn'
   | 'diff.scene.dinos' | 'diff.scene.beach' | 'diff.scene.snow' | 'diff.scene.aquarium'
@@ -722,6 +723,7 @@ export const EN: Table = {
   'color.pink': 'pink', 'color.brown': 'brown', 'color.gray': 'gray',
   'shape.circle': 'circle', 'shape.square': 'square', 'shape.triangle': 'triangle', 'shape.star': 'star',
   'sound.dog': 'woof', 'sound.cat': 'meow', 'sound.lion': 'roar', 'sound.frog': 'ribbit', 'sound.pig': 'oink',
+  'sound.fox': 'yip', 'sound.rabbit': 'thump', 'sound.panda': 'squeak',
 
   // Diff scene names
   'diff.scene.farm': 'Farm', 'diff.scene.ocean': 'Ocean',

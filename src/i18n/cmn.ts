@@ -457,6 +457,9 @@ export const CMN: Table = {
   'sound.lion': '吼',
   'sound.frog': '呱呱',
   'sound.pig': '哼哼',
+  'sound.fox': '嗷呜',
+  'sound.rabbit': '蹦蹦',
+  'sound.panda': '吱吱',
 
   // Diff scene names
   'diff.scene.farm': '农场',

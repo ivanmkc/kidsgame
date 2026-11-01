@@ -830,8 +830,8 @@ describe("conceptmatch/logic", () => {
         }
       });
 
-      it("translates all 5 animal sounds across all 4 languages without English fallback", () => {
-        expect(ANIMALS).toHaveLength(5);
+      it("translates all 8 animal sounds across all 4 languages without English fallback", () => {
+        expect(ANIMALS).toHaveLength(8);
         for (const animal of ANIMALS) {
           const en = t("en", `sound.${animal}` as UIKey);
           const ja = t("ja", `sound.${animal}` as UIKey);
@@ -851,7 +851,7 @@ describe("conceptmatch/logic", () => {
 
       it("produces unique keys for every card", () => {
         const rng = makeRng(888);
-        const board = buildBoard(rng, "animals-sounds", "en", 5);
+        const board = buildBoard(rng, "animals-sounds", "en", 8);
         const keys = board.map((c) => c.key);
         expect(new Set(keys).size).toBe(board.length);
       });
@@ -869,9 +869,9 @@ describe("conceptmatch/logic", () => {
       });
 
       it("satisfies R3 by including visual onomatopoeia text on audio sound cards", () => {
-        const board = buildBoard(makeRng(1), "animals-sounds", "en", 5);
+        const board = buildBoard(makeRng(1), "animals-sounds", "en", 8);
         const audioCards = board.filter((c) => c.display.type === "audio");
-        expect(audioCards).toHaveLength(5);
+        expect(audioCards).toHaveLength(8);
         for (const card of audioCards) {
           if (card.display.type === "audio") {
             expect(card.display.text).toBeTruthy();
@@ -880,10 +880,21 @@ describe("conceptmatch/logic", () => {
         }
       });
 
-      it("caps at 5 pairs when requested pairs exceeds pool size", () => {
+      it("generates 8 pairs (16 cards) for Hard difficulty filling a 4x4 board", () => {
+        const rng = makeRng(777);
+        const board = buildBoard(rng, "animals-sounds", "en", 8);
+        expect(board).toHaveLength(16);
+        const conceptIds = new Set(board.map((c) => c.conceptId));
+        expect(conceptIds.size).toBe(8);
+        for (const animal of ANIMALS) {
+          expect(conceptIds.has(animal)).toBe(true);
+        }
+      });
+
+      it("caps at 8 pairs when requested pairs exceeds pool size", () => {
         const rng = makeRng(42);
         const board = buildBoard(rng, "animals-sounds", "en", 10);
-        expect(board).toHaveLength(10);
+        expect(board).toHaveLength(16);
       });
     });
 
@@ -1439,10 +1450,10 @@ describe("conceptmatch/logic", () => {
       expect(pairsForDifficulty("hard", "shapes-objects")).toBe(4);
     });
 
-    it("scales animals-sounds deck capped by capacity (2 for easy, 5 for medium, 5 for hard)", () => {
+    it("scales animals-sounds deck (2 for easy, 6 for medium, 8 for hard, capped at 8)", () => {
       expect(pairsForDifficulty("easy", "animals-sounds")).toBe(2);
-      expect(pairsForDifficulty("medium", "animals-sounds")).toBe(5);
-      expect(pairsForDifficulty("hard", "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty("medium", "animals-sounds")).toBe(6);
+      expect(pairsForDifficulty("hard", "animals-sounds")).toBe(8);
     });
 
     it("scales numerals-dots deck (2 for easy, 6 for medium, 8 for hard, capped at 9)", () => {
@@ -1470,7 +1481,7 @@ describe("conceptmatch/logic", () => {
     it("defaults to medium rules when difficulty is omitted", () => {
       expect(pairsForDifficulty()).toBe(6);
       expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(4);
-      expect(pairsForDifficulty(undefined, "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty(undefined, "animals-sounds")).toBe(6);
       expect(pairsForDifficulty(undefined, "letters")).toBe(6);
     });
 
