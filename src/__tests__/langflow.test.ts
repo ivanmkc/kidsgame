@@ -141,6 +141,10 @@ describe('i18n table completeness', () => {
     expect(JA['spell.hearAgain']).toBe('🔊 タップでもういちどきく');
     expect(JA['spell.hearAgain']).not.toMatch(kanjiRegex);
   });
+
+  it('Cantonese numbers Han title uses Chinese term 漢字數字 rather than Japanese 漢數字', () => {
+    expect(YUE['shell.numbers.titleHan']).toBe('搵數字（漢字數字）');
+  });
 });
 
 // ── (b) Static-analysis regression guard ─────────────────────────────────
