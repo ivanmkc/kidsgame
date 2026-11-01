@@ -401,3 +401,20 @@ test("WORD_CARDS registers Word Family card with beta: true and localized text",
   expect(yueHtml).toContain("詞語家族");
   expect(yueHtml).toContain("配對發音，砌出字詞！");
 });
+
+test("GAME_CARDS registers musicbox card and renders localized title", () => {
+  const onNavigate = vi.fn();
+  const musicboxCard = GAME_CARDS.find((c) => c.route === "musicbox");
+  expect(musicboxCard).toBeDefined();
+
+  const html = renderToString(
+    <MenuCard
+      g={musicboxCard!}
+      lang="en"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(html).toContain("Music Box");
+});
