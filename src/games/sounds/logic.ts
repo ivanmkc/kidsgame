@@ -46,11 +46,13 @@ function candidateTile(
   rows: number,
 ): number {
   const gap = 14;
+  const headerHeight = width <= 360 ? 130 : 84;
+  const promptAllowance = width <= 360 ? 150 : 130;
   return Math.max(
     0,
     Math.min(
       (Math.min(width - 32, 600) - (cols - 1) * gap) / cols,
-      (height - 84 - 130 - (rows - 1) * gap) / rows,
+      (height - headerHeight - promptAllowance - (rows - 1) * gap) / rows,
       170,
     ),
   );
