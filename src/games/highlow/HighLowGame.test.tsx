@@ -776,6 +776,117 @@ describe("HighLowGame UI", () => {
 
     vi.useRealTimers();
   });
+
+  it("renders responsive pick row and buttons fitting compact mobile landscape viewports", () => {
+    vi.useFakeTimers();
+    setViewport(568, 320);
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    const { unmount } = render(
+      <HighLowGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn = screen.getByTestId("highlow-high");
+    const lowBtn = screen.getByTestId("highlow-low");
+    const replayBtn = screen.getByTestId("highlow-replay");
+    const pickRow = screen.getByTestId("highlow-pick-row");
+
+    expect(highBtn.style.paddingTop).toBe("8px");
+    expect(highBtn.style.paddingBottom).toBe("8px");
+    expect(highBtn.style.paddingLeft).toBe("12px");
+    expect(highBtn.style.paddingRight).toBe("12px");
+    expect(highBtn.style.minWidth).toBe("96px");
+    expect(lowBtn.style.paddingTop).toBe("8px");
+    expect(lowBtn.style.paddingBottom).toBe("8px");
+    expect(lowBtn.style.paddingLeft).toBe("12px");
+    expect(lowBtn.style.paddingRight).toBe("12px");
+    expect(lowBtn.style.minWidth).toBe("96px");
+    expect(replayBtn.style.width).toBe("44px");
+    expect(replayBtn.style.height).toBe("44px");
+    expect(pickRow.style.gap).toBe("6px");
+    expect(within(pickRow).queryByTestId("highlow-replay")).toBeNull();
+
+    unmount();
+
+    // 740x360 compact landscape
+    setViewport(740, 360);
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    const highBtn360 = screen.getByTestId("highlow-high");
+    const replayBtn360 = screen.getByTestId("highlow-replay");
+    const pickRow360 = screen.getByTestId("highlow-pick-row");
+
+    expect(highBtn360.style.paddingTop).toBe("10px");
+    expect(highBtn360.style.paddingBottom).toBe("10px");
+    expect(highBtn360.style.paddingLeft).toBe("16px");
+    expect(highBtn360.style.paddingRight).toBe("16px");
+    expect(highBtn360.style.minWidth).toBe("110px");
+    expect(replayBtn360.style.width).toBe("48px");
+    expect(replayBtn360.style.height).toBe("48px");
+    expect(pickRow360.style.gap).toBe("8px");
+
+    vi.useRealTimers();
+  });
+
+  it("renders compact listenCard with instructional feedback during guided corrections in landscape", () => {
+    vi.useFakeTimers();
+    setViewport(568, 320);
+    let onDoneCb: (() => void) | undefined;
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (_notes, _bpm, _onNote, onDone) => {
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In listen phase initially
+    expect(screen.getByTestId("melody-dot-0")).toBeDefined();
+    expect(screen.getByTestId("melody-dot-1")).toBeDefined();
+
+    // Advance to pick phase
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    // Make an incorrect pick to trigger instructional feedback
+    const dots = screen.getAllByTestId(/melody-dot-[01]/);
+    const dot0 = dots[0];
+    const isNote0Higher =
+      dot0.style.transform?.includes("translateY(-20px)") ||
+      dot0.style.transform?.includes("-20");
+    // If note 0 is higher, note 1 is lower, so answer is "low"; picking "high" is wrong
+    const wrongChoice = isNote0Higher ? "high" : "low";
+
+    fireEvent.click(screen.getByTestId(`highlow-${wrongChoice}`));
+
+    // Advance 500ms flash timer to re-enter listen phase with instructional feedback
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    const directionEl = screen.getByTestId("highlow-instructional-direction");
+    expect(directionEl).toBeDefined();
+
+    vi.useRealTimers();
+  });
 });
 
 const noop = () => {};
