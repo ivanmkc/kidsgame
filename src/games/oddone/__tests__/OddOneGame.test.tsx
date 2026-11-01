@@ -163,6 +163,45 @@ describe("OddOneGame", () => {
     }
   });
 
+  it("prevents tapping the question prompt during the celebration delay from interrupting narration", () => {
+    vi.useFakeTimers();
+    try {
+      const { container } = render(
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+      );
+
+      vi.mocked(say).mockClear();
+      vi.mocked(sfx.tap).mockClear();
+
+      const correctBtn = container.querySelector(
+        '[data-testid$="-odd"]',
+      ) as HTMLElement;
+      
+      const promptBtn = container.querySelector(
+        '[data-testid^="oddone-question-"]',
+      ) as HTMLElement;
+
+      act(() => {
+        fireEvent.click(correctBtn);
+        // immediately tap the question prompt
+        fireEvent.click(promptBtn);
+      });
+
+      // sfx.tap and say(prompt) shouldn't be called from the prompt click
+      expect(sfx.tap).not.toHaveBeenCalled();
+      
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      
+      // Still not called
+      expect(sfx.tap).not.toHaveBeenCalled();
+
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("does not block input after a wrong tap and allows immediate correction", () => {
     vi.useFakeTimers();
     try {
