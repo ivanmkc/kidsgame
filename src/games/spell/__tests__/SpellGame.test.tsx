@@ -1306,6 +1306,39 @@ describe("SpellGame", () => {
 
     // Tap first tile 'C'
     fireEvent.click(screen.getByTestId("spell-tile-1"));
+  it("resets word pool and active round when difficulty changes", () => {
+    vi.spyOn(logic, "pickGameWords").mockImplementation((_rng, _pool, diff) => {
+      if (diff === "hard") {
+        return [
+          { icon: "cat", lang: "en", text: "CAT", chars: ["C", "A", "T"], roman: "", source: "spotit" },
+          { icon: "dog", lang: "en", text: "DOG", chars: ["D", "O", "G"], roman: "", source: "spotit" },
+          { icon: "pig", lang: "en", text: "PIG", chars: ["P", "I", "G"], roman: "", source: "spotit" },
+          { icon: "cow", lang: "en", text: "COW", chars: ["C", "O", "W"], roman: "", source: "spotit" },
+          { icon: "bat", lang: "en", text: "BAT", chars: ["B", "A", "T"], roman: "", source: "spotit" },
+          { icon: "fox", lang: "en", text: "FOX", chars: ["F", "O", "X"], roman: "", source: "spotit" },
+        ];
+      }
+      return [
+        { icon: "cat", lang: "en", text: "CAT", chars: ["C", "A", "T"], roman: "", source: "spotit" },
+        { icon: "dog", lang: "en", text: "DOG", chars: ["D", "O", "G"], roman: "", source: "spotit" },
+        { icon: "pig", lang: "en", text: "PIG", chars: ["P", "I", "G"], roman: "", source: "spotit" },
+        { icon: "cow", lang: "en", text: "COW", chars: ["C", "O", "W"], roman: "", source: "spotit" },
+      ];
+    });
+    
+    const makeRoundSpy = vi.spyOn(logic, "makeRound").mockImplementation(
+      (_rng, word, decoys) => ({
+        word,
+        chars: word.chars,
+        decoys: Array.from({ length: decoys }),
+        tiles: [
+          { id: 1, char: word.chars[0] },
+          { id: 2, char: word.chars[1] },
+          { id: 3, char: word.chars[2] },
+          ...(decoys > 0 ? [{ id: 4, char: "Z" }] : [])
+        ],
+      })
+    );
 
     // Slot 0 is now done (solid green border), slot 1 is active (solid gold), slot 2 remains inactive (dashed purple)
     expect(window.getComputedStyle(slot0).borderTopStyle).toBe("solid");
@@ -1332,5 +1365,22 @@ describe("SpellGame", () => {
     expect(window.getComputedStyle(slot2).borderTopColor).toBe(
       "rgba(255, 194, 75, 1.00)",
     );
+  });
+});
+    const { rerender } = render(
+      <SpellGame onHome={() => {}} difficulty="easy" lang="en" />
+    );
+    
+    // Check initial state
+    expect(screen.getByText("🔤 0/4")).toBeTruthy();
+    makeRoundSpy.mockClear();
+    
+    // Change difficulty
+    rerender(<SpellGame onHome={() => {}} difficulty="hard" lang="en" />);
+    
+    // Assert behavior that fails if useEffect isn't correct:
+    // The component should have recreated the round and updated the word count.
+    expect(makeRoundSpy).toHaveBeenCalled();
+    expect(screen.getByText("🔤 0/6")).toBeTruthy();
   });
 });
