@@ -1247,6 +1247,36 @@ describe("conceptmatch/logic", () => {
           const concepts = new Set(board.map((c) => c.conceptId));
           expect(concepts.size).toBe(15);
         });
+
+        it("does not overrepresent rhyming words in medium/hard rounds", () => {
+          const rhymingConcepts = ["dog", "frog", "car", "star"];
+          let allFourPresentCount = 0;
+          const trials = 50;
+
+          for (let seed = 0; seed < trials; seed++) {
+            const board = buildBoard(
+              makeRng(seed),
+              "picture-word",
+              "en",
+              6,
+              undefined,
+              true,
+            );
+            const concepts = new Set(board.map((c) => c.conceptId));
+            
+            let matchCount = 0;
+            for (const rc of rhymingConcepts) {
+              if (concepts.has(rc)) {
+                matchCount++;
+              }
+            }
+            if (matchCount === 4) {
+              allFourPresentCount++;
+            }
+          }
+
+          expect(allFourPresentCount).toBeLessThan(trials);
+        });
       });
 
       describe("mixed deck", () => {

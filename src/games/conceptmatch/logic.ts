@@ -289,8 +289,10 @@ export function buildBoard(
         (group) => group.length >= 2,
       );
       const shuffledGroups = shuffle(rng, multiWordGroups);
+      const maxRhymeGroups = Math.floor(rng() * 2) + 1;
+      const selectedGroups = shuffledGroups.slice(0, maxRhymeGroups);
 
-      for (const group of shuffledGroups) {
+      for (const group of selectedGroups) {
         if (chosen.length >= pairs) {
           break;
         }
