@@ -252,6 +252,26 @@ describe("whoami pack specifics", () => {
   });
 });
 
+describe("animal pack specifics", () => {
+  const rounds = ALL_PACKS.animal.rounds();
+
+  it("does not use the jaw snapping alligator round", () => {
+    for (const r of rounds) {
+      expect(r.prompt[1]).not.toBe("Snap snap!");
+      expect(r.reveal[0]).not.toContain("alligator");
+    }
+  });
+
+  it("includes wolf with howling sound on hard difficulty", () => {
+    const wolfRound = rounds.find((r) =>
+      r.reveal.includes("It was... A wolf! Did you get it?"),
+    );
+    expect(wolfRound).toBeDefined();
+    expect(wolfRound!.prompt[1]).toBe("Awoooo!");
+    expect(wolfRound!.level).toBe("hard");
+  });
+});
+
 describe("speechLines", () => {
   it("returns >50 lines", () => {
     const lines = speechLines();

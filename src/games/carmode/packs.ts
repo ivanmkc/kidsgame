@@ -345,7 +345,7 @@ const ANIMAL_SOUNDS: AnimalSound[] = [
   { onomatopoeia: "Caw caw!", answer: "A crow!", level: "hard" },
   { onomatopoeia: "Eee-aw! Eee-aw!", answer: "A donkey!", level: "hard" },
   { onomatopoeia: "Chirp chirp!", answer: "A cricket!", level: "hard" },
-  { onomatopoeia: "Snap snap!", answer: "An alligator!", level: "hard" },
+  { onomatopoeia: "Awoooo!", answer: "A wolf!", level: "hard" },
 ];
 
 function animalRounds(): Round[] {
