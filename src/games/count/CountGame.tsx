@@ -17,7 +17,7 @@ import { Lang, numberWord, useLangEpoch } from "../../lang";
 import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { colors, darken, fonts, shadows } from "../../theme";
-import { say, sayThen, sfx } from "../../sound";
+import { say, sayThen, sfx, stopNarration } from "../../sound";
 import {
   CountRound,
   applyTap,
@@ -67,6 +67,8 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.count"));
   const elapsed = useElapsed(showTimer && !won, timerKey);
+
+  useEffect(() => stopNarration, []);
 
   // Keyed on the round OBJECT so a repeat number still re-narrates.
   useEffect(() => {
