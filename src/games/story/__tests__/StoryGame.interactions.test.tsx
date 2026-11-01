@@ -377,6 +377,154 @@ describe('StoryGame choice navigation and redo history', () => {
     expect(screen.queryByTestId('story-text-apple')).toBeNull();
   });
 
+  it('clears redo stack when switching to a different story scene', () => {
+    const testStoryA: Story = {
+      id: 'test-switch-redo-story-a',
+      title: 'Switch Redo Story A',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Story A Start',
+          choices: [{ label: 'Forest A', next: 'forest-a' }],
+        },
+        'forest-a': {
+          image: 'story/luna_start.jpg',
+          text: 'Story A Forest',
+          choices: [],
+        },
+      },
+    };
+    const testStoryB: Story = {
+      id: 'test-switch-redo-story-b',
+      title: 'Switch Redo Story B',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Story B Start',
+          choices: [{ label: 'Castle B', next: 'castle-b' }],
+        },
+        'forest-a': {
+          image: 'story/luna_start.jpg',
+          text: 'Story B Imposter Node',
+          choices: [],
+        },
+        'castle-b': {
+          image: 'story/luna_start.jpg',
+          text: 'Story B Castle',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStoryA, testStoryB);
+
+    const { rerender } = render(
+      <StoryGame
+        sceneId="test-switch-redo-story-a"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // 1. Advance to forest-a in story A
+    fireEvent.click(screen.getByTestId('story-choice-forest-a'));
+    expect(screen.getByTestId('story-text-forest-a')).toBeDefined();
+
+    // 2. Go back with ArrowLeft, pushing forest-a onto redo stack
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // 3. Switch to story B
+    rerender(
+      <StoryGame
+        sceneId="test-switch-redo-story-b"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+    expect(screen.getByText('Story B Start')).toBeDefined();
+
+    // 4. Press ArrowRight (redo) - should not pop forest-a from previous story
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    expect(screen.getByText('Story B Start')).toBeDefined();
+    expect(screen.queryByTestId('story-text-forest-a')).toBeNull();
+  });
+
+  it('clears redo stack when restarting story via read again button', () => {
+    const sfxWinSpy = vi.spyOn(sfx, 'win').mockReturnValue();
+    const testRestartStory: Story = {
+      id: 'test-restart-redo-story',
+      title: 'Restart Redo Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Restart Story Start',
+          choices: [{ label: 'End Choice', next: 'ending' }],
+        },
+        ending: {
+          image: 'story/luna_start.jpg',
+          text: 'The End of Restart Story',
+          choices: [{ label: 'Extra Choice', next: 'extra' }],
+        },
+        extra: {
+          image: 'story/luna_start.jpg',
+          text: 'Extra Node',
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testRestartStory);
+
+    const { rerender } = render(
+      <StoryGame
+        sceneId="test-restart-redo-story"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // 1. Advance to ending, then to extra
+    fireEvent.click(screen.getByTestId('story-choice-ending'));
+    expect(screen.getByTestId('story-text-ending')).toBeDefined();
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+    fireEvent.click(screen.getByTestId('story-choice-extra'));
+    expect(screen.getByTestId('story-text-extra')).toBeDefined();
+
+    // 2. Go back with ArrowLeft to ending, pushing 'extra' onto redo stack
+    fireEvent.keyDown(window, { key: 'ArrowLeft' });
+    expect(screen.getByTestId('story-text-ending')).toBeDefined();
+
+    // 3. Make ending a terminal node and re-render with same sceneId (no scene change)
+    testRestartStory.nodes.ending.choices = [];
+    rerender(
+      <StoryGame
+        sceneId="test-restart-redo-story"
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+      />,
+    );
+
+    // 4. Click read again (story-restart)
+    const restartBtn = screen.getByTestId('story-restart');
+    fireEvent.click(restartBtn);
+    expect(sfxWinSpy).toHaveBeenCalledOnce();
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+
+    // 5. Press ArrowRight (redo) - should remain on start and not jump to extra
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    expect(screen.getByTestId('story-text-start')).toBeDefined();
+    expect(screen.queryByTestId('story-text-extra')).toBeNull();
+  });
+
   it('ignores rapid double taps on standard button choices to prevent skipping scenes', () => {
     const testRapidStory: Story = {
       id: 'test-rapid-tap',

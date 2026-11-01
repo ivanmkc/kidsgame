@@ -58,6 +58,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     setZoomTarget(null);
     setClip(null);
     hist.current = [];
+    redo.current = [];
     animating.current = false;
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -338,7 +339,7 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
               label={node.bad ? t(lang, 'story.startOver') : t(lang, 'story.readAgain')}
               color={colors.green}
               darkColor={darken(colors.green)}
-              onPress={() => { if (!node.bad) sfx.win(); hist.current = []; setNodeId('start'); }}
+              onPress={() => { if (!node.bad) sfx.win(); hist.current = []; redo.current = []; setNodeId('start'); }}
               testID="story-restart"
               minWidth={230}
             />
