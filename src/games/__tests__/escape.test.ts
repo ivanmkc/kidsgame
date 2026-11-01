@@ -6,6 +6,7 @@ import { EscapeGame } from "../escape/EscapeGame";
 import {
   applyTap,
   escapeDisplayWidth,
+  ESCAPE_VERTICAL_OVERHEAD,
   escapeHintMs,
   isHotspotAvailable,
   lintRoom,
@@ -402,6 +403,23 @@ describe("shipped escape rooms", () => {
     it("clamps wide viewports to MAX_DISPLAY_WIDTH (980px)", () => {
       expect(escapeDisplayWidth(1200)).toBe(MAX_DISPLAY_WIDTH);
       expect(escapeDisplayWidth(2000)).toBe(MAX_DISPLAY_WIDTH);
+    });
+
+    it("clamps display width on mobile landscape viewports to fit tray on screen", () => {
+      expect(ESCAPE_VERTICAL_OVERHEAD).toBe(180);
+      // 667x375 (e.g. iPhone SE / 8 landscape): availH = 375 - 180 = 195; floor(195 * 16 / 9) = 346.
+      expect(escapeDisplayWidth(667, 375)).toBe(346);
+      // 844x390 (e.g. iPhone 12/13/14 landscape): availH = 390 - 180 = 210; floor(210 * 16 / 9) = 373.
+      expect(escapeDisplayWidth(844, 390)).toBe(373);
+      // Extreme short landscape clamps to MIN_DISPLAY_WIDTH.
+      expect(escapeDisplayWidth(600, 250)).toBe(MIN_DISPLAY_WIDTH);
+    });
+
+    it("does not constrain display width by height in portrait orientation", () => {
+      // 375x667 portrait: width is the binding constraint.
+      expect(escapeDisplayWidth(375, 667)).toBe(351);
+      // 390x844 portrait: width is the binding constraint.
+      expect(escapeDisplayWidth(390, 844)).toBe(366);
     });
   });
 });
