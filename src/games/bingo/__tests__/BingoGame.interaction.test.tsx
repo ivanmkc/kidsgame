@@ -276,6 +276,19 @@ test("unmounts with wrong timer running", async () => {
   expect(true).toBe(true);
 });
 
+test("calls stopNarration on unmount to prevent audio leak across navigation", () => {
+  const stopNarrationSpy = vi.spyOn(sound, "stopNarration");
+  const onHome = vi.fn();
+  const { unmount } = render(
+    <BingoGame onHome={onHome} difficulty="easy" lang="en" />,
+  );
+  expect(stopNarrationSpy).not.toHaveBeenCalled();
+
+  unmount();
+
+  expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
+});
+
 test("plays through to win and resets", async () => {
   const onHome = vi.fn();
   render(<BingoGame onHome={onHome} difficulty="easy" lang="en" />);
