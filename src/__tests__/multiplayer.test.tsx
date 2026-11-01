@@ -224,6 +224,16 @@ describe("saveTwoPlayer", () => {
     expect(() => saveTwoPlayer(true)).not.toThrow();
   });
 
+  it("does not throw when window.localStorage access throws SecurityError", () => {
+    const fakeWindow = {
+      get localStorage(): FakeStorage {
+        throw new Error("SecurityError");
+      },
+    };
+    vi.stubGlobal("window", fakeWindow);
+    expect(() => saveTwoPlayer(true)).not.toThrow();
+  });
+
   it("does not touch localStorage on non-web platform", () => {
     (Platform as FakePlatform).OS = "android";
     saveTwoPlayer(true);
