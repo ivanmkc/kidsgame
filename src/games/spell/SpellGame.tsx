@@ -199,6 +199,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     Math.min(
       (Math.min(width - 32, 560) - (slotCount - 1) * 10) / slotCount,
       68,
+      height * 0.15,
     ),
   );
   const tileSize = Math.max(
@@ -206,6 +207,7 @@ export function SpellGame({ onHome, difficulty, lang }: Props) {
     Math.min(
       (Math.min(width - 32, 560) - (tileCount - 1) * 10) / tileCount,
       74,
+      height * 0.16,
     ),
   );
   const shortH = height < 480;

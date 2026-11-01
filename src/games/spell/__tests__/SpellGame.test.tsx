@@ -756,6 +756,45 @@ describe("SpellGame", () => {
     expect(tileText.style.fontSize).toBe("32px");
   });
 
+  it("scales slot and tile sizes based on height on compact landscape viewport", () => {
+    setViewport(568, 320); // compact landscape
+    vi.spyOn(logic, "pickGameWords").mockReturnValue([
+      {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+    ]);
+    vi.spyOn(logic, "makeRound").mockReturnValue({
+      word: {
+        icon: "cat",
+        lang: "en",
+        text: "CAT",
+        chars: ["C", "A", "T"],
+        roman: "",
+        source: "spotit",
+      },
+      chars: ["C", "A", "T"],
+      decoys: [],
+      tiles: [
+        { id: 1, char: "C" },
+        { id: 2, char: "A" },
+        { id: 3, char: "T" },
+      ],
+    });
+
+    render(<SpellGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    const slot = screen.getByTestId("spell-slot-0");
+    expect(slot.style.width).toBe("48px");
+
+    const tile = screen.getByTestId("spell-tile-1");
+    expect(tile.style.width).toBe("51.2px");
+  });
+
   describe("language switch safety", () => {
     function SpellGameTestHarness({
       initialLang = "en",
