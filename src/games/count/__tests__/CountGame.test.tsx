@@ -16,8 +16,10 @@ import { t } from "../../../i18n";
 import { CountGame } from "../CountGame";
 import * as countLogic from "../logic";
 import {
+  MIN_STAGE_H,
   STAGE_PADDING,
   applyPickAnswer,
+  countLayout,
   critterLabel,
   gridFor,
   makeCountRound,
@@ -708,7 +710,7 @@ describe("CountGame stage critter positioning", () => {
       configurable: true,
     });
     Object.defineProperty(document.documentElement, "clientHeight", {
-      value: 240,
+      value: 200,
       configurable: true,
     });
     window.dispatchEvent(new Event("resize"));
@@ -1041,3 +1043,130 @@ describe("CountGame affordances, prompt replay and ordinal badges", () => {
     expect(screen.getByTestId("count-progress")).toBeDefined();
   });
 });
+
+describe("countLayout", () => {
+  it("enforces minimum stage height floor and responsive dimensions on mobile landscape viewports", () => {
+    const android740 = countLayout(740, 360, 5);
+    expect(android740.isLandscape).toBe(true);
+    expect(android740.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+    expect(android740.stageH).toBe(260);
+    expect(android740.stageW).toBe(338);
+
+    const iphoneLandscape = countLayout(667, 375, 5);
+    expect(iphoneLandscape.isLandscape).toBe(true);
+    expect(iphoneLandscape.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+    expect(iphoneLandscape.stageH).toBe(275);
+    expect(iphoneLandscape.stageW).toBe(322);
+
+    const compactLandscape = countLayout(568, 320, 5);
+    expect(compactLandscape.isLandscape).toBe(true);
+    expect(compactLandscape.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+    expect(compactLandscape.stageH).toBe(220);
+    expect(compactLandscape.stageW).toBe(270);
+  });
+
+  it("uses standard vertical layout and preserves stage height on portrait screens", () => {
+    const portrait360 = countLayout(360, 800, 5);
+    expect(portrait360.isLandscape).toBe(false);
+    expect(portrait360.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+    expect(portrait360.stageW).toBe(328);
+
+    const compactPortrait = countLayout(320, 480, 4);
+    expect(compactPortrait.isLandscape).toBe(false);
+    expect(compactPortrait.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+    expect(compactPortrait.stageW).toBe(288);
+  });
+
+  it("uses standard spacious layout on tablet in landscape", () => {
+    const tablet = countLayout(1024, 768, 10);
+    expect(tablet.isLandscape).toBe(false);
+    expect(tablet.stageH).toBe(476);
+    expect(tablet.stageW).toBe(560);
+    expect(tablet.stageH).toBeGreaterThanOrEqual(MIN_STAGE_H);
+  });
+
+  it("clamps stageW to a minimum of 0 on extremely narrow viewports to avoid negative dimensions", () => {
+    const narrowPortrait = countLayout(30, 600, 2);
+    expect(narrowPortrait.stageW).toBeGreaterThanOrEqual(0);
+    expect(narrowPortrait.isLandscape).toBe(false);
+
+    const narrowLandscape = countLayout(40, 30, 2);
+    expect(narrowLandscape.stageW).toBeGreaterThanOrEqual(0);
+    expect(narrowLandscape.isLandscape).toBe(true);
+  });
+
+  it("sizes critters so 3 rows on hard difficulty (n=10) fit without vertical overlap", () => {
+    const viewports = [
+      { w: 740, h: 360 },
+      { w: 667, h: 375 },
+      { w: 568, h: 320 },
+      { w: 844, h: 390 },
+    ];
+    for (const { w, h } of viewports) {
+      const layout = countLayout(w, h, 10);
+      expect(layout.isLandscape).toBe(true);
+      const innerH = layout.stageH - 2 * STAGE_PADDING;
+      expect(3 * layout.critterSize).toBeLessThanOrEqual(innerH);
+      expect(layout.critterSize).toBeGreaterThanOrEqual(30);
+    }
+  });
+});
+
+describe("CountGame mobile landscape layout", () => {
+  it("renders stage and quiz controls side-by-side in mobile landscape without vertical overflow", () => {
+    Object.defineProperty(document.documentElement, "clientWidth", {
+      value: 740,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, "clientHeight", {
+      value: 360,
+      configurable: true,
+    });
+    window.dispatchEvent(new Event("resize"));
+
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => {
+      done?.();
+    });
+    vi.spyOn(sound, "say").mockImplementation(() => {});
+
+    vi.spyOn(countLogic, "makeCountRound").mockReturnValue({
+      icon: "star",
+      n: 2,
+      positions: [
+        { x: 25, y: 50 },
+        { x: 75, y: 50 },
+      ],
+      choices: [1, 2, 3],
+      answer: 2,
+    });
+
+    render(<CountGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // In count phase, stage dimensions match landscape side-by-side layout
+    const stage = screen.getByTestId("count-stage-star-2");
+    expect(parseFloat(stage.style.width)).toBe(338);
+    expect(parseFloat(stage.style.height)).toBe(260);
+
+    // Progress hint is rendered
+    expect(screen.getByTestId("count-progress")).toBeDefined();
+
+    // Tap both critters to transition to quiz phase
+    fireEvent.click(screen.getByTestId("count-critter-0"));
+    fireEvent.click(screen.getByTestId("count-critter-1"));
+
+    // Stage maintains dimensions without vertical shift
+    expect(parseFloat(stage.style.width)).toBe(338);
+    expect(parseFloat(stage.style.height)).toBe(260);
+
+    // Quiz phase is active side-by-side: prompt and choice buttons exist
+    const prompt = screen.getByTestId("count-prompt");
+    expect(prompt).toBeDefined();
+    for (const c of [1, 2, 3]) {
+      const choice = screen.getByTestId(
+        `count-choice-${c}${c === 2 ? "-answer" : ""}`,
+      );
+      expect(choice).toBeDefined();
+    }
+  });
+});
+

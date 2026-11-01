@@ -19,6 +19,44 @@ export interface Position {
   y: number;
 }
 export const STAGE_PADDING = 16;
+export const MIN_STAGE_H = 120;
+
+export interface CountLayout {
+  isLandscape: boolean;
+  stageW: number;
+  stageH: number;
+  critterSize: number;
+}
+
+/**
+ * Responsive layout calculation for CountGame.
+ * On mobile landscape viewports (height < 500), places the stage side-by-side
+ * with the quiz controls so neither the stage nor the controls vertically overflow
+ * into the GameShell header.
+ */
+export function countLayout(
+  width: number,
+  height: number,
+  n = 1,
+): CountLayout {
+  const isLandscape = width > height && height < 500;
+
+  if (isLandscape) {
+    const availH = height - 84 - 16;
+    const stageH = Math.round(Math.max(MIN_STAGE_H, Math.min(availH, 360)));
+    const maxStageW = Math.max(0, width - 48) * 0.52;
+    const stageW = Math.round(Math.min(maxStageW, stageH * 1.3));
+    const critterSize = Math.round(stageCritterSize(n, stageW, stageH));
+    return { isLandscape, stageW, stageH, critterSize };
+  }
+
+  const stageW = Math.max(0, Math.min(width - 32, 560));
+  const stageH = Math.round(
+    Math.max(MIN_STAGE_H, Math.min(height - 84 - 180, stageW * 0.85)),
+  );
+  const critterSize = Math.round(stageCritterSize(n, stageW, stageH));
+  return { isLandscape, stageW, stageH, critterSize };
+}
 
 /**
  * Critter size for n items on a stage of width x height: scales to fit within
