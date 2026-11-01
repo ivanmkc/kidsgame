@@ -905,10 +905,10 @@ describe("FastSlowGame UI interaction", () => {
     // Repeated tap on the same wrong button is ignored
     fireEvent.click(wrongBtn);
 
-    // Immediate tap of correct button succeeds without waiting for 500ms error flash
+    // Immediate tap of correct button is ignored because board is locked
     fireEvent.click(correctBtn);
-    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 1/8");
-    expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("fastslow-score").textContent).toBe("🎵 0/8");
+    expect(within(correctBtn).queryAllByText(/✨|⭐/).length).toBe(0);
 
     vi.mocked(sayThen).mockImplementation(defaultSayThenImpl);
     vi.useRealTimers();

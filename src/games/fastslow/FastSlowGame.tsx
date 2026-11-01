@@ -157,6 +157,9 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
   useEffect(() => {
     if (epoch === 0 || won) return;
     clearWrongTimer();
+    if (phase === "pick") {
+      lockedRef.current = false;
+    }
     if (phase === "listen") {
       if (listenTimerRef.current) {
         clearTimeout(listenTimerRef.current);
@@ -232,6 +235,7 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
         }, 1000);
       }
     } else {
+      lockedRef.current = true;
       sfx.wrong();
       wrongPickRef.current = picked;
       setWrongPick(picked);
@@ -244,7 +248,6 @@ export function FastSlowGame({ onHome, difficulty, lang }: Props) {
       wrongTimerRef.current = setTimeout(() => {
         wrongTimerRef.current = null;
         if (roundEpochRef.current !== currentEpoch) return;
-        lockedRef.current = true;
         wrongPickRef.current = null;
         setWrongPick(null);
         setInstructionalTempo(trueSpeed);
