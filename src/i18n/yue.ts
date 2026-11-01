@@ -142,7 +142,7 @@ export const YUE: Table = {
   'shell.letters.subTap': '聽到英文字母就撳佢',
   'shell.letters.subSound': '邊個英文字母發呢個音？',
   'shell.numbers.title': '搵數字',
-  'shell.numbers.titleHan': '搵數字（漢數字）',
+  'shell.numbers.titleHan': '搵數字（漢字數字）',
   'shell.numbers.sub': '聽到數字就撳佢',
   'button.switchScript': '切換數字寫法',
   'shell.sounds.titleEn': '首音',
