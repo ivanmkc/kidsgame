@@ -142,7 +142,12 @@ export function pairsForDifficulty(
   }
 
   if (deck && DECK_CAPACITIES[deck] !== undefined) {
-    return Math.min(target, DECK_CAPACITIES[deck]!);
+    const cap = DECK_CAPACITIES[deck]!;
+    if (difficulty === "medium") {
+      if (cap === 4) target = 3;
+      else if (cap === 5) target = 4;
+    }
+    return Math.min(target, cap);
   }
   return target;
 }

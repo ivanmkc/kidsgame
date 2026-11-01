@@ -716,7 +716,7 @@ describe("ConceptMatchGame", () => {
     );
   });
 
-  it("caps card and pair counts for shapes-objects (2 for easy, 4 for medium and hard)", () => {
+  it("caps card and pair counts for shapes-objects (2 for easy, 3 for medium, 4 for hard)", () => {
     const { rerender } = render(
       <ConceptMatchGame deck="shapes-objects" difficulty="easy" lang="en" />,
     );
@@ -737,9 +737,9 @@ describe("ConceptMatchGame", () => {
       .filter((el) =>
         el.getAttribute("data-testid")?.startsWith("concept-card-"),
       );
-    expect(cards).toHaveLength(8);
-    expect(screen.getByTestId("concept-score").textContent).toContain("0/4");
-    expect(screen.getByText("Find all 4 pairs")).toBeDefined();
+    expect(cards).toHaveLength(6);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/3");
+    expect(screen.getByText("Find all 3 pairs")).toBeDefined();
 
     rerender(
       <ConceptMatchGame deck="shapes-objects" difficulty="hard" lang="en" />,
@@ -754,7 +754,7 @@ describe("ConceptMatchGame", () => {
     expect(screen.getByText("Find all 4 pairs")).toBeDefined();
   });
 
-  it("caps card and pair counts for animals-sounds (2 for easy, 5 for medium and hard)", () => {
+  it("caps card and pair counts for animals-sounds (2 for easy, 4 for medium, 5 for hard)", () => {
     const { rerender } = render(
       <ConceptMatchGame deck="animals-sounds" difficulty="easy" lang="en" />,
     );
@@ -775,9 +775,9 @@ describe("ConceptMatchGame", () => {
       .filter((el) =>
         el.getAttribute("data-testid")?.startsWith("concept-card-"),
       );
-    expect(cards).toHaveLength(10);
-    expect(screen.getByTestId("concept-score").textContent).toContain("0/5");
-    expect(screen.getByText("Find all 5 pairs")).toBeDefined();
+    expect(cards).toHaveLength(8);
+    expect(screen.getByTestId("concept-score").textContent).toContain("0/4");
+    expect(screen.getByText("Find all 4 pairs")).toBeDefined();
 
     rerender(
       <ConceptMatchGame deck="animals-sounds" difficulty="hard" lang="en" />,
