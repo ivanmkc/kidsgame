@@ -124,26 +124,33 @@ function RulesPreview({ lang }: { lang: Lang }) {
 function BingoPreview() {
   const icons = manifest.spotit.icons;
   return (
-    <View style={[styles.iconRow, { backgroundColor: 'rgba(214,111,168,0.10)' }]}>
-      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
-        <View
-          key={idx}
-          style={[
-            styles.previewTile,
-            { width: 32, height: 32, borderRadius: 8, borderWidth: 2 },
-            [0, 4, 8].includes(idx)
-              ? { borderColor: colors.gold, backgroundColor: 'rgba(232,162,79,0.18)' }
-              : { borderColor: colors.blush },
-          ]}
-        >
-          <Image
-            source={SPOTIT_ICONS[icons[idx % icons.length]]}
-            style={{ width: '76%', height: '76%' }}
-            resizeMode="contain"
-          />
-          {[0, 4, 8].includes(idx) && (
-            <Text style={{ position: 'absolute', top: -4, right: -4, fontSize: 10 }}>⭐</Text>
-          )}
+    <View style={[styles.iconRow, { backgroundColor: 'rgba(214,111,168,0.10)', flexDirection: 'column', gap: 4 }]}>
+      {[0, 1, 2].map((row) => (
+        <View key={row} testID="bingo-row" style={{ flexDirection: 'row', gap: 4 }}>
+          {[0, 1, 2].map((col) => {
+            const idx = row * 3 + col;
+            return (
+              <View
+                key={idx}
+                style={[
+                  styles.previewTile,
+                  { width: 32, height: 32, borderRadius: 8, borderWidth: 2 },
+                  [0, 4, 8].includes(idx)
+                    ? { borderColor: colors.gold, backgroundColor: 'rgba(232,162,79,0.18)' }
+                    : { borderColor: colors.blush },
+                ]}
+              >
+                <Image
+                  source={SPOTIT_ICONS[icons[idx % icons.length]]}
+                  style={{ width: '76%', height: '76%' }}
+                  resizeMode="contain"
+                />
+                {[0, 4, 8].includes(idx) && (
+                  <Text style={{ position: 'absolute', top: -4, right: -4, fontSize: 10 }}>⭐</Text>
+                )}
+              </View>
+            );
+          })}
         </View>
       ))}
     </View>

@@ -1,4 +1,6 @@
+// @vitest-environment happy-dom
 import { renderToString } from 'react-dom/server';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { manifest } from '../../manifest';
@@ -30,6 +32,16 @@ describe('MenuPreviews', () => {
       expect(html.length).toBeGreaterThan(0);
     });
   }
+
+  it('renders BingoPreview with exactly 3 rows', () => {
+    const node = previewFor('bingo', 'en');
+    render(<>{node}</>);
+    const rows = screen.getAllByTestId('bingo-row');
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+      expect(row.children).toHaveLength(3);
+    }
+  });
 
   it('renders rules preview with non-en lang', () => {
     const node = previewFor('rules', 'ja');
