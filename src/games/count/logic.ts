@@ -127,7 +127,7 @@ export function makeCountRound(
   do {
     icon = CURRICULUM.critters[randInt(rng, CURRICULUM.critters.length)];
     n = min + randInt(rng, max - min + 1);
-  } while (icon === prevIcon && n === prevN && guard++ < 200);
+  } while ((icon === prevIcon || n === prevN) && guard++ < 200);
 
   const positions = scatterPositions(rng, n);
   const choices = makeCountChoices(rng, n, max);

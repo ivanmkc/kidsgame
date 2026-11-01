@@ -136,6 +136,69 @@ describe("count with me", () => {
     expect(round.n).toBe(max);
   });
 
+  it("makeCountRound rerolls if only icon matches previous round", () => {
+    let callCount = 0;
+    const rng = () => {
+      callCount++;
+      // Roll 1: icon matches prevIcon (0 -> critters[0]), count differs (0.9999 -> max)
+      if (callCount === 1) return 0;
+      if (callCount === 2) return 0.9999;
+      // Roll 2: icon differs (0.9999 -> critters[last]), count differs (0.9999 -> max)
+      if (callCount <= 4) return 0.9999;
+      return 0.5;
+    };
+    const { min, max } = countSettings("easy");
+    const prevIcon = CURRICULUM.critters[0];
+    const prevN = min;
+    const round = makeCountRound(rng, "easy", prevIcon, prevN);
+    expect(round.icon).not.toBe(prevIcon);
+    expect(round.n).not.toBe(prevN);
+    expect(round.icon).toBe(
+      CURRICULUM.critters[CURRICULUM.critters.length - 1],
+    );
+    expect(round.n).toBe(max);
+  });
+
+  it("makeCountRound rerolls if only count matches previous round", () => {
+    let callCount = 0;
+    const rng = () => {
+      callCount++;
+      // Roll 1: icon differs (0.9999 -> critters[last]), count matches prevN (0 -> min)
+      if (callCount === 1) return 0.9999;
+      if (callCount === 2) return 0;
+      // Roll 2: icon differs (0.9999 -> critters[last]), count differs (0.9999 -> max)
+      if (callCount <= 4) return 0.9999;
+      return 0.5;
+    };
+    const { min, max } = countSettings("easy");
+    const prevIcon = CURRICULUM.critters[0];
+    const prevN = min;
+    const round = makeCountRound(rng, "easy", prevIcon, prevN);
+    expect(round.icon).not.toBe(prevIcon);
+    expect(round.n).not.toBe(prevN);
+    expect(round.icon).toBe(
+      CURRICULUM.critters[CURRICULUM.critters.length - 1],
+    );
+    expect(round.n).toBe(max);
+  });
+
+  it("makeCountRound ensures consecutive rounds never repeat critter or count across 100 rounds", () => {
+    const rng = makeRng(42);
+    let prevIcon: string | undefined;
+    let prevN: number | undefined;
+    for (let i = 0; i < 100; i++) {
+      const round = makeCountRound(rng, "easy", prevIcon, prevN);
+      if (prevIcon !== undefined) {
+        expect(round.icon).not.toBe(prevIcon);
+      }
+      if (prevN !== undefined) {
+        expect(round.n).not.toBe(prevN);
+      }
+      prevIcon = round.icon;
+      prevN = round.n;
+    }
+  });
+
   it("applyTap marks an uncounted item as tapped without mutating original", () => {
     const initial = [0, 0, 0];
     const next = applyTap(initial, 1);
