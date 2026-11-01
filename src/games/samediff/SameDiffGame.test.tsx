@@ -133,8 +133,8 @@ describe("SameDiffGame UI", () => {
     };
     const diffRatiosA = phrasePitchRatios(roundDiff, roundDiff.phraseA);
     const diffRatiosB = phrasePitchRatios(roundDiff, roundDiff.phraseB);
-    expect(diffRatiosA[1]).toBeCloseTo(4 / 7); // (64 - 60) / 7
-    expect(diffRatiosB[1]).toBeCloseTo(8 / 7); // (68 - 60) / 7
+    expect(diffRatiosA[1]).toBeCloseTo(4 / 8); // (64 - 60) / 8
+    expect(diffRatiosB[1]).toBeCloseTo(8 / 8); // (68 - 60) / 8
 
     const flatRound: SameDiffRound = {
       phraseA: [
