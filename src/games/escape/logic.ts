@@ -257,8 +257,15 @@ export function escapeHintMs(difficulty: Difficulty): number {
 
 export const MIN_DISPLAY_WIDTH = 256;
 export const MAX_DISPLAY_WIDTH = 980;
+export const ESCAPE_VERTICAL_OVERHEAD = 180;
 
 /** Computes clamped display width for the escape room scene frame. */
-export function escapeDisplayWidth(width: number): number {
-  return Math.max(MIN_DISPLAY_WIDTH, Math.min(width - 24, MAX_DISPLAY_WIDTH));
+export function escapeDisplayWidth(width: number, height?: number): number {
+  let maxWidth = Math.min(width - 24, MAX_DISPLAY_WIDTH);
+  if (height !== undefined && width > height) {
+    const availH = Math.max(0, height - ESCAPE_VERTICAL_OVERHEAD);
+    maxWidth = Math.min(maxWidth, Math.floor(availH * (16 / 9)));
+  }
+  return Math.max(MIN_DISPLAY_WIDTH, maxWidth);
 }
+

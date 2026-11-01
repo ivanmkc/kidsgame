@@ -723,4 +723,33 @@ describe("EscapeGame", () => {
       setViewport(origW, origH);
     }
   });
+
+  it("restricts scene frame size in mobile landscape so inventory tray fits on screen", () => {
+    const origW = window.innerWidth;
+    const origH = window.innerHeight;
+    try {
+      setViewport(667, 375);
+      const rooms = manifest.escape ?? [];
+      const room = rooms.find((r) => r.id === "toyroom") ?? rooms[0];
+
+      const { container } = render(
+        <EscapeGame
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          sceneId={room.id}
+          lang="en"
+        />,
+      );
+
+      const img = container.querySelector("img");
+      expect(img).toBeDefined();
+      expect((img?.parentElement as HTMLElement)?.style.width).toBe("346px");
+      expect((img?.parentElement as HTMLElement)?.style.height).toBe("194.625px");
+      expect(screen.getByTestId("escape-tray")).toBeDefined();
+    } finally {
+      setViewport(origW, origH);
+    }
+  });
 });
+

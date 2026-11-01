@@ -140,7 +140,7 @@ export function EscapeGame({
   const lastAction = useRef(Date.now());
   const framePos = useRef({ x: 0, y: 0 });
   const trayPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const stateRef = useRef(state);
   stateRef.current = state;
   const prevSceneRef = useRef<string | undefined>(undefined);
@@ -181,7 +181,7 @@ export function EscapeGame({
     return () => clearInterval(iv);
   }, [room, state, hintMs]);
 
-  const displayWidth = escapeDisplayWidth(width);
+  const displayWidth = escapeDisplayWidth(width, height);
   const scale = displayWidth / 1280;
   const displayHeight = 720 * scale;
 
