@@ -160,7 +160,7 @@ describe("BellsGame", () => {
     // Rapidly tap bell-0 twice in the same tick / render cycle
     act(() => {
       fireEvent.click(bell0);
-      
+
       fireEvent.click(bell1);
     });
 
@@ -190,10 +190,10 @@ describe("BellsGame", () => {
     // Rapidly hammer 5 times when sequence length is 2
     act(() => {
       fireEvent.click(bell0);
-      
+
       fireEvent.click(bell1);
       fireEvent.click(bell0);
-      
+
       fireEvent.click(bell1);
       fireEvent.click(bell0);
     });
@@ -312,7 +312,6 @@ describe("BellsGame", () => {
       vi.advanceTimersByTime(5000);
     });
 
-    
     const bell1 = screen.getByTestId("bell-1");
     expect(bell1.style.borderColor).toBe("rgba(255, 194, 75, 1.00)");
 
@@ -388,8 +387,8 @@ describe("BellsGame", () => {
     const bell0 = screen.getByTestId("bell-0");
     const bell1 = screen.getByTestId("bell-1");
     fireEvent.click(bell0);
-      
-      fireEvent.click(bell1);
+
+    fireEvent.click(bell1);
 
     expect(goodSpy).toHaveBeenCalledTimes(1);
 
@@ -415,13 +414,12 @@ describe("BellsGame", () => {
 
     const bell0 = screen.getByTestId("bell-0");
     const bell1 = screen.getByTestId("bell-1");
-    
 
     // Click 1, 0, 0 in a single act() — wrong first tap must block subsequent taps
     act(() => {
       fireEvent.click(bell1);
       fireEvent.click(bell0);
-      
+
       fireEvent.click(bell1);
     });
 
@@ -445,7 +443,6 @@ describe("BellsGame", () => {
 
     const bell0 = screen.getByTestId("bell-0");
     const bell1 = screen.getByTestId("bell-1");
-    
 
     act(() => {
       fireEvent.click(bell0);
@@ -740,6 +737,30 @@ describe("BellsGame", () => {
       fireEvent.click(bell0);
     });
     expect(within(bell0).queryAllByText(/[✨⭐]/)).toHaveLength(0);
+
+    vi.useRealTimers();
+  });
+  it("incorrect tap leaves the progress tap dot empty instead of filling it", () => {
+    vi.useFakeTimers();
+    vi.spyOn(Math, "random").mockReturnValue(0); // Sequence [0, 0] for easy
+    vi.spyOn(music, "playNote").mockImplementation(() => {});
+
+    render(<BellsGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Advance through demo into play phase
+    act(() => {
+      vi.advanceTimersByTime(5000);
+    });
+
+    const dot0 = screen.getByTestId("tap-dot-0");
+    const emptyClass = dot0.className;
+
+    // Tap incorrect bell (bell-1 instead of bell-0)
+    const wrongBell = screen.getByTestId("bell-1");
+    fireEvent.click(wrongBell);
+
+    // The dot should remain empty
+    expect(dot0.className).toBe(emptyClass);
 
     vi.useRealTimers();
   });
