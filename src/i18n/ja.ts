@@ -118,7 +118,7 @@ export const JA: Table = {
   'card.cm-colors.title': 'いろと ことば',
   'card.cm-colors.blurb': 'いろと ことばを あわせよう！',
   'card.cm-letters.title': 'もじあわせ',
-  'card.cm-letters.blurb': '大文字と小文字を合わせよう！',
+  'card.cm-letters.blurb': 'おおもじと こもじを あわせよう！',
   'card.cm-mixed.title': 'いろいろあわせ',
   'card.cm-mixed.blurb': 'もじや ことばや いろを あわせよう！',
 
