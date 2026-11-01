@@ -640,4 +640,11 @@ describe("RhymeGame", () => {
     fireEvent.click(round1Tile);
     expect(goodSpy.mock.calls.length + wrongSpy.mock.calls.length).toBe(2);
   });
+
+  it("renders 'coming soon' banner when original language has fewer than 3 families despite fallback", () => {
+    vi.spyOn(logic, "effectiveLang").mockReturnValue("en");
+
+    render(<RhymeGame onHome={() => {}} difficulty="easy" lang="cmn" />);
+    expect(screen.getByTestId("rhyme-fewer-banner")).toBeDefined();
+  });
 });
