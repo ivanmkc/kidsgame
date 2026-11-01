@@ -1,7 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { Animated, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle, useWindowDimensions } from 'react-native';
-import { colors, shadows } from '../theme';
-import { SparkleBurst } from './Sparkles';
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  View,
+  ViewStyle,
+  useWindowDimensions,
+} from "react-native";
+import { colors, shadows } from "../theme";
+import { SparkleBurst } from "./Sparkles";
 
 function tint(hex: string, alpha: number): string {
   const n = parseInt(hex.slice(1), 16);
@@ -42,11 +51,11 @@ export function FlipCard({
 
   const frontRot = t.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
+    outputRange: ["0deg", "180deg"],
   });
   const backRot = t.interpolate({
     inputRange: [0, 1],
-    outputRange: ['180deg', '360deg'],
+    outputRange: ["180deg", "360deg"],
   });
 
   return (
@@ -55,6 +64,7 @@ export function FlipCard({
       testID={testID}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
+      disabled={up || matched}
       style={{ width: size, height: size * 1.15 }}
     >
       <Animated.View
@@ -91,7 +101,9 @@ export function FlipCard({
         ]}
       >
         {renderCardFace(size)}
-        {matched ? <SparkleBurst trigger={sparkleTrigger ?? 1} count={5} size={13} /> : null}
+        {matched ? (
+          <SparkleBurst trigger={sparkleTrigger ?? 1} count={5} size={13} />
+        ) : null}
       </Animated.View>
     </Pressable>
   );
@@ -117,18 +129,35 @@ export function MemoryBoard({
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const count = Math.max(1, cardCount);
-  const cols = isLandscape ? Math.max(1, Math.ceil(count / 2)) : count <= 8 ? 2 : count <= 12 ? 3 : 4;
+  const cols = isLandscape
+    ? Math.max(1, Math.ceil(count / 2))
+    : count <= 8
+      ? 2
+      : count <= 12
+        ? 3
+        : 4;
   const rows = Math.ceil(count / cols);
   const gap = 12;
   const availW = Math.min(width - 32, 1100) - extraPaddingW;
   const availH = height - 84 - extraPaddingH;
   const cardW = Math.max(
     0,
-    Math.min((availW - (cols - 1) * gap) / cols, (availH - (rows - 1) * gap) / rows / 1.15, 150),
+    Math.min(
+      (availW - (cols - 1) * gap) / cols,
+      (availH - (rows - 1) * gap) / rows / 1.15,
+      150,
+    ),
   );
 
   return (
-    <View testID={testID} style={[styles.board, { width: cols * cardW + (cols - 1) * gap, gap }, style]}>
+    <View
+      testID={testID}
+      style={[
+        styles.board,
+        { width: cols * cardW + (cols - 1) * gap, gap },
+        style,
+      ]}
+    >
       {children(cardW)}
     </View>
   );
@@ -136,45 +165,45 @@ export function MemoryBoard({
 
 const styles = StyleSheet.create({
   board: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
   },
   face: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backfaceVisibility: 'hidden',
+    alignItems: "center",
+    justifyContent: "center",
+    backfaceVisibility: "hidden",
   },
   faceDown: { backgroundColor: colors.teal, padding: 5 },
   backRim: {
     flex: 1,
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     borderRadius: 13,
     borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "rgba(255,255,255,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   backBadge: {
-    width: '58%',
+    width: "58%",
     aspectRatio: 1,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.28)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255,255,255,0.28)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   backDot: {
-    position: 'absolute',
+    position: "absolute",
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
   faceUp: {
     backgroundColor: colors.card,
@@ -183,6 +212,6 @@ const styles = StyleSheet.create({
   },
   faceMatched: {
     borderColor: colors.green,
-    backgroundColor: 'rgba(95,191,110,0.12)',
+    backgroundColor: "rgba(95,191,110,0.12)",
   },
 });
