@@ -27,23 +27,50 @@ export function setMuted(m: boolean): void {
 }
 
 type Name = 'tap' | 'good' | 'wrong' | 'flip' | 'win' | 'boing' | 'thunder';
-const cache: Partial<Record<Name, HTMLAudioElement>> = {};
+
+// SFX pool: iOS Safari blocks un-primed audio elements from playing outside
+// a user gesture. We pre-create a fixed pool of HTMLAudioElements, prime them
+// with silent audio on the first user gesture alongside narration, and cycle
+// through them. Idle elements are preferred so rapid taps overlap.
+const SFX_POOL_SIZE = 6;
+let sfxPool: HTMLAudioElement[] | null = null;
+let sfxIndex = 0;
+
+function getSfxPool(): HTMLAudioElement[] {
+  if (Platform.OS !== 'web' || typeof window === 'undefined' || !window.Audio) return [];
+  if (!sfxPool) {
+    sfxPool = [];
+    for (let i = 0; i < SFX_POOL_SIZE; i++) {
+      const a = new window.Audio();
+      a.preload = 'auto';
+      sfxPool.push(a);
+    }
+  }
+  return sfxPool;
+}
+
+if (Platform.OS === 'web' && typeof window !== 'undefined' && window.Audio) {
+  getSfxPool();
+}
 
 function play(name: Name, volume = 0.5): void {
   if (muted || Platform.OS !== 'web' || typeof window === 'undefined' || !window.Audio) return;
   try {
-    // sfx/ resolves against the page URL, so it works at / and /kidsgame/
-    let a = cache[name];
-    if (!a) {
-      a = new window.Audio(`sfx/${name}.mp3`);
-      a.preload = 'auto';
-      cache[name] = a;
+    const pool = getSfxPool();
+    if (!pool.length) return;
+    const node = pool[sfxIndex];
+    sfxIndex = (sfxIndex + 1) % pool.length;
+    const src = `sfx/${name}.mp3`;
+    if (!node.src.endsWith(src)) {
+      node.src = src;
+    } else {
+      node.currentTime = 0;
     }
-    // cloneNode so rapid taps overlap instead of restarting
-    const node = a.cloneNode(true) as HTMLAudioElement;
     node.volume = volume;
-    void node.play().catch(() => { /* pre-gesture play: ignore */ });
-  } catch { /* audio unavailable: stay silent */ }
+    void node.play()?.catch?.(() => { /* pre-gesture play: ignore */ });
+  } catch {
+    return;
+  }
 }
 
 export const sfx = {
@@ -119,6 +146,15 @@ function primeUnlock(): void {
     const p = a.play();
     if (p && typeof p.then === 'function') p.catch(() => { /* fine */ });
   } catch { /* fine */ }
+  for (const s of getSfxPool()) {
+    try {
+      s.src = SILENT_WAV;
+      const p = s.play();
+      if (p && typeof p.then === 'function') p.catch(() => { /* fine */ });
+    } catch {
+      continue;
+    }
+  }
 }
 
 if (Platform.OS === 'web' && typeof window !== 'undefined') {
