@@ -229,8 +229,32 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
       preview={<div>preview</div>}
     />,
   );
-  expect(picwordJaHtml).toContain("絵と言葉");
-  expect(picwordJaHtml).toContain("絵と言葉を合わせよう！");
+  expect(picwordJaHtml).toContain("えと ことば");
+  expect(picwordJaHtml).toContain("えと ことばを あわせよう！");
+
+  const picspeakJaHtml = renderToString(
+    <MenuCard
+      g={picspeakCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(picspeakJaHtml).toContain("えと おと");
+  expect(picspeakJaHtml).toContain("えと おとを あわせよう！");
+
+  const colorsJaHtml = renderToString(
+    <MenuCard
+      g={colorsCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(colorsJaHtml).toContain("いろと ことば");
+  expect(colorsJaHtml).toContain("いろと ことばを あわせよう！");
 
   const picwordCmnHtml = renderToString(
     <MenuCard
