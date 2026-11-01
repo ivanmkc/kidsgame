@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -218,6 +219,8 @@ def _gen_node(spec: dict, nid: str, n: dict, parent_png: Path | None = None) -> 
         best.save(OUT / fname)
 
     entry: dict = {"image": f"story/{fname}", "text": n["text"]}
+    if n.get("bad") or re.search(r"\boops(ie)?\b", n.get("text", ""), re.IGNORECASE):
+        entry["bad"] = True
     if "choices" in n:
         chs = [{"label": c["label"], "next": c["next"], **({"icon": c["icon"]} if c.get("icon") else {})}
                for c in n["choices"]]
