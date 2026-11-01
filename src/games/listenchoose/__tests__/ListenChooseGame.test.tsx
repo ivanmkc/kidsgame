@@ -140,7 +140,13 @@ describe("ListenChooseGame", () => {
   } {
     const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
     const allWords = [...LEVEL_1_WORDS, ...LEVEL_2_WORDS, ...LEVEL_3_WORDS];
-    const targetWord = allWords.find((w) => w.en === targetText)!;
+    const targetWord = allWords.find(
+      (w) =>
+        w.en === targetText ||
+        w.ja === targetText ||
+        w.cmn === targetText ||
+        w.yue === targetText,
+    )!;
     const visibleWords = allWords.filter((w) =>
       screen.queryByTestId(`choice-${w.icon}`),
     );
@@ -646,7 +652,7 @@ describe("ListenChooseGame", () => {
     }
   });
 
-  it("safely resets to opening screen when language switches mid-round", () => {
+  it("preserves active game, streak, and speaks new language when language switches mid-round", () => {
     const onHome = vi.fn();
     const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
 
@@ -657,44 +663,51 @@ describe("ListenChooseGame", () => {
     expect(screen.getByTestId("speaker-button")).toBeTruthy();
     expect(sound.sayThen).toHaveBeenCalled();
 
+    // Complete round 1 correctly to build streak to 1
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 1 / 12",
+    );
+
     vi.mocked(sound.sayThen).mockClear();
 
     // Switch language mid-round to Japanese
     rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
 
-    // Active round is discarded and game resets to opening screen in Japanese
-    expect(screen.queryByTestId("speaker-button")).toBeNull();
-    const playBtn = screen.getByTestId("play-button");
-    expect(playBtn).toBeTruthy();
-    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(
-      1,
+    // Active game remains on screen: speaker button is present, play button is not shown
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(screen.queryByTestId("play-button")).toBeNull();
+    // Streak progress is preserved
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 1 / 12",
     );
-    expect(screen.getByText("ことばを きいて えを えらぼう！")).toBeTruthy();
-    expect(screen.getByText("あそぶ")).toBeTruthy();
 
-    // Advancing timers does not trigger any old-language speech or state changes
+    // Target word is re-spoken in Japanese
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
+
+    // Advancing timers does not trigger any old-language speech
+    vi.mocked(sound.sayThen).mockClear();
     act(() => {
       vi.runAllTimers();
     });
     expect(sound.sayThen).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("speaker-button")).toBeNull();
-
-    // Starting new round plays target word in Japanese
-    fireEvent.click(playBtn);
-    expect(sound.sayThen).toHaveBeenCalledTimes(1);
-    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
-    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
   });
 
-  it("cancels pending celebration timer and resets cleanly when language switches mid-celebration", () => {
+  it("cancels pending celebration timer, stays in active game, and preserves streak when language switches mid-celebration", () => {
     const onHome = vi.fn();
     const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
 
     // Pick correct answer to trigger celebration
-    const targetText = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
-    const correctBtn = screen.getByRole("button", { name: targetText! });
-    fireEvent.click(correctBtn);
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
 
     expect(screen.getByTestId("celebration")).toBeTruthy();
     vi.mocked(sound.sayThen).mockClear();
@@ -702,25 +715,25 @@ describe("ListenChooseGame", () => {
     // Switch language while celebrate timer (800ms) is pending
     rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
 
-    // Celebration overlay is gone and game reset to opening screen
+    // Celebration overlay is gone and game stays active
     expect(screen.queryByTestId("celebration")).toBeNull();
-    expect(screen.getByTestId("play-button")).toBeTruthy();
-    expect(screen.getByText("あそぶ")).toBeTruthy();
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(screen.queryByTestId("play-button")).toBeNull();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 0 / 12",
+    );
 
     // Advance past celebration timer duration
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    // Old celebration callback does not advance round or speak next word
-    expect(sound.sayThen).not.toHaveBeenCalled();
-    expect(screen.queryByTestId("speaker-button")).toBeNull();
-    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
-      "⭐ 0 / 12",
-    );
+    // Old celebration callback does not double-advance; game remains active
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(screen.queryByTestId("play-button")).toBeNull();
   });
 
-  it("cancels pending wobble timer and resets cleanly when language switches mid-wobble", () => {
+  it("cancels pending wobble timer and stays in active game when language switches mid-wobble", () => {
     const onHome = vi.fn();
     const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
     fireEvent.click(screen.getByTestId("play-button"));
@@ -733,19 +746,20 @@ describe("ListenChooseGame", () => {
     // Switch language while wobble timer (450ms) is pending
     rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
 
-    expect(screen.getByTestId("play-button")).toBeTruthy();
-    expect(screen.getByText("あそぶ")).toBeTruthy();
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(screen.queryByTestId("play-button")).toBeNull();
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
 
     // Advance past wobble timer duration
     act(() => {
       vi.advanceTimersByTime(600);
     });
 
-    // Wobble callback discarded, game remains on start screen
-    expect(screen.queryByTestId("speaker-button")).toBeNull();
+    // Wobble callback discarded, game remains active
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
   });
 
-  it("resets mid-round when language is cycled via in-game header button", () => {
+  it("preserves active game and streak when language is cycled via in-game header button", () => {
     function Harness() {
       const [lang, setLang] = React.useState<Lang>("en");
       return (
@@ -764,24 +778,46 @@ describe("ListenChooseGame", () => {
     fireEvent.click(screen.getByTestId("play-button"));
     expect(screen.getByTestId("speaker-button")).toBeTruthy();
 
+    // Answer round 1 to build streak
+    const { targetBtn } = getRoundChoices();
+    fireEvent.click(targetBtn);
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 1 / 12",
+    );
+
     vi.mocked(sound.sayThen).mockClear();
 
     // Cycle language via header chip
     fireEvent.click(screen.getByTestId("lang-cycle"));
 
-    expect(screen.queryByTestId("speaker-button")).toBeNull();
-    const playBtn = screen.getByTestId("play-button");
-    expect(playBtn).toBeTruthy();
-    expect(screen.getAllByText("きいてえらぼう").length).toBeGreaterThanOrEqual(
-      1,
+    // Game stays active, streak is preserved, play-button is NOT shown
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(screen.queryByTestId("play-button")).toBeNull();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 1 / 12",
     );
-    expect(screen.getByText("ことばを きいて えを えらぼう！")).toBeTruthy();
-    expect(screen.getByText("あそぶ")).toBeTruthy();
+
+    // Re-speaks target word in Japanese
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
 
     act(() => {
       vi.runAllTimers();
     });
-    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    // Next correct guess in Japanese advances streak to 2
+    const jaChoices = getRoundChoices();
+    fireEvent.click(jaChoices.targetBtn);
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 2 / 12",
+    );
   });
 
   it("adapts layout on mobile landscape viewports (844x390) so choices fit without clipping", () => {
@@ -1069,6 +1105,62 @@ describe("ListenChooseGame", () => {
     expect(
       newTargetCaptures[newTargetCaptures.length - 1]?.disabled,
     ).toBeFalsy();
+  });
+
+  it("preserves start screen when language switches before starting", () => {
+    const onHome = vi.fn();
+    const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
+
+    expect(screen.getByTestId("play-button")).toBeTruthy();
+    expect(screen.queryByTestId("speaker-button")).toBeNull();
+
+    rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
+
+    // Remains on start screen with localized Play button
+    expect(screen.getByTestId("play-button")).toBeTruthy();
+    expect(screen.getByText("あそぶ")).toBeTruthy();
+    expect(screen.queryByTestId("speaker-button")).toBeNull();
+
+    // Clicking Play starts round 1 in Japanese
+    vi.mocked(sound.sayThen).mockClear();
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    expect(screen.getByTestId("speaker-button")).toBeTruthy();
+    expect(sound.sayThen).toHaveBeenCalledTimes(1);
+    const spokenWord = vi.mocked(sound.sayThen).mock.lastCall?.[0]?.[0];
+    expect(spokenWord).not.toMatch(/^[a-z]+$/i);
+  });
+
+  it("preserves win overlay and streak when language switches after winning", () => {
+    const onHome = vi.fn();
+    const { rerender } = render(<ListenChooseGame onHome={onHome} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    // Advance 12 rounds to trigger win
+    for (let round = 1; round <= 12; round++) {
+      const { targetBtn } = getRoundChoices();
+      fireEvent.click(targetBtn);
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
+
+    expect(screen.getByText(t("en", "win.soundsWords"))).toBeTruthy();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 12 / 12",
+    );
+
+    vi.mocked(sound.sayThen).mockClear();
+
+    // Switch language to Japanese while on win overlay
+    rerender(<ListenChooseGame onHome={onHome} lang="ja" />);
+
+    // Win overlay stays visible, streak remains 12, no round word spoken
+    expect(screen.getByText(t("ja", "win.soundsWords"))).toBeTruthy();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "⭐ 12 / 12",
+    );
+    expect(sound.sayThen).not.toHaveBeenCalled();
   });
 });
 
