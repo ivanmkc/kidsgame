@@ -82,19 +82,33 @@ describe("OddOneGame", () => {
   it("clamps minimum tile size to 60px on short viewports to prevent negative dimensions", () => {
     const originalWidth = window.innerWidth;
     const originalHeight = window.innerHeight;
-    Object.defineProperty(window, "innerWidth", { value: 800, configurable: true });
-    Object.defineProperty(window, "innerHeight", { value: 100, configurable: true });
+    Object.defineProperty(window, "innerWidth", {
+      value: 800,
+      configurable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 100,
+      configurable: true,
+    });
     try {
       const { container } = render(
-        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />
+        <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
       );
-      const buttons = container.querySelectorAll('[data-testid^="oddone-item-"]');
+      const buttons = container.querySelectorAll(
+        '[data-testid^="oddone-item-"]',
+      );
       expect(buttons.length).toBeGreaterThan(0);
       const tileWidth = parseFloat((buttons[0] as HTMLElement).style.width);
       expect(tileWidth).toBe(60);
     } finally {
-      Object.defineProperty(window, "innerWidth", { value: originalWidth, configurable: true });
-      Object.defineProperty(window, "innerHeight", { value: originalHeight, configurable: true });
+      Object.defineProperty(window, "innerWidth", {
+        value: originalWidth,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: originalHeight,
+        configurable: true,
+      });
     }
   });
 
@@ -873,5 +887,41 @@ describe("OddOneGame", () => {
       expect(tiles[0]?.getAttribute("aria-label")).toBe("いぬ");
       expect(tiles[3]?.getAttribute("aria-label")).toBe("りんご");
     });
+  });
+
+  it("calls stopNarration on unmount to prevent audio leak across navigation", () => {
+    const { unmount } = render(
+      <OddOneGame onHome={() => {}} difficulty="easy" lang="en" />,
+    );
+    expect(stopNarration).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(stopNarration).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls stopNarration on unmount when player taps Home", () => {
+    function Parent() {
+      const [inGame, setInGame] = React.useState(true);
+      return inGame ? (
+        <OddOneGame
+          onHome={() => setInGame(false)}
+          difficulty="easy"
+          lang="en"
+        />
+      ) : null;
+    }
+    const { container } = render(<Parent />);
+    expect(stopNarration).not.toHaveBeenCalled();
+
+    const homeBtn = container.querySelector(
+      '[data-testid="back-button"]',
+    ) as HTMLElement;
+    expect(homeBtn).toBeTruthy();
+    act(() => {
+      fireEvent.click(homeBtn);
+    });
+
+    expect(stopNarration).toHaveBeenCalledTimes(1);
   });
 });
