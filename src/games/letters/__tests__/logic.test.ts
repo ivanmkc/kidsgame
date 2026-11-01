@@ -50,6 +50,35 @@ describe("LETTER_SOUNDS phonics pool", () => {
     expect(roundO.targetKey).toBe("O");
     expect(roundO.promptLine).toBe("Which letter says ah?");
   });
+
+  it("includes letters that share a sound (both C and K say kuh)", () => {
+    const entryC = LETTER_SOUNDS.find((s) => s.letter === "C");
+    const entryK = LETTER_SOUNDS.find((s) => s.letter === "K");
+    expect(entryC).toEqual({ letter: "C", sound: "kuh" });
+    expect(entryK).toEqual({ letter: "K", sound: "kuh" });
+  });
+
+  it("sound tier allows K as target and excludes letters sharing its sound from distractors", () => {
+    const idxK = LETTER_SOUNDS.findIndex((s) => s.letter === "K");
+    expect(idxK).toBeGreaterThanOrEqual(0);
+    const rngK = () => (idxK + 0.5) / LETTER_SOUNDS.length;
+    const roundK = makeLetterRound(rngK, "sound", 8);
+    expect(roundK.targetKey).toBe("K");
+    expect(roundK.promptLine).toBe("Which letter says kuh?");
+    const labelsK = roundK.tiles.map((t) => t.label);
+    expect(labelsK).toContain("K");
+    expect(labelsK).not.toContain("C");
+
+    const idxC = LETTER_SOUNDS.findIndex((s) => s.letter === "C");
+    expect(idxC).toBeGreaterThanOrEqual(0);
+    const rngC = () => (idxC + 0.5) / LETTER_SOUNDS.length;
+    const roundC = makeLetterRound(rngC, "sound", 8);
+    expect(roundC.targetKey).toBe("C");
+    expect(roundC.promptLine).toBe("Which letter says kuh?");
+    const labelsC = roundC.tiles.map((t) => t.label);
+    expect(labelsC).toContain("C");
+    expect(labelsC).not.toContain("K");
+  });
 });
 
 describe("settingsForLetters", () => {
@@ -205,9 +234,8 @@ describe("speechLines", () => {
 
     // Total should only include valid combinations:
     // 25 kana (ja) + 3 * (26 letters + 18 sounds) = 157.
-    expect(lines).toHaveLength(
-      KANA_POOL.length + 3 * (26 + LETTER_SOUNDS.length),
-    );
+    const uniqueSounds = new Set(LETTER_SOUNDS.map((s) => s.sound)).size;
+    expect(lines).toHaveLength(KANA_POOL.length + 3 * (26 + uniqueSounds));
 
     // Valid combinations included:
     expect(lineSet.has(t("ja", "letters.findKana", { kana: "あ" }))).toBe(true);
