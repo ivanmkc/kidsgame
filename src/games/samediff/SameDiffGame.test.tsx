@@ -18,6 +18,7 @@ import {
   BASE_PHRASES,
   speechLines,
   getInstructionalFeedback,
+  sameDiffLayout,
 } from "./logic";
 import { makeRng } from "../../rng";
 import { sfx } from "../../sound";
@@ -1200,6 +1201,144 @@ describe("SameDiffGame UI", () => {
       });
 
       expect(playSpy).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
+  });
+
+  describe("sameDiffLayout logic", () => {
+    it("detects compact mobile landscape viewports", () => {
+      expect(sameDiffLayout(667, 375).isLandscape).toBe(true);
+      expect(sameDiffLayout(844, 390).isLandscape).toBe(true);
+      expect(sameDiffLayout(800, 360).isLandscape).toBe(true);
+      expect(sameDiffLayout(568, 320).isLandscape).toBe(true);
+      expect(sameDiffLayout(915, 412).isLandscape).toBe(true);
+    });
+
+    it("detects portrait viewports as not compact landscape", () => {
+      expect(sameDiffLayout(375, 667).isLandscape).toBe(false);
+      expect(sameDiffLayout(390, 844).isLandscape).toBe(false);
+      expect(sameDiffLayout(360, 800).isLandscape).toBe(false);
+    });
+
+    it("detects tablet and desktop viewports as not compact landscape", () => {
+      expect(sameDiffLayout(1024, 768).isLandscape).toBe(false);
+      expect(sameDiffLayout(1440, 900).isLandscape).toBe(false);
+    });
+
+    it("handles zero or non-positive dimensions gracefully", () => {
+      expect(sameDiffLayout(0, 0).isLandscape).toBe(false);
+      expect(sameDiffLayout(-100, 300).isLandscape).toBe(false);
+      expect(sameDiffLayout(300, -100).isLandscape).toBe(false);
+    });
+  });
+
+  describe("SameDiffGame responsive landscape layout", () => {
+    function setViewport(width: number, height: number) {
+      Object.defineProperty(window, "innerWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(window, "innerHeight", {
+        value: height,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientWidth", {
+        value: width,
+        configurable: true,
+      });
+      Object.defineProperty(document.documentElement, "clientHeight", {
+        value: height,
+        configurable: true,
+      });
+      if (window.visualViewport) {
+        Object.defineProperty(window.visualViewport, "width", {
+          value: width,
+          configurable: true,
+        });
+        Object.defineProperty(window.visualViewport, "height", {
+          value: height,
+          configurable: true,
+        });
+      }
+      window.dispatchEvent(new Event("resize"));
+    }
+
+    afterEach(() => {
+      setViewport(1024, 768);
+    });
+
+    it("arranges board in a row layout and applies compact sizing on 667x375 landscape viewport during pick phase", () => {
+      setViewport(667, 375);
+      vi.useFakeTimers();
+      render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(4200);
+      });
+
+      const board = screen.getByTestId("samediff-board");
+      const listenCard = screen.getByTestId("samediff-listen-card");
+      const pickContainer = screen.getByTestId("samediff-pick-container");
+      const replayBtn = screen.getByTestId("samediff-replay");
+      const sameBtn = screen.getByTestId("samediff-same");
+      const diffBtn = screen.getByTestId("samediff-diff");
+
+      // Verify row layout is active on board
+      expect(window.getComputedStyle(board).flexDirection).toBe("row");
+      expect(board.contains(listenCard)).toBe(true);
+      expect(board.contains(pickContainer)).toBe(true);
+
+      // Verify compact card and button styling are applied
+      expect(window.getComputedStyle(replayBtn).width).toBe("52px");
+      expect(window.getComputedStyle(replayBtn).height).toBe("52px");
+      expect(window.getComputedStyle(listenCard).paddingTop).toBe("10px");
+      expect(window.getComputedStyle(listenCard).borderRadius).toBe("20px");
+
+      expect(sameBtn).toBeDefined();
+      expect(diffBtn).toBeDefined();
+
+      vi.useRealTimers();
+    });
+
+    it("arranges board in a row layout on 844x390 landscape viewport", () => {
+      setViewport(844, 390);
+      vi.useFakeTimers();
+      render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(4200);
+      });
+
+      const board = screen.getByTestId("samediff-board");
+      const replayBtn = screen.getByTestId("samediff-replay");
+      const listenCard = screen.getByTestId("samediff-listen-card");
+
+      expect(window.getComputedStyle(board).flexDirection).toBe("row");
+      expect(window.getComputedStyle(replayBtn).width).toBe("52px");
+      expect(window.getComputedStyle(listenCard).paddingTop).toBe("10px");
+
+      vi.useRealTimers();
+    });
+
+    it("preserves vertical column layout and standard sizing in portrait viewport (390x844)", () => {
+      setViewport(390, 844);
+      vi.useFakeTimers();
+      render(<SameDiffGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+      act(() => {
+        vi.advanceTimersByTime(4200);
+      });
+
+      const board = screen.getByTestId("samediff-board");
+      const replayBtn = screen.getByTestId("samediff-replay");
+      const listenCard = screen.getByTestId("samediff-listen-card");
+
+      expect(window.getComputedStyle(board).flexDirection).toBe("column");
+      expect(window.getComputedStyle(replayBtn).width).toBe("72px");
+      expect(window.getComputedStyle(replayBtn).height).toBe("72px");
+      expect(window.getComputedStyle(listenCard).paddingTop).toBe("24px");
+      expect(window.getComputedStyle(listenCard).borderRadius).toBe("24px");
 
       vi.useRealTimers();
     });
