@@ -177,7 +177,7 @@ export function MemoryGame({
     <MemoryBoard
       cardCount={board.length}
       extraPaddingW={duel ? 26 : 0}
-      extraPaddingH={duel ? 92 : 64}
+      extraPaddingH={duel ? 128 : 64}
     >
       {(cardW) =>
         board.map((card) => {
