@@ -1433,15 +1433,15 @@ describe("conceptmatch/logic", () => {
   });
 
   describe("pairsForDifficulty", () => {
-    it("scales shapes-objects deck capped by capacity (2 for easy, 4 for medium, 4 for hard)", () => {
+    it("scales shapes-objects deck scaled down for medium (2 for easy, 3 for medium, 4 for hard)", () => {
       expect(pairsForDifficulty("easy", "shapes-objects")).toBe(2);
-      expect(pairsForDifficulty("medium", "shapes-objects")).toBe(4);
+      expect(pairsForDifficulty("medium", "shapes-objects")).toBe(3);
       expect(pairsForDifficulty("hard", "shapes-objects")).toBe(4);
     });
 
-    it("scales animals-sounds deck capped by capacity (2 for easy, 5 for medium, 5 for hard)", () => {
+    it("scales animals-sounds deck scaled down for medium (2 for easy, 4 for medium, 5 for hard)", () => {
       expect(pairsForDifficulty("easy", "animals-sounds")).toBe(2);
-      expect(pairsForDifficulty("medium", "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty("medium", "animals-sounds")).toBe(4);
       expect(pairsForDifficulty("hard", "animals-sounds")).toBe(5);
     });
 
@@ -1469,8 +1469,8 @@ describe("conceptmatch/logic", () => {
 
     it("defaults to medium rules when difficulty is omitted", () => {
       expect(pairsForDifficulty()).toBe(6);
-      expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(4);
-      expect(pairsForDifficulty(undefined, "animals-sounds")).toBe(5);
+      expect(pairsForDifficulty(undefined, "shapes-objects")).toBe(3);
+      expect(pairsForDifficulty(undefined, "animals-sounds")).toBe(4);
       expect(pairsForDifficulty(undefined, "letters")).toBe(6);
     });
 
