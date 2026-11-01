@@ -42,7 +42,16 @@ export const DECK_TO_CARD_KEY: Record<ConceptMatchDeck, CardKey> = {
   mixed: "cm-mixed",
 };
 
-export const ANIMALS: string[] = ["dog", "cat", "lion", "frog", "pig"];
+export const ANIMALS: string[] = [
+  "dog",
+  "cat",
+  "lion",
+  "frog",
+  "pig",
+  "fox",
+  "rabbit",
+  "panda",
+];
 
 export interface ShapePair {
   shape: string;
@@ -128,7 +137,7 @@ const DECK_CAPACITIES: Partial<Record<ConceptMatchDeck, number>> = {
  * Returns the target pair count for a given difficulty and deck.
  * Ramps across easy (2 pairs / 2x2 grid), medium (6 pairs / 3x4 grid),
  * and hard (8 pairs / 4x4 grid), capped by deck capacity (shapes-objects=4,
- * animals-sounds=5, numerals-dots=9).
+ * animals-sounds=8, numerals-dots=9).
  */
 export function pairsForDifficulty(
   difficulty: Difficulty = "medium",
