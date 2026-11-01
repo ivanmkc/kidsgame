@@ -32,6 +32,48 @@ describe("routeParts", () => {
   });
 });
 
+describe("readHash", () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.unstubAllGlobals();
+    (Platform as { OS: string }).OS = "web";
+    window.location.hash = "";
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    (Platform as { OS: string }).OS = "web";
+    window.location.hash = "";
+  });
+
+  it("returns menu when hash is empty", async () => {
+    const { readHash } = await import("../nav");
+    expect(readHash()).toBe("menu");
+  });
+
+  it("returns menu when hash is only # or #/", async () => {
+    const { readHash } = await import("../nav");
+    window.location.hash = "#";
+    expect(readHash()).toBe("menu");
+
+    window.location.hash = "#/";
+    expect(readHash()).toBe("menu");
+  });
+
+  it("returns route from hash when present", async () => {
+    const { readHash } = await import("../nav");
+    window.location.hash = "#/diff/farm";
+    expect(readHash()).toBe("diff/farm");
+  });
+
+  it("returns menu on non-web platform", async () => {
+    (Platform as { OS: string }).OS = "ios";
+    window.location.hash = "#/diff/farm";
+    const { readHash } = await import("../nav");
+    expect(readHash()).toBe("menu");
+  });
+});
+
 describe("useRoute", () => {
   let pushStateSpy: ReturnType<typeof vi.spyOn>;
   let replaceStateSpy: ReturnType<typeof vi.spyOn>;
@@ -77,9 +119,9 @@ describe("useRoute", () => {
     ];
   }
 
-  it("reads players route when hash is empty", async () => {
+  it("reads menu route when hash is empty", async () => {
     const [route] = await renderHook();
-    expect(route).toBe("players");
+    expect(route).toBe("menu");
   });
 
   it("reads route from hash when present", async () => {
@@ -94,14 +136,14 @@ describe("useRoute", () => {
     expect(route).toBe("menu");
   });
 
-  it("falls back to players when hash is only # or #/", async () => {
+  it("falls back to menu when hash is only # or #/", async () => {
     window.location.hash = "#";
     const [route1] = await renderHook();
-    expect(route1).toBe("players");
+    expect(route1).toBe("menu");
 
     window.location.hash = "#/";
     const [route2] = await renderHook();
-    expect(route2).toBe("players");
+    expect(route2).toBe("menu");
   });
 
   it("navigates and pushes history on web", async () => {
@@ -131,12 +173,12 @@ describe("useRoute", () => {
     expect(pushStateSpy).not.toHaveBeenCalled();
   });
 
-  it("defaults to players and skips web navigation on non-web platform", async () => {
+  it("defaults to menu and skips web navigation on non-web platform", async () => {
     (Platform as { OS: string }).OS = "ios";
-    window.location.hash = "#/menu";
+    window.location.hash = "#/diff";
 
     const [route, navigate] = await renderHook();
-    expect(route).toBe("players");
+    expect(route).toBe("menu");
 
     navigate("diff");
     expect(stopNarrationSpy).not.toHaveBeenCalled();
@@ -177,7 +219,7 @@ describe("useRoute", () => {
     const { useRoute } = await import("../nav");
     const { result } = renderHookRTL(() => useRoute());
 
-    expect(result.current[0]).toBe("players");
+    expect(result.current[0]).toBe("menu");
     stopNarrationSpy.mockClear();
 
     act(() => {
@@ -193,15 +235,15 @@ describe("useRoute", () => {
     const { useRoute } = await import("../nav");
     const { result } = renderHookRTL(() => useRoute());
 
-    expect(result.current[0]).toBe("players");
+    expect(result.current[0]).toBe("menu");
     stopNarrationSpy.mockClear();
 
     act(() => {
-      window.location.hash = "#/menu";
+      window.location.hash = "#/diff";
     });
 
     expect(stopNarrationSpy).toHaveBeenCalledTimes(1);
-    expect(result.current[0]).toBe("menu");
+    expect(result.current[0]).toBe("diff");
   });
 
   it("removes event listeners on unmount so subsequent events do not trigger updates", async () => {
@@ -227,7 +269,7 @@ describe("useRoute", () => {
     });
 
     expect(stopNarrationSpy).not.toHaveBeenCalled();
-    expect(result.current[0]).toBe("players");
+    expect(result.current[0]).toBe("menu");
   });
 
   it("synchronizes route across multiple useRoute instances when navigate is called", async () => {
@@ -235,8 +277,8 @@ describe("useRoute", () => {
     const { result: instance1 } = renderHookRTL(() => useRoute());
     const { result: instance2 } = renderHookRTL(() => useRoute());
 
-    expect(instance1.current[0]).toBe("players");
-    expect(instance2.current[0]).toBe("players");
+    expect(instance1.current[0]).toBe("menu");
+    expect(instance2.current[0]).toBe("menu");
 
     act(() => {
       instance2.current[1]("diff");
