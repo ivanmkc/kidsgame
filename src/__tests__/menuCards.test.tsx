@@ -1,7 +1,12 @@
 import { renderToString } from "react-dom/server";
 import React from "react";
 import { MenuCard } from "../components/MenuCard";
-import { GAME_CARDS, MUSIC_CARDS, NUMBER_CARDS, WORD_CARDS } from "../menuCards";
+import {
+  GAME_CARDS,
+  MUSIC_CARDS,
+  NUMBER_CARDS,
+  WORD_CARDS,
+} from "../menuCards";
 import { expect, test, vi } from "vitest";
 
 test("every music-category game is marked beta and renders the pill", () => {
@@ -172,6 +177,19 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   expect(lettersHtml).toContain("Letter Match");
   expect(lettersHtml).toContain("Match big and small letters!");
 
+  const lettersJaHtml = renderToString(
+    <MenuCard
+      g={lettersCard}
+      lang="ja"
+      cardWidth={100}
+      onNavigate={onNavigate}
+      preview={<div>preview</div>}
+    />,
+  );
+  expect(lettersJaHtml).toContain("もじあわせ");
+  expect(lettersJaHtml).toContain("おおもじと こもじを あわせよう！");
+  expect(lettersJaHtml).not.toContain("大文字");
+
   const enHtml = renderToString(
     <MenuCard
       g={numdotsCard}
@@ -328,7 +346,6 @@ test("Concept Match menu cards render localized titles and blurbs", () => {
   expect(mixedYueHtml).toContain("混合配對");
   expect(mixedYueHtml).toContain("將字母、文字同顏色配成一對！");
 });
-
 
 test("WORD_CARDS registers Word Family card with beta: true and localized text", () => {
   const onNavigate = vi.fn();
