@@ -43,11 +43,16 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   // Veo action clip playing over the scene (the hero DOES the tapped action)
   const [clip, setClip] = useState<{ src: string; next: string } | null>(null);
   const animating = useRef(false);
+  const pickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // breadcrumb trail for Go back / Try another way (+ redo for arrow keys)
   const hist = useRef<string[]>([]);
   const redo = useRef<string[]>([]);
 
   useEffect(() => {
+    if (pickTimer.current) {
+      clearTimeout(pickTimer.current);
+      pickTimer.current = null;
+    }
     setNodeId('start');
     zoom.setValue(0);
     setZoomTarget(null);
@@ -55,6 +60,15 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     hist.current = [];
     animating.current = false;
   }, [sceneId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    return () => {
+      if (pickTimer.current) {
+        clearTimeout(pickTimer.current);
+        pickTimer.current = null;
+      }
+    };
+  }, []);
 
   const rawNode: StoryNode | null = story ? story.nodes[nodeId] ?? story.nodes.start : null;
   const node: StoryNode | null = useMemo(() => normalizeStoryNode(rawNode), [rawNode]);
@@ -165,6 +179,11 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     setNodeId(next);
   };
   const goBack = () => {
+    if (pickTimer.current) {
+      clearTimeout(pickTimer.current);
+      pickTimer.current = null;
+      animating.current = false;
+    }
     const prev = hist.current.pop();
     if (prev) {
       animating.current = false;
@@ -174,6 +193,11 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
     }
   };
   const goForward = () => {
+    if (pickTimer.current) {
+      clearTimeout(pickTimer.current);
+      pickTimer.current = null;
+      animating.current = false;
+    }
     const next = redo.current.pop();
     if (next) {
       animating.current = false;
@@ -217,10 +241,13 @@ export function StoryGame({ onHome, sceneId, onPickScene, onBackToPicker, lang =
   const pickChoice = (c: StoryChoice, choiceLabel: string) => {
     if (animating.current) return;
     animating.current = true;
-    setTimeout(() => { animating.current = false; }, 400);
     sfx.tap();
     say(choiceLabel);
-    advance(c.next);
+    pickTimer.current = setTimeout(() => {
+      advance(c.next);
+      animating.current = false;
+      pickTimer.current = null;
+    }, 400);
   };
 
   const tx = zoomTarget ? (imgW / 2 - zoomTarget.cx) * ZOOM : 0;
