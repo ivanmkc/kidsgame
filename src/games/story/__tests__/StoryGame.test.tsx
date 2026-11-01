@@ -49,7 +49,6 @@ vi.mock("../../../components/GameShell", () => ({
 
 const capturedPressables: FakePressableProps[] = [];
 const capturedPressableMap: Record<string, FakePressableProps> = {};
-
 vi.mock("react-native", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const ActualPressable =
@@ -935,5 +934,58 @@ describe("StoryGame", () => {
     expect(saySeqSpy).toHaveBeenLastCalledWith(
       expect.arrayContaining(["いきたい ほうを タップ！"]),
     );
+  });
+
+  it('does not collapse story illustration frame to negative or tiny dimensions on compact landscape viewports', () => {
+    const origInnerWidth = window.innerWidth;
+    const origInnerHeight = window.innerHeight;
+    const origClientWidth = document.documentElement.clientWidth;
+    const origClientHeight = document.documentElement.clientHeight;
+    const origVvWidth = window.visualViewport?.width;
+    const origVvHeight = window.visualViewport?.height;
+
+    const setViewport = (width: number, height: number) => {
+      Object.defineProperty(window, 'innerWidth', { value: width, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: height, configurable: true });
+      Object.defineProperty(document.documentElement, 'clientWidth', { value: width, configurable: true });
+      Object.defineProperty(document.documentElement, 'clientHeight', { value: height, configurable: true });
+      if (window.visualViewport) {
+        Object.defineProperty(window.visualViewport, 'width', { value: width, configurable: true });
+        Object.defineProperty(window.visualViewport, 'height', { value: height, configurable: true });
+        window.visualViewport.dispatchEvent(new Event('resize'));
+      }
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    try {
+      setViewport(640, 320);
+      const { getByTestId } = render(
+        <StoryGame
+          sceneId="luna"
+          onHome={noop}
+          onPickScene={noop}
+          onBackToPicker={noop}
+          lang="en"
+        />
+      );
+
+      const frame = getByTestId('story-frame');
+      expect(frame).toBeDefined();
+      const inner = frame.firstElementChild as HTMLElement;
+      expect(inner).toBeDefined();
+      expect(Number.parseFloat(inner.style.width)).toBeGreaterThanOrEqual(260);
+      expect(Number.parseFloat(inner.style.height)).toBeGreaterThanOrEqual(140);
+    } finally {
+      Object.defineProperty(window, 'innerWidth', { value: origInnerWidth, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: origInnerHeight, configurable: true });
+      Object.defineProperty(document.documentElement, 'clientWidth', { value: origClientWidth, configurable: true });
+      Object.defineProperty(document.documentElement, 'clientHeight', { value: origClientHeight, configurable: true });
+      if (window.visualViewport && origVvWidth !== undefined && origVvHeight !== undefined) {
+        Object.defineProperty(window.visualViewport, 'width', { value: origVvWidth, configurable: true });
+        Object.defineProperty(window.visualViewport, 'height', { value: origVvHeight, configurable: true });
+        window.visualViewport.dispatchEvent(new Event('resize'));
+      }
+      window.dispatchEvent(new Event('resize'));
+    }
   });
 });
