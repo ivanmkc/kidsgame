@@ -158,8 +158,12 @@ export function EscapeGame({
   useEffect(() => {
     const isNewScene = sceneId !== prevSceneRef.current;
     prevSceneRef.current = sceneId;
-    if (room && (isNewScene || !stateRef.current.done)) {
-      say(roomText(room, "intro", lang));
+    if (room) {
+      if (isNewScene || !stateRef.current.done) {
+        say(roomText(room, "intro", lang));
+      } else {
+        say(roomText(room, "winText", lang));
+      }
     }
   }, [sceneId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 

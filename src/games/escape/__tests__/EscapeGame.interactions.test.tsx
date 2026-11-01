@@ -346,7 +346,7 @@ describe("EscapeGame revealed item hit target", () => {
     vi.useRealTimers();
   });
 
-  it("does not re-trigger room intro speech when language is switched during win overlay", () => {
+  it("speaks win line in new language (and does not re-trigger room intro) when language is switched during win overlay", () => {
     vi.useFakeTimers();
     vi.spyOn(sound, "say").mockImplementation(() => {});
     vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => cb && cb());
@@ -390,7 +390,9 @@ describe("EscapeGame revealed item hit target", () => {
     // The intro problem prompt (puppy trapped crying for help) must NOT be spoken
     const jaIntro = room.t?.ja?.intro ?? room.intro;
     expect(sound.say).not.toHaveBeenCalledWith(jaIntro);
-    expect(sound.say).not.toHaveBeenCalled();
+    // The win line in the new language must be spoken
+    const jaWin = room.t?.ja?.winText ?? room.winText;
+    expect(sound.say).toHaveBeenCalledWith(jaWin);
 
     cleanup();
     vi.useRealTimers();
