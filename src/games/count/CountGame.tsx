@@ -21,12 +21,12 @@ import { say, sayThen, sfx, stopNarration } from "../../sound";
 import {
   CountRound,
   applyTap,
+  countLayout,
   countSettings,
   critterLabel,
   applyPickAnswer,
   makeCountRound,
   STAGE_PADDING,
-  stageCritterSize,
 } from "./logic";
 import { spriteLT } from "../quizround/logic";
 import { useWinLine } from "../winlines";
@@ -167,9 +167,11 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
   };
 
   const { width, height } = useWindowDimensions();
-  const stageW = Math.min(width - 32, 560);
-  const stageH = Math.max(120, Math.min(height - 84 - 180, stageW * 0.85));
-  const critterSize = stageCritterSize(round.n, stageW, stageH);
+  const { isLandscape, stageW, stageH, critterSize } = countLayout(
+    width,
+    height,
+    round.n,
+  );
   const promptText = t(lang, "shell.count.prompt");
 
   return (
@@ -196,7 +198,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
         </View>
       }
     >
-      <View style={styles.board}>
+      <View style={[styles.board, isLandscape && styles.boardLandscape]}>
         <View
           style={[
             styles.stage,
@@ -231,7 +233,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
           })}
         </View>
         {phase === "quiz" ? (
-          <View style={styles.quiz}>
+          <View style={[styles.quiz, isLandscape && styles.quizLandscape]}>
             <Pressable
               disabled={won}
               onPress={() => {
@@ -242,15 +244,28 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
               accessibilityLabel={promptText}
               style={({ pressed }) => [
                 styles.promptCard,
+                isLandscape && styles.promptCardLandscape,
                 shadows.soft,
                 pressed && styles.pressed,
               ]}
               testID="count-prompt"
             >
-              <Text style={styles.promptText}>{promptText}</Text>
+              <Text
+                style={[
+                  styles.promptText,
+                  isLandscape && styles.promptTextLandscape,
+                ]}
+              >
+                {promptText}
+              </Text>
               <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
             </Pressable>
-            <View style={styles.choiceRow}>
+            <View
+              style={[
+                styles.choiceRow,
+                isLandscape && styles.choiceRowLandscape,
+              ]}
+            >
               {round.choices.map((c) => (
                 <Pressable
                   key={c}
@@ -260,6 +275,7 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
                   accessibilityLabel={String(c)}
                   style={({ pressed }) => [
                     styles.choice,
+                    isLandscape && styles.choiceLandscape,
                     shadows.soft,
                     wrongPick === c && styles.choiceWrong,
                     locked && c === round.answer && styles.choiceCorrect,
@@ -272,9 +288,19 @@ export function CountGame({ onHome, difficulty, lang }: Props) {
             </View>
           </View>
         ) : (
-          <Text style={styles.hint} testID="count-progress">
-            {tapped.filter((x) => x > 0).length} / {round.n}
-          </Text>
+          <View
+            style={[
+              styles.progressWrap,
+              isLandscape && styles.progressWrapLandscape,
+            ]}
+          >
+            <Text
+              style={[styles.hint, isLandscape && styles.hintLandscape]}
+              testID="count-progress"
+            >
+              {tapped.filter((x) => x > 0).length} / {round.n}
+            </Text>
+          </View>
         )}
       </View>
       <WinOverlay
@@ -364,6 +390,10 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingHorizontal: 16,
   },
+  boardLandscape: {
+    flexDirection: "row",
+    gap: 20,
+  },
   stage: {
     backgroundColor: colors.paper,
     borderRadius: 24,
@@ -373,6 +403,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   quiz: { alignItems: "center", gap: 12 },
+  quizLandscape: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
   promptCard: {
     backgroundColor: colors.gold,
     borderRadius: 18,
@@ -383,11 +418,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 2,
   },
+  promptCardLandscape: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
   promptText: {
     fontFamily: fonts.display,
     fontSize: 22,
     color: colors.ink,
     textAlign: "center",
+  },
+  promptTextLandscape: {
+    fontSize: 20,
   },
   hearHint: {
     fontFamily: fonts.bodyReg,
@@ -395,6 +437,7 @@ const styles = StyleSheet.create({
     color: colors.inkSoft,
   },
   choiceRow: { flexDirection: "row", gap: 14 },
+  choiceRowLandscape: { gap: 10 },
   choice: {
     backgroundColor: colors.card,
     borderRadius: 20,
@@ -404,6 +447,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     minWidth: 74,
     alignItems: "center",
+  },
+  choiceLandscape: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    minWidth: 64,
   },
   choiceWrong: {
     borderColor: colors.red,
@@ -415,7 +463,18 @@ const styles = StyleSheet.create({
   },
   choiceText: { fontFamily: fonts.display, fontSize: 34, color: colors.ink },
   pressed: { transform: [{ scale: 0.94 }] },
+  progressWrap: { alignItems: "center" },
+  progressWrapLandscape: {
+    minWidth: 220,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   hint: { fontFamily: fonts.bodyReg, color: colors.inkSoft, fontSize: 14 },
+  hintLandscape: {
+    fontFamily: fonts.display,
+    color: colors.inkSoft,
+    fontSize: 18,
+  },
   badge: {
     position: "absolute",
     right: -4,
