@@ -299,7 +299,7 @@ describe("EscapeGame", () => {
 
   it("renders FilterCycleChip and cycles difficulty filter on press", () => {
     const onFilter = vi.fn();
-    render(
+    const { unmount } = render(
       <EscapeGame
         onHome={noop}
         onPickScene={noop}
@@ -313,6 +313,22 @@ describe("EscapeGame", () => {
     expect(cycleBtn).toBeTruthy();
     fireEvent.click(cycleBtn);
     expect(onFilter).toHaveBeenCalledWith("medium");
+
+    unmount();
+
+    const onFilterFromMed = vi.fn();
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        lang="en"
+        filter="medium"
+        onFilter={onFilterFromMed}
+      />,
+    );
+    fireEvent.click(screen.getByTestId("difficulty-cycle"));
+    expect(onFilterFromMed).toHaveBeenCalledWith("hard");
   });
 
   it("dims rooms that do not match the active difficulty filter", () => {
@@ -332,6 +348,7 @@ describe("EscapeGame", () => {
 
     unmount();
 
+    // When filter is hard but zero hard rooms exist, rooms are not dimmed as unavailable
     render(
       <EscapeGame
         onHome={noop}
@@ -343,8 +360,55 @@ describe("EscapeGame", () => {
     );
     const hardToy = screen.getByTestId("scene-pick-toyroom");
     const hardPirate = screen.getByTestId("scene-pick-piratecove");
-    expect(window.getComputedStyle(hardToy).opacity).toBe("0.32");
-    expect(window.getComputedStyle(hardPirate).opacity).toBe("0.32");
+    expect(window.getComputedStyle(hardToy).opacity).not.toBe("0.32");
+    expect(window.getComputedStyle(hardPirate).opacity).not.toBe("0.32");
+  });
+
+  it("scaffolds difficulty in hard mode: hides passive lock pulse rings and scales hint delay to 18s", () => {
+    // Under easy mode, lock hotspot has a passive pulse ring
+    const { unmount } = render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId="toyroom"
+        filter="easy"
+        lang="en"
+      />,
+    );
+    const easyChest = screen.getByTestId("escape-spot-chest");
+    expect(easyChest.children.length).toBeGreaterThan(0);
+
+    unmount();
+
+    // Under hard mode, lock hotspot hides passive pulse rings
+    render(
+      <EscapeGame
+        onHome={noop}
+        onPickScene={noop}
+        onBackToPicker={noop}
+        sceneId="toyroom"
+        filter="hard"
+        lang="en"
+      />,
+    );
+    const hardChest = screen.getByTestId("escape-spot-chest");
+    expect(hardChest.children.length).toBe(0);
+
+    const pillow = screen.getByTestId("escape-spot-pillow");
+    expect(pillow.children.length).toBe(0);
+
+    // Idle hint timer is 18s: does not trigger after 12.5s
+    act(() => {
+      vi.advanceTimersByTime(12500);
+    });
+    expect(pillow.children.length).toBe(0);
+
+    // Triggers after 18.5s total
+    act(() => {
+      vi.advanceTimersByTime(6000);
+    });
+    expect(pillow.children.length).toBeGreaterThan(0);
   });
 
   it("surprise button picks from rooms matching active filter", () => {
