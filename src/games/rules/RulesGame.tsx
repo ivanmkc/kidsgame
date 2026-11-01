@@ -237,20 +237,24 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
               ? t(lang, "rules.doAgain", { n: round.ruleNumber })
               : round.rule.label}
           </Text>
-          {round.isRecall && !reminded ? (
-            <Pressable
-              onPress={remind}
-              testID="rules-remind"
-              accessibilityLabel={t(lang, "rules.remind")}
-              accessibilityRole="button"
-              style={({ pressed }) => [
-                styles.remindBtn,
-                shadows.soft,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <Text style={styles.remindText}>{t(lang, "rules.remind")}</Text>
-            </Pressable>
+          {round.isRecall ? (
+            <View style={styles.remindWrapper} testID="rules-remind-wrapper">
+              {!reminded ? (
+                <Pressable
+                  onPress={remind}
+                  testID="rules-remind"
+                  accessibilityLabel={t(lang, "rules.remind")}
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.remindBtn,
+                    shadows.soft,
+                    pressed && { opacity: 0.8 },
+                  ]}
+                >
+                  <Text style={styles.remindText}>{t(lang, "rules.remind")}</Text>
+                </Pressable>
+              ) : null}
+            </View>
           ) : null}
         </View>
         <View
@@ -313,6 +317,10 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
 }
 
 const styles = StyleSheet.create({
+  remindWrapper: {
+    minHeight: 50,
+    justifyContent: "center",
+  },
   remindBtn: {
     backgroundColor: colors.gold,
     borderRadius: 12,

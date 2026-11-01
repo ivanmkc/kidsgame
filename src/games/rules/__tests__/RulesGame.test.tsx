@@ -360,6 +360,46 @@ describe("RulesGame", () => {
     }
   });
 
+  it("preserves the layout wrapper even when the remind button is temporarily hidden", () => {
+    vi.useFakeTimers();
+    try {
+      render(<RulesGame onHome={() => {}} difficulty="hard" lang="en" />);
+
+      // Play through rounds 0..4 to reach recall round 5
+      for (let i = 0; i < 5; i++) {
+        const matches = screen.getAllByTestId(/-y$/);
+        for (const tile of matches) {
+          fireEvent.click(tile);
+        }
+        act(() => {
+          vi.advanceTimersByTime(600);
+        });
+      }
+
+      // We are on round 5 (Memory check)
+      const wrapper = screen.getByTestId("rules-remind-wrapper");
+      expect(wrapper).toBeDefined();
+
+      const remindBtn = screen.getByTestId("rules-remind");
+      fireEvent.click(remindBtn);
+
+      // Button is hidden
+      expect(screen.queryByTestId("rules-remind")).toBeNull();
+      // Wrapper remains
+      expect(screen.getByTestId("rules-remind-wrapper")).toBeDefined();
+
+      // After 2.6s the button reappears
+      act(() => {
+        vi.advanceTimersByTime(2600);
+      });
+
+      expect(screen.getByTestId("rules-remind")).toBeDefined();
+      expect(screen.getByTestId("rules-remind-wrapper")).toBeDefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("uses localized toddler-appropriate accessibility labels on grid tiles across languages", () => {
     vi.spyOn(logic, "makeRulesRound").mockReturnValue({
       ruleNumber: 1,
