@@ -71,8 +71,7 @@ vi.mock("react-native", async (importOriginal) => {
     ...actual,
     View: (props: FakeViewProps) => {
       if (typeof props.testID === "string") {
-        if (!capturedViewMap[props.testID])
-          capturedViewMap[props.testID] = [];
+        if (!capturedViewMap[props.testID]) capturedViewMap[props.testID] = [];
         capturedViewMap[props.testID].push(props);
       }
       return React.createElement(ActualView, props);
@@ -93,7 +92,6 @@ vi.mock("react-native", async (importOriginal) => {
 });
 
 describe("ListenChooseGame", () => {
-
   it("starts with 4 choices when difficulty is hard", () => {
     const onHome = vi.fn();
     render(<ListenChooseGame onHome={onHome} difficulty="hard" />);
@@ -197,8 +195,9 @@ describe("ListenChooseGame", () => {
       getRoundChoices();
     expect(targetBtn).toBeTruthy();
     expect(distractorBtn).toBeTruthy();
-    expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText(distractorWord.en)).toBeTruthy();
+    expect(targetBtn.getAttribute("aria-label")).toBe(targetWord.en);
+    expect(distractorBtn.getAttribute("aria-label")).toBe(distractorWord.en);
+    expect(screen.queryByText(distractorWord.en)).toBeNull();
   });
 
   it("replays target word when Big Speaker button is tapped", () => {
@@ -491,6 +490,9 @@ describe("ListenChooseGame", () => {
     fireEvent.click(screen.getByTestId("play-button"));
     // Spoken word caption is omitted by default
     expect(screen.queryByTestId("listenchoose-caption")).toBeNull();
+    const { targetWord, distractorWord } = getRoundChoices();
+    // Choice cards omit text by default so early readers cannot bypass listening
+    expect(screen.queryByText(distractorWord.en)).toBeNull();
 
     // Toggle ON during gameplay
     const gameToggle = screen.getByTestId("captions-toggle");
@@ -501,11 +503,14 @@ describe("ListenChooseGame", () => {
     expect(screen.getByTestId("listenchoose-caption").textContent).toBe(
       spokenTarget,
     );
+    expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(distractorWord.en)).toBeTruthy();
 
     // Toggle back OFF during gameplay
     fireEvent.click(gameToggle);
     expect(gameToggle.textContent).toContain("OFF");
     expect(screen.queryByTestId("listenchoose-caption")).toBeNull();
+    expect(screen.queryByText(distractorWord.en)).toBeNull();
     unmount();
 
     // Verify toggling ON on start screen preserves caption into round
@@ -514,6 +519,8 @@ describe("ListenChooseGame", () => {
     expect(screen.getByTestId("captions-toggle").textContent).toContain("ON");
     fireEvent.click(screen.getByTestId("play-button"));
     expect(screen.getByTestId("listenchoose-caption")).toBeTruthy();
+    const preChoices = getRoundChoices();
+    expect(screen.getByText(preChoices.distractorWord.en)).toBeTruthy();
     preToggle.unmount();
 
     // Verify non-English (Japanese) localization of toggle (defaults to オフ)
@@ -529,6 +536,25 @@ describe("ListenChooseGame", () => {
     captures.forEach((props) => {
       expect(props.hitSlop).toBe(12);
     });
+  });
+
+  it("omits written labels on choice cards by default to preserve auditory discrimination, rendering them only when captions is enabled", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    const { targetWord, distractorWord } = getRoundChoices();
+    expect(screen.queryByText(targetWord.en)).toBeNull();
+    expect(screen.queryByText(distractorWord.en)).toBeNull();
+
+    // Enable captions: choice cards render written labels under pictures
+    fireEvent.click(screen.getByTestId("captions-toggle"));
+    expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(distractorWord.en)).toBeTruthy();
+
+    // Disable captions: choice cards hide written labels again
+    fireEvent.click(screen.getByTestId("captions-toggle"));
+    expect(screen.queryByText(targetWord.en)).toBeNull();
+    expect(screen.queryByText(distractorWord.en)).toBeNull();
   });
 
   it("filters out untranslated words in non-English play", () => {
@@ -547,7 +573,7 @@ describe("ListenChooseGame", () => {
       const choiceElements = screen.queryAllByTestId(/^choice-[^0-9]/);
       let correctBtn: HTMLElement | undefined;
       for (const el of choiceElements) {
-        const label = el.textContent;
+        const label = el.getAttribute("aria-label");
         if (label) {
           // The word must be a valid Japanese translation, not an English fallback (which would be [a-z]+)
           expect(label).not.toMatch(/^[a-z]+$/i);
@@ -608,7 +634,7 @@ describe("ListenChooseGame", () => {
 
     vi.mocked(sound.sayThen).mockClear();
     expect(screen.getByTestId("play-again").textContent).toBe(
-      t("ja", "overlay.playAgain")
+      t("ja", "overlay.playAgain"),
     );
     fireEvent.click(screen.getByTestId("play-again"));
 
@@ -801,7 +827,8 @@ describe("ListenChooseGame", () => {
     expect(speakerStyle.height).toBe(56);
 
     // Choice cards should be scaled down to 120px height
-    const { targetWord, distractorWord } = getRoundChoices();
+    const { targetBtn, distractorBtn, targetWord, distractorWord } =
+      getRoundChoices();
     for (const icon of [targetWord.icon, distractorWord.icon]) {
       const cardCaptures = capturedPressableMap[`choice-${icon}`];
       expect(cardCaptures).toBeDefined();
@@ -814,7 +841,14 @@ describe("ListenChooseGame", () => {
       expect(cardStyle.width).toBeLessThanOrEqual(120);
     }
 
-    // Text labels are present
+    // Choice cards fit and are accessible
+    expect(targetBtn).toBeTruthy();
+    expect(distractorBtn).toBeTruthy();
+    expect(targetBtn.getAttribute("aria-label")).toBe(targetWord.en);
+    expect(distractorBtn.getAttribute("aria-label")).toBe(distractorWord.en);
+
+    // With captions enabled, labels render in compact landscape typography
+    fireEvent.click(screen.getByTestId("captions-toggle"));
     expect(screen.getAllByText(targetWord.en).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(distractorWord.en)).toBeTruthy();
   });
@@ -1071,4 +1105,3 @@ describe("ListenChooseGame", () => {
     ).toBeFalsy();
   });
 });
-

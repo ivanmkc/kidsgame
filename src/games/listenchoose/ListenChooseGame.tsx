@@ -350,6 +350,7 @@ export function ListenChooseGame({
                   choice={choice}
                   index={i}
                   lang={lang}
+                  captions={captions}
                   highlight={
                     (state.highlightCorrect &&
                       choice.icon === state.currentRound.target.icon) ||
@@ -395,6 +396,7 @@ function ChoiceCard({
   choice,
   index,
   lang,
+  captions = false,
   highlight,
   correct,
   wobble,
@@ -405,6 +407,7 @@ function ChoiceCard({
   choice: Word;
   index: number;
   lang: Lang;
+  captions?: boolean;
   highlight: boolean;
   correct: boolean;
   wobble: boolean;
@@ -504,11 +507,16 @@ function ChoiceCard({
           ]}
           resizeMode="contain"
         />
-        <Text
-          style={[styles.choiceLabel, layout.shortH && styles.choiceLabelShort]}
-        >
-          {label}
-        </Text>
+        {captions && (
+          <Text
+            style={[
+              styles.choiceLabel,
+              layout.shortH && styles.choiceLabelShort,
+            ]}
+          >
+            {label}
+          </Text>
+        )}
       </Pressable>
     </Animated.View>
   );
