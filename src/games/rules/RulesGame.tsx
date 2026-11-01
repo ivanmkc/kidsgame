@@ -158,7 +158,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     } else {
       if (wrongIdx !== null) return;
       sfx.wrong();
-      say(tileLabel(round.tiles[i].icon, lang));
+      say(tileLabel(round.tiles[i].icon, "en"));
       wrongIdxRef.current = i;
       setWrongIdx(i);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
