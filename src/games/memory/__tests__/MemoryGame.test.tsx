@@ -466,6 +466,56 @@ describe("MemoryGame", () => {
     );
   });
 
+  it("does not speak old-language turn announcement when language switches during mismatch delay", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0.1);
+    vi.spyOn(logic, "buildBoard").mockReturnValue([
+      { key: 0, icon: "apple" },
+      { key: 1, icon: "banana" },
+      { key: 2, icon: "apple" },
+      { key: 3, icon: "banana" },
+    ]);
+
+    function Harness() {
+      const [lang, setLang] = React.useState<Lang>("en");
+      return (
+        <LangContext.Provider
+          value={{
+            lang,
+            onCycle: () => setLang((l) => (l === "en" ? "ja" : "en")),
+          }}
+        >
+          <MemoryGame
+            onHome={vi.fn()}
+            difficulty="easy"
+            twoPlayerEnabled={true}
+            lang={lang}
+          />
+        </LangContext.Provider>
+      );
+    }
+
+    render(<Harness />);
+
+    fireEvent.click(screen.getByTestId("mp-choose-2p"));
+
+    fireEvent.click(screen.getByTestId("memory-card-0-apple"));
+    fireEvent.click(screen.getByTestId("memory-card-1-banana"));
+
+    vi.mocked(sound.say).mockClear();
+
+    // Switch language during the 750ms mismatch delay
+    fireEvent.click(screen.getByTestId("lang-cycle"));
+
+    act(() => {
+      vi.advanceTimersByTime(750);
+    });
+
+    expect(sound.say).not.toHaveBeenCalledWith(
+      t("en", "hidden.turn", { name: t("en", MP_PLAYERS[1].name) }),
+    );
+    expect(sound.say).not.toHaveBeenCalled();
+  });
+
   it("mounts fresh face-down cards on next round without flipping down from face-up", async () => {
     const onHome = vi.fn();
     render(<MemoryGame onHome={onHome} difficulty="easy" lang="en" />);
@@ -739,14 +789,19 @@ describe("MemoryGame", () => {
     ]);
 
     const speakSpy = vi.fn();
-    const origSynthesis = (window as unknown as { speechSynthesis: unknown }).speechSynthesis;
-    const origUtterance = (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance;
-    
+    const origSynthesis = (window as unknown as { speechSynthesis: unknown })
+      .speechSynthesis;
+    const origUtterance = (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance;
+
     (window as unknown as { speechSynthesis: unknown }).speechSynthesis = {
       speak: speakSpy,
       cancel: vi.fn(),
     };
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = class {
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = class {
       text: string;
       constructor(text: string) {
         this.text = text;
@@ -789,17 +844,20 @@ describe("MemoryGame", () => {
     });
 
     expect(sound.stopNarration).toHaveBeenCalledTimes(1);
-    
+
     // Check that we DO get the win line via sound.say mock (because useWinLine uses it)
     expect(sound.say).toHaveBeenCalledWith(t("ja", "win.memory"));
-    
+
     // Assert the pre-game blurb was NOT spoken (which uses real say -> speechSynthesis)
     expect(speakSpy).not.toHaveBeenCalledWith(
-      expect.objectContaining({ text: t("ja", "card.memory.blurb") })
+      expect.objectContaining({ text: t("ja", "card.memory.blurb") }),
     );
 
-    (window as unknown as { speechSynthesis: unknown }).speechSynthesis = origSynthesis;
-    (window as unknown as { SpeechSynthesisUtterance: unknown }).SpeechSynthesisUtterance = origUtterance;
+    (window as unknown as { speechSynthesis: unknown }).speechSynthesis =
+      origSynthesis;
+    (
+      window as unknown as { SpeechSynthesisUtterance: unknown }
+    ).SpeechSynthesisUtterance = origUtterance;
   });
 
   it("stops narration and speaks localized win recap when switching language on duel victory screen", async () => {
