@@ -18,7 +18,7 @@ import { t } from "../../i18n";
 import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
-import { say, sfx } from "../../sound";
+import { say, sfx, stopNarration } from "../../sound";
 import { CATEGORY_TEXT } from "../iconCategories";
 import { itemLabel, makeOddOneRound } from "./logic";
 import { useWinLine } from "../winlines";
@@ -66,6 +66,7 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
 
   useEffect(() => {
     return () => {
+      stopNarration();
       if (celebrateTimerRef.current) clearTimeout(celebrateTimerRef.current);
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
     };
