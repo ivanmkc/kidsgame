@@ -38,6 +38,25 @@ export function roundsToWin(d: Difficulty): number {
   return 8;
 }
 
+function isValidSequence(seq: number[]): boolean {
+  if (seq.length < 2) return true;
+  let allSame = true;
+  for (let i = 1; i < seq.length; i++) {
+    if (seq[i] !== seq[0]) {
+      allSame = false;
+      break;
+    }
+  }
+  if (allSame) return false;
+
+  for (let i = 2; i < seq.length; i++) {
+    if (seq[i] === seq[i - 1] && seq[i] === seq[i - 2]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export function makeBellsRound(
   rng: Rng,
   d: Difficulty,
@@ -66,7 +85,10 @@ export function makeBellsRound(
         sequence.push(randInt(rng, n));
       }
     }
-  } while (previousSequence && sequencesMatch(sequence, previousSequence));
+  } while (
+    (previousSequence && sequencesMatch(sequence, previousSequence)) ||
+    !isValidSequence(sequence)
+  );
   return { bells, sequence };
 }
 

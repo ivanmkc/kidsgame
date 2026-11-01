@@ -214,4 +214,45 @@ describe("makeBellsRound", () => {
     expect(roundB.sequence).toEqual([2, 1]);
     expect(callCount).toBe(6);
   });
+
+  it("rejects sequences where all notes are identical on medium", () => {
+    let callCount = 0;
+    const mockRng = () => {
+      callCount++;
+      // medium length is 3, bellCount is 4
+      if (callCount <= 3) return 0.1; // 0, 0, 0 (rejected)
+      if (callCount <= 6) return 0.9; // 3, 3, 3 (rejected)
+      if (callCount === 7) return 0.1; // 0
+      if (callCount === 8) return 0.5; // 2
+      if (callCount === 9) return 0.1; // 0
+      return 0.5;
+    };
+    const round = makeBellsRound(mockRng, "medium");
+    expect(round.sequence).toEqual([0, 2, 0]);
+    expect(callCount).toBe(9);
+  });
+
+  it("rejects sequences with more than two consecutive identical notes on hard", () => {
+    let callCount = 0;
+    const mockRng = () => {
+      callCount++;
+      // hard length is 5, bellCount is 5
+      // 1st attempt: 1, 1, 1, 1, 1 (all same, rejected)
+      if (callCount <= 5) return 0.3; // 1 (0.3 * 5 = 1.5 -> 1)
+      // 2nd attempt: 0, 0, 0, 4, 3 (3 consecutive same, rejected)
+      if (callCount <= 8) return 0.1; // 0
+      if (callCount === 9) return 0.9; // 4
+      if (callCount === 10) return 0.7; // 3
+      // 3rd attempt: 2, 3, 3, 3, 4 (3 consecutive same, rejected)
+      if (callCount === 11) return 0.5; // 2
+      if (callCount <= 14) return 0.7; // 3
+      if (callCount === 15) return 0.9; // 4
+      // 4th attempt: 0, 1, 0, 1, 0 (accepted)
+      if (callCount % 2 === 0) return 0.1; // 0
+      return 0.3; // 1
+    };
+    const round = makeBellsRound(mockRng, "hard");
+    expect(round.sequence).toEqual([0, 1, 0, 1, 0]);
+    expect(callCount).toBe(20);
+  });
 });
