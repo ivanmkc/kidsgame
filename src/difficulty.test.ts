@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Platform } from 'react-native';
+import { manifest } from './manifest';
 import {
   byLevel,
   DIFFICULTIES,
@@ -137,11 +138,21 @@ describe('DIFFICULTIES', () => {
   });
 
   it('scaffolds hiddenDraw progression from easy to hard', () => {
-    expect(DIFFICULTIES.easy.hiddenDraw).toBe(5);
-    expect(DIFFICULTIES.medium.hiddenDraw).toBe(6);
+    expect(DIFFICULTIES.easy.hiddenDraw).toBe(3);
+    expect(DIFFICULTIES.medium.hiddenDraw).toBe(5);
     expect(DIFFICULTIES.hard.hiddenDraw).toBe(8);
     expect(DIFFICULTIES.easy.hiddenDraw).toBeLessThan(DIFFICULTIES.medium.hiddenDraw);
     expect(DIFFICULTIES.medium.hiddenDraw).toBeLessThan(DIFFICULTIES.hard.hiddenDraw);
+  });
+
+  it('differentiates hard vs medium target draw count across all 13 hard scenes', () => {
+    const hardScenes = manifest.hidden.filter((s) => s.level === 'hard');
+    expect(hardScenes).toHaveLength(13);
+    for (const scene of hardScenes) {
+      const mediumDraw = Math.min(settingsFor('medium').hiddenDraw, scene.targets.length);
+      const hardDraw = Math.min(settingsFor('hard').hiddenDraw, scene.targets.length);
+      expect(hardDraw).toBeGreaterThan(mediumDraw);
+    }
   });
 
   it('scaffolds hint availability for hard difficulty in hidden scenes', () => {
