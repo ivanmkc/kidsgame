@@ -4,7 +4,11 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { Animated } from 'react-native';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SpawnedObject, SpawnEntry } from '../musicbox/SpawnedObject';
+import { SCENES } from '../musicbox/scenes';
 import { ZONE_PARALLAX_SPEEDS, SpawnZone } from '../musicbox/logic';
+
+
+import { JourneyScene } from '../musicbox/JourneyScene';
 
 vi.mock('../../assets/images', () => {
   const p = new Proxy({}, { get: () => ({ uri: 'stub.png' }) });
@@ -151,5 +155,43 @@ describe('musicbox spawned object parallax scrolling', () => {
     setValueSpy.mockRestore();
     springSpy.mockRestore();
     unmount();
+  });
+});
+
+import * as music from '../../music';
+
+describe('JourneyScene pointer down handling', () => {
+  afterEach(() => {
+    cleanup();
+    vi.restoreAllMocks();
+  });
+
+  it('falls back to native event x and y coordinates when offsetX and locationX are missing', () => {
+    const scene = SCENES[0];
+    
+    render(
+      <JourneyScene scene={scene} freePlay={true} lang="en" />
+    );
+
+    const stage = screen.getByTestId('musicbox-stage');
+    
+    const playNoteSpy = vi.spyOn(music, 'playNote');
+
+    stage.addEventListener('pointerdown', (e) => {
+      Object.defineProperty(e, 'offsetX', { get: () => undefined });
+      Object.defineProperty(e, 'offsetY', { get: () => undefined });
+      Object.defineProperty(e, 'locationX', { get: () => undefined });
+      Object.defineProperty(e, 'locationY', { get: () => undefined });
+      Object.defineProperty(e, 'x', { get: () => 0.5 });
+      Object.defineProperty(e, 'y', { get: () => 0.9 });
+    }, { capture: true });
+
+    fireEvent.pointerDown(stage, {
+      pointerId: 1
+    });
+
+    expect(playNoteSpy).toHaveBeenCalledWith(48, expect.anything());
+
+    playNoteSpy.mockRestore();
   });
 });
