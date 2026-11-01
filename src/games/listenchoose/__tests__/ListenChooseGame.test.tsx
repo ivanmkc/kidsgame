@@ -1008,5 +1008,67 @@ describe("ListenChooseGame", () => {
     expect(celebrationCaptures?.[0]?.pointerEvents).toBe("none");
     expect(celebrationCaptures?.[0]?.style).toEqual(StyleSheet.absoluteFill);
   });
+
+  it("disables choice cards when game is won and ignores further picks on victory screen", () => {
+    render(<ListenChooseGame onHome={vi.fn()} lang="en" />);
+    fireEvent.click(screen.getByTestId("play-button"));
+
+    for (let i = 0; i < 12; i++) {
+      const { targetBtn } = getRoundChoices();
+      fireEvent.click(targetBtn);
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+    }
+
+    expect(screen.getByTestId("win-overlay")).toBeDefined();
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "12 / 12",
+    );
+
+    const { targetBtn, distractorBtn, targetWord, distractorWord } =
+      getRoundChoices();
+
+    const targetCaptures = capturedPressableMap[`choice-${targetWord.icon}`];
+    const distractorCaptures =
+      capturedPressableMap[`choice-${distractorWord.icon}`];
+    expect(targetCaptures[targetCaptures.length - 1]?.disabled).toBe(true);
+    expect(distractorCaptures[distractorCaptures.length - 1]?.disabled).toBe(
+      true,
+    );
+
+    vi.mocked(sfx.wrong).mockClear();
+    vi.mocked(sfx.good).mockClear();
+    vi.mocked(sound.sayThen).mockClear();
+
+    // Tapping distractor card on victory screen should be ignored
+    fireEvent.click(distractorBtn);
+    expect(sfx.wrong).not.toHaveBeenCalled();
+    expect(sound.sayThen).not.toHaveBeenCalled();
+
+    // Tapping target card on victory screen should be ignored
+    fireEvent.click(targetBtn);
+    expect(sfx.good).not.toHaveBeenCalled();
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getByTestId("listenchoose-streak").textContent).toContain(
+      "12 / 12",
+    );
+
+    // Arm WinOverlay buttons (600ms)
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+
+    // Play again should re-enable choice cards
+    fireEvent.click(screen.getByTestId("play-again"));
+    const newRoundChoices = getRoundChoices();
+    const newTargetCaptures =
+      capturedPressableMap[`choice-${newRoundChoices.targetWord.icon}`];
+    expect(
+      newTargetCaptures[newTargetCaptures.length - 1]?.disabled,
+    ).toBeFalsy();
+  });
 });
 
