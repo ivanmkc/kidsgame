@@ -8,7 +8,7 @@ import {
   useLockdown,
   effectiveLang,
   visibleCards,
-  GATE_WORDS,
+  GATE_KEYS,
   randomGateWord,
 } from "../../lockdown";
 import { LangContext } from "../../components/GameShell";
@@ -102,25 +102,25 @@ describe("randomGateWord", () => {
   it("returns words from the localized pool for each language", () => {
     for (const lang of langs) {
       for (let i = 0; i < 50; i++) {
-        expect(GATE_WORDS[lang]).toContain(randomGateWord(lang));
+        expect(GATE_KEYS.map(k => t(lang, k))).toContain(randomGateWord(lang));
       }
     }
   });
 
   it("defaults to English when called without arguments", () => {
     for (let i = 0; i < 20; i++) {
-      expect(GATE_WORDS.en).toContain(randomGateWord());
+      expect(GATE_KEYS.map(k => t("en", k))).toContain(randomGateWord());
     }
   });
 
   it("provides non-empty pools for all supported languages", () => {
     for (const lang of langs) {
-      expect(GATE_WORDS[lang].length).toBeGreaterThanOrEqual(10);
+      expect(GATE_KEYS.map(k => t(lang, k)).length).toBeGreaterThanOrEqual(10);
     }
   });
 
   it("uses kanji for Japanese adult gate words to prevent pre-readers from passing", () => {
-    for (const word of GATE_WORDS.ja) {
+    for (const word of GATE_KEYS.map(k => t("ja", k))) {
       expect(/[\u4e00-\u9faf]/.test(word)).toBe(true);
     }
   });
@@ -134,16 +134,16 @@ describe("randomGateWord", () => {
     const cmnWords = new Set(WORDS.map((w) => w.cmn));
     const yueWords = new Set(WORDS.map((w) => w.yue));
 
-    for (const word of GATE_WORDS.en) {
+    for (const word of GATE_KEYS.map(k => t("en", k))) {
       expect(enWords.has(word.toLowerCase())).toBe(false);
     }
-    for (const word of GATE_WORDS.ja) {
+    for (const word of GATE_KEYS.map(k => t("ja", k))) {
       expect(jaWords.has(word)).toBe(false);
     }
-    for (const word of GATE_WORDS.cmn) {
+    for (const word of GATE_KEYS.map(k => t("cmn", k))) {
       expect(cmnWords.has(word)).toBe(false);
     }
-    for (const word of GATE_WORDS.yue) {
+    for (const word of GATE_KEYS.map(k => t("yue", k))) {
       expect(yueWords.has(word)).toBe(false);
     }
   });

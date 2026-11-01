@@ -317,8 +317,10 @@ export type UIKey =
   | 'hidden.scene.giant_kitchen' | 'hidden.scene.witch_kitchen'
   // ── Game-specific prompts ────────────────────────────────────────
   | 'compare.prompt.more' | 'compare.prompt.fewer' | 'compare.praise'
-  | 'sums.plus' | 'sums.question' | 'sums.praise';
-
+  | 'sums.plus' | 'sums.question' | 'sums.praise'
+  | 'gate.word.bicycle' | 'gate.word.giraffe' | 'gate.word.kitchen' | 'gate.word.purple' | 'gate.word.bridge'
+  | 'gate.word.tunnel' | 'gate.word.window' | 'gate.word.garden' | 'gate.word.orange' | 'gate.word.basket'
+  | 'gate.word.dolphin' | 'gate.word.volcano' | 'gate.word.blanket' | 'gate.word.crystal' | 'gate.word.feather';
 export type Table = Record<UIKey, string>;
 
 // English baseline — MUST match the literal strings that were already in
@@ -760,10 +762,24 @@ export const EN: Table = {
   'compare.prompt.more': 'Tap the side with MORE!',
   'compare.prompt.fewer': 'Tap the side with FEWER!',
   'compare.praise': 'That\'s right!',
-
   'sums.plus': 'plus',
   'sums.question': 'How many now?',
   'sums.praise': 'That\'s right!',
+  'gate.word.bicycle': 'bicycle',
+  'gate.word.giraffe': 'giraffe',
+  'gate.word.kitchen': 'kitchen',
+  'gate.word.purple': 'purple',
+  'gate.word.bridge': 'bridge',
+  'gate.word.tunnel': 'tunnel',
+  'gate.word.window': 'window',
+  'gate.word.garden': 'garden',
+  'gate.word.orange': 'orange',
+  'gate.word.basket': 'basket',
+  'gate.word.dolphin': 'dolphin',
+  'gate.word.volcano': 'volcano',
+  'gate.word.blanket': 'blanket',
+  'gate.word.crystal': 'crystal',
+  'gate.word.feather': 'feather',
 };
 
 const TABLES: Record<Lang, Table> = { en: EN, ja: JA, cmn: CMN, yue: YUE };
