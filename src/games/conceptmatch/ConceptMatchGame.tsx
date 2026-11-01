@@ -16,6 +16,7 @@ import {
   ConceptMatchDeck,
   DECK_TO_CARD_KEY,
   buildBoard,
+  hasCaptionableCards,
   isMatch,
   pairsForDifficulty,
   updateBoardLang,
@@ -142,21 +143,23 @@ export function ConceptMatchGame({
       lang={lang}
       right={
         <View style={styles.headerRight}>
-          <Pressable
-            onPress={() => setCaptions((c) => !c)}
-            testID="captions-toggle"
-            accessibilityRole="button"
-            hitSlop={12}
-            style={({ pressed }) => [
-              styles.captionsToggle,
-              pressed && { opacity: 0.6 }
-            ]}
-          >
-            <Text style={styles.captionsToggleText}>
-              💬 {t(lang, "listenchoose.captions")}:{" "}
-              {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
-            </Text>
-          </Pressable>
+          {hasCaptionableCards(board) && (
+            <Pressable
+              onPress={() => setCaptions((c) => !c)}
+              testID="captions-toggle"
+              accessibilityRole="button"
+              hitSlop={12}
+              style={({ pressed }) => [
+                styles.captionsToggle,
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Text style={styles.captionsToggleText}>
+                💬 {t(lang, "listenchoose.captions")}:{" "}
+                {t(lang, captions ? "listenchoose.on" : "listenchoose.off")}
+              </Text>
+            </Pressable>
+          )}
           <ScoreChip
             label={`🧠 ${matchedPairs}/${totalPairs}`}
             testID="concept-score"
@@ -259,7 +262,7 @@ function renderCardFace(card: ConceptMatchCard, size: number, captions: boolean)
         />
       );
     case "audio": {
-      const visualText = display.text || (captions ? card.speech : null);
+      const visualText = captions ? card.speech : null;
       return (
         <View testID={`card-audio-${card.key}`} style={styles.audioWrap}>
           <Text style={{ fontSize: size * 0.32 }}>🔊</Text>
