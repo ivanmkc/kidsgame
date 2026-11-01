@@ -181,45 +181,28 @@ export function makeBoard(
     // Every cell becomes a call, so the whole BOARD has to be unambiguous:
     // no two icons may share a first-sound — counting the alternate names a
     // kid might use ("bunny" makes the rabbit a 'buh' answer next to the
-    // butterfly). Icons that carry only their canonical sound go in first;
-    // the alternate-carrying ones claim two sounds each and would starve a
-    // 9-cell board if they went first.
-    const claimed = new Set<string>();
-    const byPickiness = [
-      ...shuffle(
-        rng,
-        pool.filter((w) => soundsFor(w).length === 1),
-      ),
-      ...shuffle(
-        rng,
-        pool.filter((w) => soundsFor(w).length > 1),
-      ),
-    ];
+    // butterfly).
+    const MAX_ATTEMPTS = 50;
     selected = [];
-    for (const w of byPickiness) {
-      if (selected.length >= cellCount) break;
-      const sounds = phonicsSoundsFor(w);
-      if (sounds.some((snd) => claimed.has(snd))) continue;
-      sounds.forEach((snd) => claimed.add(snd));
-      selected.push(w);
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      const claimed = new Set<string>();
+      const candidate: WordEntry[] = [];
+      for (const w of shuffle(rng, [...pool])) {
+        if (candidate.length >= cellCount) break;
+        const sounds = phonicsSoundsFor(w);
+        if (sounds.some((snd) => claimed.has(snd))) continue;
+        sounds.forEach((snd) => claimed.add(snd));
+        candidate.push(w);
+      }
+      if (candidate.length >= cellCount) {
+        selected = candidate;
+        break;
+      }
     }
     if (selected.length < cellCount) {
-      // Pool too thin for a fully clean board: fall back to canonical-sound
-      // uniqueness (the pre-existing guarantee) rather than shipping a
-      // short board.
-      const canonical = new Set(
-        selected.map((w) => phonicsVoiceSound(w.sound)),
+      throw new Error(
+        `Unable to generate unambiguous phonics board of size ${size}`,
       );
-      for (const w of shuffle(
-        rng,
-        pool.filter((w) => !selected.includes(w)),
-      )) {
-        if (selected.length >= cellCount) break;
-        const sound = phonicsVoiceSound(w.sound);
-        if (canonical.has(sound)) continue;
-        canonical.add(sound);
-        selected.push(w);
-      }
     }
   } else {
     // Name mode: "Find the flower!" must not have both the blossom and the

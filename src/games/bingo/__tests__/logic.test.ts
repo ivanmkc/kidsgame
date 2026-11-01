@@ -86,6 +86,46 @@ describe("makeBoard", () => {
     }
   });
 
+  it("phonics board: includes multi-sound words and generates the 'duh' sound for dog", () => {
+    const multiSoundIcons = [
+      "dog",
+      "rabbit",
+      "ladybug",
+      "sunflower",
+      "strawberry",
+      "plane",
+      "rocket",
+      "soccer",
+      "gift",
+    ];
+    const iconCounts: Record<string, number> = {};
+    const soundCounts: Record<string, number> = {};
+    for (const icon of multiSoundIcons) iconCounts[icon] = 0;
+
+    for (let seed = 1; seed <= 200; seed++) {
+      const b = boardWith(seed, 3, "phonics");
+      for (const cell of b.cells) {
+        if (cell.icon in iconCounts) iconCounts[cell.icon]++;
+      }
+      for (const call of b.calls) {
+        if (call.sound) {
+          soundCounts[call.sound] = (soundCounts[call.sound] ?? 0) + 1;
+        }
+      }
+    }
+
+    for (const icon of multiSoundIcons) {
+      expect(iconCounts[icon]).toBeGreaterThan(0);
+    }
+    expect(soundCounts["duh"]).toBeGreaterThan(0);
+  });
+
+  it("throws loudly when the pool cannot form an unambiguous phonics board", () => {
+    expect(() =>
+      makeBoard(makeRng(1), ["banana", "butterfly"], 3, "phonics", "en"),
+    ).toThrow("Unable to generate unambiguous phonics board of size 3");
+  });
+
   it("name board: never shows two icons a kid calls by the same word", () => {
     // "Find the flower!" fits the blossom and the sunflower equally.
     for (const size of [3, 4, 5] as const) {
@@ -354,9 +394,17 @@ describe("speechLines", () => {
   });
 
   it("maps phonics call lines for apple to pre-rendered voice clips in VOICE", () => {
-    const b = boardWith(1, 3, "phonics");
-    const appleCall = b.calls.find(
-      (c) => b.cells[c.answerIdx].icon === "apple",
+    let b: BingoBoard | undefined;
+    for (let seed = 1; seed <= 50; seed++) {
+      const candidate = boardWith(seed, 3, "phonics");
+      if (candidate.cells.some((c) => c.icon === "apple")) {
+        b = candidate;
+        break;
+      }
+    }
+    expect(b).toBeDefined();
+    const appleCall = b!.calls.find(
+      (c) => b!.cells[c.answerIdx].icon === "apple",
     );
     expect(appleCall).toBeDefined();
     expect(appleCall!.sound).toBe("ah");
