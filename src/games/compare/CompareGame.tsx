@@ -205,7 +205,14 @@ export function CompareGame({ onHome, difficulty, lang }: Props) {
           testID={`compare-prompt-${round.ask}`}
         >
           <Text style={styles.promptText}>{promptText}</Text>
-          <Text style={styles.hearHint}>{t(lang, "spell.hearAgain")}</Text>
+          <Text
+            style={[
+              styles.hearHint,
+              round.ask === "fewer" && styles.hearHintFewer,
+            ]}
+          >
+            {t(lang, "spell.hearAgain")}
+          </Text>
         </Pressable>
         <View style={[styles.plates, { width: totalW }]}>
           <Plate
@@ -362,6 +369,9 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyReg,
     fontSize: 12,
     color: colors.inkSoft,
+  },
+  hearHintFewer: {
+    color: colors.paper,
   },
   plates: { flexDirection: "row", justifyContent: "space-between" },
   plateCol: {

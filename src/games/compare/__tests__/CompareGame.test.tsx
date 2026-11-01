@@ -291,6 +291,29 @@ describe("CompareGame prompt replay", () => {
     expect(saySpy).toHaveBeenCalledWith("Tap the side with FEWER!");
   });
 
+  it("uses high-contrast paper color for hear hint text on fewer prompt card", () => {
+    vi.spyOn(logic, "makeCompareRound").mockReturnValue({
+      left: { icon: "star", count: 3, positions: [] },
+      right: { icon: "dog", count: 6, positions: [] },
+      ask: "fewer",
+      correctSide: "left",
+    });
+
+    render(<CompareGame onHome={noop} difficulty="hard" lang="en" />);
+
+    const promptBtn = screen.getByTestId("compare-prompt-fewer");
+    const hint = within(promptBtn).getByText(t("en", "spell.hearAgain"));
+    expect(window.getComputedStyle(hint).color).toBe("rgba(255, 253, 247, 1.00)");
+  });
+
+  it("uses inkSoft color for hear hint text on standard more prompt card", () => {
+    render(<CompareGame onHome={noop} difficulty="easy" lang="en" />);
+
+    const promptBtn = screen.getByTestId("compare-prompt-more");
+    const hint = within(promptBtn).getByText(t("en", "spell.hearAgain"));
+    expect(window.getComputedStyle(hint).color).toBe("rgba(110, 92, 123, 1.00)");
+  });
+
   it("disables prompt button and does not replay audio when game is won", () => {
     let queuedCb: (() => void) | undefined;
     vi.spyOn(sound, "sayThen").mockImplementation((_, cb) => {
