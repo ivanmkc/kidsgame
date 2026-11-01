@@ -175,3 +175,52 @@ describe('SpotItGame wrong-tap timer cleanup', () => {
     expect(clearTimeoutSpy).toHaveBeenCalledWith(wrongTimerId);
   });
 });
+
+describe('SpotItGame inactivity timer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+    vi.spyOn(sound.sfx, 'wrong').mockImplementation(() => {});
+    vi.spyOn(sound.sfx, 'good').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
+
+  it('resets inactivity timer when wrong answer is tapped', () => {
+    vi.useFakeTimers();
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+    render(<SpotItGame onHome={() => {}} difficulty="easy" seed={42} lang="en" />);
+
+    const topButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('top-symbol-'));
+    const bottomButtons = screen
+      .getAllByRole('button')
+      .filter((el) => el.getAttribute('data-testid')?.startsWith('bottom-symbol-'));
+
+    const topSymbolIds = topButtons.map((b) => b.getAttribute('data-testid')!.replace('top-symbol-', ''));
+    const bottomSymbolIds = bottomButtons.map((b) => b.getAttribute('data-testid')!.replace('bottom-symbol-', ''));
+    const matchingId = topSymbolIds.find((id) => bottomSymbolIds.includes(id));
+    const wrongId = topSymbolIds.find((id) => id !== matchingId);
+    expect(wrongId).toBeDefined();
+
+    const hintCallIndex = setTimeoutSpy.mock.calls.findIndex((call) => call[1] === 15000);
+    const initialHintTimerId = setTimeoutSpy.mock.results[hintCallIndex].value;
+
+    vi.advanceTimersByTime(14000);
+    
+    fireEvent.click(screen.getByTestId(`top-symbol-${wrongId}`));
+
+    expect(clearTimeoutSpy).toHaveBeenCalledWith(initialHintTimerId);
+
+    const newHintCallIndices = setTimeoutSpy.mock.calls
+      .map((call, i) => (call[1] === 15000 ? i : -1))
+      .filter((i) => i !== -1);
+    expect(newHintCallIndices.length).toBeGreaterThan(1);
+  });
+});

@@ -97,6 +97,7 @@ function SpotItSolo({
   const [showHint, setShowHint] = useState(false);
   const wrongCountRef = useRef(0);
   const wrongTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const winTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [roundKey, setRoundKey] = useState(0); // retriggers the deal-in animation
   const [timerKey, setTimerKey] = useState(0);
@@ -108,6 +109,7 @@ function SpotItSolo({
       stopNarration();
       if (wrongTimerRef.current) clearTimeout(wrongTimerRef.current);
       if (winTimerRef.current) clearTimeout(winTimerRef.current);
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
     },
     [],
   );
@@ -117,13 +119,13 @@ function SpotItSolo({
   useEffect(() => {
     setShowHint(false);
     wrongCountRef.current = 0;
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
     if (locked || won) return;
     const delay = soloHintDelayMs(difficulty);
     if (!Number.isFinite(delay)) return;
-    const t = setTimeout(() => {
+    inactivityTimerRef.current = setTimeout(() => {
       setShowHint(true);
     }, delay);
-    return () => clearTimeout(t);
   }, [roundKey, locked, won, difficulty]);
   const showTimer = settingsFor(difficulty).timer;
   const elapsed = useElapsed(showTimer && !won && !locked, timerKey);
@@ -172,6 +174,13 @@ function SpotItSolo({
       wrongCountRef.current += 1;
       if (shouldShowSoloHintOnWrong(wrongCountRef.current)) {
         setShowHint(true);
+      }
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      const delay = soloHintDelayMs(difficulty);
+      if (Number.isFinite(delay)) {
+        inactivityTimerRef.current = setTimeout(() => {
+          setShowHint(true);
+        }, delay);
       }
     }
   };
