@@ -87,29 +87,65 @@ export function speechLines(): string[] {
 export interface HighLowLayout {
   gap: number;
   pickBtnPaddingHorizontal: number;
+  pickBtnPaddingVertical: number;
   pickBtnMinWidth: number;
+  pickEmojiFontSize: number;
+  pickLabelFontSize: number;
   replaySize: number;
   replayFontSize: number;
-  pickLabelFontSize: number;
+  isLandscape: boolean;
+  shortH: boolean;
+  melodyDotRowHeight: number;
 }
 
-export function highLowLayout(width: number): HighLowLayout {
+export function highLowLayout(width: number, height = 0): HighLowLayout {
+  const isLandscape = height > 0 && width > height;
+  const shortH = isLandscape && height < 500;
+
+  if (shortH) {
+    const isUltraCompact = height < 360;
+    return {
+      gap: isUltraCompact ? 6 : 8,
+      pickBtnPaddingHorizontal: isUltraCompact ? 12 : 16,
+      pickBtnPaddingVertical: isUltraCompact ? 8 : 10,
+      pickBtnMinWidth: isUltraCompact ? 96 : 110,
+      pickEmojiFontSize: isUltraCompact ? 32 : 36,
+      pickLabelFontSize: isUltraCompact ? 16 : 18,
+      replaySize: isUltraCompact ? 44 : 48,
+      replayFontSize: isUltraCompact ? 22 : 24,
+      isLandscape,
+      shortH,
+      melodyDotRowHeight: 48,
+    };
+  }
+
   if (width > 0 && width < 430) {
     return {
       gap: 10,
       pickBtnPaddingHorizontal: 8,
+      pickBtnPaddingVertical: 28,
       pickBtnMinWidth: 96,
+      pickEmojiFontSize: 56,
+      pickLabelFontSize: 16,
       replaySize: 56,
       replayFontSize: 28,
-      pickLabelFontSize: 16,
+      isLandscape,
+      shortH,
+      melodyDotRowHeight: 60,
     };
   }
+
   return {
     gap: 12,
     pickBtnPaddingHorizontal: 16,
+    pickBtnPaddingVertical: 28,
     pickBtnMinWidth: 130,
+    pickEmojiFontSize: 56,
+    pickLabelFontSize: 22,
     replaySize: 72,
     replayFontSize: 36,
-    pickLabelFontSize: 22,
+    isLandscape,
+    shortH,
+    melodyDotRowHeight: 60,
   };
 }

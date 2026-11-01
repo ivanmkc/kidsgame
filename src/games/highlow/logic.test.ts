@@ -171,16 +171,83 @@ describe("highlow logic", () => {
       expect(layout.pickBtnMinWidth).toBe(96);
     });
 
+    it("scales down buttons, padding, and gaps on compact mobile landscape viewports", () => {
+      // Ultra-compact mobile landscape (568x320)
+      const compact320 = highLowLayout(568, 320);
+      expect(compact320.isLandscape).toBe(true);
+      expect(compact320.shortH).toBe(true);
+      expect(compact320.gap).toBe(6);
+      expect(compact320.pickBtnPaddingVertical).toBe(8);
+      expect(compact320.pickBtnPaddingHorizontal).toBe(12);
+      expect(compact320.pickBtnMinWidth).toBe(96);
+      expect(compact320.pickEmojiFontSize).toBe(32);
+      expect(compact320.pickLabelFontSize).toBe(16);
+      expect(compact320.replaySize).toBe(44);
+      expect(compact320.replayFontSize).toBe(22);
+      expect(compact320.melodyDotRowHeight).toBe(48);
+
+      // Compact mobile landscape (667x375)
+      const compact375 = highLowLayout(667, 375);
+      expect(compact375.isLandscape).toBe(true);
+      expect(compact375.shortH).toBe(true);
+      expect(compact375.gap).toBe(8);
+      expect(compact375.pickBtnPaddingVertical).toBe(10);
+      expect(compact375.pickBtnPaddingHorizontal).toBe(16);
+      expect(compact375.pickBtnMinWidth).toBe(110);
+      expect(compact375.pickEmojiFontSize).toBe(36);
+      expect(compact375.pickLabelFontSize).toBe(18);
+      expect(compact375.replaySize).toBe(48);
+      expect(compact375.replayFontSize).toBe(24);
+      expect(compact375.melodyDotRowHeight).toBe(48);
+
+      // Compact mobile landscape (740x360)
+      const compact360 = highLowLayout(740, 360);
+      expect(compact360.isLandscape).toBe(true);
+      expect(compact360.shortH).toBe(true);
+      expect(compact360.gap).toBe(8);
+      expect(compact360.pickBtnPaddingVertical).toBe(10);
+      expect(compact360.replaySize).toBe(48);
+    });
+
+    it("keeps total board content height comfortably within 220-250px so it fits mobile landscape viewports", () => {
+      // GameShell chrome is ~80px.
+      // Board contains melodyDotRow, replay button, choice buttons, and 2 gaps.
+      const screenHeights = [320, 360, 375, 390, 414, 428];
+      for (const h of screenHeights) {
+        const layout = highLowLayout(800, h);
+        expect(layout.shortH).toBe(true);
+        const choiceBtnHeight =
+          layout.pickBtnPaddingVertical * 2 +
+          layout.pickEmojiFontSize +
+          4 +
+          layout.pickLabelFontSize +
+          6;
+        const boardContentHeight =
+          layout.melodyDotRowHeight +
+          layout.gap * 2 +
+          layout.replaySize +
+          choiceBtnHeight;
+        expect(boardContentHeight).toBeLessThanOrEqual(250);
+        const totalScreenHeight = 80 + boardContentHeight;
+        expect(totalScreenHeight).toBeLessThan(h);
+      }
+    });
+
     it("preserves spacious layout on standard mobile, tablets, and desktop (>= 430px)", () => {
       const portrait430 = highLowLayout(430);
       expect(portrait430.gap).toBe(12);
       expect(portrait430.pickBtnPaddingHorizontal).toBe(16);
+      expect(portrait430.pickBtnPaddingVertical).toBe(28);
       expect(portrait430.pickBtnMinWidth).toBe(130);
       expect(portrait430.replaySize).toBe(72);
       expect(portrait430.replayFontSize).toBe(36);
       expect(portrait430.pickLabelFontSize).toBe(22);
+      expect(portrait430.melodyDotRowHeight).toBe(60);
+      expect(portrait430.shortH).toBe(false);
 
-      const tablet = highLowLayout(768);
+      const tablet = highLowLayout(768, 1024);
+      expect(tablet.isLandscape).toBe(false);
+      expect(tablet.shortH).toBe(false);
       expect(tablet.gap).toBe(12);
       expect(tablet.pickBtnPaddingHorizontal).toBe(16);
       expect(tablet.pickBtnMinWidth).toBe(130);
@@ -188,7 +255,9 @@ describe("highlow logic", () => {
       expect(tablet.replayFontSize).toBe(36);
       expect(tablet.pickLabelFontSize).toBe(22);
 
-      const desktop = highLowLayout(1024);
+      const desktop = highLowLayout(1024, 768);
+      expect(desktop.isLandscape).toBe(true);
+      expect(desktop.shortH).toBe(false);
       expect(desktop.gap).toBe(12);
       expect(desktop.pickBtnPaddingHorizontal).toBe(16);
       expect(desktop.pickBtnMinWidth).toBe(130);
@@ -203,6 +272,7 @@ describe("highlow logic", () => {
       expect(fallback.pickBtnMinWidth).toBe(130);
       expect(fallback.replaySize).toBe(72);
       expect(fallback.replayFontSize).toBe(36);
+      expect(fallback.shortH).toBe(false);
     });
   });
 

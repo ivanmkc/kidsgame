@@ -39,8 +39,8 @@ interface Props {
 
 export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const { epoch, isValid } = useLangEpoch(lang);
-  const { width } = useWindowDimensions();
-  const layout = highLowLayout(width);
+  const { width, height } = useWindowDimensions();
+  const layout = highLowLayout(width, height);
   const total = roundsToWin(difficulty);
   const rngRef = useRef(makeRng(Math.floor(Math.random() * 1e9)));
   const lockedRef = useRef(false);
@@ -207,7 +207,14 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   }, [phase, won, lang, wrongPick]);
 
   const onPick = (picked: "high" | "low") => {
-    if (won || phase !== "pick" || lockedRef.current || !isValid() || wrongPickRef.current === picked) return;
+    if (
+      won ||
+      phase !== "pick" ||
+      lockedRef.current ||
+      !isValid() ||
+      wrongPickRef.current === picked
+    )
+      return;
     stopNarration();
     if (isCorrect(round, picked)) {
       lockedRef.current = true;
@@ -363,7 +370,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   });
 
   const renderMelodyDots = (allFilled: boolean) => (
-    <View style={styles.melodyDotRow}>
+    <View style={[styles.melodyDotRow, { height: layout.melodyDotRowHeight }]}>
       <View
         testID="melody-dot-0"
         style={[
@@ -397,9 +404,19 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     >
       <View style={styles.board}>
         {phase === "listen" ? (
-          <View style={[styles.listenCard, shadows.soft]}>
+          <View
+            style={[
+              styles.listenCard,
+              layout.shortH && styles.listenCardShort,
+              shadows.soft,
+            ]}
+          >
             <Animated.Text
-              style={[styles.listenEmoji, { transform: [{ scale: earPulse }] }]}
+              style={[
+                styles.listenEmoji,
+                layout.shortH && styles.listenEmojiShort,
+                { transform: [{ scale: earPulse }] },
+              ]}
             >
               👂
             </Animated.Text>
@@ -408,6 +425,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                 testID="highlow-instructional-direction"
                 style={[
                   styles.instructionalText,
+                  layout.shortH && styles.instructionalTextShort,
                   {
                     color:
                       instructionalDirection === "high" ? "#5DA9E8" : "#E8874F",
@@ -471,14 +489,23 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                       backgroundColor: "#E3EEFB",
                       borderColor: "#5DA9E8",
                       paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                      paddingVertical: layout.pickBtnPaddingVertical,
                       minWidth: layout.pickBtnMinWidth,
                     },
+                    layout.shortH && styles.pickBtnShort,
                     shadows.glowGold,
                     wrongPick === "high" && styles.wrong,
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.pickEmoji}>↗️</Text>
+                  <Text
+                    style={[
+                      styles.pickEmoji,
+                      { fontSize: layout.pickEmojiFontSize },
+                    ]}
+                  >
+                    ↗️
+                  </Text>
                   <Text
                     adjustsFontSizeToFit
                     numberOfLines={1}
@@ -511,14 +538,23 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
                       backgroundColor: "#FFF0E5",
                       borderColor: "#E8874F",
                       paddingHorizontal: layout.pickBtnPaddingHorizontal,
+                      paddingVertical: layout.pickBtnPaddingVertical,
                       minWidth: layout.pickBtnMinWidth,
                     },
+                    layout.shortH && styles.pickBtnShort,
                     shadows.glowGold,
                     wrongPick === "low" && styles.wrong,
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.pickEmoji}>↘️</Text>
+                  <Text
+                    style={[
+                      styles.pickEmoji,
+                      { fontSize: layout.pickEmojiFontSize },
+                    ]}
+                  >
+                    ↘️
+                  </Text>
                   <Text
                     adjustsFontSizeToFit
                     numberOfLines={1}
@@ -615,4 +651,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   replayText: { fontSize: 36 },
+  listenCardShort: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    gap: 6,
+  },
+  listenEmojiShort: { fontSize: 36 },
+  instructionalTextShort: { fontSize: 20 },
+  pickBtnShort: {
+    borderRadius: 18,
+    borderWidth: 3,
+    gap: 4,
+  },
 });
