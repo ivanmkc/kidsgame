@@ -195,8 +195,7 @@ describe("shadow match", () => {
 describe("odd one out (which does not belong)", () => {
   it("n-1 same-category items + one intruder at oddIndex", async () => {
     const { makeOddOneRound } = await import("../oddone/logic");
-    const { categoryOf } = await import("../iconCategories");
-    const { CURRICULUM } = await import("../../curriculum/content");
+    const { categoryOf, CURRICULUM } = await import("../../curriculum/content");
     for (let seed = 1; seed <= 40; seed++) {
       for (const n of [4, 6, 9]) {
         const r = makeOddOneRound(makeRng(seed * n), manifest.spotit.icons, n);
@@ -232,7 +231,7 @@ describe("odd one out (which does not belong)", () => {
     // food?", a kid who counts the butterfly as nature or seafood as food
     // has nowhere to go, so the intruder must not come from there either.
     const { makeOddOneRound } = await import("../oddone/logic");
-    const { CATEGORY_CONFLICTS } = await import("../iconCategories");
+    const { CATEGORY_CONFLICTS } = await import("../../curriculum/content");
     const seenConflictedBases = new Set<string>();
     for (let seed = 1; seed <= 400; seed++) {
       for (const n of [4, 6, 9]) {
@@ -262,8 +261,8 @@ describe("odd one out (which does not belong)", () => {
   });
 
   it("every category the round builder can pick has a spoken question in all four langs", async () => {
-    const { CATEGORY_TEXT } = await import("../iconCategories");
-    const { CURRICULUM } = await import("../../curriculum/content");
+    const { CATEGORY_TEXT, CURRICULUM } =
+      await import("../../curriculum/content");
     const { t } = await import("../../i18n");
     // The generic "Which one does not belong?" fallback tells a kid nothing
     // about WHICH group the board is built from, so no category may reach it.

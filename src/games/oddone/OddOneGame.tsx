@@ -19,7 +19,7 @@ import { manifest } from "../../manifest";
 import { makeRng } from "../../rng";
 import { colors, fonts, shadows } from "../../theme";
 import { say, sfx, stopNarration } from "../../sound";
-import { CATEGORY_TEXT } from "../iconCategories";
+import { CATEGORY_TEXT } from "../../curriculum/content";
 import { itemLabel, makeOddOneRound } from "./logic";
 import { useWinLine } from "../winlines";
 
