@@ -51,7 +51,7 @@ describe("FeedbackChip", () => {
     ).toBeDefined();
   });
 
-  it("exposes selection through accessibilityState on kind buttons", () => {
+  it("exposes pressed state on kind buttons and avoids aria-selected", () => {
     render(<FeedbackChip lang="en" />);
     fireEvent.click(
       screen.getByRole("button", { name: t("en", "feedback.chip") }),
@@ -64,16 +64,18 @@ describe("FeedbackChip", () => {
       name: t("en", "feedback.idea"),
     });
 
-    expect(brokenBtn.getAttribute("aria-selected")).toBe("false");
-    expect(ideaBtn.getAttribute("aria-selected")).toBe("false");
+    expect(brokenBtn.getAttribute("aria-pressed")).toBe("false");
+    expect(ideaBtn.getAttribute("aria-pressed")).toBe("false");
+    expect(brokenBtn.getAttribute("aria-selected")).toBeNull();
+    expect(ideaBtn.getAttribute("aria-selected")).toBeNull();
 
     fireEvent.click(brokenBtn);
-    expect(brokenBtn.getAttribute("aria-selected")).toBe("true");
-    expect(ideaBtn.getAttribute("aria-selected")).toBe("false");
+    expect(brokenBtn.getAttribute("aria-pressed")).toBe("true");
+    expect(ideaBtn.getAttribute("aria-pressed")).toBe("false");
 
     fireEvent.click(ideaBtn);
-    expect(brokenBtn.getAttribute("aria-selected")).toBe("false");
-    expect(ideaBtn.getAttribute("aria-selected")).toBe("true");
+    expect(brokenBtn.getAttribute("aria-pressed")).toBe("false");
+    expect(ideaBtn.getAttribute("aria-pressed")).toBe("true");
   });
 
   it("ensures Send and Cancel buttons have at least 44pt touch height and center alignment", () => {
