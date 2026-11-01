@@ -1,3 +1,4 @@
+import * as sound from "../../sound";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
@@ -176,6 +177,7 @@ describe("melody bells", () => {
 
   it("unmounts during listen phase and cancels demo timers", () => {
     vi.useFakeTimers();
+    vi.spyOn(sound, "sayThen").mockImplementation((_texts, done) => done());
     let notesPlayed = 0;
     let mockCancel: (() => void) | null = null;
     const playSequenceSpy = vi

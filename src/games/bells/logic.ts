@@ -1,6 +1,6 @@
 import { Rng, randInt } from "../../rng";
 import { Difficulty } from "../../difficulty";
-import { Lang } from "../../lang";
+import { Lang, LANGS } from "../../lang";
 import { t } from "../../i18n";
 
 const PENTATONIC = [60, 62, 64, 67, 69]; // C D E G A (C major pentatonic)
@@ -131,7 +131,7 @@ export function canTap(
 }
 
 export function speechLines(): string[] {
-  return [];
+  return LANGS.map((l) => t(l.id, "shell.bells.sub"));
 }
 
 export interface BellsLayout {
