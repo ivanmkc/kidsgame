@@ -301,7 +301,7 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
-  it("allows immediate retry of correct pick on incorrect pick while ignoring repeated wrong taps", () => {
+  it("locks input immediately upon wrong pick preventing bypass of feedback", () => {
     vi.useFakeTimers();
     let latestNotes: music.SeqNote[] = [];
     let onDoneCb: (() => void) | undefined;
@@ -338,7 +338,19 @@ describe("HighLowGame UI", () => {
     fireEvent.click(wrongBtn);
     expect(wrongSpy).toHaveBeenCalledTimes(1);
 
-    // Tapping correct button immediately succeeds without waiting for 500ms error flash
+    // Tapping correct button during 500ms error window is ignored (locked)
+    fireEvent.click(correctBtn);
+    expect(goodSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 0/8");
+
+    // Advance past 500ms wrong flash, sayThen, and replay
+    act(() => {
+      vi.advanceTimersByTime(500);
+      vi.advanceTimersByTime(3000);
+      onDoneCb?.();
+    });
+
+    // Tapping correct button now succeeds
     fireEvent.click(correctBtn);
     expect(goodSpy).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("highlow-score").textContent).toBe("🎵 1/8");

@@ -244,6 +244,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       }
     } else {
       sfx.wrong();
+      lockedRef.current = true;
       wrongPickRef.current = picked;
       setWrongPick(picked);
       const currentEpoch = roundEpochRef.current;
@@ -255,7 +256,6 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
       wrongTimerRef.current = setTimeout(() => {
         wrongTimerRef.current = null;
         if (roundEpochRef.current !== currentEpoch || !isValid()) return;
-        lockedRef.current = true;
         wrongPickRef.current = null;
         setWrongPick(null);
         setInstructionalDirection(trueDir);
@@ -295,7 +295,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   };
 
   const replay = () => {
-    if (phase === "pick" && !lockedRef.current) {
+    if (phase === "pick") {
       stopSequence();
       stopNarration();
       if (listenTimerRef.current) {
