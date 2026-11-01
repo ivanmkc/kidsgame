@@ -158,6 +158,62 @@ describe("HighLowGame UI", () => {
     vi.useRealTimers();
   });
 
+  it("scaffolds listening intervals across session rounds on Easy (12 semitones for round 1, 9 semitones for round 5)", () => {
+    vi.useFakeTimers();
+    let capturedNotes: { m: number; b: number }[] = [];
+    let onDoneCb: (() => void) | undefined;
+    const makeRoundSpy = vi.spyOn(highLowLogic, "makeHighLowRound");
+
+    vi.spyOn(music, "playSequence").mockImplementation(
+      (notes, _bpm, _onNote, onDone) => {
+        capturedNotes = notes as { m: number; b: number }[];
+        onDoneCb = onDone;
+        return () => {};
+      },
+    );
+
+    render(<HighLowGame onHome={() => {}} difficulty="easy" lang="en" />);
+
+    // Round 1: index 0. Initial interval should be 12 semitones.
+    act(() => {
+      vi.advanceTimersByTime(400);
+      onDoneCb?.();
+    });
+
+    expect(makeRoundSpy).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      "easy",
+      0,
+    );
+    expect(Math.abs(capturedNotes[1].m - capturedNotes[0].m)).toBe(12);
+
+    // Play through rounds 1 to 4 to reach round 5 (index 4)
+    for (let r = 0; r < 4; r++) {
+      const isHigh = capturedNotes[1].m > capturedNotes[0].m;
+      const correctBtn = screen.getByTestId(
+        isHigh ? "highlow-high" : "highlow-low",
+      );
+      fireEvent.click(correctBtn);
+      act(() => {
+        vi.advanceTimersByTime(1000); // celebration delay
+      });
+      act(() => {
+        vi.advanceTimersByTime(400); // listen delay
+        onDoneCb?.();
+      });
+    }
+
+    // Round 5: index 4. Interval should scaffold down to 9 semitones.
+    expect(makeRoundSpy).toHaveBeenLastCalledWith(
+      expect.any(Function),
+      "easy",
+      4,
+    );
+    expect(Math.abs(capturedNotes[1].m - capturedNotes[0].m)).toBe(9);
+
+    vi.useRealTimers();
+  });
+
   it("delays transition to listen phase by 1000ms after a correct pick, keeping buttons mounted and locking input", () => {
     vi.useFakeTimers();
     let capturedNotes: { m: number; b: number }[] = [];

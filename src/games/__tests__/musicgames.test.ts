@@ -55,7 +55,7 @@ describe("high or low", () => {
     for (let seed = 1; seed <= 30; seed++) {
       for (const d of ["easy", "medium", "hard"] as const) {
         const rng = makeRng(seed);
-        const r = makeHighLowRound(rng, d);
+        const r = makeHighLowRound(rng, d, 0);
         expect(r.noteA).not.toBe(r.noteB);
         expect(Math.abs(r.noteB - r.noteA)).toBeGreaterThan(0);
         expect(["high", "low"]).toContain(hlAnswer(r));
@@ -70,7 +70,7 @@ describe("high or low", () => {
     const seen = new Set<string>();
     for (let seed = 1; seed <= 200; seed++) {
       for (const d of ["easy", "medium", "hard"] as const) {
-        const r = makeHighLowRound(makeRng(seed), d);
+        const r = makeHighLowRound(makeRng(seed), d, 0);
         const wentUp = r.noteB > r.noteA;
         const ans = hlAnswer(r);
         expect(ans).toBe(wentUp ? "high" : "low");

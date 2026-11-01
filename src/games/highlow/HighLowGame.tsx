@@ -51,7 +51,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
   const roundEpochRef = useRef(0);
   const feedbackSpeechRef = useRef<string[] | null>(null);
   const [round, setRound] = useState<HighLowRound>(() =>
-    makeHighLowRound(rngRef.current, difficulty),
+    makeHighLowRound(rngRef.current, difficulty, 0),
   );
   const [score, setScore] = useState(0);
   const [roundIndex, setRoundIndex] = useState(0);
@@ -236,7 +236,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
           advanceTimerRef.current = null;
           lockedRef.current = false;
           roundEpochRef.current++;
-          setRound(makeHighLowRound(rngRef.current, difficulty));
+          setRound(makeHighLowRound(rngRef.current, difficulty, nextRoundIndex));
         }, 1000);
       } else {
         if (winTimerRef.current) {
@@ -298,7 +298,7 @@ export function HighLowGame({ onHome, difficulty, lang }: Props) {
     setWon(false);
     setInstructionalDirection(null);
     setListenNote(null);
-    setRound(makeHighLowRound(rngRef.current, difficulty));
+    setRound(makeHighLowRound(rngRef.current, difficulty, 0));
   };
 
   const replay = () => {
