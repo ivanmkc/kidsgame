@@ -8,13 +8,21 @@ interface Props {
   translateY: Animated.AnimatedInterpolation<number> | Animated.AnimatedAddition<number>;
   scale: Animated.AnimatedInterpolation<number>;
   rotate?: Animated.AnimatedInterpolation<string>;
+  flourishRotate?: Animated.AnimatedInterpolation<string>;
 }
 
 const VEHICLE_SIZE = 160;
 
-export function VehicleSprite({ scene, translateY, scale, rotate }: Props) {
+export function VehicleSprite({ scene, translateY, scale, rotate, flourishRotate }: Props) {
   const src = MUSICBOX_IMAGES[`${scene.id}/vehicle`];
   const topPct = `${scene.vehicleY * 100}%`;
+
+  const transforms: unknown[] = [
+    { translateY: translateY as unknown as Animated.AnimatedInterpolation<number> },
+    { scale },
+  ];
+  if (rotate) transforms.push({ rotate });
+  if (flourishRotate) transforms.push({ rotate: flourishRotate });
 
   return (
     <Animated.View
@@ -22,19 +30,11 @@ export function VehicleSprite({ scene, translateY, scale, rotate }: Props) {
         styles.vehicle,
         {
           top: topPct as unknown as number,
-          transform: rotate
-            ? [
-                { translateY: translateY as unknown as Animated.AnimatedInterpolation<number> },
-                { scale },
-                { rotate },
-              ]
-            : [
-                { translateY: translateY as unknown as Animated.AnimatedInterpolation<number> },
-                { scale },
-              ],
+          transform: transforms,
         },
       ] as unknown as Animated.WithAnimatedObject<import('react-native').ViewStyle>[]}
       pointerEvents="none"
+      testID="musicbox-vehicle"
     >
       <Image
         source={src}

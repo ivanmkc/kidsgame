@@ -33,6 +33,12 @@ export function advance(s: BoxState): BoxState {
   return { ...s, idx: s.idx + 1 };
 }
 
+/** Whether the current tap count completes a full loop of the song melody. */
+export function isSongLoopComplete(s: BoxState): boolean {
+  if (!s.song || s.song.notes.length === 0) return false;
+  return s.idx > 0 && s.idx % s.song.notes.length === 0;
+}
+
 /** Octave offset from vertical tap position.
  *  yFrac 0 = top of screen, 1 = bottom.
  *  Top third: +12 (one octave up). Middle third: 0. Bottom third: -12. */

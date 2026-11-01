@@ -12,6 +12,7 @@ import {
   advance,
   beatsForTap,
   harmonyOffsets,
+  isSongLoopComplete,
   noteForTap,
   octaveOffset,
   pickSpawnSprite,
@@ -23,6 +24,8 @@ import { songById } from "./logic";
 import { ScrollingWorld } from "./ScrollingWorld";
 import { SpawnedObject, SpawnEntry } from "./SpawnedObject";
 import { VehicleSprite } from "./VehicleSprite";
+import { Confetti } from "../../components/Confetti";
+import { sfx } from "../../sound";
 import { t } from "../../i18n";
 import { Lang } from "../../lang";
 
@@ -44,6 +47,7 @@ export function JourneyScene({
 }: Props) {
   const song = freePlay ? null : songById(scene.songId);
   const [state, setState] = useState<BoxState>(() => startState(song));
+  const [celebrate, setCelebrate] = useState(0);
   const [spawns, setSpawns] = useState<SpawnEntry[]>([]);
   const spawnsRef = useRef(spawns);
   spawnsRef.current = spawns;
@@ -52,6 +56,7 @@ export function JourneyScene({
   const scrollTotal = useRef(0);
   const currentScrollX = useRef(0);
   const vehicleBounce = useRef(new Animated.Value(0)).current;
+  const vehicleFlourish = useRef(new Animated.Value(0)).current;
   const vehicleIdle = useRef(new Animated.Value(0)).current;
   const stageSize = useRef({ w: 1, h: 1 });
   const activePointers = useRef(new Set<number>());
@@ -79,6 +84,8 @@ export function JourneyScene({
     activePointers.current.clear();
     vehicleIdle.setValue(0);
     vehicleBounce.setValue(0);
+    vehicleFlourish.setValue(0);
+    setCelebrate(0);
 
     const loop = Animated.loop(
       Animated.sequence([
@@ -114,6 +121,19 @@ export function JourneyScene({
       const nextS = advance(s);
       stateRef.current = nextS;
       setState(nextS);
+
+      if (isSongLoopComplete(nextS)) {
+        sfx.win();
+        setCelebrate((c) => c + 1);
+        vehicleFlourish.setValue(0);
+        Animated.timing(vehicleFlourish, {
+          toValue: 1,
+          duration: 900,
+          useNativeDriver: true,
+        }).start(({ finished }) => {
+          if (finished) vehicleFlourish.setValue(0);
+        });
+      }
 
       const scrollAmount =
         fingerCount > 1 ? SCROLL_PER_TAP * 0.3 : SCROLL_PER_TAP;
@@ -154,7 +174,7 @@ export function JourneyScene({
         },
       ]);
     },
-    [richChords, scene, scrollX, vehicleBounce],
+    [richChords, scene, scrollX, vehicleBounce, vehicleFlourish],
   );
 
   const onTapSpawn = useCallback((entry: SpawnEntry) => {
@@ -194,16 +214,22 @@ export function JourneyScene({
   const vehicleTranslateY = useMemo(
     () =>
       Animated.add(
-        vehicleBounce.interpolate({
+        Animated.add(
+          vehicleBounce.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0, -18, 0],
+          }),
+          vehicleIdle.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0, -6, 0],
+          }),
+        ),
+        vehicleFlourish.interpolate({
           inputRange: [0, 0.5, 1],
-          outputRange: [0, -18, 0],
-        }),
-        vehicleIdle.interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [0, -6, 0],
+          outputRange: [0, -42, 0],
         }),
       ),
-    [vehicleBounce, vehicleIdle],
+    [vehicleBounce, vehicleIdle, vehicleFlourish],
   );
 
   const vehicleScale = useMemo(
@@ -222,6 +248,15 @@ export function JourneyScene({
         outputRange: ["-2deg", "0deg", "2deg", "0deg", "-2deg"],
       }),
     [vehicleIdle],
+  );
+
+  const vehicleFlourishRotate = useMemo(
+    () =>
+      vehicleFlourish.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0deg", "360deg"],
+      }),
+    [vehicleFlourish],
   );
 
   return (
@@ -247,6 +282,7 @@ export function JourneyScene({
         translateY={vehicleTranslateY}
         scale={vehicleScale}
         rotate={vehicleRotate}
+        flourishRotate={vehicleFlourishRotate}
       />
 
       {spawns.map((s) => (
@@ -258,6 +294,8 @@ export function JourneyScene({
           lang={lang}
         />
       ))}
+
+      {celebrate > 0 ? <Confetti key={celebrate} count={24} /> : null}
     </View>
   );
 }

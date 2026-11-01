@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   startState,
   advance,
+  isSongLoopComplete,
   noteForTap,
   beatsForTap,
   octaveOffset,
@@ -33,6 +34,48 @@ describe("musicbox v2 logic", () => {
       s = advance(s);
     }
     expect(secondPass).toEqual(firstPass);
+  });
+
+  it("detects song loop completion at note multiples and rejects intermediate taps or free play", () => {
+    const twinkle = SONGS.find((s) => s.id === "twinkle")!;
+    expect(twinkle.notes.length).toBe(42);
+
+    let s = startState(twinkle);
+    expect(isSongLoopComplete(s)).toBe(false);
+
+    // Taps 1 through 41 are intermediate notes
+    for (let tap = 1; tap < 42; tap++) {
+      s = advance(s);
+      expect(isSongLoopComplete(s)).toBe(false);
+    }
+
+    // Tap 42 finishes the 42-note song loop
+    s = advance(s);
+    expect(s.idx).toBe(42);
+    expect(isSongLoopComplete(s)).toBe(true);
+
+    // Tap 43 begins loop 2, not a completion
+    s = advance(s);
+    expect(s.idx).toBe(43);
+    expect(isSongLoopComplete(s)).toBe(false);
+
+    // Advance to tap 84 (loop 2 completion)
+    for (let tap = 44; tap <= 84; tap++) {
+      s = advance(s);
+      if (tap === 84) {
+        expect(isSongLoopComplete(s)).toBe(true);
+      } else {
+        expect(isSongLoopComplete(s)).toBe(false);
+      }
+    }
+
+    // Free play never completes a loop
+    let free = startState(null);
+    expect(isSongLoopComplete(free)).toBe(false);
+    for (let tap = 1; tap <= 100; tap++) {
+      free = advance(free);
+      expect(isSongLoopComplete(free)).toBe(false);
+    }
   });
 
   it("beatsForTap matches song note durations", () => {
