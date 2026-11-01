@@ -24,7 +24,7 @@ export function loadTwoPlayer(): boolean {
 }
 
 export function saveTwoPlayer(on: boolean): void {
-  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.localStorage) {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
     try { window.localStorage.setItem(KEY, on ? 'on' : 'off'); } catch { /* non-fatal */ }
   }
 }
