@@ -231,11 +231,19 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
             ) : null}
             {round ? (
               <>
-                <View
-                  style={[
+                <Pressable
+                  disabled={won}
+                  onPress={() => {
+                    if (won || lockedRef.current) return;
+                    saySequence(round.promptLines);
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(lang, "spell.hearAgain")}
+                  style={({ pressed }) => [
                     styles.prompt,
                     shadows.soft,
                     shortH && styles.promptShort,
+                    pressed && styles.pressed,
                   ]}
                   testID={`rhyme-prompt-${round.target.icon}`}
                 >
@@ -256,7 +264,10 @@ export function RhymeGame({ onHome, difficulty, lang }: Props) {
                   {round.caption ? (
                     <Text style={styles.caption}>{round.caption}</Text>
                   ) : null}
-                </View>
+                  <Text style={styles.speakerHint}>
+                    {t(lang, "spell.hearAgain")}
+                  </Text>
+                </Pressable>
                 <View
                   style={[
                     styles.grid,
@@ -341,6 +352,11 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.inkSoft,
     marginTop: 2,
+  },
+  speakerHint: {
+    fontFamily: fonts.bodyReg,
+    fontSize: 12,
+    color: colors.inkSoft,
   },
   banner: {
     backgroundColor: colors.blush,
