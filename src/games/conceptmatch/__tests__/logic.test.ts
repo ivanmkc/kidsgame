@@ -3,6 +3,7 @@ import { t, UIKey } from "../../../i18n";
 import { hanNumeral, Lang, numberWord } from "../../../lang";
 import { makeRng } from "../../../rng";
 import { WORDS, wordFor } from "../../../curriculum/content";
+
 import {
   ALPHABET,
   ANIMALS,
@@ -20,7 +21,10 @@ import {
   rhymeKeyFor,
   updateBoardLang,
   updateCardLang,
+  MAPPED_RHYME_WORDS,
 } from "../logic";
+
+const ALL_WORDS = [...WORDS, ...MAPPED_RHYME_WORDS];
 
 describe("conceptmatch/logic", () => {
   describe("isMatch", () => {
@@ -105,7 +109,7 @@ describe("conceptmatch/logic", () => {
 
   describe("rhymeKeyFor", () => {
     it("returns rhymeKey for English, jaRhyme for Japanese, cmnRhyme for Mandarin, yueRhyme for Cantonese", () => {
-      const dog = WORDS.find((w) => w.icon === "dog")!;
+      const dog = ALL_WORDS.find((w) => w.icon === "dog")!;
       expect(rhymeKeyFor(dog, "en")).toBe(dog.rhymeKey);
       expect(rhymeKeyFor(dog, "ja")).toBe(dog.jaRhyme);
       expect(rhymeKeyFor(dog, "cmn")).toBe(dog.cmnRhyme);
@@ -203,6 +207,22 @@ describe("conceptmatch/logic", () => {
     });
 
     describe("picture-word deck", () => {
+      it("includes RHYME_WORDS in the English pool", () => {
+        let foundRhyme = false;
+        for (let seed = 0; seed < 50; seed++) {
+          const board = buildBoard(makeRng(seed), "picture-word", "en", 8);
+          if (
+            board.some((c) =>
+              MAPPED_RHYME_WORDS.some((rw) => rw.icon === c.conceptId),
+            )
+          ) {
+            foundRhyme = true;
+            break;
+          }
+        }
+        expect(foundRhyme).toBe(true);
+      });
+
       it("defaults to 2 pairs (4 cards)", () => {
         const rng = makeRng(42);
         const board = buildBoard(rng, "picture-word");
@@ -228,7 +248,7 @@ describe("conceptmatch/logic", () => {
           const [card1, card2] = cards;
           expect(isMatch(card1, card2)).toBe(true);
 
-          const entry = WORDS.find((w) => w.icon === conceptId);
+          const entry = ALL_WORDS.find((w) => w.icon === conceptId);
           expect(entry).toBeDefined();
           const expectedWord = wordFor(entry!, "en").text;
 
@@ -256,7 +276,7 @@ describe("conceptmatch/logic", () => {
         expect(boardJa).toHaveLength(6);
 
         for (const card of boardJa) {
-          const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+          const entry = ALL_WORDS.find((w) => w.icon === card.conceptId)!;
           const expectedWord = wordFor(entry, "ja").text;
           expect(card.speech).toBe(expectedWord);
           if (card.display.type === "text") {
@@ -309,7 +329,7 @@ describe("conceptmatch/logic", () => {
           const [card1, card2] = cards;
           expect(isMatch(card1, card2)).toBe(true);
 
-          const entry = WORDS.find((w) => w.icon === conceptId);
+          const entry = ALL_WORDS.find((w) => w.icon === conceptId);
           expect(entry).toBeDefined();
           const expectedWord = wordFor(entry!, "en").text;
 
@@ -336,7 +356,7 @@ describe("conceptmatch/logic", () => {
         expect(board).toHaveLength(6);
 
         for (const card of board) {
-          const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+          const entry = ALL_WORDS.find((w) => w.icon === card.conceptId)!;
           const expectedWord = wordFor(entry, "yue").text;
           expect(card.speech).toBe(expectedWord);
           if (card.display.type === "audio") {
@@ -790,7 +810,7 @@ describe("conceptmatch/logic", () => {
           expect(isMatch(card1, card2)).toBe(true);
           expect(ANIMALS).toContain(conceptId);
 
-          const entry = WORDS.find((w) => w.icon === conceptId)!;
+          const entry = ALL_WORDS.find((w) => w.icon === conceptId)!;
           const expectedName = wordFor(entry, "en").text;
           const expectedSound = t("en", `sound.${conceptId}` as UIKey);
 
@@ -817,7 +837,7 @@ describe("conceptmatch/logic", () => {
           const rng = makeRng(42);
           const board = buildBoard(rng, "animals-sounds", lang, 2);
           for (const card of board) {
-            const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+            const entry = ALL_WORDS.find((w) => w.icon === card.conceptId)!;
             const expectedName = wordFor(entry, lang).text;
             const expectedSound = t(lang, `sound.${card.conceptId}` as UIKey);
 
@@ -902,7 +922,7 @@ describe("conceptmatch/logic", () => {
           COLORS.some((color) => color.id === c.conceptId),
         );
         const hasWord = board.some((c) =>
-          WORDS.some((w) => w.icon === c.conceptId),
+          ALL_WORDS.some((w) => w.icon === c.conceptId),
         );
 
         // For 6 pairs across 4 subdecks, at least 2 of these categories must be present
@@ -1107,7 +1127,7 @@ describe("conceptmatch/logic", () => {
               new Set(boardTrue.map((c) => c.conceptId)),
             );
             const entriesTrue = conceptsTrue.map((id) =>
-              WORDS.find((w) => w.icon === id)!,
+              ALL_WORDS.find((w) => w.icon === id)!,
             );
             const keyA = rhymeKeyFor(entriesTrue[0], "en");
             const keyB = rhymeKeyFor(entriesTrue[1], "en");
@@ -1127,7 +1147,7 @@ describe("conceptmatch/logic", () => {
               new Set(boardFalse.map((c) => c.conceptId)),
             );
             const entriesFalse = conceptsFalse.map((id) =>
-              WORDS.find((w) => w.icon === id)!,
+              ALL_WORDS.find((w) => w.icon === id)!,
             );
             const keyFalseA = rhymeKeyFor(entriesFalse[0], "en");
             const keyFalseB = rhymeKeyFor(entriesFalse[1], "en");
@@ -1152,8 +1172,8 @@ describe("conceptmatch/logic", () => {
           expect(board).toHaveLength(4);
           const concepts = Array.from(new Set(board.map((c) => c.conceptId)));
           expect(concepts).toHaveLength(2);
-          const entry0 = WORDS.find((w) => w.icon === concepts[0])!;
-          const entry1 = WORDS.find((w) => w.icon === concepts[1])!;
+          const entry0 = ALL_WORDS.find((w) => w.icon === concepts[0])!;
+          const entry1 = ALL_WORDS.find((w) => w.icon === concepts[1])!;
           expect(rhymeKeyFor(entry0, "en")).toBeTruthy();
           expect(rhymeKeyFor(entry0, "en")).toBe(rhymeKeyFor(entry1, "en"));
         });
@@ -1172,15 +1192,15 @@ describe("conceptmatch/logic", () => {
             expect(board).toHaveLength(4);
             const concepts = Array.from(new Set(board.map((c) => c.conceptId)));
             expect(concepts).toHaveLength(2);
-            const entry0 = WORDS.find((w) => w.icon === concepts[0])!;
-            const entry1 = WORDS.find((w) => w.icon === concepts[1])!;
+            const entry0 = ALL_WORDS.find((w) => w.icon === concepts[0])!;
+            const entry1 = ALL_WORDS.find((w) => w.icon === concepts[1])!;
             const key0 = rhymeKeyFor(entry0, lang);
             const key1 = rhymeKeyFor(entry1, lang);
             expect(key0).toBeTruthy();
             expect(key0).toBe(key1);
 
             for (const card of board) {
-              const entry = WORDS.find((w) => w.icon === card.conceptId)!;
+              const entry = ALL_WORDS.find((w) => w.icon === card.conceptId)!;
               const expectedText = wordFor(entry, lang).text;
               expect(card.speech).toBe(expectedText);
               if (card.display.type === "text") {
@@ -1301,6 +1321,7 @@ describe("conceptmatch/logic", () => {
         speech: "red",
       };
       const updated = updateCardLang(card, "color-word", "ja");
+      if (!updated) throw new Error("null");
       expect(updated.speech).toBe("あか");
       expect(updated.display).toEqual({ type: "text", text: "あか" });
     });
@@ -1313,6 +1334,7 @@ describe("conceptmatch/logic", () => {
         speech: "red",
       };
       const updated = updateCardLang(card, "color-word", "ja");
+      if (!updated) throw new Error("null");
       expect(updated.speech).toBe("あか");
       expect(updated.display).toEqual({ type: "color", color: "#E53935" });
     });
@@ -1325,6 +1347,7 @@ describe("conceptmatch/logic", () => {
         speech: "apple",
       };
       const updated = updateCardLang(card, "picture-word", "ja");
+      if (!updated) throw new Error("null");
       expect(updated.speech).toBe("りんご");
       expect(updated.display).toEqual({ type: "text", text: "りんご" });
     });
@@ -1337,6 +1360,7 @@ describe("conceptmatch/logic", () => {
         speech: "three",
       };
       const updated = updateCardLang(card, "numerals-han", "ja");
+      if (!updated) throw new Error("null");
       expect(updated.speech).toBe("さん");
     });
 
@@ -1348,6 +1372,7 @@ describe("conceptmatch/logic", () => {
         speech: "circle",
       };
       const updated = updateCardLang(card, "shapes-objects", "ja");
+      if (!updated) throw new Error("null");
       expect(updated.speech).toBe("まる");
     });
 
@@ -1359,6 +1384,7 @@ describe("conceptmatch/logic", () => {
         speech: "woof",
       };
       const updatedSound = updateCardLang(soundCard, "animals-sounds", "ja");
+      if (!updatedSound) throw new Error("null");
       expect(updatedSound.speech).toBe("わんわん");
       expect(updatedSound.display).toEqual({ type: "audio" });
 
@@ -1369,12 +1395,14 @@ describe("conceptmatch/logic", () => {
         speech: "dog",
       };
       const updatedAnimal = updateCardLang(animalCard, "animals-sounds", "ja");
+      if (!updatedAnimal) throw new Error("null");
       expect(updatedAnimal.speech).toBe("いぬ");
     });
 
     it("maps over entire board with updateBoardLang", () => {
       const board = buildBoard(makeRng(1), "color-word", "en", 2);
       const updated = updateBoardLang(board, "color-word", "ja");
+      if (!updated) throw new Error("null");
       expect(updated).toHaveLength(board.length);
       for (const card of updated) {
         if (card.display.type === "text") {
@@ -1422,8 +1450,9 @@ describe("conceptmatch/logic", () => {
     });
 
     it("updates color and word cards while preserving letters in mixed deck", () => {
-      const board = buildBoard(makeRng(123), "mixed", "en", 6);
+      const board = buildBoard(makeRng(42), "mixed", "en", 6);
       const updated = updateBoardLang(board, "mixed", "ja");
+      if (!updated) throw new Error("null");
       expect(updated).toHaveLength(board.length);
 
       for (let i = 0; i < board.length; i++) {
@@ -1651,4 +1680,16 @@ describe("conceptmatch/logic", () => {
     });
   });
 });
+describe("updateCardLang", () => {
+  it("returns null when a concept is missing a translation in the target language", () => {
+    const mockRhymeCard: ConceptMatchCard = {
+      key: "sun-word",
+      conceptId: "sun",
+      display: { type: "text", text: "sun" },
+      speech: "sun",
+    };
 
+    const updatedCard = updateCardLang(mockRhymeCard, "picture-word", "ja");
+    expect(updatedCard).toBeNull();
+  });
+});
