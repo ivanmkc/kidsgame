@@ -598,3 +598,46 @@ describe('StoryGame choice navigation and redo history', () => {
     expect(screen.getByTestId('story-text-opt2')).toBeDefined();
   });
 });
+  it('try again rewinds one step instead of resetting the story', () => {
+    const testStory: Story = {
+      id: 'test-try-again',
+      title: 'Try Again Story',
+      nodes: {
+        start: {
+          image: 'story/luna_start.jpg',
+          text: 'Beginning',
+          choices: [{ label: 'Go Left', next: 'middle' }],
+        },
+        middle: {
+          image: 'story/luna_start.jpg',
+          text: 'Middle',
+          choices: [{ label: 'Bad Path', next: 'bad_end' }],
+        },
+        bad_end: {
+          image: 'story/luna_start.jpg',
+          text: 'Dead end',
+          bad: true,
+          choices: [],
+        },
+      },
+    };
+    manifest.stories?.push(testStory);
+
+    render(<StoryGame sceneId="test-try-again" onHome={noop} onPickScene={noop} onBackToPicker={noop} lang="en" />);
+
+    // 1. Advance to middle
+    fireEvent.click(screen.getByTestId('story-choice-middle'));
+    expect(screen.getByTestId('story-text-middle')).toBeDefined();
+
+    // 2. Advance to bad end
+    fireEvent.click(screen.getByTestId('story-choice-bad_end'));
+    expect(screen.getByTestId('story-text-bad_end')).toBeDefined();
+
+    // 3. Tap Try again
+    fireEvent.click(screen.getByTestId('story-try-again'));
+
+    // 4. Should be back at middle, not start
+    expect(screen.getByTestId('story-text-middle')).toBeDefined();
+    expect(screen.queryByTestId('story-text-start')).toBeNull();
+  });
+});
