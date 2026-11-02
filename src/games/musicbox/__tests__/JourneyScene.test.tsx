@@ -8,7 +8,7 @@ import {
   act,
 } from "@testing-library/react";
 import { Animated } from "react-native";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SCENES } from "../scenes";
 import { JourneyScene } from "../JourneyScene";
 import { ScrollingWorld } from "../ScrollingWorld";
@@ -31,7 +31,12 @@ vi.mock("../../assets/images", () => {
 });
 
 describe("JourneyScene accessibility", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
     vi.restoreAllMocks();
   });
@@ -95,19 +100,18 @@ describe("JourneyScene accessibility", () => {
     const scrollSpringCalls = springSpy.mock.calls.filter(
       (c) => c[1].friction === 14 && c[1].tension === 50,
     );
-    expect(scrollSpringCalls).toHaveLength(2);
+    // Since the second touch is instantaneous (no timer advance), it groups and doesn't scroll again
+    expect(scrollSpringCalls).toHaveLength(1);
     expect(scrollSpringCalls[0][1].toValue).toBe(48);
-    expect(scrollSpringCalls[1][1].toValue).toBeCloseTo(62.4);
 
-    // Initial tap played 1 note at velocity 1; second tap with 2 fingers played 2 notes (harmony chord) at velocity 0.7
-    expect(playNoteSpy).toHaveBeenCalledTimes(3);
+    // Initial tap played 1 note at velocity 1; second tap adds the harmony note for the same chord
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, expect.any(Number), 1);
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, expect.any(Number), 0.7);
-    expect(playNoteSpy).toHaveBeenNthCalledWith(3, expect.any(Number), 0.7);
 
-    // Second object successfully spawned while first finger was held
+    // No second object spawned for the grouped tap
     expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
-      2,
+      1,
     );
 
     unmount();
@@ -125,6 +129,7 @@ describe("JourneyScene accessibility", () => {
       clientY: 100,
     });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenCalledTimes(1);
     expect(playNoteSpy).toHaveBeenCalledWith(expect.any(Number), 1);
@@ -147,10 +152,13 @@ describe("JourneyScene accessibility", () => {
     // Three stage taps: play notes 0, 1, 2 (all 60) and spawn 3 objects; next note is 62
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenCalledTimes(3);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
@@ -187,6 +195,7 @@ describe("JourneyScene accessibility", () => {
     // Next stage tap: plays note 3 (62 + 12 = 74) at full velocity, verifying song index was not advanced by note tap
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     expect(playNoteSpy).toHaveBeenLastCalledWith(74, 1);
     expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
       4,
@@ -206,8 +215,10 @@ describe("JourneyScene accessibility", () => {
     // Tap stage twice: plays notes 0 and 1 (both 60 + 12 = 72 at top default yFrac)
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, 72, 1);
@@ -222,6 +233,7 @@ describe("JourneyScene accessibility", () => {
     // Tapping stage now plays note 2 (67 + 12 = 79) at full volume without melodic repetition
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     expect(playNoteSpy).toHaveBeenLastCalledWith(79, 1);
 
     unmount();
@@ -295,6 +307,7 @@ describe("JourneyScene accessibility", () => {
       offsetY: 150,
     });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     const notes1 = screen.getAllByRole("button", { name: "Music note" });
     expect(notes1).toHaveLength(1);
@@ -311,6 +324,7 @@ describe("JourneyScene accessibility", () => {
       offsetY: 150,
     });
     fireEvent.pointerUp(stage, { pointerId: 2 });
+    vi.advanceTimersByTime(100);
 
     const notes2 = screen.getAllByRole("button", { name: "Music note" });
     expect(notes2).toHaveLength(2);
@@ -327,6 +341,7 @@ describe("JourneyScene accessibility", () => {
       offsetY: 150,
     });
     fireEvent.pointerUp(stage, { pointerId: 3 });
+    vi.advanceTimersByTime(100);
 
     const notes3 = screen.getAllByRole("button", { name: "Music note" });
     expect(notes3).toHaveLength(3);
@@ -420,6 +435,7 @@ describe("JourneyScene accessibility", () => {
         clientY: 100,
       });
       fireEvent.pointerUp(stage, { pointerId: i });
+      vi.advanceTimersByTime(100);
     }
 
     playNoteSpy.mockClear();
@@ -437,8 +453,9 @@ describe("JourneyScene accessibility", () => {
     });
 
     // Note 5 is A (69 + 12 = 81 in top third). Diatonic minor third above A is C (84), not C# (85).
-    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 81, 0.7);
-    expect(playNoteSpy).toHaveBeenNthCalledWith(3, 84, 0.7);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(1, 81, 1);
+    expect(playNoteSpy).toHaveBeenNthCalledWith(2, 84, 0.7);
+    expect(playNoteSpy).toHaveBeenCalledTimes(2);
 
     unmount();
   });
@@ -452,8 +469,10 @@ describe("JourneyScene accessibility", () => {
 
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     // Tap 1: pentatonic 60 + 12 = 72
@@ -479,7 +498,7 @@ describe("JourneyScene accessibility", () => {
     unmount();
   });
 
-  it("plays sequential melody notes and advances state across simultaneous multi-touch taps", () => {
+  it("groups simultaneous multi-touch taps into a single chord without advancing state multiple times", () => {
     // SCENES[1] is 'row': notes are [60, 60, 60, 62, 64, 64, 62, ...]
     const rowScene = SCENES[1];
     const playNoteSpy = vi.spyOn(music, "playNote");
@@ -490,8 +509,10 @@ describe("JourneyScene accessibility", () => {
     // Advance 2 notes with single taps first: plays note 0 (60) and note 1 (60)
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     playNoteSpy.mockClear();
 
     // Now at note 2 (60). Next notes in Row are: note 2 = 60, note 3 = 62, note 4 = 64.
@@ -502,36 +523,37 @@ describe("JourneyScene accessibility", () => {
       fireEvent.pointerDown(stage, { pointerId: 3 });
     });
 
-    // Notes played across the 3 simultaneous taps:
-    // Tap 1 (1 finger): note 2 root (60 + 12 = 72)
-    // Tap 2 (2 fingers): note 3 root (62 + 12 = 74) + harmony (77)
-    // Tap 3 (3 fingers): note 4 root (64 + 12 = 76) + harmony (79, 83)
     const simultaneousMidis = playNoteSpy.mock.calls.map((call) => call[0]);
-    expect(simultaneousMidis).toEqual([72, 74, 77, 76, 79, 83]);
+    expect(simultaneousMidis).toEqual([72, 76, 79]);
 
-    // 2 initial taps + 3 simultaneous taps = 5 spawned objects
+    // 2 initial taps + 1 grouped tap = 3 spawned objects
     expect(screen.getAllByRole("button", { name: "Music note" })).toHaveLength(
-      5,
+      3,
     );
 
     // Release all 3 fingers
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerUp(stage, { pointerId: 2 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerUp(stage, { pointerId: 3 });
+    vi.advanceTimersByTime(100);
 
     playNoteSpy.mockClear();
 
-    // Follow-up single tap: must play note 5 (64 + 12 = 76), proving state advanced 3 steps
+    // Follow-up single tap: plays note 3 (62 + 12 = 74) because state only advanced 1 step
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     expect(playNoteSpy).toHaveBeenCalledTimes(1);
-    expect(playNoteSpy).toHaveBeenLastCalledWith(76, 1);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(74, 1);
 
-    // Subsequent single tap: plays note 6 (62 + 12 = 74)
+    // Subsequent single tap: plays note 4 (64 + 12 = 76)
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
-    expect(playNoteSpy).toHaveBeenLastCalledWith(74, 1);
+    expect(playNoteSpy).toHaveBeenLastCalledWith(76, 1);
 
     unmount();
   });
@@ -547,6 +569,8 @@ describe("JourneyScene accessibility", () => {
     fireEvent.pointerLeave(stage, { pointerId: 1, clientX: -10, clientY: 100 });
 
     playNoteSpy.mockClear();
+
+    vi.advanceTimersByTime(100);
 
     // Now tap again with a different pointerId (or same, but let's say different)
     fireEvent.pointerDown(stage, { pointerId: 2, clientX: 100, clientY: 100 });
@@ -572,6 +596,7 @@ describe("JourneyScene accessibility", () => {
     const stage = screen.getByLabelText("Stage");
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     const bounceCall = springSpy.mock.calls.find((c) => c[1].friction === 4);
     expect(bounceCall).toBeDefined();
@@ -619,6 +644,7 @@ describe("JourneyScene accessibility", () => {
 
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(bounceValue).toBeDefined();
     expect(bounceAnimCallback).toBeDefined();
@@ -647,6 +673,7 @@ describe("JourneyScene accessibility", () => {
     for (let i = 1; i <= 41; i++) {
       fireEvent.pointerDown(stage, { pointerId: 1 });
       fireEvent.pointerUp(stage, { pointerId: 1 });
+      vi.advanceTimersByTime(100);
     }
 
     expect(winSpy).not.toHaveBeenCalled();
@@ -655,6 +682,7 @@ describe("JourneyScene accessibility", () => {
     // Tap 42 completes the song melody loop
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(winSpy).toHaveBeenCalledTimes(1);
     expect(screen.queryAllByText("🎉").length).toBeGreaterThan(0);
@@ -667,6 +695,7 @@ describe("JourneyScene accessibility", () => {
     // Tap 43 begins loop 2 seamlessly without double-celebrating
     fireEvent.pointerDown(stage, { pointerId: 1 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(winSpy).toHaveBeenCalledTimes(1);
 
@@ -685,6 +714,7 @@ describe("JourneyScene accessibility", () => {
     for (let i = 1; i <= 42; i++) {
       fireEvent.pointerDown(stage, { pointerId: 1 });
       fireEvent.pointerUp(stage, { pointerId: 1 });
+      vi.advanceTimersByTime(100);
     }
 
     expect(winSpy).not.toHaveBeenCalled();
@@ -694,9 +724,7 @@ describe("JourneyScene accessibility", () => {
   });
 
   it("does not reset vehicleFlourish to 0 when flourish animation is interrupted ({ finished: false })", () => {
-    let flourishCallback:
-      | ((result: { finished: boolean }) => void)
-      | undefined;
+    let flourishCallback: ((result: { finished: boolean }) => void) | undefined;
     let flourishValue: Animated.Value | undefined;
 
     const originalTiming = Animated.timing;
@@ -720,6 +748,7 @@ describe("JourneyScene accessibility", () => {
     for (let i = 1; i <= 42; i++) {
       fireEvent.pointerDown(stage, { pointerId: 1 });
       fireEvent.pointerUp(stage, { pointerId: 1 });
+      vi.advanceTimersByTime(100);
     }
 
     expect(flourishValue).toBeDefined();
@@ -735,6 +764,44 @@ describe("JourneyScene accessibility", () => {
     flourishCallback!({ finished: true });
     expect(setValueSpy).toHaveBeenCalledWith(0);
 
+    unmount();
+  });
+
+  it("advances melody once and plays triad on simultaneous 3-finger tap", () => {
+    vi.useFakeTimers();
+    const playNoteSpy = vi.spyOn(music, "playNote");
+    const { unmount } = render(<JourneyScene scene={SCENES[0]} lang="en" />);
+    const stage = screen.getByLabelText("Stage");
+
+    act(() => {
+      fireEvent.pointerDown(stage, {
+        pointerId: 1,
+        offsetX: 100,
+        offsetY: 100,
+      });
+      fireEvent.pointerDown(stage, {
+        pointerId: 2,
+        offsetX: 110,
+        offsetY: 110,
+      });
+      fireEvent.pointerDown(stage, {
+        pointerId: 3,
+        offsetX: 120,
+        offsetY: 120,
+      });
+    });
+
+    expect(playNoteSpy).toHaveBeenCalledTimes(3);
+
+    act(() => {
+      fireEvent.pointerDown(stage, {
+        pointerId: 4,
+        offsetX: 100,
+        offsetY: 100,
+      });
+    });
+
+    vi.useRealTimers();
     unmount();
   });
 });

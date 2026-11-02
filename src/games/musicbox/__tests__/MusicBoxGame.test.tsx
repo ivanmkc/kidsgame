@@ -55,6 +55,7 @@ describe("MusicBoxGame rendering", () => {
     const stage = screen.getByLabelText("ステージ");
     expect(stage).toBeDefined();
 
+    vi.useRealTimers();
     unmount();
   });
 
@@ -77,6 +78,7 @@ describe("MusicBoxGame rendering", () => {
       screen.getByText("Tap anywhere to play the next note!"),
     ).toBeDefined();
 
+    vi.useRealTimers();
     unmount();
   });
 
@@ -107,6 +109,7 @@ describe("MusicBoxGame rendering", () => {
     fireEvent.click(jingleCard);
     expect(onPickScene).toHaveBeenCalledWith("jingle");
 
+    vi.useRealTimers();
     unmount();
   });
 
@@ -126,6 +129,7 @@ describe("MusicBoxGame rendering", () => {
     );
 
     expect(saySpy).toHaveBeenCalledWith("Pick a song to play!");
+    vi.useRealTimers();
     unmount();
   });
 
@@ -145,6 +149,7 @@ describe("MusicBoxGame rendering", () => {
     );
 
     expect(saySpy).toHaveBeenCalledWith("うたを えらんでね！");
+    vi.useRealTimers();
     unmount();
   });
 
@@ -167,6 +172,7 @@ describe("MusicBoxGame rendering", () => {
     expect(saySpy).toHaveBeenCalledWith(
       "Tap, tap, tap anywhere to play the song!",
     );
+    vi.useRealTimers();
     unmount();
   });
 
@@ -201,6 +207,7 @@ describe("MusicBoxGame rendering", () => {
     );
 
     expect(saySpy).toHaveBeenLastCalledWith("Pick a song to play!");
+    vi.useRealTimers();
     unmount();
   });
 
@@ -228,6 +235,7 @@ describe("MusicBoxGame rendering", () => {
       screen.getByText("Magic keys! Every tap makes a pretty note!"),
     ).toBeDefined();
 
+    vi.useRealTimers();
     unmount();
   });
 
@@ -251,6 +259,7 @@ describe("MusicBoxGame rendering", () => {
     expect(saySpy).toHaveBeenCalledWith(
       "まほうの けんばん！ タップすると きれいなおとが なるよ！",
     );
+    vi.useRealTimers();
     unmount();
   });
 
@@ -310,6 +319,7 @@ describe("MusicBoxGame rendering", () => {
     expect(saySpy).toHaveBeenLastCalledWith(
       "まほうの けんばん！ タップすると きれいなおとが なるよ！",
     );
+    vi.useRealTimers();
     unmount();
   });
 
@@ -358,10 +368,12 @@ describe("MusicBoxGame rendering", () => {
 
     expect(saySpy).toHaveBeenCalledTimes(2);
     expect(saySpy).toHaveBeenLastCalledWith("うたを えらんでね！");
+    vi.useRealTimers();
     unmount();
   });
 
   it("plays pentatonic free-play notes on stage tap when difficulty is easy", () => {
+    vi.useFakeTimers();
     const playNoteSpy = vi.spyOn(music, "playNote");
     const onHome = vi.fn();
     const onPickScene = vi.fn();
@@ -381,18 +393,22 @@ describe("MusicBoxGame rendering", () => {
     const stage = screen.getByLabelText("Stage");
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
     // Second note in free play is 79 (pentatonic 67 + 12), whereas standard Twinkle note 2 is 72 (60 + 12)
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, 79, 1);
 
+    vi.useRealTimers();
     unmount();
   });
 
   it("plays rich chord dyad on single stage tap when difficulty is hard", () => {
+    vi.useFakeTimers();
     const playNoteSpy = vi.spyOn(music, "playNote");
     const onHome = vi.fn();
     const onPickScene = vi.fn();
@@ -412,16 +428,19 @@ describe("MusicBoxGame rendering", () => {
     const stage = screen.getByLabelText("Stage");
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     // Single-finger tap on hard difficulty sounds root (72) and harmony third (76) at 0.7 velocity
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 0.7);
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, 76, 0.7);
 
+    vi.useRealTimers();
     unmount();
   });
 
   it("plays standard melody solo note on stage tap when difficulty is medium", () => {
+    vi.useFakeTimers();
     const playNoteSpy = vi.spyOn(music, "playNote");
     const onHome = vi.fn();
     const onPickScene = vi.fn();
@@ -441,14 +460,17 @@ describe("MusicBoxGame rendering", () => {
     const stage = screen.getByLabelText("Stage");
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
     fireEvent.pointerDown(stage, { pointerId: 1, clientX: 100, clientY: 100 });
     fireEvent.pointerUp(stage, { pointerId: 1 });
+    vi.advanceTimersByTime(100);
 
     expect(playNoteSpy).toHaveBeenCalledTimes(2);
     // Twinkle melody: both first and second notes are C (72) played as solo notes (volume 1)
     expect(playNoteSpy).toHaveBeenNthCalledWith(1, 72, 1);
     expect(playNoteSpy).toHaveBeenNthCalledWith(2, 72, 1);
 
+    vi.useRealTimers();
     unmount();
   });
 });

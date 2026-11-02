@@ -62,6 +62,9 @@ export function JourneyScene({
   const activePointers = useRef(new Set<number>());
   const stateRef = useRef(state);
   stateRef.current = state;
+  const lastTapTime = useRef(0);
+  const lastNoteState = useRef<BoxState | null>(null);
+  const playedOffsets = useRef(new Set<number>());
 
   useEffect(() => {
     const id = scrollX.addListener(({ value }) => {
@@ -82,6 +85,9 @@ export function JourneyScene({
     scrollTotal.current = 0;
     currentScrollX.current = 0;
     activePointers.current.clear();
+    lastTapTime.current = 0;
+    lastNoteState.current = null;
+    playedOffsets.current.clear();
     vehicleIdle.setValue(0);
     vehicleBounce.setValue(0);
     vehicleFlourish.setValue(0);
@@ -108,15 +114,34 @@ export function JourneyScene({
   const doTap = useCallback(
     (x: number, y: number, fingerCount: number) => {
       primeMusic();
+      const now = Date.now();
+      const isGrouped = now - lastTapTime.current < 50;
+
+      let s: BoxState;
+      if (isGrouped && lastNoteState.current) {
+        s = lastNoteState.current;
+      } else {
+        lastTapTime.current = now;
+        s = stateRef.current;
+        lastNoteState.current = s;
+        playedOffsets.current.clear();
+      }
+
       const scrollAtSpawn = currentScrollX.current;
       const yFrac = y / Math.max(1, stageSize.current.h);
       const offset = octaveOffset(yFrac);
-      const s = stateRef.current;
       const midi = noteForTap(s) + offset;
       const offsets = harmonyOffsets(fingerCount, midi, richChords);
+
       for (const h of offsets) {
-        playNote(midi + h, offsets.length > 1 ? 0.7 : 1);
+        if (!playedOffsets.current.has(h)) {
+          playNote(midi + h, offsets.length > 1 ? 0.7 : 1);
+          playedOffsets.current.add(h);
+        }
       }
+
+      if (isGrouped) return;
+
       const big = beatsForTap(s) > 1;
       const nextS = advance(s);
       stateRef.current = nextS;
