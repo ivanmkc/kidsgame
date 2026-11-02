@@ -20,10 +20,11 @@ import { t } from "../../i18n";
 import { makeRng } from "../../rng";
 import { sayThen, sfx, stopNarration, useSay } from "../../sound";
 import { colors, fonts, shadows } from "../../theme";
-import { Word } from "./data";
+import { Word, getLevelConfig } from "./data";
 import {
   GameState,
   ListenChooseLayout,
+  generateRound,
   getWordText,
   initGameState,
   listenChooseLayout,
@@ -103,9 +104,38 @@ export function ListenChooseGame({
     setWobbleIcon(null);
     setCorrectIcon(null);
     setCelebrate(false);
-    setStarted(false);
     setIsSpeaking(false);
-    setGameState(initGameState(rngRef.current, difficulty, lang));
+
+    if (!started) {
+      setGameState(initGameState(rngRef.current, difficulty, lang));
+      return;
+    }
+
+    if (state.won) {
+      return;
+    }
+
+    const config = getLevelConfig(state.level, lang);
+    const nextRound = generateRound(
+      rngRef.current,
+      config.words,
+      config.numChoices,
+      undefined,
+      config.prioritizeRhymes,
+    );
+    setGameState((prev) => ({
+      ...prev,
+      currentRound: nextRound,
+      wrongGuesses: 0,
+      highlightCorrect: false,
+    }));
+
+    const currentSpeakEpoch = ++speakEpochRef.current;
+    setIsSpeaking(true);
+    sayThen([getWordText(nextRound.target, lang)], () => {
+      if (!isValid()) return;
+      if (speakEpochRef.current === currentSpeakEpoch) setIsSpeaking(false);
+    });
   }, [epoch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onPlay = () => {
