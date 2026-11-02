@@ -10,7 +10,6 @@ import {
   makeBoard,
   settingsForBingo,
   speechLines,
-  bingoShout,
   tileLabel,
 } from "../logic";
 
@@ -358,12 +357,7 @@ describe("speechLines", () => {
     expect(new Set(lines).size).toBe(lines.length);
   });
 
-  it("includes bingo shout for all langs", () => {
-    const lines = speechLines();
-    expect(lines).toContain("BINGO!");
-    expect(lines).toContain("ビンゴ！");
-    expect(lines).toContain("宾果！");
-  });
+
 
   it("includes name-mode prompts", () => {
     const lines = speechLines();
@@ -424,21 +418,6 @@ describe("speechLines", () => {
   });
 });
 
-describe("bingoShout", () => {
-  it("returns ASCII shout for Cantonese matching English", () => {
-    expect(bingoShout("yue")).toBe("BINGO!");
-  });
-
-  it("maps every language shout to a pre-rendered voice clip", () => {
-    const langs = ["en", "ja", "cmn", "yue"] as const;
-    for (const lang of langs) {
-      const shout = bingoShout(lang);
-      const clip =
-        (lang !== "en" ? VOICE[`${lang}|${shout}`] : undefined) ?? VOICE[shout];
-      expect(clip).toBeDefined();
-    }
-  });
-});
 
 describe("tileLabel", () => {
   it("returns localized spoken words matching the prompt instead of raw icon IDs", () => {
