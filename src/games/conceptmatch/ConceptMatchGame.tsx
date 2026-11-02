@@ -6,7 +6,7 @@ import { FlipCard, MemoryBoard } from "../../components/MemoryBoard";
 import { WinOverlay } from "../../components/WinOverlay";
 import { useMemoryLogic } from "../../components/useMemoryLogic";
 import { t, UIKey } from "../../i18n";
-import { Lang } from "../../lang";
+import { Lang, useLangEpoch } from "../../lang";
 import { makeRng } from "../../rng";
 import { say, sfx, useSay } from "../../sound";
 import { colors, fonts } from "../../theme";
@@ -40,6 +40,8 @@ export function ConceptMatchGame({
   const activePairs = pairs ?? pairsForDifficulty(difficulty, deck);
   const cardKey = (deck && DECK_TO_CARD_KEY[deck]) ?? "memory";
   const groupSimilar = difficulty !== "easy";
+
+  useLangEpoch(lang);
 
   const [captions, setCaptions] = useState(false);
   const [roundKey, setRoundKey] = useState(0);
