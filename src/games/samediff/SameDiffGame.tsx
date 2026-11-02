@@ -64,11 +64,12 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
   const wrongTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const replayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const winTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roundEpochRef = useRef(0);
   const lockedRef = useRef(false);
   const [roundIndex, setRoundIndex] = useState(0);
   const firstTryRef = useRef(true);
-  const won = roundIndex >= total;
+  const [won, setWon] = useState(false);
   useWinLine(won, t(lang, "win.samediff"));
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
       if (gapTimer.current) clearTimeout(gapTimer.current);
       if (wrongTimer.current) clearTimeout(wrongTimer.current);
       if (replayTimer.current) clearTimeout(replayTimer.current);
+      if (winTimer.current) clearTimeout(winTimer.current);
       stopSequence();
       stopNarration();
     };
@@ -91,6 +93,7 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     if (gapTimer.current) clearTimeout(gapTimer.current);
     if (wrongTimer.current) clearTimeout(wrongTimer.current);
     if (replayTimer.current) clearTimeout(replayTimer.current);
+    if (winTimer.current) clearTimeout(winTimer.current);
     setActiveNote(null);
     wrongPickRef.current = null;
     setWrongPick(null);
@@ -201,6 +204,13 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
         ]);
         historyRef.current.push(nextRound.phraseIdx);
         setRound(nextRound);
+      } else {
+        if (winTimer.current) clearTimeout(winTimer.current);
+        winTimer.current = setTimeout(() => {
+          winTimer.current = null;
+          lockedRef.current = false;
+          setWon(true);
+        }, 1000);
       }
     } else {
       sfx.wrong();
@@ -239,6 +249,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
     if (replayTimer.current) clearTimeout(replayTimer.current);
     if (gapTimer.current) clearTimeout(gapTimer.current);
     if (startTimer.current) clearTimeout(startTimer.current);
+    if (winTimer.current) {
+      clearTimeout(winTimer.current);
+      winTimer.current = null;
+    }
+    setWon(false);
     lockedRef.current = false;
     firstTryRef.current = true;
     setPhase("listenA");
@@ -349,15 +364,11 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
             <View style={styles.melodyRow} testID="melody-row-0">
               <View
                 testID="melody-dot-0"
-                style={[
-                  styles.melodyDot,
-                  styles.melodyDotFilled,
-                ]}
+                style={[styles.melodyDot, styles.melodyDotFilled]}
               />
               <View testID="melody-notes-0" style={styles.phraseNotesTrack}>
                 {ratiosA.map((ratio, i) => {
-                  const isNoteActive =
-                    phase === "listenA" && activeNote === i;
+                  const isNoteActive = phase === "listenA" && activeNote === i;
                   const stemHeight = Math.max(2, Math.round(6 + ratio * 56));
                   return (
                     <View
@@ -399,7 +410,10 @@ export function SameDiffGame({ onHome, difficulty, lang }: Props) {
                   ? ratiosB.map((ratio, i) => {
                       const isNoteActive =
                         phase === "listenB" && activeNote === i;
-                      const stemHeight = Math.max(2, Math.round(6 + ratio * 56));
+                      const stemHeight = Math.max(
+                        2,
+                        Math.round(6 + ratio * 56),
+                      );
                       return (
                         <View
                           key={i}
