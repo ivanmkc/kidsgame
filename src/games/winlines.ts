@@ -27,6 +27,7 @@ export const SPOKEN_WIN_KEYS = [
   "win.rhyme",
   "win.count",
   "win.compare",
+  "win.balance",
   "win.sums",
   "win.bingo",
   "win.musicbox",

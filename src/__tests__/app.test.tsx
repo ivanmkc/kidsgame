@@ -125,3 +125,11 @@ test("App passes difficulty filter to CarModeGame", async () => {
   render(<App />);
   expect(screen.getByTestId("carmode-score").textContent).toContain("1/3");
 }, 15000);
+test("App routes to BalanceGame for balance", async () => {
+  window.location.hash = "#/balance";
+  const { default: App } = await import("../../App");
+  render(<App />);
+  expect(screen.getByText("Number Balance")).toBeTruthy();
+});
+
+
