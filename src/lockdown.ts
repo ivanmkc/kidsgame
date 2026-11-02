@@ -1,6 +1,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { Platform } from "react-native";
 import { Lang, LANGS } from "./lang";
+import { t, UIKey } from "./i18n";
 
 const KEY = "kgb.lockdown.v1";
 
@@ -167,78 +168,25 @@ export function visibleCards<T extends { route: string }>(
   return cards.filter((c) => !hiddenGames.includes(c.route));
 }
 
-export const GATE_WORDS: Record<Lang, readonly string[]> = {
-  en: [
-    "bicycle",
-    "giraffe",
-    "kitchen",
-    "purple",
-    "bridge",
-    "tunnel",
-    "window",
-    "garden",
-    "orange",
-    "basket",
-    "dolphin",
-    "volcano",
-    "blanket",
-    "crystal",
-    "feather",
-  ],
-  ja: [
-    "保護者",
-    "設定",
-    "確認",
-    "台所",
-    "自転車",
-    "窓口",
-    "庭園",
-    "火山",
-    "毛布",
-    "結晶",
-    "羽毛",
-    "眼鏡",
-    "階段",
-    "図書館",
-    "封筒",
-  ],
-  cmn: [
-    "保护",
-    "设置",
-    "确认",
-    "密码",
-    "台灯",
-    "厨房",
-    "自行车",
-    "窗户",
-    "火山",
-    "毛毯",
-    "羽毛",
-    "水饺",
-    "眼镜",
-    "楼梯",
-    "日历",
-  ],
-  yue: [
-    "保護",
-    "設置",
-    "確認",
-    "密碼",
-    "檯燈",
-    "廚房",
-    "單車",
-    "窗戶",
-    "火山",
-    "毛氈",
-    "羽毛",
-    "水餃",
-    "眼鏡",
-    "樓梯",
-    "日曆",
-  ],
-};
+export const GATE_KEYS: readonly UIKey[] = [
+  "gate.word.bicycle",
+  "gate.word.giraffe",
+  "gate.word.kitchen",
+  "gate.word.purple",
+  "gate.word.bridge",
+  "gate.word.tunnel",
+  "gate.word.window",
+  "gate.word.garden",
+  "gate.word.orange",
+  "gate.word.basket",
+  "gate.word.dolphin",
+  "gate.word.volcano",
+  "gate.word.blanket",
+  "gate.word.crystal",
+  "gate.word.feather",
+];
 
 export function randomGateWord(lang: Lang = "en"): string {
-  const pool = GATE_WORDS[lang] ?? GATE_WORDS.en;
-  return pool[Math.floor(Math.random() * pool.length)];
+  const key = GATE_KEYS[Math.floor(Math.random() * GATE_KEYS.length)];
+  return t(lang, key);
 }
