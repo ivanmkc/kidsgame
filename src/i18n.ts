@@ -241,6 +241,7 @@ export type UIKey =
   | 'oddone.not.things'
   | 'rules.memoryCheck' | 'rules.ruleNumber' | 'rules.doAgain'
   | 'rules.remind' | 'rules.progress'
+  | 'rules.tap.animals' | 'rules.tap.nature' | 'rules.tap.food' | 'rules.tap.things'
   | 'puzzle.peek' | 'puzzle.peekA11y' | 'puzzle.hint' | 'puzzle.tileA11y'
   | 'sticker.clear' | 'sticker.magicFizzled' | 'sticker.magicPending'
   | 'sticker.magicLong' | 'sticker.a11yClear' | 'sticker.a11yAdd'
@@ -624,6 +625,10 @@ export const EN: Table = {
   'rules.doAgain': 'Do Rule #{n} again — remember it? 🤔',
   'rules.remind': '💡 Remind me!',
   'rules.progress': 'Found {found} of {total}',
+  'rules.tap.animals': 'Tap all the ANIMALS! 🐾',
+  'rules.tap.nature': 'Tap the FLOWERS, RAINBOWS & STARS! 🌸',
+  'rules.tap.food': 'Tap all the YUMMY FOOD! 🍎',
+  'rules.tap.things': 'Tap the TOYS, VEHICLES & PRESENTS! 🚗',
   'puzzle.peek': '🖼️ Peek',
   'puzzle.peekA11y': 'Peek at the finished picture',
   'puzzle.hint': 'Tap one piece, then tap another to swap them!',

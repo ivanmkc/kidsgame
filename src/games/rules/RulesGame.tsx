@@ -89,7 +89,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
   };
   const remind = () => {
     sfx.tap();
-    say(round.rule.label);
+    say(t(lang, round.rule.labelKey));
     setReminded(true);
     if (remindTimer.current) clearTimeout(remindTimer.current);
     remindTimer.current = setTimeout(() => setReminded(false), 2600);
@@ -122,7 +122,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
     if (won) return;
     const line = round.isRecall
       ? rulesRecallLine(round.ruleNumber, lang)
-      : round.rule.label;
+      : t(lang, round.rule.labelKey);
     setReminded(false);
     if (!introDone.current) {
       introDone.current = true;
@@ -235,7 +235,7 @@ export function RulesGame({ onHome, difficulty, lang = "en" }: Props) {
           >
             {round.isRecall && !reminded
               ? t(lang, "rules.doAgain", { n: round.ruleNumber })
-              : round.rule.label}
+              : t(lang, round.rule.labelKey)}
           </Text>
           {round.isRecall ? (
             <View style={styles.remindWrapper} testID="rules-remind-wrapper">

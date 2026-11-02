@@ -208,21 +208,21 @@ describe("rule time logic", () => {
 
   it("falls back gracefully when categories are heavily constrained", () => {
     const rng = makeRng(1);
-    const rules = [
-      { category: "c1", label: "L1" },
-      { category: "c2", label: "L2" },
-      { category: "c1", label: "L3" },
-      { category: "c2", label: "L4" },
-      { category: "c1", label: "L5" },
-      { category: "c2", label: "L6" },
+    const rules: import("../logic").Rule[] = [
+      { category: "c1", labelKey: "rules.tap.animals" },
+      { category: "c2", labelKey: "rules.tap.animals" },
+      { category: "c1", labelKey: "rules.tap.animals" },
+      { category: "c2", labelKey: "rules.tap.animals" },
+      { category: "c1", labelKey: "rules.tap.animals" },
+      { category: "c2", labelKey: "rules.tap.animals" },
     ];
     const res = pickRuleIndex(rng, 5, 3, rules);
     expect(res.isRecall).toBe(true);
     expect(rules[res.ruleIdx].category).not.toBe(rules[5].category);
 
-    const sameRules = Array.from({ length: 6 }, () => ({
+    const sameRules: import("../logic").Rule[] = Array.from({ length: 6 }, () => ({
       category: "c1",
-      label: "L",
+      labelKey: "rules.tap.animals",
     }));
     const fallbackRes = pickRuleIndex(rng, 5, 3, sameRules);
     expect(fallbackRes.isRecall).toBe(true);
