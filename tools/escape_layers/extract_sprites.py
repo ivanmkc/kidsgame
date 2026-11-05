@@ -459,6 +459,7 @@ def extract_sprite_sheet(
     delta_l1 = np.abs(
         after_crop.astype(np.int16) - before_crop.astype(np.int16)
     ).sum(axis=-1)
+    _external_after_alpha = None
     if plate_img is not None:
         # After-state alpha keyed against the CLEAN PLATE: the runtime
         # shows the plate wherever this layer is transparent, so the
@@ -562,12 +563,50 @@ def extract_sprite_sheet(
             continue
         raw_t = k / max(actual_ease - 1, 1)
         t = raw_t * raw_t * (3 - 2 * raw_t)
+        orig_alpha = subsampled[idx][:, :, 3].copy()
         subsampled[idx] = (
             subsampled[idx].astype(np.float32) * (1 - t) + after_f * t
         ).clip(0, 255).astype(np.uint8)
+        subsampled[idx][:, :, 3] = orig_alpha
         sub_coverages[idx] = float(np.sum(subsampled[idx][:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
         if k in (0, actual_ease // 2, actual_ease - 1):
             print(f"[{name}]   ease frame {idx}: t={t:.3f}")
+
+    # Full-coverage last frame: extend alpha to cover everywhere the
+    # after-scene differs from the clean plate (within the bbox).  The
+    # tail ease only covers the territory derived from the before-scene
+    # SAM mask; objects that change shape (chest opens, pillow moves)
+    # leave gaps.  Fix: merge the plate→after alpha into the last frame
+    # so the held composition exactly reconstructs the after-scene.
+    # Constrain to proximity of the last animation mask to prevent
+    # capturing unrelated siblings (pillow, etc.) that also differ
+    # from the plate.
+    if plate_img is not None:
+        plate_crop_fc = plate_img[
+            bbox["y"]:bbox["y"] + bbox["h"],
+            bbox["x"]:bbox["x"] + bbox["w"],
+        ]
+        delta_fc = np.abs(
+            after_crop.astype(np.int16) - plate_crop_fc.astype(np.int16)
+        ).sum(axis=-1)
+        full_mask = ndimage.binary_closing(delta_fc > 25, iterations=2)
+        full_mask = ndimage.binary_fill_holes(full_mask)
+        anim_territory = subsampled[-1][:, :, 3] > 0
+        full_mask &= ndimage.binary_dilation(anim_territory, iterations=20)
+        full_alpha = full_mask.astype(np.uint8) * 255
+        full_alpha_f = np.array(
+            Image.fromarray(full_alpha).filter(ImageFilter.GaussianBlur(radius=1))
+        )
+        last = subsampled[-1].copy()
+        merged_a = np.maximum(last[:, :, 3], full_alpha_f)
+        new_px = (merged_a > 0) & (last[:, :, 3] == 0)
+        last[:, :, :3][new_px] = after_crop[new_px]
+        last[:, :, 3] = merged_a
+        old_cov = float(np.sum(subsampled[-1][:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
+        new_cov = float(np.sum(last[:, :, 3] > 0)) / (bbox["w"] * bbox["h"]) * 100
+        subsampled[-1] = last
+        sub_coverages[-1] = new_cov
+        print(f"[{name}] Full-coverage last frame: {old_cov:.1f}% → {new_cov:.1f}%")
 
     composed = before_crop.copy().astype(np.float32)
     alpha = subsampled[-1][:, :, 3:4].astype(np.float32) / 255.0
@@ -837,6 +876,7 @@ if __name__ == "__main__":
     parser.add_argument("--before", help="Path to before-scene PNG")
     parser.add_argument("--after", help="Path to after-scene PNG")
     parser.add_argument("--bbox", help="Bounding box as x,y,w,h (auto-detected if omitted)")
+    parser.add_argument("--plate", help="Path to clean plate PNG (objectless background)")
     parser.add_argument("--out-dir", default="public/escape-sprites")
     parser.add_argument("--name", help="Output name prefix")
     parser.add_argument("--all", action="store_true", help="Process all un-migrated hotspots")
@@ -857,6 +897,12 @@ if __name__ == "__main__":
             Image.open(args.after).convert("RGB").resize((1280, 720), Image.LANCZOS)
         )
 
+        plate_img = None
+        if args.plate:
+            plate_img = np.array(
+                Image.open(args.plate).convert("RGB").resize((1280, 720), Image.LANCZOS)
+            )
+
         if args.bbox:
             x, y, w, h = map(int, args.bbox.split(","))
             bbox = {"x": x, "y": y, "w": w, "h": h}
@@ -870,6 +916,7 @@ if __name__ == "__main__":
             bbox=bbox,
             out_dir=Path(args.out_dir),
             name=args.name,
+            plate_img=plate_img,
         )
         print(f"\nResult: {result}")
     else:
