@@ -169,9 +169,9 @@ export function OddOneGame({ onHome, difficulty, lang = "en" }: Props) {
     >
       <View style={styles.board}>
         <Pressable
-          disabled={won}
+          disabled={won || roundClosedRef.current}
           onPress={() => {
-            if (won) return;
+            if (won || roundClosedRef.current) return;
             sfx.tap();
             say(prompt);
           }}
