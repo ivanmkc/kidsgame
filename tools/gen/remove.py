@@ -297,7 +297,7 @@ def remove_all_objects(
             else:
                 print(f"  WARNING: {hotspot} removal failed all attempts")
 
-    clean = np.array(scene).copy()
+    clean = np.array(scene).astype(np.float32)
     scores_out = {}
     for hotspot in masks:
         if hotspot not in results:
@@ -305,11 +305,20 @@ def remove_all_objects(
             continue
         img, scores = results[hotspot]
         mask = masks[hotspot]
-        result_arr = np.array(img)
-        clean[mask] = result_arr[mask]
+        result_arr = np.array(img).astype(np.float32)
+
+        # Feathered compositing: Gaussian-blur the mask boundary to avoid
+        # hard seams between removal result and original scene.
+        from scipy.ndimage import gaussian_filter
+        alpha = gaussian_filter(mask.astype(np.float32), sigma=3.0)
+        alpha = np.clip(alpha, 0, 1)
+        for c in range(3):
+            clean[:, :, c] = (
+                clean[:, :, c] * (1 - alpha) + result_arr[:, :, c] * alpha
+            )
         scores_out[hotspot] = scores
 
-    return Image.fromarray(clean), scores_out
+    return Image.fromarray(np.clip(clean, 0, 255).astype(np.uint8)), scores_out
 
 
 # ---- CLI ----
